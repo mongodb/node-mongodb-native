@@ -43,6 +43,7 @@ export abstract class AWSTemporaryCredentialProvider {
 /** @internal */
 export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
   private _provider?: () => Promise<AWSCredentials>;
+  private _roleProviders: { [roleArn: string]: () => Promise<AWSCredentials> } = {};
   /**
    * The AWS SDK caches credentials automatically and handles refresh when the credentials have expired.
    * To ensure this occurs, we need to cache the `provider` returned by the AWS sdk and re-use it when fetching credentials.
@@ -117,7 +118,36 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
      * - The EC2/ECS Instance Metadata Service
      */
     try {
-      const creds = await this.provider();
+      const roleArn = props.AWS_ROLE_ARN;
+      let provider: () => Promise<AWSCredentials>;
+      if (roleArn) {
+        // check we really hvae the AWS SDK - we should, but typescript doesn't know it at this point
+        if ('kModuleError' in AWSTemporaryCredentialProvider.awsSDK) {
+          throw AWSTemporaryCredentialProvider.awsSDK.kModuleError;
+        }
+        // maintain a list of providers for each role arn - I honestly can't imagine any way that
+        // multiple would be needed, but the way credentials are passed around, I guess it could technically
+        // be possible for the configuration to get changed at runtime by a user doing weird stuff?
+        // If we say 'a user can never change the credentials after creating a MongoClient', then the
+        // map would be overkill and we could memoize a single provider.
+        if (!this._roleProviders[roleArn]) {
+          // set up the aws cred provider from @aws-sdk/credential-providers that assumes a role for you
+          this._roleProviders[roleArn] =
+            AWSTemporaryCredentialProvider.awsSDK.fromTemporaryCredentials({
+              // tell it to start from our base provider that we've done a bit of special configuraiton to,
+              masterCredentials: this.provider,
+              // and then go and assume the desired role.
+              params: {
+                RoleArn: roleArn,
+                RoleSessionName: 'mongodb'
+              }
+            });
+        }
+        provider = this._roleProviders[roleArn];
+      } else {
+        provider = this.provider;
+      }
+      const creds = await provider();
       return {
         AccessKeyId: creds.accessKeyId,
         SecretAccessKey: creds.secretAccessKey,

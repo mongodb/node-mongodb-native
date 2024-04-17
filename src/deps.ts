@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore -- optional interface, will gracefully degrade to `any` if `foo` isn't installed
+import type { FromTemporaryCredentialsOptions } from '@aws-sdk/credential-providers';
+
 import { type Stream } from './cmap/connect';
 import { MongoMissingDependencyError } from './error';
 import type { Callback } from './utils';
@@ -94,6 +98,10 @@ type CredentialProvider = {
     options: { clientConfig: { region: string } }
   ): () => Promise<AWSCredentials>;
   fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;
+  fromTemporaryCredentials(
+    this: void,
+    options: FromTemporaryCredentialsOptions
+  ): () => Promise<AWSCredentials>;
 };
 
 export function getAwsCredentialProvider():

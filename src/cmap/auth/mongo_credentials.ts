@@ -66,6 +66,8 @@ export interface AuthMechanismProperties extends Document {
   ALLOWED_HOSTS?: string[];
   /** @experimental */
   TOKEN_AUDIENCE?: string;
+
+  AWS_ROLE_ARN?: string;
 }
 
 /** @public */
