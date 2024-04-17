@@ -148,7 +148,6 @@ export abstract class AbstractCursor<
   [kDocuments]: {
     length: number;
     shift(bsonOptions?: any): TSchema | null;
-    unshift(doc: TSchema): void;
     clear(): void;
     pushMany(many: Iterable<TSchema>): void;
     push(item: TSchema): void;
@@ -390,14 +389,7 @@ export abstract class AbstractCursor<
       return true;
     }
 
-    const doc = await next<TSchema>(this, { blocking: true, transform: false });
-
-    if (doc) {
-      this[kDocuments].unshift(doc);
-      return true;
-    }
-
-    return false;
+    return await next(this, { blocking: true, transform: false, hasNext: true });
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
@@ -406,7 +398,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return await next(this, { blocking: true, transform: true });
+    return await next(this, { blocking: true, transform: true, hasNext: false });
   }
 
   /**
@@ -417,7 +409,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return await next(this, { blocking: false, transform: true });
+    return await next(this, { blocking: false, transform: true, hasNext: false });
   }
 
   /**
@@ -726,13 +718,42 @@ async function next<T>(
   cursor: AbstractCursor<T>,
   {
     blocking,
-    transform
+    transform,
+    hasNext
   }: {
     blocking: boolean;
     transform: boolean;
+    hasNext: true;
   }
-): Promise<T | null> {
+): Promise<boolean>;
+
+async function next<T>(
+  cursor: AbstractCursor<T>,
+  {
+    blocking,
+    transform,
+    hasNext
+  }: {
+    blocking: boolean;
+    transform: boolean;
+    hasNext: false;
+  }
+): Promise<T | null>;
+
+async function next<T>(
+  cursor: AbstractCursor<T>,
+  {
+    blocking,
+    transform,
+    hasNext
+  }: {
+    blocking: boolean;
+    transform: boolean;
+    hasNext: boolean;
+  }
+): Promise<boolean | T | null> {
   if (cursor.closed) {
+    if (hasNext) return false;
     return null;
   }
 
@@ -743,6 +764,7 @@ async function next<T>(
     }
 
     if (cursor[kDocuments].length !== 0) {
+      if (hasNext) return true;
       const doc = cursor[kDocuments].shift(cursor[kOptions]);
 
       if (doc != null && transform && cursor[kTransform]) {
@@ -767,6 +789,7 @@ async function next<T>(
       // cleanupCursor should never throw, but if it does it indicates a bug in the driver
       // and we should surface the error
       await cleanupCursor(cursor, {});
+      if (hasNext) return false;
       return null;
     }
 
@@ -811,10 +834,12 @@ async function next<T>(
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
+      if (hasNext) return false;
       return null;
     }
   } while (!cursor.isDead || cursor[kDocuments].length !== 0);
 
+  if (hasNext) return false;
   return null;
 }
 

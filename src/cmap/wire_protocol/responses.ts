@@ -121,11 +121,9 @@ function throwUnsupportedError() {
 }
 
 export class CursorResponse extends MongoDBResponse {
-  id: Long | null = null;
-  ns: MongoDBNamespace | null = null;
-
-  documents: any | null = null;
-  bufferForUnshift: any[] = [];
+  public id: Long | null = null;
+  public ns: MongoDBNamespace | null = null;
+  public documents: any | null = null;
 
   private batch: OnDemandDocument | null = null;
   private values: Generator<OnDemandDocument, void, void> | null = null;
@@ -161,20 +159,13 @@ export class CursorResponse extends MongoDBResponse {
       shift: {
         value: (options?: BSONSerializeOptions) => {
           this.iterated += 1;
-          if (this.bufferForUnshift.length) return this.bufferForUnshift.pop();
           const r = this.values?.next();
           if (!r || r.done) return null;
-          if (options.raw) {
+          if (options?.raw) {
             return r.value.toBytes();
           } else {
             return r.value.toObject(options);
           }
-        }
-      },
-      unshift: {
-        value: (v: any) => {
-          this.iterated -= 1;
-          this.bufferForUnshift.push(v);
         }
       },
       clear: {
