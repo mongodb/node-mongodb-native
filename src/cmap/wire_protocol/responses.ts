@@ -17,6 +17,10 @@ export type MongoDBResponseConstructor = {
 
 /** @internal */
 export class MongoDBResponse extends OnDemandDocument {
+  static is(value: unknown): value is MongoDBResponse {
+    return value instanceof MongoDBResponse;
+  }
+
   // {ok:1}
   static empty = new MongoDBResponse(new Uint8Array([13, 0, 0, 0, 16, 111, 107, 0, 1, 0, 0, 0, 0]));
 
@@ -154,18 +158,18 @@ export class CursorResponse extends MongoDBResponse {
     this.documents = Object.defineProperties(Object.create(null), {
       length: {
         get: () => {
-          return this.batchSize - this.iterated;
+          return Math.max(this.batchSize - this.iterated, 0);
         }
       },
       shift: {
         value: (options?: BSONSerializeOptions) => {
           this.iterated += 1;
-          const r = this.values?.next();
-          if (!r || r.done) return null;
+          const result = this.values?.next();
+          if (!result || result.done) return null;
           if (options?.raw) {
-            return r.value.toBytes();
+            return result.value.toBytes();
           } else {
-            return r.value.toObject(options);
+            return result.value.toObject(options);
           }
         }
       },

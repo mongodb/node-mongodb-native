@@ -6,6 +6,7 @@ import {
 
 import { deserialize, type Document, serialize } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { getMongoDBClientEncryption } from '../deps';
 import { MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
@@ -473,8 +474,15 @@ export class AutoEncrypter {
   /**
    * Decrypt a command response
    */
-  async decrypt(response: Uint8Array | Document, options: CommandOptions = {}): Promise<Document> {
-    const buffer = Buffer.isBuffer(response) ? response : serialize(response, options);
+  async decrypt(
+    response: Uint8Array | Document | MongoDBResponse,
+    options: CommandOptions = {}
+  ): Promise<Document> {
+    const buffer = MongoDBResponse.is(response)
+      ? response.toBytes()
+      : Buffer.isBuffer(response)
+      ? response
+      : serialize(response, options);
 
     const context = this._mongocrypt.makeDecryptionContext(buffer);
 
@@ -487,10 +495,11 @@ export class AutoEncrypter {
     });
 
     const decorateResult = this[kDecorateResult];
-    const result = await stateMachine.execute<Document>(this, context);
+    const result = await stateMachine.execute(this, context, response.constructor);
     if (decorateResult) {
       decorateDecryptionResult(result, response);
     }
+
     return result;
   }
 

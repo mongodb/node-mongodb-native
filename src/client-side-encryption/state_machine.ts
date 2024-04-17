@@ -11,6 +11,7 @@ import {
   serialize
 } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
+import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import { getSocks, type SocksLib } from '../deps';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '../utils';
@@ -156,14 +157,15 @@ export class StateMachine {
    */
   async execute<T extends Document>(
     executor: StateMachineExecutable,
-    context: MongoCryptContext
+    context: MongoCryptContext,
+    responseType?: MongoDBResponseConstructor
   ): Promise<T> {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
     const metaDataClient = executor._metaDataClient;
     const mongocryptdClient = executor._mongocryptdClient;
     const mongocryptdManager = executor._mongocryptdManager;
-    let result: T | null = null;
+    let result: any | null = null;
 
     while (context.state !== MONGOCRYPT_CTX_DONE && context.state !== MONGOCRYPT_CTX_ERROR) {
       debug(`[context#${context.id}] ${stateToString.get(context.state) || context.state}`);
@@ -252,7 +254,12 @@ export class StateMachine {
             const message = context.status.message || 'Finalization error';
             throw new MongoCryptError(message);
           }
-          result = deserialize(finalizedContext, this.options) as T;
+
+          result =
+            responseType != null
+              ? new responseType(finalizedContext)
+              : (result = deserialize(finalizedContext, this.options) as T);
+
           break;
         }
 
