@@ -1,6 +1,7 @@
 import { type AWSCredentials, getAwsCredentialProvider } from '../../deps';
 import { MongoAWSError } from '../../error';
 import { request } from '../../utils';
+import { type AuthMechanismProperties } from './mongo_credentials';
 
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
 const AWS_EC2_URI = 'http://169.254.169.254';
@@ -27,7 +28,7 @@ export interface AWSTempCredentials {
  * Fetches temporary AWS credentials.
  */
 export abstract class AWSTemporaryCredentialProvider {
-  abstract getCredentials(): Promise<AWSTempCredentials>;
+  abstract getCredentials(props: AuthMechanismProperties): Promise<AWSTempCredentials>;
   private static _awsSDK: ReturnType<typeof getAwsCredentialProvider>;
   protected static get awsSDK() {
     AWSTemporaryCredentialProvider._awsSDK ??= getAwsCredentialProvider();
@@ -104,7 +105,7 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
     return this._provider;
   }
 
-  override async getCredentials(): Promise<AWSTempCredentials> {
+  override async getCredentials(props: AuthMechanismProperties): Promise<AWSTempCredentials> {
     /*
      * Creates a credential provider that will attempt to find credentials from the
      * following sources (listed in order of precedence):
@@ -135,7 +136,7 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
  * section of the Auth spec.
  */
 export class LegacyAWSTemporaryCredentialProvider extends AWSTemporaryCredentialProvider {
-  override async getCredentials(): Promise<AWSTempCredentials> {
+  override async getCredentials(_props: AuthMechanismProperties): Promise<AWSTempCredentials> {
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
     // is set then drivers MUST assume that it was set by an AWS ECS agent
     if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {

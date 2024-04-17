@@ -502,7 +502,8 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    const creds = this._client.options.credentials?.mechanismProperties || {};
+    return await refreshKMSCredentials(this._kmsProviders, creds);
   }
 
   /**

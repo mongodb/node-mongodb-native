@@ -9,7 +9,7 @@ import { MongocryptdManager } from '../../../src/client-side-encryption/mongocry
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { MongoClient } from '../../../src/mongo_client';
+import { MongoClient, type MongoOptions } from '../../../src/mongo_client';
 import { BSON, type DataKey } from '../../mongodb';
 import * as requirements from './requirements.helper';
 
@@ -37,7 +37,11 @@ const MOCK_MONGOCRYPTD_RESPONSE = readExtendedJsonToBuffer(
 const MOCK_KEYDOCUMENT_RESPONSE = readExtendedJsonToBuffer(`${__dirname}/data/key-document.json`);
 const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(`${__dirname}/data/kms-decrypt-reply.txt`);
 
-class MockClient {}
+class MockClient {
+  get options(): Partial<MongoOptions> {
+    return {};
+  }
+}
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;

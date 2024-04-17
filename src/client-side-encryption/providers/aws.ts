@@ -1,10 +1,14 @@
 import { AWSSDKCredentialProvider } from '../../cmap/auth/aws_temporary_credentials';
+import { type AuthMechanismProperties } from '../../cmap/auth/mongo_credentials';
 import { type KMSProviders } from '.';
 
 /**
  * @internal
  */
-export async function loadAWSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
+export async function loadAWSCredentials(
+  kmsProviders: KMSProviders,
+  props: AuthMechanismProperties
+): Promise<KMSProviders> {
   const credentialProvider = new AWSSDKCredentialProvider();
 
   // We shouldn't ever receive a response from the AWS SDK that doesn't have a `SecretAccessKey`
@@ -14,7 +18,7 @@ export async function loadAWSCredentials(kmsProviders: KMSProviders): Promise<KM
     SecretAccessKey = '',
     AccessKeyId = '',
     Token
-  } = await credentialProvider.getCredentials();
+  } = await credentialProvider.getCredentials(props);
   const aws: NonNullable<KMSProviders['aws']> = {
     secretAccessKey: SecretAccessKey,
     accessKeyId: AccessKeyId

@@ -176,7 +176,9 @@ async function makeTempCredentials(
       }
     });
   }
-  const temporaryCredentials = await awsCredentialFetcher.getCredentials();
+  const temporaryCredentials = await awsCredentialFetcher.getCredentials(
+    credentials.mechanismProperties
+  );
 
   return makeMongoCredentialsFromAWSTemp(temporaryCredentials);
 }

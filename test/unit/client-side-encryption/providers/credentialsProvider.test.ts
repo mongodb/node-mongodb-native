@@ -87,7 +87,7 @@ describe('#refreshKMSCredentials', function () {
         });
 
         it('refreshes the aws credentials', async function () {
-          const providers = await refreshKMSCredentials(kmsProviders);
+          const providers = await refreshKMSCredentials(kmsProviders, {});
           expect(providers).to.deep.equal({
             aws: {
               accessKeyId: accessKey,
@@ -116,7 +116,7 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('refreshes only the aws credentials', async function () {
-            const providers = await refreshKMSCredentials(kmsProviders);
+            const providers = await refreshKMSCredentials(kmsProviders, {});
             expect(providers).to.deep.equal({
               local: {
                 key: Buffer.alloc(96)

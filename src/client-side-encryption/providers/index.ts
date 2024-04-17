@@ -1,3 +1,4 @@
+import { type AuthMechanismProperties } from '../../cmap/auth/mongo_credentials';
 import { loadAWSCredentials } from './aws';
 import { loadAzureCredentials } from './azure';
 import { loadGCPCredentials } from './gcp';
@@ -150,11 +151,14 @@ export function isEmptyCredentials(
  *
  * @internal
  */
-export async function refreshKMSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
+export async function refreshKMSCredentials(
+  kmsProviders: KMSProviders,
+  props: AuthMechanismProperties
+): Promise<KMSProviders> {
   let finalKMSProviders = kmsProviders;
 
   if (isEmptyCredentials('aws', kmsProviders)) {
-    finalKMSProviders = await loadAWSCredentials(finalKMSProviders);
+    finalKMSProviders = await loadAWSCredentials(finalKMSProviders, props);
   }
 
   if (isEmptyCredentials('gcp', kmsProviders)) {

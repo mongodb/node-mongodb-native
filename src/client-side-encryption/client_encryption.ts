@@ -654,7 +654,8 @@ export class ClientEncryption {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    const authProps = this._client.options.credentials?.mechanismProperties || {};
+    return await refreshKMSCredentials(this._kmsProviders, authProps);
   }
 
   static get libmongocryptVersion() {
