@@ -961,7 +961,7 @@ class ReadableCursorStream extends Readable {
 
   private _readNext() {
     // eslint-disable-next-line github/no-then
-    next(this._cursor, { blocking: true, transform: true }).then(
+    next(this._cursor, { blocking: true, transform: true, hasNext: false }).then(
       result => {
         if (result == null) {
           this.push(null);

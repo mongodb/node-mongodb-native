@@ -120,6 +120,7 @@ function throwUnsupportedError() {
   throw new Error('Unsupported method');
 }
 
+/** @internal */
 export class CursorResponse extends MongoDBResponse {
   public id: Long | null = null;
   public ns: MongoDBNamespace | null = null;
