@@ -5,8 +5,8 @@ import { type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import * as tls from 'tls';
-import { promisify } from 'util';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
@@ -83,6 +83,7 @@ describe('StateMachine', function () {
   });
 
   describe('kmsRequest', function () {
+    let sandbox: sinon.SinonSandbox;
     class MockSocket extends EventEmitter {
       constructor(callback) {
         super();
@@ -98,13 +99,17 @@ describe('StateMachine', function () {
     }
 
     before(function () {
-      this.sinon = sinon.createSandbox();
+      sandbox = sinon.createSandbox();
+    });
+
+    afterEach(function () {
+      sandbox.restore();
     });
 
     context('when handling standard kms requests', function () {
       beforeEach(function () {
         this.fakeSocket = undefined;
-        this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
+        sandbox.stub(tls, 'connect').callsFake((options, callback) => {
           this.fakeSocket = new MockSocket(callback);
           return this.fakeSocket;
         });
@@ -178,18 +183,18 @@ describe('StateMachine', function () {
           let connectOptions;
 
           it('sets the cert and key options in the tls connect options', async function () {
-            this.sinon.stub(fs, 'readFile').callsFake(fileName => {
+            sandbox.stub(fs, 'readFile').callsFake(fileName => {
               expect(fileName).to.equal('test.pem');
               return Promise.resolve(buffer);
             });
-            this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
+            sandbox.stub(tls, 'connect').callsFake((options, callback) => {
               connectOptions = options;
               this.fakeSocket = new MockSocket(callback);
               return this.fakeSocket;
             });
             const kmsRequestPromise = stateMachine.kmsRequest(request);
 
-            await promisify(setTimeout)(0);
+            await setTimeoutAsync(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
 
             await kmsRequestPromise;
@@ -207,18 +212,18 @@ describe('StateMachine', function () {
           let connectOptions;
 
           it('sets the ca options in the tls connect options', async function () {
-            this.sinon.stub(fs, 'readFile').callsFake(fileName => {
+            sandbox.stub(fs, 'readFile').callsFake(fileName => {
               expect(fileName).to.equal('test.pem');
               return Promise.resolve(buffer);
             });
-            this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
+            sandbox.stub(tls, 'connect').callsFake((options, callback) => {
               connectOptions = options;
               this.fakeSocket = new MockSocket(callback);
               return this.fakeSocket;
             });
             const kmsRequestPromise = stateMachine.kmsRequest(request);
 
-            await promisify(setTimeout)(0);
+            await setTimeoutAsync(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
 
             await kmsRequestPromise;
@@ -234,14 +239,14 @@ describe('StateMachine', function () {
           let connectOptions;
 
           it('sets the passphrase option in the tls connect options', async function () {
-            this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
+            sandbox.stub(tls, 'connect').callsFake((options, callback) => {
               connectOptions = options;
               this.fakeSocket = new MockSocket(callback);
               return this.fakeSocket;
             });
             const kmsRequestPromise = stateMachine.kmsRequest(request);
 
-            await promisify(setTimeout)(0);
+            await setTimeoutAsync(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
 
             await kmsRequestPromise;
@@ -309,12 +314,12 @@ describe('StateMachine', function () {
             port: server.address().port
           });
           await once(netSocket, 'connect');
-          this.sinon.stub(tls, 'connect').returns(netSocket);
+          sandbox.stub(tls, 'connect').returns(netSocket);
         });
 
         afterEach(function () {
           server.close();
-          this.sinon.restore();
+          sandbox.restore();
         });
 
         it('throws a MongoCryptError error', async function () {
@@ -327,7 +332,7 @@ describe('StateMachine', function () {
           try {
             const kmsRequestPromise = stateMachine.kmsRequest(request);
 
-            await promisify(setTimeout)(0);
+            await setTimeoutAsync(0);
             serverSocket.end();
 
             await kmsRequestPromise;
@@ -339,10 +344,6 @@ describe('StateMachine', function () {
           expect.fail('missed exception');
         });
       });
-    });
-
-    afterEach(function () {
-      this.sinon.restore();
     });
   });
 
