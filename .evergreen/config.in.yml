@@ -1371,14 +1371,8 @@ task_groups:
         params:
           working_dir: "src"
           binary: bash
-          add_expansions_to_env: true
-          env:
-            testgcpkms_key_file: ${gcpkms_key_file}
-            GCPKMS_SERVICEACCOUNT: ${gcpkms_service_account}
-            GCPKMS_DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-            GCPKMS_MACHINETYPE: "e2-standard-4"
           args:
-            - .evergreen/setup-gcp-instance.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
       - command: expansions.update
         # Load the GCPKMS_GCLOUD, GCPKMS_INSTANCE, GCPKMS_REGION, and GCPKMS_ZONE expansions.
         params:
@@ -1395,7 +1389,7 @@ task_groups:
             GCPKMS_ZONE: ${GCPKMS_ZONE}
             GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/delete-instance.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
     tasks:
       - test-gcpkms-task
 
