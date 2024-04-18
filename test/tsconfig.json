@@ -5,5 +5,9 @@
         "allowJs": true,
         "checkJs": false
     },
-    "include": ["../node_modules/@types/mocha/index.d.ts", "./mongodb-mocha.d.ts",]
+    "include": [
+        "../node_modules/@types/mocha/index.d.ts",
+        "../global.d.ts",
+        "./**/*"
+    ]
 }
