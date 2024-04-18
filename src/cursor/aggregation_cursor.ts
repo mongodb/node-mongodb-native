@@ -86,33 +86,45 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     );
   }
 
+  /** Add a stage to the aggregation pipeline
+   * @example
+   * ```
+   * const documents = await users.aggregate().addStage({ $match: { name: /Mike/ } }).toArray();
+   * ```
+   * @example
+   * ```
+   * const documents = await users.aggregate()
+   *   .addStage<{ name: string }>({ $project: { name: true } })
+   *   .toArray(); // type of documents is { name: string }[]
+   * ```
+   */
+  addStage(stage: Document): this;
+  addStage<T = Document>(stage: Document): AggregationCursor<T>;
+  addStage<T = Document>(stage: Document): AggregationCursor<T> {
+    assertUninitialized(this);
+    this[kPipeline].push(stage);
+    return this as unknown as AggregationCursor<T>;
+  }
+
   /** Add a group stage to the aggregation pipeline */
   group<T = TSchema>($group: Document): AggregationCursor<T>;
   group($group: Document): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $group });
-    return this;
+    return this.addStage({ $group });
   }
 
   /** Add a limit stage to the aggregation pipeline */
   limit($limit: number): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $limit });
-    return this;
+    return this.addStage({ $limit });
   }
 
   /** Add a match stage to the aggregation pipeline */
   match($match: Document): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $match });
-    return this;
+    return this.addStage({ $match });
   }
 
   /** Add an out stage to the aggregation pipeline */
   out($out: { db: string; coll: string } | string): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $out });
-    return this;
+    return this.addStage({ $out });
   }
 
   /**
@@ -157,50 +169,36 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * ```
    */
   project<T extends Document = Document>($project: Document): AggregationCursor<T> {
-    assertUninitialized(this);
-    this[kPipeline].push({ $project });
-    return this as unknown as AggregationCursor<T>;
+    return this.addStage<T>({ $project });
   }
 
   /** Add a lookup stage to the aggregation pipeline */
   lookup($lookup: Document): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $lookup });
-    return this;
+    return this.addStage({ $lookup });
   }
 
   /** Add a redact stage to the aggregation pipeline */
   redact($redact: Document): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $redact });
-    return this;
+    return this.addStage({ $redact });
   }
 
   /** Add a skip stage to the aggregation pipeline */
   skip($skip: number): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $skip });
-    return this;
+    return this.addStage({ $skip });
   }
 
   /** Add a sort stage to the aggregation pipeline */
   sort($sort: Sort): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $sort });
-    return this;
+    return this.addStage({ $sort });
   }
 
   /** Add a unwind stage to the aggregation pipeline */
   unwind($unwind: Document | string): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $unwind });
-    return this;
+    return this.addStage({ $unwind });
   }
 
   /** Add a geoNear stage to the aggregation pipeline */
   geoNear($geoNear: Document): this {
-    assertUninitialized(this);
-    this[kPipeline].push({ $geoNear });
-    return this;
+    return this.addStage({ $geoNear });
   }
 }
