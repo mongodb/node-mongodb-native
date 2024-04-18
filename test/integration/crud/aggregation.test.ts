@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 
-import { MongoInvalidArgumentError } from '../../mongodb';
+import { type MongoClient, MongoInvalidArgumentError } from '../../mongodb';
 import { filterForCommands } from '../shared';
 
 describe('Aggregation', function () {
-  let client;
+  let client: MongoClient;
 
   beforeEach(async function () {
     client = this.configuration.newClient();
@@ -938,5 +938,69 @@ describe('Aggregation', function () {
         })
         .finally(() => client.close());
     }
+  });
+
+  it('should return identical results for array aggregations and builder aggregations', async function () {
+    const databaseName = this.configuration.db;
+    const db = client.db(databaseName);
+    const collection = db.collection(
+      'shouldReturnIdenticalResultsForArrayAggregationsAndBuilderAggregations'
+    );
+
+    const docs = [
+      {
+        title: 'this is my title',
+        author: 'bob',
+        posted: new Date(),
+        pageViews: 5,
+        tags: ['fun', 'good', 'fun'],
+        other: { foo: 5 },
+        comments: [
+          { author: 'joe', text: 'this is cool' },
+          { author: 'sam', text: 'this is bad' }
+        ]
+      }
+    ];
+
+    await collection.insertMany(docs, { writeConcern: { w: 1 } });
+    const arrayPipelineCursor = collection.aggregate([
+      {
+        $project: {
+          author: 1,
+          tags: 1
+        }
+      },
+      { $unwind: '$tags' },
+      {
+        $group: {
+          _id: { tags: '$tags' },
+          authors: { $addToSet: '$author' }
+        }
+      },
+      { $sort: { _id: -1 } }
+    ]);
+
+    const builderPipelineCursor = collection
+      .aggregate()
+      .project({ author: 1, tags: 1 })
+      .unwind('$tags')
+      .group({ _id: { tags: '$tags' }, authors: { $addToSet: '$author' } })
+      .sort({ _id: -1 });
+
+    const builderGenericStageCursor = collection
+      .aggregate()
+      .addStage({ $project: { author: 1, tags: 1 } })
+      .addStage({ $unwind: '$tags' })
+      .addStage({ $group: { _id: { tags: '$tags' }, authors: { $addToSet: '$author' } } })
+      .addStage({ $sort: { _id: -1 } });
+
+    const expectedResults = [
+      { _id: { tags: 'good' }, authors: ['bob'] },
+      { _id: { tags: 'fun' }, authors: ['bob'] }
+    ];
+
+    expect(await arrayPipelineCursor.toArray()).to.deep.equal(expectedResults);
+    expect(await builderPipelineCursor.toArray()).to.deep.equal(expectedResults);
+    expect(await builderGenericStageCursor.toArray()).to.deep.equal(expectedResults);
   });
 });
