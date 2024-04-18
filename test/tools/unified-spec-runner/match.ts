@@ -561,63 +561,65 @@ function compareEvents(
           );
         }
       }
-      return;
     } else if (expectedEvent.serverHeartbeatStartedEvent) {
       expect(actualEvent).to.be.instanceOf(ServerHeartbeatStartedEvent);
       const expectedSdamEvent = expectedEvent.serverHeartbeatStartedEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.serverHeartbeatFailedEvent) {
       expect(actualEvent).to.be.instanceOf(ServerHeartbeatFailedEvent);
       const expectedSdamEvent = expectedEvent.serverHeartbeatFailedEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.serverHeartbeatSucceededEvent) {
       expect(actualEvent).to.be.instanceOf(ServerHeartbeatSucceededEvent);
       const expectedSdamEvent = expectedEvent.serverHeartbeatSucceededEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.serverOpeningEvent) {
       expect(actualEvent).to.be.instanceOf(ServerOpeningEvent);
       const expectedSdamEvent = expectedEvent.serverOpeningEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.serverClosedEvent) {
       expect(actualEvent).to.be.instanceOf(ServerClosedEvent);
       const expectedSdamEvent = expectedEvent.serverClosedEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.topologyOpeningEvent) {
       expect(actualEvent).to.be.instanceOf(TopologyOpeningEvent);
       const expectedSdamEvent = expectedEvent.topologyOpeningEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.topologyClosingEvent) {
       expect(actualEvent).to.be.instanceOf(TopologyClosedEvent);
       const expectedSdamEvent = expectedEvent.topologyClosingEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.topologyDescriptionChangedEvent) {
       expect(actualEvent).to.be.instanceOf(TopologyDescriptionChangedEvent);
+
+      const actualTopChangedEvent = actualEvent as TopologyDescriptionChangedEvent;
       const expectedSdamEvent = expectedEvent.topologyDescriptionChangedEvent;
-      for (const property of Object.keys(expectedSdamEvent)) {
-        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+
+      if (expectedSdamEvent.previousDescription?.type) {
+        expect(actualTopChangedEvent.previousDescription.type).to.equal(
+          expectedSdamEvent.previousDescription.type
+        );
       }
-      return;
+
+      if (expectedSdamEvent.newDescription?.type) {
+        expect(actualTopChangedEvent.newDescription.type).to.equal(
+          expectedSdamEvent.newDescription.type
+        );
+      }
     } else {
       expect.fail(`Encountered unexpected event - ${inspect(actualEvent)}`);
     }

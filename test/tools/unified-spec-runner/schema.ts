@@ -7,6 +7,7 @@ import type {
   ServerApiVersion,
   SeverityLevel,
   TagSet,
+  TopologyType as EventTopologyType,
   W
 } from '../../mongodb';
 import { type TestConfiguration } from '../runner/config';
@@ -314,6 +315,7 @@ export interface ExpectedCmapEvent {
   connectionCheckedOutEvent?: Record<string, never>;
   connectionCheckedInEvent?: Record<string, never>;
 }
+
 export interface ExpectedSdamEvent {
   serverDescriptionChangedEvent?: {
     previousDescription?: {
@@ -336,10 +338,10 @@ export interface ExpectedSdamEvent {
   topologyDescriptionChangedEvent?: {
     topologyId?: any;
     previousDescription?: {
-      type?: string;
+      type?: EventTopologyType;
     };
     newDescription?: {
-      type?: string;
+      type?: EventTopologyType;
     };
   };
   topologyOpeningEvent?: {
