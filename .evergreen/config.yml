@@ -1125,17 +1125,7 @@ tasks:
           binary: bash
           add_expansions_to_env: true
           args:
-            - src/.evergreen/copy-driver-to-azure.sh
-      - command: subprocess.exec
-        type: test
-        params:
-          working_dir: src
-          binary: bash
-          add_expansions_to_env: true
-          env:
-            AZUREKMS_CMD: env EXPECTED_AZUREKMS_OUTCOME=success bash src/.evergreen/run-azure-kms-tests.sh
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/run-command.sh
+            - src/.evergreen/copy-driver-to-azure-and-run.sh
   - name: test-azurekms-fail-task
     commands:
       - command: expansions.update
@@ -3624,9 +3614,10 @@ task_groups:
         params:
           working_dir: src
           binary: bash
-          add_expansions_to_env: true
+          env:
+            AZUREKMS_VMNAME_PREFIX: NODE_DRIVER
           args:
-            - .evergreen/setup-azure-vm.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
       - command: expansions.update
         params:
           file: src/testazurekms-expansions.yml
@@ -3639,7 +3630,7 @@ task_groups:
           binary: bash
           add_expansions_to_env: true
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/delete-vm.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
     tasks:
       - test-azurekms-task
   - name: test_atlas_task_group
