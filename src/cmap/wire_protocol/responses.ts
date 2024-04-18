@@ -129,10 +129,10 @@ export class CursorResponse extends MongoDBResponse {
   public id: Long | null = null;
   public ns: MongoDBNamespace | null = null;
   public documents: any | null = null;
+  public batchSize = 0;
 
   private batch: OnDemandDocument | null = null;
   private values: Generator<OnDemandDocument, void, void> | null = null;
-  private batchSize = 0;
   private iterated = 0;
 
   constructor(b: Uint8Array, o?: number, a?: boolean) {
@@ -184,7 +184,7 @@ export class CursorResponse extends MongoDBResponse {
     });
   }
 
-  static isCursorResponse(value: unknown): value is CursorResponse {
+  static override is(value: unknown): value is CursorResponse {
     return value instanceof CursorResponse;
   }
 }

@@ -657,7 +657,7 @@ export abstract class AbstractCursor<
       const state = await this._initialize(this[kSession]);
       const response = state.response;
       this[kServer] = state.server;
-      if (CursorResponse.isCursorResponse(response)) {
+      if (CursorResponse.is(response)) {
         this[kId] = response.id;
         if (response.ns) this[kNamespace] = response.ns;
         this[kDocuments] = response.documents;
@@ -798,7 +798,7 @@ async function next<T>(
 
     try {
       const response = await cursor.getMore(batchSize);
-      if (CursorResponse.isCursorResponse(response)) {
+      if (CursorResponse.is(response)) {
         cursor[kId] = response.id;
         cursor[kDocuments] = response.documents;
       } else if (response) {

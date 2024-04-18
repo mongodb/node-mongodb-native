@@ -1,4 +1,5 @@
 import { type Document, Long } from '../bson';
+import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import { type ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
@@ -34,7 +35,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   /** @internal */
   [kFilter]: Document;
   /** @internal */
-  [kNumReturned]?: number;
+  [kNumReturned] = 0;
   /** @internal */
   [kBuiltOptions]: FindOptions;
 
@@ -78,7 +79,9 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const response = await executeOperation(this.client, findOperation);
 
     // the response is not a cursor when `explain` is enabled
-    this[kNumReturned] = response.cursor?.firstBatch?.length;
+    if (CursorResponse.is(response)) {
+      this[kNumReturned] = response.batchSize;
+    }
 
     // TODO: NODE-2882
     return { server: findOperation.server, session, response };
@@ -113,8 +116,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
     const response = await super.getMore(batchSize, true);
     // TODO: wrap this in some logic to prevent it from happening if we don't need this support
-    if (response) {
-      this[kNumReturned] = this[kNumReturned] + response.batchLength;
+    if (CursorResponse.is(response)) {
+      this[kNumReturned] = this[kNumReturned] + response.batchSize;
     }
 
     return response;
