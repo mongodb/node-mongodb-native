@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import {
   BufferPool,
@@ -15,10 +14,8 @@ import {
   MongoDBNamespace,
   MongoRuntimeError,
   ObjectId,
-  shuffle,
-  TimeoutController
+  shuffle
 } from '../mongodb';
-import { createTimerSandbox } from './timer_sandbox';
 
 describe('driver utils', function () {
   describe('.hostMatchesWildcards', function () {
@@ -981,67 +978,6 @@ describe('driver utils', function () {
     context('when addresses in SRV record end without dots', () => {
       it('accepts address since it matches the parent domain', () => {
         expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
-      });
-    });
-  });
-
-  describe('class TimeoutController', () => {
-    let timerSandbox, clock, spy;
-
-    beforeEach(function () {
-      timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-      spy = sinon.spy();
-    });
-
-    afterEach(function () {
-      clock.restore();
-      timerSandbox.restore();
-    });
-
-    describe('constructor', () => {
-      it('when no timeout is provided, it creates an infinite timeout', () => {
-        const controller = new TimeoutController();
-        // @ts-expect-error Accessing a private field on TimeoutController
-        expect(controller.timeoutId).to.be.null;
-      });
-
-      it('when timeout is 0, it creates an infinite timeout', () => {
-        const controller = new TimeoutController(0);
-        // @ts-expect-error Accessing a private field on TimeoutController
-        expect(controller.timeoutId).to.be.null;
-      });
-
-      it('when timeout <0, it creates an infinite timeout', () => {
-        const controller = new TimeoutController(-5);
-        // @ts-expect-error Accessing a private field on TimeoutController
-        expect(controller.timeoutId).to.be.null;
-      });
-
-      context('when timeout > 0', () => {
-        let timeoutController: TimeoutController;
-
-        beforeEach(function () {
-          timeoutController = new TimeoutController(3000);
-          timeoutController.signal.addEventListener('abort', spy);
-        });
-
-        afterEach(function () {
-          timeoutController.clear();
-        });
-
-        it('it creates a timeout', () => {
-          // @ts-expect-error Accessing a private field on TimeoutController
-          expect(timeoutController.timeoutId).not.to.be.null;
-        });
-
-        it('times out after `timeout` milliseconds', () => {
-          expect(spy, 'spy was called after creation').not.to.have.been.called;
-          clock.tick(2999);
-          expect(spy, 'spy was called before 3000ms has expired').not.to.have.been.called;
-          clock.tick(1);
-          expect(spy, 'spy was not called after 3000ms').to.have.been.called;
-        });
       });
     });
   });

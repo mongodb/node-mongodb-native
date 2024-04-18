@@ -201,6 +201,7 @@ export * from '../src/sdam/topology';
 export * from '../src/sdam/topology_description';
 export * from '../src/sessions';
 export * from '../src/sort';
+export * from '../src/timeout';
 export * from '../src/transactions';
 export * from '../src/utils';
 export * from '../src/write_concern';
