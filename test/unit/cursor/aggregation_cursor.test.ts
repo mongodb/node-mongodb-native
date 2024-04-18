@@ -78,8 +78,8 @@ describe('class AggregationCursor', () => {
 
   context('lookup()', () => {
     it('adds a $lookup stage', () => {
-      cursor.redact({ lookup: true });
-      expect(cursor.pipeline).to.have.deep.property('0', { $redact: { lookup: true } });
+      cursor.lookup({ lookup: true });
+      expect(cursor.pipeline).to.have.deep.property('0', { $lookup: { lookup: true } });
     });
   });
 
