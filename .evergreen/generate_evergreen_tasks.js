@@ -114,6 +114,22 @@ BASE_TASKS.push({
   ]
 });
 
+BASE_TASKS.push({
+  name: `test-x509-authentication`,
+  tags: ['latest', 'auth', 'x509'],
+  commands: [
+    updateExpansions({
+      VERSION: 'latest',
+      TOPOLOGY: 'sharded_cluster',
+      AUTH: 'noauth',
+      SSL: 'ssl'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run x509 auth tests' }
+  ]
+})
+
 // manually added tasks
 TASKS.push(
   ...[
