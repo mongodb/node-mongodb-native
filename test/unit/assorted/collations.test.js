@@ -55,7 +55,7 @@ describe('Collation', function () {
         request.reply(primary[0]);
       } else if (doc.aggregate) {
         commandResult = doc;
-        request.reply({ ok: 1, cursor: { id: 0, firstBatch: [], ns: 'collation_test' } });
+        request.reply({ ok: 1, cursor: { id: 0n, firstBatch: [], ns: 'collation_test' } });
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
@@ -183,7 +183,7 @@ describe('Collation', function () {
         request.reply(primary[0]);
       } else if (doc.find) {
         commandResult = doc;
-        request.reply({ ok: 1, cursor: { id: 0, firstBatch: [] } });
+        request.reply({ ok: 1, cursor: { id: 0n, firstBatch: [] } });
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
@@ -215,7 +215,7 @@ describe('Collation', function () {
         request.reply(primary[0]);
       } else if (doc.find) {
         commandResult = doc;
-        request.reply({ ok: 1, cursor: { id: 0, firstBatch: [] } });
+        request.reply({ ok: 1, cursor: { id: 0n, firstBatch: [] } });
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
@@ -249,7 +249,7 @@ describe('Collation', function () {
         request.reply(primary[0]);
       } else if (doc.find) {
         commandResult = doc;
-        request.reply({ ok: 1, cursor: { id: 0, firstBatch: [] } });
+        request.reply({ ok: 1, cursor: { id: 0n, firstBatch: [] } });
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }

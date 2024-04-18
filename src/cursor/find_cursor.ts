@@ -1,4 +1,4 @@
-import { type Document, Long } from '../bson';
+import { type Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import { type ExplainVerbosityLike } from '../explain';
