@@ -110,7 +110,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
           // instead, if we determine there are no more documents to request from the server, we preemptively
           // close the cursor
         }
-        return { cursor: { id: Long.ZERO, nextBatch: [] } };
+        return CursorResponse.emptyGetMore;
       }
     }
 

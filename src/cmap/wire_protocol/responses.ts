@@ -126,6 +126,17 @@ function throwUnsupportedError() {
 
 /** @internal */
 export class CursorResponse extends MongoDBResponse {
+  static emptyGetMore = new CursorResponse(
+    Buffer.from(
+      'NgAAABBvawABAAAAA2N1cnNvcgAhAAAAEmlkAAAAAAAAAAAABG5leHRCYXRjaAAFAAAAAAAA',
+      'base64'
+    )
+  );
+
+  static override is(value: unknown): value is CursorResponse {
+    return value instanceof CursorResponse;
+  }
+
   public id: Long | null = null;
   public ns: MongoDBNamespace | null = null;
   public documents: any | null = null;
@@ -182,9 +193,5 @@ export class CursorResponse extends MongoDBResponse {
       pushMany: { value: throwUnsupportedError },
       push: { value: throwUnsupportedError }
     });
-  }
-
-  static override is(value: unknown): value is CursorResponse {
-    return value instanceof CursorResponse;
   }
 }
