@@ -1071,6 +1071,18 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
+  run x509 auth tests:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          MONGODB_URI: ${MONGODB_URI}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
 tasks:
   - name: test-atlas-data-lake
     tags:
@@ -1731,6 +1743,23 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-x509-authentication
+    tags:
+      - latest
+      - auth
+      - x509
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
+            - {key: SSL, value: ssl}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run x509 auth tests
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -3975,6 +4004,7 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
+      - test-x509-authentication
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
@@ -4028,6 +4058,7 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
+      - test-x509-authentication
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
@@ -4081,6 +4112,7 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
+      - test-x509-authentication
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
@@ -4133,6 +4165,7 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
+      - test-x509-authentication
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
