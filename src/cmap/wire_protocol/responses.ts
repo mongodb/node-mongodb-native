@@ -95,33 +95,29 @@ export class MongoDBResponse extends OnDemandDocument {
     return this.clusterTime ?? null;
   }
 
-  public override toObject(options: BSONSerializeOptions = {}): Record<string, any> {
+  public override toObject(options?: BSONSerializeOptions): Record<string, any> {
     const exactBSONOptions = {
-      useBigInt64: options.useBigInt64,
-      promoteLongs: options.promoteLongs,
-      promoteValues: options.promoteValues,
-      promoteBuffers: options.promoteBuffers,
-      bsonRegExp: options.bsonRegExp,
-      raw: options.raw ?? false,
-      fieldsAsRaw: options.fieldsAsRaw ?? {},
+      useBigInt64: options?.useBigInt64,
+      promoteLongs: options?.promoteLongs,
+      promoteValues: options?.promoteValues,
+      promoteBuffers: options?.promoteBuffers,
+      bsonRegExp: options?.bsonRegExp,
+      raw: options?.raw ?? false,
+      fieldsAsRaw: options?.fieldsAsRaw ?? {},
       validation: this.parseBsonSerializationOptions(options)
     };
     return super.toObject(exactBSONOptions);
   }
 
-  private parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {
+  private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
     utf8: { writeErrors: false } | false;
   } {
+    const enableUtf8Validation = options?.enableUtf8Validation;
     if (enableUtf8Validation === false) {
       return { utf8: false };
     }
-
     return { utf8: { writeErrors: false } };
   }
-}
-
-function throwUnsupportedError() {
-  throw new Error('Unsupported method');
 }
 
 /** @internal */
@@ -139,7 +135,6 @@ export class CursorResponse extends MongoDBResponse {
 
   public id: Long | null = null;
   public ns: MongoDBNamespace | null = null;
-  public documents: any | null = null;
   public batchSize = 0;
 
   private batch: OnDemandDocument | null = null;
@@ -163,35 +158,35 @@ export class CursorResponse extends MongoDBResponse {
     else if (cursor.has('nextBatch')) this.batch = cursor.get('nextBatch', BSONType.array, true);
     else throw new MongoUnexpectedServerResponseError('Cursor document did not contain a batch');
 
-    this.values = this.batch.valuesAs(BSONType.object);
     this.batchSize = this.batch.size();
-    this.iterated = 0;
-    this.documents = Object.defineProperties(Object.create(null), {
-      length: {
-        get: () => {
-          return Math.max(this.batchSize - this.iterated, 0);
-        }
-      },
-      shift: {
-        value: (options?: BSONSerializeOptions) => {
-          this.iterated += 1;
-          const result = this.values?.next();
-          if (!result || result.done) return null;
-          if (options?.raw) {
-            return result.value.toBytes();
-          } else {
-            return result.value.toObject(options);
-          }
-        }
-      },
-      clear: {
-        value: () => {
-          this.iterated = this.batchSize;
-          this.values?.return();
-        }
-      },
-      pushMany: { value: throwUnsupportedError },
-      push: { value: throwUnsupportedError }
-    });
+  }
+
+  get length() {
+    return Math.max(this.batchSize - this.iterated, 0);
+  }
+
+  shift(options?: BSONSerializeOptions): any {
+    this.iterated += 1;
+    this.values ??= this.batch?.valuesAs(BSONType.object) ?? null;
+    const result = this.values?.next();
+    if (!result || result.done) return null;
+    if (options?.raw) {
+      return result.value.toBytes();
+    } else {
+      return result.value.toObject(options);
+    }
+  }
+
+  clear() {
+    this.iterated = this.batchSize;
+    this.values?.return();
+  }
+
+  pushMany() {
+    throw new Error('pushMany Unsupported method');
+  }
+
+  push() {
+    throw new Error('push Unsupported method');
   }
 }

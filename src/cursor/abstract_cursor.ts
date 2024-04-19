@@ -660,7 +660,7 @@ export abstract class AbstractCursor<
       if (CursorResponse.is(response)) {
         this[kId] = response.id;
         if (response.ns) this[kNamespace] = response.ns;
-        this[kDocuments] = response.documents;
+        this[kDocuments] = response;
       } else if (response.cursor) {
         // TODO(NODE-2674): Preserve int64 sent from MongoDB
         this[kId] =
@@ -800,7 +800,7 @@ async function next<T>(
       const response = await cursor.getMore(batchSize);
       if (CursorResponse.is(response)) {
         cursor[kId] = response.id;
-        cursor[kDocuments] = response.documents;
+        cursor[kDocuments] = response;
       } else if (response) {
         const cursorId =
           typeof response.cursor.id === 'number'
