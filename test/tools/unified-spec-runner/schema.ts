@@ -347,7 +347,7 @@ export interface ExpectedSdamEvent {
   topologyOpeningEvent?: {
     topologyId?: any;
   };
-  topologyClosingEvent?: {
+  topologyClosedEvent?: {
     topologyId?: any;
   };
   serverOpeningEvent?: {

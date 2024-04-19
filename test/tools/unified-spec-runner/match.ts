@@ -597,9 +597,9 @@ function compareEvents(
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-    } else if (expectedEvent.topologyClosingEvent) {
+    } else if (expectedEvent.topologyClosedEvent) {
       expect(actualEvent).to.be.instanceOf(TopologyClosedEvent);
-      const expectedSdamEvent = expectedEvent.topologyClosingEvent;
+      const expectedSdamEvent = expectedEvent.topologyClosedEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
