@@ -5,8 +5,8 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const skipTable: { pattern: string; reason: string }[] = [
   { pattern: 'Topology lifecycle', reason: 'see NODE-5723' },
-  { pattern: 'connect with serverMonitoringMode=stream >=4.4', reason: 'NODE-XXXX' },
-  { pattern: 'connect with serverMonitoringMode=auto >=4.4', reason: 'NODE-XXXX' }
+  { pattern: 'connect with serverMonitoringMode=stream >=4.4', reason: 'NODE-6045' },
+  { pattern: 'connect with serverMonitoringMode=auto >=4.4', reason: 'NODE-6045' }
 ];
 
 describe('SDAM Unified Tests (Spec)', function () {
