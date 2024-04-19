@@ -78,6 +78,7 @@ benchmarkRunner
       readBench,
       writeBench,
       driverBench,
+      ...microBench.parallel,
       ...microBench.bsonBench,
       ...microBench.singleBench,
       ...microBench.multiBench
