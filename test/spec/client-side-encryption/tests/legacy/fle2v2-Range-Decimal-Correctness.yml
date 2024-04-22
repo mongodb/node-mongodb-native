@@ -8,6 +8,8 @@ runOn:
     # FLE 2 Encrypted collections are not supported on standalone.
     # Tests for Decimal (without precision) must only run against a replica set. Decimal (without precision) queries are expected to take a long time and may exceed the default mongos timeout.
     topology: [ "replicaset" ]
+    # Skip tests for "rangePreview" algorithm on Server 8.0+. Server 8.0 drops "rangePreview" and adds "range".
+    maxServerVersion: "7.99.99"
 database_name: &database_name "default"
 collection_name: &collection_name "default"
 data: []
