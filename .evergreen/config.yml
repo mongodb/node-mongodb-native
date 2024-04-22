@@ -1125,17 +1125,7 @@ tasks:
           binary: bash
           add_expansions_to_env: true
           args:
-            - src/.evergreen/copy-driver-to-azure.sh
-      - command: subprocess.exec
-        type: test
-        params:
-          working_dir: src
-          binary: bash
-          add_expansions_to_env: true
-          env:
-            AZUREKMS_CMD: env EXPECTED_AZUREKMS_OUTCOME=success bash src/.evergreen/run-azure-kms-tests.sh
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/run-command.sh
+            - src/.evergreen/copy-driver-to-azure-and-run.sh
   - name: test-azurekms-fail-task
     commands:
       - command: expansions.update
@@ -3596,14 +3586,8 @@ task_groups:
         params:
           working_dir: src
           binary: bash
-          add_expansions_to_env: true
-          env:
-            testgcpkms_key_file: ${gcpkms_key_file}
-            GCPKMS_SERVICEACCOUNT: ${gcpkms_service_account}
-            GCPKMS_DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-            GCPKMS_MACHINETYPE: e2-standard-4
           args:
-            - .evergreen/setup-gcp-instance.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
       - command: expansions.update
         params:
           file: src/testgcpkms-expansions.yml
@@ -3618,7 +3602,7 @@ task_groups:
             GCPKMS_ZONE: ${GCPKMS_ZONE}
             GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/delete-instance.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
     tasks:
       - test-gcpkms-task
   - name: test_azurekms_task_group
@@ -3630,9 +3614,10 @@ task_groups:
         params:
           working_dir: src
           binary: bash
-          add_expansions_to_env: true
+          env:
+            AZUREKMS_VMNAME_PREFIX: NODE_DRIVER
           args:
-            - .evergreen/setup-azure-vm.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
       - command: expansions.update
         params:
           file: src/testazurekms-expansions.yml
@@ -3645,7 +3630,7 @@ task_groups:
           binary: bash
           add_expansions_to_env: true
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/delete-vm.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
     tasks:
       - test-azurekms-task
   - name: test_atlas_task_group
