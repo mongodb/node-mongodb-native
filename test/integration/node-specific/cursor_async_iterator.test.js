@@ -72,6 +72,17 @@ describe('Cursor Async Iterator Tests', function () {
       }
     });
 
+    it('should not iterate if closed immediately', async function () {
+      const cursor = collection.find();
+      await cursor.close();
+
+      let count = 0;
+      for await (const _ of cursor) count++;
+
+      expect(count).to.equal(0);
+      expect(cursor.closed).to.be.true;
+    });
+
     it('should properly stop when cursor is closed', async function () {
       const cursor = collection.find();
 
