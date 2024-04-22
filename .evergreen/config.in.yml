@@ -1310,6 +1310,7 @@ tasks:
             - { key: NODE_LTS_VERSION, value: "20" }
       - func: install dependencies
       - command: subprocess.exec
+        type: test
         params:
           working_dir: src
           binary: bash
