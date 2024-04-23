@@ -4,7 +4,13 @@ import { Readable } from 'stream';
 import { clearTimeout, setTimeout as setTimeoutCb } from 'timers';
 import { setInterval } from 'timers/promises';
 
-import { type Collection, type Document, type MongoClient, ObjectId } from '../mongodb';
+import {
+  type Collection,
+  type Document,
+  type MongoClient,
+  ObjectId,
+  ReadConcern
+} from '../mongodb';
 
 class TimeoutController extends AbortController {
   timeoutId: NodeJS.Timeout;
@@ -46,10 +52,12 @@ describe('Index Management Prose Tests', function () {
      */
     function waitForIndexes({
       predicate,
-      indexNames
+      indexNames,
+      collection
     }: {
       predicate: (arg0: Array<Document>) => boolean;
       indexNames: string | string[];
+      collection: Collection;
     }): Promise<Array<Document>> {
       const names = new Set([indexNames].flat());
       return Readable.from(
@@ -112,7 +120,8 @@ describe('Index Management Prose Tests', function () {
         // 1. An index with the name of test-search-index is present and the index has a field queryable with a value of true.
         const [index] = await waitForIndexes({
           predicate: indexes => indexes.every(index => index.queryable),
-          indexNames: 'test-search-index'
+          indexNames: 'test-search-index',
+          collection
         });
 
         // Assert that index has a property latestDefinition whose value is { 'mappings': { 'dynamic': false } }
@@ -165,7 +174,8 @@ describe('Index Management Prose Tests', function () {
         // 2. An index with the name of test-search-index-2 is present and index has a field queryable with the value of true. Store result in index2.
         const indexes = await waitForIndexes({
           predicate: indexes => indexes.every(index => index.queryable),
-          indexNames: ['test-search-index-1', 'test-search-index-2']
+          indexNames: ['test-search-index-1', 'test-search-index-2'],
+          collection
         });
 
         const index1 = indexes.find(({ name }) => name === 'test-search-index-1');
@@ -203,7 +213,8 @@ describe('Index Management Prose Tests', function () {
       // 1. An index with the name of test-search-index is present and index has a field queryable with the value of true.
       await waitForIndexes({
         predicate: indexes => indexes.every(index => index.queryable),
-        indexNames: 'test-search-index'
+        indexNames: 'test-search-index',
+        collection
       });
 
       // Run a dropSearchIndex on coll0, using test-search-index for the name.
@@ -213,7 +224,8 @@ describe('Index Management Prose Tests', function () {
       // This test fails if it times out waiting for the deletion to succeed.
       const indexes = await waitForIndexes({
         predicate: indexes => indexes.length === 0,
-        indexNames: 'test-search-index'
+        indexNames: 'test-search-index',
+        collection
       });
 
       expect(indexes).to.deep.equal([]);
@@ -241,7 +253,8 @@ describe('Index Management Prose Tests', function () {
       // 1. An index with the name of test-search-index is present and index has a field queryable with the value of true.
       await waitForIndexes({
         predicate: indexes => indexes.every(index => index.queryable),
-        indexNames: 'test-search-index'
+        indexNames: 'test-search-index',
+        collection
       });
 
       // Run a updateSearchIndex on coll0, using the following definition.
@@ -261,7 +274,8 @@ describe('Index Management Prose Tests', function () {
       // 2. The index has a field queryable with a value of true and has a field status with the value of READY.
       const [index2] = await waitForIndexes({
         predicate: indexes => indexes.every(index => index.queryable && index.status === 'READY'),
-        indexNames: 'test-search-index'
+        indexNames: 'test-search-index',
+        collection
       });
 
       // Assert that an index is present with the name test-search-index and the definition has a
@@ -281,6 +295,49 @@ describe('Index Management Prose Tests', function () {
 
         // Run a dropSearchIndex command and assert that no error is thrown.
         await collection.dropSearchIndex('test-search-index');
+      }
+    );
+
+    it(
+      'Case 6: Driver can successfully create and list search indexes with non-default readConcern and writeConcern',
+      metadata,
+      async function () {
+        // 1. Create a collection with the "create" command using a randomly generated name (referred to as coll0).
+        // 2. Apply a write concern WriteConcern(w=1) and a read concern with ReadConcern(level="majority") to coll0.
+        const coll0 = await client.db('node-test').createCollection(new ObjectId().toHexString(), {
+          readConcern: ReadConcern.MAJORITY,
+          writeConcern: { w: 1 }
+        });
+
+        // 3. Create a new search index on coll0 with the createSearchIndex helper. Use the following definition:
+        // {
+        //   name: 'test-search-index-case6',
+        //   definition: {
+        //     mappings: { dynamic: false }
+        //   }
+        // }
+        const name = await coll0.createSearchIndex({
+          name: 'test-search-index-case6',
+          definition: {
+            mappings: { dynamic: false }
+          }
+        });
+
+        // 4. Assert that the command returns the name of the index: "test-search-index-case6".
+        expect(name).to.equal('test-search-index-case6');
+
+        // 5. Run coll0.listSearchIndexes() repeatedly every 5 seconds until the following condition is satisfied and store the value in a variable index:
+        //   - An index with the name of test-search-index-case6 is present and the index has a field queryable with a value of true.
+        const [index] = await waitForIndexes({
+          predicate: indexes => indexes.every(index => index.queryable),
+          indexNames: 'test-search-index-case6',
+          collection: coll0
+        });
+
+        // 6. Assert that index has a property latestDefinition whose value is { 'mappings': { 'dynamic': false } }
+        expect(index)
+          .to.have.nested.property('latestDefinition.mappings')
+          .to.deep.equal({ dynamic: false });
       }
     );
   });
