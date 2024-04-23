@@ -7,6 +7,7 @@ import {
   HostAddress,
   hostMatchesWildcards,
   isHello,
+  isUint8Array,
   LEGACY_HELLO_COMMAND,
   List,
   matchesParentDomain,
@@ -980,5 +981,30 @@ describe('driver utils', function () {
         expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
       });
     });
+  });
+
+  describe('isUint8Array()', () => {
+    describe('when given a UintArray', () =>
+      it('returns true', () => expect(isUint8Array(Uint8Array.from([1]))).to.be.true));
+
+    describe('when given a Buffer', () =>
+      it('returns true', () => expect(isUint8Array(Buffer.from([1]))).to.be.true));
+
+    describe('when given a value that does not have `Uint8Array` at Symbol.toStringTag', () => {
+      it('returns false', () => {
+        const weirdArray = Uint8Array.from([1]);
+        Object.defineProperty(weirdArray, Symbol.toStringTag, { value: 'blah' });
+        expect(isUint8Array(weirdArray)).to.be.false;
+      });
+    });
+
+    describe('when given null', () =>
+      it('returns false', () => expect(isUint8Array(null)).to.be.false));
+
+    describe('when given a non object', () =>
+      it('returns false', () => expect(isUint8Array('')).to.be.false));
+
+    describe('when given an object that does not respond to Symbol.toStringTag', () =>
+      it('returns false', () => expect(isUint8Array(Object.create(null))).to.be.false));
   });
 });

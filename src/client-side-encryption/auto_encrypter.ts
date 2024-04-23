@@ -10,7 +10,7 @@ import { MongoDBResponse, type MongoDBResponseConstructor } from '../cmap/wire_p
 import { getMongoDBClientEncryption } from '../deps';
 import { MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
-import { MongoDBCollectionNamespace } from '../utils';
+import { isUint8Array, MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
@@ -480,7 +480,7 @@ export class AutoEncrypter {
   ): Promise<Document> {
     const buffer = MongoDBResponse.is(response)
       ? response.toBytes()
-      : Buffer.isBuffer(response)
+      : isUint8Array(response)
       ? response
       : serialize(response, options);
 
