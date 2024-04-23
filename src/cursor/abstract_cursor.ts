@@ -389,7 +389,7 @@ export abstract class AbstractCursor<
       return true;
     }
 
-    return await next(this, { blocking: true, transform: false, hasNext: true });
+    return await next(this, { blocking: true, transform: false, shift: false });
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
@@ -398,7 +398,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return await next(this, { blocking: true, transform: true, hasNext: false });
+    return await next(this, { blocking: true, transform: true, shift: true });
   }
 
   /**
@@ -409,7 +409,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return await next(this, { blocking: false, transform: true, hasNext: false });
+    return await next(this, { blocking: false, transform: true, shift: true });
   }
 
   /**
@@ -719,11 +719,11 @@ async function next<T>(
   {
     blocking,
     transform,
-    hasNext
+    shift
   }: {
     blocking: boolean;
     transform: boolean;
-    hasNext: true;
+    shift: false;
   }
 ): Promise<boolean>;
 
@@ -732,11 +732,11 @@ async function next<T>(
   {
     blocking,
     transform,
-    hasNext
+    shift
   }: {
     blocking: boolean;
     transform: boolean;
-    hasNext: false;
+    shift: true;
   }
 ): Promise<T | null>;
 
@@ -745,15 +745,15 @@ async function next<T>(
   {
     blocking,
     transform,
-    hasNext
+    shift
   }: {
     blocking: boolean;
     transform: boolean;
-    hasNext: boolean;
+    shift: boolean;
   }
 ): Promise<boolean | T | null> {
   if (cursor.closed) {
-    if (hasNext) return false;
+    if (!shift) return false;
     return null;
   }
 
@@ -764,7 +764,7 @@ async function next<T>(
     }
 
     if (cursor[kDocuments].length !== 0) {
-      if (hasNext) return true;
+      if (!shift) return true;
       const doc = cursor[kDocuments].shift(cursor[kOptions]);
 
       if (doc != null && transform && cursor[kTransform]) {
@@ -789,7 +789,7 @@ async function next<T>(
       // cleanupCursor should never throw, but if it does it indicates a bug in the driver
       // and we should surface the error
       await cleanupCursor(cursor, {});
-      if (hasNext) return false;
+      if (!shift) return false;
       return null;
     }
 
@@ -834,12 +834,12 @@ async function next<T>(
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
-      if (hasNext) return false;
+      if (!shift) return false;
       return null;
     }
   } while (!cursor.isDead || cursor[kDocuments].length !== 0);
 
-  if (hasNext) return false;
+  if (!shift) return false;
   return null;
 }
 
@@ -961,7 +961,7 @@ class ReadableCursorStream extends Readable {
 
   private _readNext() {
     // eslint-disable-next-line github/no-then
-    next(this._cursor, { blocking: true, transform: true, hasNext: false }).then(
+    next(this._cursor, { blocking: true, transform: true, shift: false }).then(
       result => {
         if (result == null) {
           this.push(null);
