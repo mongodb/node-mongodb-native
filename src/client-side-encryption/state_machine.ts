@@ -153,13 +153,29 @@ export class StateMachine {
   ) {}
 
   /**
-   * Executes the state machine according to the specification
+   * Executes the state machine according to the specification.
+   * Will construct the result using `responseType`.
+   */
+  async execute<R extends MongoDBResponseConstructor>(
+    executor: StateMachineExecutable,
+    context: MongoCryptContext,
+    responseType?: R
+  ): Promise<InstanceType<R>>;
+
+  /**
+   * Executes the state machine according to the specification.
+   * Will return a document from the default BSON deserializer.
    */
   async execute<T extends Document>(
     executor: StateMachineExecutable,
+    context: MongoCryptContext
+  ): Promise<T>;
+
+  async execute<T extends Document, R extends MongoDBResponseConstructor>(
+    executor: StateMachineExecutable,
     context: MongoCryptContext,
-    responseType?: MongoDBResponseConstructor
-  ): Promise<T> {
+    responseType?: R
+  ): Promise<T | InstanceType<R>> {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
     const metaDataClient = executor._metaDataClient;
