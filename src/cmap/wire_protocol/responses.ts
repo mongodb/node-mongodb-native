@@ -170,23 +170,13 @@ export class MongoDBResponse extends OnDemandDocument {
 /** @internal */
 export class CursorResponse extends MongoDBResponse {
   /**
-   * This is a BSON document containing the following:
-   * ```
-   * { ok: 1, cursor: { id: 0n, nextBatch: new Array(0) } }
-   * ```
-   * This is used when the client side findCursor is closed by tracking the number returned and limit
-   * to avoid an extra round trip. It provides a cursor response that the server _would_ return _if_
-   * that round trip were to be made.
+   * This supports a feature of the FindCursor.
+   * It is an optimization to avoid an extra getMore when the limit has been reached
    */
-  static emptyGetMore = new CursorResponse(
-    Buffer.from(
-      'NgAAABBvawABAAAAA2N1cnNvcgAhAAAAEmlkAAAAAAAAAAAABG5leHRCYXRjaAAFAAAAAAAA',
-      'base64'
-    )
-  );
+  static emptyGetMore = { id: new Long(0), length: 0, shift: () => null };
 
   static override is(value: unknown): value is CursorResponse {
-    return value instanceof CursorResponse;
+    return value instanceof CursorResponse || value === CursorResponse.emptyGetMore;
   }
 
   public id: Long;
@@ -223,12 +213,8 @@ export class CursorResponse extends MongoDBResponse {
       return null;
     }
 
-    const result = this.batch?.get(this.iterated, BSONType.object, true) ?? null;
+    const result = this.batch.get(this.iterated, BSONType.object, true) ?? null;
     this.iterated += 1;
-
-    if (result == null) {
-      throw new MongoUnexpectedServerResponseError('Cursor batch contains null values');
-    }
 
     if (options?.raw) {
       return result.toBytes();
