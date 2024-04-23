@@ -122,6 +122,15 @@ export class MongoDBResponse extends OnDemandDocument {
 
 /** @internal */
 export class CursorResponse extends MongoDBResponse {
+  /**
+   * This is a BSON document containing the following:
+   * ```
+   * { ok: 1, cursor: { id: 0n, nextBatch: new Array(0) } }
+   * ```
+   * This is used when the client side findCursor is closed by tracking the number returned and limit
+   * to avoid an extra round trip. It provides a cursor response that the server _would_ return _if_
+   * that round trip were to be made.
+   */
   static emptyGetMore = new CursorResponse(
     Buffer.from(
       'NgAAABBvawABAAAAA2N1cnNvcgAhAAAAEmlkAAAAAAAAAAAABG5leHRCYXRjaAAFAAAAAAAA',
