@@ -190,7 +190,7 @@ export class CursorResponse extends MongoDBResponse {
   }
 
   public id: Long;
-  public ns: MongoDBNamespace;
+  public ns: MongoDBNamespace | null = null;
   public batchSize = 0;
 
   private batch: OnDemandDocument;
@@ -204,8 +204,8 @@ export class CursorResponse extends MongoDBResponse {
     const id = cursor.get('id', BSONType.long, true);
     this.id = new Long(Number(id & 0xffff_ffffn), Number((id >> 32n) & 0xffff_ffffn));
 
-    const namespace = cursor.get('ns', BSONType.string) ?? '';
-    if (namespace) this.ns = ns(namespace);
+    const namespace = cursor.get('ns', BSONType.string);
+    if (namespace != null) this.ns = ns(namespace);
 
     if (cursor.has('firstBatch')) this.batch = cursor.get('firstBatch', BSONType.array, true);
     else if (cursor.has('nextBatch')) this.batch = cursor.get('nextBatch', BSONType.array, true);
