@@ -147,11 +147,10 @@ export class CursorResponse extends MongoDBResponse {
   public batchSize = 0;
 
   private batch: OnDemandDocument | null = null;
-  private values: Generator<OnDemandDocument, void, void> | null = null;
   private iterated = 0;
 
-  constructor(b: Uint8Array, o?: number, a?: boolean) {
-    super(b, o, a);
+  constructor(bytes: Uint8Array, offset?: number, isArray?: boolean) {
+    super(bytes, offset, isArray);
 
     if (this.isError) return;
 
@@ -175,20 +174,26 @@ export class CursorResponse extends MongoDBResponse {
   }
 
   shift(options?: BSONSerializeOptions): any {
+    if (this.iterated >= this.batchSize) {
+      return null;
+    }
+
+    const result = this.batch?.get(this.iterated, BSONType.object, true) ?? null;
     this.iterated += 1;
-    this.values ??= this.batch?.valuesAs(BSONType.object) ?? null;
-    const result = this.values?.next();
-    if (!result || result.done) return null;
+
+    if (result == null) {
+      throw new MongoUnexpectedServerResponseError('Cursor batch contains null values');
+    }
+
     if (options?.raw) {
-      return result.value.toBytes();
+      return result.toBytes();
     } else {
-      return result.value.toObject(options);
+      return result.toObject(options);
     }
   }
 
   clear() {
     this.iterated = this.batchSize;
-    this.values?.return();
   }
 
   pushMany() {
