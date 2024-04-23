@@ -3,12 +3,59 @@ import {
   BSONType,
   type Document,
   Long,
+  parseToElementsToArray,
   type Timestamp
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
 import { type MongoDBNamespace, ns } from '../../utils';
 import { OnDemandDocument } from './on_demand/document';
+
+// eslint-disable-next-line no-restricted-syntax
+const enum BSONElementOffset {
+  type = 0,
+  nameOffset = 1,
+  nameLength = 2,
+  offset = 3,
+  length = 4
+}
+/**
+ * Accepts a BSON payload and checks for na "ok: 0" element.
+ * This utility is intended to prevent calling response class constructors
+ * that expect the result to be a success and demand certain properties to exist.
+ *
+ * For example, a cursor response always expects a cursor embedded document.
+ * In order to write the class such that the properties reflect that assertion (non-null)
+ * we cannot invoke the subclass constructor if the BSON represents an error.
+ *
+ * @param bytes - BSON document returned from the server
+ */
+export function isErrorResponse(bson: Uint8Array): boolean {
+  const elements = parseToElementsToArray(bson, 0);
+  for (let eIdx = 0; eIdx < elements.length; eIdx++) {
+    const element = elements[eIdx];
+
+    if (element[BSONElementOffset.nameLength] === 2) {
+      const nameOffset = element[BSONElementOffset.nameOffset];
+
+      // 111 == "o", 107 == "k"
+      if (bson[nameOffset] === 111 && bson[nameOffset + 1] === 107) {
+        const valueOffset = element[BSONElementOffset.offset];
+        const valueLength = element[BSONElementOffset.length];
+
+        // If any byte in the length of the ok number (works for any type) is non zero,
+        // then it is considered "ok: 1"
+        for (let i = valueOffset; i < valueOffset + valueLength; i++) {
+          if (bson[i] !== 0x00) return false;
+        }
+
+        return true;
+      }
+    }
+  }
+
+  return true;
+}
 
 /** @internal */
 export type MongoDBResponseConstructor = {
@@ -142,17 +189,15 @@ export class CursorResponse extends MongoDBResponse {
     return value instanceof CursorResponse;
   }
 
-  public id: Long | null = null;
-  public ns: MongoDBNamespace | null = null;
+  public id: Long;
+  public ns: MongoDBNamespace;
   public batchSize = 0;
 
-  private batch: OnDemandDocument | null = null;
+  private batch: OnDemandDocument;
   private iterated = 0;
 
   constructor(bytes: Uint8Array, offset?: number, isArray?: boolean) {
     super(bytes, offset, isArray);
-
-    if (this.isError) return;
 
     const cursor = this.get('cursor', BSONType.object, true);
 

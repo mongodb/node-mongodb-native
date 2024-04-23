@@ -62,7 +62,11 @@ import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
-import { MongoDBResponse, type MongoDBResponseConstructor } from './wire_protocol/responses';
+import {
+  isErrorResponse,
+  MongoDBResponse,
+  type MongoDBResponseConstructor
+} from './wire_protocol/responses';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
@@ -443,7 +447,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
-        const document = new (responseType ?? MongoDBResponse)(bson, 0, false);
+        const document =
+          responseType == null
+            ? new MongoDBResponse(bson)
+            : isErrorResponse(bson)
+            ? new MongoDBResponse(bson)
+            : new responseType(bson);
 
         yield document;
         this.throwIfAborted();
