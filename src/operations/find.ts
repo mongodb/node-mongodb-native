@@ -114,6 +114,7 @@ export class FindOperation extends CommandOperation<Document> {
     return await server.command(this.ns, findCommand, {
       ...this.options,
       ...this.bsonOptions,
+      timeout: this.timeout,
       documentsReturnedIn: 'firstBatch',
       session
     });
