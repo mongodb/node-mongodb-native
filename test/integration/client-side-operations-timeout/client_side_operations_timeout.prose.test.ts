@@ -1,8 +1,12 @@
 /* Specification prose tests */
 
+import { expect } from 'chai';
+
+import { MongoClient, MongoServerSelectionError, now } from '../../mongodb';
+
 // TODO(NODE-5824): Implement CSOT prose tests
-describe.skip('CSOT spec prose tests', () => {
-  context('1. Multi-batch writes', () => {
+describe('CSOT spec prose tests', () => {
+  context.skip('1. Multi-batch writes', () => {
     /**
      * This test MUST only run against standalones on server versions 4.4 and higher.
      * The `insertMany` call takes an exceedingly long time on replicasets and sharded
@@ -31,7 +35,7 @@ describe.skip('CSOT spec prose tests', () => {
      */
   });
 
-  context('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
+  context.skip('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
     /**
      * This test MUST only be run against enterprise server versions 4.2 and higher.
      *
@@ -42,7 +46,7 @@ describe.skip('CSOT spec prose tests', () => {
      */
   });
 
-  context('3. ClientEncryption', () => {
+  context.skip('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
      * `LOCAL_MASTERKEY` refers to the following base64:
@@ -132,7 +136,7 @@ describe.skip('CSOT spec prose tests', () => {
     });
   });
 
-  context('4. Background Connection Pooling', () => {
+  context.skip('4. Background Connection Pooling', () => {
     /**
      * The tests in this section MUST only be run if the server version is 4.4 or higher and the URI has authentication
      * fields (i.e. a username and password). Each test in this section requires drivers to create a MongoClient and then wait
@@ -192,7 +196,7 @@ describe.skip('CSOT spec prose tests', () => {
     });
   });
 
-  context('5. Blocking Iteration Methods', () => {
+  context.skip('5. Blocking Iteration Methods', () => {
     /**
      * Tests in this section MUST only be run against server versions 4.4 and higher and only apply to drivers that have a
      * blocking method for cursor iteration that executes `getMore` commands in a loop until a document is available or an
@@ -251,7 +255,7 @@ describe.skip('CSOT spec prose tests', () => {
     });
   });
 
-  context('6. GridFS - Upload', () => {
+  context.skip('6. GridFS - Upload', () => {
     /** Tests in this section MUST only be run against server versions 4.4 and higher. */
 
     context('uploads via openUploadStream can be timed out', () => {
@@ -306,7 +310,7 @@ describe.skip('CSOT spec prose tests', () => {
     });
   });
 
-  context('7. GridFS - Download', () => {
+  context.skip('7. GridFS - Download', () => {
     /**
      * This test MUST only be run against server versions 4.4 and higher.
      * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -351,42 +355,94 @@ describe.skip('CSOT spec prose tests', () => {
   });
 
   context('8. Server Selection', () => {
-    context('serverSelectionTimeoutMS honored if timeoutMS is not set', () => {
+    it('serverSelectionTimeoutMS honored if timeoutMS is not set', async () => {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?serverSelectionTimeoutMS=10`.
        * 1. Using `client`, execute the command `{ ping: 1 }` against the `admin` database.
        *   - Expect this to fail with a server selection timeout error after no more than 15ms.
        */
+      const client = new MongoClient('mongodb://invalid/?serverSelectionTimeoutMS=10');
+      let duration: number;
+      const admin = client.db('test').admin();
+      const start = now();
+      const maybeError = await admin
+        .ping()
+        .then(
+          () => null,
+          e => e
+        )
+        .finally(() => {
+          duration = now() - start;
+        });
+
+      expect(maybeError).to.be.instanceof(MongoServerSelectionError);
+      expect(duration).to.be.lte(15);
     });
 
-    context(
-      "timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS",
-      () => {
-        /**
-         * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
-         * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
-         *   - Expect this to fail with a server selection timeout error after no more than 15ms.
-         */
-      }
-    );
+    it("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async () => {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+      const client = new MongoClient('mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20');
+      const start = now();
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .command({ ping: 1 })
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
 
-    context(
-      "serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS",
-      () => {
-        /**
-         * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10`.
-         * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
-         *   - Expect this to fail with a server selection timeout error after no more than 15ms.
-         */
-      }
-    );
+      expect(maybeError).to.be.instanceof(MongoServerSelectionError);
+      expect(end - start).to.be.lte(15);
+    });
 
-    context('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', () => {
+    it("serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS", async () => {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+      const client = new MongoClient('mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10');
+      const start = now();
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .command({ ping: 1 })
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+
+      expect(maybeError).to.be.instanceof(MongoServerSelectionError);
+      expect(end - start).to.be.lte(15);
+    });
+
+    it('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', async () => {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=0&serverSelectionTimeoutMS=10`.
        * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
        *   - Expect this to fail with a server selection timeout error after no more than 15ms.
        */
+      const client = new MongoClient('mongodb://invalid/?timeoutMS=0&serverSelectionTimeoutMS=10');
+      const start = now();
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .command({ ping: 1 })
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+
+      expect(maybeError).to.be.instanceof(MongoServerSelectionError);
+      expect(end - start).to.be.lte(15);
     });
 
     context(
@@ -440,7 +496,7 @@ describe.skip('CSOT spec prose tests', () => {
     );
   });
 
-  context('9. endSession', () => {
+  context.skip('9. endSession', () => {
     /**
      * This test MUST only be run against replica sets and sharded clusters with server version 4.4 or higher. It MUST be
      * run three times: once with the timeout specified via the MongoClient `timeoutMS` option, once with the timeout
@@ -472,7 +528,7 @@ describe.skip('CSOT spec prose tests', () => {
      */
   });
 
-  context('10. Convenient Transactions', () => {
+  context.skip('10. Convenient Transactions', () => {
     /** Tests in this section MUST only run against replica sets and sharded clusters with server versions 4.4 or higher. */
 
     context('timeoutMS is refreshed for abortTransaction if the callback fails', () => {
