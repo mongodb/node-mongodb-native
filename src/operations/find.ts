@@ -1,6 +1,5 @@
 import type { Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
-import type { Collection } from '../collection';
 import { MongoInvalidArgumentError } from '../error';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';

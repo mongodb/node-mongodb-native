@@ -298,107 +298,110 @@ describe('Client Side Encryption Functional', function () {
     });
   });
 
-  describe('when @@mdb.decorateDecryptionResult is set on autoEncrypter', () => {
-    let client: MongoClient;
-    let encryptedClient: MongoClient;
+  describe(
+    'when @@mdb.decorateDecryptionResult is set on autoEncrypter',
+    { requires: { mongodb: '>=7.0' } },
+    () => {
+      let client: MongoClient;
+      let encryptedClient: MongoClient;
 
-    beforeEach(async function () {
-      client = this.configuration.newClient();
+      beforeEach(async function () {
+        client = this.configuration.newClient();
 
-      const encryptSchema = (keyId: unknown, bsonType: string) => ({
-        encrypt: {
-          bsonType,
-          algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
-          keyId: [keyId]
-        }
-      });
+        const encryptSchema = (keyId: unknown, bsonType: string) => ({
+          encrypt: {
+            bsonType,
+            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
+            keyId: [keyId]
+          }
+        });
 
-      const kmsProviders = this.configuration.kmsProviders(crypto.randomBytes(96));
+        const kmsProviders = this.configuration.kmsProviders(crypto.randomBytes(96));
 
-      await client.connect();
+        await client.connect();
 
-      const encryption = new ClientEncryption(client, {
-        keyVaultNamespace,
-        kmsProviders,
-        extraOptions: getEncryptExtraOptions()
-      });
+        const encryption = new ClientEncryption(client, {
+          keyVaultNamespace,
+          kmsProviders,
+          extraOptions: getEncryptExtraOptions()
+        });
 
-      const dataDb = client.db(dataDbName);
-      const keyVaultDb = client.db(keyVaultDbName);
+        const dataDb = client.db(dataDbName);
+        const keyVaultDb = client.db(keyVaultDbName);
 
-      await dataDb.dropCollection(dataCollName).catch(() => null);
-      await keyVaultDb.dropCollection(keyVaultCollName).catch(() => null);
-      await keyVaultDb.createCollection(keyVaultCollName);
-      const dataKey = await encryption.createDataKey('local');
+        await dataDb.dropCollection(dataCollName).catch(() => null);
+        await keyVaultDb.dropCollection(keyVaultCollName).catch(() => null);
+        await keyVaultDb.createCollection(keyVaultCollName);
+        const dataKey = await encryption.createDataKey('local');
 
-      const $jsonSchema = {
-        bsonType: 'object',
-        properties: {
-          a: encryptSchema(dataKey, 'int'),
-          b: encryptSchema(dataKey, 'string'),
-          c: {
-            bsonType: 'object',
-            properties: {
-              d: {
-                encrypt: {
-                  keyId: [dataKey],
-                  algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
-                  bsonType: 'string'
+        const $jsonSchema = {
+          bsonType: 'object',
+          properties: {
+            a: encryptSchema(dataKey, 'int'),
+            b: encryptSchema(dataKey, 'string'),
+            c: {
+              bsonType: 'object',
+              properties: {
+                d: {
+                  encrypt: {
+                    keyId: [dataKey],
+                    algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+                    bsonType: 'string'
+                  }
                 }
               }
             }
           }
-        }
-      };
+        };
 
-      await dataDb.createCollection(dataCollName, {
-        validator: { $jsonSchema }
+        await dataDb.createCollection(dataCollName, {
+          validator: { $jsonSchema }
+        });
+
+        encryptedClient = this.configuration.newClient(
+          {},
+          {
+            autoEncryption: {
+              keyVaultNamespace,
+              kmsProviders,
+              extraOptions: getEncryptExtraOptions()
+            }
+          }
+        );
+
+        encryptedClient.autoEncrypter[Symbol.for('@@mdb.decorateDecryptionResult')] = true;
+        await encryptedClient.connect();
       });
 
-      encryptedClient = this.configuration.newClient(
-        {},
-        {
-          autoEncryption: {
-            keyVaultNamespace,
-            kmsProviders,
-            extraOptions: getEncryptExtraOptions()
-          }
-        }
-      );
+      afterEach(async function () {
+        await encryptedClient?.close();
+        await client?.close();
+      });
 
-      encryptedClient.autoEncrypter[Symbol.for('@@mdb.decorateDecryptionResult')] = true;
-      await encryptedClient.connect();
-    });
+      it('adds decrypted keys to result at @@mdb.decryptedKeys', async function () {
+        const coll = encryptedClient.db(dataDbName).collection(dataCollName);
 
-    afterEach(function () {
-      return Promise.resolve()
-        .then(() => encryptedClient?.close())
-        .then(() => client?.close());
-    });
+        const data = {
+          _id: new BSON.ObjectId(),
+          a: 1,
+          b: 'abc',
+          c: { d: 'def' }
+        };
 
-    it('adds decrypted keys to result at @@mdb.decryptedKeys', async function () {
-      const coll = encryptedClient.db(dataDbName).collection(dataCollName);
+        const result = await coll.insertOne(data);
+        const decrypted = await coll.findOne({ _id: result.insertedId });
 
-      const data = {
-        _id: new BSON.ObjectId(),
-        a: 1,
-        b: 'abc',
-        c: { d: 'def' }
-      };
+        expect(decrypted).to.deep.equal(data);
+        expect(decrypted)
+          .to.have.property(Symbol.for('@@mdb.decryptedKeys'))
+          .that.deep.equals(['a', 'b']);
 
-      const result = await coll.insertOne(data);
-      const decrypted = await coll.findOne({ _id: result.insertedId });
-
-      expect(decrypted).to.deep.equal(data);
-      expect(decrypted)
-        .to.have.property(Symbol.for('@@mdb.decryptedKeys'))
-        .that.deep.equals(['a', 'b']);
-
-      // Nested
-      expect(decrypted).to.have.property('c');
-      expect(decrypted.c)
-        .to.have.property(Symbol.for('@@mdb.decryptedKeys'))
-        .that.deep.equals(['d']);
-    });
-  });
+        // Nested
+        expect(decrypted).to.have.property('c');
+        expect(decrypted.c)
+          .to.have.property(Symbol.for('@@mdb.decryptedKeys'))
+          .that.deep.equals(['d']);
+      });
+    }
+  );
 });

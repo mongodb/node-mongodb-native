@@ -102,7 +102,7 @@ describe('abstract operation', function () {
         correctCommandName: 'count'
       },
       {
-        subclassCreator: () => new mongodb.FindOperation(undefined, collection.fullNamespace),
+        subclassCreator: () => new mongodb.FindOperation(collection.fullNamespace),
         subclassType: mongodb.FindOperation,
         correctCommandName: 'find'
       },
