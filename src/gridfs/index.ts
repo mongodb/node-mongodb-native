@@ -4,6 +4,7 @@ import type { FindCursor } from '../cursor/find_cursor';
 import type { Db } from '../db';
 import { MongoRuntimeError } from '../error';
 import { type Filter, TypedEventEmitter } from '../mongo_types';
+import { ReadConcern, ReadConcernLike } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
@@ -36,6 +37,8 @@ export interface GridFSBucketOptions extends WriteConcernOptions {
   chunkSizeBytes?: number;
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
+  /** Read concern and level to be passed into read operations. (only MongoDB 3.2 or higher supported) */
+  readConcern?: ReadConcernLike;
   /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }
@@ -47,6 +50,7 @@ export interface GridFSBucketPrivate {
     bucketName: string;
     chunkSizeBytes: number;
     readPreference?: ReadPreference;
+    readConcern?: ReadConcernLike;
     writeConcern: WriteConcern | undefined;
   };
   _chunksCollection: Collection<GridFSChunk>;
@@ -84,6 +88,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     const privateOptions = {
       ...DEFAULT_GRIDFS_BUCKET_OPTIONS,
       ...options,
+      readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options)
     };
     this.s = {
