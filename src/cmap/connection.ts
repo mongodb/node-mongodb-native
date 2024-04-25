@@ -748,7 +748,7 @@ export class CryptoConnection extends Connection {
     ns: MongoDBNamespace,
     cmd: Document,
     options?: CommandOptions,
-    responseType?: T | undefined
+    _responseType?: T | undefined
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {
@@ -762,7 +762,7 @@ export class CryptoConnection extends Connection {
     const serverWireVersion = maxWireVersion(this);
     if (serverWireVersion === 0) {
       // This means the initial handshake hasn't happened yet
-      return await super.command<T>(ns, cmd, options, responseType);
+      return await super.command<T>(ns, cmd, options, undefined);
     }
 
     if (serverWireVersion < 8) {
@@ -796,7 +796,7 @@ export class CryptoConnection extends Connection {
       }
     }
 
-    const response = await super.command<T>(ns, encrypted, options, responseType);
+    const response = await super.command<T>(ns, encrypted, options, undefined);
 
     return await autoEncrypter.decrypt(response, options);
   }

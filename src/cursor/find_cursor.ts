@@ -70,11 +70,13 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   async _initialize(session: ClientSession): Promise<ExecutionResult> {
-    const findOperation = new FindOperation(undefined, this.namespace, this[kFilter], {
+    const findOperation = new FindOperation(this.namespace, this[kFilter], {
       ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
       session
     });
+
+    findOperation.encryptionEnabled = !!this.client.autoEncrypter;
 
     const response = await executeOperation(this.client, findOperation);
 
@@ -114,7 +116,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       }
     }
 
-    const response = await super.getMore(batchSize, true);
+    const response = await super.getMore(batchSize, this.client.autoEncrypter ? false : true);
     // TODO: wrap this in some logic to prevent it from happening if we don't need this support
     if (CursorResponse.is(response)) {
       this[kNumReturned] = this[kNumReturned] + response.batchSize;
@@ -148,7 +150,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
     return await executeOperation(
       this.client,
-      new FindOperation(undefined, this.namespace, this[kFilter], {
+      new FindOperation(this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
         explain: verbosity ?? true
