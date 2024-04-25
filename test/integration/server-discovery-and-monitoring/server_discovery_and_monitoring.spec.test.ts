@@ -4,9 +4,18 @@ import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const skipTable: { pattern: string; reason: string }[] = [
-  { pattern: 'Topology lifecycle', reason: 'see NODE-5723' },
-  { pattern: 'connect with serverMonitoringMode=stream >=4.4', reason: 'NODE-6045' },
-  { pattern: 'connect with serverMonitoringMode=auto >=4.4', reason: 'NODE-6045' }
+  {
+    pattern: 'Topology lifecycle',
+    reason: 'TODO(NODE-5723): Need to implement DRIVERS-2711 spec change'
+  },
+  {
+    pattern: 'connect with serverMonitoringMode=stream >=4.4',
+    reason: 'TODO(NODE-6045): Ensure that first server hearbeat does not report that it is awaited'
+  },
+  {
+    pattern: 'connect with serverMonitoringMode=auto >=4.4',
+    reason: 'TODO(NODE-6045): Ensure that first server hearbeat does not report that it is awaited'
+  }
 ];
 
 describe('SDAM Unified Tests (Spec)', function () {

@@ -33,7 +33,6 @@ export class Timeout extends Promise<never> {
     return 'MongoDBTimeout';
   }
 
-  private timeoutError: TimeoutError;
   private id?: NodeJS.Timeout;
 
   public readonly start: number;
@@ -55,9 +54,6 @@ export class Timeout extends Promise<never> {
       executor(noop, promiseReject);
     });
 
-    // NOTE: Construct timeout error at point of Timeout instantiation to preserve stack traces
-    this.timeoutError = new TimeoutError(`Expired after ${duration}ms`);
-
     this.duration = duration;
     this.start = Math.trunc(performance.now());
 
@@ -65,7 +61,7 @@ export class Timeout extends Promise<never> {
       this.id = setTimeout(() => {
         this.ended = Math.trunc(performance.now());
         this.timedOut = true;
-        reject(this.timeoutError);
+        reject(new TimeoutError(`Expired after ${duration}ms`));
       }, this.duration);
       // Ensure we do not keep the Node.js event loop running
       if (typeof this.id.unref === 'function') {

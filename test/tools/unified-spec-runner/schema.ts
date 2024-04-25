@@ -96,7 +96,7 @@ export interface UnifiedSuite {
   tests: Test[];
   _yamlAnchors?: Document;
 }
-export const TopologyId = Object.freeze({
+export const TopologyName = Object.freeze({
   single: 'single',
   replicaset: 'replicaset',
   sharded: 'sharded',
@@ -104,13 +104,13 @@ export const TopologyId = Object.freeze({
   loadBalanced: 'load-balanced'
 } as const);
 
-export type TopologyId = (typeof TopologyId)[keyof typeof TopologyId];
+export type TopologyName = (typeof TopologyName)[keyof typeof TopologyName];
 export interface RunOnRequirement {
   serverless?: 'forbid' | 'allow' | 'require';
   auth?: boolean;
   maxServerVersion?: string;
   minServerVersion?: string;
-  topologies?: TopologyId[];
+  topologies?: TopologyName[];
   serverParameters?: Document;
   csfle?: boolean;
 }
