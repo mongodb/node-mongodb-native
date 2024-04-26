@@ -264,7 +264,7 @@
         {
           "minServerVersion": "4.1.8",
           "topologies": [
-            "sharded"
+            "sharded-replicaset"
           ]
         }
       ],

@@ -322,7 +322,7 @@
           "minServerVersion": "4.1.0",
           "topologies": [
             "replicaset",
-            "sharded"
+            "sharded-replicaset"
           ],
           "serverless": "forbid"
         }

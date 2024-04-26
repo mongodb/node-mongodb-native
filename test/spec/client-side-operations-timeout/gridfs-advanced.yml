@@ -119,7 +119,7 @@ tests:
                 update: *filesCollectionName
                 maxTimeMS: { $$type: ["int", "long"] }
 
-  # Tests for the "drop" operation. Any tests that might result in multiple commands being sent do not have expectEvents
+  # Tests for the "drop" opration. Any tests that might result in multiple commands being sent do not have expectEvents
   # assertions as these assertions reduce test robustness and can cause flaky failures.
 
   - description: "timeoutMS can be overridden for drop"

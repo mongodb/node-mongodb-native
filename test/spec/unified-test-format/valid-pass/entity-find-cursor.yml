@@ -61,19 +61,19 @@ tests:
           - commandSucceededEvent:
               reply:
                 cursor:
-                  id: { $$type: [ int, long ] }
+                  id: { $$type: long }
                   ns: { $$type: string }
                   firstBatch: { $$type: array } 
               commandName: find
           - commandStartedEvent:
               command:
-                getMore: { $$type: [ int, long ] }
+                getMore: { $$type: long }
                 collection: *collection0Name
               commandName: getMore
           - commandSucceededEvent:
               reply:
                 cursor:
-                  id: { $$type: [ int, long ] }
+                  id: { $$type: long }
                   ns: { $$type: string }
                   nextBatch: { $$type: array } 
               commandName: getMore

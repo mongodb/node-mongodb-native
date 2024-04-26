@@ -11,7 +11,7 @@
     {
       "minServerVersion": "4.1.8",
       "topologies": [
-        "sharded"
+        "sharded-replicaset"
       ]
     }
   ],
@@ -93,7 +93,7 @@
           "minServerVersion": "4.3.4",
           "topologies": [
             "replicaset",
-            "sharded"
+            "sharded-replicaset"
           ]
         }
       ],
@@ -203,7 +203,7 @@
           "minServerVersion": "4.3.4",
           "topologies": [
             "replicaset",
-            "sharded"
+            "sharded-replicaset"
           ]
         }
       ],

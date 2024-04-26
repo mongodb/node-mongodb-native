@@ -33,3 +33,11 @@ tests:
           # Insert the same document to force a DuplicateKey error.
           document: *insertDocument
         ignoreResultAndError: false
+
+  - description: malformed operation fails if ignoreResultAndError is true
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          foo: bar
+        ignoreResultAndError: true
