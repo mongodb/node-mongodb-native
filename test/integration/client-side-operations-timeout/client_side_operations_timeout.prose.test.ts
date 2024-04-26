@@ -364,7 +364,7 @@ describe('CSOT spec prose tests', () => {
       const client = new MongoClient('mongodb://invalid/?serverSelectionTimeoutMS=10');
       let duration: number;
       const admin = client.db('test').admin();
-      const start = now();
+      const start = performance.now();
       const maybeError = await admin
         .ping()
         .then(
@@ -372,7 +372,7 @@ describe('CSOT spec prose tests', () => {
           e => e
         )
         .finally(() => {
-          duration = now() - start;
+          duration = performance.now() - start;
         });
 
       expect(maybeError).to.be.instanceof(MongoServerSelectionError);
