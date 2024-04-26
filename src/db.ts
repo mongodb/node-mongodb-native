@@ -272,6 +272,7 @@ export class Db {
       this.client,
       new RunCommandOperation(this, command, {
         ...resolveBSONOptions(options),
+        timeoutMS: options?.timeoutMS,
         session: options?.session,
         readPreference: options?.readPreference
       })

@@ -78,7 +78,8 @@ export class Admin {
       new RunAdminCommandOperation(command, {
         ...resolveBSONOptions(options),
         session: options?.session,
-        readPreference: options?.readPreference
+        readPreference: options?.readPreference,
+        timeoutMS: options?.timeoutMS
       })
     );
   }
