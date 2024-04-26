@@ -514,6 +514,10 @@ export function resolveOptions<T extends CommandOperationOptions>(
     result.readPreference = readPreference;
   }
 
+  const timeoutMS = options?.timeoutMS;
+
+  result.timeoutMS = timeoutMS ?? parent?.timeoutMS;
+
   return result;
 }
 

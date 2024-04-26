@@ -222,6 +222,10 @@ export class Db {
     return this.s.namespace.toString();
   }
 
+  get timeoutMS(): number | undefined {
+    return this.s.options?.timeoutMS;
+  }
+
   /**
    * Create a new collection on a server with the specified options. Use this to create capped collections.
    * More information about command options available at https://www.mongodb.com/docs/manual/reference/command/create/

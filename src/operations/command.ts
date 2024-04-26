@@ -64,6 +64,7 @@ export interface OperationParent {
   writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
   bsonOptions?: BSONSerializeOptions;
+  timeoutMS?: number;
 }
 
 /** @internal */
