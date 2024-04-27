@@ -31,6 +31,7 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     let tokenEntry: TokenEntry;
     if (cache?.hasToken()) {
       tokenEntry = cache.get();
+      console.log(tokenEntry);
       try {
         return await this.finishAuthentication(
           connection,
@@ -38,6 +39,7 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
           tokenEntry.idpServerResponse
         );
       } catch (error) {
+        console.log(error);
         if (error.code === 18) {
           cache?.remove();
           return await this.oneStepAuth(connection, credentials, callback, cache);
@@ -46,6 +48,7 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
         }
       }
     }
+    console.log('no token, one step');
     return await this.oneStepAuth(connection, credentials, callback, cache);
   }
 }

@@ -2,7 +2,7 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 set -o xtrace   # Write all commands first to stderr
 
-ENVIRONMENT=${ENVIRONMENT:-"aws"}
+ENVIRONMENT=${ENVIRONMENT:-"test"}
 PROJECT_DIRECTORY=${PROJECT_DIRECTORY:-"."}
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
