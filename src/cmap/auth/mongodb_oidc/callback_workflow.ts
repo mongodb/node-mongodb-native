@@ -4,21 +4,19 @@ import { MongoMissingCredentialsError } from '../../../error';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
-import type {
-  IdPInfo,
-  IdPServerResponse,
-  OIDCCallbackFunction,
-  OIDCCallbackParams,
-  Workflow
+import {
+  type OIDCCallbackFunction,
+  type OIDCCallbackParams,
+  type OIDCResponse,
+  type Workflow
 } from '../mongodb_oidc';
 import { finishCommandDocument, startCommandDocument } from './command_builders';
-import type { TokenCache, TokenEntry } from './token_cache';
-
-/** The current version of OIDC implementation. */
-const OIDC_VERSION = 1;
+import type { TokenCache } from './token_cache';
 
 /** 5 minutes in milliseconds */
-const TIMEOUT_MS = 300000;
+export const HUMAN_TIMEOUT_MS = 300000;
+/** 1 minute in milliseconds */
+export const AUTOMATED_TIMEOUT_MS = 60000;
 
 /** Properties allowed on results of callbacks. */
 const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
@@ -43,26 +41,13 @@ export abstract class CallbackWorkflow implements Workflow {
   }
 
   /**
-   * Reauthenticate the callback workflow.
-   * For reauthentication:
-   * - Check if the connection's accessToken is not equal to the token manager's.
-   *   - If they are different, use the token from the manager and set it on the connection and finish auth.
-   *     - On success return, on error continue.
-   * - start auth to update the IDP information
-   *   - If the idp info has changed, clear access token and refresh token.
-   *   - If the idp info has not changed, attempt to use the refresh token.
-   * - if there's still a refresh token at this point, attempt to finish auth with that.
-   * - Attempt the full auth run, on error, raise to user.
+   * Each workflow should specify the correct custom behaviour for reauthentication.
    */
-  async reauthenticate(
+  abstract reauthenticate(
     connection: Connection,
     credentials: MongoCredentials,
-    cache?: TokenCache
-  ): Promise<Document> {
-    // Reauthentication should always remove the access token.
-    cache?.remove();
-    return await this.execute(connection, credentials, cache);
-  }
+    cache: TokenCache
+  ): Promise<Document>;
 
   /**
    * Execute the OIDC callback workflow.
@@ -70,30 +55,16 @@ export abstract class CallbackWorkflow implements Workflow {
   abstract execute(
     connection: Connection,
     credentials: MongoCredentials,
-    cache?: TokenCache,
+    cache: TokenCache,
     response?: Document
   ): Promise<Document>;
-
-  /**
-   * Performs the one-step authorisation flow as defined in the OIDC auth spec.
-   */
-  protected async oneStepAuth(
-    connection: Connection,
-    credentials: MongoCredentials,
-    callback: OIDCCallbackFunction,
-    cache?: TokenCache
-  ): Promise<Document> {
-    const tokenEntry = await this.fetchAccessToken(connection, credentials, callback);
-    cache?.put(tokenEntry);
-    return await this.finishAuthentication(connection, credentials, tokenEntry.idpServerResponse);
-  }
 
   /**
    * Starts the callback authentication process. If there is a speculative
    * authentication document from the initial handshake, then we will use that
    * value to get the issuer, otherwise we will send the saslStart command.
    */
-  private async startAuthentication(
+  protected async startAuthentication(
     connection: Connection,
     credentials: MongoCredentials,
     response?: Document
@@ -117,34 +88,21 @@ export abstract class CallbackWorkflow implements Workflow {
   protected async finishAuthentication(
     connection: Connection,
     credentials: MongoCredentials,
-    tokenResult: IdPServerResponse,
+    token: string,
     conversationId?: number
   ): Promise<Document> {
     const result = await connection.command(
       ns(credentials.source),
-      finishCommandDocument(tokenResult.accessToken, conversationId),
+      finishCommandDocument(token, conversationId),
       undefined
     );
     return result;
   }
 
-  /**
-   * Fetches an access token using either the request or refresh callbacks and
-   * puts it in the cache.
-   */
-  protected async fetchAccessToken(
-    connection: Connection,
-    credentials: MongoCredentials,
+  protected async executeAndValidateCallback(
     callback: OIDCCallbackFunction,
-    idpInfo?: IdPInfo
-  ): Promise<TokenEntry> {
-    const params: OIDCCallbackParams = {
-      timeoutContext: AbortSignal.timeout(TIMEOUT_MS),
-      version: OIDC_VERSION
-    };
-    if (idpInfo) {
-      params.idpInfo = idpInfo;
-    }
+    params: OIDCCallbackParams
+  ): Promise<OIDCResponse> {
     // With no token in the cache we use the request callback.
     const result = await callback(params);
     // Validate that the result returned by the callback is acceptable. If it is not
@@ -152,7 +110,7 @@ export abstract class CallbackWorkflow implements Workflow {
     if (isCallbackResultInvalid(result)) {
       throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
-    return { idpServerResponse: result, idpInfo: idpInfo };
+    return result;
   }
 }
 

@@ -62,6 +62,9 @@ export interface OIDCCallbackParams {
  */
 export type OIDCCallbackFunction = (params: OIDCCallbackParams) => Promise<OIDCResponse>;
 
+/** The current version of OIDC implementation. */
+export const OIDC_VERSION = 1;
+
 type ProviderName = 'test' | 'azure' | 'gcp' | 'automated_callback' | 'human_callback';
 
 export interface Workflow {
@@ -72,7 +75,7 @@ export interface Workflow {
   execute(
     connection: Connection,
     credentials: MongoCredentials,
-    cache?: TokenCache,
+    cache: TokenCache,
     response?: Document
   ): Promise<Document>;
 
@@ -82,13 +85,13 @@ export interface Workflow {
   reauthenticate(
     connection: Connection,
     credentials: MongoCredentials,
-    cache?: TokenCache
+    cache: TokenCache
   ): Promise<Document>;
 
   /**
    * Get the document to add for speculative authentication.
    */
-  speculativeAuth(credentials: MongoCredentials): Promise<Document>;
+  speculativeAuth(credentials: MongoCredentials, cache: TokenCache): Promise<Document>;
 }
 
 /** @internal */
@@ -104,12 +107,12 @@ OIDC_WORKFLOWS.set('gcp', new GCPMachineWorkflow());
  * @experimental
  */
 export class MongoDBOIDC extends AuthProvider {
-  cache?: TokenCache;
+  cache: TokenCache;
 
   /**
    * Instantiate the auth provider.
    */
-  constructor(cache?: TokenCache) {
+  constructor(cache: TokenCache) {
     super();
     this.cache = cache;
   }
@@ -137,7 +140,7 @@ export class MongoDBOIDC extends AuthProvider {
   ): Promise<HandshakeDocument> {
     const credentials = getCredentials(authContext);
     const workflow = getWorkflow(credentials);
-    const result = await workflow.speculativeAuth(credentials);
+    const result = await workflow.speculativeAuth(credentials, this.cache);
     return { ...handshakeDoc, ...result };
   }
 }

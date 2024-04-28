@@ -27,7 +27,7 @@ export abstract class MachineWorkflow implements Workflow {
   async execute(
     connection: Connection,
     credentials: MongoCredentials,
-    cache?: TokenCache
+    cache: TokenCache
   ): Promise<Document> {
     const token = await this.getTokenFromCacheOrEnv(credentials, cache);
     const command = finishCommandDocument(token);
@@ -41,17 +41,17 @@ export abstract class MachineWorkflow implements Workflow {
   async reauthenticate(
     connection: Connection,
     credentials: MongoCredentials,
-    cache?: TokenCache
+    cache: TokenCache
   ): Promise<Document> {
     // Reauthentication implies the token has expired.
-    cache?.remove();
+    cache.removeAccessToken();
     return await this.execute(connection, credentials, cache);
   }
 
   /**
    * Get the document to add for speculative authentication.
    */
-  async speculativeAuth(credentials: MongoCredentials, cache?: TokenCache): Promise<Document> {
+  async speculativeAuth(credentials: MongoCredentials, cache: TokenCache): Promise<Document> {
     const token = await this.getTokenFromCacheOrEnv(credentials, cache);
     const document = finishCommandDocument(token);
     document.db = credentials.source;
@@ -63,15 +63,13 @@ export abstract class MachineWorkflow implements Workflow {
    */
   private async getTokenFromCacheOrEnv(
     credentials: MongoCredentials,
-    cache?: TokenCache
+    cache: TokenCache
   ): Promise<string> {
-    if (cache?.hasToken()) {
-      return cache.get().idpServerResponse.accessToken;
+    if (cache.hasAccessToken) {
+      return cache.getAccessToken();
     } else {
       const token = await this.getToken(credentials);
-      cache?.put({
-        idpServerResponse: { accessToken: token.access_token, expiresInSeconds: token.expires_in }
-      });
+      cache.put({ accessToken: token.access_token, expiresInSeconds: token.expires_in });
       return token.access_token;
     }
   }

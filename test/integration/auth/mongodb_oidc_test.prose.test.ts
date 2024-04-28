@@ -26,7 +26,7 @@ const createCallback = (tokenFile = 'test_user1', expiresInSeconds?: number, ext
 
 // Generates the result the request or refresh callback returns.
 const generateResult = (token: string, expiresInSeconds?: number, extraFields?: any) => {
-  const response: OIDCResponse = { accessToken: token };
+  const response: OIDCResponse = { accessToken: token, refreshToken: token };
   if (expiresInSeconds) {
     response.expiresInSeconds = expiresInSeconds;
   }
@@ -65,7 +65,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
         });
@@ -86,7 +87,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
         });
@@ -118,7 +120,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
         });
@@ -139,7 +142,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
         });
@@ -161,7 +165,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
         });
@@ -182,7 +187,8 @@ describe('OIDC Auth Spec Tests', function () {
               authMechanismProperties: {
                 OIDC_CALLBACK: callbackSpy,
                 ENVIRONMENT: 'test'
-              }
+              },
+              retryReads: false
             });
           } catch (error) {
             expect(error).to.exist;
@@ -210,7 +216,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           const provider = client.s.authProviders.getOrCreateProvider(
             'MONGODB-OIDC'
@@ -237,7 +244,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           const provider = client.s.authProviders.getOrCreateProvider(
             'MONGODB-OIDC'
@@ -278,7 +286,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
           await client
@@ -359,7 +368,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
           await client
@@ -414,7 +424,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
           await client
@@ -470,7 +481,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('test');
           await collection.insertOne({ n: 1 });
@@ -526,7 +538,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
         });
@@ -550,7 +563,8 @@ describe('OIDC Auth Spec Tests', function () {
             },
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
         });
@@ -574,7 +588,8 @@ describe('OIDC Auth Spec Tests', function () {
             },
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
         });
@@ -598,7 +613,8 @@ describe('OIDC Auth Spec Tests', function () {
             },
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
         });
@@ -618,7 +634,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriMulti, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
         });
@@ -640,7 +657,8 @@ describe('OIDC Auth Spec Tests', function () {
               authMechanismProperties: {
                 OIDC_HUMAN_CALLBACK: callbackSpy,
                 ALLOWED_HOSTS: []
-              }
+              },
+              retryReads: false
             });
             collection = client.db('test').collection('testHuman');
           });
@@ -663,7 +681,8 @@ describe('OIDC Auth Spec Tests', function () {
               authMechanismProperties: {
                 OIDC_HUMAN_CALLBACK: callbackSpy,
                 ALLOWED_HOSTS: ['example.com']
-              }
+              },
+              retryReads: false
             });
             collection = client.db('test').collection('testHuman');
           });
@@ -706,12 +725,13 @@ describe('OIDC Auth Spec Tests', function () {
         beforeEach(function () {
           client = new MongoClient(uriSingle, {
             auth: {
-              username: `test_machine${process.env.OIDC_DOMAIN}`,
+              username: `test_machine`,
               password: undefined
             },
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
         });
@@ -723,7 +743,7 @@ describe('OIDC Auth Spec Tests', function () {
       });
     });
 
-    describe('1. OIDC Human Callback Validation', function () {
+    describe('2. OIDC Human Callback Validation', function () {
       let client: MongoClient;
       let collection: Collection;
 
@@ -740,7 +760,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
         });
@@ -762,7 +783,8 @@ describe('OIDC Auth Spec Tests', function () {
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
-            }
+            },
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
         });
@@ -770,6 +792,301 @@ describe('OIDC Auth Spec Tests', function () {
         it('does not successfully authenticate', async function () {
           const error = await collection.findOne().catch(error => error);
           expect(error).to.exist;
+        });
+      });
+
+      describe('2.3 Refresh Token Is Passed To The Callback', function () {
+        const callbackSpy = sinon.spy(createCallback());
+        // Create a MongoClient with a human callback that checks for the presence of a refresh token.
+        // Perform a find operation that succeeds.
+        // Set a fail point for find commands of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find"
+        //     ],
+        //     errorCode: 391
+        //   }
+        // }
+        // Perform a find operation that succeeds.
+        // Assert that the callback has been called twice.
+        // Assert that the refresh token was provided to the callback once.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: callbackSpy
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('testHuman');
+          await collection.findOne();
+          await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
+        });
+
+        afterEach(async function () {
+          await client.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+        });
+
+        it('successfully authenticates', async function () {
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledTwice;
+          expect(callbackSpy.lastCall.firstArg.refreshToken).to.not.be.null;
+        });
+      });
+    });
+
+    describe('3. Speculative Authentication', function () {
+      let client: MongoClient;
+      let collection: Collection;
+
+      afterEach(async function () {
+        await client?.close();
+      });
+
+      describe('3.1 Uses speculative authentication if there is a cached token', function () {
+        const callbackSpy = sinon.spy(createCallback());
+        // Create an OIDC configured client with a human callback that returns a valid token.
+        // Set a fail point for find commands of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find"
+        //     ],
+        //     closeConnection: true
+        //   }
+        // }
+        // Perform a find operation that fails.
+        // Set a fail point for saslStart commands of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "saslStart"
+        //     ],
+        //     errorCode: 18
+        //   }
+        // }
+        // Perform a find operation that succeeds.
+        // Close the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: callbackSpy
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('testHuman');
+          await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                closeConnection: true
+              }
+            });
+          const error = await collection.findOne().catch(error => error);
+          expect(error).to.exist;
+          await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['saslStart'],
+                errorCode: 18
+              }
+            });
+        });
+
+        afterEach(async function () {
+          await client.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+        });
+
+        it('successfully authenticates', async function () {
+          const result = await collection.findOne();
+          expect(result).to.be.null;
+        });
+      });
+
+      describe('3.2 Does not use speculative authentication if there is no cached token', function () {
+        const callbackSpy = sinon.spy(createCallback());
+        // Create an OIDC configured client with a human callback that returns a valid token.
+        // Set a fail point for saslStart commands of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "saslStart"
+        //     ],
+        //     errorCode: 18
+        //   }
+        // }
+        // Perform a find operation that fails.
+        // Close the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: callbackSpy
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('testHuman');
+          await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['saslStart'],
+                errorCode: 18
+              }
+            });
+        });
+
+        afterEach(async function () {
+          await client.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+        });
+
+        it('does not successfully authenticate', async function () {
+          const error = await collection.findOne().catch(error => error);
+          expect(error).to.exist;
+        });
+      });
+    });
+
+    describe('4. Reauthentication', function () {
+      let client: MongoClient;
+      let collection: Collection;
+
+      afterEach(async function () {
+        await client?.close();
+      });
+
+      describe('4.1 Succeeds', function () {
+        const callbackSpy = sinon.spy(createCallback());
+        const commandStartedEvents = [];
+        const commandSucceededEvents = [];
+        const commandFailedEvents = [];
+        // Create an OIDC configured client and add an event listener. The following assumes that the driver
+        //   does not emit saslStart or saslContinue events. If the driver does emit those events, ignore/filter
+        //   them for the purposes of this test.
+        // Perform a find operation that succeeds.
+        // Assert that the human callback has been called once.
+        // Clear the listener state if possible.
+        // Force a reauthenication using a fail point of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find"
+        //     ],
+        //     errorCode: 391 // ReauthenticationRequired
+        //   }
+        // }
+        // Perform another find operation that succeeds.
+        // Assert that the human callback has been called twice.
+        // Assert that the ordering of list started events is [find], , find. Note that if the listener stat could
+        //   not be cleared then there will and be extra find command.
+        // Assert that the list of command succeeded events is [find].
+        // Assert that a find operation failed once during the command execution.
+        // Close the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: callbackSpy
+            },
+            monitorCommands: true,
+            retryReads: false
+          });
+          collection = client.db('test').collection('testHuman');
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledOnce;
+          client.on('commandStarted', event => {
+            if (event.commandName === 'find') commandStartedEvents.push(event.commandName);
+          });
+          client.on('commandSucceeded', event => {
+            if (event.commandName === 'find') commandSucceededEvents.push(event.commandName);
+          });
+          client.on('commandFailed', event => {
+            if (event.commandName === 'find') commandFailedEvents.push(event.commandName);
+          });
+          await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
+        });
+
+        afterEach(async function () {
+          await client.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+        });
+
+        it('successfully authenticates', async function () {
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledTwice;
+          expect(commandStartedEvents).to.deep.equal(['find', 'find']);
+          expect(commandSucceededEvents).to.deep.equal(['find']);
+          expect(commandFailedEvents).to.deep.equal(['find']);
         });
       });
     });

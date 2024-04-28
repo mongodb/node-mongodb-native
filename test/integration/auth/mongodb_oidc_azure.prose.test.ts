@@ -26,9 +26,6 @@ describe('OIDC Auth Spec Azure Tests', function () {
       // Close the client.
       beforeEach(function () {
         const options: MongoClientOptions = {};
-        // if (process.env.AZUREOIDC_USERNAME) {
-        //   options.auth = { username: process.env.AZUREOIDC_USERNAME, password: undefined };
-        // }
         if (process.env.AZUREOIDC_RESOURCE) {
           options.authMechanismProperties = { TOKEN_RESOURCE: process.env.AZUREOIDC_RESOURCE };
         }
