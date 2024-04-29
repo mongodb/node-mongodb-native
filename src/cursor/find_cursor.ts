@@ -76,8 +76,6 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       session
     });
 
-    findOperation.encryptionEnabled = !!this.client.autoEncrypter;
-
     const response = await executeOperation(this.client, findOperation);
 
     // the response is not a cursor when `explain` is enabled

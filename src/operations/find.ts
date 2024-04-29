@@ -77,8 +77,6 @@ export class FindOperation extends CommandOperation<Document> {
   override options: FindOptions & { writeConcern?: never };
   filter: Document;
 
-  public encryptionEnabled = false;
-
   constructor(ns: MongoDBNamespace, filter: Document = {}, options: FindOptions = {}) {
     super(undefined, options);
 
@@ -117,7 +115,7 @@ export class FindOperation extends CommandOperation<Document> {
         documentsReturnedIn: 'firstBatch',
         session
       },
-      this.explain || this.encryptionEnabled ? undefined : CursorResponse
+      this.explain ? undefined : CursorResponse
     );
   }
 }
