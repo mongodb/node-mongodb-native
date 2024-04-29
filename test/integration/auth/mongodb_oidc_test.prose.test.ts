@@ -219,10 +219,10 @@ describe('OIDC Auth Spec Tests', function () {
             },
             retryReads: false
           });
-          const provider = client.s.authProviders.getOrCreateProvider(
-            'MONGODB-OIDC'
-          ) as MongoDBOIDC;
-          provider.cache.put({ idpServerResponse: { accessToken: 'bad' } });
+          const provider = client.s.authProviders.getOrCreateProvider('MONGODB-OIDC', {
+            OIDC_CALLBACK: callbackSpy
+          }) as MongoDBOIDC;
+          provider.workflow.cache.put({ idpServerResponse: { accessToken: 'bad' } });
           collection = client.db('test').collection('test');
         });
 
@@ -247,10 +247,10 @@ describe('OIDC Auth Spec Tests', function () {
             },
             retryReads: false
           });
-          const provider = client.s.authProviders.getOrCreateProvider(
-            'MONGODB-OIDC'
-          ) as MongoDBOIDC;
-          provider.cache.put({ idpServerResponse: { accessToken: 'bad' } });
+          const provider = client.s.authProviders.getOrCreateProvider('MONGODB-OIDC', {
+            OIDC_CALLBACK: callbackSpy
+          }) as MongoDBOIDC;
+          provider.workflow.cache.put({ idpServerResponse: { accessToken: 'bad' } });
           collection = client.db('test').collection('test');
         });
 

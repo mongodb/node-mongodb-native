@@ -1,8 +1,7 @@
 import { BSON, type Document } from 'bson';
 
-import { MongoMissingCredentialsError } from '../../../error';
 import { type Connection } from '../../connection';
-import { type AuthMechanismProperties, type MongoCredentials } from '../mongo_credentials';
+import { type MongoCredentials } from '../mongo_credentials';
 import {
   type IdPInfo,
   OIDC_VERSION,
@@ -13,13 +12,18 @@ import {
 import { CallbackWorkflow, HUMAN_TIMEOUT_MS } from './callback_workflow';
 import { type TokenCache } from './token_cache';
 
-const NO_CALLBACK = 'No OIDC_HUMAN_CALLBACK provided for human callback workflow.';
-
 /**
  * Class implementing behaviour for the non human callback workflow.
  * @internal
  */
 export class HumanCallbackWorkflow extends CallbackWorkflow {
+  /**
+   * Instantiate the human callback workflow.
+   */
+  constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
+    super(cache, callback);
+  }
+
   /**
    * Reauthenticate the callback workflow.
    * For reauthentication:
@@ -32,40 +36,31 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
    * - if there's still a refresh token at this point, attempt to finish auth with that.
    * - Attempt the full auth run, on error, raise to user.
    */
-  async reauthenticate(
-    connection: Connection,
-    credentials: MongoCredentials,
-    cache: TokenCache
-  ): Promise<Document> {
+  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     // Reauthentication should always remove the access token, but in the
     // human workflow we need to pass the refesh token through if it
     // exists.
-    cache.removeAccessToken();
-    return await this.execute(connection, credentials, cache);
+    this.cache.removeAccessToken();
+    return await this.execute(connection, credentials);
   }
 
   /**
    * Execute the OIDC human callback workflow.
    */
-  async execute(
-    connection: Connection,
-    credentials: MongoCredentials,
-    cache: TokenCache
-  ): Promise<Document> {
-    const callback = getCallback(credentials.mechanismProperties);
+  async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     // Check if the Client Cache has an access token.
     // If it does, cache the access token in the Connection Cache and perform a One-Step SASL conversation
     // using the access token. If the server returns an Authentication error (18),
     // invalidate the access token token from the Client Cache, clear the Connection Cache,
     // and restart the authentication flow. Raise any other errors to the user. On success, exit the algorithm.
-    if (cache.hasAccessToken) {
-      const token = cache.getAccessToken();
+    if (this.cache.hasAccessToken) {
+      const token = this.cache.getAccessToken();
       try {
         return await this.finishAuthentication(connection, credentials, token);
       } catch (error) {
         if (error.code === 18) {
-          cache.removeAccessToken();
-          return await this.execute(connection, credentials, cache);
+          this.cache.removeAccessToken();
+          return await this.execute(connection, credentials);
         } else {
           throw error;
         }
@@ -78,16 +73,16 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     // an Authentication error (18), clear the refresh token, invalidate the access token from the
     // Client Cache, clear the Connection Cache, and restart the authentication flow. Raise any other
     // errors to the user. On success, exit the algorithm.
-    if (cache.hasRefreshToken) {
-      const refreshToken = cache.getRefreshToken();
-      const result = await this.fetchAccessToken(callback, cache.getIdpInfo(), refreshToken);
-      cache.put(result);
+    if (this.cache.hasRefreshToken) {
+      const refreshToken = this.cache.getRefreshToken();
+      const result = await this.fetchAccessToken(this.cache.getIdpInfo(), refreshToken);
+      this.cache.put(result);
       try {
         return await this.finishAuthentication(connection, credentials, result.accessToken);
       } catch (error) {
         if (error.code === 18) {
-          cache.removeRefreshToken();
-          return await this.execute(connection, credentials, cache);
+          this.cache.removeRefreshToken();
+          return await this.execute(connection, credentials);
         } else {
           throw error;
         }
@@ -106,8 +101,8 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     console.log(startResponse);
     const conversationId = startResponse.conversationId;
     const idpInfo = BSON.deserialize(startResponse.payload.buffer) as IdPInfo;
-    const callbackResponse = await this.fetchAccessToken(callback, idpInfo);
-    cache.put(callbackResponse, idpInfo);
+    const callbackResponse = await this.fetchAccessToken(idpInfo);
+    this.cache.put(callbackResponse, idpInfo);
     return await this.finishAuthentication(
       connection,
       credentials,
@@ -119,11 +114,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
   /**
    * Fetches an access token using the callback.
    */
-  private async fetchAccessToken(
-    callback: OIDCCallbackFunction,
-    idpInfo: IdPInfo,
-    refreshToken?: string
-  ): Promise<OIDCResponse> {
+  private async fetchAccessToken(idpInfo: IdPInfo, refreshToken?: string): Promise<OIDCResponse> {
     const params: OIDCCallbackParams = {
       timeoutContext: AbortSignal.timeout(HUMAN_TIMEOUT_MS),
       version: OIDC_VERSION,
@@ -132,16 +123,6 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     if (refreshToken) {
       params.refreshToken = refreshToken;
     }
-    return await this.executeAndValidateCallback(callback, params);
+    return await this.executeAndValidateCallback(params);
   }
-}
-
-/**
- * Returns a human callback from the mechanism properties.
- */
-export function getCallback(mechanismProperties: AuthMechanismProperties): OIDCCallbackFunction {
-  if (mechanismProperties.OIDC_HUMAN_CALLBACK) {
-    return mechanismProperties.OIDC_HUMAN_CALLBACK;
-  }
-  throw new MongoMissingCredentialsError(NO_CALLBACK);
 }

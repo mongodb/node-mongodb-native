@@ -1,6 +1,6 @@
 import { type Document } from 'bson';
 
-import { MongoMissingCredentialsError } from '../../../error';
+import { MongoDriverError, MongoMissingCredentialsError } from '../../../error';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
@@ -11,7 +11,7 @@ import {
   type Workflow
 } from '../mongodb_oidc';
 import { finishCommandDocument, startCommandDocument } from './command_builders';
-import type { TokenCache } from './token_cache';
+import { type TokenCache } from './token_cache';
 
 /** 5 minutes in milliseconds */
 export const HUMAN_TIMEOUT_MS = 300000;
@@ -30,6 +30,17 @@ const CALLBACK_RESULT_ERROR =
  * @internal
  */
 export abstract class CallbackWorkflow implements Workflow {
+  cache: TokenCache;
+  callback: OIDCCallbackFunction;
+
+  /**
+   * Instantiate the callback workflow.
+   */
+  constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
+    this.cache = cache;
+    this.callback = this.withLock(callback);
+  }
+
   /**
    * Get the document to add for speculative authentication. This also needs
    * to add a db field from the credentials source.
@@ -43,11 +54,7 @@ export abstract class CallbackWorkflow implements Workflow {
   /**
    * Each workflow should specify the correct custom behaviour for reauthentication.
    */
-  abstract reauthenticate(
-    connection: Connection,
-    credentials: MongoCredentials,
-    cache: TokenCache
-  ): Promise<Document>;
+  abstract reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document>;
 
   /**
    * Execute the OIDC callback workflow.
@@ -55,7 +62,6 @@ export abstract class CallbackWorkflow implements Workflow {
   abstract execute(
     connection: Connection,
     credentials: MongoCredentials,
-    cache: TokenCache,
     response?: Document
   ): Promise<Document>;
 
@@ -99,18 +105,34 @@ export abstract class CallbackWorkflow implements Workflow {
     return result;
   }
 
-  protected async executeAndValidateCallback(
-    callback: OIDCCallbackFunction,
-    params: OIDCCallbackParams
-  ): Promise<OIDCResponse> {
+  /**
+   * Executes the callback and validates the output.
+   */
+  protected async executeAndValidateCallback(params: OIDCCallbackParams): Promise<OIDCResponse> {
+    if (!this.callback) {
+      throw new MongoDriverError('');
+    }
     // With no token in the cache we use the request callback.
-    const result = await callback(params);
+    const result = await this.callback(params);
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
     if (isCallbackResultInvalid(result)) {
       throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
     return result;
+  }
+
+  /**
+   * Ensure the callback is only executed one at a time.
+   */
+  protected withLock(callback: OIDCCallbackFunction) {
+    let lock: Promise<any> = Promise.resolve();
+    return async (params: OIDCCallbackParams): Promise<OIDCResponse> => {
+      await lock;
+      // eslint-disable-next-line github/no-then
+      lock = lock.then(() => callback(params));
+      return await lock;
+    };
   }
 }
 

@@ -1,8 +1,8 @@
 import { type Document } from 'bson';
+import { setTimeout } from 'timers/promises';
 
-import { MongoMissingCredentialsError } from '../../../error';
 import { type Connection } from '../../connection';
-import { type AuthMechanismProperties, type MongoCredentials } from '../mongo_credentials';
+import { type MongoCredentials } from '../mongo_credentials';
 import {
   OIDC_VERSION,
   type OIDCCallbackFunction,
@@ -12,13 +12,24 @@ import {
 import { AUTOMATED_TIMEOUT_MS, CallbackWorkflow } from './callback_workflow';
 import { type TokenCache } from './token_cache';
 
-const NO_CALLBACK = 'No OIDC_CALLBACK provided for callback workflow.';
+/** Must wait at least 100ms between invokations */
+const CALLBACK_DELAY = 100;
 
 /**
  * Class implementing behaviour for the non human callback workflow.
  * @internal
  */
 export class AutomatedCallbackWorkflow extends CallbackWorkflow {
+  private lastInvokationTime: number;
+
+  /**
+   * Instantiate the human callback workflow.
+   */
+  constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
+    super(cache, callback);
+    this.lastInvokationTime = Date.now();
+  }
+
   /**
    * Reauthenticate the callback workflow.
    * For reauthentication:
@@ -31,66 +42,59 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
    * - if there's still a refresh token at this point, attempt to finish auth with that.
    * - Attempt the full auth run, on error, raise to user.
    */
-  async reauthenticate(
-    connection: Connection,
-    credentials: MongoCredentials,
-    cache: TokenCache
-  ): Promise<Document> {
+  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     // Reauthentication should always remove the access token.
-    cache.removeAccessToken();
-    return await this.execute(connection, credentials, cache);
+    this.cache.removeAccessToken();
+    return await this.execute(connection, credentials);
   }
 
   /**
    * Execute the OIDC callback workflow.
    */
-  async execute(
-    connection: Connection,
-    credentials: MongoCredentials,
-    cache: TokenCache
-  ): Promise<Document> {
-    const callback = getCallback(credentials.mechanismProperties);
+  async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     // If there is a cached access token, try to authenticate with it. If
     // authentication fails with an Authentication error (18),
     // invalidate the access token, fetch a new access token, and try
     // to authenticate again.
     // If the server fails for any other reason, do not clear the cache.
-    if (cache.hasAccessToken) {
-      const token = cache.getAccessToken();
+    if (this.cache.hasAccessToken) {
+      const token = this.cache.getAccessToken();
       try {
         return await this.finishAuthentication(connection, credentials, token);
       } catch (error) {
         if (error.code === 18) {
-          cache.removeAccessToken();
-          return await this.execute(connection, credentials, cache);
+          this.cache.removeAccessToken();
+          return await this.execute(connection, credentials);
         } else {
           throw error;
         }
       }
     }
-    const response = await this.fetchAccessToken(callback);
-    cache.put(response);
+    let response: OIDCResponse;
+    const now = Date.now();
+    // Ensure a delay between invokations to not overload the callback.
+    if (now - this.lastInvokationTime > CALLBACK_DELAY) {
+      response = await this.fetchAccessToken();
+    } else {
+      const responses = await Promise.all([
+        setTimeout(CALLBACK_DELAY - (now - this.lastInvokationTime)),
+        this.fetchAccessToken()
+      ]);
+      response = responses[1];
+    }
+    this.lastInvokationTime = now;
+    this.cache.put(response);
     return await this.finishAuthentication(connection, credentials, response.accessToken);
   }
 
   /**
    * Fetches the access token using the callback.
    */
-  protected async fetchAccessToken(callback: OIDCCallbackFunction): Promise<OIDCResponse> {
+  protected async fetchAccessToken(): Promise<OIDCResponse> {
     const params: OIDCCallbackParams = {
       timeoutContext: AbortSignal.timeout(AUTOMATED_TIMEOUT_MS),
       version: OIDC_VERSION
     };
-    return await this.executeAndValidateCallback(callback, params);
+    return await this.executeAndValidateCallback(params);
   }
-}
-
-/**
- * Returns the callback from the mechanism properties.
- */
-export function getCallback(mechanismProperties: AuthMechanismProperties): OIDCCallbackFunction {
-  if (mechanismProperties.OIDC_CALLBACK) {
-    return mechanismProperties.OIDC_CALLBACK;
-  }
-  throw new MongoMissingCredentialsError(NO_CALLBACK);
 }

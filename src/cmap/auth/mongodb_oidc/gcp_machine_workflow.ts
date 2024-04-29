@@ -2,6 +2,7 @@ import { MongoGCPError } from '../../../error';
 import { request } from '../../../utils';
 import { type MongoCredentials } from '../mongo_credentials';
 import { type AccessToken, MachineWorkflow } from './machine_workflow';
+import { type TokenCache } from './token_cache';
 
 /** GCP base URL. */
 const GCP_BASE_URL =
@@ -15,6 +16,13 @@ const TOKEN_RESOURCE_MISSING_ERROR =
   'TOKEN_RESOURCE must be set in the auth mechanism properties when ENVIRONMENT is gcp.';
 
 export class GCPMachineWorkflow extends MachineWorkflow {
+  /**
+   * Instantiate the machine workflow.
+   */
+  constructor(cache: TokenCache) {
+    super(cache);
+  }
+
   /**
    * Get the token from the environment.
    */

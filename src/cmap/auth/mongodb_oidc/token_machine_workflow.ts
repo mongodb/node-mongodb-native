@@ -2,6 +2,7 @@ import * as fs from 'fs';
 
 import { MongoAWSError } from '../../../error';
 import { type AccessToken, MachineWorkflow } from './machine_workflow';
+import { type TokenCache } from './token_cache';
 
 /** Error for when the token is missing in the environment. */
 const TOKEN_MISSING_ERROR = 'OIDC_TOKEN_FILE must be set in the environment.';
@@ -12,8 +13,11 @@ const TOKEN_MISSING_ERROR = 'OIDC_TOKEN_FILE must be set in the environment.';
  * @internal
  */
 export class TokenMachineWorkflow extends MachineWorkflow {
-  constructor() {
-    super();
+  /**
+   * Instantiate the machine workflow.
+   */
+  constructor(cache: TokenCache) {
+    super(cache);
   }
 
   /**
