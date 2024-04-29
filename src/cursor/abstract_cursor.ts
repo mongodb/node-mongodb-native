@@ -720,7 +720,9 @@ export abstract class AbstractCursor<
 
     if (this[kId] == null) {
       await this.cursorInit();
-      return;
+      // If the cursor died or returned documents, return
+      if (this[kDocuments].length !== 0 || this.isDead) return;
+      // Otherwise, run a getMore
     }
 
     // otherwise need to call getMore
@@ -868,6 +870,11 @@ class ReadableCursorStream extends Readable {
   }
 
   private _readNext() {
+    if (this._cursor[kId] === Long.ZERO) {
+      this.push(null);
+      return;
+    }
+
     // eslint-disable-next-line github/no-then
     this._cursor.next().then(
       result => {
