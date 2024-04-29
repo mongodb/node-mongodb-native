@@ -971,13 +971,14 @@ describe('OIDC Auth Spec Tests', function () {
             retryReads: false
           });
           collection = client.db('test').collection('testHuman');
+          console.log('setting fail point');
           await client
             .db()
             .admin()
             .command({
               configureFailPoint: 'failCommand',
               mode: {
-                times: 1
+                times: 2
               },
               data: {
                 failCommands: ['saslStart'],
@@ -994,6 +995,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('does not successfully authenticate', async function () {
+          console.log('execute find');
           const error = await collection.findOne().catch(error => error);
           expect(error).to.exist;
         });

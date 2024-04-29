@@ -46,9 +46,15 @@ export abstract class CallbackWorkflow implements Workflow {
    * to add a db field from the credentials source.
    */
   async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
-    const document = startCommandDocument(credentials);
-    document.db = credentials.source;
-    return { speculativeAuthenticate: document };
+    // Check if the Client Cache has an access token.
+    // If it does, cache the access token in the Connection Cache and send a JwtStepRequest
+    // with the cached access token in the speculative authentication SASL payload.
+    if (this.cache.hasAccessToken) {
+      const document = finishCommandDocument(this.cache.getAccessToken());
+      document.db = credentials.source;
+      return { speculativeAuthenticate: document };
+    }
+    return {};
   }
 
   /**
