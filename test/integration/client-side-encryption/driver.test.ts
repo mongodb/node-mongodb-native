@@ -300,7 +300,7 @@ describe('Client Side Encryption Functional', function () {
 
   describe(
     'when @@mdb.decorateDecryptionResult is set on autoEncrypter',
-    { requires: { mongodb: '>=7.0' } },
+    { requires: { clientSideEncryption: true, mongodb: '>=4.4' } },
     () => {
       let client: MongoClient;
       let encryptedClient: MongoClient;
