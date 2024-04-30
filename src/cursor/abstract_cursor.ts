@@ -3,12 +3,10 @@ import { Readable, Transform } from 'stream';
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import {
-  type AnyError,
   MongoAPIError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
   MongoInvalidArgumentError,
-  MongoNetworkError,
   MongoRuntimeError,
   MongoTailableCursorError
 } from '../error';
@@ -307,7 +305,11 @@ export abstract class AbstractCursor<
 
     try {
       while (true) {
-        if (this.closed) {
+        if (this.killed) {
+          return;
+        }
+
+        if (this.closed && this[kDocuments].length === 0) {
           return;
         }
 

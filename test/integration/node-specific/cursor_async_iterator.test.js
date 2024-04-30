@@ -77,6 +77,7 @@ describe('Cursor Async Iterator Tests', function () {
       await cursor.close();
 
       let count = 0;
+      // eslint-disable-next-line no-unused-vars
       for await (const _ of cursor) count++;
 
       expect(count).to.equal(0);

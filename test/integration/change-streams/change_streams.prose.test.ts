@@ -4,7 +4,6 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
 import {
-  AbstractCursor,
   type ChangeStream,
   type CommandFailedEvent,
   type CommandStartedEvent,
@@ -18,7 +17,6 @@ import {
   Timestamp
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { getSymbolFrom } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 /**

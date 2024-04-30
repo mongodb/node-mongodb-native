@@ -7,7 +7,6 @@ import { PassThrough } from 'stream';
 import { setTimeout } from 'timers';
 
 import {
-  AbstractCursor,
   type ChangeStream,
   type ChangeStreamOptions,
   type Collection,
