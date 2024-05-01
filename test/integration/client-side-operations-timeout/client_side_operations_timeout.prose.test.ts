@@ -399,17 +399,18 @@ describe('CSOT spec prose tests', function () {
        */
       client = new MongoClient('mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20');
       const start = now();
+
       const maybeError = await client
         .db('test')
         .admin()
-        .command({ ping: 1 })
+        .ping()
         .then(
           () => null,
           e => e
         );
       const end = now();
 
-      expect(maybeError).to.be.instanceof(MongoServerSelectionError);
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     });
 
@@ -431,7 +432,7 @@ describe('CSOT spec prose tests', function () {
         );
       const end = now();
 
-      expect(maybeError).to.be.instanceof(MongoServerSelectionError);
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     });
 
@@ -453,11 +454,11 @@ describe('CSOT spec prose tests', function () {
         );
       const end = now();
 
-      expect(maybeError).to.be.instanceof(MongoServerSelectionError);
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     });
 
-    it("timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS", function () {
+    it("timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS", async function () {
       /**
        * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
        * username and password).
@@ -477,6 +478,35 @@ describe('CSOT spec prose tests', function () {
        * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
        *   - Expect this to fail with a timeout error after no more than 15ms.
        */
+      await internalClient
+        .db('db')
+        .admin()
+        .command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['saslContinue'],
+            blockConnection: true,
+            blockTimeMS: 15
+          }
+        });
+
+      client = this.configuration.newClient({
+        serverSelectionTimeoutMS: 20,
+        timeoutMS: 10
+      });
+      const start = now();
+      const maybeError = await client
+        .db('db')
+        .collection('coll')
+        .insertOne({ x: 1 })
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+      expect(end - start).to.be.lte(15);
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
     });
 
     it("serverSelectionTimeoutMS honored for connection handshake commands if it's lower than timeoutMS", async function () {
