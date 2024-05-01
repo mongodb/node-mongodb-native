@@ -133,13 +133,13 @@ export abstract class AbstractCursor<
   CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
 > extends TypedEventEmitter<CursorEvents> {
   /** @internal */
-  [kId]: Long | null;
+  private [kId]: Long | null;
   /** @internal */
-  [kSession]: ClientSession;
+  private [kSession]: ClientSession;
   /** @internal */
-  [kServer]?: Server;
+  private [kServer]?: Server;
   /** @internal */
-  [kNamespace]: MongoDBNamespace;
+  private [kNamespace]: MongoDBNamespace;
   /** @internal */
   [kDocuments]: {
     length: number;
@@ -149,23 +149,23 @@ export abstract class AbstractCursor<
     push(item: TSchema): void;
   };
   /** @internal */
-  [kClient]: MongoClient;
+  private [kClient]: MongoClient;
   /** @internal */
-  [kTransform]?: (doc: TSchema) => any;
+  private [kTransform]?: (doc: TSchema) => any;
   /** @internal */
-  [kInitialized]: boolean;
+  private [kInitialized]: boolean;
   /** @internal */
-  [kClosed]: boolean;
+  private [kClosed]: boolean;
   /** @internal */
-  [kKilled]: boolean;
+  private [kKilled]: boolean;
   /** @internal */
-  [kOptions]: InternalAbstractCursorOptions;
+  private [kOptions]: InternalAbstractCursorOptions;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
 
   /** @internal */
-  constructor(
+  protected constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
     options: AbstractCursorOptions = {}
@@ -706,7 +706,7 @@ export abstract class AbstractCursor<
     return;
   }
 
-  /** Attempt to obtain more documents */
+  /** @internal Attempt to obtain more documents */
   private async fetchBatch(): Promise<void> {
     if (this.closed) {
       return;
@@ -759,6 +759,7 @@ export abstract class AbstractCursor<
     }
   }
 
+  /** @internal */
   private async cleanup(error?: Error) {
     this[kClosed] = true;
     const session = this[kSession];
@@ -791,7 +792,9 @@ export abstract class AbstractCursor<
     }
   }
 
+  /** @internal */
   private hasEmittedClose = false;
+  /** @internal */
   private emitClose() {
     try {
       if (!this.hasEmittedClose && (this[kDocuments].length === 0 || this[kClosed])) {
@@ -803,6 +806,7 @@ export abstract class AbstractCursor<
     }
   }
 
+  /** @internal */
   private makeSafeTransform<TSchema>(transform: (doc: TSchema) => any): (doc: TSchema) => any {
     return doc => {
       try {
@@ -823,6 +827,7 @@ export abstract class AbstractCursor<
     };
   }
 
+  /** @internal */
   protected throwIfInitialized() {
     if (this[kInitialized]) throw new MongoCursorInUseError();
   }
