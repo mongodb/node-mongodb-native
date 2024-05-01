@@ -425,7 +425,7 @@ describe('CSOT spec prose tests', function () {
       const maybeError = await client
         .db('test')
         .admin()
-        .command({ ping: 1 })
+        .ping()
         .then(
           () => null,
           e => e
@@ -447,7 +447,7 @@ describe('CSOT spec prose tests', function () {
       const maybeError = await client
         .db('test')
         .admin()
-        .command({ ping: 1 })
+        .ping()
         .then(
           () => null,
           e => e
@@ -505,8 +505,8 @@ describe('CSOT spec prose tests', function () {
           e => e
         );
       const end = now();
-      expect(end - start).to.be.lte(15);
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
     });
 
     it("serverSelectionTimeoutMS honored for connection handshake commands if it's lower than timeoutMS", async function () {
@@ -556,8 +556,8 @@ describe('CSOT spec prose tests', function () {
           e => e
         );
       const end = now();
-      expect(end - start).to.be.lte(15);
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
     });
   });
 
