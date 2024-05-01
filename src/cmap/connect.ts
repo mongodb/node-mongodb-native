@@ -13,9 +13,11 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
+import { Timeout, TimeoutError } from '../timeout';
 import { HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext } from './auth/auth_provider';
 import { AuthMechanism } from './auth/providers';
@@ -37,6 +39,7 @@ export type Stream = Socket | TLSSocket;
 
 export async function connect(options: ConnectionOptions): Promise<Connection> {
   let connection: Connection | null = null;
+  console.log(options.timeout);
   try {
     const socket = await makeSocket(options);
     connection = makeConnection(options, socket);
@@ -110,7 +113,25 @@ export async function performInitialHandshake(
   }
 
   const start = new Date().getTime();
-  const response = await conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions);
+
+  let response: Document;
+  if (options.timeout) {
+    console.log(options.timeout);
+    try {
+      response = await Promise.race([
+        options.timeout,
+        conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions)
+      ]);
+    } catch (error) {
+      if (TimeoutError.is(error)) {
+        throw new MongoOperationTimeoutError('Timed out during handshake');
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    response = await conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions);
+  }
 
   if (!('isWritablePrimary' in response)) {
     // Provide hello-style response document.
@@ -321,14 +342,40 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
   const existingSocket = options.existingSocket;
 
+  let timeout: Timeout | null;
+  if (options.timeout) {
+    options.timeout.throwIfExpired();
+    timeout = Timeout.expires(Timeout.min(connectTimeoutMS, options.timeout.remainingTime));
+  } else {
+    timeout = null;
+  }
+
   let socket: Stream;
 
   if (options.proxyHost != null) {
     // Currently, only Socks5 is supported.
-    return await makeSocks5Connection({
-      ...options,
-      connectTimeoutMS // Should always be present for Socks5
-    });
+    if (timeout) {
+      try {
+        timeout.throwIfExpired();
+        return await Promise.race([
+          timeout,
+          makeSocks5Connection({
+            ...options,
+            connectTimeoutMS // Should always be present for Socks5
+          })
+        ]);
+      } catch (error) {
+        if (TimeoutError.is(error)) {
+          throw new MongoOperationTimeoutError('Failed during socket creation');
+        } else {
+          throw error;
+        }
+      }
+    } else
+      return await makeSocks5Connection({
+        ...options,
+        connectTimeoutMS // Should always be present for Socks5
+      });
   }
 
   if (useTLS) {
@@ -370,11 +417,22 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   }
 
   try {
-    socket = await connectedSocket;
-    return socket;
+    // TODO: race Promises here
+    if (timeout) {
+      timeout.throwIfExpired();
+      socket = await Promise.race([timeout, connectedSocket]);
+      return socket;
+    } else {
+      socket = await connectedSocket;
+      return socket;
+    }
   } catch (error) {
     socket.destroy();
-    throw error;
+    if (TimeoutError.is(error)) {
+      throw new MongoOperationTimeoutError('Timed out during socket creation');
+    } else {
+      throw error;
+    }
   } finally {
     socket.setTimeout(0);
     socket.removeAllListeners();
@@ -397,6 +455,7 @@ function loadSocks() {
 }
 
 async function makeSocks5Connection(options: MakeConnectionOptions): Promise<Stream> {
+  // TODO: ADD CSOT support here
   const hostAddress = HostAddress.fromHostPort(
     options.proxyHost ?? '', // proxyHost is guaranteed to set here
     options.proxyPort ?? 1080

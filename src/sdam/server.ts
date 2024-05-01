@@ -30,6 +30,7 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerClosedError,
   type MongoServerError,
@@ -39,6 +40,7 @@ import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
+import { TimeoutError } from '../timeout';
 import { isTransactionCommand } from '../transactions';
 import {
   type EventEmitterWithState,
@@ -295,7 +297,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     this.incrementOperationCount();
     if (conn == null) {
       try {
-        conn = await this.pool.checkOut({ timeout: options.timeout });
+        conn = await this.pool.checkOut({ timeout: options.serverSelectionTimeout });
         if (this.loadBalanced && isPinnableCommand(cmd, session)) {
           session?.pin(conn);
         }
@@ -308,8 +310,20 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     try {
       try {
-        return await conn.command(ns, cmd, finalOptions);
+        if (finalOptions.timeout) {
+          finalOptions.timeout.throwIfExpired();
+          return await Promise.race([finalOptions.timeout, conn.command(ns, cmd, finalOptions)]);
+        } else {
+          return await conn.command(ns, cmd, finalOptions);
+        }
       } catch (commandError) {
+        if (TimeoutError.is(commandError))
+          throw this.decorateCommandError(
+            conn,
+            cmd,
+            finalOptions,
+            new MongoOperationTimeoutError('Timed out in command execution')
+          );
         throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
       }
     } catch (operationError) {
@@ -319,8 +333,20 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       ) {
         await this.pool.reauthenticate(conn);
         try {
-          return await conn.command(ns, cmd, finalOptions);
+          if (finalOptions.timeout) {
+            finalOptions.timeout.throwIfExpired();
+            return await Promise.race([finalOptions.timeout, conn.command(ns, cmd, finalOptions)]);
+          } else {
+            return await conn.command(ns, cmd, finalOptions);
+          }
         } catch (commandError) {
+          if (TimeoutError.is(commandError))
+            throw this.decorateCommandError(
+              conn,
+              cmd,
+              finalOptions,
+              new MongoOperationTimeoutError('Timed out in command execution')
+            );
           throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
         }
       } else {

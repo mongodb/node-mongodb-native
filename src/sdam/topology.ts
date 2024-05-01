@@ -285,8 +285,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     const selectedHosts =
       options.srvMaxHosts == null ||
-      options.srvMaxHosts === 0 ||
-      options.srvMaxHosts >= seedlist.length
+        options.srvMaxHosts === 0 ||
+        options.srvMaxHosts >= seedlist.length
         ? seedlist
         : shuffle(seedlist, options.srvMaxHosts);
 
@@ -460,8 +460,17 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     const timeoutMS = this.client.options.timeoutMS;
     const timeout = timeoutMS != null ? Timeout.expires(timeoutMS) : undefined;
+    const serverSelectionTimeoutMS = this.s.serverSelectionTimeoutMS;
+    const serverSelectionTimeout =
+      timeoutMS != null
+        ? Timeout.expires(Timeout.min(timeoutMS, serverSelectionTimeoutMS))
+        : undefined;
     const readPreference = options.readPreference ?? ReadPreference.primary;
-    const selectServerOptions = { operationName: 'ping', timeout, ...options };
+    const selectServerOptions = {
+      operationName: 'ping',
+      timeout: serverSelectionTimeout,
+      ...options
+    };
     try {
       const server = await this.selectServer(
         readPreferenceServerSelector(readPreference),
@@ -470,7 +479,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
       if (!skipPingOnConnect && server && this.s.credentials) {
-        await server.command(ns('admin.$cmd'), { ping: 1 }, { timeout });
+        await server.command(ns('admin.$cmd'), { ping: 1 }, { timeout, serverSelectionTimeout });
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
         this.emit(Topology.CONNECT, this);
@@ -586,12 +595,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
     const serverSelectionTimeoutMS = options.serverSelectionTimeoutMS ?? 0;
-    let timeout: Timeout;
-    if (options.timeout && options.timeout.remainingTime < serverSelectionTimeoutMS) {
-      timeout = options.timeout;
-    } else {
-      timeout = Timeout.expires(serverSelectionTimeoutMS);
-    }
+    const timeout = options.timeout ?? Timeout.expires(serverSelectionTimeoutMS);
 
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
@@ -611,6 +615,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     processWaitQueue(this);
 
     try {
+      timeout.throwIfExpired();
       return await Promise.race([serverPromise, waitQueueMember.timeout]);
     } catch (error) {
       if (TimeoutError.is(error)) {
@@ -951,10 +956,10 @@ function processWaitQueue(topology: Topology) {
       const previousServer = waitQueueMember.previousServer;
       selectedDescriptions = serverSelector
         ? serverSelector(
-            topology.description,
-            serverDescriptions,
-            previousServer ? [previousServer] : []
-          )
+          topology.description,
+          serverDescriptions,
+          previousServer ? [previousServer] : []
+        )
         : serverDescriptions;
     } catch (selectorError) {
       waitQueueMember.timeout.clear();

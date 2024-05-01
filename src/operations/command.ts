@@ -119,6 +119,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       ...this.options,
       ...this.bsonOptions,
       timeout: this.timeout,
+      serverSelectionTimeout: this.serverSelectionTimeout,
       readPreference: this.readPreference,
       session
     };

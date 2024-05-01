@@ -41,7 +41,7 @@ export class Timeout extends Promise<never> {
   public timedOut = false;
 
   get remainingTime(): number {
-    if (this.timedOut) return 0;
+    if (this.timedOut) return -1;
     if (this.duration === 0) return Infinity;
     return this.start + this.duration - Math.trunc(performance.now());
   }
@@ -82,6 +82,10 @@ export class Timeout extends Promise<never> {
   clear(): void {
     clearTimeout(this.id);
     this.id = undefined;
+  }
+
+  throwIfExpired(): void {
+    if (this.timedOut) throw new TimeoutError('Timed out');
   }
 
   public static expires(durationMS: number): Timeout {

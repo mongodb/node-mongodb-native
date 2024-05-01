@@ -365,9 +365,13 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
 
-    const timeout = options?.timeout
-      ? Timeout.expires(Timeout.min(options.timeout.remainingTime, waitQueueTimeoutMS))
-      : Timeout.expires(waitQueueTimeoutMS);
+    let timeout: Timeout;
+    if (options?.timeout) {
+      options.timeout.throwIfExpired();
+      timeout = options.timeout;
+    } else {
+      timeout = Timeout.expires(waitQueueTimeoutMS);
+    }
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
@@ -376,7 +380,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     };
 
     this[kWaitQueue].push(waitQueueMember);
-    process.nextTick(() => this.processWaitQueue());
+    process.nextTick(() => this.processWaitQueue({ timeout }));
 
     try {
       return await Promise.race([promise, waitQueueMember.timeout]);
@@ -622,14 +626,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return true;
   }
 
-  private createConnection(callback: Callback<Connection>) {
+  private createConnection(callback: Callback<Connection>, options?: { timeout?: Timeout }) {
     const connectOptions: ConnectionOptions = {
       ...this.options,
       id: this[kConnectionCounter].next().value,
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
       mongoLogger: this.mongoLogger,
-      authProviders: this[kServer].topology.client.s.authProviders
+      authProviders: this[kServer].topology.client.s.authProviders,
+      timeout: options?.timeout
     };
 
     this[kPending]++;
@@ -741,7 +746,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
   }
 
-  private processWaitQueue() {
+  private processWaitQueue(options?: { timeout?: Timeout }) {
     if (this[kProcessingWaitQueue]) {
       return;
     }
@@ -829,7 +834,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           waitQueueMember.timeout.clear();
         }
         process.nextTick(() => this.processWaitQueue());
-      });
+      }, options);
     }
     this[kProcessingWaitQueue] = false;
   }

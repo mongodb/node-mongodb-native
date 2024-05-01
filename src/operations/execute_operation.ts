@@ -26,6 +26,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
+import { Timeout } from '../timeout';
 import { squashError, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
@@ -152,11 +153,20 @@ export async function executeOperation<
   }
 
   const timeout = operation.timeout;
+  timeout?.throwIfExpired();
+  // TODO: construct serverSelection timeout here, pass it into topology.selectServer and store on
+  // operation for use in operation.execute when we have to perform connection checkout
+  operation.serverSelectionTimeout =
+    operation.timeout != null
+      ? Timeout.expires(
+          Timeout.min(operation.timeout.remainingTime, topology.s.serverSelectionTimeoutMS)
+        )
+      : undefined;
 
   const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    timeout
+    timeout: operation.serverSelectionTimeout
   });
 
   if (session == null) {
