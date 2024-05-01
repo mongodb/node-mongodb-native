@@ -89,7 +89,6 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
       }
     }
 
-    console.log('starting regular 2 step');
     // Start a new Two-Step SASL conversation.
     // Run a PrincipalStepRequest to get the IdpInfo.
     // Call the OIDC Human Callback with the new IdpInfo to get a new access token and optional refresh
@@ -98,7 +97,6 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     // new access token in the Client Cache and Connection Cache.
     // Attempt to authenticate using a JwtStepRequest with the new access token. Raise any errors to the user.
     const startResponse = await this.startAuthentication(connection, credentials);
-    console.log(startResponse);
     const conversationId = startResponse.conversationId;
     const idpInfo = BSON.deserialize(startResponse.payload.buffer) as IdPInfo;
     const callbackResponse = await this.fetchAccessToken(idpInfo);

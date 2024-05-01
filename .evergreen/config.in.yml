@@ -1256,7 +1256,7 @@ tasks:
             ENVIRONMENT: aws
             SCRIPT: run-oidc-unified-tests.sh
           args:
-            - .evergreen/run-oidc-tests-aws.sh
+            - .evergreen/run-oidc-tests-test.sh
 
   - name: "oidc-auth-test-gcp-latest"
     commands:
