@@ -1,6 +1,7 @@
 import { Readable, Transform } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
+import { CursorResponse } from '../cmap/wire_protocol/responses';
 import {
   type AnyError,
   MongoAPIError,
@@ -144,7 +145,13 @@ export abstract class AbstractCursor<
   /** @internal */
   [kNamespace]: MongoDBNamespace;
   /** @internal */
-  [kDocuments]: List<TSchema>;
+  [kDocuments]: {
+    length: number;
+    shift(bsonOptions?: any): TSchema | null;
+    clear(): void;
+    pushMany(many: Iterable<TSchema>): void;
+    push(item: TSchema): void;
+  };
   /** @internal */
   [kClient]: MongoClient;
   /** @internal */
@@ -286,7 +293,7 @@ export abstract class AbstractCursor<
     const documentsToRead = Math.min(number ?? this[kDocuments].length, this[kDocuments].length);
 
     for (let count = 0; count < documentsToRead; count++) {
-      const document = this[kDocuments].shift();
+      const document = this[kDocuments].shift(this[kOptions]);
       if (document != null) {
         bufferedDocs.push(document);
       }
@@ -382,14 +389,7 @@ export abstract class AbstractCursor<
       return true;
     }
 
-    const doc = await next<TSchema>(this, { blocking: true, transform: false });
-
-    if (doc) {
-      this[kDocuments].unshift(doc);
-      return true;
-    }
-
-    return false;
+    return await next(this, { blocking: true, transform: false, shift: false });
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
@@ -398,7 +398,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return await next(this, { blocking: true, transform: true });
+    return await next(this, { blocking: true, transform: true, shift: true });
   }
 
   /**
@@ -409,7 +409,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return await next(this, { blocking: false, transform: true });
+    return await next(this, { blocking: false, transform: true, shift: true });
   }
 
   /**
@@ -633,12 +633,13 @@ export abstract class AbstractCursor<
   protected abstract _initialize(session: ClientSession | undefined): Promise<ExecutionResult>;
 
   /** @internal */
-  async getMore(batchSize: number): Promise<Document | null> {
+  async getMore(batchSize: number, useCursorResponse = false): Promise<Document | null> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const getMoreOperation = new GetMoreOperation(this[kNamespace], this[kId]!, this[kServer]!, {
       ...this[kOptions],
       session: this[kSession],
-      batchSize
+      batchSize,
+      useCursorResponse
     });
 
     return await executeOperation(this[kClient], getMoreOperation);
@@ -656,7 +657,11 @@ export abstract class AbstractCursor<
       const state = await this._initialize(this[kSession]);
       const response = state.response;
       this[kServer] = state.server;
-      if (response.cursor) {
+      if (CursorResponse.is(response)) {
+        this[kId] = response.id;
+        if (response.ns) this[kNamespace] = response.ns;
+        this[kDocuments] = response;
+      } else if (response.cursor) {
         // TODO(NODE-2674): Preserve int64 sent from MongoDB
         this[kId] =
           typeof response.cursor.id === 'number'
@@ -713,13 +718,42 @@ async function next<T>(
   cursor: AbstractCursor<T>,
   {
     blocking,
-    transform
+    transform,
+    shift
   }: {
     blocking: boolean;
     transform: boolean;
+    shift: false;
   }
-): Promise<T | null> {
+): Promise<boolean>;
+
+async function next<T>(
+  cursor: AbstractCursor<T>,
+  {
+    blocking,
+    transform,
+    shift
+  }: {
+    blocking: boolean;
+    transform: boolean;
+    shift: true;
+  }
+): Promise<T | null>;
+
+async function next<T>(
+  cursor: AbstractCursor<T>,
+  {
+    blocking,
+    transform,
+    shift
+  }: {
+    blocking: boolean;
+    transform: boolean;
+    shift: boolean;
+  }
+): Promise<boolean | T | null> {
   if (cursor.closed) {
+    if (!shift) return false;
     return null;
   }
 
@@ -730,7 +764,8 @@ async function next<T>(
     }
 
     if (cursor[kDocuments].length !== 0) {
-      const doc = cursor[kDocuments].shift();
+      if (!shift) return true;
+      const doc = cursor[kDocuments].shift(cursor[kOptions]);
 
       if (doc != null && transform && cursor[kTransform]) {
         try {
@@ -754,6 +789,7 @@ async function next<T>(
       // cleanupCursor should never throw, but if it does it indicates a bug in the driver
       // and we should surface the error
       await cleanupCursor(cursor, {});
+      if (!shift) return false;
       return null;
     }
 
@@ -762,8 +798,10 @@ async function next<T>(
 
     try {
       const response = await cursor.getMore(batchSize);
-
-      if (response) {
+      if (CursorResponse.is(response)) {
+        cursor[kId] = response.id;
+        cursor[kDocuments] = response;
+      } else if (response) {
         const cursorId =
           typeof response.cursor.id === 'number'
             ? Long.fromNumber(response.cursor.id)
@@ -796,10 +834,12 @@ async function next<T>(
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
+      if (!shift) return false;
       return null;
     }
   } while (!cursor.isDead || cursor[kDocuments].length !== 0);
 
+  if (!shift) return false;
   return null;
 }
 
@@ -921,7 +961,7 @@ class ReadableCursorStream extends Readable {
 
   private _readNext() {
     // eslint-disable-next-line github/no-then
-    next(this._cursor, { blocking: true, transform: true }).then(
+    next(this._cursor, { blocking: true, transform: true, shift: true }).then(
       result => {
         if (result == null) {
           this.push(null);
