@@ -533,7 +533,11 @@ export function maybeClearPinnedConnection(
     const servers = Array.from(topology.s.servers.values());
     const loadBalancer = servers[0];
 
-    if (options?.error == null || options?.force) {
+    if (
+      options?.error == null ||
+      options?.error?.name === 'MongoExpiredSessionError' ||
+      options?.force
+    ) {
       loadBalancer.pool.checkIn(conn);
       session[kPinnedConnection] = undefined;
       conn.emit(
