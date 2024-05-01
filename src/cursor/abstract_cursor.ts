@@ -341,7 +341,7 @@ export abstract class AbstractCursor<
 
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
     if (options?.transform) {
-      const transform = makeSafeTransform(this, options.transform);
+      const transform = this.makeSafeTransform(options.transform);
       const readable = new ReadableCursorStream(this);
 
       const transformedStream = readable.pipe(
@@ -473,7 +473,7 @@ export abstract class AbstractCursor<
    * @param value - The flag boolean value.
    */
   addCursorFlag(flag: CursorFlag, value: boolean): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (!CURSOR_FLAGS.includes(flag)) {
       throw new MongoInvalidArgumentError(`Flag ${flag} is not one of ${CURSOR_FLAGS}`);
     }
@@ -529,14 +529,14 @@ export abstract class AbstractCursor<
    * @param transform - The mapping transformation method.
    */
   map<T = any>(transform: (doc: TSchema) => T): AbstractCursor<T> {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-3283): Improve transform typing
     if (oldTransform) {
       this[kTransform] = doc => {
         return transform(oldTransform(doc));
       };
     } else {
-      this[kTransform] = makeSafeTransform(this, transform);
+      this[kTransform] = this.makeSafeTransform(transform);
     }
 
     return this as unknown as AbstractCursor<T>;
@@ -548,7 +548,7 @@ export abstract class AbstractCursor<
    * @param readPreference - The new read preference for the cursor.
    */
   withReadPreference(readPreference: ReadPreferenceLike): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (readPreference instanceof ReadPreference) {
       this[kOptions].readPreference = readPreference;
     } else if (typeof readPreference === 'string') {
@@ -566,7 +566,7 @@ export abstract class AbstractCursor<
    * @param readPreference - The new read preference for the cursor.
    */
   withReadConcern(readConcern: ReadConcernLike): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     const resolvedReadConcern = ReadConcern.fromOptions({ readConcern });
     if (resolvedReadConcern) {
       this[kOptions].readConcern = resolvedReadConcern;
@@ -581,7 +581,7 @@ export abstract class AbstractCursor<
    * @param value - Number of milliseconds to wait before aborting the query.
    */
   maxTimeMS(value: number): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (typeof value !== 'number') {
       throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
@@ -596,7 +596,7 @@ export abstract class AbstractCursor<
    * @param value - The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/find/|find command documentation}.
    */
   batchSize(value: number): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (this[kOptions].tailable) {
       throw new MongoTailableCursorError('Tailable cursor does not support batchSize');
     }
@@ -802,44 +802,39 @@ export abstract class AbstractCursor<
       this.hasEmittedClose = true;
     }
   }
+
+  private makeSafeTransform<TSchema>(transform: (doc: TSchema) => any): (doc: TSchema) => any {
+    return doc => {
+      try {
+        const result = transform(doc);
+        // eslint-disable-next-line no-restricted-syntax
+        if (result === null) {
+          const message =
+            'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
+          throw new MongoAPIError(message);
+        }
+
+        return result;
+      } catch (error) {
+        // eslint-disable-next-line github/no-then
+        this.close().then(undefined, squashError);
+        throw error;
+      }
+    };
+  }
+
+  protected throwIfInitialized() {
+    if (this[kInitialized]) throw new MongoCursorInUseError();
+  }
 }
 
+/** A temporary helper to box up the many possible type issue of cursor ids */
 function getCursorId(response: Document) {
   return typeof response.cursor.id === 'number'
     ? Long.fromNumber(response.cursor.id)
     : typeof response.cursor.id === 'bigint'
     ? Long.fromBigInt(response.cursor.id)
     : response.cursor.id;
-}
-
-function makeSafeTransform<TSchema>(
-  cursor: AbstractCursor,
-  transform: (doc: TSchema) => any
-): (doc: TSchema) => any {
-  return doc => {
-    try {
-      const result = transform(doc);
-      // eslint-disable-next-line no-restricted-syntax
-      if (result === null) {
-        const message =
-          'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
-        throw new MongoAPIError(message);
-      }
-
-      return result;
-    } catch (error) {
-      // eslint-disable-next-line github/no-then
-      cursor.close().then(undefined, squashError);
-      throw error;
-    }
-  };
-}
-
-/** @internal */
-export function assertUninitialized(cursor: AbstractCursor): void {
-  if (cursor[kInitialized]) {
-    throw new MongoCursorInUseError();
-  }
 }
 
 class ReadableCursorStream extends Readable {
