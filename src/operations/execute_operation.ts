@@ -151,10 +151,12 @@ export async function executeOperation<
     selector = readPreference;
   }
 
+  const timeout = operation.timeout;
+
   const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    timeout: operation.timeout
+    timeout
   });
 
   if (session == null) {

@@ -79,7 +79,7 @@ export class Admin {
         ...resolveBSONOptions(options),
         session: options?.session,
         readPreference: options?.readPreference,
-        timeoutMS: options?.timeoutMS
+        timeoutMS: options?.timeoutMS ?? this.s.db.timeoutMS
       })
     );
   }
