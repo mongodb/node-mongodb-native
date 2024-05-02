@@ -1,5 +1,4 @@
 import type { Document } from '../bson';
-import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError } from '../error';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
@@ -115,7 +114,7 @@ export class FindOperation extends CommandOperation<Document> {
         documentsReturnedIn: 'firstBatch',
         session
       },
-      this.explain ? undefined : CursorResponse
+      undefined
     );
   }
 }
