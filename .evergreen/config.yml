@@ -1164,6 +1164,7 @@ tasks:
     commands:
       - func: install dependencies
       - command: subprocess.exec
+        type: test
         params:
           working_dir: src
           binary: bash
@@ -1175,6 +1176,7 @@ tasks:
           args:
             - .evergreen/run-oidc-tests-azure.sh
       - command: subprocess.exec
+        type: test
         params:
           working_dir: src
           binary: bash
@@ -1189,6 +1191,7 @@ tasks:
     commands:
       - func: install dependencies
       - command: subprocess.exec
+        type: test
         params:
           working_dir: src
           binary: bash
@@ -1200,6 +1203,7 @@ tasks:
           args:
             - .evergreen/run-oidc-tests-test.sh
       - command: subprocess.exec
+        type: test
         params:
           working_dir: src
           binary: bash
@@ -1214,6 +1218,7 @@ tasks:
     commands:
       - func: install dependencies
       - command: subprocess.exec
+        type: test
         params:
           working_dir: src
           binary: bash
@@ -1225,6 +1230,7 @@ tasks:
           args:
             - .evergreen/run-oidc-tests-gcp.sh
       - command: subprocess.exec
+        type: test
         params:
           working_dir: src
           binary: bash
