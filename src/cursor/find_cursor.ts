@@ -81,6 +81,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     // the response is not a cursor when `explain` is enabled
     if (CursorResponse.is(response)) {
       this[kNumReturned] = response.batchSize;
+    } else {
+      this[kNumReturned] = this[kNumReturned] + (response?.cursor.firstBatch.length ?? 0);
     }
 
     // TODO: NODE-2882
@@ -118,6 +120,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     // TODO: wrap this in some logic to prevent it from happening if we don't need this support
     if (CursorResponse.is(response)) {
       this[kNumReturned] = this[kNumReturned] + response.batchSize;
+    } else {
+      this[kNumReturned] = this[kNumReturned] + (response?.cursor.nextBatch.length ?? 0);
     }
 
     return response;
