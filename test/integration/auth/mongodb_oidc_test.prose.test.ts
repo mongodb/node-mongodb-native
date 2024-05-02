@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { expect, util } from 'chai';
+import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {

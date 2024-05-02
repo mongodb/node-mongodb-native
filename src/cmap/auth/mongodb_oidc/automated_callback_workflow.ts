@@ -12,22 +12,22 @@ import {
 import { AUTOMATED_TIMEOUT_MS, CallbackWorkflow } from './callback_workflow';
 import { type TokenCache } from './token_cache';
 
-/** Must wait at least 100ms between invokations */
-const CALLBACK_DELAY = 100;
+/** Must wait at least 100ms between invocations */
+const CALLBACK_DEBOUNCE_MS = 100;
 
 /**
  * Class implementing behaviour for the non human callback workflow.
  * @internal
  */
 export class AutomatedCallbackWorkflow extends CallbackWorkflow {
-  private lastInvokationTime: number;
+  private lastInvocationTime: number;
 
   /**
    * Instantiate the human callback workflow.
    */
   constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
     super(cache, callback);
-    this.lastInvokationTime = Date.now();
+    this.lastInvocationTime = Date.now();
   }
 
   /**
@@ -66,16 +66,16 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     let response: OIDCResponse;
     const now = Date.now();
     // Ensure a delay between invokations to not overload the callback.
-    if (now - this.lastInvokationTime > CALLBACK_DELAY) {
+    if (now - this.lastInvocationTime > CALLBACK_DEBOUNCE_MS) {
       response = await this.fetchAccessToken();
     } else {
       const responses = await Promise.all([
-        setTimeout(CALLBACK_DELAY - (now - this.lastInvokationTime)),
+        setTimeout(CALLBACK_DEBOUNCE_MS - (now - this.lastInvocationTime)),
         this.fetchAccessToken()
       ]);
       response = responses[1];
     }
-    this.lastInvokationTime = now;
+    this.lastInvocationTime = now;
     this.cache.put(response);
     return await this.finishAuthentication(connection, credentials, response.accessToken);
   }

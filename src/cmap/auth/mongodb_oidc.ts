@@ -1,6 +1,6 @@
 import type { Document } from 'bson';
 
-import { MongoDriverError, MongoMissingCredentialsError } from '../../error';
+import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
@@ -109,7 +109,7 @@ export class MongoDBOIDC extends AuthProvider {
   constructor(workflow?: Workflow) {
     super();
     if (!workflow) {
-      throw new MongoDriverError('');
+      throw new MongoInvalidArgumentError('No workflow provided to the OIDC auth provider.');
     }
     this.workflow = workflow;
   }

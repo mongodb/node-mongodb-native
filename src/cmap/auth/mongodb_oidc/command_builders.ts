@@ -3,11 +3,22 @@ import { Binary, BSON, type Document } from 'bson';
 import { type MongoCredentials } from '../mongo_credentials';
 import { AuthMechanism } from '../providers';
 
+/** @internal */
+export interface OIDCCommand {
+  saslStart?: number;
+  saslContinue?: number;
+  conversationId?: number;
+  mechanism?: string;
+  autoAuthorize?: number;
+  db?: string;
+  payload: Binary;
+}
+
 /**
  * Generate the finishing command document for authentication. Will be a
  * saslStart or saslContinue depending on the presence of a conversation id.
  */
-export function finishCommandDocument(token: string, conversationId?: number) {
+export function finishCommandDocument(token: string, conversationId?: number): OIDCCommand {
   if (conversationId != null) {
     return {
       saslContinue: 1,
@@ -29,7 +40,7 @@ export function finishCommandDocument(token: string, conversationId?: number) {
 /**
  * Generate the saslStart command document.
  */
-export function startCommandDocument(credentials: MongoCredentials) {
+export function startCommandDocument(credentials: MongoCredentials): OIDCCommand {
   const payload: Document = {};
   if (credentials.username) {
     payload.n = credentials.username;
