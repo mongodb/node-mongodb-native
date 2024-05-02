@@ -125,7 +125,6 @@ const EXPECTED_EXPORTS = [
   'ServerType',
   'SrvPollingEvent',
   'Timestamp',
-  'TokenCache',
   'TopologyClosedEvent',
   'TopologyDescriptionChangedEvent',
   'TopologyOpeningEvent',

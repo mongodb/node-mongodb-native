@@ -12,12 +12,8 @@ describe('GCPMachineFlow', function () {
       const credentials = sinon.createStubInstance(MongoCredentials);
 
       it('throws an error', async function () {
-        try {
-          await workflow.execute(connection, credentials);
-          expect.fail('workflow must fail without TOKEN_RESOURCE');
-        } catch (error) {
-          expect(error.message).to.include('TOKEN_RESOURCE');
-        }
+        const error = await workflow.execute(connection, credentials).catch(error => error);
+        expect(error.message).to.include('TOKEN_RESOURCE');
       });
     });
   });

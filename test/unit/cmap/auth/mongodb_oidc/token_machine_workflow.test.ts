@@ -23,16 +23,14 @@ describe('TokenMachineFlow', function () {
       });
 
       after(function () {
-        process.env.OIDC_TOKEN_FILE = file;
+        if (file) {
+          process.env.OIDC_TOKEN_FILE = file;
+        }
       });
 
       it('throws an error', async function () {
-        try {
-          await workflow.execute(connection, credentials);
-          expect.fail('workflow must fail without OIDC_TOKEN_FILE');
-        } catch (error) {
-          expect(error.message).to.include('OIDC_TOKEN_FILE');
-        }
+        const error = await workflow.execute(connection, credentials).catch(error => error);
+        expect(error.message).to.include('OIDC_TOKEN_FILE');
       });
     });
   });
