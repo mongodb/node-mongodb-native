@@ -1,5 +1,5 @@
+import { get } from '../../../client-side-encryption/providers/utils';
 import { MongoAzureError } from '../../../error';
-import { request } from '../../../utils';
 import type { MongoCredentials } from '../mongo_credentials';
 import { type AccessToken, MachineWorkflow } from './machine_workflow';
 import { type TokenCache } from './token_cache';
@@ -58,11 +58,15 @@ async function getAzureTokenData(tokenAudience: string, username?: string): Prom
   if (username) {
     url.searchParams.append('client_id', username);
   }
-  const data = await request(url.toString(), {
-    json: true,
+  const response = await get(url.toString(), {
     headers: AZURE_HEADERS
   });
-  return data as AccessToken;
+  if (response.status !== 200) {
+    throw new MongoAzureError(
+      `Status code ${response.status} returned from the Azure endpoint. Response body ${response.body}`
+    );
+  }
+  return JSON.parse(response.body);
 }
 
 /**
