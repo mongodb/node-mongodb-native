@@ -82,7 +82,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (CursorResponse.is(response)) {
       this[kNumReturned] = response.batchSize;
     } else {
-      this[kNumReturned] = this[kNumReturned] + (response?.cursor.firstBatch.length ?? 0);
+      // Can be an explain response, hence the ?. on everything
+      this[kNumReturned] = this[kNumReturned] + (response?.cursor?.firstBatch?.length ?? 0);
     }
 
     // TODO: NODE-2882
@@ -121,7 +122,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (CursorResponse.is(response)) {
       this[kNumReturned] = this[kNumReturned] + response.batchSize;
     } else {
-      this[kNumReturned] = this[kNumReturned] + (response?.cursor.nextBatch.length ?? 0);
+      this[kNumReturned] = this[kNumReturned] + (response?.cursor?.nextBatch?.length ?? 0);
     }
 
     return response;
