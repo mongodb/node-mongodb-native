@@ -14,8 +14,8 @@ import { TokenMachineWorkflow } from './mongodb_oidc/token_machine_workflow';
 const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
 
 /**
+ * The information returned by the server on the IDP server.
  * @public
- * @experimental
  */
 export interface IdPInfo {
   issuer: string;
@@ -24,8 +24,9 @@ export interface IdPInfo {
 }
 
 /**
+ * The response from the IdP server with the access token and
+ * optional expiration time and refresh token.
  * @public
- * @experimental
  */
 export interface IdPServerResponse {
   accessToken: string;
@@ -34,8 +35,9 @@ export interface IdPServerResponse {
 }
 
 /**
+ * The response required to be returned from the machine or
+ * human callback workflows' callback.
  * @public
- * @experimental
  */
 export interface OIDCResponse {
   accessToken: string;
@@ -44,19 +46,20 @@ export interface OIDCResponse {
 }
 
 /**
+ * The parameters that the driver provides to the user supplied
+ * human or machine callback.
  * @public
- * @experimental
  */
 export interface OIDCCallbackParams {
   timeoutContext: AbortSignal;
-  version: number;
+  version: 1;
   idpInfo?: IdPInfo;
   refreshToken?: string;
 }
 
 /**
+ * The signature of the human or machine callback functions.
  * @public
- * @experimental
  */
 export type OIDCCallbackFunction = (params: OIDCCallbackParams) => Promise<OIDCResponse>;
 
@@ -96,7 +99,6 @@ OIDC_WORKFLOWS.set('gcp', () => new GCPMachineWorkflow(new TokenCache()));
 
 /**
  * OIDC auth provider.
- * @experimental
  */
 export class MongoDBOIDC extends AuthProvider {
   workflow: Workflow;

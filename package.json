@@ -148,7 +148,6 @@
     "check:drivers-atlas-testing": "mocha --config test/mocha_mongodb.json test/atlas/drivers_atlas_testing.test.ts",
     "check:adl": "mocha --config test/mocha_mongodb.json test/manual/atlas-data-lake-testing",
     "check:aws": "nyc mocha --config test/mocha_mongodb.json test/integration/auth/mongodb_aws.test.ts",
-    "check:oidc": "mocha --config test/mocha_mongodb.json test/manual/mongodb_oidc.prose.test.ts",
     "check:oidc-auth": "mocha --config test/mocha_mongodb.json test/integration/auth/auth.spec.test.ts",
     "check:oidc-test": "mocha --config test/mocha_mongodb.json test/integration/auth/mongodb_oidc_test.prose.test.ts",
     "check:oidc-azure": "mocha --config test/mocha_mongodb.json test/integration/auth/mongodb_oidc_azure.prose.test.ts",

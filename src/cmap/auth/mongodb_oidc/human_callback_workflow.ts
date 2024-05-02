@@ -11,6 +11,7 @@ import {
 } from '../mongodb_oidc';
 import { CallbackWorkflow, HUMAN_TIMEOUT_MS } from './callback_workflow';
 import { type TokenCache } from './token_cache';
+import { MONGODB_ERROR_CODES, MongoError } from '../../../error';
 
 /**
  * Class implementing behaviour for the non human callback workflow.
@@ -58,7 +59,10 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
       try {
         return await this.finishAuthentication(connection, credentials, token);
       } catch (error) {
-        if (error.code === 18) {
+        if (
+          error instanceof MongoError &&
+          error.code === MONGODB_ERROR_CODES.AuthenticationFailed
+        ) {
           this.cache.removeAccessToken();
           return await this.execute(connection, credentials);
         } else {
@@ -80,7 +84,10 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
       try {
         return await this.finishAuthentication(connection, credentials, result.accessToken);
       } catch (error) {
-        if (error.code === 18) {
+        if (
+          error instanceof MongoError &&
+          error.code === MONGODB_ERROR_CODES.AuthenticationFailed
+        ) {
           this.cache.removeRefreshToken();
           return await this.execute(connection, credentials);
         } else {

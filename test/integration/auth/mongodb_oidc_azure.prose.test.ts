@@ -57,7 +57,7 @@ describe('OIDC Auth Spec Azure Tests', function () {
 
       it('does not authenticate', async function () {
         const error = await collection.findOne().catch(error => error);
-        expect(error.message).to.include(/Azure endpoint/);
+        expect(error.message).to.include('Azure endpoint');
       });
     });
 

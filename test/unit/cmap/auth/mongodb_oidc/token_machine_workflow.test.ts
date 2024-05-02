@@ -1,11 +1,16 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { Connection, MongoCredentials, TokenMachineWorkflow } from '../../../../mongodb';
+import {
+  Connection,
+  MongoCredentials,
+  TokenCache,
+  TokenMachineWorkflow
+} from '../../../../mongodb';
 
 describe('TokenMachineFlow', function () {
   describe('#execute', function () {
-    const workflow = new TokenMachineWorkflow();
+    const workflow = new TokenMachineWorkflow(new TokenCache());
 
     context('when OIDC_TOKEN_FILE is not in the env', function () {
       let file;

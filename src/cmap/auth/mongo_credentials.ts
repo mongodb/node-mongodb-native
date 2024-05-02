@@ -61,17 +61,11 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
-  /** @experimental */
   OIDC_CALLBACK?: OIDCCallbackFunction;
-  /** @experimental */
   OIDC_HUMAN_CALLBACK?: OIDCCallbackFunction;
-  /** @experimental */
   ENVIRONMENT?: 'test' | 'azure' | 'gcp';
-  /** @experimental */
   ALLOWED_HOSTS?: string[];
-  /** @experimental */
   TOKEN_RESOURCE?: string;
-  /** @experimental */
   TOKEN_CLIENT_ID?: string;
 }
 

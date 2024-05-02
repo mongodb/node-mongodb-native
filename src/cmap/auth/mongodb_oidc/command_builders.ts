@@ -7,8 +7,8 @@ import { AuthMechanism } from '../providers';
  * Generate the finishing command document for authentication. Will be a
  * saslStart or saslContinue depending on the presence of a conversation id.
  */
-export function finishCommandDocument(token: string, conversationId?: number): Document {
-  if (conversationId != null && typeof conversationId === 'number') {
+export function finishCommandDocument(token: string, conversationId?: number) {
+  if (conversationId != null) {
     return {
       saslContinue: 1,
       conversationId: conversationId,
@@ -29,7 +29,7 @@ export function finishCommandDocument(token: string, conversationId?: number): D
 /**
  * Generate the saslStart command document.
  */
-export function startCommandDocument(credentials: MongoCredentials): Document {
+export function startCommandDocument(credentials: MongoCredentials) {
   const payload: Document = {};
   if (credentials.username) {
     payload.n = credentials.username;

@@ -36,6 +36,7 @@ export const NODE_IS_RECOVERING_ERROR_MESSAGE = new RegExp('node is recovering',
 export const MONGODB_ERROR_CODES = Object.freeze({
   HostUnreachable: 6,
   HostNotFound: 7,
+  AuthenticationFailed: 18,
   NetworkTimeout: 89,
   ShutdownInProgress: 91,
   PrimarySteppedDown: 189,

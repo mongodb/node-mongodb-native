@@ -1,11 +1,16 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { AzureMachineWorkflow, Connection, MongoCredentials } from '../../../../mongodb';
+import {
+  AzureMachineWorkflow,
+  Connection,
+  MongoCredentials,
+  TokenCache
+} from '../../../../mongodb';
 
 describe('AzureMachineFlow', function () {
   describe('#execute', function () {
-    const workflow = new AzureMachineWorkflow();
+    const workflow = new AzureMachineWorkflow(new TokenCache());
 
     context('when TOKEN_RESOURCE is not set', function () {
       const connection = sinon.createStubInstance(Connection);
