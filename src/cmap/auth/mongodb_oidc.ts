@@ -119,6 +119,9 @@ export class MongoDBOIDC extends AuthProvider {
    */
   override async auth(authContext: AuthContext): Promise<void> {
     const { connection, reauthenticating, response } = authContext;
+    if (response?.speculativeAuthenticate?.done) {
+      return;
+    }
     const credentials = getCredentials(authContext);
     if (reauthenticating) {
       await this.workflow.reauthenticate(connection, credentials);

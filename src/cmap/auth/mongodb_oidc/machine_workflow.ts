@@ -53,6 +53,10 @@ export abstract class MachineWorkflow implements Workflow {
    * Get the document to add for speculative authentication.
    */
   async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
+    // The spec states only cached access tokens can use speculative auth.
+    if (!this.cache.hasAccessToken) {
+      return {};
+    }
     const token = await this.getTokenFromCacheOrEnv(credentials);
     const document = finishCommandDocument(token);
     document.db = credentials.source;

@@ -210,24 +210,9 @@ export function makeConnectionString(
 ): string {
   const connectionString = new ConnectionString(uri);
   for (const [name, value] of Object.entries(uriOptions ?? {})) {
-    // If name is authMechanismProperties and value is { $$placeholder: 1 }
-    // Then look at the environment for the proper value to set.
     if (name === 'authMechanismProperties' && '$$placeholder' in (value as any)) {
-      // if (process.env.AWS_WEB_IDENTITY_TOKEN_FILE) {
-      //   connectionString.searchParams.set(name, 'ENVIRONMENT:aws');
-      // }
-      // if (process.env.GCPOIDC_AUDIENCE) {
-      //   connectionString.searchParams.set(
-      //     name,
-      //     `ENVIRONMENT:gcp,TOKEN_RESOURCE:${process.env.GCPOIDC_AUDIENCE}`
-      //   );
-      // }
-      // if (process.env.AZUREOIDC_CLIENTID) {
-      //   connectionString.searchParams.set(
-      //     name,
-      //     `ENVIRONMENT:azure,TOKEN_RESOURCE:${process.env.AZUREOIDC_CLIENTID}`
-      //   );
-      // }
+      // This is a no-op - we want to ignore setting this as the URI in the
+      // environment already has the auth mech property set.
     } else {
       connectionString.searchParams.set(name, String(value));
     }

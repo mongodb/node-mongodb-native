@@ -63,7 +63,7 @@ async function getAzureTokenData(tokenAudience: string, username?: string): Prom
   });
   if (response.status !== 200) {
     throw new MongoAzureError(
-      `Status code ${response.status} returned from the Azure endpoint. Response body ${response.body}`
+      `Status code ${response.status} returned from the Azure endpoint. Response body: ${response.body}`
     );
   }
   return JSON.parse(response.body);

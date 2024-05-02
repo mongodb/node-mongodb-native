@@ -1,6 +1,6 @@
-import { type Document } from 'bson';
 import { setTimeout } from 'timers/promises';
 
+import { type Document } from '../../../bson';
 import { type Connection } from '../../connection';
 import { type MongoCredentials } from '../mongo_credentials';
 import {

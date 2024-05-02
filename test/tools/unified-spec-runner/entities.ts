@@ -369,7 +369,6 @@ export class FailPointMap extends Map<string, Document> {
     } else {
       // create a new client
       address = addressOrClient.toString();
-      console.log('address', address);
       client = getClient(address, this.isSrv);
       try {
         await client.connect();
@@ -580,7 +579,6 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
-        console.log('client', process.env.MONGODB_URI, process.env.MONGODB_URI_SINGLE);
         let uri: string;
         // For OIDC we need to ensure we use MONGODB_URI_SINGLE for the MongoClient.
         if (process.env.MONGODB_URI_SINGLE?.includes('MONGODB-OIDC')) {
@@ -589,17 +587,13 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           uri = makeConnectionString(config.url({ useMultipleMongoses }), entity.client.uriOptions);
         }
         const client = new UnifiedMongoClient(uri, entity.client);
-        console.log(entity.client, uri);
         new EntityEventRegistry(client, entity.client, map).register();
         try {
-          console.log('connecting');
           await client.connect();
         } catch (error) {
-          console.log('error', error);
           console.error(ejson`failed to connect entity ${entity}`);
           throw error;
         }
-        console.log('setting client', entity.client.id, client);
         map.set(entity.client.id, client);
       } else if ('database' in entity) {
         const client = map.getEntity('client', entity.database.client);

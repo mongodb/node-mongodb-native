@@ -1257,7 +1257,7 @@ tasks:
           env:
             DRIVERS_TOOLS: ${DRIVERS_TOOLS}
             PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-            ENVIRONMENT: aws
+            ENVIRONMENT: test
             SCRIPT: run-oidc-unified-tests.sh
           args:
             - .evergreen/run-oidc-tests-test.sh

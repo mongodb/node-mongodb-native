@@ -220,11 +220,9 @@ async function runUnifiedTest(
     // If any event listeners were enabled on any client entities,
     // the test runner MUST now disable those event listeners.
     for (const [id, client] of entities.mapOf('client')) {
-      console.log('id, client', id, client);
       client.stopCapturingEvents();
       clientList.set(id, client);
     }
-    console.log('clientList', clientList);
 
     if (test.expectEvents) {
       for (const expectedEventsForClient of test.expectEvents) {
