@@ -31,16 +31,9 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
   }
 
   /**
-   * Reauthenticate the callback workflow.
-   * For reauthentication:
-   * - Check if the connection's accessToken is not equal to the token manager's.
-   *   - If they are different, use the token from the manager and set it on the connection and finish auth.
-   *     - On success return, on error continue.
-   * - start auth to update the IDP information
-   *   - If the idp info has changed, clear access token and refresh token.
-   *   - If the idp info has not changed, attempt to use the refresh token.
-   * - if there's still a refresh token at this point, attempt to finish auth with that.
-   * - Attempt the full auth run, on error, raise to user.
+   * Reauthenticate the callback workflow. For this we invalidated the access token
+   * in the cache and run the authentication steps again. No initial handshake needs
+   * to be sent.
    */
   async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     // Reauthentication should always remove the access token.
