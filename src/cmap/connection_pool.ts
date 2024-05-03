@@ -367,11 +367,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     let timeout: Timeout;
     if (options?.timeout) {
-      options.timeout.throwIfExpired();
       timeout = options.timeout;
     } else {
       timeout = Timeout.expires(waitQueueTimeoutMS);
     }
+
+    timeout.throwIfExpired();
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
