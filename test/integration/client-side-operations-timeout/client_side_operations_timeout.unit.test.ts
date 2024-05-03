@@ -20,17 +20,17 @@ describe('CSOT spec unit tests', function () {
 
   it('Operations should ignore waitQueueTimeoutMS if timeoutMS is also set.', async function () {
     //
-    client = this.configuration.newClient({ waitQueueTimeoutMS: 999999, timeoutMS: 200 });
+    client = this.configuration.newClient({ waitQueueTimeoutMS: 999999, timeoutMS: 1000 });
     sinon.spy(Timeout, 'expires');
 
     await client.db('db').collection('collection').insertOne({ x: 1 });
 
-    expect(Timeout.expires).to.have.been.calledWith(200);
+    expect(Timeout.expires).to.have.been.calledWith(1000);
     expect(Timeout.expires).to.not.have.been.calledWith(999999);
   });
 
   it('If timeoutMS is set for an operation, the remaining timeoutMS value should apply to connection checkout after a server has been selected.', async function () {
-    client = this.configuration.newClient({ timeoutMS: 200 });
+    client = this.configuration.newClient({ timeoutMS: 1000 });
     // Spy on connection checkout and pull options argument
     const checkoutSpy = sinon.spy(ConnectionPool.prototype, 'checkOut');
     const remainingTimeSpy = sinon.spy(Timeout.prototype, 'remainingTime', ['get']);
