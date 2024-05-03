@@ -337,7 +337,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
             conn,
             cmd,
             finalOptions,
-            new MongoOperationTimeoutError('Timed out in command execution')
+            new MongoOperationTimeoutError('Timed out during command execution')
           );
         throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
       }

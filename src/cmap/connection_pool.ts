@@ -402,7 +402,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           this.address
         );
         if (options?.timeout) {
-          throw new MongoOperationTimeoutError('Timed out', { cause: timeoutError });
+          throw new MongoOperationTimeoutError('Timed out during connection checkout', {
+            cause: timeoutError
+          });
         }
         throw timeoutError;
       }

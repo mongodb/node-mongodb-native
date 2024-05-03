@@ -644,7 +644,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         }
 
         if (options.timeout) {
-          throw new MongoOperationTimeoutError('Timed out', { cause: timeoutError });
+          throw new MongoOperationTimeoutError('Timed out during server selection', {
+            cause: timeoutError
+          });
         }
         throw timeoutError;
       }
