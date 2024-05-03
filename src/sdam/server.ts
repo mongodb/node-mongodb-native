@@ -325,9 +325,12 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     try {
       try {
-        if (finalOptions.timeout) {
-          finalOptions.timeout.throwIfExpired();
-          return await Promise.race([finalOptions.timeout, conn.command(ns, cmd, finalOptions)]);
+        if (finalOptions.operationTimeout) {
+          finalOptions.operationTimeout.throwIfExpired();
+          return await Promise.race([
+            finalOptions.operationTimeout,
+            conn.command(ns, cmd, finalOptions)
+          ]);
         } else {
           return await conn.command(ns, cmd, finalOptions, responseType);
         }
@@ -347,24 +350,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
         await this.pool.reauthenticate(conn);
+        // TODO(NODE-5682): Implement CSOT support for socket read/write at the connection layer
         try {
-          if (finalOptions.timeout) {
-            finalOptions.timeout.throwIfExpired();
-            return await Promise.race([
-              finalOptions.timeout,
-              conn.command(ns, cmd, finalOptions, responseType)
-            ]);
-          } else {
-            return await conn.command(ns, cmd, finalOptions, responseType);
-          }
+          return await conn.command(ns, cmd, finalOptions, responseType);
         } catch (commandError) {
-          if (TimeoutError.is(commandError))
-            throw this.decorateCommandError(
-              conn,
-              cmd,
-              finalOptions,
-              new MongoOperationTimeoutError('Timed out in command execution')
-            );
           throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
         }
       } else {
