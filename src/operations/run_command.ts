@@ -62,7 +62,8 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
       ...this.options,
       readPreference: this.readPreference,
       session,
-      timeout: this.timeout
+      timeout: this.timeout,
+      serverSelectionTimeout: this.serverSelectionTimeout
     });
     return res;
   }
