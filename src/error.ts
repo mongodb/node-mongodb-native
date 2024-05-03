@@ -702,6 +702,9 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
   }
 }
 
+/**
+ * @internal
+ */
 export class MongoOperationTimeoutError extends MongoRuntimeError {
   override get name(): string {
     return 'MongoOperationTimeoutError';

@@ -19,7 +19,6 @@ describe('CSOT spec unit tests', function () {
   });
 
   it('Operations should ignore waitQueueTimeoutMS if timeoutMS is also set.', async function () {
-    //
     client = this.configuration.newClient({ waitQueueTimeoutMS: 999999, timeoutMS: 1000 });
     sinon.spy(Timeout, 'expires');
 
