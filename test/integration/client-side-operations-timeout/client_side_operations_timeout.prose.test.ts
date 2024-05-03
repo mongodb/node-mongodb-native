@@ -458,7 +458,7 @@ describe('CSOT spec prose tests', function () {
       expect(end - start).to.be.lte(15);
     });
 
-    it("timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS", async function () {
+    it.skip("timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS", async function () {
       /**
        * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
        * username and password).
@@ -507,9 +507,10 @@ describe('CSOT spec prose tests', function () {
       const end = now();
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
-    });
+    }).skipReason =
+      'TODO(DRIVERS-2347): Requires this ticket to be implemented before we can assert on connection CSOT behaviour';
 
-    it("serverSelectionTimeoutMS honored for connection handshake commands if it's lower than timeoutMS", async function () {
+    it.skip("serverSelectionTimeoutMS honored for connection handshake commands if it's lower than timeoutMS", async function () {
       /**
        * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
        * username and password).
@@ -558,7 +559,8 @@ describe('CSOT spec prose tests', function () {
       const end = now();
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
-    });
+    }).skipReason =
+      'TODO(DRIVERS-2347): Requires this ticket to be implemented before we can assert on connection CSOT behaviour';
   });
 
   context.skip('9. endSession', () => {

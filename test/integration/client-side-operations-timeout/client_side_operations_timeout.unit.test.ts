@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 /**
  * The following tests are described in CSOTs spec prose tests as "unit" tests
  * The tests enumerated in this section could not be expressed in either spec or prose format.
@@ -20,24 +19,30 @@ describe('CSOT spec unit tests', function () {
   });
 
   it('Operations should ignore waitQueueTimeoutMS if timeoutMS is also set.', async function () {
-    client = this.configuration.newClient({ waitQueueTimeoutMS: 10_000, timeoutMS: 200 });
+    //
+    client = this.configuration.newClient({ waitQueueTimeoutMS: 999999, timeoutMS: 200 });
     sinon.spy(Timeout, 'expires');
 
     await client.db('db').collection('collection').insertOne({ x: 1 });
 
     expect(Timeout.expires).to.have.been.calledWith(200);
-    expect(Timeout.expires).to.not.have.been.calledWith(10_000);
+    expect(Timeout.expires).to.not.have.been.calledWith(999999);
   });
 
   it('If timeoutMS is set for an operation, the remaining timeoutMS value should apply to connection checkout after a server has been selected.', async function () {
     client = this.configuration.newClient({ timeoutMS: 200 });
-    const expiresSpy = sinon.spy(Timeout, 'expires');
+    // Spy on connection checkout and pull options argument
+    const checkoutSpy = sinon.spy(ConnectionPool.prototype, 'checkOut');
     const remainingTimeSpy = sinon.spy(Timeout.prototype, 'remainingTime', ['get']);
 
     await client.db('db').collection('collection').insertOne({ x: 1 });
-    const getterFirstCall = remainingTimeSpy.get.firstCall;
+    const remainingTimeFirstCall = remainingTimeSpy.get.firstCall;
 
-    expect(expiresSpy.lastCall.args[0]).to.be.approximately(getterFirstCall.returnValue, 1);
+    expect(checkoutSpy).to.have.been.calledOnce;
+    expect(checkoutSpy.firstCall.args[0].timeout).to.exist;
+    expect(checkoutSpy.firstCall.args[0].timeout.duration).to.be.equal(
+      remainingTimeFirstCall.returnValue
+    );
   });
 
   it('If timeoutMS is not set for an operation, waitQueueTimeoutMS should apply to connection checkout after a server has been selected.', async function () {
@@ -53,10 +58,11 @@ describe('CSOT spec unit tests', function () {
     expect(expiresSpy).to.have.been.calledWith(123456);
   });
 
-  context(
+  context.skip(
     'If a new connection is required to execute an operation, min(remaining computedServerSelectionTimeout, connectTimeoutMS) should apply to socket establishment.',
     () => {}
-  );
+  ).skipReason =
+    'TODO(DRIVERS-2347): Requires this ticket to be implemented before we can assert on connection CSOT behaviour';
 
   context(
     'For drivers that have control over OCSP behavior, min(remaining computedServerSelectionTimeout, 5 seconds) should apply to HTTP requests against OCSP responders.',
