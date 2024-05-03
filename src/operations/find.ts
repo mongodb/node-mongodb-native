@@ -105,13 +105,18 @@ export class FindOperation extends CommandOperation<Document> {
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
 
-    return await server.command(this.ns, findCommand, {
-      ...this.options,
-      ...this.bsonOptions,
-      timeout: this.timeout,
-      documentsReturnedIn: 'firstBatch',
-      session
-    }, undefined);
+    return await server.command(
+      this.ns,
+      findCommand,
+      {
+        ...this.options,
+        ...this.bsonOptions,
+        timeout: this.timeout,
+        documentsReturnedIn: 'firstBatch',
+        session
+      },
+      undefined
+    );
   }
 }
 

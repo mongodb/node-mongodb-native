@@ -615,13 +615,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     processWaitQueue(this);
 
     try {
-      timeout.throwIfExpired();
+      waitQueueMember.timeout.throwIfExpired();
       return await Promise.race([serverPromise, waitQueueMember.timeout]);
     } catch (error) {
       if (TimeoutError.is(error)) {
         // Timeout
         waitQueueMember[kCancelled] = true;
-        timeout.clear();
+        waitQueueMember.timeout.clear();
         const timeoutError = new MongoServerSelectionError(
           `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
           this.description

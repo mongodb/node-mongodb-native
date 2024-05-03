@@ -350,7 +350,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         try {
           if (finalOptions.timeout) {
             finalOptions.timeout.throwIfExpired();
-            return await Promise.race([finalOptions.timeout, conn.command(ns, cmd, finalOptions, responseType)]);
+            return await Promise.race([
+              finalOptions.timeout,
+              conn.command(ns, cmd, finalOptions, responseType)
+            ]);
           } else {
             return await conn.command(ns, cmd, finalOptions, responseType);
           }
