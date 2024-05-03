@@ -479,7 +479,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
       if (!skipPingOnConnect && server && this.s.credentials) {
-        await server.command(ns('admin.$cmd'), { ping: 1 }, { timeout, serverSelectionTimeout });
+        await server.command(
+          ns('admin.$cmd'),
+          { ping: 1 },
+          { operationTimeout: timeout, serverSelectionTimeout }
+        );
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
         this.emit(Topology.CONNECT, this);

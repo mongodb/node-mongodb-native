@@ -95,7 +95,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   directConnection?: boolean;
 
   /** @internal */
-  timeout?: Timeout;
+  operationTimeout?: Timeout;
 
   /** @internal */
   serverSelectionTimeout?: Timeout;
