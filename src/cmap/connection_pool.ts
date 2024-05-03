@@ -380,7 +380,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     };
 
     this[kWaitQueue].push(waitQueueMember);
-    process.nextTick(() => this.processWaitQueue({ timeout }));
+    process.nextTick(() => this.processWaitQueue());
 
     try {
       return await Promise.race([promise, waitQueueMember.timeout]);
@@ -626,15 +626,14 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return true;
   }
 
-  private createConnection(callback: Callback<Connection>, options?: { timeout?: Timeout }) {
+  private createConnection(callback: Callback<Connection>) {
     const connectOptions: ConnectionOptions = {
       ...this.options,
       id: this[kConnectionCounter].next().value,
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
       mongoLogger: this.mongoLogger,
-      authProviders: this[kServer].topology.client.s.authProviders,
-      timeout: options?.timeout
+      authProviders: this[kServer].topology.client.s.authProviders
     };
 
     this[kPending]++;
@@ -746,7 +745,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
   }
 
-  private processWaitQueue(options?: { timeout?: Timeout }) {
+  private processWaitQueue() {
     if (this[kProcessingWaitQueue]) {
       return;
     }
@@ -834,7 +833,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           waitQueueMember.timeout.clear();
         }
         process.nextTick(() => this.processWaitQueue());
-      }, options);
+      });
     }
     this[kProcessingWaitQueue] = false;
   }

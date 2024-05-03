@@ -92,6 +92,7 @@ export interface CommandOptions extends BSONSerializeOptions {
 
   /** @internal */
   timeout?: Timeout;
+
   /** @internal */
   serverSelectionTimeout?: Timeout;
 }
@@ -132,8 +133,6 @@ export interface ConnectionOptions
   extendedMetadata: Promise<Document>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
-  /** @internal */
-  timeout?: Timeout;
 }
 
 /** @public */
