@@ -7,6 +7,7 @@ import {
   type ConnectionPoolOptions
 } from '../cmap/connection_pool';
 import { PoolClearedError } from '../cmap/errors';
+import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import {
   APM_EVENTS,
   CLOSED,
@@ -264,11 +265,25 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
-  /**
-   * Execute a command
-   * @internal
-   */
-  async command(ns: MongoDBNamespace, cmd: Document, options: CommandOptions): Promise<Document> {
+  public async command<T extends MongoDBResponseConstructor>(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions | undefined,
+    responseType: T | undefined
+  ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
+
+  public async command(
+    ns: MongoDBNamespace,
+    command: Document,
+    options?: CommandOptions
+  ): Promise<Document>;
+
+  public async command(
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: CommandOptions,
+    responseType?: MongoDBResponseConstructor
+  ): Promise<Document> {
     if (ns.db == null || typeof ns === 'string') {
       throw new MongoInvalidArgumentError('Namespace must not be a string');
     }
@@ -314,7 +329,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           finalOptions.timeout.throwIfExpired();
           return await Promise.race([finalOptions.timeout, conn.command(ns, cmd, finalOptions)]);
         } else {
-          return await conn.command(ns, cmd, finalOptions);
+          return await conn.command(ns, cmd, finalOptions, responseType);
         }
       } catch (commandError) {
         if (TimeoutError.is(commandError))
@@ -335,9 +350,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         try {
           if (finalOptions.timeout) {
             finalOptions.timeout.throwIfExpired();
-            return await Promise.race([finalOptions.timeout, conn.command(ns, cmd, finalOptions)]);
+            return await Promise.race([finalOptions.timeout, conn.command(ns, cmd, finalOptions, responseType)]);
           } else {
-            return await conn.command(ns, cmd, finalOptions);
+            return await conn.command(ns, cmd, finalOptions, responseType);
           }
         } catch (commandError) {
           if (TimeoutError.is(commandError))

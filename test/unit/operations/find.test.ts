@@ -18,7 +18,7 @@ describe('FindOperation', function () {
   });
 
   describe('#constructor', function () {
-    const operation = new FindOperation(undefined, namespace, filter, options);
+    const operation = new FindOperation(namespace, filter, options);
 
     it('sets the namespace', function () {
       expect(operation.ns).to.deep.equal(namespace);
@@ -40,7 +40,7 @@ describe('FindOperation', function () {
       const server = new Server(topology, new ServerDescription('a:1'), {} as any);
 
       it('should build basic find command with filter', async () => {
-        const findOperation = new FindOperation(undefined, namespace, filter);
+        const findOperation = new FindOperation(namespace, filter);
         const stub = sinon.stub(server, 'command').resolves({});
         await findOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(namespace, {
@@ -53,7 +53,7 @@ describe('FindOperation', function () {
         const options = {
           oplogReplay: true
         };
-        const findOperation = new FindOperation(undefined, namespace, {}, options);
+        const findOperation = new FindOperation(namespace, {}, options);
         const stub = sinon.stub(server, 'command').resolves({});
         await findOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(

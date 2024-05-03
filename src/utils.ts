@@ -65,6 +65,19 @@ export const ByteUtils = {
 };
 
 /**
+ * Returns true if value is a Uint8Array or a Buffer
+ * @param value - any value that may be a Uint8Array
+ */
+export function isUint8Array(value: unknown): value is Uint8Array {
+  return (
+    value != null &&
+    typeof value === 'object' &&
+    Symbol.toStringTag in value &&
+    value[Symbol.toStringTag] === 'Uint8Array'
+  );
+}
+
+/**
  * Determines if a connection's address matches a user provided list
  * of domain wildcards.
  */
