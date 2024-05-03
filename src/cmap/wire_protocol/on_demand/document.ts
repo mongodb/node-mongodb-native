@@ -58,7 +58,7 @@ export class OnDemandDocument {
   private readonly indexFound: Record<number, boolean> = Object.create(null);
 
   /** All bson elements in this document */
-  private readonly elements: BSONElement[];
+  private readonly elements: ReadonlyArray<BSONElement>;
 
   constructor(
     /** BSON bytes, this document begins at offset */
@@ -97,12 +97,28 @@ export class OnDemandDocument {
    * @param name - a basic latin string name of a BSON element
    * @returns
    */
-  private getElement(name: string): CachedBSONElement | null {
+  private getElement(name: string | number): CachedBSONElement | null {
     const cachedElement = this.cache[name];
     if (cachedElement === false) return null;
 
     if (cachedElement != null) {
       return cachedElement;
+    }
+
+    if (typeof name === 'number') {
+      if (this.isArray) {
+        if (name < this.elements.length) {
+          const element = this.elements[name];
+          const cachedElement = { element, value: undefined };
+          this.cache[name] = cachedElement;
+          this.indexFound[name] = true;
+          return cachedElement;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
     }
 
     for (let index = 0; index < this.elements.length; index++) {
@@ -198,6 +214,13 @@ export class OnDemandDocument {
   }
 
   /**
+   * Returns the number of elements in this BSON document
+   */
+  public size() {
+    return this.elements.length;
+  }
+
+  /**
    * Checks for the existence of an element by name.
    *
    * @remarks
@@ -222,16 +245,20 @@ export class OnDemandDocument {
    * @param required - whether or not the element is expected to exist, if true this function will throw if it is not present
    */
   public get<const T extends keyof JSTypeOf>(
-    name: string,
+    name: string | number,
     as: T,
     required?: false | undefined
   ): JSTypeOf[T] | null;
 
   /** `required` will make `get` throw if name does not exist or is null/undefined */
-  public get<const T extends keyof JSTypeOf>(name: string, as: T, required: true): JSTypeOf[T];
+  public get<const T extends keyof JSTypeOf>(
+    name: string | number,
+    as: T,
+    required: true
+  ): JSTypeOf[T];
 
   public get<const T extends keyof JSTypeOf>(
-    name: string,
+    name: string | number,
     as: T,
     required?: boolean
   ): JSTypeOf[T] | null {
@@ -303,21 +330,9 @@ export class OnDemandDocument {
     });
   }
 
-  /**
-   * Iterates through the elements of a document reviving them using the `as` BSONType.
-   *
-   * @param as - The type to revive all elements as
-   */
-  public *valuesAs<const T extends keyof JSTypeOf>(as: T): Generator<JSTypeOf[T]> {
-    if (!this.isArray) {
-      throw new BSONError('Unexpected conversion of non-array value to array');
-    }
-    let counter = 0;
-    for (const element of this.elements) {
-      const value = this.toJSValue<T>(element, as);
-      this.cache[counter] = { element, value };
-      yield value;
-      counter += 1;
-    }
+  /** Returns this document's bytes only */
+  toBytes() {
+    const size = getInt32LE(this.bson, this.offset);
+    return this.bson.subarray(this.offset, this.offset + size);
   }
 }

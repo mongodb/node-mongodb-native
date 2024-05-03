@@ -27,7 +27,7 @@ describe('Sessions - unit/sessions', function () {
           request.reply({ ok: 1, operationTime: insertOperationTime });
         } else if (doc.find) {
           findCommand = doc;
-          request.reply({ ok: 1, cursor: { id: 0, firstBatch: [] } });
+          request.reply({ ok: 1, cursor: { id: 0n, firstBatch: [] } });
         } else if (doc.endSessions) {
           request.reply({ ok: 1 });
         }
