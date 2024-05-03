@@ -58,6 +58,7 @@ describe('CSOT spec unit tests', function () {
     expect(expiresSpy).to.have.been.calledWith(123456);
   });
 
+  /* eslint-disable @typescript-eslint/no-empty-function */
   context.skip(
     'If a new connection is required to execute an operation, min(remaining computedServerSelectionTimeout, connectTimeoutMS) should apply to socket establishment.',
     () => {}
@@ -89,4 +90,5 @@ describe('CSOT spec unit tests', function () {
     'When doing minPoolSize maintenance, connectTimeoutMS is used as the timeout for socket establishment.',
     () => {}
   ).skipReason = 'TODO(NODE-6091): Implement CSOT logic for Background Connection Pooling';
+  /* eslint-enable @typescript-eslint/no-empty-function */
 });
