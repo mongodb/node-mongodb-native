@@ -16,18 +16,23 @@ export interface AccessToken {
   expires_in?: number;
 }
 
+/** @internal */
+export type OIDCTokenFunction = (credentials: MongoCredentials) => Promise<AccessToken>;
+
 /**
  * Common behaviour for OIDC machine workflows.
  * @internal
  */
 export abstract class MachineWorkflow implements Workflow {
   cache: TokenCache;
+  callback: OIDCTokenFunction;
 
   /**
    * Instantiate the machine workflow.
    */
   constructor(cache: TokenCache) {
     this.cache = cache;
+    this.callback = this.withLock(this.getToken.bind(this));
   }
 
   /**
@@ -70,10 +75,23 @@ export abstract class MachineWorkflow implements Workflow {
     if (this.cache.hasAccessToken) {
       return this.cache.getAccessToken();
     } else {
-      const token = await this.getToken(credentials);
+      const token = await this.callback(credentials);
       this.cache.put({ accessToken: token.access_token, expiresInSeconds: token.expires_in });
       return token.access_token;
     }
+  }
+
+  /**
+   * Ensure the callback is only executed one at a time.
+   */
+  private withLock(callback: OIDCTokenFunction) {
+    let lock: Promise<any> = Promise.resolve();
+    return async (credentials: MongoCredentials): Promise<AccessToken> => {
+      await lock;
+      // eslint-disable-next-line github/no-then
+      lock = lock.then(() => callback(credentials));
+      return await lock;
+    };
   }
 
   /**
