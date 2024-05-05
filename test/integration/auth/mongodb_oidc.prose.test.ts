@@ -1300,6 +1300,92 @@ describe('OIDC Auth Spec Tests', function () {
           expect(callbackSpy).to.have.been.calledTwice;
         });
       });
+
+      describe('4.4 Fails', function () {
+        let accessCount = 0;
+
+        const createBadCallback = () => {
+          return async () => {
+            let token;
+            if (accessCount === 0) {
+              token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
+                encoding: 'utf8'
+              });
+            } else {
+              token = 'bad';
+            }
+            accessCount++;
+            return generateResult(token, 10000, { refreshToken: 'bad' });
+          };
+        };
+
+        let utilClient: MongoClient;
+        const callbackSpy = sinon.spy(createBadCallback());
+        // Create an OIDC configured client that returns invalid refresh tokens and returns invalid access tokens after the first access.
+        // Perform a find operation that succeeds.
+        // Assert that the human callback has been called once.
+        // Force a reauthenication using a failCommand of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find",
+        //     ],
+        //     errorCode: 391 // ReauthenticationRequired
+        //   }
+        // }
+        // Perform a find operation that fails.
+        // Assert that the human callback has been called three times.
+        // Close the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: callbackSpy
+            },
+            monitorCommands: true,
+            retryReads: false
+          });
+          utilClient = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: createCallback()
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('testHuman');
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledOnce;
+          await utilClient
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
+        });
+
+        afterEach(async function () {
+          await utilClient.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          await utilClient.close();
+        });
+
+        it('does not successfully authenticate', async function () {
+          const error = await collection.findOne().catch(error => error);
+          expect(error).to.exist;
+          expect(callbackSpy).to.have.been.calledThrice;
+        });
+      });
     });
   });
 });
