@@ -1,5 +1,5 @@
 import { MongoGCPError } from '../../../error';
-import { request } from '../../../utils';
+import { get } from '../../../utils';
 import { type MongoCredentials } from '../mongo_credentials';
 import { type AccessToken, MachineWorkflow } from './machine_workflow';
 import { type TokenCache } from './token_cache';
@@ -41,9 +41,13 @@ export class GCPMachineWorkflow extends MachineWorkflow {
 async function getGcpTokenData(tokenAudience: string): Promise<AccessToken> {
   const url = new URL(GCP_BASE_URL);
   url.searchParams.append('audience', tokenAudience);
-  const data = await request(url.toString(), {
-    json: false,
+  const response = await get(url, {
     headers: GCP_HEADERS
   });
-  return { access_token: data };
+  if (response.status !== 200) {
+    throw new MongoGCPError(
+      `Status code ${response.status} returned from the GCP endpoint. Response body: ${response.body}`
+    );
+  }
+  return JSON.parse(response.body);
 }

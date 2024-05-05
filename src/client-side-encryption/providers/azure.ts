@@ -1,7 +1,7 @@
 import { type Document } from '../../bson';
+import { get } from '../../utils';
 import { MongoCryptAzureKMSRequestError, MongoCryptKMSRequestNetworkTimeoutError } from '../errors';
 import { type KMSProviders } from './index';
-import { get } from './utils';
 
 const MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS = 6000;
 

@@ -1,5 +1,5 @@
-import { get } from '../../../client-side-encryption/providers/utils';
 import { MongoAzureError } from '../../../error';
+import { get } from '../../../utils';
 import type { MongoCredentials } from '../mongo_credentials';
 import { type AccessToken, MachineWorkflow } from './machine_workflow';
 import { type TokenCache } from './token_cache';
@@ -58,7 +58,7 @@ async function getAzureTokenData(tokenAudience: string, username?: string): Prom
   if (username) {
     url.searchParams.append('client_id', username);
   }
-  const response = await get(url.toString(), {
+  const response = await get(url, {
     headers: AZURE_HEADERS
   });
   if (response.status !== 200) {
