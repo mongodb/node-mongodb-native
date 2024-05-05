@@ -38,20 +38,20 @@ export abstract class MachineWorkflow implements Workflow {
   /**
    * Execute the workflow. Gets the token from the subclass implementation.
    */
-  async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+  async execute(connection: Connection, credentials: MongoCredentials): Promise<void> {
     const token = await this.getTokenFromCacheOrEnv(credentials);
     const command = finishCommandDocument(token);
-    return await connection.command(ns(credentials.source), command, undefined);
+    await connection.command(ns(credentials.source), command, undefined);
   }
 
   /**
    * Reauthenticate on a machine workflow just grabs the token again since the server
    * has said the current access token is invalid or expired.
    */
-  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void> {
     // Reauthentication implies the token has expired.
     this.cache.removeAccessToken();
-    return await this.execute(connection, credentials);
+    await this.execute(connection, credentials);
   }
 
   /**

@@ -1,6 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
-import { type Document } from '../../../bson';
+import { MONGODB_ERROR_CODES, MongoError } from '../../../error';
 import { type Connection } from '../../connection';
 import { type MongoCredentials } from '../mongo_credentials';
 import {
@@ -35,16 +35,16 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
    * in the cache and run the authentication steps again. No initial handshake needs
    * to be sent.
    */
-  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void> {
     // Reauthentication should always remove the access token.
     this.cache.removeAccessToken();
-    return await this.execute(connection, credentials);
+    await this.execute(connection, credentials);
   }
 
   /**
    * Execute the OIDC callback workflow.
    */
-  async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+  async execute(connection: Connection, credentials: MongoCredentials): Promise<void> {
     // If there is a cached access token, try to authenticate with it. If
     // authentication fails with an Authentication error (18),
     // invalidate the access token, fetch a new access token, and try
@@ -55,7 +55,10 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
       try {
         return await this.finishAuthentication(connection, credentials, token);
       } catch (error) {
-        if (error.code === 18) {
+        if (
+          error instanceof MongoError &&
+          error.code === MONGODB_ERROR_CODES.AuthenticationFailed
+        ) {
           this.cache.removeAccessToken();
           return await this.execute(connection, credentials);
         } else {
@@ -77,7 +80,7 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     }
     this.lastInvocationTime = now;
     this.cache.put(response);
-    return await this.finishAuthentication(connection, credentials, response.accessToken);
+    await this.finishAuthentication(connection, credentials, response.accessToken);
   }
 
   /**

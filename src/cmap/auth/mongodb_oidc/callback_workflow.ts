@@ -60,7 +60,7 @@ export abstract class CallbackWorkflow implements Workflow {
   /**
    * Each workflow should specify the correct custom behaviour for reauthentication.
    */
-  abstract reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document>;
+  abstract reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void>;
 
   /**
    * Execute the OIDC callback workflow.
@@ -69,7 +69,7 @@ export abstract class CallbackWorkflow implements Workflow {
     connection: Connection,
     credentials: MongoCredentials,
     response?: Document
-  ): Promise<Document>;
+  ): Promise<void>;
 
   /**
    * Starts the callback authentication process. If there is a speculative
@@ -102,13 +102,12 @@ export abstract class CallbackWorkflow implements Workflow {
     credentials: MongoCredentials,
     token: string,
     conversationId?: number
-  ): Promise<Document> {
-    const result = await connection.command(
+  ): Promise<void> {
+    await connection.command(
       ns(credentials.source),
       finishCommandDocument(token, conversationId),
       undefined
     );
-    return result;
   }
 
   /**

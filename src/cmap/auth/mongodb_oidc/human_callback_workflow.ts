@@ -1,4 +1,4 @@
-import { BSON, type Document } from 'bson';
+import { BSON } from 'bson';
 
 import { MONGODB_ERROR_CODES, MongoError } from '../../../error';
 import { type Connection } from '../../connection';
@@ -30,18 +30,18 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
    * in the cache and run the authentication steps again. No initial handshake needs
    * to be sent.
    */
-  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void> {
     // Reauthentication should always remove the access token, but in the
     // human workflow we need to pass the refesh token through if it
     // exists.
     this.cache.removeAccessToken();
-    return await this.execute(connection, credentials);
+    await this.execute(connection, credentials);
   }
 
   /**
    * Execute the OIDC human callback workflow.
    */
-  async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+  async execute(connection: Connection, credentials: MongoCredentials): Promise<void> {
     // Check if the Client Cache has an access token.
     // If it does, cache the access token in the Connection Cache and perform a One-Step SASL conversation
     // using the access token. If the server returns an Authentication error (18),

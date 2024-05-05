@@ -78,12 +78,12 @@ export interface Workflow {
     connection: Connection,
     credentials: MongoCredentials,
     response?: Document
-  ): Promise<Document>;
+  ): Promise<void>;
 
   /**
    * Each workflow should specify the correct custom behaviour for reauthentication.
    */
-  reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<Document>;
+  reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void>;
 
   /**
    * Get the document to add for speculative authentication.
