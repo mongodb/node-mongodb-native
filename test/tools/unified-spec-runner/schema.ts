@@ -7,6 +7,7 @@ import type {
   ServerApiVersion,
   SeverityLevel,
   TagSet,
+  TopologyType,
   W
 } from '../../mongodb';
 import { type TestConfiguration } from '../runner/config';
@@ -95,7 +96,7 @@ export interface UnifiedSuite {
   tests: Test[];
   _yamlAnchors?: Document;
 }
-export const TopologyType = Object.freeze({
+export const TopologyName = Object.freeze({
   single: 'single',
   replicaset: 'replicaset',
   sharded: 'sharded',
@@ -103,13 +104,13 @@ export const TopologyType = Object.freeze({
   loadBalanced: 'load-balanced'
 } as const);
 
-export type TopologyId = (typeof TopologyType)[keyof typeof TopologyType];
+export type TopologyName = (typeof TopologyName)[keyof typeof TopologyName];
 export interface RunOnRequirement {
   serverless?: 'forbid' | 'allow' | 'require';
   auth?: boolean;
   maxServerVersion?: string;
   minServerVersion?: string;
-  topologies?: TopologyId[];
+  topologies?: TopologyName[];
   serverParameters?: Document;
   csfle?: boolean;
 }
@@ -314,6 +315,7 @@ export interface ExpectedCmapEvent {
   connectionCheckedOutEvent?: Record<string, never>;
   connectionCheckedInEvent?: Record<string, never>;
 }
+
 export interface ExpectedSdamEvent {
   serverDescriptionChangedEvent?: {
     previousDescription?: {
@@ -336,16 +338,16 @@ export interface ExpectedSdamEvent {
   topologyDescriptionChangedEvent?: {
     topologyId?: any;
     previousDescription?: {
-      type?: string;
+      type?: TopologyType;
     };
     newDescription?: {
-      type?: string;
+      type?: TopologyType;
     };
   };
   topologyOpeningEvent?: {
     topologyId?: any;
   };
-  topologyClosingEvent?: {
+  topologyClosedEvent?: {
     topologyId?: any;
   };
   serverOpeningEvent?: {

@@ -26,13 +26,8 @@ import {
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import {
-  type Callback,
-  List,
-  makeCounter,
-  promiseWithResolvers,
-  TimeoutController
-} from '../utils';
+import { Timeout, TimeoutError } from '../timeout';
+import { type Callback, List, makeCounter, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -107,7 +102,7 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
 export interface WaitQueueMember {
   resolve: (conn: Connection) => void;
   reject: (err: AnyError) => void;
-  timeoutController: TimeoutController;
+  timeout: Timeout;
   [kCancelled]?: boolean;
 }
 
@@ -368,33 +363,40 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
 
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
+
+    const timeout = Timeout.expires(waitQueueTimeoutMS);
+
     const waitQueueMember: WaitQueueMember = {
       resolve,
       reject,
-      timeoutController: new TimeoutController(waitQueueTimeoutMS)
+      timeout
     };
-    waitQueueMember.timeoutController.signal.addEventListener('abort', () => {
-      waitQueueMember[kCancelled] = true;
-      waitQueueMember.timeoutController.clear();
-
-      this.emitAndLog(
-        ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-        new ConnectionCheckOutFailedEvent(this, 'timeout')
-      );
-      waitQueueMember.reject(
-        new WaitQueueTimeoutError(
-          this.loadBalanced
-            ? this.waitQueueErrorMetrics()
-            : 'Timed out while checking out a connection from connection pool',
-          this.address
-        )
-      );
-    });
 
     this[kWaitQueue].push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());
 
-    return await promise;
+    try {
+      return await Promise.race([promise, waitQueueMember.timeout]);
+    } catch (error) {
+      if (TimeoutError.is(error)) {
+        waitQueueMember[kCancelled] = true;
+
+        waitQueueMember.timeout.clear();
+
+        this.emitAndLog(
+          ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+          new ConnectionCheckOutFailedEvent(this, 'timeout')
+        );
+        const timeoutError = new WaitQueueTimeoutError(
+          this.loadBalanced
+            ? this.waitQueueErrorMetrics()
+            : 'Timed out while checking out a connection from connection pool',
+          this.address
+        );
+        throw timeoutError;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -758,7 +760,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
           new ConnectionCheckOutFailedEvent(this, reason, error)
         );
-        waitQueueMember.timeoutController.clear();
+        waitQueueMember.timeout.clear();
         this[kWaitQueue].shift();
         waitQueueMember.reject(error);
         continue;
@@ -779,7 +781,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(this, connection)
         );
-        waitQueueMember.timeoutController.clear();
+        waitQueueMember.timeout.clear();
 
         this[kWaitQueue].shift();
         waitQueueMember.resolve(connection);
@@ -818,7 +820,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             waitQueueMember.resolve(connection);
           }
 
-          waitQueueMember.timeoutController.clear();
+          waitQueueMember.timeout.clear();
         }
         process.nextTick(() => this.processWaitQueue());
       });

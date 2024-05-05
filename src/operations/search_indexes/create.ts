@@ -8,12 +8,15 @@ import { AbstractOperation } from '../operation';
 /**
  * @public
  */
-export interface SearchIndexDescription {
+export interface SearchIndexDescription extends Document {
   /** The name of the index. */
   name?: string;
 
   /** The index definition. */
   definition: Document;
+
+  /** The type of the index.  Currently `search` or `vectorSearch` are supported. */
+  type?: string;
 }
 
 /** @internal */

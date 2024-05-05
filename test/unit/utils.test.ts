@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import {
   BufferPool,
@@ -8,6 +7,7 @@ import {
   HostAddress,
   hostMatchesWildcards,
   isHello,
+  isUint8Array,
   LEGACY_HELLO_COMMAND,
   List,
   matchesParentDomain,
@@ -15,10 +15,8 @@ import {
   MongoDBNamespace,
   MongoRuntimeError,
   ObjectId,
-  shuffle,
-  TimeoutController
+  shuffle
 } from '../mongodb';
-import { createTimerSandbox } from './timer_sandbox';
 
 describe('driver utils', function () {
   describe('.hostMatchesWildcards', function () {
@@ -985,64 +983,28 @@ describe('driver utils', function () {
     });
   });
 
-  describe('class TimeoutController', () => {
-    let timerSandbox, clock, spy;
+  describe('isUint8Array()', () => {
+    describe('when given a UintArray', () =>
+      it('returns true', () => expect(isUint8Array(Uint8Array.from([1]))).to.be.true));
 
-    beforeEach(function () {
-      timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-      spy = sinon.spy();
-    });
+    describe('when given a Buffer', () =>
+      it('returns true', () => expect(isUint8Array(Buffer.from([1]))).to.be.true));
 
-    afterEach(function () {
-      clock.restore();
-      timerSandbox.restore();
-    });
-
-    describe('constructor', () => {
-      it('when no timeout is provided, it creates an infinite timeout', () => {
-        const controller = new TimeoutController();
-        // @ts-expect-error Accessing a private field on TimeoutController
-        expect(controller.timeoutId).to.be.null;
-      });
-
-      it('when timeout is 0, it creates an infinite timeout', () => {
-        const controller = new TimeoutController(0);
-        // @ts-expect-error Accessing a private field on TimeoutController
-        expect(controller.timeoutId).to.be.null;
-      });
-
-      it('when timeout <0, it creates an infinite timeout', () => {
-        const controller = new TimeoutController(-5);
-        // @ts-expect-error Accessing a private field on TimeoutController
-        expect(controller.timeoutId).to.be.null;
-      });
-
-      context('when timeout > 0', () => {
-        let timeoutController: TimeoutController;
-
-        beforeEach(function () {
-          timeoutController = new TimeoutController(3000);
-          timeoutController.signal.addEventListener('abort', spy);
-        });
-
-        afterEach(function () {
-          timeoutController.clear();
-        });
-
-        it('it creates a timeout', () => {
-          // @ts-expect-error Accessing a private field on TimeoutController
-          expect(timeoutController.timeoutId).not.to.be.null;
-        });
-
-        it('times out after `timeout` milliseconds', () => {
-          expect(spy, 'spy was called after creation').not.to.have.been.called;
-          clock.tick(2999);
-          expect(spy, 'spy was called before 3000ms has expired').not.to.have.been.called;
-          clock.tick(1);
-          expect(spy, 'spy was not called after 3000ms').to.have.been.called;
-        });
+    describe('when given a value that does not have `Uint8Array` at Symbol.toStringTag', () => {
+      it('returns false', () => {
+        const weirdArray = Uint8Array.from([1]);
+        Object.defineProperty(weirdArray, Symbol.toStringTag, { value: 'blah' });
+        expect(isUint8Array(weirdArray)).to.be.false;
       });
     });
+
+    describe('when given null', () =>
+      it('returns false', () => expect(isUint8Array(null)).to.be.false));
+
+    describe('when given a non object', () =>
+      it('returns false', () => expect(isUint8Array('')).to.be.false));
+
+    describe('when given an object that does not respond to Symbol.toStringTag', () =>
+      it('returns false', () => expect(isUint8Array(Object.create(null))).to.be.false));
   });
 });

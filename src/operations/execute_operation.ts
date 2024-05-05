@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { type CursorResponse } from '../cmap/wire_protocol/responses';
 import {
   isRetryableReadError,
   isRetryableWriteError,
@@ -44,7 +45,7 @@ export interface ExecutionResult {
   /** The session used for this operation, may be implicitly created */
   session?: ClientSession;
   /** The raw server response for the operation */
-  response: Document;
+  response: Document | CursorResponse;
 }
 
 /**
@@ -119,7 +120,14 @@ export async function executeOperation<
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
-  if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
+  const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
+  const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
+
+  if (
+    inTransaction &&
+    !readPreference.equals(ReadPreference.primary) &&
+    (hasReadAspect || operation.commandName === 'runCommand')
+  ) {
     throw new MongoTransactionError(
       `Read preference in a transaction must be primary, not: ${readPreference.mode}`
     );
@@ -177,8 +185,6 @@ export async function executeOperation<
     supportsRetryableWrites(server) &&
     operation.canRetryWrite;
 
-  const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
-  const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
   const willRetry = (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
 
   if (hasWriteAspect && willRetryWrite) {

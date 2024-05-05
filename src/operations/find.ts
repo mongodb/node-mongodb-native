@@ -1,5 +1,4 @@
 import type { Document } from '../bson';
-import type { Collection } from '../collection';
 import { MongoInvalidArgumentError } from '../error';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
@@ -77,13 +76,8 @@ export class FindOperation extends CommandOperation<Document> {
   override options: FindOptions & { writeConcern?: never };
   filter: Document;
 
-  constructor(
-    collection: Collection | undefined,
-    ns: MongoDBNamespace,
-    filter: Document = {},
-    options: FindOptions = {}
-  ) {
-    super(collection, options);
+  constructor(ns: MongoDBNamespace, filter: Document = {}, options: FindOptions = {}) {
+    super(undefined, options);
 
     this.options = { ...options };
     delete this.options.writeConcern;
@@ -111,12 +105,17 @@ export class FindOperation extends CommandOperation<Document> {
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
 
-    return await server.command(this.ns, findCommand, {
-      ...this.options,
-      ...this.bsonOptions,
-      documentsReturnedIn: 'firstBatch',
-      session
-    });
+    return await server.command(
+      this.ns,
+      findCommand,
+      {
+        ...this.options,
+        ...this.bsonOptions,
+        documentsReturnedIn: 'firstBatch',
+        session
+      },
+      undefined
+    );
   }
 }
 

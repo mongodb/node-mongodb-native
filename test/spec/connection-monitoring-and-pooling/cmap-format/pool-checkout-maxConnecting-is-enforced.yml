@@ -13,7 +13,7 @@ failPoint:
     failCommands: ["isMaster","hello"]
     closeConnection: false
     blockConnection: true
-    blockTimeMS: 750
+    blockTimeMS: 800
 poolOptions:
   maxPoolSize: 10
   waitQueueTimeoutMS: 5000
@@ -36,7 +36,7 @@ operations:
     count: 1
   # wait some more time to ensure thread1 has begun establishing a Connection
   - name: wait
-    ms: 100
+    ms: 400
   # start 2 check out requests. Only one thread should
   # start creating a Connection and the other one should be
   # waiting for pendingConnectionCount to be less than maxConnecting,

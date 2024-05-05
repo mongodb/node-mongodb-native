@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 
-import { MongoInvalidArgumentError } from '../../mongodb';
+import { type MongoClient, MongoInvalidArgumentError } from '../../mongodb';
 import { filterForCommands } from '../shared';
 
 describe('Aggregation', function () {
-  let client;
+  let client: MongoClient;
 
   beforeEach(async function () {
     client = this.configuration.newClient();
