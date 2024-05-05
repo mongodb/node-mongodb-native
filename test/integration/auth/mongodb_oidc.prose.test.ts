@@ -1155,6 +1155,151 @@ describe('OIDC Auth Spec Tests', function () {
           expect(commandFailedEvents).to.deep.equal(['find']);
         });
       });
+
+      describe('4.2 Succeeds no refresh', function () {
+        let utilClient: MongoClient;
+        const callbackSpy = sinon.spy(createCallback());
+        // Create an OIDC configured client with a human callback that does not return a refresh token.
+        // Perform a find operation that succeeds.
+        // Assert that the human callback has been called once.
+        // Force a reauthenication using a fail point of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find"
+        //     ],
+        //     errorCode: 391 // ReauthenticationRequired
+        //   }
+        // }
+        // Perform a find operation that succeeds.
+        // Assert that the human callback has been called twice.
+        // Close the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: callbackSpy
+            },
+            monitorCommands: true,
+            retryReads: false
+          });
+          utilClient = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: createCallback()
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('testHuman');
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledOnce;
+          await utilClient
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
+        });
+
+        afterEach(async function () {
+          await utilClient.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          await utilClient.close();
+        });
+
+        it('successfully authenticates', async function () {
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledTwice;
+        });
+      });
+
+      describe('4.3 Succeeds after refresh fails', function () {
+        const createBadCallback = () => {
+          return async () => {
+            const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
+              encoding: 'utf8'
+            });
+            return generateResult(token, 10000, { refreshToken: 'bad' });
+          };
+        };
+
+        let utilClient: MongoClient;
+        const callbackSpy = sinon.spy(createBadCallback());
+        // Create an OIDC configured client with a callback that returns the test_user1 access token and a bad refresh token.
+        // Perform a find operation that succeeds.
+        // Assert that the human callback has been called once.
+        // Force a reauthenication using a fail point of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find",
+        //     ],
+        //     errorCode: 391 // ReauthenticationRequired
+        //   }
+        // }
+        // Perform a find operation that succeeds.
+        // Assert that the human callback has been called 2 times.
+        // Close the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: callbackSpy
+            },
+            monitorCommands: true,
+            retryReads: false
+          });
+          utilClient = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_HUMAN_CALLBACK: createCallback()
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('testHuman');
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledOnce;
+          await utilClient
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
+        });
+
+        afterEach(async function () {
+          await utilClient.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          await utilClient.close();
+        });
+
+        it('successfully authenticates', async function () {
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledTwice;
+        });
+      });
     });
   });
 });
