@@ -70,11 +70,11 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     const now = Date.now();
     // Ensure a delay between invokations to not overload the callback.
     if (now - this.lastInvocationTime > CALLBACK_DEBOUNCE_MS) {
-      response = await this.fetchAccessToken();
+      response = await this.fetchAccessToken(credentials);
     } else {
       const responses = await Promise.all([
         setTimeout(CALLBACK_DEBOUNCE_MS - (now - this.lastInvocationTime)),
-        this.fetchAccessToken()
+        this.fetchAccessToken(credentials)
       ]);
       response = responses[1];
     }
@@ -86,11 +86,14 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
   /**
    * Fetches the access token using the callback.
    */
-  protected async fetchAccessToken(): Promise<OIDCResponse> {
+  protected async fetchAccessToken(credentials: MongoCredentials): Promise<OIDCResponse> {
     const params: OIDCCallbackParams = {
       timeoutContext: AbortSignal.timeout(AUTOMATED_TIMEOUT_MS),
       version: OIDC_VERSION
     };
+    if (credentials.username) {
+      params.username = credentials.username;
+    }
     return await this.executeAndValidateCallback(params);
   }
 }

@@ -72,7 +72,11 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     // errors to the user. On success, exit the algorithm.
     if (this.cache.hasRefreshToken) {
       const refreshToken = this.cache.getRefreshToken();
-      const result = await this.fetchAccessToken(this.cache.getIdpInfo(), refreshToken);
+      const result = await this.fetchAccessToken(
+        this.cache.getIdpInfo(),
+        credentials,
+        refreshToken
+      );
       this.cache.put(result);
       try {
         return await this.finishAuthentication(connection, credentials, result.accessToken);
@@ -99,7 +103,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     const startResponse = await this.startAuthentication(connection, credentials);
     const conversationId = startResponse.conversationId;
     const idpInfo = BSON.deserialize(startResponse.payload.buffer) as IdPInfo;
-    const callbackResponse = await this.fetchAccessToken(idpInfo);
+    const callbackResponse = await this.fetchAccessToken(idpInfo, credentials);
     this.cache.put(callbackResponse, idpInfo);
     return await this.finishAuthentication(
       connection,
@@ -112,12 +116,19 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
   /**
    * Fetches an access token using the callback.
    */
-  private async fetchAccessToken(idpInfo: IdPInfo, refreshToken?: string): Promise<OIDCResponse> {
+  private async fetchAccessToken(
+    idpInfo: IdPInfo,
+    credentials: MongoCredentials,
+    refreshToken?: string
+  ): Promise<OIDCResponse> {
     const params: OIDCCallbackParams = {
       timeoutContext: AbortSignal.timeout(HUMAN_TIMEOUT_MS),
       version: OIDC_VERSION,
       idpInfo: idpInfo
     };
+    if (credentials.username) {
+      params.username = credentials.username;
+    }
     if (refreshToken) {
       params.refreshToken = refreshToken;
     }
