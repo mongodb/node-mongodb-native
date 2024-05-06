@@ -101,11 +101,12 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
       return await Promise.race([this.executeAndValidateCallback(params), timeout]);
     } catch (error) {
       if (TimeoutError.is(error)) {
-        timeout.clear();
         controller.abort();
         throw new MongoOIDCError(`OIDC callback timed out after ${AUTOMATED_TIMEOUT_MS}ms.`);
       }
       throw error;
+    } finally {
+      timeout.clear();
     }
   }
 }

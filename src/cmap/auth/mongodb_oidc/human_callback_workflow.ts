@@ -139,11 +139,12 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
       return await Promise.race([this.executeAndValidateCallback(params), timeout]);
     } catch (error) {
       if (TimeoutError.is(error)) {
-        timeout.clear();
         controller.abort();
         throw new MongoOIDCError(`OIDC callback timed out after ${HUMAN_TIMEOUT_MS}ms.`);
       }
       throw error;
+    } finally {
+      timeout.clear();
     }
   }
 }
