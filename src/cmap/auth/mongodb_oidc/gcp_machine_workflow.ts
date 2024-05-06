@@ -49,5 +49,5 @@ async function getGcpTokenData(tokenAudience: string): Promise<AccessToken> {
       `Status code ${response.status} returned from the GCP endpoint. Response body: ${response.body}`
     );
   }
-  return JSON.parse(response.body);
+  return { access_token: response.body };
 }
