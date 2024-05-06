@@ -1,6 +1,7 @@
 import { BSON } from 'bson';
 
-import { MONGODB_ERROR_CODES, MongoError } from '../../../error';
+import { MONGODB_ERROR_CODES, MongoError, MongoOIDCError } from '../../../error';
+import { Timeout, TimeoutError } from '../../../timeout';
 import { type Connection } from '../../connection';
 import { type MongoCredentials } from '../mongo_credentials';
 import {
@@ -121,8 +122,9 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     credentials: MongoCredentials,
     refreshToken?: string
   ): Promise<OIDCResponse> {
+    const controller = new AbortController();
     const params: OIDCCallbackParams = {
-      timeoutContext: AbortSignal.timeout(HUMAN_TIMEOUT_MS),
+      timeoutContext: controller.signal,
       version: OIDC_VERSION,
       idpInfo: idpInfo
     };
@@ -132,6 +134,16 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     if (refreshToken) {
       params.refreshToken = refreshToken;
     }
-    return await this.executeAndValidateCallback(params);
+    const timeout = Timeout.expires(HUMAN_TIMEOUT_MS);
+    try {
+      return await Promise.race([this.executeAndValidateCallback(params), timeout]);
+    } catch (error) {
+      if (TimeoutError.is(error)) {
+        timeout.clear();
+        controller.abort();
+        throw new MongoOIDCError(`OIDC callback timed out after ${HUMAN_TIMEOUT_MS}ms.`);
+      }
+      throw error;
+    }
   }
 }

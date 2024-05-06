@@ -1,6 +1,7 @@
 import { setTimeout } from 'timers/promises';
 
-import { MONGODB_ERROR_CODES, MongoError } from '../../../error';
+import { MONGODB_ERROR_CODES, MongoError, MongoOIDCError } from '../../../error';
+import { Timeout, TimeoutError } from '../../../timeout';
 import { type Connection } from '../../connection';
 import { type MongoCredentials } from '../mongo_credentials';
 import {
@@ -87,13 +88,24 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
    * Fetches the access token using the callback.
    */
   protected async fetchAccessToken(credentials: MongoCredentials): Promise<OIDCResponse> {
+    const controller = new AbortController();
     const params: OIDCCallbackParams = {
-      timeoutContext: AbortSignal.timeout(AUTOMATED_TIMEOUT_MS),
+      timeoutContext: controller.signal,
       version: OIDC_VERSION
     };
     if (credentials.username) {
       params.username = credentials.username;
     }
-    return await this.executeAndValidateCallback(params);
+    const timeout = Timeout.expires(AUTOMATED_TIMEOUT_MS);
+    try {
+      return await Promise.race([this.executeAndValidateCallback(params), timeout]);
+    } catch (error) {
+      if (TimeoutError.is(error)) {
+        timeout.clear();
+        controller.abort();
+        throw new MongoOIDCError(`OIDC callback timed out after ${AUTOMATED_TIMEOUT_MS}ms.`);
+      }
+      throw error;
+    }
   }
 }

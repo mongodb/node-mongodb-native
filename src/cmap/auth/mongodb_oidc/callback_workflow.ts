@@ -130,9 +130,10 @@ export abstract class CallbackWorkflow implements Workflow {
   protected withLock(callback: OIDCCallbackFunction) {
     let lock: Promise<any> = Promise.resolve();
     return async (params: OIDCCallbackParams): Promise<OIDCResponse> => {
+      // We do this to ensure that we would never return the result of the
+      // previous lock, only the current callback's value would get returned.
       await lock;
-      // eslint-disable-next-line github/no-then
-      lock = lock.then(() => callback(params));
+      lock = callback(params);
       return await lock;
     };
   }

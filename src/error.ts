@@ -532,6 +532,34 @@ export class MongoAWSError extends MongoRuntimeError {
 
 /**
  * A error generated when the user attempts to authenticate
+ * via OIDC callbacks, but fails.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoOIDCError extends MongoRuntimeError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message: string) {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoOIDCError';
+  }
+}
+
+/**
+ * A error generated when the user attempts to authenticate
  * via Azure, but fails.
  *
  * @public
