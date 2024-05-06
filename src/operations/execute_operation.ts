@@ -28,7 +28,7 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { Timeout } from '../timeout';
-import { squashError, supportsRetryableWrites } from '../utils';
+import { csotMin, squashError, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -160,7 +160,7 @@ export async function executeOperation<
   operation.serverSelectionTimeout =
     operation.timeout != null
       ? Timeout.expires(
-          Timeout.min(operation.timeout.remainingTime, topology.s.serverSelectionTimeoutMS)
+          csotMin(operation.timeout.remainingTime, topology.s.serverSelectionTimeoutMS)
         )
       : undefined;
 

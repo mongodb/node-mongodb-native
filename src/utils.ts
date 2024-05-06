@@ -1334,6 +1334,12 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
   }
 }
 
+export function csotMin(duration1: number, duration2: number): number {
+  if (duration1 === 0) return duration2;
+  if (duration2 === 0) return duration1;
+  return Math.min(duration1, duration2);
+}
+
 export function noop() {
   return;
 }
