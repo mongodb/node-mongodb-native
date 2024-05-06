@@ -1,6 +1,6 @@
 import { type Document } from 'bson';
 
-import { MongoDriverError, MongoMissingCredentialsError } from '../../../error';
+import { MongoMissingCredentialsError } from '../../../error';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
@@ -114,9 +114,6 @@ export abstract class CallbackWorkflow implements Workflow {
    * Executes the callback and validates the output.
    */
   protected async executeAndValidateCallback(params: OIDCCallbackParams): Promise<OIDCResponse> {
-    if (!this.callback) {
-      throw new MongoDriverError('');
-    }
     // With no token in the cache we use the request callback.
     const result = await this.callback(params);
     // Validate that the result returned by the callback is acceptable. If it is not

@@ -101,7 +101,6 @@ export { BatchType } from './bulk/common';
 export { AutoEncryptionLoggerLevel } from './client-side-encryption/auto_encrypter';
 export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
 export { Workflow } from './cmap/auth/mongodb_oidc';
-export type { TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
 export { CURSOR_FLAGS } from './cursor/abstract_cursor';
@@ -259,6 +258,7 @@ export type {
   OIDCCallbackParams,
   OIDCResponse
 } from './cmap/auth/mongodb_oidc';
+export type { TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 export type {
   MessageHeader,
   OpCompressedRequest,
