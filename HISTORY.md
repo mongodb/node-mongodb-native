@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.6.1](https://github.com/mongodb/node-mongodb-native/compare/v6.6.0...v6.6.1) (2024-05-06)
+
+
+### Bug Fixes
+
+* **NODE-6151:** MongoClient connect does not keep Node.js running ([#4101](https://github.com/mongodb/node-mongodb-native/issues/4101)) ([7e0d9e6](https://github.com/mongodb/node-mongodb-native/commit/7e0d9e689859e20ad0fd7aae047fc349e24355c9))
+
 ## [6.6.0](https://github.com/mongodb/node-mongodb-native/compare/v6.5.0...v6.6.0) (2024-05-02)
 
 
