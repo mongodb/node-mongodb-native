@@ -103,10 +103,4 @@ export class Timeout extends Promise<never> {
       typeof timeout.then === 'function'
     );
   }
-
-  static min(duration1: number, duration2: number): number {
-    if (duration1 === 0) return duration2;
-    if (duration2 === 0) return duration1;
-    return Math.min(duration1, duration2);
-  }
 }

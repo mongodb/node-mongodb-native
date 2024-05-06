@@ -38,6 +38,7 @@ import { Timeout, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
+  csotMin,
   type EventEmitterWithState,
   HostAddress,
   List,
@@ -462,9 +463,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const timeout = timeoutMS != null ? Timeout.expires(timeoutMS) : undefined;
     const serverSelectionTimeoutMS = this.s.serverSelectionTimeoutMS;
     const serverSelectionTimeout =
-      timeoutMS != null
-        ? Timeout.expires(Timeout.min(timeoutMS, serverSelectionTimeoutMS))
-        : undefined;
+      timeoutMS != null ? Timeout.expires(csotMin(timeoutMS, serverSelectionTimeoutMS)) : undefined;
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const selectServerOptions = {
       operationName: 'ping',
