@@ -55,7 +55,7 @@ export interface OIDCResponse {
  * @public
  */
 export interface OIDCCallbackParams {
-  callbackTimeoutMS: number;
+  timeoutContext: AbortSignal;
   version: 1;
   idpInfo?: IdPInfo;
   refreshToken?: string;
