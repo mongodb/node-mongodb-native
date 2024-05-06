@@ -61,12 +61,16 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
+  /** A user provided OIDC machine callback function. */
   OIDC_CALLBACK?: OIDCCallbackFunction;
+  /** A user provided OIDC human interacted callback function. */
   OIDC_HUMAN_CALLBACK?: OIDCCallbackFunction;
+  /** The OIDC environment. Note that 'test' is for internal use only. */
   ENVIRONMENT?: 'test' | 'azure' | 'gcp';
+  /** Allowed hosts that OIDC auth can connect to. */
   ALLOWED_HOSTS?: string[];
+  /** The resource token for OIDC auth in Azure and GCP. */
   TOKEN_RESOURCE?: string;
-  TOKEN_CLIENT_ID?: string;
 }
 
 /** @public */

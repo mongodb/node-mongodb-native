@@ -18,8 +18,15 @@ const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
  * @public
  */
 export interface IdPInfo {
+  /**
+   * A URL which describes the Authentication Server. This identifier should
+   * be the iss of provided access tokens, and be viable for RFC8414 metadata
+   * discovery and RFC9207 identification.
+   */
   issuer: string;
+  /** A unique client ID for this OIDC client. */
   clientId: string;
+  /** A list of additional scopes to request from IdP. */
   requestScopes?: string[];
 }
 
@@ -29,8 +36,11 @@ export interface IdPInfo {
  * @public
  */
 export interface IdPServerResponse {
+  /** The OIDC access token. */
   accessToken: string;
+  /** The time when the access token expires. For future use. */
   expiresInSeconds?: number;
+  /** The refresh token, if applicable, to be used by the callback to request a new token from the issuer. */
   refreshToken?: string;
 }
 
@@ -40,8 +50,11 @@ export interface IdPServerResponse {
  * @public
  */
 export interface OIDCResponse {
+  /** The OIDC access token. */
   accessToken: string;
+  /** The time when the access token expires. For future use. */
   expiresInSeconds?: number;
+  /** The refresh token, if applicable, to be used by the callback to request a new token from the issuer. */
   refreshToken?: string;
 }
 
@@ -55,9 +68,15 @@ export interface OIDCResponse {
  * @public
  */
 export interface OIDCCallbackParams {
+  /** Optional username. */
+  username?: string;
+  /** The context in which to timeout the OIDC callback. */
   timeoutContext: AbortSignal;
+  /** The current OIDC API version. */
   version: 1;
+  /** The IdP information returned from the server. */
   idpInfo?: IdPInfo;
+  /** The refresh token, if applicable, to be used by the callback to request a new token from the issuer. */
   refreshToken?: string;
 }
 
