@@ -19,9 +19,9 @@ import {
   tokenCache
 } from '../../../../src/client-side-encryption/providers/azure';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import * as utils from '../../../../src/client-side-encryption/providers/utils';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as utils from '../../../../src/utils';
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
