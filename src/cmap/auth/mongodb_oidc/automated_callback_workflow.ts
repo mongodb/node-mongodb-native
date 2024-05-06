@@ -88,7 +88,7 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
    */
   protected async fetchAccessToken(): Promise<OIDCResponse> {
     const params: OIDCCallbackParams = {
-      timeoutContext: AbortSignal.timeout(AUTOMATED_TIMEOUT_MS),
+      callbackTimeoutMS: AUTOMATED_TIMEOUT_MS,
       version: OIDC_VERSION
     };
     return await this.executeAndValidateCallback(params);

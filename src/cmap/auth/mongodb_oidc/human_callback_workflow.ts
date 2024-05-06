@@ -114,7 +114,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
    */
   private async fetchAccessToken(idpInfo: IdPInfo, refreshToken?: string): Promise<OIDCResponse> {
     const params: OIDCCallbackParams = {
-      timeoutContext: AbortSignal.timeout(HUMAN_TIMEOUT_MS),
+      callbackTimeoutMS: HUMAN_TIMEOUT_MS,
       version: OIDC_VERSION,
       idpInfo: idpInfo
     };
