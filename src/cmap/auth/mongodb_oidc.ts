@@ -48,6 +48,10 @@ export interface OIDCResponse {
 /**
  * The parameters that the driver provides to the user supplied
  * human or machine callback.
+ *
+ * The version number is used to communicate callback API changes that are not breaking but that
+ * users may want to know about and review their implementation. Users may wish to check the version
+ * number and throw an error if their expected version number and the one provided do not match.
  * @public
  */
 export interface OIDCCallbackParams {
