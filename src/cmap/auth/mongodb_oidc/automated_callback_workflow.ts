@@ -68,10 +68,10 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     }
     let response: OIDCResponse;
     const now = Date.now();
-    // Ensure a delay between invokations to not overload the callback.
     if (now - this.lastInvocationTime > CALLBACK_DEBOUNCE_MS) {
       response = await this.fetchAccessToken(credentials);
     } else {
+      // Ensure a delay between invokations to not overload the callback.
       const responses = await Promise.all([
         setTimeout(CALLBACK_DEBOUNCE_MS - (now - this.lastInvocationTime)),
         this.fetchAccessToken(credentials)
