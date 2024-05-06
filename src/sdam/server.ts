@@ -31,7 +31,6 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerClosedError,
   type MongoServerError,
@@ -41,7 +40,6 @@ import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
-import { TimeoutError } from '../timeout';
 import { isTransactionCommand } from '../transactions';
 import {
   type EventEmitterWithState,
@@ -320,28 +318,15 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         this.decrementOperationCount();
         if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
         throw checkoutError;
+      } finally {
+        options.serverSelectionTimeout?.clear();
       }
     }
 
     try {
       try {
-        if (finalOptions.operationTimeout) {
-          finalOptions.operationTimeout.throwIfExpired();
-          return await Promise.race([
-            finalOptions.operationTimeout,
-            conn.command(ns, cmd, finalOptions)
-          ]);
-        } else {
-          return await conn.command(ns, cmd, finalOptions, responseType);
-        }
+        return await conn.command(ns, cmd, finalOptions, responseType);
       } catch (commandError) {
-        if (TimeoutError.is(commandError))
-          throw this.decorateCommandError(
-            conn,
-            cmd,
-            finalOptions,
-            new MongoOperationTimeoutError('Timed out during command execution')
-          );
         throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
       }
     } catch (operationError) {
