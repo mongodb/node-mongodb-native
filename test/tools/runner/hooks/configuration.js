@@ -140,6 +140,7 @@ const testConfigBeforeHook = async function () {
     .command({ getParameter: '*' })
     .catch(error => ({ noReply: error }));
 
+  console.log(process.env);
   this.configuration = new TestConfiguration(
     loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
     context
