@@ -46,6 +46,10 @@ export class Timeout extends Promise<never> {
     return this.start + this.duration - Math.trunc(performance.now());
   }
 
+  get timeElapsed(): number {
+    return Math.trunc(performance.now()) - this.start;
+  }
+
   /** Create a new timeout that expires in `duration` ms */
   private constructor(executor: Executor = () => null, duration: number, unref = false) {
     let reject!: Reject;
