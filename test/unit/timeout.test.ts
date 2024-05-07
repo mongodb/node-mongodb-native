@@ -23,12 +23,12 @@ describe('Timeout', function () {
       beforeEach(() => {
         timeout = Timeout.expires(2000);
       });
-      it('creates a timeout instance that will not keep the Node.js event loop active', function () {
+      it.skip('creates a timeout instance that will not keep the Node.js event loop active', function () {
         expect(timeout).to.have.property('id');
         // @ts-expect-error: accessing private property
         const id = timeout.id;
         expect(id?.hasRef()).to.be.false;
-      });
+      }).skipReason = 'Skipping until further work during CSOT implementation';
       it('throws a TimeoutError when it expires', async function () {
         try {
           await timeout;

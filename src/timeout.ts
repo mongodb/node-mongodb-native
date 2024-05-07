@@ -47,7 +47,7 @@ export class Timeout extends Promise<never> {
   }
 
   /** Create a new timeout that expires in `duration` ms */
-  private constructor(executor: Executor = () => null, duration: number) {
+  private constructor(executor: Executor = () => null, duration: number, unref = false) {
     let reject!: Reject;
 
     if (duration < 0) {
@@ -69,8 +69,8 @@ export class Timeout extends Promise<never> {
         this.timedOut = true;
         reject(new TimeoutError(`Expired after ${duration}ms`));
       }, this.duration);
-      // Ensure we do not keep the Node.js event loop running
-      if (typeof this.id.unref === 'function') {
+      if (typeof this.id.unref === 'function' && unref) {
+        // Ensure we do not keep the Node.js event loop running
         this.id.unref();
       }
     }
@@ -88,8 +88,8 @@ export class Timeout extends Promise<never> {
     if (this.timedOut) throw new TimeoutError('Timed out');
   }
 
-  public static expires(durationMS: number): Timeout {
-    return new Timeout(undefined, durationMS);
+  public static expires(durationMS: number, unref?: boolean): Timeout {
+    return new Timeout(undefined, durationMS, unref);
   }
 
   static is(timeout: unknown): timeout is Timeout {
