@@ -18,77 +18,85 @@ describe('CSOT spec unit tests', function () {
     await client?.close();
   });
 
-  it('Operations should ignore waitQueueTimeoutMS if timeoutMS is also set.', async function () {
-    client = this.configuration.newClient({ waitQueueTimeoutMS: 999999, timeoutMS: 1000 });
-    sinon.spy(Timeout, 'expires');
+  context('Server Selection and Connection Checkout', function () {
+    it('Operations should ignore waitQueueTimeoutMS if timeoutMS is also set.', async function () {
+      client = this.configuration.newClient({ waitQueueTimeoutMS: 999999, timeoutMS: 1000 });
+      sinon.spy(Timeout, 'expires');
 
-    await client.db('db').collection('collection').insertOne({ x: 1 });
+      await client.db('db').collection('collection').insertOne({ x: 1 });
 
-    expect(Timeout.expires).to.have.been.calledWith(1000);
-    expect(Timeout.expires).to.not.have.been.calledWith(999999);
-  });
+      expect(Timeout.expires).to.have.been.calledWith(1000);
+      expect(Timeout.expires).to.not.have.been.calledWith(999999);
+    });
 
-  it('If timeoutMS is set for an operation, the remaining timeoutMS value should apply to connection checkout after a server has been selected.', async function () {
-    client = this.configuration.newClient({ timeoutMS: 1000 });
-    // Spy on connection checkout and pull options argument
-    const checkoutSpy = sinon.spy(ConnectionPool.prototype, 'checkOut');
-    const remainingTimeSpy = sinon.spy(Timeout.prototype, 'remainingTime', ['get']);
+    it('If timeoutMS is set for an operation, the remaining timeoutMS value should apply to connection checkout after a server has been selected.', async function () {
+      client = this.configuration.newClient({ timeoutMS: 1000 });
+      // Spy on connection checkout and pull options argument
+      const checkoutSpy = sinon.spy(ConnectionPool.prototype, 'checkOut');
+      const remainingTimeSpy = sinon.spy(Timeout.prototype, 'remainingTime', ['get']);
 
-    await client.db('db').collection('collection').insertOne({ x: 1 });
-    const remainingTimeFirstCall = remainingTimeSpy.get.firstCall;
+      await client.db('db').collection('collection').insertOne({ x: 1 });
+      const remainingTimeFirstCall = remainingTimeSpy.get.firstCall;
 
-    expect(checkoutSpy).to.have.been.calledOnce;
-    expect(checkoutSpy.firstCall.args[0].timeout).to.exist;
-    expect(checkoutSpy.firstCall.args[0].timeout.duration).to.be.approximately(
-      remainingTimeFirstCall.returnValue,
-      3
+      expect(checkoutSpy).to.have.been.calledOnce;
+      expect(checkoutSpy.firstCall.args[0].timeout).to.exist;
+      expect(checkoutSpy.firstCall.args[0].timeout.duration).to.be.approximately(
+        remainingTimeFirstCall.returnValue,
+        3
+      );
+    });
+
+    it('If timeoutMS is not set for an operation, waitQueueTimeoutMS should apply to connection checkout after a server has been selected.', async function () {
+      client = this.configuration.newClient({ waitQueueTimeoutMS: 123456 });
+
+      const checkoutSpy = sinon.spy(ConnectionPool.prototype, 'checkOut');
+      const selectServerSpy = sinon.spy(Topology.prototype, 'selectServer');
+      const expiresSpy = sinon.spy(Timeout, 'expires');
+
+      await client.db('db').collection('collection').insertOne({ x: 1 });
+      expect(checkoutSpy).to.have.been.calledAfter(selectServerSpy);
+
+      expect(expiresSpy).to.have.been.calledWith(123456);
+    });
+
+    /* eslint-disable @typescript-eslint/no-empty-function */
+    context.skip(
+      'If a new connection is required to execute an operation, min(remaining computedServerSelectionTimeout, connectTimeoutMS) should apply to socket establishment.',
+      () => {}
+    ).skipReason =
+      'TODO(DRIVERS-2347): Requires this ticket to be implemented before we can assert on connection CSOT behaviour';
+
+    context(
+      'For drivers that have control over OCSP behavior, min(remaining computedServerSelectionTimeout, 5 seconds) should apply to HTTP requests against OCSP responders.',
+      () => {}
     );
   });
 
-  it('If timeoutMS is not set for an operation, waitQueueTimeoutMS should apply to connection checkout after a server has been selected.', async function () {
-    client = this.configuration.newClient({ waitQueueTimeoutMS: 123456 });
-
-    const checkoutSpy = sinon.spy(ConnectionPool.prototype, 'checkOut');
-    const selectServerSpy = sinon.spy(Topology.prototype, 'selectServer');
-    const expiresSpy = sinon.spy(Timeout, 'expires');
-
-    await client.db('db').collection('collection').insertOne({ x: 1 });
-    expect(checkoutSpy).to.have.been.calledAfter(selectServerSpy);
-
-    expect(expiresSpy).to.have.been.calledWith(123456);
-  });
-
-  /* eslint-disable @typescript-eslint/no-empty-function */
-  context.skip(
-    'If a new connection is required to execute an operation, min(remaining computedServerSelectionTimeout, connectTimeoutMS) should apply to socket establishment.',
-    () => {}
-  ).skipReason =
-    'TODO(DRIVERS-2347): Requires this ticket to be implemented before we can assert on connection CSOT behaviour';
-
-  context(
-    'For drivers that have control over OCSP behavior, min(remaining computedServerSelectionTimeout, 5 seconds) should apply to HTTP requests against OCSP responders.',
-    () => {}
-  );
-
-  context.skip(
-    'If timeoutMS is unset, operations fail after two non-consecutive socket timeouts.',
-    () => {}
-  ).skipReason =
+  context.skip('Socket timeouts', function () {
+    context(
+      'If timeoutMS is unset, operations fail after two non-consecutive socket timeouts.',
+      () => {}
+    );
+  }).skipReason =
     'TODO(NODE-5682): Add CSOT support for socket read/write at the connection layer for CRUD APIs';
 
-  context.skip(
-    'The remaining timeoutMS value should apply to HTTP requests against KMS servers for CSFLE.',
-    () => {}
-  ).skipReason = 'TODO(NODE-5686): Add CSOT support to client side encryption';
+  context.skip('Client side encryption', function () {
+    context(
+      'The remaining timeoutMS value should apply to HTTP requests against KMS servers for CSFLE.',
+      () => {}
+    );
 
-  context.skip(
-    'The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.',
-    () => {}
-  ).skipReason = 'TODO(NODE-5686): Add CSOT support to client side encryption';
+    context(
+      'The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.',
+      () => {}
+    );
+  }).skipReason = 'TODO(NODE-5686): Add CSOT support to client side encryption';
 
-  context.skip(
-    'When doing minPoolSize maintenance, connectTimeoutMS is used as the timeout for socket establishment.',
-    () => {}
-  ).skipReason = 'TODO(NODE-6091): Implement CSOT logic for Background Connection Pooling';
+  context.skip('Background Connection Pooling', function () {
+    context(
+      'When doing minPoolSize maintenance, connectTimeoutMS is used as the timeout for socket establishment.',
+      () => {}
+    );
+  }).skipReason = 'TODO(NODE-6091): Implement CSOT logic for Background Connection Pooling';
   /* eslint-enable @typescript-eslint/no-empty-function */
 });
