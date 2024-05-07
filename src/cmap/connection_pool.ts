@@ -28,7 +28,7 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Timeout, TimeoutError } from '../timeout';
-import { type Callback, List, makeCounter, promiseWithResolvers } from '../utils';
+import { type Callback, csotMin, List, makeCounter, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -370,7 +370,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     if (options?.timeout) {
       // CSOT enabled
       // Determine if we're using the timeout passed in or a new timeout
-      if (options.timeout.duration === 0 || serverSelectionTimeoutMS < options.timeout.duration) {
+      if (
+        csotMin(options.timeout.duration, serverSelectionTimeoutMS) === serverSelectionTimeoutMS
+      ) {
         timeout = Timeout.expires(serverSelectionTimeoutMS - options.timeout.timeElapsed);
       } else {
         timeout = options.timeout;
