@@ -63,10 +63,7 @@ export abstract class AbstractOperation<TResult = any> {
   options: OperationOptions;
 
   /** @internal */
-  timeout?: Timeout;
-
-  /** @internal */
-  serverSelectionTimeout?: Timeout;
+  operationTimeout?: Timeout;
 
   [kSession]: ClientSession | undefined;
 
@@ -85,7 +82,7 @@ export abstract class AbstractOperation<TResult = any> {
     this.trySecondaryWrite = false;
 
     if (options.timeoutMS != null) {
-      this.timeout = Timeout.expires(options.timeoutMS);
+      this.operationTimeout = Timeout.expires(options.timeoutMS);
     }
   }
 

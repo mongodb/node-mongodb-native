@@ -152,10 +152,8 @@ export async function executeOperation<
     selector = readPreference;
   }
 
-  const timeout = operation.timeout;
+  const timeout = operation.operationTimeout;
   timeout?.throwIfExpired();
-  // TODO: construct serverSelection timeout here, pass it into topology.selectServer and store on
-  // operation for use in operation.execute when we have to perform connection checkout
 
   const server = await topology.selectServer(selector, {
     session,
@@ -271,7 +269,7 @@ async function retryOperation<
   // select a new server, and attempt to retry the operation
   const server = await topology.selectServer(selector, {
     session,
-    timeout: operation.serverSelectionTimeout,
+    timeout: operation.operationTimeout,
     operationName: operation.commandName,
     previousServer
   });

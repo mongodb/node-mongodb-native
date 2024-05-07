@@ -319,7 +319,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
         throw checkoutError;
       } finally {
-        options.serverSelectionTimeout?.clear();
+        options.operationTimeout?.clear();
       }
     }
 

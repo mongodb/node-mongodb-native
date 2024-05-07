@@ -460,14 +460,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     const timeoutMS = this.client.options.timeoutMS;
-    const timeout = timeoutMS != null ? Timeout.expires(timeoutMS) : undefined;
-    const serverSelectionTimeoutMS = this.s.serverSelectionTimeoutMS;
-    const serverSelectionTimeout =
-      timeoutMS != null ? Timeout.expires(csotMin(timeoutMS, serverSelectionTimeoutMS)) : undefined;
+    const operationTimeout = timeoutMS != null ? Timeout.expires(timeoutMS) : undefined;
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const selectServerOptions = {
       operationName: 'ping',
-      timeout: serverSelectionTimeout,
+      timeout: operationTimeout,
       ...options
     };
     try {
@@ -478,11 +475,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
       if (!skipPingOnConnect && server && this.s.credentials) {
-        await server.command(
-          ns('admin.$cmd'),
-          { ping: 1 },
-          { operationTimeout: timeout, serverSelectionTimeout }
-        );
+        await server.command(ns('admin.$cmd'), { ping: 1 }, { operationTimeout });
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
         this.emit(Topology.CONNECT, this);
