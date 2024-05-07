@@ -318,8 +318,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         this.decrementOperationCount();
         if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
         throw checkoutError;
-      } finally {
-        options.operationTimeout?.clear();
       }
     }
 

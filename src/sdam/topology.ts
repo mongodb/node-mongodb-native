@@ -38,7 +38,6 @@ import { Timeout, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
-  csotMin,
   type EventEmitterWithState,
   HostAddress,
   List,
