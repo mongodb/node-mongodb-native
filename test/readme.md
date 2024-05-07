@@ -28,14 +28,14 @@ Below is a summary of the types of test automation in this repo.
 | Unit                    | `/test/unit`        | The unit tests test individual pieces of code, typically functions. These tests do **not** interact with a real database, so mocks are used instead. <br><br>The unit test directory mirrors the `/src` directory structure with test file names matching the source file names of the code they test.                                                                                                                                                                                          | `npm run check:unit`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Integration             | `/test/integration` | The integration tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. <br><br> The integration test directory follows the `test/spec` directory structure representing the different functional areas of the driver. <br><br> **Note:** The `.gitkeep` files are intentionally left to ensure that this directory structure is preserved even as the actual test files are moved around. | `npm run check:test`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Benchmark               | `/test/benchmarks`  | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance.                                                                                                                                                                                                                                                                                                                                                                                | `npm run check:bench`                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Specialized Environment | `/test/manual`      | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br><br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests have a special Evergreen configuration and run in isolation from the other tests.                                                                                                                                                  | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OSCP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization |
+| Specialized Environment | `/test/manual`      | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br><br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests have a special Evergreen configuration and run in isolation from the other tests.                                                                                                                                                  | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OCSP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization |
 | TypeScript Definition   | `/test/types`       | The TypeScript definition tests verify the type definitions are correct.                                                                                                                                                                                                                                                                                                                                                                                                                        | `npm run check:tsd`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| Github Actions          | `/test/action`      | Tests that run as Github actions such as dependency checking.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Currently only `npm run check:dependencies` but could be expanded to more in the future.                                                                                                                                                                                                                                                                                                                                                                          |
-| Code Examples           | `/test/integration/node-specific/examples`    | Code examples that are also paired with tests that show they are working examples.                                                                                                                                                                                                                                                                                                                                                                                                              | Currently `npm run check:lambda` to test the AWS Lambda example with default auth and `npm run check:lambda:aws` to test the AWS Lambda example with AWS auth.                                                                                                                                                                                                                                                                                                    |
+| GitHub Actions          | `/test/action`      | Tests that run as GitHub Actions such as dependency checking.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Currently, only `npm run check:dependencies` but could be expanded to more in the future.                                                                                                                                                                                                                                                                                                                                                                          |
+| Code Examples           | `/test/integration/node-specific/examples`    | Code examples that are also paired with tests that show they are working examples.                                                                                                                                                                                                                                                                                                                                                                                                              | Currently, `npm run check:lambda` to test the AWS Lambda example with default auth and `npm run check:lambda:aws` to test the AWS Lambda example with AWS auth.                                                                                                                                                                                                                                                                                                    |
 
 ### Spec Tests
 
-All of the MongoDB drivers follow the same [specifications (specs)][driver-specs]. Each spec has tests associated with it. Some of the tests are prose (written, descriptive) tests, which must be implemented on a case by case basis by the developers on the driver teams. Other tests are written in a standardized form as YAML and converted to JSON, which can be read by the specialized spec test runners that are implemented in each driver.
+All of the MongoDB drivers follow the same [specifications (specs)][driver-specs]. Each spec has tests associated with it. Some of the tests are prose (written, descriptive) tests, which must be implemented on a case-by-case basis by the developers on the driver teams. Other tests are written in a standardized form as YAML and converted to JSON, which can be read by the specialized spec test runners that are implemented in each driver.
 
 The input test specifications are stored in `test/spec`.
 
@@ -45,9 +45,17 @@ The actual implementations of the spec tests can be unit tests or integration te
 
 The easiest way to get started running the tests locally is to start a standalone server and run all of the tests.
 
-Start a mongod standalone with our [cluster_setup.sh](tools/cluster_setup.sh) script: `./test/tools/cluster_setup.sh server`.
+Start a `mongod` standalone with our [cluster_setup.sh](tools/cluster_setup.sh) script:
 
-Then run the tests: `npm test`.
+```sh
+./test/tools/cluster_setup.sh server
+```
+
+Then run the tests:
+
+```sh
+npm test
+```
 
 > **Note:** the command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
@@ -55,10 +63,10 @@ The output will show how many tests passed, failed, and are pending. Tests that 
 
 In the following subsections, we'll dig into the details of running the tests.
 
-### Testing With Authorization Enabled
+### Testing With Authorization-Enabled
 
-By default, the integration tests run with auth enabled and the cluster_setup.sh script defaults to starting servers with auth enabled.  Tests can be run locally without auth by setting the environment
-variable `AUTH` to the value of `noauth`.  This must be a two step process of starting a server without auth enabled and then running the tests without auth enabled.
+By default, the integration tests run with auth-enabled and the `cluster_setup.sh` script defaults to starting servers with auth-enabled. Tests can be run locally without auth by setting the environment
+variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
 
 ```shell
 AUTH='noauth' ./test/tools/cluster_setup.sh <server>
@@ -68,28 +76,68 @@ AUTH='noauth' npm run check:test
 
 As we mentioned earlier, the tests check the topology of the MongoDB server being used and run the tests associated with that topology. Tests that don't have a matching topology will be skipped.
 
-In the steps above, we started a standalone server: `./test/tools/cluster_setup.sh server`.
+In the steps above, we started a standalone server:
 
-You can use the same [cluster_setup.sh](tools/cluster_setup.sh) script to start a replica set or sharded cluster by passing the appropriate option: `./test/tools/cluster_setup.sh replica_set` or
-`./test/tools/cluster_setup.sh sharded_cluster`. If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated maxproc steps.)
+```sh
+./test/tools/cluster_setup.sh server
+```
 
-The [cluster_setup.sh](tools/cluster_setup.sh) script automatically stores the files associated with the MongoDB server in the `data` directory, which is stored at the top level of this repository.
+You can use the same [cluster_setup.sh](tools/cluster_setup.sh) script to start a replica set or sharded cluster by passing the appropriate option:
+```sh
+./test/tools/cluster_setup.sh replica_set
+```
+or
+```sh
+./test/tools/cluster_setup.sh sharded_cluster
+```
+If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated `maxproc` steps.)
+
+The [cluster_setup.sh](tools/cluster_setup.sh) script automatically stores the files associated with the MongoDB server in the `data` directory, which is stored at the top-level of this repository.
 You can delete this directory if you want to ensure you're running a clean configuration. If you delete the directory, the associated database server will be stopped, and you will need to run [cluster_setup.sh](tools/cluster_setup.sh) again.
 
-You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment. For example, for a standalone server, you might use: `MONGODB_URI=mongodb://localhost:27017 npm test`. For a replica set, you might use: `MONGODB_URI=mongodb://localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs npm test`.
+You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment. For example, for a standalone server, you might use:
+
+```sh
+MONGODB_URI=mongodb://localhost:27017 npm test
+```
+
+For a replica set, you might use: 
+
+```sh
+MONGODB_URI=mongodb://localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs npm test
+```
 
 ### Running Individual Tests
 
-The easiest way to run a single test is by appending `.only()` to the test context you want to run. For example, you could update a test function to be `it.only(‘cool test’, function() {})`. Then
-run the test using `npm run check:test` for a functional or integration test or `npm run check:unit` for a unit test. See [Mocha's documentation][mocha-only] for more detailed information on `.only()`.
+The easiest way to run a single test is by appending `.only()` to the test context you want to run. For example, you could update a test function to be:
 
-Another way to run a single test is to use Mocha's `grep` flag. For functional or integration tests, run `npm run check:test -- -g 'test name'`. For unit tests, run `npm run check:unit -- -g 'test name'`. See the [Mocha documentation][mocha-grep] for information on the `grep` flag.
+```JavaScript
+it.only('cool test', function() {})
+```
+
+Then, run the test using `npm run check:test` for a functional or integration test or 
+`npm run check:unit`
+for a unit test. See [Mocha's documentation][mocha-only] for more detailed information on `.only()`.
+
+Another way to run a single test is to use Mocha's `grep` flag. For functional or integration tests, run:
+```sh
+npm run check:test -- -g <test name>
+``` 
+For unit tests, run:
+```sh
+npm run check:unit -- -g <test name>
+```
+See the [Mocha documentation][mocha-grep] for information on the `grep` flag.
 
 ## Running the Tests in Evergreen
 
-[Evergreen][evergreen-wiki] is the continuous integration (CI) system we use. Evergreen builds are automatically run whenever a pull request is created or when commits are pushed to particular branches (e.g., main, 4.0, and 3.6).
+[Evergreen][evergreen-wiki] is the continuous integration (CI) system we use. Evergreen builds are automatically run whenever a pull request is created or when commits are pushed to particular branches (e.g., `main`, `4.0`, and `3.6`).
 
-Each Evergreen build runs the test suite against a variety of build variants that include a combination of topologies, special environments, and operating systems. By default, commits in pull requests only run a subset of the build variants in order to save time and resources. To configure a build, update `.evergreen/config.yml.in` and then generate a new Evergreen config via `node .evergreen/generate_evergreen_tasks.js`.
+Each Evergreen build runs the test suite against a variety of build variants that include a combination of topologies, special environments, and operating systems. By default, commits in pull requests only run a subset of the build variants in order to save time and resources. To configure a build, update `.evergreen/config.yml.in` and then generate a new Evergreen config via: 
+
+```sh
+node .evergreen/generate_evergreen_tasks.js
+```
 
 ### Manually Kicking Off Evergreen Builds
 
@@ -117,11 +165,15 @@ Once you have the Evergreen CLI setup, you are ready to run a build. Keep in min
 
 1. In a terminal, navigate to your node driver directory:
 
-   `cd node-mongodb-native`
+   ```sh
+   cd node-mongodb-native
+   ```
 
-1. Use the Evergreen `patch` command. `-y` skips the confirmation dialog. `-u` includes uncommitted changes. `-p [project name]` specifies the Evergreen project. --browse opens the patch URL in your browser.
+1. Use the Evergreen `patch` command. `-y` skips the confirmation dialog. `-u` includes uncommitted changes. `-p [project name]` specifies the Evergreen project. `--browse` opens the patch URL in your browser.
 
-   `evergreen patch -y -u -p mongo-node-driver-next --browse`
+   ```sh
+   evergreen patch -y -u -p mongo-node-driver-next --browse
+   ```
 
 1. In your browser, select the build variants and tasks to run.
 
@@ -145,7 +197,7 @@ modify the steps to work with existing Node projects.
 
 1. Navigate to a new directory and create a new Node project by running `npm init` in a terminal and working through the interactive prompts. A new file named `package.json` will be created for you.
 1. In `package.json`, create a new dependency for `mongodb` that points to your local copy of the driver. For example:
-   ```
+   ```JSON
    "dependencies": {
      "mongodb": "/path-to-your-copy-of-the-driver-repo/node-mongodb-native"
    }
@@ -161,19 +213,19 @@ modify the steps to work with existing Node projects.
 
 ### Framework
 
-We use mocha to construct our test suites and chai to assert expectations.
+We use `mocha` to construct our test suites and `chai` to assert expectations.
 
 Some special notes on how mocha works with our testing setup:
 
 - `before` hooks will run even if a test is skipped by the environment it runs on.
-  - So, for example, if your before hook does logic that can only run on a certain server version you can't depend on your test block metadata to filter for that.
+  - So, for example, if your `before` hook does logic that can only run on a certain server version you can't depend on your test block metadata to filter for that.
 - `after` hooks cannot be used to clean up clients because the session leak checker currently runs in an `afterEach` hook, which would be executed before any `after` hook has a chance to run
 
 ### Skipping Tests
 
 Not all tests are able to run in all environments and some are unable to run at all due to known bugs.
 
-When marking a test to be skiped, be sure to include a `skipReason`, so that it can be added to the test run printout.
+When marking a test to be skipped, be sure to include a `skipReason`, so that it can be added to the test run printout.
 
 ```javascript
 // skipping an individual test
@@ -196,15 +248,23 @@ We recommend using a different terminal for each specialized environment to avoi
 
 Before you begin any of the subsections below, clone the [drivers-evergreen-tools repo](https://github.com/mongodb-labs/drivers-evergreen-tools.git).
 
-We recommend creating an environment variable named `DRIVERS_TOOLS` that stores the path to your local copy of the driver-evergreen-tools repo: `export DRIVERS_TOOLS="/path/to/your/copy/of/drivers-evergreen-tools"`.
+We recommend creating an environment variable named `DRIVERS_TOOLS` that stores the path to your local copy of the `driver-evergreen-tools` repo:
+
+```sh
+export DRIVERS_TOOLS="/path/to/your/copy/of/drivers-evergreen-tools"
+```
 
 ### Serverless
 
 The following steps will walk you through how to create and test a MongoDB Serverless instance.
 
-1. Create the following environment variables using a command like `export PROJECT="node-driver"`.
+1. Create the following environment variables using a command like:
 
-   > Note: MongoDB employees can pull these values from the Evergreen project's configuration.
+   ```sh
+   export PROJECT="node-driver"
+   ```
+
+   > **Note:** MongoDB employees can pull these values from the Evergreen project's configuration.
 
    | Variable Name                | Description                                                                                                      |
    | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -252,7 +312,11 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
 1. Source the environment variables using a command like `source serverless.env`.
 
-1. Export **each** of the environment variables that were created in `serverless.env`. For example: `export SINGLE_MONGOS_LB_URI`.
+1. Export **each** of the environment variables that were created in `serverless.env`. For example:
+
+   ```sh
+   export SINGLE_MONGOS_LB_URI
+   ```
 
 1. Comment out the line in `.evergreen/run-serverless-tests.sh` that sources `install-dependencies.sh`.
 
@@ -264,32 +328,46 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
 The following steps will walk you through how to start and test a load balancer.
 
-1. Start a sharded cluster with two mongos, so you have a URI similar to `MONGODB_URI=mongodb://host1,host2/`. The server must be version 5.2.0 or higher.
+1. Start a sharded cluster with two `mongos`, so you have a URI similar to `MONGODB_URI=mongodb://host1,host2/`. The server must be version 5.2.0 or higher.
     Create the config server:
-    `mongod --configsvr --replSet test --dbpath config1 --bind_ip localhost --port 27217`
+    ```sh
+    mongod --configsvr --replSet test --dbpath config1 --bind_ip localhost --port 27217
+    ```
 
     Initiate the config server in the shell:
-    ```shell
+    ```sh
     mongosh "mongodb://localhost:27217" --eval "rs.initiate( { _id: 'test', configsvr: true, members: [ { _id: 0, host: 'localhost:27217' } ] })"
     ```
 
     Create shard replica sets:
-    `mongod --shardsvr --replSet testing  --dbpath repl1 --bind_ip localhost --port 27218 --setParameter enableTestCommands=true`
-    `mongod --shardsvr --replSet testing  --dbpath repl2 --bind_ip localhost --port 27219 --setParameter enableTestCommands=true`
-    `mongod --shardsvr --replSet testing  --dbpath repl3 --bind_ip localhost --port 27220 --setParameter enableTestCommands=true`
+    ```sh
+    mongod --shardsvr --replSet testing  --dbpath repl1 --bind_ip localhost --port 27218 --setParameter enableTestCommands=true
+    ```
+    ```sh
+    mongod --shardsvr --replSet testing  --dbpath repl2 --bind_ip localhost --port 27219 --setParameter enableTestCommands=true
+    ```
+    ```sh
+    mongod --shardsvr --replSet testing  --dbpath repl3 --bind_ip localhost --port 27220 --setParameter enableTestCommands=true
+    ```
 
     Initiate replica set in the shell:
-    ```shell
+    ```sh
     mongosh "mongodb://localhost:27218" --eval "rs.initiate( { _id: 'testing', members: [ { _id: 0, host: 'localhost:27218' }, { _id: 1, host: 'localhost:27219' }, { _id: 2, host: 'localhost:27220' }] })"
     ```
 
-    Create two mongoses running on ports 27017 and 27018:
-    `mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter --setParameter loadBalancerPort=27050`
-    `mongos --configdb test/localhost:27217 --port 27018 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter --setParameter loadBalancerPort=27051`.
+    Create two `mongos` running on ports `27017` and `27018`:
+    ```sh
+    mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter loadBalancerPort=27050
+    ```
+    ```sh
+    mongos --configdb test/localhost:27217 --port 27018 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter loadBalancerPort=27051
+    ```
 
-    Initiate cluster on mongos in shell:
-    ```shell
+    Initiate cluster on `mongos` in shell:
+    ```sh
     mongosh "mongodb://localhost:27017" --eval "sh.addShard('testing/localhost:27218,localhost:27219,localhost:27220')"
+    ```
+    ```sh
     mongosh "mongodb://localhost:27017" --eval "sh.enableSharding('test')"
     ```
 1. An alternative way to the fully manual cluster setup is to use `mlaunch`:
@@ -304,17 +382,23 @@ The following steps will walk you through how to start and test a load balancer.
    ```
 
    When `mlaunch` has stopped the cluster, navigate to the `data` directory and edit the `.mlaunch_startup` file:
-   - Add `--setParameter \"loadBalancerPort=27050\"` to the first mongos configuration at the bottom of the file.
-   - Add `--setParameter \"loadBalancerPort=27051\"` to the second mongos configuration at the bottom of the file.
+   - Add `--setParameter loadBalancerPort=27050` to the first `mongos` configuration at the bottom of the file.
+   - Add `--setParameter loadBalancerPort=27051` to the second `mongos` configuration at the bottom of the file.
 
    Navigate back up to the root directory where `mlaunch` was initialized and restart:
-   ```shell
+   ```sh
    mlaunch start
    ```
 
-1. Create an environment variable named `MONGODB_URI` that stores the URI of the sharded cluster you just created. For example: `export MONGODB_URI="mongodb://host1,host2/"`
-1. Install the HAProxy load balancer. For those on macOS, you can install HAProxy with `brew install haproxy`.
-1. Start the load balancer by using the [run-load-balancer script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/run-load-balancer.sh) provided in drivers-evergreen-tools.
+1. Create an environment variable named `MONGODB_URI` that stores the URI of the sharded cluster you just created. For example:
+   ```sh
+   export MONGODB_URI="mongodb://host1,host2/"
+   ```
+1. Install the HAProxy load balancer. For those on macOS, you can install HAProxy with:
+   ```sh
+   brew install haproxy
+   ```
+1. Start the load balancer by using the [run-load-balancer script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/run-load-balancer.sh) provided in `drivers-evergreen-tools`.
    ```sh
    $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh start
    ```
@@ -329,9 +413,18 @@ The following steps will walk you through how to start and test a load balancer.
    ```
    A new file name `lb.env` is automatically created.
 1. Source the environment variables using a command like `source lb.env`.
-1. Export **each** of the environment variables that were created in `lb.env`. For example: `export SINGLE_MONGOS_LB_URI`.
-1. Export the `LOAD_BALANCER` environment variable to 'true': `export LOAD_BALANCER='true'`
-1. Disable auth for tests: `export AUTH='noauth'`
+1. Export **each** of the environment variables that were created in `lb.env`. For example:
+   ```sh
+   export SINGLE_MONGOS_LB_URI
+   ```
+1. Export the `LOAD_BALANCER` environment variable to `true`:
+   ```sh
+   export LOAD_BALANCER='true'
+   ```
+1. Disable auth for tests:
+   ```sh
+   export AUTH='noauth'
+   ```
 1. Run the test suite as you normally would:
    ```sh
    npm run check:test
@@ -342,29 +435,32 @@ The following steps will walk you through how to start and test a load balancer.
    $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
    ```
 
-### Client-Side Field Level Encryption (CSFLE)
+### Client-Side Field-Level Encryption (CSFLE)
 
 The following steps will walk you through how to run the tests for CSFLE.
 
 1. Install [MongoDB Client Encryption][npm-csfle] if you haven't already:
-   `npm install mongodb-client-encryption`.  Note: if developing changes in `mongodb-client-encryption`,
+   ```sh
+   npm install mongodb-client-encryption
+   ```   
+   > **Note:** if developing changes in `mongodb-client-encryption`,
    you can link it locally using `etc/tooling/fle.sh`.
 
-1. Create the following environment variables using a command like `export AWS_REGION="us-east-1"`.
+1. Create the following environment variables using a command like:
+   ```sh
+   export AWS_REGION="us-east-1"
+   ```
+   > **Note:** MongoDB employees can pull these values from the Evergreen project's configuration.
 
-   > Note: MongoDB employees can pull these values from the Evergreen project's configuration.
-
-   | Variable Name           | Description                                                                                 |
-   | ----------------------- | ------------------------------------------------------------------------------------------- |
-   | `AWS_ACCESS_KEY_ID`     | The AWS access key ID used to generate KMS messages                                         |
-   | `AWS_SECRET_ACCESS_KEY` | The AWS secret access key used to generate KMS messages                                     |
-   | `AWS_REGION`            | The AWS region where the KMS resides (e.g., `us-east-1`)                                    |
-   | `AWS_CMK_ID`            | The Customer Master Key for the KMS                                                         |
-   | `CSFLE_KMS_PROVIDERS`   | The raw EJSON description of the KMS providers. An example of the format is provided below. |
-   | KMIP_TLS_CA_FILE        | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem
-   |
-   | KMIP_TLS_CERT_FILE      | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem
-
+   | Variable Name          |Description                                                      |
+   | -----------------------|---------------------------------------------------------------- |
+   | `AWS_ACCESS_KEY_ID`    | The AWS access key ID used to generate KMS messages             |
+   | `AWS_SECRET_ACCESS_KEY`| The AWS secret access key used to generate KMS messages         |
+   | `AWS_REGION`           | The AWS region where the KMS resides (e.g., `us-east-1`)        |
+   | `AWS_CMK_ID`           | The Customer Master Key for the KMS                             |
+   | `CSFLE_KMS_PROVIDERS`  | The raw EJSON description of the KMS providers. An example of the format is provided below.                                                                          |
+   | `KMIP_TLS_CA_FILE`     | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem|
+   | `KMIP_TLS_CERT_FILE`   | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem |
 
    The value of the `CSFLE_KMS_PROVIDERS` variable will have the following format:
 
@@ -392,83 +488,89 @@ The following steps will walk you through how to run the tests for CSFLE.
    ```
 1. Start the KMIP servers:
 
-  `DRIVERS_TOOLS="/path/to/mongodb-labs/drivers-evergreen-tools" .evergreen/run-kms-servers.sh`
+   ```sh
+   DRIVERS_TOOLS="/path/to/mongodb-labs/drivers-evergreen-tools" .evergreen/run-kms-servers.sh
+   ```
 
-1. Ensure default ~/.aws/config is present:
+1. Ensure default `~/.aws/config` is present:
 
-  ```
-  [default]
-  aws_access_key_id=AWS_ACCESS_KEY_ID
-  aws_secret_access_key=AWS_SECRET_ACCESS_KEY
-  ```
+   ```
+   [default]
+   aws_access_key_id=AWS_ACCESS_KEY_ID
+   aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+   ```
 
 1. Set temporary AWS credentials
 
-  ```
-  pip3 install boto3
-  PYTHON="python3" source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/set-temp-creds.sh
-  ```
+   ```
+   pip3 install boto3
+   PYTHON="python3" source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/set-temp-creds.sh
+   ```
 
-  Alternatively for fish users the following script can be substituted for set-temp-creds.sh:
+   Alternatively, for fish users, the following script can be substituted for `set-temp-creds.sh`:
 
-  ```fish
-  function set_aws_creds
-      set PYTHON_SCRIPT "\
-  import boto3
-  client = boto3.client('sts')
-  credentials = client.get_session_token()['Credentials']
-  print (credentials['AccessKeyId'] + ' ' + credentials['SecretAccessKey'] + ' ' + credentials['SessionToken'])"
+   ```fish
+   function set_aws_creds
+         set PYTHON_SCRIPT "\
+   import boto3
+   client = boto3.client('sts')
+   credentials = client.get_session_token()['Credentials']
+   print (credentials['AccessKeyId'] + ' ' + credentials['SecretAccessKey'] + ' ' + credentials['SessionToken'])"
 
-      echo $PYTHON_SCRIPT | python3 -
-  end
+         echo $PYTHON_SCRIPT | python3 -
+   end
 
-  set CREDS (set_aws_creds)
+   set CREDS (set_aws_creds)
 
-  set CSFLE_AWS_TEMP_ACCESS_KEY_ID (echo $CREDS | awk '{print $1}')
-  set CSFLE_AWS_TEMP_SECRET_ACCESS_KEY (echo $CREDS | awk '{print $2}')
-  set CSFLE_AWS_TEMP_SESSION_TOKEN (echo $CREDS | awk '{print $3}')
+   set CSFLE_AWS_TEMP_ACCESS_KEY_ID (echo $CREDS | awk '{print $1}')
+   set CSFLE_AWS_TEMP_SECRET_ACCESS_KEY (echo $CREDS | awk '{print $2}')
+   set CSFLE_AWS_TEMP_SESSION_TOKEN (echo $CREDS | awk '{print $3}')
 
-  set -e CREDS
-  ```
+   set -e CREDS
+   ```
 
 1. Run the functional tests:
+   ```sh
+   npm run check:test
+   ```
 
-   `npm run check:test`
+   The output of the tests will include sections like "Client-Side Encryption Corpus", "Client-Side Encryption Functional", "Client-Side Encryption Prose Tests", and "Client-Side Encryption".
 
-   The output of the tests will include sections like "Client Side Encryption Corpus," "Client Side Encryption Functional," "Client Side Encryption Prose Tests," and "Client Side Encryption."
-
-  To run the functional tests using the crypt shared library instead of mongocryptd, download the appropriate version of the crypt shared library for the enterprise server version [here](https://www.mongodb.com/download-center/enterprise/releases) and then set the location of it in the environment variable `CRYPT_SHARED_LIB_PATH`.
+   To run the functional tests using the crypt shared library instead of `mongocryptd`, download the appropriate version of the crypt shared library for the enterprise server version [here](https://www.mongodb.com/download-center/enterprise/releases) and then set the location of it in the environment variable `CRYPT_SHARED_LIB_PATH`.
 
 #### Testing driver changes with mongosh
 
-These steps require mongosh to be available locally.  Clone it from Github.
+These steps require `mongosh` to be available locally. Clone it from GitHub.
 
-Mongosh uses a lerna monorepo.  As a result, mongosh contains multiple references to the `mongodb` package
+`mongosh` uses a `lerna` monorepo. As a result, `mongosh` contains multiple references to the `mongodb` package
 in their `package.json`s.
 
-Set up mongosh by following the steps in the mongosh readme.
+Set up `mongosh` by following the steps in the `mongosh` readme.
 
 ##### Point mongosh to the driver
 
-mongosh contains a script that does this.  To use the script, create an environment
+mongosh contains a script that does this. To use the script, create an environment
  variable `REPLACE_PACKAGE` that contains a string in the form
-`mongodb:<path to your local instance of the driver>`.  The package replacement script will replace
+`mongodb:<path to your local instance of the driver>`. The package replacement script will replace
 all occurrences of `mongodb` with the local path of your driver.
 
 An alternative, which can be useful for
-testing a release, is to first run `npm pack` on the driver.  This generates a tarball containing all the code
-that would be uploaded to npm if it were released.  Then set the environment variable `REPLACE_PACKAGE`
-with the pull path to the file.
+testing a release, is to first run `npm pack` on the driver. This generates a tarball containing all the code
+that would be uploaded to `npm` if it were released. Then, set the environment variable `REPLACE_PACKAGE`
+with the full path to the file.
 
-Once the environment variable is set, run replace package in mongosh with `npm run replace:package`.
+Once the environment variable is set, run replace package in `mongosh` with:
+```sh
+npm run replace:package
+```
 
 ##### Run specific package tests
 
-mongosh's readme documents how to run its tests.  Most likely, it isn't necessary to run all of mongosh's
-tests.  The mongosh readme also documents how to run tests for a particular scope.  The scopes are
+`mongosh`'s readme documents how to run its tests. Most likely, it isn't necessary to run all of mongosh's
+tests. The `mongosh` readme also documents how to run tests for a particular scope. The scopes are
 listed in the `generate_mongosh_tasks.js` evergreen generation script.
 
-For example, to run the `service-provider-server` package, run the following command in mongosh:
+For example, to run the `service-provider-server` package, run the following command in `mongosh`:
 
 ```shell
 lerna run test --scope @mongosh/service-provider-server
@@ -476,20 +578,43 @@ lerna run test --scope @mongosh/service-provider-server
 
 #### KMIP FLE support tests
 
-1. Install virtualenv: `pip install virtualenv`
-2. Source the ./activate-kmstlsvenv.sh script in driver evergreen tools `.evergreen/csfle/activate-kmstlsvenv.sh`
-    1. This will install all the dependencies needed to run a python kms_kmip simulated server
-3. In 4 separate terminals launch the following:
-    - `./kmstlsvenv/bin/python3 -u kms_kmip_server.py` # by default it always runs on port 5698
-    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000`
-    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001`
-    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert`
+1. Install `virtualenv`:
+   ```sh
+   pip install virtualenv
+   ```
+2. Source the `./activate-kmstlsvenv.sh` script in driver evergreen tools `.evergreen/csfle/activate-kmstlsvenv.sh`
+    - This will install all the dependencies needed to run a Python kms_kmip simulated server
+3. In four separate terminals, launch the following:
+    ```sh
+    ./kmstlsvenv/bin/python3 -u kms_kmip_server.py` # by default it always runs on port 5698
+    ```
+    ```sh
+    ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000
+    ```
+    ```sh
+    ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001
+    ```
+    ```sh
+    ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert
+    ```
 4. Set the following environment variables:
-    - `export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"`
-    - `export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"`
-5. Install the FLE lib: `npm i --no-save mongodb-client-encryption`
-6. Launch a mongodb server
-7. Run the full suite `npm run check:test` or more specifically `npx mocha --config test/mocha_mongodb.json test/integration/client-side-encryption/`
+    ```sh
+    export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
+    export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
+    ```
+5. Install the FLE lib:
+   ```sh
+   npm i --no-save mongodb-client-encryption
+   ```
+6. Launch a MongoDB server
+7. Run the full suite: 
+   ```sh
+   npm run check:test
+   ```
+   or more specifically
+   ```sh
+   npx mocha --config test/mocha_mongodb.json test/integration/client-side-encryption/
+   ```
 
 ### TODO Special Env Sections
 
