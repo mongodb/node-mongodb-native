@@ -1,0 +1,36 @@
+name: "Prepare garasign container"
+description: "Prepares the garasign container used to sign artifacts"
+inputs:
+  garasign_username:
+    description: "Garasign username"
+    required: true
+  garasign_password:
+    description: "Garasign password"
+    required: true
+  artifactory_username:
+    description: "Artifactory user"
+    required: true
+  artifactory_password:
+    description: "Artifactory password"
+    required: true
+  artifactory_registry:
+    description: "Artifactory registry to be used"
+    default: artifactory.corp.mongodb.com
+
+runs:
+  using: composite
+  steps:
+    - name: Create the envfile
+      run: |
+        cat << EOF > envfile
+        GRS_CONFIG_USER1_USERNAME=${{ inputs.garasign_username }}
+        GRS_CONFIG_USER1_PASSWORD=${{ inputs.garasign_password }}
+        EOF
+      shell: bash
+
+    - name: Log in to artifactory
+      uses: redhat-actions/podman-login@v1
+      with:
+        username: ${{ inputs.artifactory_username }}
+        password: ${{ inputs.artifactory_password }}
+        registry: ${{ inputs.artifactory_registry }}

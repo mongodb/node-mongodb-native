@@ -1,0 +1,47 @@
+name: "Sign artifact using garasign"
+description: "Signs a release artifact"
+inputs:
+  filename:
+    description: "File name to sign"
+    required: true
+  garasign_username:
+    description: "Garasign username"
+    required: true
+  garasign_password:
+    description: "Garasign password"
+    required: true
+  artifactory_username:
+    description: "Artifactory user"
+    required: true
+  artifactory_password:
+    description: "Artifactory password"
+    required: true
+  artifactory_image:
+    description: "Image to use for artifactory"
+    default: release-tools-container-registry-local/garasign-gpg
+  artifactory_registry:
+    description: "Artifactory registry to be used"
+    default: artifactory.corp.mongodb.com
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare garasign container
+      uses: ./.github/actions/garasign/setup
+      with:
+        garasign_username: ${{ inputs.garasign_username }}
+        garasign_password: ${{ inputs.garasign_password }}
+        artifactory_username: ${{ inputs.artifactory_username }}
+        artifactory_password: ${{ inputs.artifactory_password }}
+        artifactory_registry: ${{ inputs.artifactory_registry }}
+
+    - name: "Create detached signature"
+      run: |
+        podman run \
+          --env-file=envfile \
+          --rm \
+          -v $(pwd):$(pwd) \
+          -w $(pwd) \
+          ${{ inputs.artifactory_registry }}/${{ inputs.artifactory_image }} \
+          /bin/bash -c "gpgloader && gpg --detach-sign --armor --output ${{ inputs.filename }}.sig ${{ inputs.filename }}"
+      shell: bash
