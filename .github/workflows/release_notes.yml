@@ -7,13 +7,44 @@ on:
         description: 'Enter release PR number'
         required: true
         type: number
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   release_notes:
     runs-on: ubuntu-latest
+    # Run only if dispatched or comment on a pull request
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.body == 'run release_notes') }}
     steps:
-      - uses: actions/checkout@v3
+      # Determine if the triggering_actor is allowed to run this action
+      # We only permit maintainers
+      # Not only is 'triggering_actor' common between the trigger events it will also change if someone re-runs an old job
+      - name: check if triggering_actor is allowed to generate notes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          COMMENTER: ${{ github.triggering_actor && github.triggering_actor || 'empty_triggering_actor' }}
+          API_ENDPOINT: /repos/${{ github.repository }}/collaborators?permission=maintain
+        shell: bash
+        run: |
+          if [ $COMMENTER = "empty_triggering_actor" ]; then exit 1; fi
+          set -o pipefail
+          if gh api "$API_ENDPOINT" --paginate --jq ".[].login" | grep -q "^$COMMENTER\$"; then
+            echo "$COMMENTER permitted to trigger notes!" && exit 0
+          else
+            echo "$COMMENTER not permitted to trigger notes" && exit 1
+          fi
 
+      # checkout the HEAD ref from prNumber
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event_name == 'issue_comment' && github.event.issue.number || inputs.releasePr }}/head
+
+
+      # Setup Node.js and npm install
       - name: actions/setup
         uses: ./.github/actions/setup
 
@@ -42,7 +73,7 @@ jobs:
           HIGHLIGHTS: ${{ steps.highlights.outputs.highlights }}
 
       # Update the release PR body
-      - run: gh pr edit ${{ inputs.releasePr }} --body-file ${{ steps.release_notes.outputs.release_notes_path }}
+      - run: gh pr edit ${{ github.event_name == 'issue_comment' && github.event.issue.number || inputs.releasePr }} --body-file ${{ steps.release_notes.outputs.release_notes_path }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
