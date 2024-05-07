@@ -571,6 +571,18 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         new ServerSelectionStartedEvent(selector, this.description, options.operationName)
       );
     }
+    const serverSelectionTimeoutMS = options.serverSelectionTimeoutMS ?? 0;
+    let timeout: Timeout;
+    if (options.timeout) {
+      // CSOT Enabled
+      timeout =
+        options.timeout.remainingTime !== 0 &&
+        options.timeout.remainingTime < serverSelectionTimeoutMS
+          ? options.timeout
+          : Timeout.expires(serverSelectionTimeoutMS);
+    } else {
+      timeout = Timeout.expires(serverSelectionTimeoutMS);
+    }
 
     const isSharded = this.description.type === TopologyType.Sharded;
     const session = options.session;
@@ -597,8 +609,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
-    const serverSelectionTimeoutMS = options.serverSelectionTimeoutMS ?? 0;
-    const timeout = options.timeout ?? Timeout.expires(serverSelectionTimeoutMS);
 
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
@@ -624,7 +634,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       if (TimeoutError.is(error)) {
         // Timeout
         waitQueueMember[kCancelled] = true;
-        waitQueueMember.timeout.clear();
         const timeoutError = new MongoServerSelectionError(
           `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
           this.description

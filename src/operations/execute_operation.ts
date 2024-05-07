@@ -27,8 +27,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { Timeout } from '../timeout';
-import { csotMin, squashError, supportsRetryableWrites } from '../utils';
+import { squashError, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -157,17 +156,11 @@ export async function executeOperation<
   timeout?.throwIfExpired();
   // TODO: construct serverSelection timeout here, pass it into topology.selectServer and store on
   // operation for use in operation.execute when we have to perform connection checkout
-  operation.serverSelectionTimeout =
-    operation.timeout != null
-      ? Timeout.expires(
-          csotMin(operation.timeout.remainingTime, topology.s.serverSelectionTimeoutMS)
-        )
-      : undefined;
 
   const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    timeout: operation.serverSelectionTimeout
+    timeout
   });
 
   if (session == null) {

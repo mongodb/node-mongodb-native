@@ -28,7 +28,7 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Timeout, TimeoutError } from '../timeout';
-import { type Callback, List, makeCounter, promiseWithResolvers } from '../utils';
+import { type Callback, List, makeCounter, now, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -362,12 +362,20 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     );
 
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
+    const serverSelectionTimeoutMS = this[kServer].topology.s.serverSelectionTimeoutMS;
 
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
 
     let timeout: Timeout;
     if (options?.timeout) {
-      timeout = options.timeout;
+      const start = Math.trunc(now());
+      // CSOT enabled
+      // Determine if we're using the timeout passed in or a new timeout
+      if (options.timeout.duration === 0 || serverSelectionTimeoutMS < options.timeout.duration) {
+        timeout = Timeout.expires(serverSelectionTimeoutMS - start + options.timeout.start);
+      } else {
+        timeout = options.timeout;
+      }
     } else {
       timeout = Timeout.expires(waitQueueTimeoutMS);
     }

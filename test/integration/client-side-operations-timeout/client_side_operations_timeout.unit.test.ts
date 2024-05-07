@@ -39,8 +39,9 @@ describe('CSOT spec unit tests', function () {
 
     expect(checkoutSpy).to.have.been.calledOnce;
     expect(checkoutSpy.firstCall.args[0].timeout).to.exist;
-    expect(checkoutSpy.firstCall.args[0].timeout.duration).to.be.equal(
-      remainingTimeFirstCall.returnValue
+    expect(checkoutSpy.firstCall.args[0].timeout.duration).to.be.approximately(
+      remainingTimeFirstCall.returnValue,
+      3
     );
   });
 
