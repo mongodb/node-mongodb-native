@@ -1,4 +1,5 @@
-import { type Document, Long } from '../bson';
+import { type Document } from '../bson';
+import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import { type ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
@@ -34,7 +35,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   /** @internal */
   [kFilter]: Document;
   /** @internal */
-  [kNumReturned]?: number;
+  [kNumReturned] = 0;
   /** @internal */
   [kBuiltOptions]: FindOptions;
 
@@ -69,7 +70,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   async _initialize(session: ClientSession): Promise<ExecutionResult> {
-    const findOperation = new FindOperation(undefined, this.namespace, this[kFilter], {
+    const findOperation = new FindOperation(this.namespace, this[kFilter], {
       ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
       session
@@ -78,7 +79,12 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const response = await executeOperation(this.client, findOperation);
 
     // the response is not a cursor when `explain` is enabled
-    this[kNumReturned] = response.cursor?.firstBatch?.length;
+    if (CursorResponse.is(response)) {
+      this[kNumReturned] = response.batchSize;
+    } else {
+      // Can be an explain response, hence the ?. on everything
+      this[kNumReturned] = this[kNumReturned] + (response?.cursor?.firstBatch?.length ?? 0);
+    }
 
     // TODO: NODE-2882
     return { server: findOperation.server, session, response };
@@ -107,14 +113,16 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
           // instead, if we determine there are no more documents to request from the server, we preemptively
           // close the cursor
         }
-        return { cursor: { id: Long.ZERO, nextBatch: [] } };
+        return CursorResponse.emptyGetMore;
       }
     }
 
-    const response = await super.getMore(batchSize);
+    const response = await super.getMore(batchSize, false);
     // TODO: wrap this in some logic to prevent it from happening if we don't need this support
-    if (response) {
-      this[kNumReturned] = this[kNumReturned] + response.cursor.nextBatch.length;
+    if (CursorResponse.is(response)) {
+      this[kNumReturned] = this[kNumReturned] + response.batchSize;
+    } else {
+      this[kNumReturned] = this[kNumReturned] + (response?.cursor?.nextBatch?.length ?? 0);
     }
 
     return response;
@@ -145,7 +153,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
     return await executeOperation(
       this.client,
-      new FindOperation(undefined, this.namespace, this[kFilter], {
+      new FindOperation(this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
         explain: verbosity ?? true

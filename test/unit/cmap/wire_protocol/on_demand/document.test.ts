@@ -73,6 +73,7 @@ describe('class OnDemandDocument', () => {
 
   context('get()', () => {
     let document: OnDemandDocument;
+    let array: OnDemandDocument;
     const input = {
       int: 1,
       double: 1.2,
@@ -86,12 +87,27 @@ describe('class OnDemandDocument', () => {
       date: new Date(0),
       object: { a: 1 },
       array: [1, 2],
-      unsupportedType: /abc/
+      unsupportedType: /abc/,
+      [233]: 3
     };
 
     beforeEach(async function () {
       const bytes = BSON.serialize(input);
       document = new OnDemandDocument(bytes);
+      array = new OnDemandDocument(
+        BSON.serialize(Object.fromEntries(Object.values(input).entries())),
+        0,
+        true
+      );
+    });
+
+    it('supports access by number for arrays', () => {
+      expect(array.get(1, BSONType.int)).to.equal(1);
+    });
+
+    it('does not support access by number for objects', () => {
+      expect(document.get(233, BSONType.int)).to.be.null;
+      expect(document.get('233', BSONType.int)).to.equal(3);
     });
 
     it('returns null if the element does not exist', () => {
@@ -275,41 +291,6 @@ describe('class OnDemandDocument', () => {
     it('supports parsing bool', () => {
       expect(document.getNumber('bool')).to.equal(0);
       expect(document.getNumber('boolTrue')).to.equal(1);
-    });
-  });
-
-  context('*valuesAs()', () => {
-    let array: OnDemandDocument;
-    beforeEach(async function () {
-      const bytes = BSON.serialize(
-        Object.fromEntries(Array.from({ length: 10 }, () => 1).entries())
-      );
-      array = new OnDemandDocument(bytes, 0, true);
-    });
-
-    it('throws if document is not an array', () => {
-      const bytes = BSON.serialize(
-        Object.fromEntries(Array.from({ length: 10 }, () => 1).entries())
-      );
-      array = new OnDemandDocument(bytes, 0, false);
-      expect(() => array.valuesAs(BSONType.int).next()).to.throw();
-    });
-
-    it('returns a generator that yields values matching the as BSONType parameter', () => {
-      let didRun = false;
-      for (const item of array.valuesAs(BSONType.int)) {
-        didRun = true;
-        expect(item).to.equal(1);
-      }
-      expect(didRun).to.be.true;
-    });
-
-    it('caches the results of array', () => {
-      const generator = array.valuesAs(BSONType.int);
-      generator.next();
-      generator.next();
-      expect(array).to.have.nested.property('cache.0.value', 1);
-      expect(array).to.have.nested.property('cache.1.value', 1);
     });
   });
 });
