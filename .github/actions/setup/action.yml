@@ -4,7 +4,7 @@ description: 'Installs node, driver dependencies, and builds source'
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
         node-version: 'lts/*'
         cache: 'npm'

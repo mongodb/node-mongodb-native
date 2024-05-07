@@ -1,10 +1,9 @@
 on:
-  # TODO: We can reenable cron when needed
-  # schedule:
-  #   # Timezone is UTC
-  #   # https://crontab.guru/#0_0_*_*_*
-  #   # At 00:00 every day.
-  #   - cron: '0 0 * * *'
+  schedule:
+    # Timezone is UTC
+    # https://crontab.guru/#0_0_*_*_*
+    # At 00:00 every day.
+    - cron: '0 0 * * *'
 
   # Allows us to manually trigger a nightly
   # Since npm prevents duplicate releases we can run this at any time
@@ -20,7 +19,7 @@ jobs:
   release-nightly:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: actions/setup
         uses: ./.github/actions/setup
       - id: build_nightly

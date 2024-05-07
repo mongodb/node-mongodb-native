@@ -19,13 +19,13 @@ jobs:
     steps:
       - shell: bash
         run: |
-          ALPHA_SEMVER_REGEXP="-alpha(\.(0|[1-9][0-9]+))?$"
+          ALPHA_SEMVER_REGEXP="-alpha(\.([0-9]|[1-9][0-9]+))?$"
 
           if ! [[ "${{ inputs.alphaVersion }}" =~ $ALPHA_SEMVER_REGEXP ]]; then
             echo "Invalid alphaVersion string"
             exit 1
           fi
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: actions/setup
         uses: ./.github/actions/setup
       - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
