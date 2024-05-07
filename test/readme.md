@@ -342,11 +342,7 @@ The following steps will walk you through how to start and test a load balancer.
     Create shard replica sets:
     ```sh
     mongod --shardsvr --replSet testing  --dbpath repl1 --bind_ip localhost --port 27218 --setParameter enableTestCommands=true
-    ```
-    ```sh
     mongod --shardsvr --replSet testing  --dbpath repl2 --bind_ip localhost --port 27219 --setParameter enableTestCommands=true
-    ```
-    ```sh
     mongod --shardsvr --replSet testing  --dbpath repl3 --bind_ip localhost --port 27220 --setParameter enableTestCommands=true
     ```
 
@@ -357,17 +353,13 @@ The following steps will walk you through how to start and test a load balancer.
 
     Create two `mongos` running on ports `27017` and `27018`:
     ```sh
-    mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter loadBalancerPort=27050
-    ```
-    ```sh
+    mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter loadBalancerPort=27050    
     mongos --configdb test/localhost:27217 --port 27018 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter loadBalancerPort=27051
     ```
 
     Initiate cluster on `mongos` in shell:
     ```sh
-    mongosh "mongodb://localhost:27017" --eval "sh.addShard('testing/localhost:27218,localhost:27219,localhost:27220')"
-    ```
-    ```sh
+    mongosh "mongodb://localhost:27017" --eval "sh.addShard('testing/localhost:27218,localhost:27219,localhost:27220')"   
     mongosh "mongodb://localhost:27017" --eval "sh.enableSharding('test')"
     ```
 1. An alternative way to the fully manual cluster setup is to use `mlaunch`:
@@ -585,18 +577,18 @@ lerna run test --scope @mongosh/service-provider-server
 2. Source the `./activate-kmstlsvenv.sh` script in driver evergreen tools `.evergreen/csfle/activate-kmstlsvenv.sh`
     - This will install all the dependencies needed to run a Python kms_kmip simulated server
 3. In four separate terminals, launch the following:
-    ```sh
-    ./kmstlsvenv/bin/python3 -u kms_kmip_server.py` # by default it always runs on port 5698
-    ```
-    ```sh
-    ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000
-    ```
-    ```sh
-    ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001
-    ```
-    ```sh
-    ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert
-    ```
+   ```sh
+   ./kmstlsvenv/bin/python3 -u kms_kmip_server.py` # by default it always runs on port 5698
+   ```
+   ```sh
+   ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000
+   ```
+   ```sh
+   ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001
+   ```
+   ```sh
+   ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert
+   ```
 4. Set the following environment variables:
     ```sh
     export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
