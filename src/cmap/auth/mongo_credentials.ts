@@ -136,6 +136,13 @@ export class MongoCredentials {
       };
     }
 
+    if (this.mechanism === AuthMechanism.MONGODB_OIDC && this.mechanismProperties.TOKEN_RESOURCE) {
+      this.mechanismProperties = {
+        ...this.mechanismProperties,
+        TOKEN_RESOURCE: decodeURIComponent(this.mechanismProperties.TOKEN_RESOURCE)
+      };
+    }
+
     Object.freeze(this.mechanismProperties);
     Object.freeze(this);
   }
@@ -191,6 +198,12 @@ export class MongoCredentials {
       ) {
         throw new MongoInvalidArgumentError(
           `username and ENVIRONMENT '${this.mechanismProperties.ENVIRONMENT}' may not be used together for mechanism '${this.mechanism}'.`
+        );
+      }
+
+      if (this.username && this.password) {
+        throw new MongoInvalidArgumentError(
+          `No password is allowed in ENVIRONMENT '${this.mechanismProperties.ENVIRONMENT}' for '${this.mechanism}'.`
         );
       }
 

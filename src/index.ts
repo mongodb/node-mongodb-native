@@ -62,6 +62,7 @@ export {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoNotConnectedError,
+  MongoOIDCError,
   MongoParseError,
   MongoRuntimeError,
   MongoServerClosedError,
