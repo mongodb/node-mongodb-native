@@ -1229,18 +1229,6 @@ tasks:
             SCRIPT: run-oidc-prose-tests.sh
           args:
             - .evergreen/run-oidc-tests-gcp.sh
-      - command: subprocess.exec
-        type: test
-        params:
-          working_dir: src
-          binary: bash
-          env:
-            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-            ENVIRONMENT: gcp
-            SCRIPT: run-oidc-unified-tests.sh
-          args:
-            - .evergreen/run-oidc-tests-gcp.sh
   - name: test-aws-lambda-deployed
     commands:
       - command: expansions.update
