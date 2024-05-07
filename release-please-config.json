@@ -4,6 +4,7 @@
   "pull-request-header": "Please run the release_notes action before releasing to generate release highlights",
   "packages": {
     ".": {
+      "include-component-in-tag": false,
       "changelog-path": "HISTORY.md",
       "release-type": "node",
       "bump-minor-pre-major": false,
