@@ -96,6 +96,7 @@ const EXPECTED_EXPORTS = [
   'MongoNetworkError',
   'MongoNetworkTimeoutError',
   'MongoNotConnectedError',
+  'MongoOIDCError',
   'MongoParseError',
   'MongoRuntimeError',
   'MongoServerClosedError',
