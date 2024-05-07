@@ -310,7 +310,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     this.incrementOperationCount();
     if (conn == null) {
       try {
-        conn = await this.pool.checkOut({ timeout: options.operationTimeout });
+        if (options.operationTimeout) {
+          conn = await this.pool.checkOut({ timeout: options.operationTimeout });
+        } else {
+          conn = await this.pool.checkOut();
+        }
         if (this.loadBalanced && isPinnableCommand(cmd, session)) {
           session?.pin(conn);
         }
