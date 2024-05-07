@@ -13,3 +13,55 @@ runs:
       shell: bash
     - run: npm clean-install
       shell: bash
+
+name: "Sign artifact using garasign"
+description: "Signs a release artifact"
+inputs:
+  command:
+    description: "Command to run inside the container"
+    required: true
+  garasign_username:
+    description: "Garasign username"
+    required: true
+  garasign_password:
+    description: "Garasign password"
+    required: true
+  artifactory_username:
+    description: "Artifactory user"
+    required: true
+  artifactory_password:
+    description: "Artifactory password"
+    required: true
+  artifactory_image:
+    description: "Image to use for artifactory"
+    default: release-tools-container-registry-local/garasign-git
+  artifactory_registry:
+    description: "Artifactory registry to be used"
+    default: artifactory.corp.mongodb.com
+  skip_setup:
+    description: "Whether to skip setup"
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare garasign container
+      if: ${{ inputs.skip_setup == 'false' }}
+      uses: ./.github/actions/garasign/setup
+      with:
+        garasign_username: ${{ inputs.garasign_username }}
+        garasign_password: ${{ inputs.garasign_password }}
+        artifactory_username: ${{ inputs.artifactory_username }}
+        artifactory_password: ${{ inputs.artifactory_password }}
+        artifactory_registry: ${{ inputs.artifactory_registry }}
+
+    - name: "Run git command"
+      run: |
+        podman run \
+          --env-file=envfile \
+          --rm \
+          -v $(pwd):$(pwd) \
+          -w $(pwd) \
+          ${{ inputs.artifactory_registry }}/${{ inputs.artifactory_image }} \
+          /bin/bash -c "gpgloader && ${{ inputs.command }}"
+      shell: bash
