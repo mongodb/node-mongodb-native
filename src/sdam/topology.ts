@@ -38,6 +38,7 @@ import { Timeout, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
+  csotMin,
   type EventEmitterWithState,
   HostAddress,
   List,
@@ -568,10 +569,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     if (options.timeout) {
       // CSOT Enabled
       timeout =
-        options.timeout.remainingTime !== 0 &&
-        options.timeout.remainingTime < serverSelectionTimeoutMS
-          ? options.timeout
-          : Timeout.expires(serverSelectionTimeoutMS);
+        csotMin(options.timeout.remainingTime, serverSelectionTimeoutMS) ===
+        serverSelectionTimeoutMS
+          ? Timeout.expires(serverSelectionTimeoutMS)
+          : options.timeout;
     } else {
       timeout = Timeout.expires(serverSelectionTimeoutMS);
     }

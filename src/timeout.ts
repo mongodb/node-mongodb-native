@@ -41,7 +41,7 @@ export class Timeout extends Promise<never> {
   public timedOut = false;
 
   get remainingTime(): number {
-    if (this.timedOut) return -1;
+    if (this.timedOut) return 0;
     if (this.duration === 0) return Infinity;
     return this.start + this.duration - Math.trunc(performance.now());
   }
