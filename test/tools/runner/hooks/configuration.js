@@ -33,6 +33,8 @@ const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
 // Load balancer fronting 2 mongoses.
 const MULTI_MONGOS_LB_URI = process.env.MULTI_MONGOS_LB_URI;
+// OIDC scripts all set MONGODB_URI_SINGLE
+const OIDC_URI = process.env.MONGODB_URI_SINGLE;
 const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
 const filters = [];
 
@@ -114,12 +116,21 @@ const testConfigBeforeHook = async function () {
     return;
   }
 
-  const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
+  const options = {
     ...getEnvironmentalOptions(),
     // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set
     // the default dns resolution order for CI
     family: 4
-  });
+  };
+  if (OIDC_URI && process.env.ENVIRONMENT) {
+    options.authMechanismProperties = {
+      ENVIRONMENT: process.env.ENVIRONMENT
+    };
+  }
+  const client = new MongoClient(
+    loadBalanced ? SINGLE_MONGOS_LB_URI : OIDC_URI ? OIDC_URI : MONGODB_URI,
+    options
+  );
 
   await client.db('test').command({ ping: 1 });
 
