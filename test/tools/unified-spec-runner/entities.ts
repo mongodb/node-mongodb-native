@@ -369,7 +369,7 @@ export class FailPointMap extends Map<string, Document> {
     } else {
       // create a new client
       address = addressOrClient.toString();
-      client = getClient(address, this.isSrv);
+      client = getClient(address, false);
       try {
         await client.connect();
       } catch (error) {
@@ -398,7 +398,7 @@ export class FailPointMap extends Map<string, Document> {
         if (process.env.SERVERLESS || process.env.LOAD_BALANCER) {
           hostAddress += '?loadBalanced=true';
         }
-        const client = getClient(hostAddress, this.isSrv);
+        const client = getClient(hostAddress, false);
         try {
           await client.connect();
         } catch (error) {
