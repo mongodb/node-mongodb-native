@@ -571,7 +571,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): Promise<Document> {
     this.throwIfAborted();
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
-      if (document.has('writeConcernError')) {
+      if (
+        (MongoDBResponse.is(document) && document.has('writeConcernError')) ||
+        (!MongoDBResponse.is(document) && document.writeConcernError)
+      ) {
         const object = MongoDBResponse.is(document) ? document.toObject(options) : document;
         throw new MongoWriteConcernError(object.writeConcernError, object);
       }
