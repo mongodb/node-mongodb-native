@@ -1,4 +1,5 @@
 import {
+  type BSONElement,
   type BSONSerializeOptions,
   BSONType,
   type Document,
@@ -30,8 +31,7 @@ const enum BSONElementOffset {
  *
  * @param bytes - BSON document returned from the server
  */
-export function isErrorResponse(bson: Uint8Array): boolean {
-  const elements = parseToElementsToArray(bson, 0);
+export function isErrorResponse(bson: Uint8Array, elements: BSONElement[]): boolean {
   for (let eIdx = 0; eIdx < elements.length; eIdx++) {
     const element = elements[eIdx];
 
@@ -60,12 +60,21 @@ export function isErrorResponse(bson: Uint8Array): boolean {
 /** @internal */
 export type MongoDBResponseConstructor = {
   new (bson: Uint8Array, offset?: number, isArray?: boolean): MongoDBResponse;
+  make(bson: Uint8Array): MongoDBResponse;
 };
 
 /** @internal */
 export class MongoDBResponse extends OnDemandDocument {
   static is(value: unknown): value is MongoDBResponse {
     return value instanceof MongoDBResponse;
+  }
+
+  static make(bson: Uint8Array) {
+    const elements = parseToElementsToArray(bson, 0);
+    const isError = isErrorResponse(bson, elements);
+    return isError
+      ? new MongoDBResponse(bson, 0, false, elements)
+      : new this(bson, 0, false, elements);
   }
 
   // {ok:1}

@@ -66,9 +66,11 @@ export class OnDemandDocument {
     /** The start of the document */
     private readonly offset = 0,
     /** If this is an embedded document, indicates if this was a BSON array */
-    public readonly isArray = false
+    public readonly isArray = false,
+    /** If elements was already calculated */
+    elements?: BSONElement[]
   ) {
-    this.elements = parseToElementsToArray(this.bson, offset);
+    this.elements = elements ?? parseToElementsToArray(this.bson, offset);
   }
 
   /** Only supports basic latin strings */

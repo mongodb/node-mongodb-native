@@ -62,11 +62,7 @@ import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
-import {
-  isErrorResponse,
-  MongoDBResponse,
-  type MongoDBResponseConstructor
-} from './wire_protocol/responses';
+import { MongoDBResponse, type MongoDBResponseConstructor } from './wire_protocol/responses';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
@@ -448,12 +444,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
-        const document =
-          responseType == null
-            ? new MongoDBResponse(bson)
-            : isErrorResponse(bson)
-            ? new MongoDBResponse(bson)
-            : new responseType(bson);
+        const document = (responseType ?? MongoDBResponse).make(bson);
 
         yield document;
         this.throwIfAborted();
@@ -517,11 +508,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
         }
 
-        if (document.has('writeConcernError')) {
-          object ??= document.toObject(bsonOptions);
-          throw new MongoWriteConcernError(object.writeConcernError, object);
-        }
-
         if (document.isError) {
           throw new MongoServerError((object ??= document.toObject(bsonOptions)));
         }
@@ -552,35 +538,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
     } catch (error) {
       if (this.shouldEmitAndLogCommand) {
-        if (error.name === 'MongoWriteConcernError') {
-          this.emitAndLogCommand(
-            this.monitorCommands,
-            Connection.COMMAND_SUCCEEDED,
-            message.databaseName,
-            this.established,
-            new CommandSucceededEvent(
-              this,
-              message,
-              options.noResponse ? undefined : (object ??= document?.toObject(bsonOptions)),
-              started,
-              this.description.serverConnectionId
-            )
-          );
-        } else {
-          this.emitAndLogCommand(
-            this.monitorCommands,
-            Connection.COMMAND_FAILED,
-            message.databaseName,
-            this.established,
-            new CommandFailedEvent(
-              this,
-              message,
-              error,
-              started,
-              this.description.serverConnectionId
-            )
-          );
-        }
+        this.emitAndLogCommand(
+          this.monitorCommands,
+          Connection.COMMAND_FAILED,
+          message.databaseName,
+          this.established,
+          new CommandFailedEvent(this, message, error, started, this.description.serverConnectionId)
+        );
       }
       throw error;
     }
@@ -607,8 +571,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): Promise<Document> {
     this.throwIfAborted();
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
+      if (document.has('writeConcernError')) {
+        const object = MongoDBResponse.is(document) ? document.toObject(options) : document;
+        throw new MongoWriteConcernError(object.writeConcernError, object);
+      }
       return document;
     }
+
     throw new MongoUnexpectedServerResponseError('Unable to get response from server');
   }
 
