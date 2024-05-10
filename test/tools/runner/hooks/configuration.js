@@ -7,7 +7,11 @@ require('source-map-support').install({
 const path = require('path');
 const fs = require('fs');
 const { MongoClient } = require('../../../mongodb');
-const { AstrolabeTestConfiguration, TestConfiguration } = require('../config');
+const {
+  AstrolabeTestConfiguration,
+  OIDCTestConfiguration,
+  TestConfiguration
+} = require('../config');
 const { getEnvironmentalOptions } = require('../../utils');
 const mock = require('../../mongodb-mock/index');
 const { inspect } = require('util');
@@ -114,6 +118,10 @@ const testConfigBeforeHook = async function () {
     return;
   }
 
+  if (process.env.MONGODB_URI_SINGLE) {
+    this.configuration = new OIDCTestConfiguration(process.env.MONGODB_URI_SINGLE, {});
+    return;
+  }
   const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
     ...getEnvironmentalOptions(),
     // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set
