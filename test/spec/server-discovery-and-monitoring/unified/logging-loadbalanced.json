@@ -136,6 +136,22 @@
               "level": "debug",
               "component": "topology",
               "data": {
+                "message": "Topology description changed",
+                "topologyId": {
+                  "$$exists": true
+                },
+                "previousDescription": {
+                  "$$exists": true
+                },
+                "newDescription": {
+                  "$$exists": true
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "topology",
+              "data": {
                 "message": "Stopped topology monitoring",
                 "topologyId": {
                   "$$exists": true

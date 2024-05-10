@@ -1,0 +1,49 @@
+description: "replicaset-emit-topology-description-changed-before-close"
+
+schemaVersion: "1.20"
+
+runOnRequirements:
+  - topologies:
+      - replicaset
+    minServerVersion: "4.4" # awaitable hello
+
+tests:
+  - description: "Topology lifecycle"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - topologyDescriptionChangedEvent
+                  - topologyOpeningEvent
+                  - topologyClosedEvent
+      # ensure the topology has been fully discovered before closing the client.
+      # expected events are initial server discovery and 3 server connect events.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            topologyDescriptionChangedEvent: {}
+          count: 4
+      - name: close
+        object: *client
+    expectEvents:
+      - client: *client
+        eventType: sdam
+        ignoreExtraEvents: false
+        events:
+          - topologyOpeningEvent: {}
+          - topologyDescriptionChangedEvent: {} # unknown -> replset no primary
+          - topologyDescriptionChangedEvent: {} # server connected
+          - topologyDescriptionChangedEvent: {} # server connected
+          - topologyDescriptionChangedEvent: {} # server connected
+          - topologyDescriptionChangedEvent:  # replicaset -> unknown
+              previousDescription:
+                type: "ReplicaSetWithPrimary"
+              newDescription:
+                type: "Unknown"
+          - topologyClosedEvent: {}

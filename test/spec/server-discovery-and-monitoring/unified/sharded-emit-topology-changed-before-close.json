@@ -1,0 +1,108 @@
+{
+  "description": "sharded-emit-topology-description-changed-before-close",
+  "schemaVersion": "1.20",
+  "runOnRequirements": [
+    {
+      "topologies": [
+        "sharded"
+      ],
+      "minServerVersion": "4.4"
+    }
+  ],
+  "tests": [
+    {
+      "description": "Topology lifecycle",
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "observeEvents": [
+                    "topologyDescriptionChangedEvent",
+                    "topologyOpeningEvent",
+                    "topologyClosedEvent"
+                  ],
+                  "useMultipleMongoses": true
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "topologyDescriptionChangedEvent": {}
+            },
+            "count": 3
+          }
+        },
+        {
+          "name": "close",
+          "object": "client"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "sdam",
+          "ignoreExtraEvents": false,
+          "events": [
+            {
+              "topologyOpeningEvent": {}
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Unknown"
+                },
+                "newDescription": {
+                  "type": "Unknown"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Unknown"
+                },
+                "newDescription": {
+                  "type": "Sharded"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Sharded"
+                },
+                "newDescription": {
+                  "type": "Sharded"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Sharded"
+                },
+                "newDescription": {
+                  "type": "Unknown"
+                }
+              }
+            },
+            {
+              "topologyClosedEvent": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

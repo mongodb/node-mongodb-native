@@ -1,0 +1,49 @@
+description: "loadbalanced-emit-topology-description-changed-before-close"
+
+schemaVersion: "1.20"
+
+runOnRequirements:
+  - topologies:
+      - load-balanced
+    minServerVersion: "4.4" # awaitable hello
+
+tests:
+  - description: "Topology lifecycle"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - topologyDescriptionChangedEvent
+                  - topologyOpeningEvent
+                  - topologyClosedEvent
+      # ensure the topology has been fully discovered before closing the client.
+      # expected events are initial server discovery and server connect event.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            topologyDescriptionChangedEvent: {}
+          count: 2
+      - name: close
+        object: *client
+    expectEvents:
+      - client: *client
+        eventType: sdam
+        events:
+          - topologyOpeningEvent: {}
+          - topologyDescriptionChangedEvent: # unknown -> unknown w disconnected server
+              previousDescription: 
+                type: "Unknown"
+              newDescription: {}
+          - topologyDescriptionChangedEvent:  # unknown w disconnected server -> loadBalanced
+              newDescription:
+                type: "LoadBalanced"
+          - topologyDescriptionChangedEvent:  # loadbalanced -> unknown
+              newDescription:
+                type: "Unknown"
+          - topologyClosedEvent: {}

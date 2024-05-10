@@ -621,7 +621,7 @@ function compareEvents(
         );
       }
     } else {
-      expect.fail(`Encountered unexpected event - ${inspect(actualEvent)}`);
+      expect.fail(`Encountered unexpected event - ${inspect(actualEvent)} `);
     }
   }
 }
@@ -724,7 +724,7 @@ export function expectErrorCheck(
   expected: ExpectedError,
   entities: EntitiesMap
 ): void {
-  const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;
+  const expectMessage = `\n\nOriginal Error Stack: \n${error.stack} \n\n`;
 
   if (!isMongoCryptError(error)) {
     expect(error, expectMessage).to.be.instanceOf(MongoError);
@@ -755,7 +755,7 @@ export function expectErrorCheck(
     for (const errorLabel of expected.errorLabelsContain) {
       expect(
         mongoError.hasErrorLabel(errorLabel),
-        `Error was supposed to have label ${errorLabel}, has [${mongoError.errorLabels}] -- ${expectMessage}`
+        `Error was supposed to have label ${errorLabel}, has[${mongoError.errorLabels}]--${expectMessage} `
       ).to.be.true;
     }
   }
@@ -765,7 +765,7 @@ export function expectErrorCheck(
     for (const errorLabel of expected.errorLabelsOmit) {
       expect(
         mongoError.hasErrorLabel(errorLabel),
-        `Error was not supposed to have label ${errorLabel}, has [${mongoError.errorLabels}] -- ${expectMessage}`
+        `Error was not supposed to have label ${errorLabel}, has[${mongoError.errorLabels}]--${expectMessage} `
       ).to.be.false;
     }
   }

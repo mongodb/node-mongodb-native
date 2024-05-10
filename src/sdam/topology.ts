@@ -488,6 +488,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   /** Close this topology */
   close(): void {
+    const previousDescription = this.s.description;
+
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
       return;
     }
@@ -511,6 +513,21 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
 
     stateTransition(this, STATE_CLOSED);
+    this.s.description = new TopologyDescription(
+      TopologyType.Unknown,
+      new Map(),
+      this.s.options.replicaSet,
+      undefined,
+      undefined,
+      undefined,
+      this.s.options
+    );
+
+    // broadcast that topology is in closed state
+    this.emitAndLog(
+      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+      new TopologyDescriptionChangedEvent(this.s.id, previousDescription, this.s.description)
+    );
 
     // emit an event for close
     this.emitAndLog(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
