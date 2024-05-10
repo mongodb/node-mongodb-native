@@ -63,6 +63,7 @@ class Runner {
         console.log.apply(console, arguments);
       };
     this.children = {};
+    this.grep = options.grep?.toLowerCase() ?? null;
   }
 
   /**
@@ -124,6 +125,12 @@ class Runner {
     const result = {};
 
     for (const [name, benchmark] of benchmarks) {
+      if (this.grep != null) {
+        if (!name.toLowerCase().includes(this.grep)) {
+          result[name] = 0;
+          continue;
+        }
+      }
       this.reporter(`    Executing Benchmark "${name}"`);
       result[name] = await this._runBenchmark(benchmark);
     }

@@ -5,6 +5,7 @@ import {
   type Document,
   Long,
   parseToElementsToArray,
+  pluckBSONSerializeOptions,
   type Timestamp
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
@@ -153,13 +154,7 @@ export class MongoDBResponse extends OnDemandDocument {
 
   public override toObject(options?: BSONSerializeOptions): Record<string, any> {
     const exactBSONOptions = {
-      useBigInt64: options?.useBigInt64,
-      promoteLongs: options?.promoteLongs,
-      promoteValues: options?.promoteValues,
-      promoteBuffers: options?.promoteBuffers,
-      bsonRegExp: options?.bsonRegExp,
-      raw: options?.raw ?? false,
-      fieldsAsRaw: options?.fieldsAsRaw ?? {},
+      ...pluckBSONSerializeOptions(options ?? {}),
       validation: this.parseBsonSerializationOptions(options)
     };
     return super.toObject(exactBSONOptions);
@@ -188,33 +183,38 @@ export class CursorResponse extends MongoDBResponse {
     return value instanceof CursorResponse || value === CursorResponse.emptyGetMore;
   }
 
-  public id: Long;
-  public ns: MongoDBNamespace | null = null;
-  public batchSize = 0;
-
-  private batch: OnDemandDocument;
+  private _batch: OnDemandDocument | null = null;
   private iterated = 0;
 
-  constructor(bytes: Uint8Array, offset?: number, isArray?: boolean) {
-    super(bytes, offset, isArray);
+  get cursor() {
+    return this.get('cursor', BSONType.object, true);
+  }
 
-    const cursor = this.get('cursor', BSONType.object, true);
+  get id(): Long {
+    return Long.fromBigInt(this.cursor.get('id', BSONType.long, true));
+  }
 
-    const id = cursor.get('id', BSONType.long, true);
-    this.id = new Long(Number(id & 0xffff_ffffn), Number((id >> 32n) & 0xffff_ffffn));
-
-    const namespace = cursor.get('ns', BSONType.string);
-    if (namespace != null) this.ns = ns(namespace);
-
-    if (cursor.has('firstBatch')) this.batch = cursor.get('firstBatch', BSONType.array, true);
-    else if (cursor.has('nextBatch')) this.batch = cursor.get('nextBatch', BSONType.array, true);
-    else throw new MongoUnexpectedServerResponseError('Cursor document did not contain a batch');
-
-    this.batchSize = this.batch.size();
+  get ns() {
+    const namespace = this.cursor.get('ns', BSONType.string);
+    if (namespace != null) return ns(namespace);
+    return null;
   }
 
   get length() {
     return Math.max(this.batchSize - this.iterated, 0);
+  }
+
+  get batch() {
+    if (this._batch != null) return this._batch;
+    const cursor = this.cursor;
+    if (cursor.has('firstBatch')) this._batch = cursor.get('firstBatch', BSONType.array, true);
+    else if (cursor.has('nextBatch')) this._batch = cursor.get('nextBatch', BSONType.array, true);
+    else throw new MongoUnexpectedServerResponseError('Cursor document did not contain a batch');
+    return this._batch;
+  }
+
+  get batchSize() {
+    return this.batch?.size();
   }
 
   shift(options?: BSONSerializeOptions): any {

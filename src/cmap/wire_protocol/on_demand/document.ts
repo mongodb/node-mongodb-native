@@ -80,8 +80,13 @@ export class OnDemandDocument {
 
     if (name.length !== nameLength) return false;
 
-    for (let i = 0; i < name.length; i++) {
-      if (this.bson[nameOffset + i] !== name.charCodeAt(i)) return false;
+    const nameEnd = nameOffset + nameLength;
+    for (
+      let byteIndex = nameOffset, charIndex = 0;
+      charIndex < name.length && byteIndex < nameEnd;
+      charIndex++, byteIndex++
+    ) {
+      if (this.bson[byteIndex] !== name.charCodeAt(charIndex)) return false;
     }
 
     return true;
@@ -127,7 +132,7 @@ export class OnDemandDocument {
       const element = this.elements[index];
 
       // skip this element if it has already been associated with a name
-      if (!this.indexFound[index] && this.isElementName(name, element)) {
+      if (!(index in this.indexFound) && this.isElementName(name, element)) {
         const cachedElement = { element, value: undefined };
         this.cache[name] = cachedElement;
         this.indexFound[index] = true;

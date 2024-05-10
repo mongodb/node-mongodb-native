@@ -1,14 +1,26 @@
 'use strict';
 
 const MongoBench = require('../mongoBench');
+const process = require('node:process');
 const os = require('node:os');
+const util = require('node:util');
+
+const args = util.parseArgs({
+  args: process.argv.slice(2),
+  options: {
+    grep: {
+      short: 'g',
+      type: 'string',
+      required: false
+    }
+  }
+});
 
 const Runner = MongoBench.Runner;
 
 let bsonType = 'js-bson';
 // TODO(NODE-4606): test against different driver configurations in CI
 
-const { inspect } = require('util');
 const { writeFile } = require('fs/promises');
 const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
 
@@ -30,7 +42,9 @@ function average(arr) {
   return arr.reduce((x, y) => x + y, 0) / arr.length;
 }
 
-const benchmarkRunner = new Runner()
+const benchmarkRunner = new Runner({
+  grep: args.values.grep ?? null
+})
   .suite('singleBench', suite => makeSingleBench(suite))
   .suite('multiBench', suite => makeMultiBench(suite))
   .suite('parallel', suite => makeParallelBenchmarks(suite));
@@ -96,7 +110,7 @@ benchmarkRunner
   })
   .then(data => {
     const results = JSON.stringify(data, undefined, 2);
-    console.log(inspect(data, { depth: Infinity, colors: true }));
+    console.log(util.inspect(data, { depth: Infinity, colors: true }));
     return writeFile('results.json', results);
   })
   .catch(err => console.error(err));
