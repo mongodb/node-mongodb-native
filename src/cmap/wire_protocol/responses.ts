@@ -202,7 +202,7 @@ export class CursorResponse extends MongoDBResponse {
   private _batch: OnDemandDocument | null = null;
   private iterated = 0;
 
-  private get cursor() {
+  get cursor() {
     return this.get('cursor', BSONType.object, true);
   }
 
