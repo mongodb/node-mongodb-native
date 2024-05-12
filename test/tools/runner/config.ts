@@ -408,18 +408,3 @@ export class AstrolabeTestConfiguration extends TestConfiguration {
     return process.env.DRIVERS_ATLAS_TESTING_URI!;
   }
 }
-
-/**
- * Test configuration specific to OIDC testing.
- */
-export class OIDCTestConfiguration extends TestConfiguration {
-  override newClient(): MongoClient {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return new MongoClient(process.env.MONGODB_URI_SINGLE!);
-  }
-
-  override url(): string {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return process.env.MONGODB_URI_SINGLE!;
-  }
-}
