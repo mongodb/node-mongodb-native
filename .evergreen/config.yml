@@ -4462,6 +4462,8 @@ task_groups:
             - AWS_ACCESS_KEY_ID
             - AWS_SECRET_ACCESS_KEY
             - AWS_SESSION_TOKEN
+          env:
+            MONGODB_VERSION: '8.0'
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
     setup_group_can_fail_task: true

@@ -56,12 +56,13 @@ describe('OIDC Auth Spec Tests', function () {
       });
 
       describe('1.1 Callback is called during authentication', function () {
-        const callbackSpy = sinon.spy(createCallback());
+        const callbackSpy = sinon.spy(createCallback('test_machine'));
         // Create an OIDC configured client.
         // Perform a find operation that succeeds.
         // Assert that the callback was called 1 time.
         // Close the client.
         beforeEach(function () {
+          console.log(process.env);
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
