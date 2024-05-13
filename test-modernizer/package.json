@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx tsc *test.ts && npx mocha --config .mocharc *test.js",
-    "run": "ts-node index.ts"
+    "build": "npx tsc",
+    "test": "npm run build && npx mocha --config .mocharc dist/test/*test.js",
+    "run": "ts-node src/index.ts"
   },
   "keywords": [],
   "author": "",

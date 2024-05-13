@@ -28,7 +28,7 @@ export function isMochaNode(node: ts.Node): node is MochaNode {
 
 export function isMochaTest(node: ts.Node): node is MochaTestFunction {
   if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
-    const name = node.expression.escapedText ?? '';
+    const name = (node.expression.escapedText as string) ?? '';
     const isTestNode = ['it', 'test'].includes(name.toLowerCase());
     if (isTestNode) {
       (node as unknown as MochaNode).mochaType = name as any;
@@ -40,7 +40,7 @@ export function isMochaTest(node: ts.Node): node is MochaTestFunction {
 
 export function isMochaHook(node: ts.Node): node is MochaTestFunction {
   if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
-    const name = node.expression.escapedText ?? '';
+    const name = (node.expression.escapedText as string) ?? '';
     const isTestNode = ['before', 'after', 'beforeeach', 'aftereach'].includes(name.toLowerCase());
     if (isTestNode) {
       (node as unknown as MochaNode).mochaType = name as any;
@@ -52,7 +52,7 @@ export function isMochaHook(node: ts.Node): node is MochaTestFunction {
 
 export function isMochaGroup(node: ts.Node): node is MochaTestGroup {
   if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
-    const name = node.expression.escapedText ?? '';
+    const name = (node.expression.escapedText as string) ?? '';
     const isTestNode = ['describe', 'context'].includes(name.toLowerCase());
     if (isTestNode) {
       (node as unknown as MochaNode).mochaType = name as any;

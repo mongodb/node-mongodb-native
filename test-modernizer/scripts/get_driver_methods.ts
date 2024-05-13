@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as fs from 'fs';
 import * as path from 'path';
 import * as ts from 'typescript';
@@ -69,6 +70,7 @@ for (const file of walk(root)) {
   }
 }
 
+// @ts-expect-error Foo Bar Baz
 const filtered = Array.from(new Set(members.map(member => member.name?.escapedText)));
 
 console.log(`[${filtered.map(n => `"${n}"`).join(',')}]`);

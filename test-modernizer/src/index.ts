@@ -1,8 +1,8 @@
 import { createProjectSync } from '@ts-morph/bootstrap';
 import * as ts from 'typescript';
 
-import { type DriverAPI, isDriverAPI, isMochaTest, type MochaTestFunction } from './driver';
-import { annotate, explore, print, setUnion } from './utils';
+import { type DriverAPI, isDriverAPI } from './driver';
+import { annotate, print, setUnion } from './utils';
 
 declare module 'typescript' {
   export interface Node {
@@ -29,14 +29,6 @@ const resultFile = project.createSourceFile('someFileName.ts', FUNCTION_DECLARAT
 
 const program = project.createProgram();
 
-function hasCallbackAsLastArgument(node: DriverAPI) {
-  const lastArgument = node.arguments.at(-1);
-
-  return (
-    lastArgument && (ts.isFunctionExpression(lastArgument) || ts.isArrowFunction(lastArgument))
-  );
-}
-
 function getCallbackArgument(node: DriverAPI): ts.FunctionExpression | ts.ArrowFunction | null {
   const lastArgument = node.arguments.at(-1);
   if (lastArgument) {
@@ -47,31 +39,6 @@ function getCallbackArgument(node: DriverAPI): ts.FunctionExpression | ts.ArrowF
   return null;
 }
 annotate(resultFile);
-
-function getMochaTestNodesFromFile(node: ts.Node): MochaTestFunction[] {
-  const tests: Array<MochaTestFunction> = [];
-  const visit = (child: ts.Node) => {
-    isMochaTest(child) && tests.push(child);
-    child.forEachChild(visit);
-  };
-  node.forEachChild(visit);
-  return tests;
-}
-
-function usesDriverCallbackMethod(node: ts.Node): boolean {
-  let usesCallback = false;
-
-  const visit = (node: ts.Node) => {
-    if (isDriverAPI(node) && hasCallbackAsLastArgument(node)) {
-      usesCallback = true;
-    }
-    node.forEachChild(visit);
-  };
-
-  node.forEachChild(visit);
-
-  return usesCallback;
-}
 
 const checker = program.getTypeChecker();
 
@@ -89,8 +56,7 @@ function findUsagesOfParameters(
   node: (ts.FunctionExpression | ts.ArrowFunction)['body'],
   parameters: { returnParameter: ts.ParameterDeclaration; errorParameter: ts.ParameterDeclaration }
 ): { returnStatements: ts.Statement[]; errorStatements: ts.Statement[] } {
-  // @ts-expect-error Expected error.
-  if (ts.isExpression(node)) return; // todo
+  if (ts.isExpression(node)) return undefined as any; // todo
 
   /** recursively traverse a statement, looking for idenfitiers that match a parameter */
   function statementUses(parameter: ts.ParameterDeclaration) {
@@ -98,6 +64,7 @@ function findUsagesOfParameters(
       function _visit(node: ts.Node) {
         // todo - confirm this is the correct way to check equality.
         const _a = checker.getSymbolAtLocation(node);
+        // @ts-expect-error This doesn't show up in TS for some reason.
         const _b = parameter.symbol;
         if (ts.isIdentifier(node) && _a && _b && _a === _b) {
           return true;
@@ -136,9 +103,11 @@ export function convert(node: ts.Node) {
   });
 
   // remove the callback from the overload
+  // @ts-expect-error Don't know how to update this node.
   node.arguments = node.arguments.slice(0, node.arguments.length - 1);
   if (errorStatements.length === 0 && returnStatements.length === 0) {
     const _await = ts.factory.createAwaitExpression(node);
+    print(_await);
   } else if (errorStatements.length === 0) {
     // no try block here
     const statements: ts.Statement[] = [];
@@ -194,6 +163,4 @@ export function convert(node: ts.Node) {
 }
 
 // explore(resultFile);
-convert(resultFile);
-
-function analyzeControlFlow();
+// convert(resultFile);
