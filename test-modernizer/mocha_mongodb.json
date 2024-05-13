@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json",
+  "require": ["source-map-support/register", "ts-node/register"],
+  "extension": ["js", "ts"],
+  "ui": "test/tools/runner/metadata_ui.js",
+  "recursive": true,
+  "timeout": 60000,
+  "failZero": true,
+  "sort": true,
+  "color": true,
+  "ignore": [
+    "test/integration/node-specific/examples/handler.js",
+    "test/integration/node-specific/examples/handler.test.js",
+    "test/integration/node-specific/examples/aws_handler.js",
+    "test/integration/node-specific/examples/aws_handler.test.js",
+    "test/integration/node-specific/examples/setup.js"
+  ]
+}

@@ -1,0 +1,45 @@
+---
+client.connect(function (err, client) {
+    if (err) {
+        console.log(err);
+    };
+    var db = client.db(configuration.db);
+});
+===
+let client;
+try {
+  client = await client.connect();
+} catch (err) {
+  if (err) {
+    console.log(err);
+  }
+}
+var db = client.db(configuration.db);
+
+---
+client.connect(function (err, client) {});
+===
+let client;
+try {
+  client = await client.connect();
+} catch (err) {}
+
+---
+client.connect(function(err, client) {
+  client.db('foo').collection('bar').insertOne({}, (err) => {
+    if (err) console.log(err);
+  })
+})
+
+===
+
+let client;
+try {
+  client = await client.connect();
+} catch {}
+
+try {
+  await client.db('foo').collection('bar').insertOne({});
+} catch (err) {
+  console.log(err);
+}

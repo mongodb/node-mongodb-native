@@ -1,0 +1,24 @@
+{
+  "name": "test-modernizer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx tsc *test.ts && npx mocha --config .mocharc *test.js",
+    "run": "ts-node index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ts-morph/bootstrap": "^0.23.0",
+    "@types/prettier": "^3.0.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "mocha": "^10.4.0"
+  }
+}
