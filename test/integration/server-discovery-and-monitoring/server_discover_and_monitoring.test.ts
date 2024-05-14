@@ -1,8 +1,10 @@
 import { EventEmitter, once } from 'node:events';
+import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import { type MongoClient, type ServerHeartbeatSucceededEvent } from '../../mongodb';
+import { Connection, type MongoClient, type ServerHeartbeatSucceededEvent } from '../../mongodb';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
@@ -16,27 +18,29 @@ describe('SDAM Unified Tests (Node Driver)', function () {
 
 describe('Monitoring rtt tests', function () {
   let client: MongoClient;
-  let windows: Record<string, number[][]>;
-  const THRESH = 200; // Wait for 200 total heartbeats. This is high enough to work for standalone, sharded and our typical 3-node replica set topology tests
-  const SAMPLING_WINDOW_SIZE = 10;
+  let heartbeatDurations: Record<string, number[]>;
+  const HEARTBEATS_TO_COLLECT = 200; // Wait for 200 total heartbeats. This is high enough to work for standalone, sharded and our typical 3-node replica set topology tests
+  const IGNORE_SIZE = 20;
+  const DELAY_MS = 10;
   let count: number;
   const ee = new EventEmitter();
 
   const listener = (ev: ServerHeartbeatSucceededEvent) => {
     if (!client.topology.s.servers.has(ev.connectionId)) return;
-    // @ts-expect-error accessing private fields
-    const rttSampler = client.topology.s.servers.get(ev.connectionId).monitor.rttSampler;
-    // @ts-expect-error accessing private fields
-    const rttSamples = rttSampler.rttSamples;
-    windows[ev.connectionId].push(Array.from(rttSamples));
     count++;
-
-    if (count === SAMPLING_WINDOW_SIZE) {
-      ee.emit('samplingWindowFilled');
+    if (count < IGNORE_SIZE) {
       return;
     }
 
-    if (count >= THRESH) {
+    heartbeatDurations[ev.connectionId].push(ev.duration);
+
+    // We ignore the first few heartbeats since the problem reported in NODE-6172 showed that the
+    // first few heartbeats were recorded properly
+    if (count === IGNORE_SIZE) {
+      return;
+    }
+
+    if (count >= HEARTBEATS_TO_COLLECT + IGNORE_SIZE) {
       client.off('serverHeartbeatSucceeded', listener);
       ee.emit('done');
     }
@@ -44,48 +48,79 @@ describe('Monitoring rtt tests', function () {
 
   beforeEach(function () {
     count = 0;
-    windows = {};
+    heartbeatDurations = {};
   });
 
   afterEach(async function () {
-    await client?.close();
+    if (client) {
+      await client.close();
+    }
+    sinon.restore();
   });
 
   for (const serverMonitoringMode of ['poll', 'stream']) {
     context(`when serverMonitoringMode is set to '${serverMonitoringMode}'`, function () {
-      beforeEach(async function () {
-        client = this.configuration.newClient({
-          heartbeatFrequencyMS: 100,
-          connectTimeoutMS: 1000,
-          serverMonitoringMode
+      context('after collecting a number of heartbeats', function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient({
+            heartbeatFrequencyMS: 100,
+            serverMonitoringMode
+          });
+
+          // make send command delay for DELAY_MS ms to ensure that the actual time between sending
+          // a heartbeat and receiving a response don't drop below 1ms. This is done since our
+          // testing is colocated with its mongo deployment so network latency is very low
+          const stub = sinon
+            // @ts-expect-error accessing private method
+            .stub(Connection.prototype, 'sendCommand')
+            .callsFake(async function* (...args) {
+              await setTimeout(DELAY_MS);
+              yield* stub.wrappedMethod.call(this, ...args);
+            });
+          await client.connect();
+
+          client.on('serverHeartbeatSucceeded', listener);
+
+          for (const k of client.topology.s.servers.keys()) {
+            heartbeatDurations[k] = [];
+          }
+
+          await once(ee, 'done');
         });
 
-        await client.connect();
-        //await client.db('test').admin().ping();
-
-        client.on('serverHeartbeatSucceeded', listener);
-
-        for (const k of client.topology.s.servers.keys()) {
-          windows[k] = [];
-        }
-
-        await once(ee, 'samplingWindowFilled');
-      });
-
-      it('rttSampler does not accumulate 0 rtt', {
-        metadata: {
-          requires: { topology: '!load-balanced' }
-        },
-        test: async function () {
-          await once(ee, 'done');
-          for (const s in windows) {
-            // Test that at every point we collect a heartbeat, the rttSampler is not filled with
-            // zeroes
-            for (const window of windows[s]) {
-              expect(window.reduce((acc, x) => x + acc)).to.be.greaterThan(0);
+        it(
+          'heartbeat duration is not incorrectly reported as zero on ServerHeartbeatSucceededEvents',
+          {
+            metadata: {
+              requires: { topology: '!load-balanced' }
+            },
+            test: async function () {
+              for (const server in heartbeatDurations) {
+                const averageDuration =
+                  heartbeatDurations[server].reduce((acc, x) => acc + x) /
+                  heartbeatDurations[server].length;
+                expect(averageDuration).to.be.gt(DELAY_MS);
+              }
             }
           }
-        }
+        );
+
+        it('ServerDescription.roundTripTime is not incorrectly reported as zero', {
+          metadata: {
+            requires: { topology: '!load-balanced' }
+          },
+          test: async function () {
+            await once(ee, 'done');
+            for (const server in heartbeatDurations) {
+              const averageDuration =
+                heartbeatDurations[server].reduce((acc, x) => acc + x) /
+                heartbeatDurations[server].length;
+              expect(
+                client.topology.description.servers.get(server).roundTripTime
+              ).to.be.approximately(averageDuration, 1);
+            }
+          }
+        });
       });
     });
   }
