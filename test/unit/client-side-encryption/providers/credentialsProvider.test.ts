@@ -23,6 +23,7 @@ import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporar
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as utils from '../../../../src/utils';
 import * as requirements from '../requirements.helper';
+import { MongoNetworkTimeoutError } from '../../../mongodb';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -437,9 +438,7 @@ describe('#refreshKMSCredentials', function () {
       afterEach(() => sinon.restore());
       context('when the request times out', () => {
         before(() => {
-          sinon
-            .stub(utils, 'get')
-            .rejects(new MongoCryptKMSRequestNetworkTimeoutError('request timed out'));
+          sinon.stub(utils, 'get').rejects(new MongoNetworkTimeoutError('request timed out'));
         });
 
         it('throws a MongoCryptKMSRequestError', async () => {
