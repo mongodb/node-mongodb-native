@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { Connection, GCPMachineWorkflow, MongoCredentials, TokenCache } from '../../../../mongodb';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
+import { Connection, GCPMachineWorkflow, MongoCredentials } from '../../../../mongodb';
 
 describe('GCPMachineFlow', function () {
   describe('#execute', function () {

@@ -1,12 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  AzureMachineWorkflow,
-  Connection,
-  MongoCredentials,
-  TokenCache
-} from '../../../../mongodb';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
+import { AzureMachineWorkflow, Connection, MongoCredentials } from '../../../../mongodb';
 
 describe('AzureMachineFlow', function () {
   describe('#execute', function () {

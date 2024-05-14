@@ -1,12 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  Connection,
-  MongoCredentials,
-  TokenCache,
-  TokenMachineWorkflow
-} from '../../../../mongodb';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
+import { Connection, MongoCredentials, TokenMachineWorkflow } from '../../../../mongodb';
 
 describe('TokenMachineFlow', function () {
   describe('#execute', function () {
