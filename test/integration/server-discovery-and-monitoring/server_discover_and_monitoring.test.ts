@@ -17,7 +17,7 @@ describe('SDAM Unified Tests (Node Driver)', function () {
 describe('Monitoring rtt tests', function () {
   let client: MongoClient;
   let windows: Record<string, number[][]>;
-  const THRESH = 100; // Wait for 100 total heartbeats. This is high enough to work for standalone, sharded and our typical 3-node replica set topology tests
+  const THRESH = 200; // Wait for 100 total heartbeats. This is high enough to work for standalone, sharded and our typical 3-node replica set topology tests
   const SAMPLING_WINDOW_SIZE = 10;
   let count: number;
   const ee = new EventEmitter();
@@ -58,7 +58,7 @@ describe('Monitoring rtt tests', function () {
     context(`when serverMonitoringMode is set to '${serverMonitoringMode}'`, function () {
       beforeEach(async function () {
         client = this.configuration.newClient({
-          heartbeatFrequencyMS: 500,
+          heartbeatFrequencyMS: 100,
           connectTimeoutMS: 1000,
           serverMonitoringMode
         });
