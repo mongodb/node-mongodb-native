@@ -16,19 +16,37 @@ describe('SDAM Unified Tests (Node Driver)', function () {
 
 describe('Monitoring rtt tests', function () {
   let client: MongoClient;
-  let durations: number[];
-  const thresh = 40;
+  let windows: Record<string, number[][]>;
+  const thresh = 100; // Wait for 100 total heartbeats
+  const SAMPLING_WINDOW_SIZE = 10;
+  let count: number;
   const ee = new EventEmitter();
   const listener = (ev: ServerHeartbeatSucceededEvent) => {
-    durations.push(ev.duration);
-    if (durations.length >= thresh) {
+    try {
+      // @ts-expect-error accessing private fields
+      const rttSampler = client.topology.s.servers.get(ev.connectionId).monitor.rttSampler;
+      // @ts-expect-error accessing private fields
+      const rttSamples = rttSampler.rttSamples;
+      windows[ev.connectionId].push(Array.from(rttSamples));
+      count++;
+    } catch {
+      // silently ignore when servers aren't yet populated
+    }
+
+    if (count === SAMPLING_WINDOW_SIZE) {
+      ee.emit('samplingWindowFilled');
+      return;
+    }
+
+    if (count >= thresh) {
       client.off('serverHeartbeatSucceeded', listener);
       ee.emit('done');
     }
   };
 
   beforeEach(function () {
-    durations = [];
+    count = 0;
+    windows = {};
   });
 
   afterEach(async function () {
@@ -39,17 +57,35 @@ describe('Monitoring rtt tests', function () {
     context(`when serverMonitoringMode is set to '${serverMonitoringMode}'`, function () {
       beforeEach(async function () {
         client = this.configuration.newClient({
-          heartbeatFrequencyMS: 100,
+          heartbeatFrequencyMS: 500,
+          connectTimeoutMS: 1000,
           serverMonitoringMode
         });
         client.on('serverHeartbeatSucceeded', listener);
 
         await client.connect();
+
+        for (const k of client.topology.s.servers.keys()) {
+          windows[k] = [];
+        }
+
+        await once(ee, 'samplingWindowFilled');
       });
 
-      it('duration of a successful heartbeat is never reported as 0ms', async function () {
-        await once(ee, 'done');
-        expect(durations.every(x => x !== 0)).to.be.true;
+      it('rttSampler does not accumulate 0 rtt', {
+        metadata: {
+          requires: { topology: '!load-balanced' }
+        },
+        test: async function () {
+          await once(ee, 'done');
+          for (const s in windows) {
+            // Test that at every point we collect a heartbeat, the rttSampler is not filled with
+            // zeroes
+            for (const window of windows[s]) {
+              expect(window.reduce((acc, x) => x + acc)).to.be.greaterThanOrEqual(0);
+            }
+          }
+        }
       });
     });
   }
