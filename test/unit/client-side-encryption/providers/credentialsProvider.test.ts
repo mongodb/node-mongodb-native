@@ -3,10 +3,7 @@ import * as http from 'http';
 import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import {
-  MongoCryptAzureKMSRequestError,
-  MongoCryptKMSRequestNetworkTimeoutError
-} from '../../../../src/client-side-encryption/errors';
+import { MongoCryptAzureKMSRequestError } from '../../../../src/client-side-encryption/errors';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   isEmptyCredentials,
@@ -22,8 +19,8 @@ import {
 import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as utils from '../../../../src/utils';
-import * as requirements from '../requirements.helper';
 import { MongoNetworkTimeoutError } from '../../../mongodb';
+import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
