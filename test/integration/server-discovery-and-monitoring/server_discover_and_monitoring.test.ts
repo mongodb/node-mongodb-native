@@ -17,10 +17,11 @@ describe('SDAM Unified Tests (Node Driver)', function () {
 describe('Monitoring rtt tests', function () {
   let client: MongoClient;
   let windows: Record<string, number[][]>;
-  const thresh = 100; // Wait for 100 total heartbeats
+  const THRESH = 100; // Wait for 100 total heartbeats. This is high enough to work for standalone, sharded and our typical 3-node replica set topology tests
   const SAMPLING_WINDOW_SIZE = 10;
   let count: number;
   const ee = new EventEmitter();
+
   const listener = (ev: ServerHeartbeatSucceededEvent) => {
     try {
       // @ts-expect-error accessing private fields
@@ -38,7 +39,7 @@ describe('Monitoring rtt tests', function () {
       return;
     }
 
-    if (count >= thresh) {
+    if (count >= THRESH) {
       client.off('serverHeartbeatSucceeded', listener);
       ee.emit('done');
     }
@@ -82,7 +83,7 @@ describe('Monitoring rtt tests', function () {
             // Test that at every point we collect a heartbeat, the rttSampler is not filled with
             // zeroes
             for (const window of windows[s]) {
-              expect(window.reduce((acc, x) => x + acc)).to.be.greaterThanOrEqual(0);
+              expect(window.reduce((acc, x) => x + acc)).to.be.greaterThan(0);
             }
           }
         }
