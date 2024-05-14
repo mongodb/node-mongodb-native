@@ -62,7 +62,6 @@ describe('OIDC Auth Spec Tests', function () {
         // Assert that the callback was called 1 time.
         // Close the client.
         beforeEach(function () {
-          console.log(process.env);
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy

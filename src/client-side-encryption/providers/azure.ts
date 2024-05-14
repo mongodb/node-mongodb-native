@@ -1,6 +1,7 @@
 import { type Document } from '../../bson';
+import { MongoNetworkTimeoutError } from '../../error';
 import { get } from '../../utils';
-import { MongoCryptAzureKMSRequestError, MongoCryptKMSRequestNetworkTimeoutError } from '../errors';
+import { MongoCryptAzureKMSRequestError } from '../errors';
 import { type KMSProviders } from './index';
 
 const MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS = 6000;
@@ -152,7 +153,7 @@ export async function fetchAzureKMSToken(
     const response = await get(url, { headers });
     return await parseResponse(response);
   } catch (error) {
-    if (error instanceof MongoCryptKMSRequestNetworkTimeoutError) {
+    if (error instanceof MongoNetworkTimeoutError) {
       throw new MongoCryptAzureKMSRequestError(`[Azure KMS] ${error.message}`);
     }
     throw error;

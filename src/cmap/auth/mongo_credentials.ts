@@ -3,7 +3,6 @@
 import type { Document } from '../../bson';
 import {
   MongoAPIError,
-  MongoAzureError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError
 } from '../../error';
@@ -212,7 +211,7 @@ export class MongoCredentials {
           this.mechanismProperties.ENVIRONMENT === 'gcp') &&
         !this.mechanismProperties.TOKEN_RESOURCE
       ) {
-        throw new MongoAzureError(TOKEN_RESOURCE_MISSING_ERROR);
+        throw new MongoInvalidArgumentError(TOKEN_RESOURCE_MISSING_ERROR);
       }
 
       if (

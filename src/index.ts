@@ -258,8 +258,8 @@ export type {
   OIDCCallbackParams,
   OIDCResponse
 } from './cmap/auth/mongodb_oidc';
-export { Workflow } from './cmap/auth/mongodb_oidc';
-export { TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
+export type { Workflow } from './cmap/auth/mongodb_oidc';
+export type { TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 export type {
   MessageHeader,
   OpCompressedRequest,

@@ -2,8 +2,8 @@ import { expect } from 'chai';
 
 import {
   MongoAPIError,
-  MongoAzureError,
   MongoClient,
+  MongoInvalidArgumentError,
   MongoParseError,
   MongoRuntimeError
 } from '../mongodb';
@@ -75,7 +75,7 @@ export function executeUriValidationTest(
       new MongoClient(test.uri);
       expect.fail(`Expected "${test.uri}" to be invalid${test.valid ? ' because of warning' : ''}`);
     } catch (err) {
-      if (err instanceof MongoAzureError) {
+      if (err instanceof MongoInvalidArgumentError) {
         // Azure URI errors don't have an underlying cause.
       } else if (err instanceof MongoRuntimeError) {
         expect(err).to.have.nested.property('cause.code').equal('ERR_INVALID_URL');

@@ -7,7 +7,7 @@ import {
   type AzureKMSRequestOptions,
   fetchAzureKMSToken
 } from '../../../src/client-side-encryption/providers/azure';
-import { type Document, MongoNetworkTimeoutError } from '../../mongodb';
+import { type Document } from '../../mongodb';
 
 const BASE_URL = new URL(`http://127.0.0.1:8080/metadata/identity/oauth2/token`);
 class KMSRequestOptions implements AzureKMSRequestOptions {
@@ -119,7 +119,7 @@ context('Azure KMS Mock Server Tests', function () {
     it('returns an error after the request times out', async () => {
       const error = await fetchAzureKMSToken(new KMSRequestOptions('slow')).catch(e => e);
 
-      expect(error).to.be.instanceof(MongoNetworkTimeoutError);
+      expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
   });
 });
