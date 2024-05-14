@@ -17,22 +17,19 @@ describe('SDAM Unified Tests (Node Driver)', function () {
 describe('Monitoring rtt tests', function () {
   let client: MongoClient;
   let windows: Record<string, number[][]>;
-  const THRESH = 200; // Wait for 100 total heartbeats. This is high enough to work for standalone, sharded and our typical 3-node replica set topology tests
+  const THRESH = 200; // Wait for 200 total heartbeats. This is high enough to work for standalone, sharded and our typical 3-node replica set topology tests
   const SAMPLING_WINDOW_SIZE = 10;
   let count: number;
   const ee = new EventEmitter();
 
   const listener = (ev: ServerHeartbeatSucceededEvent) => {
-    try {
-      // @ts-expect-error accessing private fields
-      const rttSampler = client.topology.s.servers.get(ev.connectionId).monitor.rttSampler;
-      // @ts-expect-error accessing private fields
-      const rttSamples = rttSampler.rttSamples;
-      windows[ev.connectionId].push(Array.from(rttSamples));
-      count++;
-    } catch {
-      // silently ignore when servers aren't yet populated
-    }
+    if (!client.topology.s.servers.has(ev.connectionId)) return;
+    // @ts-expect-error accessing private fields
+    const rttSampler = client.topology.s.servers.get(ev.connectionId).monitor.rttSampler;
+    // @ts-expect-error accessing private fields
+    const rttSamples = rttSampler.rttSamples;
+    windows[ev.connectionId].push(Array.from(rttSamples));
+    count++;
 
     if (count === SAMPLING_WINDOW_SIZE) {
       ee.emit('samplingWindowFilled');
@@ -62,9 +59,11 @@ describe('Monitoring rtt tests', function () {
           connectTimeoutMS: 1000,
           serverMonitoringMode
         });
-        client.on('serverHeartbeatSucceeded', listener);
 
         await client.connect();
+        //await client.db('test').admin().ping();
+
+        client.on('serverHeartbeatSucceeded', listener);
 
         for (const k of client.topology.s.servers.keys()) {
           windows[k] = [];
