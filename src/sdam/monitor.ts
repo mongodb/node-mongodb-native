@@ -521,10 +521,7 @@ export class RTTPinger {
     this.connection = undefined;
   }
 
-  private measureAndReschedule(start?: number, conn?: Connection) {
-    if (start == null) {
-      start = now();
-    }
+  private measureAndReschedule(start: number, conn?: Connection) {
     if (this.closed) {
       conn?.destroy();
       return;
