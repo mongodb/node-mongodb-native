@@ -110,7 +110,6 @@ describe('Monitoring rtt tests', function () {
             requires: { topology: '!load-balanced' }
           },
           test: async function () {
-            await once(ee, 'done');
             for (const server in heartbeatDurations) {
               const averageDuration =
                 heartbeatDurations[server].reduce((acc, x) => acc + x) /
