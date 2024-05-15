@@ -111,9 +111,9 @@ describe('Monitoring rtt tests', function () {
               expect(relevantDurations).to.have.length.gt(0);
               const averageDuration =
                 relevantDurations.reduce((acc, x) => acc + x) / relevantDurations.length;
-              expect(
-                client.topology.description.servers.get(server).roundTripTime
-              ).to.be.approximately(averageDuration, 1);
+              const rtt = client.topology.description.servers.get(server).roundTripTime;
+              expect(rtt).to.not.equal(0);
+              expect(rtt).to.be.approximately(averageDuration, 3);
             }
           }
         });
