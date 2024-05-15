@@ -1,5 +1,6 @@
 import { createProjectSync } from '@ts-morph/bootstrap';
 import * as prettier from 'prettier';
+import { type Writable } from 'stream';
 import * as ts from 'typescript';
 
 export function annotate(child: ts.Node) {
@@ -7,37 +8,48 @@ export function annotate(child: ts.Node) {
   child.forEachChild(annotate);
 }
 
-export function explore(node: ts.Node) {
+export function explore(node: ts.Node, outStream: Writable = process.stdout) {
   // annotate nodes first
   node.forEachChild(annotate);
 
   let spacing = 0;
-  function print(node) {
+  function write(node) {
     const padding = Array.from({ length: spacing })
       .map(() => ' ')
       .join('');
-    // eslint-disable-next-line no-console
-    console.log(`${padding}${node.KIND}`);
+
+    if (node.text) {
+      outStream.write(`${padding}${node.KIND} (${node.text})\n`);
+    } else {
+      outStream.write(`${padding}${node.KIND}\n`);
+    }
     spacing += 2;
-    node.forEachChild(print);
+    node.forEachChild(write);
     spacing -= 2;
   }
 
-  node.forEachChild(print);
+  node.forEachChild(write);
 }
 
-export async function formatSource(source: string) {
+export async function formatSource(source: string | ts.Node, hint = ts.EmitHint.Unspecified) {
+  if (typeof source === 'object') {
+    const printer = ts.createPrinter();
+    const project = createProjectSync();
+    const resultFile = project.createSourceFile('someFileName.ts');
+    source = printer.printNode(hint, source, resultFile);
+  }
+
   const config = await prettier.resolveConfig(__dirname);
   const formatOptions = { ...config, parser: 'typescript' };
   return await prettier.format(source, formatOptions);
 }
 
-export async function print(node: ts.Node | ts.Statement[]) {
+export async function print(node: ts.Node | ts.Statement[], hint = ts.EmitHint.Unspecified) {
   const _node = Array.isArray(node) ? ts.factory.createBlock(node) : node;
   const printer = ts.createPrinter();
   const project = createProjectSync();
   const resultFile = project.createSourceFile('someFileName.ts');
-  const typescriptSource = printer.printNode(ts.EmitHint.Unspecified, _node, resultFile);
+  const typescriptSource = printer.printNode(hint, _node, resultFile);
   // eslint-disable-next-line no-console
   console.log(await formatSource(typescriptSource));
 }
@@ -54,4 +66,22 @@ export function setUnion<T>(a: ArrayFromabble<T>, b: IntoSet<T>): Set<T> {
       return accum;
     }, new Set<T>())
   );
+}
+
+export function find(root: ts.Node, predicate: (node: ts.Node) => boolean): ts.Node[] {
+  const result: ts.Node[] = [];
+  function visit(node: ts.Node) {
+    if (predicate(node)) {
+      result.push(node);
+    }
+    node.forEachChild(visit);
+  }
+
+  visit(root);
+
+  return result;
+}
+
+export function nodeExists(root: ts.Node, predicate: (node: ts.Node) => boolean) {
+  return find(root, predicate).length > 0;
 }
