@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.6.2](https://github.com/mongodb/node-mongodb-native/compare/v6.6.1...v6.6.2) (2024-05-15)
+
+
+### Bug Fixes
+
+* **NODE-6171:** RTT set to zero when serverMonitoringMode=stream ([#4110](https://github.com/mongodb/node-mongodb-native/issues/4110)) ([7a7ec5b](https://github.com/mongodb/node-mongodb-native/commit/7a7ec5b95d0c38b377551c31d03130cd9f1882f6))
+
 ## [6.6.1](https://github.com/mongodb/node-mongodb-native/compare/v6.6.0...v6.6.1) (2024-05-06)
 
 
