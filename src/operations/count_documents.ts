@@ -13,7 +13,7 @@ export interface CountDocumentsOptions extends AggregateOptions {
 }
 
 /** @internal */
-export class CountDocumentsOperation extends AggregateOperation<number> {
+export class CountDocumentsOperation extends AggregateOperation {
   constructor(collection: Collection, query: Document, options: CountDocumentsOptions) {
     const pipeline = [];
     pipeline.push({ $match: query });
@@ -31,16 +31,8 @@ export class CountDocumentsOperation extends AggregateOperation<number> {
     super(collection.s.namespace, pipeline, options);
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<any> {
     const result = await super.execute(server, session);
-
-    // NOTE: We're avoiding creating a cursor here to reduce the callstack.
-    const response = result as unknown as Document;
-    if (response.cursor == null || response.cursor.firstBatch == null) {
-      return 0;
-    }
-
-    const docs = response.cursor.firstBatch;
-    return docs.length ? docs[0].n : 0;
+    return result.shift()?.n ?? 0;
   }
 }

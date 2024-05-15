@@ -10,7 +10,7 @@ import {
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
-import { type MongoDBNamespace, ns } from '../../utils';
+import { ns } from '../../utils';
 import { OnDemandDocument } from './on_demand/document';
 
 // eslint-disable-next-line no-restricted-syntax
@@ -171,13 +171,29 @@ export class MongoDBResponse extends OnDemandDocument {
   }
 }
 
+// Here's a litle blast from the past.
+// OLD style method definition so that I can override get without redefining ALL the fancy TS :/
+Object.defineProperty(MongoDBResponse.prototype, 'get', {
+  value: function get(name: any, as: any, required: any) {
+    try {
+      return OnDemandDocument.prototype.get.call(this, name, as, required);
+    } catch (cause) {
+      throw new MongoUnexpectedServerResponseError(cause.message, { cause });
+    }
+  }
+});
+
 /** @internal */
 export class CursorResponse extends MongoDBResponse {
   /**
    * This supports a feature of the FindCursor.
    * It is an optimization to avoid an extra getMore when the limit has been reached
    */
-  static emptyGetMore = { id: new Long(0), length: 0, shift: () => null };
+  static emptyGetMore: CursorResponse = {
+    id: new Long(0),
+    length: 0,
+    shift: () => null
+  } as unknown as CursorResponse;
 
   static override is(value: unknown): value is CursorResponse {
     return value instanceof CursorResponse || value === CursorResponse.emptyGetMore;
@@ -186,25 +202,25 @@ export class CursorResponse extends MongoDBResponse {
   private _batch: OnDemandDocument | null = null;
   private iterated = 0;
 
-  get cursor() {
+  private get cursor() {
     return this.get('cursor', BSONType.object, true);
   }
 
-  get id(): Long {
+  public get id(): Long {
     return Long.fromBigInt(this.cursor.get('id', BSONType.long, true));
   }
 
-  get ns() {
+  public get ns() {
     const namespace = this.cursor.get('ns', BSONType.string);
     if (namespace != null) return ns(namespace);
     return null;
   }
 
-  get length() {
+  public get length() {
     return Math.max(this.batchSize - this.iterated, 0);
   }
 
-  get batch() {
+  private get batch() {
     if (this._batch != null) return this._batch;
     const cursor = this.cursor;
     if (cursor.has('firstBatch')) this._batch = cursor.get('firstBatch', BSONType.array, true);
@@ -213,11 +229,21 @@ export class CursorResponse extends MongoDBResponse {
     return this._batch;
   }
 
-  get batchSize() {
+  public get batchSize() {
     return this.batch?.size();
   }
 
-  shift(options?: BSONSerializeOptions): any {
+  public get postBatchResumeToken() {
+    return (
+      this.cursor.get('postBatchResumeToken', BSONType.object)?.toObject({
+        promoteValues: false,
+        promoteLongs: false,
+        promoteBuffers: false
+      }) ?? null
+    );
+  }
+
+  public shift(options?: BSONSerializeOptions): any {
     if (this.iterated >= this.batchSize) {
       return null;
     }
@@ -232,15 +258,40 @@ export class CursorResponse extends MongoDBResponse {
     }
   }
 
-  clear() {
+  public clear() {
     this.iterated = this.batchSize;
   }
+}
 
-  pushMany() {
-    throw new Error('pushMany Unsupported method');
+/**
+ * Explain responses have nothing to do with cursor responses
+ * This class serves to temporarily avoid refactoring how cursors handle
+ * explain responses which is to detect that the response is not cursor-like and return the explain
+ * result as the "first and only" document in the "batch" and end the "cursor"
+ */
+export class ExplainedCursorResponse extends CursorResponse {
+  isExplain = true;
+
+  override get id(): Long {
+    return Long.fromBigInt(0n);
   }
 
-  push() {
-    throw new Error('push Unsupported method');
+  override get batchSize() {
+    return 0;
+  }
+
+  override get ns() {
+    return null;
+  }
+
+  _length = 1;
+  override get length(): number {
+    return this._length;
+  }
+
+  override shift(options?: BSONSerializeOptions | undefined) {
+    if (this._length === 0) return null;
+    this._length -= 1;
+    return this.toObject(options);
   }
 }

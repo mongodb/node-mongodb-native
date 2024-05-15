@@ -13,7 +13,7 @@ import {
   MongoTailableCursorError
 } from '../error';
 import type { MongoClient } from '../mongo_client';
-import { type TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
+import { TypedEventEmitter } from '../mongo_types';
 import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
@@ -21,7 +21,7 @@ import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { List, type MongoDBNamespace, ns, squashError } from '../utils';
+import { type MongoDBNamespace, squashError } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
@@ -145,13 +145,7 @@ export abstract class AbstractCursor<
   /** @internal */
   [kNamespace]: MongoDBNamespace;
   /** @internal */
-  [kDocuments]: {
-    length: number;
-    shift(bsonOptions?: any): TSchema | null;
-    clear(): void;
-    pushMany(many: Iterable<TSchema>): void;
-    push(item: TSchema): void;
-  };
+  [kDocuments]: CursorResponse = { length: 0 } as unknown as CursorResponse;
   /** @internal */
   [kClient]: MongoClient;
   /** @internal */
@@ -182,7 +176,6 @@ export abstract class AbstractCursor<
     this[kClient] = client;
     this[kNamespace] = namespace;
     this[kId] = null;
-    this[kDocuments] = new List();
     this[kInitialized] = false;
     this[kClosed] = false;
     this[kKilled] = false;
@@ -637,13 +630,12 @@ export abstract class AbstractCursor<
   protected abstract _initialize(session: ClientSession | undefined): Promise<ExecutionResult>;
 
   /** @internal */
-  async getMore(batchSize: number, useCursorResponse = false): Promise<Document | null> {
+  async getMore(batchSize: number): Promise<CursorResponse> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const getMoreOperation = new GetMoreOperation(this[kNamespace], this[kId]!, this[kServer]!, {
       ...this[kOptions],
       session: this[kSession],
-      batchSize,
-      useCursorResponse
+      batchSize
     });
 
     return await executeOperation(this[kClient], getMoreOperation);
@@ -661,37 +653,13 @@ export abstract class AbstractCursor<
       const state = await this._initialize(this[kSession]);
       const response = state.response;
       this[kServer] = state.server;
-      if (CursorResponse.is(response)) {
-        this[kId] = response.id;
-        if (response.ns) this[kNamespace] = response.ns;
-        this[kDocuments] = response;
-      } else if (response.cursor) {
-        // TODO(NODE-2674): Preserve int64 sent from MongoDB
-        this[kId] =
-          typeof response.cursor.id === 'number'
-            ? Long.fromNumber(response.cursor.id)
-            : typeof response.cursor.id === 'bigint'
-            ? Long.fromBigInt(response.cursor.id)
-            : response.cursor.id;
 
-        if (response.cursor.ns) {
-          this[kNamespace] = ns(response.cursor.ns);
-        }
+      if (!CursorResponse.is(response)) throw new Error('ah');
 
-        this[kDocuments].pushMany(response.cursor.firstBatch);
-      }
-
-      // When server responses return without a cursor document, we close this cursor
-      // and return the raw server response. This is often the case for explain commands
-      // for example
-      if (this[kId] == null) {
-        this[kId] = Long.ZERO;
-        // TODO(NODE-3286): ExecutionResult needs to accept a generic parameter
-        this[kDocuments].push(state.response as TODO_NODE_3286);
-      }
-
-      // the cursor is now initialized, even if it is dead
-      this[kInitialized] = true;
+      this[kId] = response.id;
+      this[kNamespace] = response.ns ?? this[kNamespace];
+      this[kDocuments] = response;
+      this[kInitialized] = true; // the cursor is now initialized, even if it is dead
     } catch (error) {
       // the cursor is now initialized, even if an error occurred
       this[kInitialized] = true;
@@ -802,20 +770,8 @@ async function next<T>(
 
     try {
       const response = await cursor.getMore(batchSize);
-      if (CursorResponse.is(response)) {
-        cursor[kId] = response.id;
-        cursor[kDocuments] = response;
-      } else if (response) {
-        const cursorId =
-          typeof response.cursor.id === 'number'
-            ? Long.fromNumber(response.cursor.id)
-            : typeof response.cursor.id === 'bigint'
-            ? Long.fromBigInt(response.cursor.id)
-            : response.cursor.id;
-
-        cursor[kDocuments].pushMany(response.cursor.nextBatch);
-        cursor[kId] = cursorId;
-      }
+      cursor[kId] = response.id;
+      cursor[kDocuments] = response;
     } catch (error) {
       try {
         await cleanupCursor(cursor, { error, needsToEmitClosed: true });

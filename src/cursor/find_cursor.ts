@@ -79,19 +79,14 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const response = await executeOperation(this.client, findOperation);
 
     // the response is not a cursor when `explain` is enabled
-    if (CursorResponse.is(response)) {
-      this[kNumReturned] = response.batchSize;
-    } else {
-      // Can be an explain response, hence the ?. on everything
-      this[kNumReturned] = this[kNumReturned] + (response?.cursor?.firstBatch?.length ?? 0);
-    }
+    this[kNumReturned] = response.batchSize;
 
     // TODO: NODE-2882
     return { server: findOperation.server, session, response };
   }
 
   /** @internal */
-  override async getMore(batchSize: number): Promise<Document | null> {
+  override async getMore(batchSize: number): Promise<CursorResponse> {
     const numReturned = this[kNumReturned];
     if (numReturned) {
       // TODO(DRIVERS-1448): Remove logic to enforce `limit` in the driver
@@ -117,13 +112,9 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       }
     }
 
-    const response = await super.getMore(batchSize, this.client.autoEncrypter ? false : true);
+    const response = await super.getMore(batchSize);
     // TODO: wrap this in some logic to prevent it from happening if we don't need this support
-    if (CursorResponse.is(response)) {
-      this[kNumReturned] = this[kNumReturned] + response.batchSize;
-    } else {
-      this[kNumReturned] = this[kNumReturned] + (response?.cursor?.nextBatch?.length ?? 0);
-    }
+    this[kNumReturned] = this[kNumReturned] + response.batchSize;
 
     return response;
   }
@@ -151,14 +142,16 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** Execute the explain for the cursor */
   async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
-    return await executeOperation(
-      this.client,
-      new FindOperation(this.namespace, this[kFilter], {
-        ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
-        ...this.cursorOptions,
-        explain: verbosity ?? true
-      })
-    );
+    return (
+      await executeOperation(
+        this.client,
+        new FindOperation(this.namespace, this[kFilter], {
+          ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
+          ...this.cursorOptions,
+          explain: verbosity ?? true
+        })
+      )
+    ).shift(this[kBuiltOptions]);
   }
 
   /** Set the cursor query */

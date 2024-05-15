@@ -160,7 +160,7 @@ export { SrvPollingEvent } from './sdam/srv_polling';
 
 // type only exports below, these are removed from emitted JS
 export type { AdminPrivate } from './admin';
-export type { BSONSerializeOptions, Document } from './bson';
+export type { BSONElement, BSONSerializeOptions, Document } from './bson';
 export type { deserialize, serialize } from './bson';
 export type {
   BulkResult,
@@ -338,10 +338,7 @@ export type {
 } from './cursor/abstract_cursor';
 export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
-export type {
-  ChangeStreamAggregateRawResult,
-  ChangeStreamCursorOptions
-} from './cursor/change_stream_cursor';
+export type { ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 export type {
   ListSearchIndexesCursor,
   ListSearchIndexesOptions

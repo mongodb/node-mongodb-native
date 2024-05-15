@@ -27,6 +27,7 @@ export {
   UUID
 } from 'bson';
 
+/** @internal */
 export type BSONElement = BSON.OnDemand['BSONElement'];
 
 export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSONElement[] {

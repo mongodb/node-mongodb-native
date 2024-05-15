@@ -20,8 +20,6 @@ export interface GetMoreOptions extends OperationOptions {
   maxTimeMS?: number;
   /** TODO(NODE-4413): Address bug with maxAwaitTimeMS not being passed in from the cursor correctly */
   maxAwaitTimeMS?: number;
-
-  useCursorResponse: boolean;
 }
 
 /**
@@ -58,7 +56,7 @@ export class GetMoreOperation extends AbstractOperation {
    * Although there is a server already associated with the get more operation, the signature
    * for execute passes a server so we will just use that one.
    */
-  override async execute(server: Server, _session: ClientSession | undefined): Promise<Document> {
+  override async execute(server: Server, _session: ClientSession | undefined): Promise<CursorResponse> {
     if (server !== this.server) {
       throw new MongoRuntimeError('Getmore must run on the same server operation began on');
     }
@@ -103,7 +101,7 @@ export class GetMoreOperation extends AbstractOperation {
       this.ns,
       getMoreCmd,
       commandOptions,
-      this.options.useCursorResponse ? CursorResponse : undefined
+      CursorResponse
     );
   }
 }
