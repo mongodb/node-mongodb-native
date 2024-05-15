@@ -1,6 +1,7 @@
 import { loadSpecTests } from '../../spec';
 import { executeUriValidationTest } from '../../tools/uri_spec_runner';
 
+// TODO(NODE-6172): Handle commas in TOKEN_RESOURCE.
 const SKIP = 'should handle a complicated url-encoded TOKEN_RESOURCE (MONGODB-OIDC)';
 
 describe('Auth option spec tests (legacy)', function () {
