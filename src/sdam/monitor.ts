@@ -220,7 +220,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   }
 
   get latestRtt(): number | null {
-    return this.rttSampler.last; // FIXME: Check if this is acceptable
+    return this.rttSampler.last;
   }
 
   addRttSample(rtt: number) {
