@@ -1,10 +1,14 @@
-import { EventEmitter, once } from 'node:events';
 import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { Connection, type MongoClient, type ServerHeartbeatSucceededEvent } from '../../mongodb';
+import {
+  Connection,
+  type MongoClient,
+  promiseWithResolvers,
+  type ServerHeartbeatSucceededEvent
+} from '../../mongodb';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
@@ -19,36 +23,12 @@ describe('SDAM Unified Tests (Node Driver)', function () {
 describe('Monitoring rtt tests', function () {
   let client: MongoClient;
   let heartbeatDurations: Record<string, number[]>;
-  const HEARTBEATS_TO_COLLECT = 200; // Wait for 200 total heartbeats. This is high enough to work for standalone, sharded and our typical 3-node replica set topology tests
-  const IGNORE_SIZE = 20;
+  const HEARTBEATS_TO_COLLECT_PER_NODE = 65;
+  const IGNORE_SIZE = 5;
   const DELAY_MS = 10;
-  let count: number;
-  const ee = new EventEmitter();
-
-  const listener = (ev: ServerHeartbeatSucceededEvent) => {
-    if (!client.topology.s.servers.has(ev.connectionId)) return;
-    count++;
-    if (count < IGNORE_SIZE) {
-      return;
-    }
-
-    heartbeatDurations[ev.connectionId].push(ev.duration);
-
-    // We ignore the first few heartbeats since the problem reported in NODE-6172 showed that the
-    // first few heartbeats were recorded properly
-    if (count === IGNORE_SIZE) {
-      return;
-    }
-
-    if (count >= HEARTBEATS_TO_COLLECT + IGNORE_SIZE) {
-      client.off('serverHeartbeatSucceeded', listener);
-      ee.emit('done');
-    }
-  };
 
   beforeEach(function () {
-    count = 0;
-    heartbeatDurations = {};
+    heartbeatDurations = Object.create(null);
   });
 
   afterEach(async function () {
@@ -67,7 +47,7 @@ describe('Monitoring rtt tests', function () {
             serverMonitoringMode
           });
 
-          // make send command delay for DELAY_MS ms to ensure that the actual time between sending
+          // make sendCommand delay for DELAY_MS ms to ensure that the actual time between sending
           // a heartbeat and receiving a response don't drop below 1ms. This is done since our
           // testing is colocated with its mongo deployment so network latency is very low
           const stub = sinon
@@ -79,13 +59,28 @@ describe('Monitoring rtt tests', function () {
             });
           await client.connect();
 
-          client.on('serverHeartbeatSucceeded', listener);
+          const { promise, resolve } = promiseWithResolvers<void>();
+          client.on('serverHeartbeatSucceeded', (ev: ServerHeartbeatSucceededEvent) => {
+            heartbeatDurations[ev.connectionId] ??= [];
+            if (
+              heartbeatDurations[ev.connectionId].length <
+              HEARTBEATS_TO_COLLECT_PER_NODE + IGNORE_SIZE
+            )
+              heartbeatDurations[ev.connectionId].push(ev.duration);
 
-          for (const k of client.topology.s.servers.keys()) {
-            heartbeatDurations[k] = [];
-          }
-
-          await once(ee, 'done');
+            // We ignore the first few heartbeats since the problem reported in NODE-6172 showed that the
+            // first few heartbeats were recorded properly
+            if (
+              Object.keys(heartbeatDurations).length === client.topology.s.servers.size &&
+              Object.values(heartbeatDurations).every(
+                d => d.length === HEARTBEATS_TO_COLLECT_PER_NODE + IGNORE_SIZE
+              )
+            ) {
+              client.removeAllListeners('serverHeartbeatSucceeded');
+              resolve();
+            }
+          });
+          await promise;
         });
 
         it(
@@ -95,10 +90,11 @@ describe('Monitoring rtt tests', function () {
               requires: { topology: '!load-balanced' }
             },
             test: async function () {
-              for (const server in heartbeatDurations) {
+              for (const durations of Object.values(heartbeatDurations)) {
+                const relevantDurations = durations.slice(IGNORE_SIZE);
+                expect(relevantDurations).to.have.length.gt(0);
                 const averageDuration =
-                  heartbeatDurations[server].reduce((acc, x) => acc + x) /
-                  heartbeatDurations[server].length;
+                  relevantDurations.reduce((acc, x) => acc + x) / relevantDurations.length;
                 expect(averageDuration).to.be.gt(DELAY_MS);
               }
             }
@@ -110,10 +106,11 @@ describe('Monitoring rtt tests', function () {
             requires: { topology: '!load-balanced' }
           },
           test: async function () {
-            for (const server in heartbeatDurations) {
+            for (const [server, durations] of Object.entries(heartbeatDurations)) {
+              const relevantDurations = durations.slice(IGNORE_SIZE);
+              expect(relevantDurations).to.have.length.gt(0);
               const averageDuration =
-                heartbeatDurations[server].reduce((acc, x) => acc + x) /
-                heartbeatDurations[server].length;
+                relevantDurations.reduce((acc, x) => acc + x) / relevantDurations.length;
               expect(
                 client.topology.description.servers.get(server).roundTripTime
               ).to.be.approximately(averageDuration, 1);
