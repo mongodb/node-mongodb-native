@@ -22,7 +22,7 @@ export class ClientSideEncryptionFilter extends Filter {
   enabled: boolean;
   static version = null;
 
-  async initializeFilter(client: MongoClient, context: Record<string, any>) {
+  override async initializeFilter(client: MongoClient, context: Record<string, any>) {
     const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
     let mongodbClientEncryption;
     try {

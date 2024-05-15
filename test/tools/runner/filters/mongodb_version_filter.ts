@@ -23,7 +23,7 @@ export class MongoDBVersionFilter extends Filter {
     this.version = null;
   }
 
-  async initializeFilter(client: MongoClient, context: Record<string, any>) {
+  override async initializeFilter(client: MongoClient, context: Record<string, any>) {
     const result = await client.db('admin').command({ buildInfo: true });
     context.version = this.version = result.versionArray.slice(0, 3).join('.');
     context.buildInfo = result;

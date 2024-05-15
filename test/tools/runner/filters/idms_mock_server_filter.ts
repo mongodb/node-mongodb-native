@@ -38,7 +38,7 @@ async function isMockServerSetup() {
 export class IDMSMockServerFilter extends Filter {
   isRunning: boolean;
 
-  async initializeFilter() {
+  override async initializeFilter() {
     try {
       await isMockServerSetup();
       this.isRunning = true;

@@ -22,7 +22,7 @@ export class ServerlessFilter extends Filter {
     this.serverless = !!process.env.SERVERLESS;
   }
 
-  async initializeFilter(client: MongoClient, context: Record<string, any>) {
+  override async initializeFilter(client: MongoClient, context: Record<string, any>) {
     if (this.serverless) {
       context.serverlessCredentials = {
         username: process.env.SERVERLESS_ATLAS_USER,

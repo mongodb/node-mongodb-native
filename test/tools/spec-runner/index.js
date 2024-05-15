@@ -15,7 +15,7 @@ const {
   HEARTBEAT_EVENTS
 } = require('../../mongodb');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
-const ClientSideEncryptionFilter = require('../runner/filters/client_encryption_filter');
+const { ClientSideEncryptionFilter } = require('../runner/filters/client_encryption_filter');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -185,7 +185,7 @@ function generateTopologyTests(testSuites, testContext, filter) {
       let csfleFilterError = null;
       if (shouldRun && testContext.requiresCSFLE) {
         const csfleFilter = new ClientSideEncryptionFilter();
-        csfleFilter.initializeFilter(null, {}, () => null);
+        await csfleFilter.initializeFilter(null, {});
         try {
           if (!csfleFilter.filter({ metadata: { requires: { clientSideEncryption: true } } })) {
             shouldRun = false;

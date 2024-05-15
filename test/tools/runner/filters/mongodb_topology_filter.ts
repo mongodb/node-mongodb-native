@@ -16,7 +16,7 @@ import { Filter } from './filter';
 export class MongoDBTopologyFilter extends Filter {
   runtimeTopology: string;
 
-  async initializeFilter(client: MongoClient, context: Record<string, any>) {
+  override async initializeFilter(client: MongoClient, context: Record<string, any>) {
     const type = client.topology?.description.type;
     if (type == null) throw new Error('unexpected nullish type' + client.topology?.description);
     context.topologyType = type;
