@@ -496,4 +496,16 @@ describe('getMetadataArgument()', function () {
         })`)
     );
   });
+
+  it('non-empty test', async function () {
+    const source = parseSource(`it('does nothing', { metadata, test(a, b) {
+      expect(a).to.equal(b);
+    }})`);
+    const result = convertTestToSeparateMetadataAndTestFunctionArguments(source);
+    expect(await formatSource(result)).to.deep.equal(
+      await formatSource(`it('does nothing', metadata, function (a, b) {
+          expect(a).to.equal(b);
+        })`)
+    );
+  });
 });
