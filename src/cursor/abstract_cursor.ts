@@ -732,7 +732,12 @@ export abstract class AbstractCursor<
 
     try {
       const response = await this.getMore(batchSize);
-      if (response) {
+      // CursorResponse is disabled in this PR
+      // however the special `emptyGetMore` can be returned from find cursors
+      if (CursorResponse.is(response)) {
+        this[kId] = response.id;
+        this[kDocuments] = response;
+      } else if (response?.cursor) {
         const cursorId = getCursorId(response);
         this[kDocuments].pushMany(response.cursor.nextBatch);
         this[kId] = cursorId;
