@@ -17,7 +17,6 @@ describe('Aggregation', function () {
   it('should correctly execute simple aggregation pipeline using array', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
-
     const db = client.db(databaseName);
     // Some docs for insertion
     const docs = [
@@ -34,14 +33,12 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
     // Insert the docs
     collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as an Array
       const cursor = collection.aggregate([
         {
@@ -59,45 +56,39 @@ describe('Aggregation', function () {
         },
         { $sort: { _id: -1 } }
       ]);
-
       cursor.toArray(function (err, result) {
         expect(err).to.not.exist;
         expect(result[0]._id.tags).to.equal('good');
         expect(result[0].authors).to.eql(['bob']);
         expect(result[1]._id.tags).to.equal('fun');
         expect(result[1].authors).to.eql(['bob']);
-
         client.close(done);
       });
     });
   });
 
-  it('should correctly execute db.aggregate() with $currentOp', {
-    metadata: { requires: { mongodb: '>=4.0.0' } },
-    test: function (done) {
+  it(
+    'should correctly execute db.aggregate() with $currentOp',
+    { requires: { mongodb: '>=4.0.0' } },
+    function (done) {
       const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-
       const db = client.db('admin');
       const cursor = db.aggregate([{ $currentOp: { localOps: true } }]);
-
       cursor.toArray((err, result) => {
         expect(err).to.not.exist;
-
         const aggregateOperation = result.filter(op => op.command && op.command.aggregate)[0];
         expect(aggregateOperation.command.aggregate).to.equal(1);
         expect(aggregateOperation.command.pipeline).to.eql([{ $currentOp: { localOps: true } }]);
         expect(aggregateOperation.command.cursor).to.deep.equal({});
         expect(aggregateOperation.command['$db']).to.equal('admin');
-
         client.close(done);
       });
     }
-  });
+  );
 
   it('should fail when executing simple aggregation pipeline using arguments not an array', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
-
     const db = client.db(databaseName);
     // Some docs for insertion
     const docs = [
@@ -114,7 +105,6 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection(
       'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
@@ -123,7 +113,6 @@ describe('Aggregation', function () {
     collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as function call parameters
       // instead of an Array.
       const cursor = collection.aggregate([
@@ -142,14 +131,12 @@ describe('Aggregation', function () {
         },
         { $sort: { _id: -1 } }
       ]);
-
       cursor.toArray(function (err, result) {
         expect(err).to.not.exist;
         expect(result[0]._id.tags).to.equal('good');
         expect(result[0].authors).to.eql(['bob']);
         expect(result[1]._id.tags).to.equal('fun');
         expect(result[1].authors).to.eql(['bob']);
-
         client.close(done);
       });
     });
@@ -158,7 +145,6 @@ describe('Aggregation', function () {
   it('should fail when executing simple aggregation pipeline using arguments using single object', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
-
     const db = client.db(databaseName);
     // Some docs for insertion
     const docs = [
@@ -175,7 +161,6 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection(
       'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
@@ -184,7 +169,6 @@ describe('Aggregation', function () {
     collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as function call parameters
       // instead of an Array.
       const cursor = collection.aggregate([
@@ -203,14 +187,12 @@ describe('Aggregation', function () {
         },
         { $sort: { _id: -1 } }
       ]);
-
       cursor.toArray(function (err, result) {
         expect(err).to.not.exist;
         expect(result[0]._id.tags).to.equal('good');
         expect(result[0].authors).to.eql(['bob']);
         expect(result[1]._id.tags).to.equal('fun');
         expect(result[1].authors).to.eql(['bob']);
-
         client.close(done);
       });
     });
@@ -219,7 +201,6 @@ describe('Aggregation', function () {
   it('should correctly return and iterate over all the cursor results', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
-
     const db = client.db(databaseName);
     // Some docs for insertion
     const docs = [
@@ -236,14 +217,12 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
     // Insert the docs
     collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
       expect(err).to.not.exist;
       expect(result).to.exist;
-
       // Execute aggregate, notice the pipeline is expressed as an Array
       const cursor = collection.aggregate([
         {
@@ -260,12 +239,10 @@ describe('Aggregation', function () {
           }
         }
       ]);
-
       // Iterate over all the items in the cursor
       cursor.toArray(function (err, result) {
         expect(err).to.not.exist;
         expect(result).to.exist;
-
         client.close(done);
       });
     });
@@ -277,7 +254,6 @@ describe('Aggregation', function () {
     function (done) {
       const client = this.configuration.newClient({ maxPoolSize: 1 }),
         databaseName = this.configuration.db;
-
       const db = client.db(databaseName);
       // Some docs for insertion
       const docs = [
@@ -294,14 +270,12 @@ describe('Aggregation', function () {
           ]
         }
       ];
-
       // Create a collection
       const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
       collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
         expect(result).to.exist;
         expect(err).to.not.exist;
-
         // Execute aggregate, notice the pipeline is expressed as an Array
         const cursor = collection.aggregate(
           [
@@ -323,7 +297,6 @@ describe('Aggregation', function () {
             cursor: { batchSize: 100 }
           }
         );
-
         // Iterate over all the items in the cursor
         cursor.explain(function (err, result) {
           expect(err).to.not.exist;
@@ -337,9 +310,7 @@ describe('Aggregation', function () {
   it('should correctly return a cursor with batchSize 1 and call next', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
-
     this.defer(() => client.close());
-
     const db = client.db(databaseName);
     // Some docs for insertion
     const docs = [
@@ -356,14 +327,12 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
     // Insert the docs
     collection.insertMany(docs, { writeConcern: { w: 1 } }, (err, result) => {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as an Array
       const cursor = collection.aggregate(
         [
@@ -387,7 +356,6 @@ describe('Aggregation', function () {
         }
       );
       this.defer(() => cursor.close());
-
       // Iterate over all the items in the cursor
       cursor.next((err, result) => {
         expect(err).to.not.exist;
@@ -401,7 +369,6 @@ describe('Aggregation', function () {
   it('should correctly write the results out to a new collection', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
-
     const db = client.db(databaseName);
     // Some docs for insertion
     const docs = [
@@ -418,14 +385,12 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
     // Insert the docs
     collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as an Array
       const cursor = collection.aggregate(
         [
@@ -450,7 +415,6 @@ describe('Aggregation', function () {
       cursor.toArray(function (err, results) {
         expect(err).to.not.exist;
         expect(results).to.be.empty;
-
         client.close(done);
       });
     });
@@ -459,7 +423,6 @@ describe('Aggregation', function () {
   it('should correctly use allowDiskUse when performing an aggregation', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
-
     const db = client.db(databaseName);
     // Some docs for insertion
     const docs = [
@@ -476,14 +439,12 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
     // Insert the docs
     collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as an Array
       const cursor = collection.aggregate(
         [
@@ -512,7 +473,6 @@ describe('Aggregation', function () {
         expect(results[0].authors).to.eql(['bob']);
         expect(results[1]._id.tags).to.equal('fun');
         expect(results[1].authors).to.eql(['bob']);
-
         client.close(done);
       });
     });
@@ -523,18 +483,15 @@ describe('Aggregation', function () {
     const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
       maxPoolSize: 1
     });
-
     const db = client.db(databaseName);
     // Create a collection
     const col = db.collection('shouldPerformSimpleGroupAggregation');
     col.deleteMany({}, function (err) {
       expect(err).to.not.exist;
-
       // Insert a single document
       col.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
         expect(err).to.not.exist;
         expect(r).property('insertedCount').to.equal(3);
-
         // Get first two documents that match the query
         col
           .aggregate([
@@ -546,7 +503,6 @@ describe('Aggregation', function () {
           .toArray(function (err, docs) {
             expect(err).to.not.exist;
             expect(docs[0].total).to.equal(3);
-
             client.close(done);
           });
       });
@@ -558,21 +514,16 @@ describe('Aggregation', function () {
     const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
       maxPoolSize: 1
     });
-
     const db = client.db(databaseName);
     const col = db.collection('te.st');
     let count = 0;
-
     col.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }], function (err, r) {
       expect(err).to.not.exist;
       expect(r).property('insertedCount').to.equal(3);
-
       const cursor = col.aggregate([{ $project: { a: 1 } }]);
-
       cursor.toArray(function (err, docs) {
         expect(err).to.not.exist;
         expect(docs.length).to.be.greaterThan(0);
-
         //Using cursor - KO
         col
           .aggregate([{ $project: { a: 1 } }], {
@@ -585,7 +536,6 @@ describe('Aggregation', function () {
             function (err) {
               expect(err).to.not.exist;
               expect(count).to.be.greaterThan(0);
-
               client.close(done);
             }
           );
@@ -610,13 +560,11 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
     // Insert the docs
     const result = await collection.insertMany(docs, { writeConcern: { w: 1 } });
     expect(result).to.exist;
-
     // Execute aggregate, notice the pipeline is expressed as an Array
     const cursor = collection.aggregate(
       [
@@ -638,44 +586,36 @@ describe('Aggregation', function () {
         cursor: 1
       }
     );
-
     const error = await cursor.next().catch(error => error);
     expect(error).to.be.instanceOf(MongoInvalidArgumentError);
   });
 
   it(`should fail if you try to use explain flag with { readConcern: { level: 'local' }, writeConcern: { j: true } }`, async function () {
     const db = client.db();
-
     const collection = db.collection('foo');
     Object.assign(collection.s, { writeConcern: { j: true } });
     const error = await collection
       .aggregate([{ $project: { _id: 0 } }, { $out: 'bar' }], { explain: true })
       .toArray()
       .catch(error => error);
-
     expect(error).to.be.instanceOf(MongoInvalidArgumentError);
   });
 
   it('should fail if you try to use explain flag with { writeConcern: { j: true } }', async function () {
     const db = client.db();
-
     const collection = db.collection('foo');
     Object.assign(collection.s, { writeConcern: { j: true } });
-
     const error = await collection
       .aggregate([{ $project: { _id: 0 } }, { $out: 'bar' }], { explain: true })
       .toArray()
       .catch(error => error);
-
     expect(error).to.be.instanceOf(MongoInvalidArgumentError);
   });
 
   it('should ensure MaxTimeMS is correctly passed down into command execution when using a cursor', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
-
     this.defer(() => client.close());
-
     const db = client.db(databaseName);
     const docs = [
       {
@@ -691,14 +631,12 @@ describe('Aggregation', function () {
         ]
       }
     ];
-
     // Create a collection
     const collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
     // Insert the docs
     collection.insertMany(docs, { writeConcern: { w: 1 } }, (err, result) => {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as an Array
       const cursor = collection.aggregate(
         [
@@ -723,7 +661,6 @@ describe('Aggregation', function () {
         }
       );
       this.defer(() => cursor.close());
-
       // Override the db.command to validate the correct command
       // is executed
       const command = db.command.bind(db);
@@ -732,27 +669,22 @@ describe('Aggregation', function () {
         const c = args[0];
         expect(err).to.not.exist;
         expect(c.maxTimeMS).to.equal(1000);
-
         // Apply to existing command
         command(...args);
       };
-
       // Iterate over all the items in the cursor
       cursor.next((err, result) => {
         expect(err).to.not.exist;
         expect(result._id.tags).to.equal('good');
         expect(result.authors).to.eql(['bob']);
-
         // Validate the command
         db.command = function (...args: Parameters<(typeof db)['command']>) {
           const c = args[0];
           expect(err).to.not.exist;
           expect(c.maxTimeMS).to.equal(1000);
-
           // Apply to existing command
           command(...args);
         };
-
         // Execute aggregate, notice the pipeline is expressed as an Array
         const secondCursor = collection.aggregate(
           [
@@ -776,7 +708,6 @@ describe('Aggregation', function () {
         );
         this.defer(() => secondCursor.close());
         expect(secondCursor).to.exist;
-
         // Return the command
         db.command = command;
         done();
@@ -787,25 +718,18 @@ describe('Aggregation', function () {
   it('should pass a comment down via the aggregation command', async function () {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     const databaseName = this.configuration.db;
-
     const comment = 'Darmok and Jalad at Tanagra';
-
     const db = client.db(databaseName);
     const collection = db.collection('testingPassingDownTheAggregationCommand');
-
     const command = db.command.bind(db);
-
     db.command = function (...args: Parameters<(typeof db)['command']>) {
       const c = args[0];
       expect(c).to.be.an('object');
       expect(c.comment).to.be.a('string').and.to.equal('comment');
       command(...args);
     };
-
     const cursor = collection.aggregate([{ $project: { _id: 1 } }], { comment });
-
     expect(cursor).to.not.be.null;
-
     await client.close();
   });
 
@@ -814,11 +738,9 @@ describe('Aggregation', function () {
     const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
       maxPoolSize: 1
     });
-
     const db = client.db(databaseName);
     const date1 = new Date();
     date1.setHours(date1.getHours() - 1);
-
     // Some docs for insertion
     const docs = [
       {
@@ -830,14 +752,12 @@ describe('Aggregation', function () {
         b: 2
       }
     ];
-
     // Create a collection
     const collection = db.collection('shouldCorrectlyQueryUsingISODate');
     // Insert the docs
     collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as an Array
       const cursor = collection.aggregate([
         {
@@ -846,12 +766,10 @@ describe('Aggregation', function () {
           }
         }
       ]);
-
       // Iterate over all the items in the cursor
       cursor.next(function (err, result) {
         expect(err).to.not.exist;
         expect(result.b).to.equal(1);
-
         client.close(done);
       });
     });
@@ -869,38 +787,34 @@ describe('Aggregation', function () {
     collection.insertMany([{ a: 1 }, { b: 1 }], { writeConcern: { w: 1 } }, function (err, result) {
       expect(result).to.exist;
       expect(err).to.not.exist;
-
       // Execute aggregate, notice the pipeline is expressed as an Array
       const cursor = collection.aggregate([
         {
           $match: {}
         }
       ]);
-
       // Iterate over all the items in the cursor
       cursor.hasNext(function (err, result) {
         expect(err).to.not.exist;
         expect(result).to.equal(true);
-
         client.close(done);
       });
     });
   });
 
-  it('should not send a batchSize for aggregations with an out stage', {
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
-    async test() {
+  it(
+    'should not send a batchSize for aggregations with an out stage',
+    { requires: { topology: ['single', 'replicaset'] } },
+    async function () {
       const databaseName = this.configuration.db;
       const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
         maxPoolSize: 1,
         monitorCommands: true
       });
-
       const events = [];
       client.on('commandStarted', filterForCommands(['aggregate'], events));
       const coll1 = client.db(databaseName).collection('coll1');
       const coll2 = client.db(databaseName).collection('coll2');
-
       await Promise.all([coll1.deleteMany({}), coll2.deleteMany({})])
         .then(() => {
           const docs = Array.from({ length: 10 }).map(() => ({ a: 1 }));
@@ -938,5 +852,5 @@ describe('Aggregation', function () {
         })
         .finally(() => client.close());
     }
-  });
+  );
 });

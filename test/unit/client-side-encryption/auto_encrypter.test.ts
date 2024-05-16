@@ -15,18 +15,15 @@ import * as requirements from './requirements.helper';
 
 const bson = BSON;
 const { EJSON } = BSON;
-
 function readExtendedJsonToBuffer(path) {
   const ejson = EJSON.parse(fs.readFileSync(path, 'utf8'));
   return bson.serialize(ejson);
 }
-
 function readHttpResponse(path) {
   let data = fs.readFileSync(path, 'utf8');
   data = data.split('\n').join('\r\n');
   return Buffer.from(data, 'utf8');
 }
-
 const TEST_COMMAND = JSON.parse(
   fs.readFileSync(`${__dirname}/data/cmd.json`, { encoding: 'utf-8' })
 );
@@ -36,12 +33,9 @@ const MOCK_MONGOCRYPTD_RESPONSE = readExtendedJsonToBuffer(
 );
 const MOCK_KEYDOCUMENT_RESPONSE = readExtendedJsonToBuffer(`${__dirname}/data/key-document.json`);
 const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(`${__dirname}/data/kms-decrypt-reply.txt`);
-
 class MockClient {}
-
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-
 describe('AutoEncrypter', function () {
   this.timeout(12000);
   let ENABLE_LOG_TEST = false;
@@ -53,21 +47,16 @@ describe('AutoEncrypter', function () {
       request.addResponse(MOCK_KMS_DECRYPT_REPLY);
       return Promise.resolve();
     });
-
     sandbox.stub(StateMachine.prototype, 'fetchCollectionInfo').resolves(MOCK_COLLINFO_RESPONSE);
-
     sandbox.stub(StateMachine.prototype, 'markCommand').callsFake(() => {
       if (ENABLE_LOG_TEST) {
         const response = bson.deserialize(MOCK_MONGOCRYPTD_RESPONSE);
         response.schemaRequiresEncryption = false;
-
         ENABLE_LOG_TEST = false; // disable test after run
         return Promise.resolve(bson.serialize(response));
       }
-
       return Promise.resolve(MOCK_MONGOCRYPTD_RESPONSE);
     });
-
     sandbox
       .stub(StateMachine.prototype, 'fetchKeys')
       .resolves([bson.deserialize(MOCK_KEYDOCUMENT_RESPONSE) as DataKey]);
@@ -78,7 +67,7 @@ describe('AutoEncrypter', function () {
   });
 
   describe('#constructor', function () {
-    context('when using mongocryptd', function () {
+    describe('when using mongocryptd', function () {
       const client = new MockClient() as MongoClient;
       const autoEncrypterOptions = {
         mongocryptdBypassSpawn: true,
@@ -104,7 +93,7 @@ describe('AutoEncrypter', function () {
         expect(options).to.have.property('serverSelectionTimeoutMS', 10000);
       });
 
-      context('when mongocryptdURI is not specified', () => {
+      describe('when mongocryptdURI is not specified', () => {
         it('sets the ip address family to ipv4', function () {
           expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
           const options = autoEncrypter._mongocryptdClient?.s.options;
@@ -112,13 +101,12 @@ describe('AutoEncrypter', function () {
         });
       });
 
-      context('when mongocryptdURI is specified', () => {
+      describe('when mongocryptdURI is specified', () => {
         it('does not set the ip address family to ipv4', function () {
           const autoEncrypter = new AutoEncrypter(client, {
             ...autoEncrypterOptions,
             extraOptions: { mongocryptdURI: MongocryptdManager.DEFAULT_MONGOCRYPTD_URI }
           });
-
           expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
           const options = autoEncrypter._mongocryptdClient?.s.options;
           expect(options).not.to.have.property('family', 4);
@@ -142,7 +130,6 @@ describe('AutoEncrypter', function () {
         local: { key: Buffer.alloc(96) }
       }
     });
-
     const encrypted = await autoEncrypter.encrypt('test.test', { test: 'command' });
     expect(encrypted).to.eql({ test: 'command' });
   });
@@ -190,7 +177,6 @@ describe('AutoEncrypter', function () {
       expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
       expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
       expect(decrypted.filter[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['ssn']);
-
       // The same, but with an object containing different data types as the input
       decrypted = await mc.decrypt({
         a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
@@ -199,7 +185,6 @@ describe('AutoEncrypter', function () {
         a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
       });
       expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-
       // The same, but with nested data inside the decrypted input
       decrypted = await mc.decrypt(nestedInput);
       expect(decrypted).to.eql({ nested: { x: { y: 1234 } } });
@@ -209,7 +194,7 @@ describe('AutoEncrypter', function () {
       expect(decrypted.nested.x.y).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
     });
 
-    context('when the aws sdk is installed', function () {
+    describe('when the aws sdk is installed', function () {
       const accessKey = 'example';
       const secretKey = 'example';
 
@@ -248,7 +233,7 @@ describe('AutoEncrypter', function () {
       });
     });
 
-    context('when no refresh function is provided and no optional sdk', function () {
+    describe('when no refresh function is provided and no optional sdk', function () {
       const accessKey = 'example';
       const secretKey = 'example';
 
@@ -302,7 +287,6 @@ describe('AutoEncrypter', function () {
           local: { key: Buffer.alloc(96) }
         }
       });
-
       const encrypted = await mc.encrypt('test.test', TEST_COMMAND);
       const expected = EJSON.parse(
         JSON.stringify({
@@ -318,7 +302,6 @@ describe('AutoEncrypter', function () {
           }
         })
       );
-
       expect(encrypted).to.containSubset(expected);
     });
   });
@@ -326,16 +309,13 @@ describe('AutoEncrypter', function () {
   describe('logging', function () {
     it('should allow registration of a log handler', async function () {
       ENABLE_LOG_TEST = true;
-
       let loggerCalled = false;
       const logger = (level, message) => {
         if (loggerCalled) return;
-
         loggerCalled = true;
         expect(level).to.be.oneOf([2, 3]);
         expect(message).to.not.be.empty;
       };
-
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         logger,
@@ -344,7 +324,6 @@ describe('AutoEncrypter', function () {
           local: { key: Buffer.alloc(96) }
         }
       });
-
       const encrypted = await mc.encrypt('test.test', TEST_COMMAND);
       const expected = EJSON.parse(
         JSON.stringify({
@@ -354,7 +333,6 @@ describe('AutoEncrypter', function () {
           }
         })
       );
-
       expect(encrypted).to.containSubset(expected);
     });
   });

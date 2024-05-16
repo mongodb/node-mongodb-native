@@ -17,12 +17,11 @@ describe('MongoDB Handshake', () => {
 
   afterEach(() => client.close());
 
-  context('when hello is too large', () => {
+  describe('when hello is too large', () => {
     before(() => {
       sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
         // @ts-expect-error: sinon will place wrappedMethod there
         const command = Connection.prototype.command.wrappedMethod.bind(this);
-
         if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
           return command(ns, { ...cmd, client: { driver: { name: 'a'.repeat(1000) } } }, options);
         }
@@ -44,7 +43,7 @@ describe('MongoDB Handshake', () => {
     });
   });
 
-  context('when compressors are provided on the mongo client', () => {
+  describe('when compressors are provided on the mongo client', () => {
     let spy: Sinon.SinonSpy;
 
     before(() => {
@@ -65,7 +64,7 @@ describe('MongoDB Handshake', () => {
     });
   });
 
-  context('when load-balanced', function () {
+  describe('when load-balanced', function () {
     let opMsgRequestToBinSpy: Sinon.SinonSpy;
 
     beforeEach(() => {
@@ -74,17 +73,18 @@ describe('MongoDB Handshake', () => {
 
     afterEach(() => sinon.restore());
 
-    it('sends the hello command as OP_MSG', {
-      metadata: { requires: { topology: 'load-balanced' } },
-      test: async function () {
+    it(
+      'sends the hello command as OP_MSG',
+      { requires: { topology: 'load-balanced' } },
+      async function () {
         client = this.configuration.newClient({ loadBalanced: true });
         await client.db('admin').command({ ping: 1 });
         expect(opMsgRequestToBinSpy).to.have.been.called;
       }
-    });
+    );
   });
 
-  context('when serverApi version is present', function () {
+  describe('when serverApi version is present', function () {
     let opMsgRequestToBinSpy: Sinon.SinonSpy;
 
     beforeEach(() => {
@@ -93,17 +93,18 @@ describe('MongoDB Handshake', () => {
 
     afterEach(() => sinon.restore());
 
-    it('sends the hello command as OP_MSG', {
-      metadata: { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
-      test: async function () {
+    it(
+      'sends the hello command as OP_MSG',
+      { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
+      async function () {
         client = this.configuration.newClient({}, { serverApi: { version: ServerApiVersion.v1 } });
         await client.connect();
         expect(opMsgRequestToBinSpy).to.have.been.called;
       }
-    });
+    );
   });
 
-  context('when not load-balanced and serverApi version is not present', function () {
+  describe('when not load-balanced and serverApi version is not present', function () {
     let opQueryRequestToBinSpy: Sinon.SinonSpy;
     let opMsgRequestToBinSpy: Sinon.SinonSpy;
 
@@ -114,9 +115,10 @@ describe('MongoDB Handshake', () => {
 
     afterEach(() => sinon.restore());
 
-    it('sends the hello command as OP_MSG', {
-      metadata: { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
-      test: async function () {
+    it(
+      'sends the hello command as OP_MSG',
+      { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
+      async function () {
         if (this.configuration.serverApi) {
           this.skipReason = 'Test requires serverApi to NOT be enabled';
           return this.skip();
@@ -127,6 +129,6 @@ describe('MongoDB Handshake', () => {
         expect(opMsgRequestToBinSpy).to.have.been.called;
         opMsgRequestToBinSpy.calledAfter(opQueryRequestToBinSpy);
       }
-    });
+    );
   });
 });

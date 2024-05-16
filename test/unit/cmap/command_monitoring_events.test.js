@@ -1,5 +1,4 @@
 'use strict';
-
 const { OpQueryRequest, OpMsgRequest } = require('../../mongodb');
 const { CommandStartedEvent } = require('../../mongodb');
 const { expect } = require('chai');
@@ -13,7 +12,6 @@ describe('Command Monitoring Events - unit/cmap', function () {
     { ns: 'admin.$cmd', query: { $query: { a: 16 } } },
     { ns: 'hello there', f1: { h: { a: 52, b: { c: 10, d: [1, 2, 3, 5] } } } }
   ];
-
   for (const command of commands) {
     it(`should make a deep copy of object of type: ${command.constructor.name}`, () => {
       const ev = new CommandStartedEvent({ id: 'someId', address: 'someHost' }, command);
@@ -57,7 +55,6 @@ describe('Command Monitoring Events - unit/cmap', function () {
         },
         {}
       );
-
       const startEvent = new CommandStartedEvent(conn, query);
       expect(startEvent).to.have.property('commandName', 'testCmd');
       expect(startEvent).to.have.property('databaseName', db);
@@ -81,9 +78,7 @@ describe('Command Monitoring Events - unit/cmap', function () {
         },
         {}
       );
-
       const startEvent = new CommandStartedEvent(conn, query);
-
       expect(startEvent).to.have.property('commandName', 'testCmd');
       expect(startEvent).to.have.property('databaseName', db);
       expect(startEvent).to.have.property('requestId', query.requestId);

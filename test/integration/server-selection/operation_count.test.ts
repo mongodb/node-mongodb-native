@@ -15,14 +15,12 @@ const testMetadata: MongoDBMetadataUI = {
     mongodb: '>=4.0.0'
   }
 };
-
 const loadBalancedTestMetadata: MongoDBMetadataUI = {
   requires: {
     topology: 'load-balanced',
     mongodb: '>=4.0.0'
   }
 };
-
 const enableFailPointCommand: FailPoint = {
   configureFailPoint: 'failCommand',
   mode: 'alwaysOn',
@@ -31,7 +29,6 @@ const enableFailPointCommand: FailPoint = {
     errorCode: 80
   }
 };
-
 const disableFailPointCommand: FailPoint = {
   configureFailPoint: 'failCommand',
   mode: 'off',
@@ -39,10 +36,11 @@ const disableFailPointCommand: FailPoint = {
     failCommands: ['insert', 'getMore', 'killCursors', 'find']
   }
 };
-
 describe('Server Operation Count Tests', function () {
   let client: MongoClient;
-  let collection: Collection<{ count: number }>;
+  let collection: Collection<{
+    count: number;
+  }>;
   let cursor: AbstractCursor;
 
   beforeEach(async function () {
@@ -68,31 +66,24 @@ describe('Server Operation Count Tests', function () {
     }
   });
 
-  context('load balanced mode with pinnable operations', function () {
+  describe('load balanced mode with pinnable operations', function () {
     it('is zero after a successful command', loadBalancedTestMetadata, async function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
       const commandSpy = sinon.spy(server, 'command');
-
       await collection.findOne({ count: 1 });
-
       expect(commandSpy.called).to.be.true;
       expect(server.s.operationCount).to.equal(0);
     });
 
     it('is zero after a command fails', loadBalancedTestMetadata, async function () {
       await client.db('admin').command(enableFailPointCommand);
-
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
-
       const commandSpy = sinon.spy(server, 'command');
-
       const error = await collection.findOne({ count: 1 }).catch(e => e);
-
       expect(error).to.exist;
       expect(commandSpy.called).to.be.true;
-
       expect(server.s.operationCount).to.equal(0);
     });
 
@@ -102,14 +93,11 @@ describe('Server Operation Count Tests', function () {
       async function () {
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
-
         sinon
           .stub(ConnectionPool.prototype, 'checkOut')
           .rejects(new Error('unable to checkout connection'));
         const commandSpy = sinon.spy(server, 'command');
-
         const error = await collection.findOne({ count: 1 }).catch(e => e);
-
         expect(error).to.exist;
         expect(error).to.match(/unable to checkout connection/i);
         expect(commandSpy.called).to.be.true;
@@ -118,20 +106,17 @@ describe('Server Operation Count Tests', function () {
     );
   });
 
-  context('operationCount is adjusted properly on successful operation', function () {
+  describe('operationCount is adjusted properly on successful operation', function () {
     it('is zero after a successful command', testMetadata, async function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
       const commandSpy = sinon.spy(server, 'command');
       const incrementSpy = sinon.spy(server, 'incrementOperationCount');
       const decrementSpy = sinon.spy(server, 'decrementOperationCount');
-
       const operationPromises = Array.from({ length: 10 }, () =>
         collection.insertOne({ count: 1 })
       );
-
       await Promise.allSettled(operationPromises);
-
       expect(commandSpy.called).to.be.true;
       // This test is flaky when sleeping and asserting the operation count after the sleep but before the
       // promise execution, so we assert instead that the count was incremented 10 times and decremented 10
@@ -142,47 +127,36 @@ describe('Server Operation Count Tests', function () {
     });
   });
 
-  context('operationCount is adjusted properly when operations fail', function () {
+  describe('operationCount is adjusted properly when operations fail', function () {
     it('is zero after a command fails', testMetadata, async function () {
       await client.db('admin').command(enableFailPointCommand);
-
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
-
       const commandSpy = sinon.spy(server, 'command');
-
       const error = await collection.insertOne({ count: 1 }).catch(e => e);
-
       expect(error).to.exist;
       expect(commandSpy.called).to.be.true;
-
       expect(server.s.operationCount).to.equal(0);
     });
   });
 
-  context(
-    'operationCount is decremented when the server fails to checkout a connection',
-    function () {
-      it(
-        'is zero after failing to check out a connection for a command',
-        testMetadata,
-        async function () {
-          const server = Array.from(client.topology.s.servers.values())[0];
-          expect(server.s.operationCount).to.equal(0);
-
-          sinon
-            .stub(ConnectionPool.prototype, 'checkOut')
-            .rejects(new Error('unable to checkout connection'));
-          const commandSpy = sinon.spy(server, 'command');
-
-          const error = await collection.insertOne({ count: 1 }).catch(e => e);
-
-          expect(error).to.exist;
-          expect(error).to.match(/unable to checkout connection/i);
-          expect(commandSpy.called).to.be.true;
-          expect(server.s.operationCount).to.equal(0);
-        }
-      );
-    }
-  );
+  describe('operationCount is decremented when the server fails to checkout a connection', function () {
+    it(
+      'is zero after failing to check out a connection for a command',
+      testMetadata,
+      async function () {
+        const server = Array.from(client.topology.s.servers.values())[0];
+        expect(server.s.operationCount).to.equal(0);
+        sinon
+          .stub(ConnectionPool.prototype, 'checkOut')
+          .rejects(new Error('unable to checkout connection'));
+        const commandSpy = sinon.spy(server, 'command');
+        const error = await collection.insertOne({ count: 1 }).catch(e => e);
+        expect(error).to.exist;
+        expect(error).to.match(/unable to checkout connection/i);
+        expect(commandSpy.called).to.be.true;
+        expect(server.s.operationCount).to.equal(0);
+      }
+    );
+  });
 });

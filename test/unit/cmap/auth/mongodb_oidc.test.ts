@@ -8,7 +8,7 @@ import {
 } from '../../../mongodb';
 
 describe('class MongoDBOIDC', () => {
-  context('when an unknown OIDC provider name is set', () => {
+  describe('when an unknown OIDC provider name is set', () => {
     it('prepare rejects with MongoInvalidArgumentError', async () => {
       const oidc = new MongoDBOIDC();
       const error = await oidc
@@ -24,7 +24,6 @@ describe('class MongoDBOIDC', () => {
           )
         )
         .catch(error => error);
-
       expect(error).to.be.instanceOf(MongoInvalidArgumentError);
       expect(error).to.match(/workflow for provider/);
     });
@@ -43,7 +42,6 @@ describe('class MongoDBOIDC', () => {
           )
         )
         .catch(error => error);
-
       expect(error).to.be.instanceOf(MongoInvalidArgumentError);
       expect(error).to.match(/workflow for provider/);
     });

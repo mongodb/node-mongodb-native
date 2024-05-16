@@ -1,5 +1,4 @@
 'use strict';
-
 const setupDatabase = require('../../shared').setupDatabase;
 
 describe('examples(array filters):', function () {
@@ -21,9 +20,10 @@ describe('examples(array filters):', function () {
     collection = undefined;
   });
 
-  it('supports array filters when updating', {
-    metadata: { requires: { mongodb: '>=3.6.x', topology: ['single'] } },
-    test: async function () {
+  it(
+    'supports array filters when updating',
+    { requires: { mongodb: '>=3.6.x', topology: ['single'] } },
+    async function () {
       // 3. Exploiting the power of arrays
       await collection.updateOne(
         { _id: 1 },
@@ -31,5 +31,5 @@ describe('examples(array filters):', function () {
         { arrayFilters: [{ 'i.b': 0 }] }
       );
     }
-  });
+  );
 });

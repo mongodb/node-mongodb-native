@@ -1,5 +1,4 @@
 // The corpus test exhaustively enumerates all ways to encrypt all BSON value types. Note, the test data includes BSON binary subtype 4 (or standard UUID), which MUST be decoded and encoded as subtype 4. Run the test as follows.
-
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';
@@ -18,14 +17,12 @@ describe('Client Side Encryption Prose Corpus Test', function () {
       clientSideEncryption: true
     }
   };
-
   const corpusDir = path.resolve(__dirname, '../../spec/client-side-encryption/corpus');
   function loadCorpusData(filename) {
     return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename), { encoding: 'utf8' }), {
       relaxed: false
     });
   }
-
   const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
   const kmsProviders = CSFLE_KMS_PROVIDERS ? EJSON.parse(CSFLE_KMS_PROVIDERS) : {};
   kmsProviders.local = {
@@ -37,28 +34,23 @@ describe('Client Side Encryption Prose Corpus Test', function () {
   kmsProviders.kmip = {
     endpoint: 'localhost:5698'
   };
-
   // TODO: build this into EJSON
   // TODO: make a custom chai assertion for this
   function toComparableExtendedJSON(value) {
     return JSON.parse(EJSON.stringify({ value }, { relaxed: false }));
   }
-
   // Filters out tests that have to do with dbPointer
   // TODO: fix dbpointer and get rid of this.
   function filterImportedObject(object) {
     return Object.keys(object).reduce((copy, key) => {
       const value = object[key];
-
       if (value && typeof value === 'object' && value.type === 'dbPointer') {
         return copy;
       }
-
       copy[key] = value;
       return copy;
     }, {});
   }
-
   const corpusSchema = loadCorpusData('corpus-schema.json');
   const corpusKeyLocal = loadCorpusData('corpus-key-local.json');
   const corpusKeyAws = loadCorpusData('corpus-key-aws.json');
@@ -67,14 +59,12 @@ describe('Client Side Encryption Prose Corpus Test', function () {
   const corpusKeyGcp = loadCorpusData('corpus-key-gcp.json');
   const corpusAll = filterImportedObject(loadCorpusData('corpus.json'));
   const corpusEncryptedExpectedAll = filterImportedObject(loadCorpusData('corpus-encrypted.json'));
-
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const dataNamespace = `${dataDbName}.${dataCollName}`;
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-
   const algorithmMap = new Map([
     ['rand', 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'],
     ['det', 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic']
@@ -101,18 +91,15 @@ describe('Client Side Encryption Prose Corpus Test', function () {
     'altname_gcp',
     'altname_kmip'
   ]);
-
   async function assertion(clientEncryption, _key, expected, actual) {
     if (typeof expected === 'string') {
       expect(actual).to.equal(expected);
       return;
     }
-
     const expectedValue = expected.value;
     const actualValue = actual.value;
     const expectedJSON = toComparableExtendedJSON(expectedValue);
     const actualJSON = toComparableExtendedJSON(actualValue);
-
     switch (expected.algo) {
       case 'det': {
         expect(actualJSON).to.deep.equal(expectedJSON);
@@ -128,16 +115,13 @@ describe('Client Side Encryption Prose Corpus Test', function () {
         throw new Error('Unexpected algorithm: ' + expected.algo);
       }
     }
-
     if (expected.allowed === true) {
       const [decryptedExpectedValue, decryptedActualValue] = await Promise.all([
         clientEncryption.decrypt(expectedValue),
         clientEncryption.decrypt(actualValue)
       ]);
-
       const decryptedExpectedJSON = toComparableExtendedJSON(decryptedExpectedValue);
       const decryptedActualJSON = toComparableExtendedJSON(decryptedActualValue);
-
       expect(decryptedActualJSON).to.deep.equal(decryptedExpectedJSON);
     } else if (expected.allowed === false) {
       expect(actualJSON).to.deep.equal(expectedJSON);
@@ -145,15 +129,12 @@ describe('Client Side Encryption Prose Corpus Test', function () {
       throw new Error('Unexpected value for allowed: ' + expected.allowed);
     }
   }
-
   installNodeDNSWorkaroundHooks();
-
   let client: MongoClient;
 
   beforeEach(async function () {
     // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
     client = this.configuration.newClient();
-
     await client.connect();
     // 3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_.
     const keyDb = client.db(keyVaultDbName);
@@ -172,7 +153,6 @@ describe('Client Side Encryption Prose Corpus Test', function () {
   });
 
   afterEach(() => client?.close());
-
   function defineCorpusTests(corpus, corpusEncryptedExpected, useClientSideSchema: boolean) {
     let clientEncrypted: MongoClient, clientEncryption: ClientEncryption;
     beforeEach(async function () {
@@ -221,7 +201,6 @@ describe('Client Side Encryption Prose Corpus Test', function () {
         };
       }
       clientEncrypted = this.configuration.newClient({}, { autoEncryption });
-
       await clientEncrypted.connect();
       clientEncryption = new ClientEncryption(client, {
         keyVaultNamespace,
@@ -229,15 +208,12 @@ describe('Client Side Encryption Prose Corpus Test', function () {
         tlsOptions
       });
     });
-
     afterEach(() => clientEncrypted.close());
-
     it(
       `should pass corpus ${useClientSideSchema ? 'with' : 'without'} client schema`,
       metadata,
       async function () {
         const corpusCopied = {};
-
         // 5. Load `corpus/corpus.json <../corpus/corpus.json>`_ to a variable named ``corpus``. The corpus contains subdocuments with the following fields:
         //
         //    - ``kms`` is either ``aws`` or ``local``
@@ -284,7 +260,6 @@ describe('Client Side Encryption Prose Corpus Test', function () {
             } else {
               throw new Error('Unexpected identifier: ' + field.identifier);
             }
-
             try {
               const encryptedValue = await clientEncryption.encrypt(field.value, encryptOptions);
               if (field.allowed === true) {
@@ -305,7 +280,6 @@ describe('Client Side Encryption Prose Corpus Test', function () {
             throw new Error('Unexpected method: ' + field.method);
           }
         }
-
         // 6. Using ``client_encrypted``, insert ``corpus_copied`` into ``db.coll``.
         await clientEncrypted
           .db(dataDbName)
@@ -322,12 +296,9 @@ describe('Client Side Encryption Prose Corpus Test', function () {
         expect(toComparableExtendedJSON(corpusDecrypted)).to.deep.equal(
           toComparableExtendedJSON(corpus)
         );
-
         // 8. Load `corpus/corpus_encrypted.json <../corpus/corpus-encrypted.json>`_ to a variable named ``corpus_encrypted_expected``.
         //    Using ``client`` find the inserted document from ``db.coll`` to a variable named ``corpus_encrypted_actual``.
-
         //    Iterate over each field of ``corpus_encrypted_expected`` and check the following:
-
         //    - If the ``algo`` is ``det``, that the value equals the value of the corresponding field in ``corpus_encrypted_actual``.
         //    - If the ``algo`` is ``rand`` and ``allowed`` is true, that the value does not equal the value of the corresponding field in ``corpus_encrypted_actual``.
         //    - If ``allowed`` is true, decrypt the value with ``client_encryption``. Decrypt the value of the corresponding field of ``corpus_encrypted`` and validate that they are both equal.
@@ -350,7 +321,6 @@ describe('Client Side Encryption Prose Corpus Test', function () {
   // Note: You can uncomment the block below to run the corpus for each individial item
   // instead of running the entire corpus at once. It is significantly slower,
   // but gives you higher visibility into why the corpus may be failing
-
   // function pickValues(obj, key) {
   //   return {
   //     _id: obj._id,
@@ -364,15 +334,12 @@ describe('Client Side Encryption Prose Corpus Test', function () {
   //   .forEach(key => {
   //     const corpus = pickValues(corpusAll, key);
   //     const corpusExpectedEncrypted = pickValues(corpusEncryptedExpectedAll, key);
-
   //     describe(key, function() {
   //       defineCorpusTests(corpus, corpusExpectedEncrypted);
   //       defineCorpusTests(corpus, corpusExpectedEncrypted, true);
   //     });
   //   });
-
   defineCorpusTests(corpusAll, corpusEncryptedExpectedAll, false);
-
   // 9. Repeat steps 1-8 with a local JSON schema. I.e. amend step 4 to configure the schema on ``client_encrypted`` with the ``schema_map`` option.
   defineCorpusTests(corpusAll, corpusEncryptedExpectedAll, true);
 });

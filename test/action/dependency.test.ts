@@ -21,7 +21,6 @@ const EXPECTED_PEER_DEPENDENCIES = [
   'gcp-metadata',
   'socks'
 ];
-
 describe('package.json', function () {
   describe('dependencies', function () {
     it('only contains the expected dependencies', function () {
@@ -48,33 +47,26 @@ describe('package.json', function () {
       fs.rmSync(path.join(repoRoot, 'node_modules'), { recursive: true, force: true });
       execSync(`npm clean-install`);
     });
-
     const repoRoot = path.resolve(__dirname, '../..');
-
     const testScript = `
       const mdb = require('${repoRoot}/src/index.ts');
       console.log('import success!');`
       .split('\n')
       .join('');
-
     for (const [depName, depVersion] of Object.entries(peerDependencies)) {
       const depMajor = depVersion.split('.')[0];
-
-      context(`when ${depName} is NOT installed`, () => {
+      describe(`when ${depName} is NOT installed`, () => {
         beforeEach(async () => {
           fs.rmSync(path.join(repoRoot, 'node_modules', depName), { recursive: true, force: true });
         });
 
         it(`driver is importable`, () => {
           expect(fs.existsSync(path.join(repoRoot, 'node_modules', depName))).to.be.false;
-
           const result = execSync(`./node_modules/.bin/ts-node -e "${testScript}"`, {
             encoding: 'utf8'
           });
-
           expect(result).to.include('import success!');
         });
-
         if (depName === 'snappy') {
           itInNodeProcess(
             'getSnappy returns rejected import',
@@ -88,22 +80,18 @@ describe('package.json', function () {
           );
         }
       });
-
-      context(`when ${depName} is installed`, () => {
+      describe(`when ${depName} is installed`, () => {
         beforeEach(async function () {
           execSync(`npm install --no-save "${depName}"@"${depMajor}"`);
         });
 
         it(`driver is importable`, () => {
           expect(fs.existsSync(path.join(repoRoot, 'node_modules', depName))).to.be.true;
-
           const result = execSync(`./node_modules/.bin/ts-node -e "${testScript}"`, {
             encoding: 'utf8'
           });
-
           expect(result).to.include('import success!');
         });
-
         if (depName === 'snappy') {
           itInNodeProcess(
             'getSnappy returns fulfilled import',
@@ -117,7 +105,6 @@ describe('package.json', function () {
       });
     }
   });
-
   const EXPECTED_IMPORTS = [
     'bson',
     '@mongodb-js/saslprep',
@@ -152,7 +139,7 @@ describe('package.json', function () {
       );
     });
 
-    context('when importing mongodb', () => {
+    describe('when importing mongodb', () => {
       it('only contains the expected imports', function () {
         expect(setDifference(imports, EXPECTED_IMPORTS)).to.deep.equal(new Set());
       });

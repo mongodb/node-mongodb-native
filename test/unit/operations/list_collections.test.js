@@ -1,5 +1,4 @@
 'use strict';
-
 const { expect } = require('chai');
 const { ListCollectionsOperation } = require('../../mongodb');
 
@@ -7,8 +6,8 @@ describe('ListCollectionsOperation', function () {
   const db = 'test';
 
   describe('#constructor', function () {
-    context('when nameOnly is provided', function () {
-      context('when nameOnly is true', function () {
+    describe('when nameOnly is provided', function () {
+      describe('when nameOnly is true', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: true, dbName: db });
 
         it('sets nameOnly to true', function () {
@@ -16,7 +15,7 @@ describe('ListCollectionsOperation', function () {
         });
       });
 
-      context('when nameOnly is false', function () {
+      describe('when nameOnly is false', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: false, dbName: db });
 
         it('sets nameOnly to false', function () {
@@ -25,8 +24,8 @@ describe('ListCollectionsOperation', function () {
       });
     });
 
-    context('when authorizedCollections is provided', function () {
-      context('when authorizedCollections is true', function () {
+    describe('when authorizedCollections is provided', function () {
+      describe('when authorizedCollections is true', function () {
         const operation = new ListCollectionsOperation(
           db,
           {},
@@ -38,7 +37,7 @@ describe('ListCollectionsOperation', function () {
         });
       });
 
-      context('when authorizedCollections is false', function () {
+      describe('when authorizedCollections is false', function () {
         const operation = new ListCollectionsOperation(
           db,
           {},
@@ -51,7 +50,7 @@ describe('ListCollectionsOperation', function () {
       });
     });
 
-    context('when no options are provided', function () {
+    describe('when no options are provided', function () {
       const operation = new ListCollectionsOperation(db, {}, { dbName: db });
 
       it('sets nameOnly to false', function () {
@@ -65,8 +64,8 @@ describe('ListCollectionsOperation', function () {
   });
 
   describe('#generateCommand', function () {
-    context('when comment is provided', function () {
-      context('when the wireVersion < 9', function () {
+    describe('when comment is provided', function () {
+      describe('when the wireVersion < 9', function () {
         it('does not set a comment on the command', function () {
           const operation = new ListCollectionsOperation(
             db,
@@ -78,7 +77,7 @@ describe('ListCollectionsOperation', function () {
         });
       });
 
-      context('when the wireVersion >= 9', function () {
+      describe('when the wireVersion >= 9', function () {
         it('sets a comment on the command', function () {
           const operation = new ListCollectionsOperation(
             db,
@@ -90,8 +89,9 @@ describe('ListCollectionsOperation', function () {
         });
       });
     });
-    context('when nameOnly is provided', function () {
-      context('when nameOnly is true', function () {
+
+    describe('when nameOnly is provided', function () {
+      describe('when nameOnly is true', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: true, dbName: db });
 
         it('sets nameOnly to true', function () {
@@ -105,7 +105,7 @@ describe('ListCollectionsOperation', function () {
         });
       });
 
-      context('when nameOnly is false', function () {
+      describe('when nameOnly is false', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: false, dbName: db });
 
         it('sets nameOnly to false', function () {
@@ -120,8 +120,8 @@ describe('ListCollectionsOperation', function () {
       });
     });
 
-    context('when authorizedCollections is provided', function () {
-      context('when authorizedCollections is true', function () {
+    describe('when authorizedCollections is provided', function () {
+      describe('when authorizedCollections is true', function () {
         const operation = new ListCollectionsOperation(
           db,
           {},
@@ -139,7 +139,7 @@ describe('ListCollectionsOperation', function () {
         });
       });
 
-      context('when authorizedCollections is false', function () {
+      describe('when authorizedCollections is false', function () {
         const operation = new ListCollectionsOperation(
           db,
           {},
@@ -158,7 +158,7 @@ describe('ListCollectionsOperation', function () {
       });
     });
 
-    context('when no options are provided', function () {
+    describe('when no options are provided', function () {
       const operation = new ListCollectionsOperation(db, {}, { dbName: db });
 
       it('sets nameOnly and authorizedCollections properties to false', function () {

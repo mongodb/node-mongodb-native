@@ -18,7 +18,6 @@ import {
 } from '../../mongodb';
 
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
-
 describe('MONGODB-AWS', function () {
   let awsSdkPresent;
   let client: MongoClient;
@@ -28,13 +27,11 @@ describe('MONGODB-AWS', function () {
       this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
       return this.skip();
     }
-
     const { MONGODB_AWS_SDK = 'unset' } = process.env;
     expect(
       ['true', 'false'],
       `Always inform the AWS tests if they run with or without the SDK (MONGODB_AWS_SDK=${MONGODB_AWS_SDK})`
     ).to.include(MONGODB_AWS_SDK);
-
     awsSdkPresent = AWSTemporaryCredentialProvider.isAWSSDKInstalled;
     expect(
       awsSdkPresent,
@@ -50,13 +47,11 @@ describe('MONGODB-AWS', function () {
 
   it('should authorize when successfully authenticated', async function () {
     client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
-
     const result = await client
       .db('aws')
       .collection('aws_test')
       .estimatedDocumentCount()
       .catch(error => error);
-
     expect(result).to.not.be.instanceOf(MongoServerError);
     expect(result).to.be.a('number');
   });
@@ -72,13 +67,11 @@ describe('MONGODB-AWS', function () {
 
   it('should store a MongoDBAWS provider instance per client', async function () {
     client = this.configuration.newClient(process.env.MONGODB_URI);
-
     await client
       .db('aws')
       .collection('aws_test')
       .estimatedDocumentCount()
       .catch(error => error);
-
     expect(client).to.have.nested.property('s.authProviders');
     const provider = client.s.authProviders.getOrCreateProvider('MONGODB-AWS');
     expect(provider).to.be.instanceOf(MongoDBAWS);
@@ -100,13 +93,11 @@ describe('MONGODB-AWS', function () {
 
     it('should not throw an exception when aws token is missing', async function () {
       client = this.configuration.newClient(process.env.MONGODB_URI);
-
       const result = await client
         .db('aws')
         .collection('aws_test')
         .estimatedDocumentCount()
         .catch(error => error);
-
       // We check only for the MongoMissingCredentialsError
       // and do check for the MongoServerError as the error or numeric result
       // that can be returned depending on different types of environments
@@ -144,12 +135,10 @@ describe('MONGODB-AWS', function () {
       const config = this.configuration;
       client = config.newClient(process.env.MONGODB_URI, { authMechanism: 'MONGODB-AWS' }); // use the URI built by the test environment
       const startTime = performance.now();
-
       const caughtError = await client
         .db()
         .command({ ping: 1 })
         .catch(error => error);
-
       const endTime = performance.now();
       const timeTaken = endTime - startTime;
       expect(caughtError).to.be.instanceOf(MongoAWSError);
@@ -229,15 +218,13 @@ describe('MONGODB-AWS', function () {
         calledWith: []
       }
     ];
-
     for (const test of tests) {
-      context(test.ctx, () => {
+      describe(test.ctx, () => {
         let credentialProvider;
         let storedEnv;
         let calledArguments;
         let shouldSkip = false;
         let numberOfFromNodeProviderChainCalls;
-
         const envCheck = () => {
           const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
           return (
@@ -252,10 +239,8 @@ describe('MONGODB-AWS', function () {
             this.skipReason = 'only relevant to AssumeRoleWithWebIdentity with SDK installed';
             return this.skip();
           }
-
           // @ts-expect-error We intentionally access a protected variable.
           credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
-
           storedEnv = process.env;
           if (test.env.AWS_STS_REGIONAL_ENDPOINTS === undefined) {
             delete process.env.AWS_STS_REGIONAL_ENDPOINTS;
@@ -267,9 +252,7 @@ describe('MONGODB-AWS', function () {
           } else {
             process.env.AWS_REGION = test.env.AWS_REGION;
           }
-
           numberOfFromNodeProviderChainCalls = 0;
-
           // @ts-expect-error We intentionally access a protected variable.
           AWSTemporaryCredentialProvider._awsSDK = {
             fromNodeProviderChain(...args) {
@@ -278,7 +261,6 @@ describe('MONGODB-AWS', function () {
               return credentialProvider.fromNodeProviderChain(...args);
             }
           };
-
           client = this.configuration.newClient(process.env.MONGODB_URI);
         });
 
@@ -303,10 +285,8 @@ describe('MONGODB-AWS', function () {
             .collection('aws_test')
             .estimatedDocumentCount()
             .catch(error => error);
-
           expect(result).to.not.be.instanceOf(MongoServerError);
           expect(result).to.be.a('number');
-
           expect(calledArguments).to.deep.equal(test.calledWith);
         });
 
@@ -318,16 +298,14 @@ describe('MONGODB-AWS', function () {
             .collection('aws_test')
             .estimatedDocumentCount()
             .catch(error => error);
-
           expect(numberOfFromNodeProviderChainCalls).to.be.eql(1);
         });
       });
     }
   });
 });
-
 describe('AWS KMS Credential Fetching', function () {
-  context('when the AWS SDK is not installed', function () {
+  describe('when the AWS SDK is not installed', function () {
     beforeEach(function () {
       this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
         ? 'Test must run in an AWS auth testing environment'
@@ -336,13 +314,14 @@ describe('AWS KMS Credential Fetching', function () {
         : undefined;
       this.currentTest?.skipReason && this.skip();
     });
+
     it('fetching AWS KMS credentials throws an error', async function () {
       const error = await refreshKMSCredentials({ aws: {} }).catch(e => e);
       expect(error).to.be.instanceOf(MongoAWSError);
     });
   });
 
-  context('when the AWS SDK is installed', function () {
+  describe('when the AWS SDK is installed', function () {
     beforeEach(function () {
       this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
         ? 'Test must run in an AWS auth testing environment'
@@ -351,19 +330,17 @@ describe('AWS KMS Credential Fetching', function () {
         : undefined;
       this.currentTest?.skipReason && this.skip();
     });
+
     it('KMS credentials are successfully fetched.', async function () {
       const { aws } = await refreshKMSCredentials({ aws: {} });
-
       expect(aws).to.have.property('accessKeyId');
       expect(aws).to.have.property('secretAccessKey');
     });
 
     it('does not return any extra keys for the `aws` credential provider', async function () {
       const { aws } = await refreshKMSCredentials({ aws: {} });
-
       const keys = new Set(Object.keys(aws ?? {}));
       const allowedKeys = ['accessKeyId', 'secretAccessKey', 'sessionToken'];
-
       expect(
         Array.from(setDifference(keys, allowedKeys)),
         'received an unexpected key in the response refreshing KMS credentials'

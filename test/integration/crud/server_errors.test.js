@@ -7,12 +7,10 @@ const sinonChai = require('sinon-chai');
 const { MongoServerError } = require('../../mongodb');
 
 chai.use(sinonChai);
-
 describe('Errors', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
-
   let client;
 
   beforeEach(function () {
@@ -39,10 +37,8 @@ describe('Errors', function () {
         { writeConcern: { w: 1 } },
         err => {
           expect(err).to.not.exist;
-
           collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
             expect(err).to.not.exist;
-
             collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
               expect(err.code).to.equal(11000);
               done();
@@ -72,7 +68,6 @@ describe('Errors', function () {
             expect(err).to.not.exist;
             collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
               expect(err).to.not.exist;
-
               collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
                 expect(err.code).to.equal(11000);
                 done();
@@ -83,7 +78,6 @@ describe('Errors', function () {
       });
     });
   });
-
   const PROJECTION_ERRORS = new Set([
     'Projection cannot have a mix of inclusion and exclusion.',
     'Cannot do exclusion on field b in inclusion projection'

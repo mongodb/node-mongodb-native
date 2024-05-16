@@ -19,12 +19,10 @@ describe('When importing BSON', function () {
   // Omitted types since they're deprecated:
   // BSONSymbol
   // DBRef
-
   const options = {
     promoteValues: false,
     bsonRegExp: true
   };
-
   for (const [type, ctorArg] of types) {
     it(`should correctly round trip ${type}`, function () {
       const typeCtor = BSON[type];
@@ -43,7 +41,6 @@ describe('When importing BSON', function () {
     expect(outputDoc).to.have.nested.property('key.2', 2);
   });
 });
-
 describe('MongoDB export', () => {
   it('should include ObjectId', () =>
     expect(BSON).to.have.property('ObjectId').that.is.a('function'));

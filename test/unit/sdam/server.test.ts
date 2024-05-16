@@ -35,7 +35,6 @@ const handledErrors = [
     errorLabel: MongoErrorLabel.HandshakeError
   }
 ];
-
 const unhandledErrors = [
   {
     description: 'a non-MongoError',
@@ -53,7 +52,6 @@ const unhandledErrors = [
     errorArgs: ['TestError']
   }
 ];
-
 describe('Server', () => {
   describe('#handleError', () => {
     let server: Server, connection: Connection | undefined;
@@ -65,11 +63,10 @@ describe('Server', () => {
         {} as any
       );
     });
-
     for (const loadBalanced of [true, false]) {
       const mode = loadBalanced ? 'loadBalanced' : 'non-loadBalanced';
       const contextSuffix = loadBalanced ? ' with connection provided' : '';
-      context(`in ${mode} mode${contextSuffix}`, () => {
+      describe(`in ${mode} mode${contextSuffix}`, () => {
         beforeEach(() => {
           if (loadBalanced) {
             server.topology.description.type = TopologyType.LoadBalanced;
@@ -115,20 +112,17 @@ describe('Server', () => {
               });
             }
           });
-
           it(`should not attach a ResetPool label to the error or mark the server unknown on ${description} if it is stale`, async () => {
             // @ts-expect-error because of varied number of args
             const error = new errorClass(...errorArgs);
             if (errorLabel) {
               error.addErrorLabel(errorLabel);
             }
-
             error.connectionGeneration = -1;
             expect(
               server.pool.generation,
               'expected test server to have a pool of generation 0'
             ).to.equal(0); // sanity check
-
             const newDescriptionEvent = Promise.race([
               once(server, Server.DESCRIPTION_RECEIVED),
               sleep(1000)
@@ -142,12 +136,10 @@ describe('Server', () => {
             expect(newDescription).to.be.undefined;
           });
         }
-
         for (const { description, errorClass, errorArgs } of unhandledErrors) {
           it(`should not attach a ResetPool label to the error or mark the server unknown on ${description}`, async () => {
             // @ts-expect-error because of varied number of args
             const error = new errorClass(...errorArgs);
-
             const newDescriptionEvent = Promise.race([
               once(server, Server.DESCRIPTION_RECEIVED),
               sleep(1000)

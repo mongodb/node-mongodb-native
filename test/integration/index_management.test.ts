@@ -39,7 +39,6 @@ describe('Indexes', function () {
   it('shouldCorrectlyExtractIndexInformation', async function () {
     const collection = await db.createCollection('test_index_information');
     await collection.insertMany([{ a: 1 }], this.configuration.writeConcernMax());
-
     // Create an index on the collection
     const indexName = await db.createIndex(
       collection.collectionName,
@@ -47,18 +46,15 @@ describe('Indexes', function () {
       this.configuration.writeConcernMax()
     );
     expect(indexName).to.equal('a_1');
-
     // Let's fetch the index information
     const collectionInfo = await db.indexInformation(collection.collectionName);
     test.ok(collectionInfo['_id_'] != null);
     test.equal('_id', collectionInfo['_id_'][0][0]);
     test.ok(collectionInfo['a_1'] != null);
     test.deepEqual([['a', 1]], collectionInfo['a_1']);
-
     const collectionInfo2 = await db.indexInformation(collection.collectionName);
     const count1 = Object.keys(collectionInfo).length,
       count2 = Object.keys(collectionInfo2).length;
-
     // Tests
     test.ok(count2 >= count1);
     test.ok(collectionInfo2['_id_'] != null);
@@ -71,7 +67,6 @@ describe('Indexes', function () {
 
   it('shouldCorrectlyHandleMultipleColumnIndexes', async function () {
     await collection.insertOne({ a: 1 });
-
     const indexName = await db.createIndex(
       collection.collectionName,
       [
@@ -85,7 +80,6 @@ describe('Indexes', function () {
     // Let's fetch the index information
     const collectionInfo = await db.indexInformation(collection.collectionName);
     const count1 = Object.keys(collectionInfo).length;
-
     // Test
     test.equal(2, count1);
     test.ok(collectionInfo[indexName] != null);
@@ -104,21 +98,21 @@ describe('Indexes', function () {
 
     afterEach(() => collection.dropIndexes());
 
-    context('when `full` is not provided', () => {
+    describe('when `full` is not provided', () => {
       it('returns an array of indexes', async function () {
         const indexes = await collection.indexes();
         expect(indexes).to.be.a('array');
       });
     });
 
-    context('when `full` is set to `true`', () => {
+    describe('when `full` is set to `true`', () => {
       it('returns an array of indexes', async function () {
         const indexes = await collection.indexes({ full: true });
         expect(indexes).to.be.a('array');
       });
     });
 
-    context('when `full` is set to `false`', () => {
+    describe('when `full` is set to `false`', () => {
       it('returns a document mapping key to index definition', async function () {
         const indexes = await collection.indexes({ full: false });
         expect(indexes).to.be.a('object');
@@ -134,7 +128,7 @@ describe('Indexes', function () {
 
     afterEach(() => collection.dropIndexes());
 
-    context('when `full` is not provided', () => {
+    describe('when `full` is not provided', () => {
       it('defaults to `false` and returns a document', async function () {
         const indexes = await collection.indexInformation();
         expect(indexes).to.be.a('object');
@@ -144,14 +138,14 @@ describe('Indexes', function () {
       });
     });
 
-    context('when `full` is set to `true`', () => {
+    describe('when `full` is set to `true`', () => {
       it('returns an array of indexes', async function () {
         const indexes = await collection.indexInformation({ full: true });
         expect(indexes).to.be.a('array');
       });
     });
 
-    context('when `full` is set to `false`', () => {
+    describe('when `full` is set to `false`', () => {
       it('returns a document mapping key to index definition', async function () {
         const indexes = await collection.indexInformation({ full: false });
         expect(indexes).to.be.a('object');
@@ -170,7 +164,7 @@ describe('Indexes', function () {
       client.on('commandStarted', filterForCommands('createIndexes', started));
     });
 
-    context('when version is not specified as an option', function () {
+    describe('when version is not specified as an option', function () {
       it('does not attach `v` to the command', async () => {
         await collection.createIndex({ age: 1 });
         const { command } = started[0];
@@ -179,7 +173,7 @@ describe('Indexes', function () {
       });
     });
 
-    context('when version is specified as an option', function () {
+    describe('when version is specified as an option', function () {
       it('attaches `v` to the command with the value of `version`', async () => {
         await collection.createIndex({ age: 1 }, { version: 1 });
         const { command } = started[0];
@@ -197,7 +191,7 @@ describe('Indexes', function () {
       client.on('commandStarted', filterForCommands('createIndexes', started));
     });
 
-    context('when version is not specified as an option', function () {
+    describe('when version is not specified as an option', function () {
       it('does not attach `v` to the command', async () => {
         await collection.createIndexes([{ key: { age: 1 } }]);
         const { command } = started[0];
@@ -206,7 +200,7 @@ describe('Indexes', function () {
       });
     });
 
-    context('when version is specified as an option', function () {
+    describe('when version is specified as an option', function () {
       it('does not attach `v` to the command', async () => {
         await collection.createIndexes([{ key: { age: 1 } }], { version: 1 });
         const { command } = started[0];
@@ -215,7 +209,7 @@ describe('Indexes', function () {
       });
     });
 
-    context('when version is provided in the index description and the options', function () {
+    describe('when version is provided in the index description and the options', function () {
       it('the value in the description takes precedence', async () => {
         await collection.createIndexes([{ key: { age: 1 }, version: 1 }], { version: 0 });
         const { command } = started[0];
@@ -224,20 +218,17 @@ describe('Indexes', function () {
       });
     });
 
-    context(
-      'when version is provided in some of the index descriptions and the options',
-      function () {
-        it('does not specify a version from the `version` provided in the options', async () => {
-          await collection.createIndexes([{ key: { age: 1 }, version: 1 }, { key: { date: 1 } }], {
-            version: 0
-          });
-          const { command } = started[0];
-          expect(command).to.exist;
-          expect(command.indexes[0]).to.have.property('v', 1);
-          expect(command.indexes[1]).not.to.have.property('v');
+    describe('when version is provided in some of the index descriptions and the options', function () {
+      it('does not specify a version from the `version` provided in the options', async () => {
+        await collection.createIndexes([{ key: { age: 1 }, version: 1 }, { key: { date: 1 } }], {
+          version: 0
         });
-      }
-    );
+        const { command } = started[0];
+        expect(command).to.exist;
+        expect(command.indexes[0]).to.have.property('v', 1);
+        expect(command.indexes[1]).not.to.have.property('v');
+      });
+    });
   });
 
   describe('Collection.indexExists()', function () {
@@ -245,7 +236,7 @@ describe('Indexes', function () {
 
     afterEach(() => collection.dropIndexes());
 
-    context('when provided a string index name', () => {
+    describe('when provided a string index name', () => {
       it('returns true when the index exists', async () => {
         expect(await collection.indexExists('age_1')).to.be.true;
       });
@@ -255,7 +246,7 @@ describe('Indexes', function () {
       });
     });
 
-    context('when provided an array of index names', () => {
+    describe('when provided an array of index names', () => {
       it('returns true when all indexes exists', async () => {
         expect(await collection.indexExists(['age_1'])).to.be.true;
       });
@@ -301,7 +292,6 @@ describe('Indexes', function () {
       [{ hello: { a: 4, b: 5 } }, { hello: { a: 7, b: 2 } }, { hello: { a: 4, b: 10 } }],
       this.configuration.writeConcernMax()
     );
-
     // Create a unique subfield index and test that insert fails
     const collection2 = await db.createCollection('test_index_on_subfield2');
     await collection2.createIndex('hello_a', { writeConcern: { w: 1 }, unique: true });
@@ -314,7 +304,7 @@ describe('Indexes', function () {
     expect(err).to.be.instanceOf(Error);
   });
 
-  context('when dropIndexes succeeds', function () {
+  describe('when dropIndexes succeeds', function () {
     let collection;
 
     beforeEach(async function () {
@@ -332,13 +322,12 @@ describe('Indexes', function () {
       // Drop all the indexes
       const result = await collection.dropIndexes();
       expect(result).to.equal(true);
-
       const res = await collection.indexInformation();
       expect(res['a_1']).to.equal(undefined);
     });
   });
 
-  context('when dropIndexes fails', function () {
+  describe('when dropIndexes fails', function () {
     beforeEach(async function () {
       await collection.insertOne({ a: 1 });
       // Create an index on the collection
@@ -372,13 +361,12 @@ describe('Indexes', function () {
     );
   });
 
-  context('indexExists', function () {
+  describe('indexExists', function () {
     let collection;
 
     beforeEach(async function () {
       collection = await db.createCollection('test_index_exists');
       await collection.insert({ a: 1 });
-
       await db.createIndex(collection.collectionName, 'a');
       await db.createIndex(collection.collectionName, ['c', 'd', 'e']);
     });
@@ -424,7 +412,6 @@ describe('Indexes', function () {
       const docs = await collection.distinct('a');
       expect(docs.sort()).to.deep.equal([0, 1, 2, 3]);
     }
-
     {
       const docs = await collection.distinct('b.c');
       expect(docs.sort()).to.deep.equal(['a', 'b', 'c']);
@@ -446,7 +433,6 @@ describe('Indexes', function () {
       .toArray();
     expect(items).to.have.lengthOf(1);
     expect(items[0]).to.have.property('name', 'Sarah');
-
     // Fetch the info for the indexes
     const indexInfo = await collection.indexInformation({ full: true });
     expect(indexInfo).to.have.lengthOf(2);
@@ -455,7 +441,6 @@ describe('Indexes', function () {
   it('shouldCorrectlyHandleGeospatialIndexes', async function () {
     await collection.createIndex({ loc: '2d' }, this.configuration.writeConcernMax());
     await collection.insertOne({ loc: [-100, 100] }, this.configuration.writeConcernMax());
-
     const err = await collection
       .insertOne({ loc: [200, 200] }, this.configuration.writeConcernMax())
       .catch(e => e);
@@ -501,7 +486,6 @@ describe('Indexes', function () {
 
   it('Should correctly create an index with overriden name', async function () {
     await collection.createIndex('name', { name: 'myfunky_name' });
-
     // Fetch full index information
     const indexInformation = await collection.indexInformation({ full: false });
     expect(indexInformation).to.have.property('myfunky_name');
@@ -512,7 +496,6 @@ describe('Indexes', function () {
       [{ a: 1 }, { a: 1 }, { a: 1 }],
       this.configuration.writeConcernMax()
     );
-
     const err = await collection
       .createIndex({ a: 1 }, { writeConcern: { w: 1 }, unique: true })
       .catch(e => e);
@@ -523,29 +506,24 @@ describe('Indexes', function () {
 
   it('should correctly drop index with no callback', async function () {
     await collection.insertMany([{ a: 1 }], this.configuration.writeConcernMax());
-
     await collection.createIndex({ a: 1 }, { writeConcern: this.configuration.writeConcernMax() });
     await collection.dropIndex('a_1');
   });
 
   it('should correctly apply hint to find', async function () {
     await collection.insertMany([{ a: 1 }], this.configuration.writeConcernMax());
-
     await collection.createIndex({ a: 1 }, { writeConcern: this.configuration.writeConcernMax() });
     await collection.indexInformation({ full: false });
-
     const [doc] = await collection.find({}, { hint: 'a_1' }).toArray();
     expect(doc.a).to.equal(1);
   });
 
   it('should correctly set language_override option', async function () {
     await collection.insertMany([{ text: 'Lorem ipsum dolor sit amet.', langua: 'italian' }]);
-
     await collection.createIndex(
       { text: 'text' },
       { language_override: 'langua', name: 'language_override_index' }
     );
-
     const indexInformation = await collection.indexInformation({ full: true });
     for (let i = 0; i < indexInformation.length; i++) {
       if (indexInformation[i].name === 'language_override_index')
@@ -555,21 +533,18 @@ describe('Indexes', function () {
 
   it('should correctly use listIndexes to retrieve index list', async function () {
     await db.collection('testListIndexes').createIndex({ a: 1 });
-
     const indexes = await db.collection('testListIndexes').listIndexes().toArray();
     expect(indexes).to.have.lengthOf(2);
   });
 
   it('should correctly use listIndexes to retrieve index list using hasNext', async function () {
     await db.collection('testListIndexes_2').createIndex({ a: 1 });
-
     const result = await db.collection('testListIndexes_2').listIndexes().hasNext();
     expect(result).to.be.true;
   });
 
   it('should correctly ensureIndex for nested style index name c.d', async function () {
     await db.collection('ensureIndexWithNestedStyleIndex').createIndex({ 'c.d': 1 });
-
     // Get the list of indexes
     const indexes = await db.collection('ensureIndexWithNestedStyleIndex').listIndexes().toArray();
     expect(indexes).to.have.lengthOf(2);
@@ -580,14 +555,11 @@ describe('Indexes', function () {
       .collection('createIndexes')
       .createIndexes([{ key: { a: 1 } }, { key: { b: 1 }, name: 'hello1' }]);
     expect(r).to.deep.equal(['a_1', 'hello1']);
-
     const docs = await db.collection('createIndexes').listIndexes().toArray();
     const keys = {};
-
     for (let i = 0; i < docs.length; i++) {
       keys[docs[i].name] = true;
     }
-
     test.ok(keys['a_1']);
     test.ok(keys['hello1']);
   });
@@ -595,7 +567,6 @@ describe('Indexes', function () {
   it('should correctly execute createIndexes with one index', async function () {
     const r = await db.collection('createIndexes').createIndexes([{ key: { a: 1 } }]);
     expect(r).to.deep.equal(['a_1']);
-
     await collection.indexExists('a_1');
   });
 
@@ -608,17 +579,13 @@ describe('Indexes', function () {
     const configuration = this.configuration;
     const started: Array<CommandStartedEvent> = [];
     const succeeded: Array<CommandSucceededEvent> = [];
-
     client.on('commandStarted', function (event) {
       if (event.commandName === 'createIndexes') started.push(event);
     });
-
     client.on('commandSucceeded', function (event) {
       if (event.commandName === 'createIndexes') succeeded.push(event);
     });
-
     const db = client.db(configuration.db);
-
     await db
       .collection('partialIndexes')
       .createIndex({ a: 1 }, { partialFilterExpression: { a: 1 } });
@@ -645,7 +612,6 @@ describe('Indexes', function () {
         a: { a: 2 }
       }
     ]);
-
     await collection.createIndex({ 'a.a': 1 });
   });
 
@@ -671,7 +637,6 @@ describe('Indexes', function () {
         { unique: true, sparse: true, name: 'indexname' }
       )
       .catch(e => e);
-
     expect(err).to.be.instanceOf(Error).to.have.property('code', 11000);
   });
 
@@ -691,7 +656,6 @@ describe('Indexes', function () {
     },
     async function () {
       await collection.createIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false });
-
       const err = await collection
         .createIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n2', sparse: true })
         .catch(e => e);
@@ -704,7 +668,6 @@ describe('Indexes', function () {
     const err = await collection
       .createIndex({ 'b.one': -1, 'b.two': -1 }, { name: 'test' })
       .catch(err => err);
-
     expect(err).to.be.instanceOf(Error).to.have.property('code', 86);
   });
 
@@ -712,8 +675,9 @@ describe('Indexes', function () {
     await collection.createIndex({ 'accessControl.get': 1 }, { background: true });
   });
 
-  context('commitQuorum', function () {
+  describe('commitQuorum', function () {
     let client;
+
     beforeEach(async function () {
       client = this.configuration.newClient({ monitorCommands: true });
     });
@@ -721,7 +685,6 @@ describe('Indexes', function () {
     afterEach(async function () {
       await client.close();
     });
-
     function throwErrorTest(testCommand: (db: Db, collection: Collection) => Promise<any>) {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
@@ -735,23 +698,25 @@ describe('Indexes', function () {
         }
       };
     }
+
     it(
       'should throw an error if commitQuorum specified on db.createIndex',
       throwErrorTest((db, collection) =>
         db.createIndex(collection.collectionName, 'a', { commitQuorum: 'all' })
       )
     );
+
     it(
       'should throw an error if commitQuorum specified on collection.createIndex',
       throwErrorTest((db, collection) => collection.createIndex('a', { commitQuorum: 'all' }))
     );
+
     it(
       'should throw an error if commitQuorum specified on collection.createIndexes',
       throwErrorTest((db, collection) =>
         collection.createIndexes([{ key: { a: 1 } }, { key: { b: 1 } }], { commitQuorum: 'all' })
       )
     );
-
     function commitQuorumTest(
       testCommand: (db: Db, collection: Collection) => Promise<unknown>
     ): any {
@@ -762,12 +727,10 @@ describe('Indexes', function () {
           client.on('commandStarted', event => {
             if (event.commandName === 'createIndexes') events.push(event);
           });
-
           const db = client.db('test');
           const collection = db.collection('commitQuorum');
           await collection.insertOne({ a: 1 });
           await testCommand(db, collection);
-
           expect(events).to.be.an('array').with.lengthOf(1);
           expect(events[0]).nested.property('command.commitQuorum').to.equal(0);
           await collection.drop(err => {
@@ -776,6 +739,7 @@ describe('Indexes', function () {
         }
       };
     }
+
     it(
       'should run command with commitQuorum if specified on db.createIndex',
       commitQuorumTest((db, collection) =>
@@ -786,6 +750,7 @@ describe('Indexes', function () {
         })
       )
     );
+
     it(
       'should run command with commitQuorum if specified on collection.createIndex',
       commitQuorumTest((db, collection) =>
@@ -793,6 +758,7 @@ describe('Indexes', function () {
         collection.createIndex('a', { writeConcern: { w: 'majority' }, commitQuorum: 0 })
       )
     );
+
     it(
       'should run command with commitQuorum if specified on collection.createIndexes',
       commitQuorumTest((db, collection) =>

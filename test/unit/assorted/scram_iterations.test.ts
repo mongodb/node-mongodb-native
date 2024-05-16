@@ -26,7 +26,6 @@ describe('SCRAM Iterations Tests', function () {
   it('should error if iteration count is less than 4096', async function () {
     const scramResponse =
       'r=IE+xNFeOcslsupAA+zkDVzHd5HfwoRuP7Wi8S4py+erf8PcNm7XIdXQyT52Nj3+M,s=AzomrlMs99A7oFxDLpgFvVb+CSvdyXuNagoWVw==,i=4000';
-
     const credentials = new MongoCredentials({
       mechanism: 'DEFAULT',
       source: 'db',
@@ -35,7 +34,6 @@ describe('SCRAM Iterations Tests', function () {
       mechanismProperties: {}
     });
     client.s.options.credentials = credentials;
-
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -50,7 +48,6 @@ describe('SCRAM Iterations Tests', function () {
         throw new Error('should not be here');
       }
     });
-
     const thrownError = await client.connect().catch(error => error);
     expect(thrownError).to.be.instanceOf(MongoRuntimeError);
     expect(thrownError)
@@ -67,7 +64,6 @@ describe('SCRAM Iterations Tests', function () {
       mechanismProperties: {}
     });
     client.s.options.credentials = credentials;
-
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -88,7 +84,6 @@ describe('SCRAM Iterations Tests', function () {
         });
       }
     });
-
     const thrownError = await client.connect().catch(error => error);
     expect(thrownError).to.be.instanceOf(MongoRuntimeError);
     expect(thrownError)
@@ -105,7 +100,6 @@ describe('SCRAM Iterations Tests', function () {
       mechanismProperties: {}
     });
     client.s.options.credentials = credentials;
-
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -122,7 +116,6 @@ describe('SCRAM Iterations Tests', function () {
         request.connection.destroy();
       }
     });
-
     const thrownError = await client.connect().catch(error => error);
     expect(thrownError).to.be.instanceOf(MongoNetworkError);
     expect(thrownError)
@@ -140,7 +133,6 @@ describe('SCRAM Iterations Tests', function () {
     });
     let payload;
     client.s.options.credentials = credentials;
-
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -158,7 +150,6 @@ describe('SCRAM Iterations Tests', function () {
         request.connection.destroy();
       }
     });
-
     await client.connect().catch(error => error);
     expect(payload).to.includes('r=r7RuW8nC89hmrlIPSpatiEGnZGkuGcsquPuvfddlU3NavdfJxv/XKg==');
   });

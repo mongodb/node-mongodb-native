@@ -19,7 +19,6 @@ import * as mock from '../../tools/mongodb-mock/index';
 import type { MockServer } from '../../tools/mongodb-mock/src/server';
 import { processTick, topologyWithPlaceholderClient } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
-
 /*
     The SRV Prose Tests make use of the following REAL DNS records.
     CURRENTLY, WE DO NOT USE THESE. We have stubbed the methods to build our own fake data for testing.
@@ -37,31 +36,26 @@ import { createTimerSandbox } from '../timer_sandbox';
     _mongodb._tcp.test3.test.build.10gen.cc.      86400  IN SRV  27017  localhost.test.build.10gen.cc.
     _customname._tcp.test22.test.build.10gen.cc.  86400  IN SRV  27017  localhost.test.build.10gen.cc.
 */
-
 const srvRecord = (name, port) => ({ name, port, weight: 0, priority: 0 });
 interface ShardedClusterMocks {
   mongoses: MockServer[];
   readonly srvRecords: dns.SrvRecord[];
 }
-
 // TODO(NODE-3773): Make use of the shared driver's DNS records
 // TODO(NODE-3773): Implement tests 6-9
 describe('Polling Srv Records for Mongos Discovery', () => {
   beforeEach(function () {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const test = this.currentTest!;
-
     test.skipReason = satisfies(process.version, '>=18.0.0')
       ? `TODO(NODE-5666): fix failing unit tests on Node18 (Running with Nodejs ${process.version})`
       : undefined;
-
     if (test.skipReason) this.skip();
   });
 
   describe('SRV polling prose cases 1-5', () => {
     const SRV_HOST = 'darmok.tanagra.com';
     const context: Record<string, any> = {};
-
     function srvRecord(mockServer, port?) {
       if (typeof mockServer === 'string') {
         mockServer = { host: mockServer, port };
@@ -73,7 +67,6 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         name: mockServer.host
       };
     }
-
     class FakeSrvPoller extends SrvPoller {
       start() {
         return;
@@ -85,11 +78,9 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         this.emit('srvRecordDiscovery', new SrvPollingEvent(srvRecords));
       }
     }
-
     function srvAddresses(records) {
       return records.map(r => `${r.name}:${r.port}`);
     }
-
     const MONGOS_HELLO = Object.assign({}, mock.HELLO, {
       msg: 'isdbgrid'
     });
@@ -112,41 +103,33 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         done();
       }
     });
-
     async function runSrvPollerTest(recordSets) {
       context.servers.forEach(server => {
         server.setMessageHandler(request => {
           const doc = request.document;
-
           if (isHello(doc)) {
             request.reply(Object.assign({}, MONGOS_HELLO));
           }
         });
       });
-
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST } as SrvPollerOptions);
       const seedlist = recordSets[0].map(record =>
         HostAddress.fromString(`${record.name}:${record.port}`)
       );
-
       context.topology = topologyWithPlaceholderClient(seedlist, {
         srvPoller: srvPoller as SrvPoller,
         srvHost: SRV_HOST
       } as TopologyOptions);
       const topology: Topology = context.topology;
-
       await topology.connect({});
       expect(topology.description).to.have.property('type', TopologyType.Sharded);
       const servers = Array.from(topology.description.servers.keys());
       expect(servers).to.deep.equal(srvAddresses(recordSets[0]));
       process.nextTick(() => srvPoller.trigger(recordSets[1]));
-
       await once(topology, 'topologyDescriptionChanged');
-
       const server = Array.from(topology.description.servers.keys());
       expect(server).to.deep.equal(srvAddresses(recordSets[1]));
     }
-
     // The addition of a new DNS record:
     // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27019  localhost.test.build.10gen.cc.
     it('1. Addition of a new DNS record', async function () {
@@ -160,7 +143,6 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       ];
       await runSrvPollerTest(recordSets);
     });
-
     // The removal of an existing DNS record:
     // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27018  localhost.test.build.10gen.cc.
     it('2. Removal of an existing DNS record', async function () {
@@ -170,7 +152,6 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       ];
       await runSrvPollerTest(recordSets);
     });
-
     // The replacement of a DNS record:
     // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27018  localhost.test.build.10gen.cc.
     // replace by:
@@ -182,7 +163,6 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       ];
       await runSrvPollerTest(recordSets);
     });
-
     // The replacement of both existing DNS records with one new record:
     // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27019  localhost.test.build.10gen.cc.
     it('4. replacement of both existing DNS records with one new record', async function () {
@@ -192,7 +172,6 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       ];
       await runSrvPollerTest(recordSets);
     });
-
     // The replacement of both existing DNS records with two new records:
     // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27019  localhost.test.build.10gen.cc.
     // _mongodb._tcp.test1.test.build.10gen.cc.  86400  IN SRV  27020  localhost.test.build.10gen.cc.
@@ -238,17 +217,13 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         await mock.createServer(2019),
         await mock.createServer(2020)
       ];
-
       const srvRecords = mongoses.map(s =>
         srvRecord('localhost.test.mock.test.build.10gen.cc', s.port)
       );
-
       shardedCluster = { mongoses, srvRecords };
-
       for (const mongos of shardedCluster.mongoses) {
         mongos.setMessageHandler(request => {
           const document = request.document;
-
           if (isHello(document)) {
             request.reply({ ...mock.HELLO, msg: 'isdbgrid' });
           }
@@ -274,7 +249,6 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         client = undefined;
       }
     });
-
     function makeStubs({
       initialRecords = undefined,
       replacementRecords = undefined,
@@ -298,16 +272,13 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         }
         return replacementRecords;
       });
-
       lookupStub = sinon.stub(dns, 'lookup').callsFake((...args) => {
         const hostname = args[0];
         const options = typeof args[1] === 'object' ? args[1] : {};
         const callback = args[args.length - 1] as (err: null, address: string, family: 4) => void;
-
         if (hostname.includes('test.mock.test.build.10gen.cc')) {
           return process.nextTick(callback, null, '127.0.0.1', 4);
         }
-
         const { wrappedMethod: lookup } = lookupStub;
         lookup(hostname, options, callback);
       });
@@ -319,25 +290,20 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         { name: 'localhost.test.mock.test.build.10gen.cc', port: 2019, weight: 0, priority: 0 },
         { name: 'localhost.test.mock.test.build.10gen.cc', port: 2020, weight: 0, priority: 0 }
       ];
-
       makeStubs({ initialRecords, replacementRecords });
-
       client = new MongoClient(SRV_CONNECTION_STRING, {
         tls: false, // Need to turn off the automatic TLS turn on with SRV connection strings
         srvMaxHosts: 0,
         serverSelectionTimeoutMS: 5000 // This is just to make the test fail in a nice amount of time
       });
       await client.connect();
-
       const selectedHosts = client.topology.s.seedlist;
       expect(selectedHosts).to.have.lengthOf(initialRecords.length);
       expect(selectedHosts.map(({ host }) => host)).to.deep.equal(
         initialRecords.map(({ name }) => name)
       );
-
       clock.tick(2 * client.topology.s.srvPoller.rescanSrvIntervalMS);
       await processTick();
-
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
       expect(polledServerAddresses).to.deep.equal(
@@ -350,25 +316,20 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         { name: 'localhost.test.mock.test.build.10gen.cc', port: 2019, weight: 0, priority: 0 },
         { name: 'localhost.test.mock.test.build.10gen.cc', port: 2020, weight: 0, priority: 0 }
       ];
-
       makeStubs({ initialRecords, replacementRecords });
-
       client = new MongoClient(SRV_CONNECTION_STRING, {
         tls: false,
         srvMaxHosts: 2,
         serverSelectionTimeoutMS: 5000
       });
       await client.connect();
-
       const selectedHosts = client.topology.s.seedlist;
       expect(selectedHosts).to.have.lengthOf(2);
       expect(selectedHosts.map(({ host }) => host)).to.deep.equal(
         initialRecords.map(({ name }) => name)
       );
-
       clock.tick(2 * client.topology.s.srvPoller.rescanSrvIntervalMS);
       await processTick();
-
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
       expect(polledServerAddresses).to.deep.equal(
@@ -382,25 +343,20 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         { name: 'localhost.test.mock.test.build.10gen.cc', port: 2019, weight: 0, priority: 0 },
         { name: 'localhost.test.mock.test.build.10gen.cc', port: 2020, weight: 0, priority: 0 }
       ];
-
       makeStubs({ initialRecords, replacementRecords });
-
       client = new MongoClient(SRV_CONNECTION_STRING, {
         tls: false,
         srvMaxHosts: 2,
         serverSelectionTimeoutMS: 5000
       });
       await client.connect();
-
       const selectedHosts = client.topology.s.seedlist;
       expect(selectedHosts).to.have.lengthOf(2);
       expect(selectedHosts.map(({ host }) => host)).to.deep.equal(
         initialRecords.map(({ name }) => name)
       );
-
       clock.tick(2 * client.topology.s.srvPoller.rescanSrvIntervalMS);
       await processTick();
-
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
       // Only two addresses, one should remain the original 2017,
@@ -421,24 +377,19 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         { name: 'localhost.test.mock.test.build.10gen.cc', port: 2019, weight: 0, priority: 0 },
         { name: 'localhost.test.mock.test.build.10gen.cc', port: 2020, weight: 0, priority: 0 }
       ];
-
       makeStubs({
         initialRecords: [initialRecords[0]],
         replacementRecords,
         srvServiceName: 'myFancySrvServiceName'
       });
-
       client = new MongoClient(SRV_CONNECTION_STRING, {
         tls: false,
         srvServiceName: 'myFancySrvServiceName',
         serverSelectionTimeoutMS: 5000
       });
-
       await client.connect();
-
       clock.tick(2 * client.topology.s.srvPoller.rescanSrvIntervalMS);
       // No need to await process tick, since we're not checking DNS lookups
-
       const resolveSrvCalls = resolveSrvStub.getCalls();
       expect(resolveSrvCalls).to.have.lengthOf(2);
       expect(resolveSrvCalls[0].args[0]).includes('myFancySrvServiceName');

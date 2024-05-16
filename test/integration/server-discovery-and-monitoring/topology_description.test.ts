@@ -19,7 +19,7 @@ describe('TopologyDescription (integration tests)', function () {
     await client.connect();
   });
 
-  context('options', function () {
+  describe('options', function () {
     let client: MongoClient;
 
     afterEach(async function () {
@@ -30,7 +30,7 @@ describe('TopologyDescription (integration tests)', function () {
       client = this.configuration.newClient();
     });
 
-    context('localThresholdMS', function () {
+    describe('localThresholdMS', function () {
       it('should default to 15ms', async function () {
         const options: MongoClientOptions = {};
         client = await this.configuration.newClient(options).connect();
@@ -49,7 +49,7 @@ describe('TopologyDescription (integration tests)', function () {
     });
   });
 
-  context('topology types', function () {
+  describe('topology types', function () {
     const topologyTypesMap = new Map<TopologyTypeRequirement, TopologyType>([
       ['single', TopologyType.Single],
       ['replicaset', TopologyType.ReplicaSetWithPrimary],
@@ -57,7 +57,6 @@ describe('TopologyDescription (integration tests)', function () {
       ['load-balanced', TopologyType.LoadBalanced]
       // Intentionally omitted ReplicaSetNoPrimary & Unknown
     ]);
-
     for (const [filterType, driverType] of topologyTypesMap) {
       it(
         `when running against ${filterType} driver should declare ${driverType} topology type`,
@@ -77,7 +76,6 @@ describe('TopologyDescription (integration tests)', function () {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       const description = client.topology?.description!;
       expect(description).to.exist;
-
       expect(() => JSON.stringify(description)).not.to.throw;
     });
 
@@ -85,7 +83,6 @@ describe('TopologyDescription (integration tests)', function () {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
       const description = client.topology?.description!;
       expect(description).to.exist;
-
       const { servers } = JSON.parse(JSON.stringify(description));
       expect(Object.keys(servers).length > 0, '`servers` stringified with no servers.').to.be.true;
     });

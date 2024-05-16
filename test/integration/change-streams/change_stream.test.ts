@@ -39,17 +39,14 @@ const initIteratorMode = async (cs: ChangeStream) => {
   await initEvent;
   return;
 };
-
 const is4_2Server = (serverVersion: string) =>
   gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
-
 // Define the pipeline processing changes
 const pipeline = [
   { $addFields: { addedField: 'This is a field added using $addFields' } },
   { $project: { documentKey: false } },
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
-
 describe('Change Streams', function () {
   let client: MongoClient;
   let collection: Collection;
@@ -59,11 +56,9 @@ describe('Change Streams', function () {
   beforeEach(async function () {
     const configuration = this.configuration;
     client = configuration.newClient();
-
     await client.connect();
     db = client.db('integration_tests');
     await db.createCollection('test').catch(() => null);
-
     const csDb = client.db('changestream_integration_test');
     await csDb.dropDatabase().catch(() => null);
     await csDb.createCollection('test').catch(() => null);
@@ -78,7 +73,7 @@ describe('Change Streams', function () {
     await mock.cleanup();
   });
 
-  context('ChangeStreamCursor options', function () {
+  describe('ChangeStreamCursor options', function () {
     let client, db, collection;
 
     beforeEach(function () {
@@ -94,10 +89,9 @@ describe('Change Streams', function () {
       collection = undefined;
     });
 
-    context('fullDocument', () => {
+    describe('fullDocument', () => {
       it('does not set fullDocument if no value is provided', function () {
         const changeStream = client.watch();
-
         expect(changeStream).not.to.have.nested.property(
           'cursor.pipeline[0].$changeStream.fullDocument'
         );
@@ -105,7 +99,6 @@ describe('Change Streams', function () {
 
       it('does not validate the value passed in for the fullDocument property', function () {
         const changeStream = client.watch([], { fullDocument: 'invalid value' });
-
         expect(changeStream).to.have.nested.property(
           'cursor.pipeline[0].$changeStream.fullDocument',
           'invalid value'
@@ -114,7 +107,6 @@ describe('Change Streams', function () {
 
       it('assigns fullDocument to the correct value if it is passed as an option', function () {
         const changeStream = client.watch([], { fullDocument: 'updateLookup' });
-
         expect(changeStream).to.have.nested.property(
           'cursor.pipeline[0].$changeStream.fullDocument',
           'updateLookup'
@@ -122,10 +114,9 @@ describe('Change Streams', function () {
       });
     });
 
-    context('allChangesForCluster', () => {
+    describe('allChangesForCluster', () => {
       it('assigns allChangesForCluster to true if the ChangeStream.type is Cluster', function () {
         const changeStream = client.watch();
-
         expect(changeStream).to.have.nested.property(
           'cursor.pipeline[0].$changeStream.allChangesForCluster',
           true
@@ -134,7 +125,6 @@ describe('Change Streams', function () {
 
       it('does not assign allChangesForCluster if the ChangeStream.type is Db', function () {
         const changeStream = db.watch();
-
         expect(changeStream).not.to.have.nested.property(
           'cursor.pipeline[0].$changeStream.allChangesForCluster'
         );
@@ -142,7 +132,6 @@ describe('Change Streams', function () {
 
       it('does not assign allChangesForCluster if the ChangeStream.type is Collection', function () {
         const changeStream = collection.watch();
-
         expect(changeStream).not.to.have.nested.property(
           'cursor.pipeline[0].$changeStream.allChangesForCluster'
         );
@@ -151,49 +140,43 @@ describe('Change Streams', function () {
 
     it('ignores any invalid option values', function () {
       const changeStream = collection.watch([], { invalidOption: true });
-
       expect(changeStream).not.to.have.nested.property(
         'cursor.pipeline[0].$changeStream.invalidOption'
       );
     });
   });
 
-  it('should close the listeners after the cursor is closed', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
+  it(
+    'should close the listeners after the cursor is closed',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       const collection = db.collection('closesListeners');
       const changeStream = collection.watch(pipeline);
       const willBeChanges = on(changeStream, 'change');
       await once(changeStream.cursor, 'init');
       await collection.insertOne({ a: 1 });
-
       await willBeChanges.next();
       expect(changeStream.cursorStream?.listenerCount('data')).to.equal(1);
-
       await changeStream.close();
       expect(changeStream.cursorStream).to.not.exist;
     }
-  });
+  );
 
-  it('should create a ChangeStream on a collection and emit change events', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
+  it(
+    'should create a ChangeStream on a collection and emit change events',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       const collection = db.collection('docsDataEvent');
       const changeStream = collection.watch(pipeline);
-
       const willBeChanges = on(changeStream, 'change');
       await once(changeStream.cursor, 'init');
-
       await collection.insertOne({ d: 4 });
       await collection.updateOne({ d: 4 }, { $inc: { d: 2 } });
-
       const changes = [
         (await willBeChanges.next()).value[0],
         (await willBeChanges.next()).value[0]
       ];
-
       await changeStream.close();
-
       expect(changes).to.have.length(2);
       expect(changes[0]).to.not.have.property('documentKey');
       expect(changes[0]).to.containSubset({
@@ -205,7 +188,6 @@ describe('Change Streams', function () {
         },
         comment: 'The documentKey field has been projected out of this document.'
       });
-
       expect(changes[1]).to.containSubset({
         operationType: 'update',
         updateDescription: {
@@ -213,36 +195,31 @@ describe('Change Streams', function () {
         }
       });
     }
-  });
+  );
 
-  it('should support creating multiple simultaneous ChangeStreams', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    test: function (done) {
+  it(
+    'should support creating multiple simultaneous ChangeStreams',
+    { requires: { topology: 'replicaset' } },
+    function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
-
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
-
         const database = client.db('integration_tests');
         const collection1 = database.collection('simultaneous1');
         const collection2 = database.collection('simultaneous2');
-
         const changeStream1 = collection1.watch([{ $addFields: { changeStreamNumber: 1 } }]);
         this.defer(() => changeStream1.close());
         const changeStream2 = collection2.watch([{ $addFields: { changeStreamNumber: 2 } }]);
         this.defer(() => changeStream2.close());
         const changeStream3 = collection2.watch([{ $addFields: { changeStreamNumber: 3 } }]);
         this.defer(() => changeStream3.close());
-
         setTimeout(() => {
           this.defer(
             collection1.insertMany([{ a: 1 }]).then(() => collection2.insertMany([{ a: 1 }]))
           );
         }, 50);
-
         Promise.resolve()
           .then(() =>
             Promise.all([changeStream1.hasNext(), changeStream2.hasNext(), changeStream3.hasNext()])
@@ -252,7 +229,6 @@ describe('Change Streams', function () {
             assert.ok(hasNexts[0]);
             assert.ok(hasNexts[1]);
             assert.ok(hasNexts[2]);
-
             return Promise.all([changeStream1.next(), changeStream2.next(), changeStream3.next()]);
           })
           .then(function (changes) {
@@ -260,19 +236,15 @@ describe('Change Streams', function () {
             assert.equal(changes[0].operationType, 'insert');
             assert.equal(changes[1].operationType, 'insert');
             assert.equal(changes[2].operationType, 'insert');
-
             expect(changes[0]).to.have.nested.property('fullDocument.a', 1);
             expect(changes[1]).to.have.nested.property('fullDocument.a', 1);
             expect(changes[2]).to.have.nested.property('fullDocument.a', 1);
-
             expect(changes[0]).to.have.nested.property('ns.db', 'integration_tests');
             expect(changes[1]).to.have.nested.property('ns.db', 'integration_tests');
             expect(changes[2]).to.have.nested.property('ns.db', 'integration_tests');
-
             expect(changes[0]).to.have.nested.property('ns.coll', 'simultaneous1');
             expect(changes[1]).to.have.nested.property('ns.coll', 'simultaneous2');
             expect(changes[2]).to.have.nested.property('ns.coll', 'simultaneous2');
-
             expect(changes[0]).to.have.nested.property('changeStreamNumber', 1);
             expect(changes[1]).to.have.nested.property('changeStreamNumber', 2);
             expect(changes[2]).to.have.nested.property('changeStreamNumber', 3);
@@ -283,29 +255,24 @@ describe('Change Streams', function () {
           );
       });
     }
-  });
+  );
 
-  it('should properly close ChangeStream cursor', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    test: function (done) {
+  it(
+    'should properly close ChangeStream cursor',
+    { requires: { topology: 'replicaset' } },
+    function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
-
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
-
         const database = client.db('integration_tests');
         const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
         this.defer(() => changeStream.close());
-
         assert.equal(changeStream.closed, false);
         assert.equal(changeStream.cursor.closed, false);
-
         changeStream.close(err => {
           expect(err).to.not.exist;
-
           // Check the cursor is closed
           expect(changeStream.closed).to.be.true;
           expect(changeStream.cursor).property('closed', true);
@@ -313,92 +280,78 @@ describe('Change Streams', function () {
         });
       });
     }
-  });
+  );
 
   it(
     'should error when attempting to create a ChangeStream with a forbidden aggregation pipeline stage',
-    {
-      metadata: { requires: { topology: 'replicaset' } },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient();
-
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
-
-          const forbiddenStage = {};
-          const forbiddenStageName = '$alksdjfhlaskdfjh';
-          forbiddenStage[forbiddenStageName] = 2;
-
-          const database = client.db('integration_tests');
-          const changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
-          this.defer(() => changeStream.close());
-
-          changeStream.next(err => {
-            assert.ok(err);
-            assert.ok(err.message);
-            assert.ok(
-              err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
-            );
-
-            done();
-          });
+    { requires: { topology: 'replicaset' } },
+    function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        this.defer(() => client.close());
+        const forbiddenStage = {};
+        const forbiddenStageName = '$alksdjfhlaskdfjh';
+        forbiddenStage[forbiddenStageName] = 2;
+        const database = client.db('integration_tests');
+        const changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
+        this.defer(() => changeStream.close());
+        changeStream.next(err => {
+          assert.ok(err);
+          assert.ok(err.message);
+          assert.ok(
+            err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
+          );
+          done();
         });
-      }
+      });
     }
   );
 
-  it('should cache the change stream resume token using iterator form', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    async test() {
+  it(
+    'should cache the change stream resume token using iterator form',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       await initIteratorMode(changeStream);
       collection.insertOne({ a: 1 });
-
       const hasNext = await changeStream.hasNext();
       expect(hasNext).to.be.true;
-
       const change = await changeStream.next();
       expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
     }
-  });
+  );
 
-  it('should cache the change stream resume token using event listener form', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
+  it(
+    'should cache the change stream resume token using event listener form',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       const willBeChange = once(changeStream, 'change');
       await once(changeStream.cursor, 'init');
       collection.insertOne({ a: 1 });
-
       const [change] = await willBeChange;
       expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
     }
-  });
+  );
 
-  it('should error if resume token projected out of change stream document using iterator', {
-    metadata: { requires: { topology: 'replicaset' } },
-    test(done) {
+  it(
+    'should error if resume token projected out of change stream document using iterator',
+    { requires: { topology: 'replicaset' } },
+    function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
-
       client.connect((err, client) => {
         expect(err).to.not.exist;
-
         const database = client.db('integration_tests');
         const collection = database.collection('resumetokenProjectedOutCallback');
         const changeStream = collection.watch([{ $project: { _id: false } }]);
-
         changeStream.hasNext(() => {
           // trigger initialize
         });
-
         changeStream.cursor.on('init', () => {
           collection.insertOne({ b: 2 }, (err, res) => {
             expect(err).to.be.undefined;
             expect(res).to.exist;
-
             changeStream.next(err => {
               expect(err).to.exist;
               changeStream.close(() => {
@@ -411,22 +364,18 @@ describe('Change Streams', function () {
         });
       });
     }
-  });
+  );
 
-  it('should error if resume token projected out of change stream document using event listeners', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
+  it(
+    'should error if resume token projected out of change stream document using event listeners',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       const changeStream = collection.watch([{ $project: { _id: false } }]);
-
       const willBeChangeOrError = once(changeStream, 'change').catch(error => error);
       await once(changeStream.cursor, 'init');
-
       await collection.insertOne({ a: 1 });
-
       const error = await willBeChangeOrError;
-
       await changeStream.close();
-
       if (error instanceof MongoServerError) {
         // Newer servers
         expect(error).to.be.instanceOf(MongoServerError);
@@ -439,83 +388,64 @@ describe('Change Streams', function () {
         expect.fail(`error needs to be a known instance, got ${error.constructor.name}`);
       }
     }
-  });
+  );
 
-  it('should invalidate change stream on collection rename using event listeners', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
-    async test() {
+  it(
+    'should invalidate change stream on collection rename using event listeners',
+    { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
+    async function () {
       const willBeChange = once(changeStream, 'change');
       await once(changeStream.cursor, 'init');
-
       collection.insertOne({ a: 1 });
-
       const [change] = await willBeChange;
       expect(change).to.have.property('operationType', 'insert');
       expect(change).to.have.nested.property('fullDocument.a', 1);
-
       const willBeClose = once(changeStream, 'close');
-
       const changes = on(changeStream, 'change');
-
       await collection.rename('renamedDocs', { dropTarget: true });
-
       const [renameChange] = (await changes.next()).value;
       expect(renameChange).to.have.property('operationType', 'rename');
-
       const [invalidateChange] = (await changes.next()).value;
       expect(invalidateChange).to.have.property('operationType', 'invalidate');
-
       await willBeClose; // Server will close this changestream
     }
-  });
+  );
 
-  it('should invalidate change stream on database drop using iterator form', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
-    async test() {
+  it(
+    'should invalidate change stream on database drop using iterator form',
+    { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
+    async function () {
       const db = client.db('droppableDb');
       const collection = db.collection('invalidateCallback');
-
       // ensure ns exists before making cs
       await collection.insertOne({ random: Math.random() });
-
       const changeStream = collection.watch(pipeline);
       await initIteratorMode(changeStream);
-
       await collection.insertOne({ a: 1 });
-
       const insertChange = await changeStream.next();
       expect(insertChange).to.have.property('operationType', 'insert');
-
       await db.dropDatabase();
-
       const dropChange = await changeStream.next();
       expect(dropChange).to.have.property('operationType', 'drop');
-
       const invalidateChange = await changeStream.next();
       expect(invalidateChange).to.have.property('operationType', 'invalidate');
-
       const hasNext = await changeStream.hasNext();
       expect(hasNext).to.be.false;
-
       expect(changeStream.closed).to.be.true;
     }
-  });
+  );
 
-  it('should resume from point in time using user-provided resumeAfter', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    async test() {
+  it(
+    'should resume from point in time using user-provided resumeAfter',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       const collection = db.collection('resumeAfterTest2');
-
       await collection.drop().catch(() => null);
-
       let resumeToken;
       const docs = [{ a: 0 }, { a: 1 }, { a: 2 }];
-
       let secondChangeStream;
       const firstChangeStream = collection.watch(pipeline);
       this.defer(() => firstChangeStream.close());
-
       return initIteratorMode(firstChangeStream)
         .then(() =>
           collection
@@ -531,7 +461,6 @@ describe('Change Streams', function () {
         .then(change => {
           expect(change).to.have.property('operationType', 'insert');
           expect(change).to.have.nested.property('fullDocument.a', docs[0].a);
-
           // Save the resumeToken
           resumeToken = change._id;
           return firstChangeStream.next();
@@ -539,13 +468,11 @@ describe('Change Streams', function () {
         .then(change => {
           expect(change).to.have.property('operationType', 'insert');
           expect(change).to.have.nested.property('fullDocument.a', docs[1].a);
-
           return firstChangeStream.next();
         })
         .then(change => {
           expect(change).to.have.property('operationType', 'insert');
           expect(change).to.have.nested.property('fullDocument.a', docs[2].a);
-
           return firstChangeStream.close();
         })
         .then(() => {
@@ -553,7 +480,6 @@ describe('Change Streams', function () {
             resumeAfter: resumeToken
           });
           this.defer(() => secondChangeStream.close());
-
           return initIteratorMode(secondChangeStream).then(() => delay(200));
         })
         .then(() => secondChangeStream.hasNext())
@@ -572,47 +498,38 @@ describe('Change Streams', function () {
           return secondChangeStream.close();
         });
     }
-  });
+  );
 
-  it('should support full document lookup', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
+  it(
+    'should support full document lookup',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       const collection = db.collection('fullDocumentLookup');
       const changeStream = collection.watch([], { fullDocument: 'updateLookup' });
-
       await initIteratorMode(changeStream);
-
       const { insertedId: _id } = await collection.insertOne({ f: 128 });
-
       const insertChange = await changeStream.next();
-
       expect(insertChange).to.have.property('operationType', 'insert');
       expect(insertChange).to.have.nested.property('fullDocument.f', 128);
       expect(insertChange).to.not.have.nested.property('fullDocument.c');
-
       await collection.updateOne({ _id }, { $set: { c: 2 } });
-
       const updateChange = await changeStream.next();
-
       expect(updateChange).to.have.property('operationType', 'update');
-
       expect(updateChange).to.have.property('fullDocument').that.is.a('object');
       expect(updateChange).to.have.nested.property('fullDocument.f', 128);
       expect(updateChange).to.have.nested.property('fullDocument.c', 2);
       expect(updateChange).to.have.nested.property('updateDescription.updatedFields.c', 2);
-
       await changeStream.close();
     }
-  });
+  );
 
-  it('should support full document lookup with deleted documents', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    test: function () {
+  it(
+    'should support full document lookup with deleted documents',
+    { requires: { topology: 'replicaset' } },
+    function () {
       const database = client.db('integration_tests');
       const collection = database.collection('fullLookupTest');
       const changeStream = collection.watch(pipeline, { fullDocument: 'updateLookup' });
-
       return initIteratorMode(changeStream)
         .then(() =>
           collection.insertMany([{ i: 128 }]).then(() => collection.deleteOne({ i: 128 }))
@@ -648,76 +565,62 @@ describe('Change Streams', function () {
           return changeStream.close();
         });
     }
-  });
+  );
 
-  it('should create Change Streams with correct read preferences', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    test: function () {
+  it(
+    'should create Change Streams with correct read preferences',
+    { requires: { topology: 'replicaset' } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
-
       return client.connect().then(client => {
         this.defer(() => client.close());
-
         // should get preference from database
         const database = client.db('integration_tests', {
           readPreference: ReadPreference.PRIMARY_PREFERRED
         });
-
         const changeStream0 = database.collection('docs0').watch(pipeline);
         this.defer(() => changeStream0.close());
-
         assert.deepEqual(
           changeStream0.cursor.readPreference.preference,
           ReadPreference.PRIMARY_PREFERRED
         );
-
         // should get preference from collection
         const collection = database.collection('docs1', {
           readPreference: ReadPreference.SECONDARY_PREFERRED
         });
-
         const changeStream1 = collection.watch(pipeline);
         assert.deepEqual(
           changeStream1.cursor.readPreference.preference,
           ReadPreference.SECONDARY_PREFERRED
         );
         this.defer(() => changeStream1.close());
-
         // should get preference from Change Stream options
         const changeStream2 = collection.watch(pipeline, {
           readPreference: ReadPreference.NEAREST
         });
         this.defer(() => changeStream2.close());
-
         assert.deepEqual(changeStream2.cursor.readPreference.preference, ReadPreference.NEAREST);
       });
     }
-  });
+  );
 
-  it('should support piping of Change Streams', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    async test() {
+  it(
+    'should support piping of Change Streams',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       await initIteratorMode(changeStream);
-
       const outStream = new PassThrough({ objectMode: true });
-
       // @ts-expect-error: transform requires a Document return type
       changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
-
       const willBeData = once(outStream, 'data');
-
       await collection.insertMany([{ a: 1 }]);
-
       const [data] = await willBeData;
       const parsedEvent = JSON.parse(data);
       expect(parsedEvent).to.have.nested.property('fullDocument.a', 1);
-
       outStream.destroy();
     }
-  });
+  );
 
   describe('should error when used as iterator and emitter concurrently', function () {
     let client, coll, changeStream, kMode;
@@ -725,7 +628,6 @@ describe('Change Streams', function () {
     beforeEach(async function () {
       client = this.configuration.newClient();
       await client.connect();
-
       coll = client.db(this.configuration.db).collection('tester');
       changeStream = coll.watch();
       kMode = getSymbolFrom(changeStream, 'mode');
@@ -736,40 +638,36 @@ describe('Change Streams', function () {
       await client?.close();
     });
 
-    it('should throw when mixing event listeners with iterator methods', {
-      metadata: { requires: { topology: 'replicaset' } },
-      async test() {
+    it(
+      'should throw when mixing event listeners with iterator methods',
+      { requires: { topology: 'replicaset' } },
+      async function () {
         expect(changeStream).to.have.property(kMode, false);
         changeStream.on('change', () => {
           // ChangeStream detects emitter usage via 'newListener' event
           // so this covers all emitter methods
         });
-
         await once(changeStream.cursor, 'init');
         expect(changeStream).to.have.property(kMode, 'emitter');
-
         const errRegex = /ChangeStream cannot be used as an iterator/;
-
         const nextError = await changeStream.next().catch(error => error);
         expect(nextError.message).to.match(errRegex);
-
         const hasNextError = await changeStream.hasNext().catch(error => error);
         expect(hasNextError.message).to.match(errRegex);
-
         const tryNextError = await changeStream.tryNext().catch(error => error);
         expect(tryNextError.message).to.match(errRegex);
       }
-    });
+    );
 
-    it('should throw when mixing iterator methods with event listeners', {
-      metadata: { requires: { topology: 'replicaset' } },
-      async test() {
+    it(
+      'should throw when mixing iterator methods with event listeners',
+      { requires: { topology: 'replicaset' } },
+      async function () {
         await initIteratorMode(changeStream);
         expect(changeStream).to.have.property(kMode, false);
         const res = await changeStream.tryNext();
         expect(res).to.not.exist;
         expect(changeStream).to.have.property(kMode, 'iterator');
-
         expect(() => {
           changeStream.on('change', () => {
             // This does throw synchronously
@@ -778,18 +676,16 @@ describe('Change Streams', function () {
           });
         }).to.throw(/ChangeStream cannot be used as an EventEmitter/);
       }
-    });
+    );
   });
 
   describe('should properly handle a changeStream event being processed mid-close', function () {
     let client, coll, changeStream;
-
     function write() {
       return Promise.resolve()
         .then(() => coll.insertOne({ a: 1 }))
         .then(() => coll.insertOne({ b: 2 }));
     }
-
     function lastWrite() {
       return coll.insertOne({ c: 3 });
     }
@@ -811,59 +707,48 @@ describe('Change Streams', function () {
       client = undefined;
     });
 
-    it('when invoked with promises', {
-      metadata: { requires: { topology: 'replicaset' } },
-      test: function () {
-        const read = () => {
-          return Promise.resolve()
-            .then(() => changeStream.next())
-            .then(() => changeStream.next())
-            .then(() => {
-              this.defer(lastWrite());
-              const nextP = changeStream.next();
-              return changeStream.close().then(() => nextP);
-            });
-        };
-
-        return Promise.all([read(), write()]).then(
-          () => Promise.reject(new Error('Expected operation to fail with error')),
-          err => expect(err.message).to.equal('ChangeStream is closed')
-        );
-      }
+    it('when invoked with promises', { requires: { topology: 'replicaset' } }, function () {
+      const read = () => {
+        return Promise.resolve()
+          .then(() => changeStream.next())
+          .then(() => changeStream.next())
+          .then(() => {
+            this.defer(lastWrite());
+            const nextP = changeStream.next();
+            return changeStream.close().then(() => nextP);
+          });
+      };
+      return Promise.all([read(), write()]).then(
+        () => Promise.reject(new Error('Expected operation to fail with error')),
+        err => expect(err.message).to.equal('ChangeStream is closed')
+      );
     });
 
-    it('when invoked with callbacks', {
-      metadata: { requires: { topology: 'replicaset' } },
-      test: function (done) {
-        const ops = [];
+    it('when invoked with callbacks', { requires: { topology: 'replicaset' } }, function (done) {
+      const ops = [];
+      changeStream.next(() => {
         changeStream.next(() => {
-          changeStream.next(() => {
-            ops.push(lastWrite());
-
-            // explicitly close the change stream after the write has begun
-            ops.push(changeStream.close());
-
-            changeStream.next(err => {
-              try {
-                expect(err)
-                  .property('message')
-                  .to.match(/ChangeStream is closed/);
-                Promise.all(ops).then(() => done(), done);
-              } catch (e) {
-                done(e);
-              }
-            });
+          ops.push(lastWrite());
+          // explicitly close the change stream after the write has begun
+          ops.push(changeStream.close());
+          changeStream.next(err => {
+            try {
+              expect(err)
+                .property('message')
+                .to.match(/ChangeStream is closed/);
+              Promise.all(ops).then(() => done(), done);
+            } catch (e) {
+              done(e);
+            }
           });
         });
-
-        ops.push(
-          write().catch(() => {
-            // ignore
-          })
-        );
-      }
+      });
+      ops.push(
+        write().catch(() => {
+          // ignore
+        })
+      );
     });
-
     it.skip('when invoked using eventEmitter API', {
       metadata: {
         requires: { topology: 'replicaset' }
@@ -871,10 +756,8 @@ describe('Change Streams', function () {
       async test() {
         const changes = on(changeStream, 'change');
         await once(changeStream.cursor, 'init');
-
         await write();
         await lastWrite().catch(() => null);
-
         let counter = 0;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _ of changes) {
@@ -884,7 +767,6 @@ describe('Change Streams', function () {
             break;
           }
         }
-
         const result = await Promise.race([changes.next(), sleep(800).then(() => 42)]);
         expect(result, 'should not have recieved a third event').to.equal(42);
       }
@@ -894,31 +776,30 @@ describe('Change Streams', function () {
 
   describe('iterator api', function () {
     describe('#tryNext()', function () {
-      it('should return null on single iteration of empty cursor', {
-        metadata: { requires: { topology: 'replicaset' } },
-        async test() {
+      it(
+        'should return null on single iteration of empty cursor',
+        { requires: { topology: 'replicaset' } },
+        async function () {
           const doc = await changeStream.tryNext();
           expect(doc).to.be.null;
         }
-      });
+      );
 
-      it('should iterate a change stream until first empty batch', {
-        metadata: { requires: { topology: 'replicaset' } },
-        async test() {
+      it(
+        'should iterate a change stream until first empty batch',
+        { requires: { topology: 'replicaset' } },
+        async function () {
           // tryNext doesn't send the initial agg, just checks the driver document batch cache
           const firstTry = await changeStream.tryNext();
           expect(firstTry).to.be.null;
-
           await initIteratorMode(changeStream);
           await collection.insertOne({ a: 42 });
-
           const secondTry = await changeStream.tryNext();
           expect(secondTry).to.be.an('object');
-
           const thirdTry = await changeStream.tryNext();
           expect(thirdTry).to.be.null;
         }
-      });
+      );
     });
 
     describe('#asyncIterator', function () {
@@ -929,10 +810,8 @@ describe('Change Streams', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
             await collection.insertMany(docs);
-
             for await (const change of changeStream) {
               const { fullDocument } = change;
               const expectedDoc = docs.shift();
@@ -941,7 +820,6 @@ describe('Change Streams', function () {
                 break;
               }
             }
-
             expect(docs).to.have.length(0, 'expected to find all docs before exiting loop');
           }
         );
@@ -952,10 +830,8 @@ describe('Change Streams', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
             await collection.insertMany(docs);
-
             for await (const change of changeStream) {
               const { fullDocument } = change;
               const expectedDoc = docs.shift();
@@ -966,7 +842,6 @@ describe('Change Streams', function () {
             for await (const change of changeStream) {
               expect.fail('Change stream was resumed after partial iteration');
             }
-
             expect(docs).to.have.length(
               2,
               'expected to find remaining docs after partial iteration'
@@ -980,7 +855,6 @@ describe('Change Streams', function () {
           async function () {
             changeStream = collection.watch([]);
             changeStream.on('change', sinon.stub());
-
             try {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               for await (const change of changeStream) {
@@ -998,19 +872,15 @@ describe('Change Streams', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             const docs = [{ city: 'Los Angeles' }, { city: 'Miami' }];
             await collection.insertMany(docs);
-
             await changeStream.next();
             docs.shift();
-
             try {
               for await (const change of changeStream) {
                 const { fullDocument } = change;
                 const expectedDoc = docs.shift();
                 expect(fullDocument.city).to.equal(expectedDoc.city);
-
                 if (docs.length === 0) {
                   break;
                 }
@@ -1026,7 +896,6 @@ describe('Change Streams', function () {
           { requires: { topology: '!single' } },
           async function () {
             changeStream = collection.watch();
-
             const loop = (async function () {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               for await (const _change of changeStream) {
@@ -1034,11 +903,9 @@ describe('Change Streams', function () {
               }
               return 'loop ended without error'; // loop should not finish without error
             })();
-
             await sleep(1);
             const closeResult = changeStream.close().catch(error => error);
             expect(closeResult).to.not.be.instanceOf(Error);
-
             const result = await loop.catch(error => error);
             expect(result).to.be.instanceOf(MongoAPIError);
             expect(result.message).to.match(/ChangeStream is closed/i);
@@ -1054,10 +921,8 @@ describe('Change Streams', function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
             const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-
             const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
             await collection.insertMany(docs);
-
             await changeStreamIterator.next();
             await changeStreamIterator.return();
             expect(changeStream.closed).to.be.true;
@@ -1072,9 +937,7 @@ describe('Change Streams', function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
             const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-
             sinon.stub(changeStream.cursor, 'close').throws(new MongoAPIError('testing'));
-
             try {
               await changeStreamIterator.return();
             } catch {
@@ -1092,7 +955,6 @@ describe('Change Streams', function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
             const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
@@ -1104,7 +966,6 @@ describe('Change Streams', function () {
                 errorCode: unresumableErrorCode
               }
             } as FailPoint);
-
             await collection.insertOne({ city: 'New York City' });
             try {
               await changeStreamIterator.next();
@@ -1124,10 +985,8 @@ describe('Change Streams', function () {
           async function () {
             changeStream = collection.watch([]);
             changeStream.close();
-
             const changeStreamIterator = changeStream[Symbol.asyncIterator]();
             const change = await changeStreamIterator.next();
-
             expect(change.value).to.be.undefined;
           }
         );
@@ -1145,20 +1004,16 @@ describe('Change Streams', function () {
       client = this.configuration.newClient();
       collection = db.collection('setupAfterTest');
       const changeStreamForResumeToken = collection.watch();
-
       const changes = on(changeStreamForResumeToken, 'change');
       await once(changeStreamForResumeToken.cursor, 'init');
-
       await collection.insertOne({ x: 1 }); // ensure ns exists
       await collection.drop(); // invalidate this change stream
-
       for await (const [change] of changes) {
         if (change.operationType === 'invalidate') {
           startAfter = change._id;
           break;
         }
       }
-
       await changeStreamForResumeToken.close();
       changeStream = collection.watch([], { startAfter });
     });
@@ -1168,31 +1023,30 @@ describe('Change Streams', function () {
       await client?.close();
     });
 
-    it('should work with events', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
-      async test() {
+    it(
+      'should work with events',
+      { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      async function () {
         const willBeChange = once(changeStream, 'change');
         await once(changeStream.cursor, 'init');
         await collection.insertOne({ x: 2 });
-
         const [change] = await willBeChange;
         expect(change).to.have.property('operationType', 'insert');
         expect(change).to.have.nested.property('fullDocument.x', 2);
       }
-    });
+    );
 
-    it('should work with callbacks', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
-      async test() {
+    it(
+      'should work with callbacks',
+      { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      async function () {
         await initIteratorMode(changeStream);
-
         await collection.insertOne({ x: 2 });
-
         const change = await changeStream.next();
         expect(change).to.have.property('operationType', 'insert');
         expect(change).to.have.nested.property('fullDocument.x', 2);
       }
-    });
+    );
   });
 
   describe('Change Stream Resume Error Tests', function () {
@@ -1279,7 +1133,6 @@ describe('Change Streams', function () {
       });
     });
   });
-
   UnifiedTestSuiteBuilder.describe('document shapes')
     .runOnRequirement({
       minServerVersion: '4.0.0',
@@ -1291,7 +1144,6 @@ describe('Change Streams', function () {
     })
     .createEntities([
       { client: { id: 'client0' } },
-
       // transaction test
       { session: { id: 'session0', client: 'client0' } },
       {
@@ -1308,12 +1160,10 @@ describe('Change Streams', function () {
           collectionName: 'collection0'
         }
       },
-
       // rename test
       { database: { id: 'admin', databaseName: 'admin', client: 'client0' } },
       { database: { id: 'renameDb', databaseName: 'renameDb', client: 'client0' } },
       { collection: { id: 'collToRename', collectionName: 'collToRename', database: 'renameDb' } },
-
       // drop test
       { database: { id: 'dbToDrop', databaseName: 'dbToDrop', client: 'client0' } },
       {
@@ -1532,7 +1382,6 @@ describe('Change Streams', function () {
         .toJSON()
     )
     .run();
-
   UnifiedTestSuiteBuilder.describe('entity.watch() server-side options')
     .runOnRequirement({
       topologies: ['replicaset', 'sharded-replicaset', 'sharded', 'load-balanced'],
@@ -1668,176 +1517,149 @@ describe('Change Streams', function () {
       await client.close();
     });
 
-    context('promoteLongs', () => {
-      context('when set to true', () => {
-        it('does not convert Longs to numbers', {
-          metadata: { requires: { topology: '!single' } },
-          test: async function () {
+    describe('promoteLongs', () => {
+      describe('when set to true', () => {
+        it(
+          'does not convert Longs to numbers',
+          { requires: { topology: '!single' } },
+          async function () {
             cs = collection.watch([], { promoteLongs: true, useBigInt64: false });
-
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');
-
             const result = await collection.insertOne({ a: Long.fromNumber(0) });
             expect(result).to.exist;
-
             const change = await willBeChange;
-
             expect(change.fullDocument.a).to.be.a('number');
           }
-        });
+        );
       });
 
-      context('when set to false', () => {
-        it('converts Long values to native numbers', {
-          metadata: { requires: { topology: '!single' } },
-          test: async function () {
+      describe('when set to false', () => {
+        it(
+          'converts Long values to native numbers',
+          { requires: { topology: '!single' } },
+          async function () {
             cs = collection.watch([], { promoteLongs: false, useBigInt64: false });
-
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');
-
             const result = await collection.insertOne({ a: Long.fromNumber(0) });
             expect(result).to.exist;
-
             const change = await willBeChange;
             expect(change).to.have.nested.property('fullDocument.a').that.is.instanceOf(Long);
           }
-        });
+        );
       });
 
-      context('when omitted', () => {
-        it('defaults to true', {
-          metadata: { requires: { topology: '!single' } },
-          test: async function () {
-            cs = collection.watch([], { useBigInt64: false });
-
-            const willBeChange = once(cs, 'change').then(args => args[0]);
-            await once(cs.cursor, 'init');
-
-            const result = await collection.insertOne({ a: Long.fromNumber(0) });
-            expect(result).to.exist;
-
-            const change = await willBeChange;
-            expect(typeof change.fullDocument.a).to.equal('number');
-          }
+      describe('when omitted', () => {
+        it('defaults to true', { requires: { topology: '!single' } }, async function () {
+          cs = collection.watch([], { useBigInt64: false });
+          const willBeChange = once(cs, 'change').then(args => args[0]);
+          await once(cs.cursor, 'init');
+          const result = await collection.insertOne({ a: Long.fromNumber(0) });
+          expect(result).to.exist;
+          const change = await willBeChange;
+          expect(typeof change.fullDocument.a).to.equal('number');
         });
       });
     });
 
-    context('useBigInt64', () => {
+    describe('useBigInt64', () => {
       const useBigInt64FalseTest = async (options: ChangeStreamOptions) => {
         cs = collection.watch([], options);
         const willBeChange = once(cs, 'change').then(args => args[0]);
         await once(cs.cursor, 'init');
-
         await collection.insertOne({ a: Long.fromNumber(10) });
-
         const change = await willBeChange;
-
         expect(typeof change.fullDocument.a).to.equal('number');
       };
 
-      context('when set to false', function () {
-        it('converts Long to number', {
-          metadata: {
+      describe('when set to false', function () {
+        it(
+          'converts Long to number',
+          {
             requires: { topology: '!single' }
           },
-          test: async function () {
+          async function () {
             await useBigInt64FalseTest({ useBigInt64: false });
           }
-        });
+        );
       });
 
-      context('when set to true', function () {
-        it('converts Long to bigint', {
-          metadata: {
+      describe('when set to true', function () {
+        it(
+          'converts Long to bigint',
+          {
             requires: { topology: '!single' }
           },
-          test: async function () {
+          async function () {
             cs = collection.watch([], { useBigInt64: true });
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');
-
             await collection.insertOne({ a: Long.fromNumber(10) });
-
             const change = await willBeChange;
-
             expect(change.fullDocument).property('a').to.be.a('bigint');
             expect(change.fullDocument).property('a', 10n);
           }
-        });
+        );
       });
 
-      context('when unset', function () {
-        it('defaults to false', {
-          metadata: { requires: { topology: '!single' } },
-          test: async function () {
-            await useBigInt64FalseTest({});
-          }
+      describe('when unset', function () {
+        it('defaults to false', { requires: { topology: '!single' } }, async function () {
+          await useBigInt64FalseTest({});
         });
       });
     });
 
-    context('invalid options', function () {
-      it('does not send invalid options on the aggregate command', {
-        metadata: { requires: { topology: '!single' } },
-        test: async function () {
+    describe('invalid options', function () {
+      it(
+        'does not send invalid options on the aggregate command',
+        { requires: { topology: '!single' } },
+        async function () {
           const started: CommandStartedEvent[] = [];
-
           client.on('commandStarted', filterForCommands(['aggregate'], started));
           const doc = { invalidBSONOption: true };
           // @ts-expect-error: checking for invalid options
           cs = collection.watch([], doc);
-
           const willBeChange = once(cs, 'change').then(args => args[0]);
           await once(cs.cursor, 'init');
-
           const result = await collection.insertOne({ a: Long.fromNumber(0) });
           expect(result).to.exist;
-
           await willBeChange;
           expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
         }
-      });
+      );
 
-      it('does not send invalid options on the getMore command', {
-        metadata: { requires: { topology: '!single' } },
-        test: async function () {
+      it(
+        'does not send invalid options on the getMore command',
+        { requires: { topology: '!single' } },
+        async function () {
           const started: CommandStartedEvent[] = [];
-
           client.on('commandStarted', filterForCommands(['aggregate'], started));
           const doc = { invalidBSONOption: true };
           // @ts-expect-error: checking for invalid options
           cs = collection.watch([], doc);
-
           const willBeChange = once(cs, 'change').then(args => args[0]);
           await once(cs.cursor, 'init');
-
           const result = await collection.insertOne({ a: Long.fromNumber(0) });
           expect(result).to.exist;
-
           await willBeChange;
           expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
         }
-      });
+      );
     });
   });
 });
-
 describe('ChangeStream resumability', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
   let aggregateEvents: CommandStartedEvent[] = [];
-
   const changeStreamResumeOptions: ChangeStreamOptions = {
     fullDocument: 'updateLookup',
     collation: { locale: 'en', maxVariable: 'punct' },
     maxAwaitTimeMS: 2000,
     batchSize: 200
   };
-
   const resumableErrorCodes = [
     { error: 'HostUnreachable', code: 6, message: 'host unreachable' },
     { error: 'HostNotFound', code: 7, message: 'hot not found' },
@@ -1887,7 +1709,6 @@ describe('ChangeStream resumability', function () {
       .catch(e => e);
     await utilClient.db(dbName).createCollection(collectionName);
     await utilClient.close();
-
     client = this.configuration.newClient({ monitorCommands: true });
     client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
     collection = client.db(dbName).collection(collectionName);
@@ -1899,8 +1720,8 @@ describe('ChangeStream resumability', function () {
     aggregateEvents = [];
   });
 
-  context('iterator api', function () {
-    context('#next', function () {
+  describe('iterator api', function () {
+    describe('#next', function () {
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -1908,7 +1729,6 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
                 ? 'failCommand'
@@ -1920,23 +1740,18 @@ describe('ChangeStream resumability', function () {
                 errmsg: message
               }
             } as FailPoint);
-
             await collection.insertOne({ name: 'bailey' });
-
             const change = await changeStream.next();
             expect(change).to.have.property('operationType', 'insert');
-
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
-
         it(
           `supports consecutive resumes on error code ${code} ${error}`,
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
                 ? 'failCommand'
@@ -1948,7 +1763,6 @@ describe('ChangeStream resumability', function () {
                 errmsg: message
               }
             } as FailPoint);
-
             // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
             // resuming a change stream don't return the change event.  So we defer the insert until a period of time
             // after the change stream has started listening for a change.  2000ms is long enough for the change
@@ -1957,16 +1771,12 @@ describe('ChangeStream resumability', function () {
               sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
               changeStream.next()
             ]);
-
             const change = (value as PromiseFulfilledResult<ChangeStreamDocument>).value;
-
             expect(change).to.have.property('operationType', 'insert');
-
             expect(aggregateEvents).to.have.lengthOf(6);
           }
         );
       }
-
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -1974,25 +1784,20 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             // on 3.6 servers, no postBatchResumeToken is sent back in the initial aggregate response.
             // This means that a resume token isn't cached until the first change has been iterated.
             // In order to test the resume, we need to ensure that at least one document has
             // been iterated so we have a resume token to resume on.
             await collection.insertOne({ name: 'bailey' });
             await changeStream.next();
-
             const mock = sinon.stub(changeStream.cursor, 'getMore').callsFake(async _batchSize => {
               mock.restore();
               const error = new MongoServerError({ message: message });
               error.code = code;
               throw error;
             });
-
             await collection.insertOne({ name: 'bailey' });
-
             const change = await changeStream.next();
-
             expect(change).to.have.property('operationType', 'insert');
             expect(aggregateEvents).to.have.lengthOf(2);
           }
@@ -2005,7 +1810,6 @@ describe('ChangeStream resumability', function () {
         async function () {
           changeStream = collection.watch([], changeStreamResumeOptions);
           await initIteratorMode(changeStream);
-
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
               ? 'failCommand'
@@ -2017,28 +1821,23 @@ describe('ChangeStream resumability', function () {
               errmsg: resumableErrorCodes[0].message
             }
           } as FailPoint);
-
           expect(changeStream.cursor)
             .to.have.property('options')
             .that.containSubset(changeStreamResumeOptions);
-
           await collection.insertOne({ name: 'bailey' });
-
           await changeStream.next();
-
           expect(changeStream.cursor)
             .to.have.property('options')
             .that.containSubset(changeStreamResumeOptions);
         }
       );
 
-      context('when the error is not a resumable error', function () {
+      describe('when the error is not a resumable error', function () {
         it(
           'does not resume',
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
-
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
@@ -2050,13 +1849,9 @@ describe('ChangeStream resumability', function () {
                 errorCode: unresumableErrorCode
               }
             } as FailPoint);
-
             await initIteratorMode(changeStream);
-
             await collection.insertOne({ name: 'bailey' });
-
             const error = await changeStream.next().catch(err => err);
-
             expect(error).to.be.instanceOf(MongoServerError);
             expect(aggregateEvents).to.have.lengthOf(1);
           }
@@ -2064,7 +1859,7 @@ describe('ChangeStream resumability', function () {
       });
     });
 
-    context('#hasNext', function () {
+    describe('#hasNext', function () {
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2072,7 +1867,6 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
                 ? 'failCommand'
@@ -2084,23 +1878,18 @@ describe('ChangeStream resumability', function () {
                 errmsg: message
               }
             } as FailPoint);
-
             await collection.insertOne({ name: 'bailey' });
-
             const hasNext = await changeStream.hasNext();
             expect(hasNext).to.be.true;
-
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
-
         it(
           `supports consecutive resumes on error code ${code} ${error}`,
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
                 ? 'failCommand'
@@ -2112,7 +1901,6 @@ describe('ChangeStream resumability', function () {
                 errmsg: message
               }
             } as FailPoint);
-
             // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
             // resuming a change stream don't return the change event.  So we defer the insert until a period of time
             // after the change stream has started listening for a change.  2000ms is long enough for the change
@@ -2121,16 +1909,12 @@ describe('ChangeStream resumability', function () {
               sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
               changeStream.hasNext()
             ]);
-
             const change = (value as PromiseFulfilledResult<boolean>).value;
-
             expect(change).to.be.true;
-
             expect(aggregateEvents).to.have.lengthOf(6);
           }
         );
       }
-
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2138,26 +1922,21 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             // on 3.6 servers, no postBatchResumeToken is sent back in the initial aggregate response.
             // This means that a resume token isn't cached until the first change has been iterated.
             // In order to test the resume, we need to ensure that at least one document has
             // been iterated so we have a resume token to resume on.
             await collection.insertOne({ name: 'bailey' });
             await changeStream.next();
-
             const mock = sinon.stub(changeStream.cursor, 'getMore').callsFake(async _batchSize => {
               mock.restore();
               const error = new MongoServerError({ message: message });
               error.code = code;
               throw error;
             });
-
             await collection.insertOne({ name: 'bailey' });
-
             const hasNext = await changeStream.hasNext();
             expect(hasNext).to.be.true;
-
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
@@ -2169,7 +1948,6 @@ describe('ChangeStream resumability', function () {
         async function () {
           changeStream = collection.watch([], changeStreamResumeOptions);
           await initIteratorMode(changeStream);
-
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
               ? 'failCommand'
@@ -2181,28 +1959,23 @@ describe('ChangeStream resumability', function () {
               errmsg: resumableErrorCodes[0].message
             }
           } as FailPoint);
-
           expect(changeStream.cursor)
             .to.have.property('options')
             .that.containSubset(changeStreamResumeOptions);
-
           await collection.insertOne({ name: 'bailey' });
-
           await changeStream.hasNext();
-
           expect(changeStream.cursor)
             .to.have.property('options')
             .that.containSubset(changeStreamResumeOptions);
         }
       );
 
-      context('when the error is not a resumable error', function () {
+      describe('when the error is not a resumable error', function () {
         it(
           'does not resume',
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
-
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
@@ -2214,13 +1987,9 @@ describe('ChangeStream resumability', function () {
                 errorCode: unresumableErrorCode
               }
             } as FailPoint);
-
             await initIteratorMode(changeStream);
-
             await collection.insertOne({ name: 'bailey' });
-
             const error = await changeStream.hasNext().catch(err => err);
-
             expect(error).to.be.instanceOf(MongoServerError);
             expect(aggregateEvents).to.have.lengthOf(1);
           }
@@ -2228,7 +1997,7 @@ describe('ChangeStream resumability', function () {
       });
     });
 
-    context('#tryNext', function () {
+    describe('#tryNext', function () {
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2236,7 +2005,6 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
                 ? 'failCommand'
@@ -2248,13 +2016,11 @@ describe('ChangeStream resumability', function () {
                 errmsg: message
               }
             } as FailPoint);
-
             try {
               // tryNext is not blocking and on sharded clusters we don't have control of when
               // the actual change event will be ready on the change stream pipeline. This introduces
               // a race condition, where sometimes we receive the change event and sometimes
               // we don't when we call tryNext, depending on the timing of the sharded cluster.
-
               // Since we really only care about the resumability, it's enough for this test to throw
               // if tryNext ever throws and assert on the number of aggregate events.
               await changeStream.tryNext();
@@ -2264,14 +2030,12 @@ describe('ChangeStream resumability', function () {
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
-
         it(
           `supports consecutive resumes on error code ${code} ${error}`,
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
                 ? 'failCommand'
@@ -2283,25 +2047,21 @@ describe('ChangeStream resumability', function () {
                 errmsg: message
               }
             } as FailPoint);
-
             try {
               // tryNext is not blocking and on sharded clusters we don't have control of when
               // the actual change event will be ready on the change stream pipeline. This introduces
               // a race condition, where sometimes we receive the change event and sometimes
               // we don't when we call tryNext, depending on the timing of the sharded cluster.
-
               // Since we really only care about the resumability, it's enough for this test to throw
               // if tryNext ever throws and assert on the number of aggregate events.
               await changeStream.tryNext();
             } catch (err) {
               expect.fail(`expected tryNext to resume, received error instead: ${err}`);
             }
-
             expect(aggregateEvents).to.have.lengthOf(6);
           }
         );
       }
-
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2309,27 +2069,23 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             // on 3.6 servers, no postBatchResumeToken is sent back in the initial aggregate response.
             // This means that a resume token isn't cached until the first change has been iterated.
             // In order to test the resume, we need to ensure that at least one document has
             // been iterated so we have a resume token to resume on.
             await collection.insertOne({ name: 'bailey' });
             await changeStream.next();
-
             const mock = sinon.stub(changeStream.cursor, 'getMore').callsFake(async _batchSize => {
               mock.restore();
               const error = new MongoServerError({ message: message });
               error.code = code;
               throw error;
             });
-
             try {
               // tryNext is not blocking and on sharded clusters we don't have control of when
               // the actual change event will be ready on the change stream pipeline. This introduces
               // a race condition, where sometimes we receive the change event and sometimes
               // we don't when we call tryNext, depending on the timing of the sharded cluster.
-
               // Since we really only care about the resumability, it's enough for this test to throw
               // if tryNext ever throws and assert on the number of aggregate events.
               await changeStream.tryNext();
@@ -2347,7 +2103,6 @@ describe('ChangeStream resumability', function () {
         async function () {
           changeStream = collection.watch([], changeStreamResumeOptions);
           await initIteratorMode(changeStream);
-
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
               ? 'failCommand'
@@ -2359,28 +2114,23 @@ describe('ChangeStream resumability', function () {
               errmsg: resumableErrorCodes[0].message
             }
           } as FailPoint);
-
           expect(changeStream.cursor)
             .to.have.property('options')
             .that.containSubset(changeStreamResumeOptions);
-
           await collection.insertOne({ name: 'bailey' });
-
           await changeStream.tryNext();
-
           expect(changeStream.cursor)
             .to.have.property('options')
             .that.containSubset(changeStreamResumeOptions);
         }
       );
 
-      context('when the error is not a resumable error', function () {
+      describe('when the error is not a resumable error', function () {
         it(
           'does not resume',
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
-
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
@@ -2392,11 +2142,8 @@ describe('ChangeStream resumability', function () {
                 errorCode: unresumableErrorCode
               }
             } as FailPoint);
-
             await initIteratorMode(changeStream);
-
             const error = await changeStream.tryNext().catch(err => err);
-
             expect(error).to.be.instanceOf(MongoServerError);
             expect(aggregateEvents).to.have.lengthOf(1);
           }
@@ -2404,7 +2151,7 @@ describe('ChangeStream resumability', function () {
       });
     });
 
-    context('#asyncIterator', function () {
+    describe('#asyncIterator', function () {
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2412,10 +2159,8 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
             await collection.insertMany(docs);
-
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
                 ? 'failCommand'
@@ -2427,7 +2172,6 @@ describe('ChangeStream resumability', function () {
                 errmsg: message
               }
             } as FailPoint);
-
             for await (const change of changeStream) {
               const { fullDocument } = change;
               const expectedDoc = docs.shift();
@@ -2436,13 +2180,11 @@ describe('ChangeStream resumability', function () {
                 break;
               }
             }
-
             expect(docs).to.have.length(0, 'expected to find all docs before exiting loop');
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
       }
-
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2451,24 +2193,20 @@ describe('ChangeStream resumability', function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
             const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-
             // on 3.6 servers, no postBatchResumeToken is sent back in the initial aggregate response.
             // This means that a resume token isn't cached until the first change has been iterated.
             // In order to test the resume, we need to ensure that at least one document has
             // been iterated so we have a resume token to resume on.
             await collection.insertOne({ city: 'New York City' });
             await changeStreamIterator.next();
-
             const mock = sinon.stub(changeStream.cursor, 'getMore').callsFake(async _batchSize => {
               mock.restore();
               const error = new MongoServerError({ message });
               error.code = code;
               throw error;
             });
-
             const docs = [{ city: 'Seattle' }, { city: 'Boston' }];
             await collection.insertMany(docs);
-
             for await (const change of changeStream) {
               const { fullDocument } = change;
               const expectedDoc = docs.shift();
@@ -2477,7 +2215,6 @@ describe('ChangeStream resumability', function () {
                 break;
               }
             }
-
             expect(docs).to.have.length(0, 'expected to find all docs before exiting loop');
             expect(aggregateEvents).to.have.lengthOf(2);
           }
@@ -2491,7 +2228,6 @@ describe('ChangeStream resumability', function () {
           changeStream = collection.watch([], changeStreamResumeOptions);
           await initIteratorMode(changeStream);
           const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
               ? 'failCommand'
@@ -2503,31 +2239,26 @@ describe('ChangeStream resumability', function () {
               errmsg: resumableErrorCodes[0].message
             }
           } as FailPoint);
-
           expect(changeStream.cursor)
             .to.have.property('options')
             .that.containSubset(changeStreamResumeOptions);
-
           await collection.insertOne({ city: 'New York City' });
           await changeStreamIterator.next();
-
           expect(changeStream.cursor)
             .to.have.property('options')
             .that.containSubset(changeStreamResumeOptions);
         }
       );
 
-      context('when the error is not a resumable error', function () {
+      describe('when the error is not a resumable error', function () {
         it(
           'does not resume',
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-
             const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
             await collection.insertMany(docs);
-
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
@@ -2539,7 +2270,6 @@ describe('ChangeStream resumability', function () {
                 errorCode: unresumableErrorCode
               }
             } as FailPoint);
-
             try {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
               for await (const change of changeStream) {
@@ -2562,7 +2292,6 @@ describe('ChangeStream resumability', function () {
         { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([]);
-
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
               ? 'failCommand'
@@ -2574,25 +2303,19 @@ describe('ChangeStream resumability', function () {
               errmsg: message
             }
           } as FailPoint);
-
           const changes = once(changeStream, 'change');
           await once(changeStream.cursor, 'init');
-
           await collection.insertOne({ name: 'bailey' });
-
           const [change] = await changes;
           expect(change).to.have.property('operationType', 'insert');
-
           expect(aggregateEvents).to.have.lengthOf(2);
         }
       );
-
       it(
         `supports consecutive resumes on error code ${code} (${error})`,
         { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([]);
-
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
               ? 'failCommand'
@@ -2604,10 +2327,8 @@ describe('ChangeStream resumability', function () {
               errmsg: message
             }
           } as FailPoint);
-
           const changes = once(changeStream, 'change');
           await once(changeStream.cursor, 'init');
-
           // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
           // resuming a change stream don't return the change event.  So we defer the insert until a period of time
           // after the change stream has started listening for a change.  2000ms is long enough for the change
@@ -2616,10 +2337,8 @@ describe('ChangeStream resumability', function () {
             sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
             changes
           ]);
-
           const [change] = (value as PromiseFulfilledResult<ChangeStreamDocument[]>).value;
           expect(change).to.have.property('operationType', 'insert');
-
           expect(aggregateEvents).to.have.lengthOf(6);
         }
       );
@@ -2630,7 +2349,6 @@ describe('ChangeStream resumability', function () {
       { requires: { topology: '!single', mongodb: '>=4.2' } },
       async function () {
         changeStream = collection.watch([], changeStreamResumeOptions);
-
         await client.db('admin').command({
           configureFailPoint: is4_2Server(this.configuration.version)
             ? 'failCommand'
@@ -2642,31 +2360,25 @@ describe('ChangeStream resumability', function () {
             errmsg: resumableErrorCodes[0].message
           }
         } as FailPoint);
-
         expect(changeStream.cursor)
           .to.have.property('options')
           .that.containSubset(changeStreamResumeOptions);
-
         const changes = once(changeStream, 'change');
         await once(changeStream.cursor, 'init');
-
         await collection.insertOne({ name: 'bailey' });
-
         await changes;
-
         expect(changeStream.cursor)
           .to.have.property('options')
           .that.containSubset(changeStreamResumeOptions);
       }
     );
 
-    context('when the error is not a resumable error', function () {
+    describe('when the error is not a resumable error', function () {
       it(
         'does not resume',
         { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([]);
-
           const unresumableErrorCode = 1000;
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
@@ -2678,26 +2390,22 @@ describe('ChangeStream resumability', function () {
               errorCode: unresumableErrorCode
             }
           } as FailPoint);
-
           const willBeError = once(changeStream, 'change').catch(error => error);
           await once(changeStream.cursor, 'init');
           await collection.insertOne({ name: 'bailey' });
-
           const error = await willBeError;
-
           expect(error).to.be.instanceOf(MongoServerError);
           expect(aggregateEvents).to.have.lengthOf(1);
         }
       );
     });
 
-    context('when the error is operation was interrupted', function () {
+    describe('when the error is operation was interrupted', function () {
       it(
         'does not resume',
         { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([]);
-
           const unresumableErrorCode = 237;
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
@@ -2710,13 +2418,10 @@ describe('ChangeStream resumability', function () {
               errmsg: 'operation was interrupted'
             }
           } as FailPoint);
-
           const willBeError = once(changeStream, 'change').catch(error => error);
           await once(changeStream.cursor, 'init');
           await collection.insertOne({ name: 'bailey' });
-
           const error = await willBeError;
-
           expect(error).to.be.instanceOf(MongoServerError);
           expect(aggregateEvents).to.have.lengthOf(1);
         }
@@ -2731,7 +2436,6 @@ describe('ChangeStream resumability', function () {
       changeStream = collection.watch([], changeStreamResumeOptions);
       expect(changeStream.cursor.maxWireVersion).to.be.undefined;
       await initIteratorMode(changeStream);
-
       expect(changeStream.cursor.maxWireVersion).to.be.a('number');
     }
   );
@@ -2742,12 +2446,9 @@ describe('ChangeStream resumability', function () {
     async function () {
       changeStream = collection.watch([], changeStreamResumeOptions);
       await initIteratorMode(changeStream);
-
       const maxWireVersion = changeStream.cursor.maxWireVersion;
       changeStream.cursor.maxWireVersion = -1;
-
       await changeStream.tryNext();
-
       expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
     }
   );
@@ -2758,16 +2459,11 @@ describe('ChangeStream resumability', function () {
     async function () {
       changeStream = collection.watch([], changeStreamResumeOptions);
       await initIteratorMode(changeStream);
-
       const maxWireVersion = changeStream.cursor.maxWireVersion;
       changeStream.cursor.maxWireVersion = -1;
-
       await changeStream.tryNext();
-
       expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
-
       changeStream.cursor.maxWireVersion = -1;
-
       await changeStream.tryNext();
       expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
     }

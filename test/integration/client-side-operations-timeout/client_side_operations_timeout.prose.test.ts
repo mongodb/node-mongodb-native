@@ -1,8 +1,7 @@
 /* Specification prose tests */
-
 // TODO(NODE-5824): Implement CSOT prose tests
 describe.skip('CSOT spec prose tests', () => {
-  context('1. Multi-batch writes', () => {
+  describe('1. Multi-batch writes', () => {
     /**
      * This test MUST only run against standalones on server versions 4.4 and higher.
      * The `insertMany` call takes an exceedingly long time on replicasets and sharded
@@ -30,8 +29,7 @@ describe.skip('CSOT spec prose tests', () => {
      * 1. Verify that two `insert` commands were executed against `db.coll` as part of the `insertMany` call.
      */
   });
-
-  context('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
+  describe('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
     /**
      * This test MUST only be run against enterprise server versions 4.2 and higher.
      *
@@ -41,8 +39,7 @@ describe.skip('CSOT spec prose tests', () => {
      * 1. Verify via command monitoring that the `ping` command sent did not contain a `maxTimeMS` field.
      */
   });
-
-  context('3. ClientEncryption', () => {
+  describe('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
      * `LOCAL_MASTERKEY` refers to the following base64:
@@ -58,7 +55,7 @@ describe.skip('CSOT spec prose tests', () => {
      * { local: { key: <base64 decoding of LOCAL_MASTERKEY> } }
      * ```
      */
-    context('createDataKey', () => {
+    describe('createDataKey', () => {
       /**
        * 1. Using `internalClient`, set the following fail point:
        * ```js
@@ -80,7 +77,7 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
 
-    context('encrypt', () => {
+    describe('encrypt', () => {
       /**
        * 1. Call `client_encryption.createDataKey()` with the `local` KMS provider.
        *    - Expect a BSON binary with subtype 4 to be returned, referred to as `datakeyId`.
@@ -104,7 +101,7 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
 
-    context('decrypt', () => {
+    describe('decrypt', () => {
       /**
        * 1. Call `clientEncryption.createDataKey()` with the `local` KMS provider.
        *    - Expect this to return a BSON binary with subtype 4, referred to as `dataKeyId`.
@@ -131,43 +128,41 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
   });
-
-  context('4. Background Connection Pooling', () => {
+  describe('4. Background Connection Pooling', () => {
     /**
      * The tests in this section MUST only be run if the server version is 4.4 or higher and the URI has authentication
      * fields (i.e. a username and password). Each test in this section requires drivers to create a MongoClient and then wait
      * for some CMAP events to be published. Drivers MUST wait for up to 10 seconds and fail the test if the specified events
      * are not published within that time.
      */
-
-    context('timeoutMS used for handshake commands', () => {
+    describe('timeoutMS used for handshake commands', () => {
       /**
-       * 1. Using `internalClient`, set the following fail point:
-       * ```js
-       *       {
-       *           configureFailPoint: "failCommand",
-       *           mode: {
-       *               times: 1
-       *           },
-       *           data: {
-       *               failCommands: ["saslContinue"],
-       *               blockConnection: true,
-       *               blockTimeMS: 15,
-       *               appName: "timeoutBackgroundPoolTest"
-       *           }
-       *       }
-       * ```
-       * 1. Create a MongoClient (referred to as `client`) configured with the following:
-       *   - `minPoolSize` of 1
-       *   - `timeoutMS` of 10
-       *   - `appName` of `timeoutBackgroundPoolTest`
-       *   - CMAP monitor configured to listen for `ConnectionCreatedEvent` and `ConnectionClosedEvent` events.
-       * 1. Wait for a `ConnectionCreatedEvent` and a `ConnectionClosedEvent` to be published.
-
-       */
+             * 1. Using `internalClient`, set the following fail point:
+             * ```js
+             *       {
+             *           configureFailPoint: "failCommand",
+             *           mode: {
+             *               times: 1
+             *           },
+             *           data: {
+             *               failCommands: ["saslContinue"],
+             *               blockConnection: true,
+             *               blockTimeMS: 15,
+             *               appName: "timeoutBackgroundPoolTest"
+             *           }
+             *       }
+             * ```
+             * 1. Create a MongoClient (referred to as `client`) configured with the following:
+             *   - `minPoolSize` of 1
+             *   - `timeoutMS` of 10
+             *   - `appName` of `timeoutBackgroundPoolTest`
+             *   - CMAP monitor configured to listen for `ConnectionCreatedEvent` and `ConnectionClosedEvent` events.
+             * 1. Wait for a `ConnectionCreatedEvent` and a `ConnectionClosedEvent` to be published.
+      
+             */
     });
 
-    context('timeoutMS is refreshed for each handshake command', () => {
+    describe('timeoutMS is refreshed for each handshake command', () => {
       /**
        * 1. Using `internalClient`, set the following fail point:
        * ```js
@@ -191,15 +186,13 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
   });
-
-  context('5. Blocking Iteration Methods', () => {
+  describe('5. Blocking Iteration Methods', () => {
     /**
      * Tests in this section MUST only be run against server versions 4.4 and higher and only apply to drivers that have a
      * blocking method for cursor iteration that executes `getMore` commands in a loop until a document is available or an
      * error occurs.
      */
-
-    context('Tailable cursors', () => {
+    describe('Tailable cursors', () => {
       /**
        * 1. Using `internalClient`, drop the `db.coll` collection.
        * 1. Using `internalClient`, insert the document `{ x: 1 }` into `db.coll`.
@@ -226,7 +219,7 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
 
-    context('Change Streams', () => {
+    describe('Change Streams', () => {
       /**
        * 1. Using `internalClient`, drop the `db.coll` collection.
        * 1. Using `internalClient`, set the following fail point:
@@ -250,11 +243,9 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
   });
-
-  context('6. GridFS - Upload', () => {
+  describe('6. GridFS - Upload', () => {
     /** Tests in this section MUST only be run against server versions 4.4 and higher. */
-
-    context('uploads via openUploadStream can be timed out', () => {
+    describe('uploads via openUploadStream can be timed out', () => {
       /**
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
        * 1. Using `internalClient`, set the following fail point:
@@ -279,7 +270,7 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
 
-    context('Aborting an upload stream can be timed out', () => {
+    describe('Aborting an upload stream can be timed out', () => {
       /**
        * This test only applies to drivers that provide an API to abort a GridFS upload stream.
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -305,8 +296,7 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
   });
-
-  context('7. GridFS - Download', () => {
+  describe('7. GridFS - Download', () => {
     /**
      * This test MUST only be run against server versions 4.4 and higher.
      * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -349,9 +339,8 @@ describe.skip('CSOT spec prose tests', () => {
      * 1. Verify that two `find` commands were executed during the read: one against `db.fs.files` and another against `db.fs.chunks`.
      */
   });
-
-  context('8. Server Selection', () => {
-    context('serverSelectionTimeoutMS honored if timeoutMS is not set', () => {
+  describe('8. Server Selection', () => {
+    describe('serverSelectionTimeoutMS honored if timeoutMS is not set', () => {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?serverSelectionTimeoutMS=10`.
        * 1. Using `client`, execute the command `{ ping: 1 }` against the `admin` database.
@@ -359,29 +348,23 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
 
-    context(
-      "timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS",
-      () => {
-        /**
-         * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
-         * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
-         *   - Expect this to fail with a server selection timeout error after no more than 15ms.
-         */
-      }
-    );
+    describe("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", () => {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+    });
 
-    context(
-      "serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS",
-      () => {
-        /**
-         * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10`.
-         * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
-         *   - Expect this to fail with a server selection timeout error after no more than 15ms.
-         */
-      }
-    );
+    describe("serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS", () => {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+    });
 
-    context('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', () => {
+    describe('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', () => {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=0&serverSelectionTimeoutMS=10`.
        * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
@@ -389,58 +372,51 @@ describe.skip('CSOT spec prose tests', () => {
        */
     });
 
-    context(
-      "timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS",
-      () => {
-        /**
-         * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
-         * username and password).
-         * 1. Using `internalClient`, set the following fail point:
-         * ```js
-         *        {
-         *            configureFailPoint: failCommand,
-         *            mode: { times: 1 },
-         *            data: {
-         *                failCommands: ["saslContinue"],
-         *                blockConnection: true,
-         *                blockTimeMS: 15
-         *            }
-         *        }
-         * ```
-         * 1. Create a new MongoClient (referred to as `client`) with `timeoutMS=10` and `serverSelectionTimeoutMS=20`.
-         * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
-         *   - Expect this to fail with a timeout error after no more than 15ms.
-         */
-      }
-    );
+    describe("timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS", () => {
+      /**
+       * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
+       * username and password).
+       * 1. Using `internalClient`, set the following fail point:
+       * ```js
+       *        {
+       *            configureFailPoint: failCommand,
+       *            mode: { times: 1 },
+       *            data: {
+       *                failCommands: ["saslContinue"],
+       *                blockConnection: true,
+       *                blockTimeMS: 15
+       *            }
+       *        }
+       * ```
+       * 1. Create a new MongoClient (referred to as `client`) with `timeoutMS=10` and `serverSelectionTimeoutMS=20`.
+       * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
+       *   - Expect this to fail with a timeout error after no more than 15ms.
+       */
+    });
 
-    context(
-      "serverSelectionTimeoutMS honored for connection handshake commands if it's lower than timeoutMS",
-      () => {
-        /**
-         * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
-         * username and password).
-         * 1. Using `internalClient`, set the following fail point:
-         * ```js
-         *        {
-         *            configureFailPoint: failCommand,
-         *            mode: { times: 1 },
-         *            data: {
-         *                failCommands: ["saslContinue"],
-         *                blockConnection: true,
-         *                blockTimeMS: 15
-         *            }
-         *        }
-         * ```
-         * 1. Create a new MongoClient (referred to as `client`) with `timeoutMS=20` and `serverSelectionTimeoutMS=10`.
-         * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
-         *   - Expect this to fail with a timeout error after no more than 15ms.
-         */
-      }
-    );
+    describe("serverSelectionTimeoutMS honored for connection handshake commands if it's lower than timeoutMS", () => {
+      /**
+       * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
+       * username and password).
+       * 1. Using `internalClient`, set the following fail point:
+       * ```js
+       *        {
+       *            configureFailPoint: failCommand,
+       *            mode: { times: 1 },
+       *            data: {
+       *                failCommands: ["saslContinue"],
+       *                blockConnection: true,
+       *                blockTimeMS: 15
+       *            }
+       *        }
+       * ```
+       * 1. Create a new MongoClient (referred to as `client`) with `timeoutMS=20` and `serverSelectionTimeoutMS=10`.
+       * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
+       *   - Expect this to fail with a timeout error after no more than 15ms.
+       */
+    });
   });
-
-  context('9. endSession', () => {
+  describe('9. endSession', () => {
     /**
      * This test MUST only be run against replica sets and sharded clusters with server version 4.4 or higher. It MUST be
      * run three times: once with the timeout specified via the MongoClient `timeoutMS` option, once with the timeout
@@ -471,11 +447,9 @@ describe.skip('CSOT spec prose tests', () => {
      *    - Expect this to fail with a timeout error after no more than 15ms.
      */
   });
-
-  context('10. Convenient Transactions', () => {
+  describe('10. Convenient Transactions', () => {
     /** Tests in this section MUST only run against replica sets and sharded clusters with server versions 4.4 or higher. */
-
-    context('timeoutMS is refreshed for abortTransaction if the callback fails', () => {
+    describe('timeoutMS is refreshed for abortTransaction if the callback fails', () => {
       /**
        * 1. Using `internalClient`, drop the `db.coll` collection.
        * 1. Using `internalClient`, set the following fail point:

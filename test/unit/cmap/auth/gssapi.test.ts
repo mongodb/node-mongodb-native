@@ -25,9 +25,8 @@ describe('GSSAPI', () => {
 
   describe('.performGSSAPICanonicalizeHostName', () => {
     const hostName = 'example.com';
-
     for (const mode of [GSSAPICanonicalizationValue.off, GSSAPICanonicalizationValue.none]) {
-      context(`when the mode is ${mode}`, () => {
+      describe(`when the mode is ${mode}`, () => {
         it('performs no dns lookups', async () => {
           const host = await performGSSAPICanonicalizeHostName(hostName, {
             CANONICALIZE_HOST_NAME: mode
@@ -40,7 +39,7 @@ describe('GSSAPI', () => {
       });
     }
 
-    context(`when the mode is forward`, () => {
+    describe(`when the mode is forward`, () => {
       const resolved = '10gen.cc';
 
       beforeEach(() => {
@@ -58,17 +57,16 @@ describe('GSSAPI', () => {
         expect(dns.resolveCname).to.be.calledOnceWith(hostName);
       });
     });
-
     for (const mode of [
       GSSAPICanonicalizationValue.on,
       GSSAPICanonicalizationValue.forwardAndReverse
     ]) {
-      context(`when the mode is ${mode}`, () => {
-        context('when the forward lookup succeeds', () => {
+      describe(`when the mode is ${mode}`, () => {
+        describe('when the forward lookup succeeds', () => {
           const lookedUp = { address: '1.1.1.1', family: 4 };
 
-          context('when the reverse lookup succeeds', () => {
-            context('when there is 1 result', () => {
+          describe('when the reverse lookup succeeds', () => {
+            describe('when there is 1 result', () => {
               const resolved = '10gen.cc';
 
               beforeEach(() => {
@@ -89,7 +87,7 @@ describe('GSSAPI', () => {
               });
             });
 
-            context('when there is more than 1 result', () => {
+            describe('when there is more than 1 result', () => {
               const resolved = '10gen.cc';
 
               beforeEach(() => {
@@ -111,7 +109,7 @@ describe('GSSAPI', () => {
             });
           });
 
-          context('when the reverse lookup fails', () => {
+          describe('when the reverse lookup fails', () => {
             const cname = 'test.com';
 
             beforeEach(() => {
@@ -127,7 +125,6 @@ describe('GSSAPI', () => {
               const host = await performGSSAPICanonicalizeHostName(hostName, {
                 CANONICALIZE_HOST_NAME: mode
               });
-
               expect(host).to.equal(cname);
               expect(dns.lookup).to.be.calledOnceWith(hostName);
               expect(dns.resolvePtr).to.be.calledOnceWith(lookedUp.address);
@@ -135,7 +132,7 @@ describe('GSSAPI', () => {
             });
           });
 
-          context('when the reverse lookup is empty', () => {
+          describe('when the reverse lookup is empty', () => {
             beforeEach(() => {
               lookupSpy.restore();
               resolvePtrSpy.restore();
@@ -155,7 +152,7 @@ describe('GSSAPI', () => {
           });
         });
 
-        context('when the forward lookup fails', () => {
+        describe('when the forward lookup fails', () => {
           beforeEach(() => {
             lookupSpy.restore();
             sinon.stub(dns, 'lookup').rejects(new Error('failed'));
@@ -165,7 +162,6 @@ describe('GSSAPI', () => {
             const error = await performGSSAPICanonicalizeHostName(hostName, {
               CANONICALIZE_HOST_NAME: mode
             }).catch(error => error);
-
             expect(error.message).to.equal('failed');
             expect(dns.lookup).to.be.calledOnceWith(hostName);
             expect(dns.resolvePtr).to.not.be.called;
@@ -177,7 +173,7 @@ describe('GSSAPI', () => {
   });
 
   describe('.resolveCname', () => {
-    context('when the cname call errors', () => {
+    describe('when the cname call errors', () => {
       const hostName = 'example.com';
 
       beforeEach(() => {
@@ -192,8 +188,8 @@ describe('GSSAPI', () => {
       });
     });
 
-    context('when the cname call returns results', () => {
-      context('when there is one result', () => {
+    describe('when the cname call returns results', () => {
+      describe('when there is one result', () => {
         const hostName = 'example.com';
         const resolved = '10gen.cc';
 
@@ -209,7 +205,7 @@ describe('GSSAPI', () => {
         });
       });
 
-      context('when there is more than one result', () => {
+      describe('when there is more than one result', () => {
         const hostName = 'example.com';
         const resolved = '10gen.cc';
 
@@ -226,7 +222,7 @@ describe('GSSAPI', () => {
       });
     });
 
-    context('when the cname call returns no results', () => {
+    describe('when the cname call returns no results', () => {
       const hostName = 'example.com';
 
       beforeEach(() => {

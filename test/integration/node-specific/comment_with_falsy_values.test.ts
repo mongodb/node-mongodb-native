@@ -8,18 +8,14 @@ const falsyToString = (value: (typeof falsyValues)[number]) => {
   if (Number.isNaN(value)) {
     return 'NaN';
   }
-
   if (value === '') {
     return "''";
   }
-
   if (value?._bsontype === 'Long') {
     return 'Long.ZERO';
   }
-
   return JSON.stringify(value);
 };
-
 function* generateTestCombinations() {
   for (const [name, args] of [
     ['find', { filter: { _id: 1 } }] as const,
@@ -34,7 +30,6 @@ function* generateTestCombinations() {
     }
   }
 }
-
 const tests = Array.from(generateTestCombinations()).map(({ name, args }) => {
   const description = `${name} should pass falsy value ${falsyToString(
     args.comment
@@ -59,12 +54,10 @@ const tests = Array.from(generateTestCombinations()).map(({ name, args }) => {
     })
     .toJSON();
 });
-
 const testsForChangeStreamsAggregate = falsyValues.map(falsyValue => {
   const description = `ChangeStreams should pass falsy value ${falsyToString(
     falsyValue
   )} for comment option on initial aggregate`;
-
   return new TestBuilder(description)
     .operation({
       name: 'createChangeStream',
@@ -89,12 +82,10 @@ const testsForChangeStreamsAggregate = falsyValues.map(falsyValue => {
     })
     .toJSON();
 });
-
 const testsForGetMore = falsyValues.map(falsyValue => {
   const description = `ChangeStreams should pass falsy value ${falsyToString(
     falsyValue
   )} for comment option on getMore`;
-
   return new TestBuilder(description)
     .runOnRequirement({ topologies: ['replicaset'] })
     .operation({
@@ -144,7 +135,6 @@ const testsForGetMore = falsyValues.map(falsyValue => {
     })
     .toJSON();
 });
-
 describe('Comment with falsy values', () => {
   UnifiedTestSuiteBuilder.describe('Comment with Falsy Values')
     .runOnRequirement({ minServerVersion: '4.4.0' })
@@ -159,7 +149,6 @@ describe('Comment with falsy values', () => {
     })
     .test(tests)
     .run();
-
   UnifiedTestSuiteBuilder.describe('Change Streams Comment with Falsy Values')
     .schemaVersion('1.0')
     .createEntities(UnifiedTestSuiteBuilder.defaultEntities)
@@ -176,7 +165,7 @@ describe('Comment with falsy values', () => {
     .test(testsForGetMore)
     .run();
 
-  context('Collection.distinct()', function () {
+  describe('Collection.distinct()', function () {
     let client: MongoClient;
     let collection: Collection;
     let commands: CommandStartedEvent[] = [];
@@ -193,23 +182,18 @@ describe('Comment with falsy values', () => {
       await collection.drop();
       await client.close();
     });
-
     for (const falsyValue of falsyValues) {
       it(`distinct should send falsy value ${falsyToString(
         falsyValue
       )} on the command`, async function () {
         await collection.distinct('some-key', {}, { comment: falsyValue }).catch(() => null);
-
         expect(commands).to.have.lengthOf(1);
         const distinctCommand = commands.find(command => command.commandName === 'distinct');
         expect(distinctCommand).to.exist;
-
         // chai does not narrow types, so TS doesn't know the distinct command exists at this point.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const command = distinctCommand!.command;
-
         expect(command).to.haveOwnProperty('comment');
-
         if (Number.isNaN(falsyValue)) {
           expect(command.comment).to.be.NaN;
         } else {

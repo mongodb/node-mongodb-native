@@ -19,15 +19,12 @@ const failPoint = {
     appName: 'loadBalancingTest'
   }
 };
-
 const POOL_SIZE = 100;
-
 async function runTaskGroup(collection: Collection, count: 10 | 100 | 1000) {
   for (let i = 0; i < count; ++i) {
     await collection.findOne({});
   }
 }
-
 async function ensurePoolIsFull(client: MongoClient): Promise<boolean> {
   let connectionCount = 0;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,10 +35,8 @@ async function ensurePoolIsFull(client: MongoClient): Promise<boolean> {
     }
   }
 }
-
 // Step 1: Configure a sharded cluster with two mongoses. Use a 4.2.9 or newer server version.
 const TEST_METADATA: MongoDBMetadataUI = { requires: { mongodb: '>=4.2.9', topology: 'sharded' } };
-
 describe('operationCount-based Selection Within Latency Window - Prose Test', function () {
   let client: MongoClient;
   let seeds: Array<string>;
@@ -64,7 +59,6 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
       monitorCommands: true,
       useMultipleMongoses: true
     });
-
     client = this.configuration.newClient(uri, {
       appName: 'loadBalancingTest',
       localThresholdMS: 30000,
@@ -72,21 +66,15 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
       maxPoolSize: POOL_SIZE,
       monitorCommands: true
     });
-
     client.on('commandStarted', updateCount);
-
     const poolIsFullPromise = ensurePoolIsFull(client);
-
     await client.connect();
-
     // Step 4: Using CMAP events, ensure the client's connection pools for both mongoses have been saturated
     const poolIsFull = Promise.race([poolIsFullPromise, sleep(30 * 1000)]);
     if (!poolIsFull) {
       throw new Error('Timed out waiting for connection pool to fill to minPoolSize');
     }
-
     seeds = client.topology.s.seedlist.map(address => address.toString());
-
     counts = {};
   });
 
@@ -100,15 +88,13 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
     expect(seeds).to.have.lengthOf(2);
   });
 
-  context('when one mongos is overloaded', function () {
+  describe('when one mongos is overloaded', function () {
     let failCommandClient: MongoClient;
 
     beforeEach(async function () {
       // Step 2: Enable the following failpoint against exactly one of the mongoses:
       const failingSeed = seeds[0];
-
       failCommandClient = this.configuration.newClient(`mongodb://${failingSeed}/integration_test`);
-
       await failCommandClient.connect();
       await failCommandClient.db('admin').command(failPoint);
     });
@@ -125,7 +111,6 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
           appName: 'loadBalancingTest'
         }
       });
-
       await failCommandClient.close();
       failCommandClient = undefined;
     });
@@ -133,10 +118,8 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
     it('sends fewer requests to the overloaded server', TEST_METADATA, async function () {
       const failingSeed = seeds[0];
       const collection = client.db('test-db').collection('collection0');
-
       // Step 5: Start 10 concurrent threads / tasks that each run 10 findOne operations with empty filters using that client.
       await Promise.all(Array.from({ length: 10 }, () => runTaskGroup(collection, 10)));
-
       // Step 6: Using command monitoring events, assert that fewer than 25% of the CommandStartedEvents
       // occurred on the mongos that the failpoint was enabled on.
       const port = failingSeed.split(':')[1];
@@ -147,18 +130,15 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
 
   it('equally distributes operations with both hosts are fine', TEST_METADATA, async function () {
     const collection = client.db('test-db').collection('collection0');
-
     const numberTaskGroups = 10;
     const numberOfTasks = 1000;
     const totalNumberOfTasks = numberTaskGroups * numberOfTasks;
-
     // This test has proved flakey, not just for Node.  The number of iterations for the test has been increased,
     // to prevent the test from failing.
     // Step 8: Start 10 concurrent threads / tasks that each run 100 findOne operations with empty filters using that client.
     await Promise.all(
       Array.from({ length: numberTaskGroups }, () => runTaskGroup(collection, numberOfTasks))
     );
-
     // Step 9: Using command monitoring events, assert that each mongos was selected roughly 50% of the time (within +/- 10%).
     const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
     const percentageToHost1 = (counts[host1] / totalNumberOfTasks) * 100;
@@ -176,15 +156,11 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
      */
     async function () {
       const collection = client.db('test-db').collection('collection0');
-
       const { insertedId } = await collection.insertOne({ name: 'bumpy' });
-
       const n = 1000;
-
       for (let i = 0; i < n; ++i) {
         await collection.findOne({ _id: insertedId });
       }
-
       const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
       const percentageToHost1 = (counts[host1] / n) * 100;
       const percentageToHost2 = (counts[host2] / n) * 100;

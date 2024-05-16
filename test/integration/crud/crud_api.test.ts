@@ -15,21 +15,16 @@ import {
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
-
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
 // backwards compatibility in a fundamental way
-
 const DB_NAME = 'crud_api_tests';
-
 describe('CRUD API', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
     client = this.configuration.newClient();
-
     client.s.options.dbName = DB_NAME; // setup the default db
-
     const utilClient = this.configuration.newClient();
     await utilClient
       .db(DB_NAME)
@@ -44,33 +39,25 @@ describe('CRUD API', function () {
 
   afterEach(async function () {
     sinon.restore();
-
     await client?.close();
     client = null;
-
     const cleanup = this.configuration.newClient();
     await cleanup
       .db(DB_NAME)
       .dropDatabase()
       .catch(() => null);
-
     await cleanup.close();
   });
 
   it('should correctly execute findOne method using crud api', async function () {
     const db = client.db();
     const collection = db.collection('t');
-
     await collection.insertOne({ findOneTest: 1 });
-
     const findOneResult = await collection.findOne({ findOneTest: 1 });
-
     expect(findOneResult).to.have.property('findOneTest', 1);
     expect(findOneResult).to.have.property('_id').that.is.instanceOf(ObjectId);
-
     const findNoneResult = await collection.findOne({ findOneTest: 2 });
     expect(findNoneResult).to.be.null;
-
     await collection.drop();
     await client.close();
   });
@@ -78,7 +65,9 @@ describe('CRUD API', function () {
   describe('findOne()', () => {
     let client: MongoClient;
     let events;
-    let collection: Collection<{ _id: number }>;
+    let collection: Collection<{
+      _id: number;
+    }>;
 
     beforeEach(async function () {
       client = this.configuration.newClient({ monitorCommands: true });
@@ -89,7 +78,6 @@ describe('CRUD API', function () {
       client.on('commandFailed', commandFailed =>
         commandFailed.commandName === 'find' ? events.push(commandFailed) : null
       );
-
       collection = client.db('findOne').collection('findOne');
       await collection.drop().catch(() => null);
       await collection.insertMany([{ _id: 1 }, { _id: 2 }]);
@@ -119,7 +107,6 @@ describe('CRUD API', function () {
           }
           return this.skip();
         }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
@@ -136,7 +123,6 @@ describe('CRUD API', function () {
         if (semver.lt(this.configuration.version, '4.2.0')) {
           return;
         }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'off',
@@ -156,7 +142,7 @@ describe('CRUD API', function () {
     });
   });
 
-  context('when creating a cursor with find', () => {
+  describe('when creating a cursor with find', () => {
     let collection;
 
     beforeEach(async () => {
@@ -168,7 +154,6 @@ describe('CRUD API', function () {
     afterEach(async () => {
       await collection?.drop().catch(() => null);
     });
-
     const makeCursor = () => {
       // Possible methods on the the cursor instance
       return collection
@@ -247,10 +232,8 @@ describe('CRUD API', function () {
 
   it('should correctly execute aggregation method using crud api', function (done) {
     const db = client.db();
-
     db.collection('t1').insertMany([{ a: 1 }, { a: 1 }, { a: 2 }, { a: 1 }], function (err) {
       expect(err).to.not.exist;
-
       const testAllMethods = function () {
         // Get the cursor
         const cursor = db.collection('t1').aggregate([{ $match: {} }], {
@@ -258,7 +241,6 @@ describe('CRUD API', function () {
           batchSize: 2,
           maxTimeMS: 50
         });
-
         // Exercise all the options
         cursor
           .geoNear({ geo: 1 })
@@ -273,7 +255,6 @@ describe('CRUD API', function () {
           .sort({ sort: 1 })
           .batchSize(10)
           .unwind('name');
-
         // Execute the command with all steps defined
         // will fail
         cursor.toArray(function (err) {
@@ -281,7 +262,6 @@ describe('CRUD API', function () {
           testToArray();
         });
       };
-
       //
       // Exercise toArray
       // -------------------------------------------------
@@ -294,7 +274,6 @@ describe('CRUD API', function () {
           testNext();
         });
       };
-
       //
       // Exercise next
       // -------------------------------------------------
@@ -306,7 +285,6 @@ describe('CRUD API', function () {
           testEach();
         });
       };
-
       //
       // Exercise each
       // -------------------------------------------------
@@ -325,7 +303,6 @@ describe('CRUD API', function () {
           }
         );
       };
-
       //
       // Exercise stream
       // -------------------------------------------------
@@ -337,13 +314,11 @@ describe('CRUD API', function () {
         stream.on('data', function () {
           count = count + 1;
         });
-
         stream.once('end', function () {
           test.equal(3, count);
           testExplain();
         });
       };
-
       //
       // Explain method
       // -------------------------------------------------
@@ -352,11 +327,9 @@ describe('CRUD API', function () {
         cursor.explain(function (err, result) {
           expect(err).to.not.exist;
           test.ok(result != null);
-
           client.close(done);
         });
       };
-
       testAllMethods();
     });
   });
@@ -364,7 +337,6 @@ describe('CRUD API', function () {
   it('should correctly execute insert methods using crud api', function (done) {
     client.connect(function (err, client) {
       const db = client.db();
-
       //
       // Legacy insert method
       // -------------------------------------------------
@@ -372,11 +344,9 @@ describe('CRUD API', function () {
         db.collection('t2_1').insertMany([{ a: 1 }, { a: 2 }], function (err, r) {
           expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(2);
-
           bulkAPIInsert();
         });
       };
-
       //
       // Bulk api insert method
       // -------------------------------------------------
@@ -386,11 +356,9 @@ describe('CRUD API', function () {
         bulk.insert({ a: 1 });
         bulk.execute(function (err) {
           expect(err).to.not.exist;
-
           insertOne();
         });
       };
-
       //
       // Insert one method
       // -------------------------------------------------
@@ -401,7 +369,6 @@ describe('CRUD API', function () {
           insertMany();
         });
       };
-
       //
       // Insert many method
       // -------------------------------------------------
@@ -410,12 +377,10 @@ describe('CRUD API', function () {
         db.collection('t2_4').insertMany(docs, { writeConcern: { w: 1 } }, function (err, r) {
           expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(2);
-
           // Ordered bulk unordered
           bulkWriteUnOrdered();
         });
       };
-
       //
       // Bulk write method unordered
       // -------------------------------------------------
@@ -423,7 +388,6 @@ describe('CRUD API', function () {
         db.collection('t2_5').insertMany([{ c: 1 }], { writeConcern: { w: 1 } }, function (err, r) {
           expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(1);
-
           db.collection('t2_5').bulkWrite(
             [
               { insertOne: { document: { a: 1 } } },
@@ -440,7 +404,6 @@ describe('CRUD API', function () {
               test.equal(3, r.insertedCount);
               test.equal(1, r.upsertedCount);
               test.equal(1, r.deletedCount);
-
               // Crud fields
               test.equal(3, r.insertedCount);
               test.equal(3, Object.keys(r.insertedIds).length);
@@ -448,14 +411,12 @@ describe('CRUD API', function () {
               test.equal(1, r.deletedCount);
               test.equal(1, r.upsertedCount);
               test.equal(1, Object.keys(r.upsertedIds).length);
-
               // Ordered bulk operation
               bulkWriteUnOrderedSpec();
             }
           );
         });
       };
-
       //
       // Bulk write method unordered
       // -------------------------------------------------
@@ -466,7 +427,6 @@ describe('CRUD API', function () {
           function (err, r) {
             expect(err).to.not.exist;
             expect(r).property('insertedCount').to.equal(3);
-
             db.collection('t2_6').bulkWrite(
               [
                 { insertOne: { document: { a: 1 } } },
@@ -482,7 +442,6 @@ describe('CRUD API', function () {
                 test.equal(1, r.insertedCount);
                 test.equal(2, r.upsertedCount);
                 test.equal(2, r.deletedCount);
-
                 // Crud fields
                 test.equal(1, r.insertedCount);
                 test.equal(1, Object.keys(r.insertedIds).length);
@@ -490,7 +449,6 @@ describe('CRUD API', function () {
                 test.equal(2, r.deletedCount);
                 test.equal(2, r.upsertedCount);
                 test.equal(2, Object.keys(r.upsertedIds).length);
-
                 // Ordered bulk operation
                 bulkWriteOrdered();
               }
@@ -498,7 +456,6 @@ describe('CRUD API', function () {
           }
         );
       };
-
       //
       // Bulk write method ordered
       // -------------------------------------------------
@@ -506,7 +463,6 @@ describe('CRUD API', function () {
         db.collection('t2_7').insertMany([{ c: 1 }], { writeConcern: { w: 1 } }, function (err, r) {
           expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(1);
-
           db.collection('t2_7').bulkWrite(
             [
               { insertOne: { document: { a: 1 } } },
@@ -523,7 +479,6 @@ describe('CRUD API', function () {
               test.equal(3, r.insertedCount);
               test.equal(1, r.upsertedCount);
               test.equal(1, r.deletedCount);
-
               // Crud fields
               test.equal(3, r.insertedCount);
               test.equal(3, Object.keys(r.insertedIds).length);
@@ -531,13 +486,11 @@ describe('CRUD API', function () {
               test.equal(1, r.deletedCount);
               test.equal(1, r.upsertedCount);
               test.equal(1, Object.keys(r.upsertedIds).length);
-
               bulkWriteOrderedCrudSpec();
             }
           );
         });
       };
-
       //
       // Bulk write method ordered
       // -------------------------------------------------
@@ -545,7 +498,6 @@ describe('CRUD API', function () {
         db.collection('t2_8').insertMany([{ c: 1 }], { writeConcern: { w: 1 } }, function (err, r) {
           expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(1);
-
           db.collection('t2_8').bulkWrite(
             [
               { insertOne: { document: { a: 1 } } },
@@ -561,7 +513,6 @@ describe('CRUD API', function () {
               test.equal(1, r.insertedCount);
               test.equal(2, r.upsertedCount);
               test.equal(1, r.deletedCount);
-
               // Crud fields
               test.equal(1, r.insertedCount);
               test.equal(1, Object.keys(r.insertedIds).length);
@@ -569,28 +520,23 @@ describe('CRUD API', function () {
               test.equal(1, r.deletedCount);
               test.equal(2, r.upsertedCount);
               test.equal(2, Object.keys(r.upsertedIds).length);
-
               client.close(done);
             }
           );
         });
       };
-
       legacyInsert();
     });
   });
 
-  it('should correctly execute update methods using crud api', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly execute update methods using crud api',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       client.connect(function (err, client) {
         const db = client.db();
-
         //
         // Legacy update method
         // -------------------------------------------------
@@ -602,12 +548,10 @@ describe('CRUD API', function () {
             function (err, r) {
               expect(err).to.not.exist;
               expect(r).property('upsertedCount').to.equal(1);
-
               updateOne();
             }
           );
         };
-
         //
         // Update one method
         // -------------------------------------------------
@@ -618,7 +562,6 @@ describe('CRUD API', function () {
             function (err, r) {
               expect(err).to.not.exist;
               expect(r).property('insertedCount').to.equal(1);
-
               db.collection('t3_2').updateOne(
                 { a: 1 },
                 { $set: { a: 1 } },
@@ -628,13 +571,11 @@ describe('CRUD API', function () {
                   expect(r).property('upsertedCount').to.equal(1);
                   test.equal(0, r.matchedCount);
                   test.ok(r.upsertedId != null);
-
                   db.collection('t3_2').updateOne({ c: 1 }, { $set: { a: 1 } }, function (err, r) {
                     expect(err).to.not.exist;
                     expect(r).property('modifiedCount').to.equal(1);
                     test.equal(1, r.matchedCount);
                     test.ok(r.upsertedId == null);
-
                     replaceOne();
                   });
                 }
@@ -642,7 +583,6 @@ describe('CRUD API', function () {
             }
           );
         };
-
         //
         // Replace one method
         // -------------------------------------------------
@@ -652,7 +592,6 @@ describe('CRUD API', function () {
             expect(r).property('upsertedCount').to.equal(1);
             test.equal(0, r.matchedCount);
             test.ok(r.upsertedId != null);
-
             db.collection('t3_3').replaceOne(
               { a: 2 },
               { a: 3 },
@@ -662,13 +601,11 @@ describe('CRUD API', function () {
                 expect(r).property('modifiedCount').to.equal(1);
                 expect(r).property('upsertedCount').to.equal(0);
                 expect(r).property('matchedCount').to.equal(1);
-
                 updateMany();
               }
             );
           });
         };
-
         //
         // Update many method
         // -------------------------------------------------
@@ -679,7 +616,6 @@ describe('CRUD API', function () {
             function (err, r) {
               expect(err).to.not.exist;
               expect(r).property('insertedCount').to.equal(2);
-
               db.collection('t3_4').updateMany(
                 { a: 1 },
                 { $set: { a: 2 } },
@@ -689,7 +625,6 @@ describe('CRUD API', function () {
                   expect(r).property('modifiedCount').to.equal(2);
                   test.equal(2, r.matchedCount);
                   test.ok(r.upsertedId == null);
-
                   db.collection('t3_4').updateMany(
                     { c: 1 },
                     { $set: { d: 2 } },
@@ -698,7 +633,6 @@ describe('CRUD API', function () {
                       expect(err).to.not.exist;
                       test.equal(0, r.matchedCount);
                       test.ok(r.upsertedId != null);
-
                       client.close(done);
                     }
                   );
@@ -707,11 +641,10 @@ describe('CRUD API', function () {
             }
           );
         };
-
         legacyUpdate();
       });
     }
-  });
+  );
 
   describe('#findOneAndDelete', function () {
     let collection;
@@ -725,7 +658,7 @@ describe('CRUD API', function () {
       await collection.drop();
     });
 
-    context('when includeResultMetadata is true', function () {
+    describe('when includeResultMetadata is true', function () {
       beforeEach(async function () {
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
       });
@@ -740,7 +673,7 @@ describe('CRUD API', function () {
       });
     });
 
-    context('when includeResultMetadata is false', function () {
+    describe('when includeResultMetadata is false', function () {
       beforeEach(async function () {
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
       });
@@ -767,7 +700,7 @@ describe('CRUD API', function () {
       await collection.drop();
     });
 
-    context('when includeResultMetadata is true', function () {
+    describe('when includeResultMetadata is true', function () {
       beforeEach(async function () {
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
       });
@@ -790,7 +723,7 @@ describe('CRUD API', function () {
       });
     });
 
-    context('when includeResultMetadata is false', function () {
+    describe('when includeResultMetadata is false', function () {
       beforeEach(async function () {
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
       });
@@ -825,7 +758,7 @@ describe('CRUD API', function () {
       await collection.drop();
     });
 
-    context('when includeResultMetadata is true', function () {
+    describe('when includeResultMetadata is true', function () {
       beforeEach(async function () {
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
       });
@@ -848,7 +781,7 @@ describe('CRUD API', function () {
       });
     });
 
-    context('when includeResultMetadata is false', function () {
+    describe('when includeResultMetadata is false', function () {
       beforeEach(async function () {
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
       });
@@ -871,50 +804,41 @@ describe('CRUD API', function () {
     });
   });
 
-  it('should correctly execute removeMany with no selector', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly execute removeMany with no selector',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       client.connect(function (err, client) {
         const db = client.db();
         expect(err).to.not.exist;
-
         // Delete all items with no selector
         db.collection('t6_1').deleteMany({}, function (err) {
           expect(err).to.not.exist;
-
           client.close(done);
         });
       });
     }
-  });
+  );
 
-  it('should correctly execute crud operations with w:0', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly execute crud operations with w:0',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       client.connect(function (err, client) {
         const db = client.db();
         expect(err).to.not.exist;
-
         const col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
         col.insertOne({ a: 1 }, { writeConcern: { w: 0 } }, function (err, result) {
           expect(err).to.not.exist;
           expect(result).property('acknowledged').to.be.false;
           expect(result).property('insertedId').to.exist;
-
           col.insertMany([{ a: 1 }], { writeConcern: { w: 0 } }, function (err, result) {
             expect(err).to.not.exist;
             expect(result).to.exist;
-
             col.updateOne(
               { a: 1 },
               { $set: { b: 1 } },
@@ -922,7 +846,6 @@ describe('CRUD API', function () {
               function (err, result) {
                 expect(err).to.not.exist;
                 expect(result).to.exist;
-
                 col.updateMany(
                   { a: 1 },
                   { $set: { b: 1 } },
@@ -930,15 +853,12 @@ describe('CRUD API', function () {
                   function (err, result) {
                     expect(err).to.not.exist;
                     expect(result).to.exist;
-
                     col.deleteOne({ a: 1 }, { writeConcern: { w: 0 } }, function (err, result) {
                       expect(err).to.not.exist;
                       expect(result).to.exist;
-
                       col.deleteMany({ a: 1 }, { writeConcern: { w: 0 } }, function (err, result) {
                         expect(err).to.not.exist;
                         expect(result).to.exist;
-
                         client.close(done);
                       });
                     });
@@ -950,20 +870,17 @@ describe('CRUD API', function () {
         });
       });
     }
-  });
+  );
 
-  it('should correctly execute updateOne operations with w:0 and upsert', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly execute updateOne operations with w:0 and upsert',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       client.connect(function (err, client) {
         const db = client.db();
         expect(err).to.not.exist;
-
         db.collection('try').updateOne(
           { _id: 1 },
           { $set: { x: 1 } },
@@ -971,96 +888,78 @@ describe('CRUD API', function () {
           function (err, r) {
             expect(err).to.not.exist;
             test.ok(r != null);
-
             client.close(done);
           }
         );
       });
     }
-  });
+  );
 
-  it('should correctly execute crud operations using w:0', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly execute crud operations using w:0',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       client.connect(function (err, client) {
         const db = client.db();
         expect(err).to.not.exist;
-
         const collection = db.collection('w0crudoperations');
         collection.insertOne({}, function (err) {
           expect(err).to.not.exist;
           client.close(done);
         });
-
         // collection.insertOne({a:1});
         // collection.insertMany([{b:1}]);
         // collection.updateOne({c:1}, {$set:{a:1}}, {upsert:true});
-
         // db.collection('try').updateOne({_id:1}, {$set:{x:1}}, {upsert:true, w:0}, function(err, r) {
         //   expect(err).to.not.exist;
         //   test.ok(r != null);
-
         //   client.close();
         //   done();
         // });
       });
     }
-  });
+  );
 
-  it('should correctly throw error on illegal callback when unordered bulkWrite encounters error', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly throw error on illegal callback when unordered bulkWrite encounters error',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: async function () {
+    async function () {
       const ops = [];
       // Create a set of operations that go over the 1000 limit causing two messages
       let i = 0;
       for (; i < 1005; i++) {
         ops.push({ insertOne: { _id: i, a: i } });
       }
-
       ops.push({ insertOne: { _id: 0, a: i } });
-
       const db = client.db();
-
       const error = await db
         .collection('t20_1')
         .bulkWrite(ops, { ordered: false, writeConcern: { w: 1 } })
         .catch(error => error);
-
       expect(error).to.be.instanceOf(MongoError);
     }
-  });
+  );
 
-  it('should correctly throw error on illegal callback when ordered bulkWrite encounters error', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly throw error on illegal callback when ordered bulkWrite encounters error',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       const ops = [];
       // Create a set of operations that go over the 1000 limit causing two messages
       let i = 0;
       for (; i < 1005; i++) {
         ops.push({ insertOne: { _id: i, a: i } });
       }
-
       ops.push({ insertOne: { _id: 0, a: i } });
-
       client.connect(function (err, client) {
         const db = client.db();
         expect(err).to.not.exist;
-
         db.collection('t20_1').bulkWrite(
           ops,
           { ordered: true, writeConcern: { w: 1 } },
@@ -1071,5 +970,5 @@ describe('CRUD API', function () {
         );
       });
     }
-  });
+  );
 });

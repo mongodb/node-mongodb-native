@@ -27,16 +27,16 @@ import {
 } from '../mongodb';
 
 describe('Connection String', function () {
-  context('when serverMonitoringMode is set', function () {
-    context('when it is valid', function () {
-      context('when set in the connection string', function () {
+  describe('when serverMonitoringMode is set', function () {
+    describe('when it is valid', function () {
+      describe('when set in the connection string', function () {
         it('sets the mode', function () {
           const options = parseOptions('mongodb://localhost:27017/?serverMonitoringMode=poll');
           expect(options.serverMonitoringMode).to.equal('poll');
         });
       });
 
-      context('when set in the options', function () {
+      describe('when set in the options', function () {
         it('sets the mode', function () {
           const options = parseOptions('mongodb://localhost:27017', {
             serverMonitoringMode: 'poll'
@@ -46,8 +46,8 @@ describe('Connection String', function () {
       });
     });
 
-    context('when it is not valid', function () {
-      context('when set in the connection string', function () {
+    describe('when it is not valid', function () {
+      describe('when set in the connection string', function () {
         it('throws a parse error', function () {
           expect(() =>
             parseOptions('mongodb://localhost:27017/?serverMonitoringMode=invalid')
@@ -57,7 +57,7 @@ describe('Connection String', function () {
     });
   });
 
-  context('when serverMonitoringMode is not set', function () {
+  describe('when serverMonitoringMode is not set', function () {
     it('defaults to auto', function () {
       const options = parseOptions('mongodb://localhost:27017');
       expect(options.serverMonitoringMode).to.equal('auto');
@@ -69,7 +69,6 @@ describe('Connection String', function () {
       authMechanism: 'SCRAM-SHA-1',
       auth: { user: 'testing', password: 'llamas' }
     };
-
     expect(() => parseOptions('mongodb://localhost', optionsWithUser as any)).to.throw(
       MongoParseError
     );
@@ -103,7 +102,7 @@ describe('Connection String', function () {
   });
 
   describe('ca option', () => {
-    context('when set in the options object', () => {
+    describe('when set in the options object', () => {
       it('should parse a string', () => {
         const options = parseOptions('mongodb://localhost', {
           ca: 'hello'
@@ -115,7 +114,6 @@ describe('Connection String', function () {
         const options = parseOptions('mongodb://localhost', {
           ca: Buffer.from([1, 2, 3, 4])
         });
-
         expect(options)
           .to.have.property('ca')
           .to.deep.equal(Buffer.from([1, 2, 3, 4]));
@@ -143,7 +141,7 @@ describe('Connection String', function () {
       });
     });
 
-    context('when set in the uri', () => {
+    describe('when set in the uri', () => {
       it('should parse a string value', () => {
         const options = parseOptions('mongodb://localhost?ca=hello', {});
         expect(options).to.have.property('ca').to.equal('hello');
@@ -171,7 +169,7 @@ describe('Connection String', function () {
   });
 
   describe('readPreferenceTags option', function () {
-    context('when the option is passed in the uri', () => {
+    describe('when the option is passed in the uri', () => {
       it('should parse a single read preference tag', () => {
         const options = parseOptions('mongodb://hostname?readPreferenceTags=bar:foo');
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }]);
@@ -209,7 +207,7 @@ describe('Connection String', function () {
       });
     });
 
-    context('when the option is passed in the options object', () => {
+    describe('when the option is passed in the options object', () => {
       it('should not parse an empty readPreferenceTags object', () => {
         const options = parseOptions('mongodb://hostname?', {
           readPreferenceTags: []
@@ -251,8 +249,11 @@ describe('Connection String', function () {
     });
   });
 
-  context('boolean options', function () {
-    const valuesExpectations: { value: string; expectation: 'error' | boolean }[] = [
+  describe('boolean options', function () {
+    const valuesExpectations: {
+      value: string;
+      expectation: 'error' | boolean;
+    }[] = [
       { value: 'true', expectation: true },
       { value: 'false', expectation: false },
       { value: '-1', expectation: 'error' },
@@ -268,7 +269,7 @@ describe('Connection String', function () {
     ];
     for (const { value, expectation } of valuesExpectations) {
       const connString = `mongodb://hostname?retryWrites=${value}`;
-      context(`when provided '${value}'`, function () {
+      describe(`when provided '${value}'`, function () {
         if (expectation === 'error') {
           it('throws MongoParseError', function () {
             expect(() => {
@@ -298,8 +299,8 @@ describe('Connection String', function () {
     expect(options.readConcern.level).to.equal('local');
   });
 
-  context('when auth mechanism is MONGODB-OIDC', function () {
-    context('when ALLOWED_HOSTS is in the URI', function () {
+  describe('when auth mechanism is MONGODB-OIDC', function () {
+    describe('when ALLOWED_HOSTS is in the URI', function () {
       it('raises an error', function () {
         expect(() => {
           parseOptions(
@@ -312,8 +313,8 @@ describe('Connection String', function () {
       });
     });
 
-    context('when ALLOWED_HOSTS is in the options', function () {
-      context('when it is an array of strings', function () {
+    describe('when ALLOWED_HOSTS is in the options', function () {
+      describe('when it is an array of strings', function () {
         const hosts = ['*.example.com'];
 
         it('sets the allowed hosts property', function () {
@@ -332,7 +333,7 @@ describe('Connection String', function () {
         });
       });
 
-      context('when it is not an array of strings', function () {
+      describe('when it is not an array of strings', function () {
         it('raises an error', function () {
           expect(() => {
             parseOptions(
@@ -351,7 +352,7 @@ describe('Connection String', function () {
       });
     });
 
-    context('when ALLOWED_HOSTS is not in the options', function () {
+    describe('when ALLOWED_HOSTS is not in the options', function () {
       it('sets the default value', function () {
         const options = parseOptions(
           'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws'
@@ -363,8 +364,8 @@ describe('Connection String', function () {
       });
     });
 
-    context('when TOKEN_AUDIENCE is in the properties', function () {
-      context('when it is a uri', function () {
+    describe('when TOKEN_AUDIENCE is in the properties', function () {
+      describe('when it is a uri', function () {
         const options = parseOptions(
           'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:api%3A%2F%2Ftest'
         );
@@ -406,9 +407,8 @@ describe('Connection String', function () {
     options = parseOptions(`mongodb+srv://a/?authSource=someDb`);
     expect(options).to.not.have.property('credentials');
   });
-
   for (const mechanism of ['GSSAPI', 'MONGODB-X509']) {
-    context(`when the authMechanism is ${mechanism} and authSource is NOT $external`, function () {
+    describe(`when the authMechanism is ${mechanism} and authSource is NOT $external`, function () {
       it('throws a MongoParseError', function () {
         expect(() =>
           parseOptions(`mongodb+srv://hostname/?authMechanism=${mechanism}&authSource=invalid`)
@@ -429,7 +429,6 @@ describe('Connection String', function () {
     const client = new MongoClient('mongodb://localhost:123/?authSource=someDb', {
       serverSelectionTimeoutMS: 500
     });
-
     let thrownError: Error;
     try {
       // relies on us not running a mongod on port 123, fairly likely assumption
@@ -437,7 +436,6 @@ describe('Connection String', function () {
     } catch (error) {
       thrownError = error;
     }
-
     // We should fail to connect, not fail to find an auth provider thus we should not find a MongoAPIError
     expect(thrownError).to.not.be.instanceOf(MongoAPIError);
     expect(client.options).to.not.have.a.property('credentials');
@@ -454,7 +452,6 @@ describe('Connection String', function () {
     const options = parseOptions(
       `mongodb://myName:myPassword@localhost:27017/${dbName}?authSource=${authSource}`
     );
-
     expect(options).has.property('dbName', dbName);
     expect(options.credentials).to.have.property('source', authSource);
   });
@@ -465,7 +462,7 @@ describe('Connection String', function () {
     expect(options.replicaSet).to.equal('123abc');
   });
 
-  context('when directionConnection is set', () => {
+  describe('when directionConnection is set', () => {
     it('sets directConnection successfully when there is one host', () => {
       const options = parseOptions('mongodb://localhost:27027/?directConnection=true');
       expect(options.directConnection).to.be.true;
@@ -478,17 +475,17 @@ describe('Connection String', function () {
     });
   });
 
-  context('when providing tlsCRLFile', function () {
+  describe('when providing tlsCRLFile', function () {
     it('sets the tlsCRLFile option', function () {
       const options = parseOptions('mongodb://localhost/?tls=true&tlsCRLFile=path/to/crl.pem');
       expect(options.tlsCRLFile).to.equal('path/to/crl.pem');
     });
   });
 
-  context('when both tls and ssl options are provided', function () {
-    context('when the options are provided in the URI', function () {
-      context('when the options are equal', function () {
-        context('when both options are true', function () {
+  describe('when both tls and ssl options are provided', function () {
+    describe('when the options are provided in the URI', function () {
+      describe('when the options are equal', function () {
+        describe('when both options are true', function () {
           it('sets the tls option', function () {
             const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
             expect(options.tls).to.be.true;
@@ -500,7 +497,7 @@ describe('Connection String', function () {
           });
         });
 
-        context('when both options are false', function () {
+        describe('when both options are false', function () {
           it('sets the tls option', function () {
             const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
             expect(options.tls).to.be.false;
@@ -513,7 +510,7 @@ describe('Connection String', function () {
         });
       });
 
-      context('when the options are not equal', function () {
+      describe('when the options are not equal', function () {
         it('raises an error', function () {
           expect(() => {
             parseOptions('mongodb://localhost/?tls=true&ssl=false');
@@ -522,9 +519,9 @@ describe('Connection String', function () {
       });
     });
 
-    context('when the options are provided in the options', function () {
-      context('when the options are equal', function () {
-        context('when both options are true', function () {
+    describe('when the options are provided in the options', function () {
+      describe('when the options are equal', function () {
+        describe('when both options are true', function () {
           it('sets the tls option', function () {
             const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
             expect(options.tls).to.be.true;
@@ -536,8 +533,8 @@ describe('Connection String', function () {
           });
         });
 
-        context('when both options are false', function () {
-          context('when the URI is an SRV URI', function () {
+        describe('when both options are false', function () {
+          describe('when the URI is an SRV URI', function () {
             it('overrides the tls option', function () {
               const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
               expect(options.tls).to.be.false;
@@ -549,7 +546,7 @@ describe('Connection String', function () {
             });
           });
 
-          context('when the URI is not SRV', function () {
+          describe('when the URI is not SRV', function () {
             it('sets the tls option', function () {
               const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
               expect(options.tls).to.be.false;
@@ -563,7 +560,7 @@ describe('Connection String', function () {
         });
       });
 
-      context('when the options are not equal', function () {
+      describe('when the options are not equal', function () {
         it('raises an error', function () {
           expect(() => {
             parseOptions('mongodb://localhost/', { tls: true, ssl: false });
@@ -626,7 +623,6 @@ describe('Connection String', function () {
     afterEach(() => {
       sinon.restore();
     });
-
     function makeStub(txtRecord: string) {
       const mockAddress = [
         {
@@ -636,20 +632,16 @@ describe('Connection String', function () {
           priority: 0
         }
       ];
-
       const mockRecord: string[][] = [[txtRecord]];
-
       // first call is for stubbing resolveSrv
       // second call is for stubbing resolveTxt
       sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
         return mockAddress;
       });
-
       sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
         return mockRecord;
       });
     }
-
     for (const mechanism of AUTH_MECHS_AUTH_SRC_EXTERNAL) {
       it(`should set authSource to $external for ${mechanism} external mechanism`, async function () {
         makeStub('authSource=thisShouldNotBeAuthSource');
@@ -657,7 +649,6 @@ describe('Connection String', function () {
         if (mechanism === AuthMechanism.MONGODB_OIDC) {
           mechanismProperties.PROVIDER_NAME = 'aws';
         }
-
         const credentials = new MongoCredentials({
           source: '$external',
           mechanism,
@@ -665,16 +656,13 @@ describe('Connection String', function () {
           password: mechanism === AuthMechanism.MONGODB_X509 ? undefined : 'password',
           mechanismProperties: mechanismProperties
         });
-
         credentials.validate();
-
         const options = {
           credentials,
           srvHost: 'test.mock.test.build.10gen.cc',
           srvServiceName: 'mongodb',
           userSpecifiedAuthSource: false
         } as MongoOptions;
-
         await resolveSRVRecord(options);
         // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
         expect(options).property('credentials').to.equal(credentials);
@@ -684,7 +672,6 @@ describe('Connection String', function () {
 
     it('should set a default authSource for non-external mechanisms with no user-specified source', async function () {
       makeStub('authSource=thisShouldBeAuthSource');
-
       const credentials = new MongoCredentials({
         source: 'admin',
         mechanism: AuthMechanism.MONGODB_SCRAM_SHA256,
@@ -693,14 +680,12 @@ describe('Connection String', function () {
         mechanismProperties: {}
       });
       credentials.validate();
-
       const options = {
         credentials,
         srvHost: 'test.mock.test.build.10gen.cc',
         srvServiceName: 'mongodb',
         userSpecifiedAuthSource: false
       } as MongoOptions;
-
       await resolveSRVRecord(options);
       // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
       expect(options).property('credentials').to.not.equal(credentials);
@@ -717,14 +702,12 @@ describe('Connection String', function () {
         mechanismProperties: {}
       });
       credentials.validate();
-
       const options = {
         credentials,
         srvHost: 'test.mock.test.build.10gen.cc',
         srvServiceName: 'mongodb',
         userSpecifiedAuthSource: false
       } as MongoOptions;
-
       await resolveSRVRecord(options as any);
       // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
       expect(options).property('credentials').to.equal(credentials);
@@ -740,7 +723,6 @@ describe('Connection String', function () {
         srvServiceName: 'mongodb',
         userSpecifiedAuthSource: false
       } as MongoOptions;
-
       await resolveSRVRecord(options as any);
       expect(options).to.have.nested.property('credentials.username', '');
       expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
@@ -845,7 +827,6 @@ describe('Connection String', function () {
       expect(warning)
         .to.have.property('message')
         .that.matches(/useNewUrlParser has no effect/);
-
       willBeWarning = once(process, 'warning');
       //@ts-expect-error: using unsupported option on purpose
       parseOptions('mongodb://host', { useNewUrlParser: true });
@@ -862,7 +843,6 @@ describe('Connection String', function () {
       expect(warning)
         .to.have.property('message')
         .that.matches(/useUnifiedTopology has no effect/);
-
       willBeWarning = once(process, 'warning');
       //@ts-expect-error: using unsupported option on purpose
       parseOptions('mongodb://host', { useUnifiedTopology: true });
@@ -875,7 +855,6 @@ describe('Connection String', function () {
 
   describe('when mongodbLogPath is in options', function () {
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-
     let stderrStub;
     let stdoutStub;
 
@@ -888,7 +867,7 @@ describe('Connection String', function () {
       sinon.restore();
     });
 
-    context('when option is `stderr`', function () {
+    describe('when option is `stderr`', function () {
       it('it is accessible through mongoLogger.logDestination', function () {
         const client = new MongoClient('mongodb://a/?mongodbLogPath=stderr', {
           [loggerFeatureFlag]: true
@@ -900,7 +879,7 @@ describe('Connection String', function () {
       });
     });
 
-    context('when option is `stdout`', function () {
+    describe('when option is `stdout`', function () {
       it('it is accessible through mongoLogger.logDestination', function () {
         const client = new MongoClient('mongodb://a/?mongodbLogPath=stdout', {
           [loggerFeatureFlag]: true
@@ -912,7 +891,7 @@ describe('Connection String', function () {
       });
     });
 
-    context('when option is invalid', function () {
+    describe('when option is invalid', function () {
       it('should throw error at construction', function () {
         expect(
           () =>
@@ -930,7 +909,6 @@ describe('Connection String', function () {
     afterEach(() => {
       process.env.MONGODB_LOG_CLIENT = undefined;
     });
-
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
     const test_cases = [
       ['non-SRV example uri', 'mongodb://a.example.com:27017,b.example.com:27017/', ''],
@@ -950,7 +928,7 @@ describe('Connection String', function () {
       ['SRV documentDB uri 2', 'mongodb+srv://a.docdB-eLastic.amazonaws.com/', DOCUMENT_DB_MSG]
     ];
 
-    context('when logging is turned on', () => {
+    describe('when logging is turned on', () => {
       for (const [name, uri, message] of test_cases) {
         it(`${name} triggers ${message.length === 0 ? 'no' : 'correct info'} msg`, () => {
           const stream = {
@@ -963,7 +941,6 @@ describe('Connection String', function () {
             [loggerFeatureFlag]: true,
             mongodbLogPath: stream
           });
-
           if (message.length > 0) {
             expect(stream.buffer).to.have.lengthOf(1);
             expect(stream.buffer[0]).to.have.property('c', 'client');

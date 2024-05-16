@@ -4,8 +4,8 @@ import { WriteConcern } from '../mongodb';
 
 describe('WriteConcern', function () {
   describe('#constructor', function () {
-    context('when w is provided', function () {
-      context('when w is a number', function () {
+    describe('when w is provided', function () {
+      describe('when w is a number', function () {
         const writeConcern = new WriteConcern(1);
 
         it('sets the w property', function () {
@@ -13,7 +13,7 @@ describe('WriteConcern', function () {
         });
       });
 
-      context('when w is a string number', function () {
+      describe('when w is a string number', function () {
         const writeConcern = new WriteConcern('10');
 
         it('sets the w property to a number', function () {
@@ -21,7 +21,7 @@ describe('WriteConcern', function () {
         });
       });
 
-      context('when w is a string', function () {
+      describe('when w is a string', function () {
         const writeConcern = new WriteConcern('majority');
 
         it('sets the w property to the string', function () {
@@ -30,7 +30,7 @@ describe('WriteConcern', function () {
       });
     });
 
-    context('when wtimeoutMS is provided', function () {
+    describe('when wtimeoutMS is provided', function () {
       const writeConcern = new WriteConcern(1, 50);
 
       it('sets the wtimeoutMS property', function () {
@@ -42,7 +42,7 @@ describe('WriteConcern', function () {
       });
     });
 
-    context('when journal is provided', function () {
+    describe('when journal is provided', function () {
       const writeConcern = new WriteConcern(1, 50, true);
 
       it('sets the journal property', function () {
@@ -54,7 +54,7 @@ describe('WriteConcern', function () {
       });
     });
 
-    context('when fsync is provided', function () {
+    describe('when fsync is provided', function () {
       const writeConcern = new WriteConcern(1, 50, false, true);
 
       it('sets the journal property', function () {
@@ -68,7 +68,7 @@ describe('WriteConcern', function () {
   });
 
   describe('.apply', function () {
-    context('when no options are set', function () {
+    describe('when no options are set', function () {
       const document = {};
       const writeConcern = new WriteConcern();
 
@@ -77,7 +77,7 @@ describe('WriteConcern', function () {
       });
     });
 
-    context('when w is in the write concern', function () {
+    describe('when w is in the write concern', function () {
       const document = {};
       const writeConcern = new WriteConcern(2);
 
@@ -88,7 +88,7 @@ describe('WriteConcern', function () {
       });
     });
 
-    context('when wtimeoutMS is in the write concern', function () {
+    describe('when wtimeoutMS is in the write concern', function () {
       const document = {};
       const writeConcern = new WriteConcern(2, 30);
 
@@ -99,7 +99,7 @@ describe('WriteConcern', function () {
       });
     });
 
-    context('when journal is in the write concern', function () {
+    describe('when journal is in the write concern', function () {
       const document = {};
       const writeConcern = new WriteConcern(2, 30, true);
 
@@ -110,7 +110,7 @@ describe('WriteConcern', function () {
       });
     });
 
-    context('when fsync is in the write concern', function () {
+    describe('when fsync is in the write concern', function () {
       const document = {};
       const writeConcern = new WriteConcern(2, 30, true, false);
 

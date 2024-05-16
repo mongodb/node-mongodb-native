@@ -1,5 +1,4 @@
 'use strict';
-
 const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
 
@@ -14,7 +13,6 @@ describe('examples(query-embedded-documents):', function () {
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
-
     await db.collection('inventory').deleteMany({});
     // Start Example 14
     await db.collection('inventory').insertMany([
@@ -58,61 +56,62 @@ describe('examples(query-embedded-documents):', function () {
     db = undefined;
   });
 
-  it('Match an Embedded/Nested Document', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Match an Embedded/Nested Document',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 15
       const cursor = db.collection('inventory').find({
         size: { h: 14, w: 21, uom: 'cm' }
       });
       // End Example 15
-
       expect(await cursor.count()).to.equal(1);
     }
-  });
+  );
 
-  it('Match an Embedded/Nested Document - document order', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Match an Embedded/Nested Document - document order',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 16
       const cursor = db.collection('inventory').find({
         size: { w: 21, h: 14, uom: 'cm' }
       });
       // End Example 16
-
       expect(await cursor.count()).to.equal(0);
     }
-  });
+  );
 
-  it('Specify Equality Match on a Nested Field', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Specify Equality Match on a Nested Field',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 17
       const cursor = db.collection('inventory').find({
         'size.uom': 'in'
       });
       // End Example 17
-
       expect(await cursor.count()).to.equal(2);
     }
-  });
+  );
 
-  it('Specify Match using Query Operator', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Specify Match using Query Operator',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 18
       const cursor = db.collection('inventory').find({
         'size.h': { $lt: 15 }
       });
       // End Example 18
-
       expect(await cursor.count()).to.equal(4);
     }
-  });
+  );
 
-  it('Specify ``AND`` Condition', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Specify ``AND`` Condition',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 19
       const cursor = db.collection('inventory').find({
         'size.h': { $lt: 15 },
@@ -120,8 +119,7 @@ describe('examples(query-embedded-documents):', function () {
         status: 'D'
       });
       // End Example 19
-
       expect(await cursor.count()).to.equal(1);
     }
-  });
+  );
 });

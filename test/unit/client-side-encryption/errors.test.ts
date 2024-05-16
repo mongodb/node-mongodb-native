@@ -30,7 +30,6 @@ describe('MongoCryptError', function () {
     new MongoCryptError(''),
     new MongoCryptInvalidArgumentError('')
   ];
-
   for (const err of errors) {
     describe(err.name, function () {
       it('is subclass of MongoError', function () {

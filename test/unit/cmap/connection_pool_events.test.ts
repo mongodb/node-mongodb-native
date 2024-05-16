@@ -10,7 +10,7 @@ describe('Connection Pool Events', function () {
 
   describe('ConnectionPoolCreatedEvent', function () {
     describe('constructor', function () {
-      context('when provided expected option fields', function () {
+      describe('when provided expected option fields', function () {
         it(`Sets the allowed fields appropriately`, function () {
           const options = {
             maxIdleTimeMS: 0,
@@ -23,11 +23,11 @@ describe('Connection Pool Events', function () {
             ...connectionPoolMock,
             options
           } as unknown as ConnectionPool);
-
           expect(event).to.have.deep.property('options', options);
         });
       });
-      context('when provided unallowed fields', function () {
+
+      describe('when provided unallowed fields', function () {
         it('only stores expected fields', function () {
           const options = {
             maxIdleTimeMS: 0,
@@ -46,7 +46,6 @@ describe('Connection Pool Events', function () {
             ...connectionPoolMock,
             options
           } as unknown as ConnectionPool);
-
           expect(event).to.have.deep.property('options', {
             maxIdleTimeMS: 0,
             maxConnecting: 2,

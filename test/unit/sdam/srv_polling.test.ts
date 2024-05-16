@@ -16,7 +16,6 @@ import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Mongos SRV Polling', function () {
   const SRV_HOST = 'darmok.tanagra.com';
-
   function srvRecord(mockServer, port?: number) {
     if (typeof mockServer === 'string') {
       mockServer = { host: mockServer, port };
@@ -28,7 +27,6 @@ describe('Mongos SRV Polling', function () {
       name: mockServer.host
     };
   }
-
   function stubDns(err: Error | null, records?: dns.SrvRecord[]) {
     if (err) {
       sinon.stub(dns.promises, 'resolveSrv').rejects(err);
@@ -56,15 +54,11 @@ describe('Mongos SRV Polling', function () {
       it('should emit event, disable haMode, and schedule another poll', async function () {
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
         const poller = new SrvPoller({ srvHost: SRV_HOST, heartbeatFrequencyMS: 100 });
-
         const willBeDiscovery = once(poller, 'srvRecordDiscovery');
-
         sinon.stub(poller, 'schedule');
-
         poller.haMode = true;
         expect(poller).to.have.property('haMode', true);
         poller.success(records);
-
         const [e] = await willBeDiscovery;
         expect(e)
           .to.be.an.instanceOf(SrvPollingEvent)
@@ -78,10 +72,8 @@ describe('Mongos SRV Polling', function () {
     describe('failure', function () {
       it('should enable haMode and schedule', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
-
         sinon.stub(poller, 'schedule');
         poller.failure('Some kind of failure');
-
         expect(poller.schedule).to.have.been.calledOnce;
         expect(poller).to.have.property('haMode', true);
       });
@@ -95,13 +87,9 @@ describe('Mongos SRV Polling', function () {
 
       it('should poll dns srv records', async function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
-
         sinon.stub(dns.promises, 'resolveSrv').resolves([srvRecord('iLoveJavascript.lots')]);
-
         await poller._poll();
-
         clearTimeout(poller._timeout);
-
         expect(dns.promises.resolveSrv).to.have.been.calledOnce.and.to.have.been.calledWith(
           `_mongodb._tcp.${SRV_HOST}`
         );
@@ -109,38 +97,29 @@ describe('Mongos SRV Polling', function () {
 
       it('should not succeed or fail if poller was stopped', async function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
-
         stubDns(null, []);
         stubPoller(poller);
-
         const pollerPromise = poller._poll();
         poller.generation += 1;
         await pollerPromise;
-
         expect(poller.success).to.not.have.been.called;
         expect(poller.failure).to.not.have.been.called;
       });
 
       it('should fail if dns returns error', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
-
         stubDns(new Error('Some Error'));
         stubPoller(poller);
-
         await poller._poll();
-
         expect(poller.success).to.not.have.been.called;
         expect(poller.failure).to.have.been.calledOnce;
       });
 
       it('should fail if dns returns no records', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
-
         stubDns(null, []);
         stubPoller(poller);
-
         await poller._poll();
-
         expect(poller.success).to.not.have.been.called;
         expect(poller.failure).to.have.been.calledOnce;
       });
@@ -148,12 +127,9 @@ describe('Mongos SRV Polling', function () {
       it('should fail if dns returns no records that match parent domain', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.org'), srvRecord('shaka.walls.com')];
-
         stubDns(null, records);
         stubPoller(poller);
-
         await poller._poll();
-
         expect(poller.success).to.not.have.been.called;
         expect(poller.failure).to.have.been.calledOnce;
       });
@@ -161,12 +137,9 @@ describe('Mongos SRV Polling', function () {
       it('should succeed when valid records are returned by dns', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
-
         stubDns(null, records);
         stubPoller(poller);
-
         await poller._poll();
-
         expect(poller.success).to.have.been.calledOnce.and.calledWithMatch(records);
         expect(poller.failure).to.not.have.been.called;
       });
@@ -174,12 +147,9 @@ describe('Mongos SRV Polling', function () {
       it('should succeed when some valid records are returned and some do not match parent domain', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.walls.com')];
-
         stubDns(null, records);
         stubPoller(poller);
-
         await poller._poll();
-
         expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
         expect(poller.failure).to.not.have.been.called;
       });
@@ -201,48 +171,40 @@ describe('Mongos SRV Polling', function () {
 
     it('should not make an srv poller if there is no srv host', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
-
       const topology = topologyWithPlaceholderClient(['localhost:27017', 'localhost:27018'], {
         srvPoller
       });
-
       expect(topology).to.not.have.property('srvPoller');
     });
 
     it('should make an srvPoller if there is an srvHost', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
-
       const topology = topologyWithPlaceholderClient(['localhost:27017', 'localhost:27018'], {
         srvHost: SRV_HOST,
         srvPoller
       });
-
       expect(topology.s).to.have.property('srvPoller').that.equals(srvPoller);
     });
 
     it('should only start polling if topology description changes to sharded', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
       sinon.stub(srvPoller, 'start');
-
       const topology = topologyWithPlaceholderClient(['localhost:27017', 'localhost:27018'], {
         srvHost: SRV_HOST,
         srvPoller
       });
-
       const topologyDescriptions = [
         new TopologyDescription(TopologyType.Unknown),
         new TopologyDescription(TopologyType.Unknown),
         new TopologyDescription(TopologyType.Sharded),
         new TopologyDescription(TopologyType.Sharded)
       ];
-
       function emit(prev, current) {
         topology.emit(
           'topologyDescriptionChanged',
           new sdamEvents.TopologyDescriptionChangedEvent(topology.s.id, prev, current)
         );
       }
-
       expect(srvPoller.start).to.not.have.been.called;
       emit(topologyDescriptions[0], topologyDescriptions[1]);
       expect(srvPoller.start).to.not.have.been.called;

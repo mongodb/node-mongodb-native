@@ -33,7 +33,6 @@ describe('Topology (unit)', function () {
     if (client) {
       await client.close();
     }
-
     if (topology) {
       topology.close();
     }
@@ -55,7 +54,6 @@ describe('Topology (unit)', function () {
           driverInfo: {}
         })
       });
-
       expect(server.clientMetadata?.application.name).to.equal('My application name');
     });
 
@@ -70,13 +68,9 @@ describe('Topology (unit)', function () {
           request.reply({ ok: 1 });
         }
       });
-
       client = new MongoClient(`mongodb://${mockServer.uri()}/`);
-
       await client.connect();
-
       await client.db().command({ ping: 1 });
-
       expect(helloRequests).to.have.length.greaterThan(1);
       for (const request of helloRequests) {
         expect(request)
@@ -96,7 +90,6 @@ describe('Topology (unit)', function () {
     it('should time out operations against servers that have been blackholed', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-
         let initialHelloSent = false;
         if (isHello(doc) && !initialHelloSent) {
           request.reply(mock.HELLO);
@@ -105,7 +98,6 @@ describe('Topology (unit)', function () {
           // black hole all other operations
         }
       });
-
       const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
       topology.connect().then(() => {
         topology.selectServer('primary', {}).then(server => {
@@ -137,63 +129,59 @@ describe('Topology (unit)', function () {
       sinon.restore();
     });
 
-    context(
-      'when server selection returns a server description but the description is not in the topology',
-      function () {
-        beforeEach(() => {
-          mockServer.setMessageHandler(request => {
-            const doc = request.document;
-            if (isHello(doc)) {
-              request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
-            } else {
-              request.reply({ ok: 1 });
-            }
-          });
-          secondMockServer.setMessageHandler(request => {
-            const doc = request.document;
-            if (isHello(doc)) {
-              request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
-            } else {
-              request.reply({ ok: 1 });
-            }
-          });
+    describe('when server selection returns a server description but the description is not in the topology', function () {
+      beforeEach(() => {
+        mockServer.setMessageHandler(request => {
+          const doc = request.document;
+          if (isHello(doc)) {
+            request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
+          } else {
+            request.reply({ ok: 1 });
+          }
         });
-        context('when the topology originally only contained one server', function () {
-          it('returns a MongoServerSelectionError', async function () {
-            topology = topologyWithPlaceholderClient([mockServer.hostAddress()], {});
-
-            await topology.connect();
-            sinon.stub(topology.s.servers, 'get').callsFake(() => {
-              return undefined;
-            });
-            const err = await topology.selectServer('primary', {}).then(
-              () => null,
-              e => e
-            );
-            expect(err).to.be.instanceOf(MongoServerSelectionError);
-          });
+        secondMockServer.setMessageHandler(request => {
+          const doc = request.document;
+          if (isHello(doc)) {
+            request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
+          } else {
+            request.reply({ ok: 1 });
+          }
         });
+      });
 
-        context('when the topology originally contained more than one server', function () {
-          it('returns a MongoServerSelectionError', async function () {
-            topology = topologyWithPlaceholderClient(
-              [mockServer.hostAddress(), secondMockServer.hostAddress()],
-              {}
-            );
-
-            await topology.connect();
-            sinon.stub(topology.s.servers, 'get').callsFake(() => {
-              return undefined;
-            });
-            const err = await topology.selectServer('primary', {}).then(
-              () => null,
-              e => e
-            );
-            expect(err).to.be.instanceOf(MongoServerSelectionError);
+      describe('when the topology originally only contained one server', function () {
+        it('returns a MongoServerSelectionError', async function () {
+          topology = topologyWithPlaceholderClient([mockServer.hostAddress()], {});
+          await topology.connect();
+          sinon.stub(topology.s.servers, 'get').callsFake(() => {
+            return undefined;
           });
+          const err = await topology.selectServer('primary', {}).then(
+            () => null,
+            e => e
+          );
+          expect(err).to.be.instanceOf(MongoServerSelectionError);
         });
-      }
-    );
+      });
+
+      describe('when the topology originally contained more than one server', function () {
+        it('returns a MongoServerSelectionError', async function () {
+          topology = topologyWithPlaceholderClient(
+            [mockServer.hostAddress(), secondMockServer.hostAddress()],
+            {}
+          );
+          await topology.connect();
+          sinon.stub(topology.s.servers, 'get').callsFake(() => {
+            return undefined;
+          });
+          const err = await topology.selectServer('primary', {}).then(
+            () => null,
+            e => e
+          );
+          expect(err).to.be.instanceOf(MongoServerSelectionError);
+        });
+      });
+    });
 
     it('should set server to unknown and reset pool on `node is recovering` error', async function () {
       mockServer.setMessageHandler(request => {
@@ -206,17 +194,13 @@ describe('Topology (unit)', function () {
           request.reply({ ok: 1 });
         }
       });
-
       topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
       await topology.connect();
       const server = await topology.selectServer('primary', {});
-
       let serverDescription;
       server.on('descriptionReceived', sd => (serverDescription = sd));
-
       let poolCleared = false;
       topology.on('connectionPoolCleared', () => (poolCleared = true));
-
       const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
         () => null,
         e => e
@@ -236,16 +220,13 @@ describe('Topology (unit)', function () {
           request.reply({ ok: 1 });
         }
       });
-
       const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
       await topology.connect();
       const server = await topology.selectServer('primary', {});
       let serverDescription;
       server.on('descriptionReceived', sd => (serverDescription = sd));
-
       let poolCleared = false;
       topology.on('connectionPoolCleared', () => (poolCleared = true));
-
       const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
         () => null,
         e => e
@@ -266,13 +247,11 @@ describe('Topology (unit)', function () {
           request.reply({ ok: 1 });
         }
       });
-
       topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
       await topology.connect();
       const server = await topology.selectServer('primary', {});
       let serverDescription;
       server.on('descriptionReceived', sd => (serverDescription = sd));
-
       const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
         () => null,
         e => e
@@ -283,13 +262,10 @@ describe('Topology (unit)', function () {
 
     it('should encounter a server selection timeout on garbled server responses', function () {
       const test = this.test;
-
       test.skipReason = satisfies(process.version, '>=18.0.0')
         ? 'TODO(NODE-5666): fix failing unit tests on Node18'
         : undefined;
-
       if (test.skipReason) this.skip();
-
       const server = net.createServer();
       server.listen(0, 'localhost', 2, async () => {
         server.on('connection', c => c.on('data', () => c.write('garbage_data')));
@@ -305,7 +281,6 @@ describe('Topology (unit)', function () {
         expect(err)
           .to.have.property('message')
           .that.matches(/Server selection timed out/);
-
         server.close();
         await client.close();
       });
@@ -316,7 +291,6 @@ describe('Topology (unit)', function () {
 
       beforeEach(() => {
         topology = topologyWithPlaceholderClient('', { srvHost: 'fakeHost' });
-
         expect(topology.s.detectSrvRecords).to.be.a('function');
         expect(topology.s.detectShardedTopology).to.be.a('function');
       });
@@ -328,7 +302,6 @@ describe('Topology (unit)', function () {
           server.monitor[kMonitorId].stop();
         }
       });
-
       function transitionTopology(topology, from, to) {
         topology.emit(
           Topology.TOPOLOGY_DESCRIPTION_CHANGED,
@@ -347,7 +320,6 @@ describe('Topology (unit)', function () {
           // fake a transition to Sharded
           transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded);
           expect(topology.s.srvPoller).to.be.instanceOf(SrvPoller);
-
           const srvPollerListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
           expect(srvPollerListeners).to.have.lengthOf(1);
           expect(srvPollerListeners[0]).to.equal(topology.s.detectSrvRecords);
@@ -358,12 +330,10 @@ describe('Topology (unit)', function () {
 
         it('should emit topologyDescriptionChange event', async function () {
           const p = once(topology, Topology.TOPOLOGY_DESCRIPTION_CHANGED);
-
           topology.s.srvPoller.emit(
             SrvPoller.SRV_RECORD_DISCOVERY,
             new SrvPollingEvent([{ priority: 1, weight: 1, port: 2, name: 'fake' }])
           );
-
           const [ev] = await p;
           // The first event we get here is caused by the srv record discovery event below
           expect(ev).to.have.nested.property('newDescription.servers');
@@ -386,14 +356,11 @@ describe('Topology (unit)', function () {
         it('should not add more than one srvRecordDiscovery listener', function () {
           // fake a transition to Sharded
           transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded); // Transition 1
-
           const srvListenersFirstTransition = topology.s.srvPoller.listeners(
             SrvPoller.SRV_RECORD_DISCOVERY
           );
           expect(srvListenersFirstTransition).to.have.lengthOf(1);
-
           transitionTopology(topology, TopologyType.Unknown, TopologyType.Sharded); // Transition 2
-
           const srvListenersSecondTransition = topology.s.srvPoller.listeners(
             SrvPoller.SRV_RECORD_DISCOVERY
           );
@@ -403,7 +370,6 @@ describe('Topology (unit)', function () {
         it('should not add srvRecordDiscovery listener if transition is not to Sharded topology', function () {
           // fake a transition to **NOT** Sharded
           transitionTopology(topology, TopologyType.Unknown, TopologyType.ReplicaSetWithPrimary);
-
           const srvListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
           expect(srvListeners).to.have.lengthOf(0);
         });
@@ -415,7 +381,6 @@ describe('Topology (unit)', function () {
     it('should schedule monitoring if no suitable server is found', async function () {
       const topology = topologyWithPlaceholderClient('someserver:27019', {});
       const requestCheck = sinon.stub(Server.prototype, 'requestCheck');
-
       // satisfy the initial connect, then restore the original method
       const selectServer = sinon
         .stub(Topology.prototype, 'selectServer')
@@ -424,13 +389,11 @@ describe('Topology (unit)', function () {
           selectServer.restore();
           return server;
         });
-
       sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
         return;
       });
-
       await topology.connect();
       const err = await topology
         .selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 })
@@ -452,9 +415,7 @@ describe('Topology (unit)', function () {
         this.s.state = 'connected';
         this.emit('connect');
       });
-
       topology.close();
-
       const err = await topology
         .selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 })
         .then(
@@ -479,12 +440,10 @@ describe('Topology (unit)', function () {
           const server = Array.from(this.s.servers.values())[0];
           return server;
         });
-
         sinon.stub(Server.prototype, 'connect').callsFake(function () {
           this.s.state = 'connected';
           this.emit('connect');
         });
-
         const toSelect = 10;
         let completed = 0;
         // methodology:
@@ -494,21 +453,17 @@ describe('Topology (unit)', function () {
         //   - make one last selection, but ensure that all selections are no longer blocked from
         //     returning their value
         //   - verify that 10 callbacks were called
-
         await topology.connect();
-
         let preventSelection = true;
         const anySelector = td => {
           if (preventSelection) return [];
           const server = Array.from(td.servers.values())[0];
           return [server];
         };
-
         const failingSelector = () => {
           if (preventSelection) return [];
           throw new TypeError('bad news!');
         };
-
         preventSelection = true;
         for (let i = 0; i < toSelect - 1; ++i) {
           await topology.selectServer(i % 5 === 0 ? failingSelector : anySelector, {});
@@ -517,7 +472,6 @@ describe('Topology (unit)', function () {
         preventSelection = false;
         await topology.selectServer(anySelector, {});
         completed++;
-
         expect(completed).to.equal(toSelect);
       });
     });

@@ -20,7 +20,6 @@ function enforceServerVersionLimits(requires, scenario) {
     requires.serverless = scenario.serverless;
   }
 }
-
 function findScenarios(...args: string[]) {
   const route = [__dirname, '..', '..', 'spec', 'crud'].concat(Array.from(args));
   return fs
@@ -29,10 +28,8 @@ function findScenarios(...args: string[]) {
     .map(x => [x, fs.readFileSync(path.resolve(...route.concat([x])), 'utf8')])
     .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
-
 const readScenarios = findScenarios('v1', 'read');
 const writeScenarios = findScenarios('v1', 'write');
-
 const testContext = {};
 describe('CRUD spec v1', function () {
   beforeEach(function () {
@@ -55,23 +52,17 @@ describe('CRUD spec v1', function () {
       const scenarioName = scenarioData[0];
       const scenario = scenarioData[1];
       scenario.name = scenarioName;
-
       const metadata = {
         requires: {
           topology: ['single', 'replicaset', 'sharded']
         }
       };
-
       enforceServerVersionLimits(metadata.requires, scenario);
-
       describe(scenarioName, function () {
         scenario.tests.forEach(scenarioTest => {
           beforeEach(() => testContext.db.dropDatabase());
-          it(scenarioTest.description, {
-            metadata,
-            test: function () {
-              return executeScenario(scenario, scenarioTest, this.configuration, testContext);
-            }
+          it(scenarioTest.description, metadata, function () {
+            return executeScenario(scenario, scenarioTest, this.configuration, testContext);
           });
         });
       });
@@ -83,30 +74,22 @@ describe('CRUD spec v1', function () {
       const scenarioName = scenarioData[0];
       const scenario = scenarioData[1];
       scenario.name = scenarioName;
-
       const metadata = {
         requires: {
           topology: ['single', 'replicaset', 'sharded']
         }
       };
-
       enforceServerVersionLimits(metadata.requires, scenario);
-
       describe(scenarioName, function () {
         beforeEach(() => testContext.db.dropDatabase());
-
         scenario.tests.forEach(scenarioTest => {
-          it(scenarioTest.description, {
-            metadata,
-            test: function () {
-              return executeScenario(scenario, scenarioTest, this.configuration, testContext);
-            }
+          it(scenarioTest.description, metadata, function () {
+            return executeScenario(scenario, scenarioTest, this.configuration, testContext);
           });
         });
       });
     });
   });
-
   function invert(promise) {
     return promise.then(
       () => {
@@ -115,14 +98,12 @@ describe('CRUD spec v1', function () {
       e => e
     );
   }
-
   function assertWriteExpectations(collection, outcome) {
     return function (result) {
       Object.keys(outcome.result).forEach(resultName => {
         expect(result).to.have.property(resultName);
         expect(result[resultName]).to.containSubset(outcome.result[resultName]);
       });
-
       if (collection && outcome.collection && outcome.collection.data) {
         return collection
           .find({})
@@ -133,13 +114,11 @@ describe('CRUD spec v1', function () {
       }
     };
   }
-
   function assertReadExpectations(db, collection, outcome) {
     return function (result) {
       if (outcome.result && !outcome.collection) {
         expect(result).to.containSubset(outcome.result);
       }
-
       if (collection && outcome.collection) {
         if (outcome.collection.name) {
           return db
@@ -150,7 +129,6 @@ describe('CRUD spec v1', function () {
               expect(collectionResults).to.containSubset(outcome.collection.data);
             });
         }
-
         return collection
           .find({})
           .toArray()
@@ -160,52 +138,43 @@ describe('CRUD spec v1', function () {
       }
     };
   }
-
   function executeAggregateTest(scenarioTest, db, collection) {
     const options = {};
     if (scenarioTest.operation.arguments.collation) {
       options.collation = scenarioTest.operation.arguments.collation;
     }
-
     const pipeline = scenarioTest.operation.arguments.pipeline;
     return collection
       .aggregate(pipeline, options)
       .toArray()
       .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
-
   function executeCountTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const filter = args.filter;
     const options = Object.assign({}, args);
     delete options.filter;
-
     return collection
       .count(filter, options)
       .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
-
   function executeCountDocumentsTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const filter = args.filter;
     const options = Object.assign({}, args);
     delete options.filter;
-
     return collection
       .countDocuments(filter, options)
       .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
-
   function executeEstimatedDocumentCountTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const options = Object.assign({}, args);
     delete options.filter;
-
     return collection
       .estimatedDocumentCount(options)
       .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
-
   function executeDistinctTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const fieldName = args.fieldName;
@@ -213,53 +182,43 @@ describe('CRUD spec v1', function () {
     const filter = args.filter || {};
     delete options.fieldName;
     delete options.filter;
-
     return collection
       .distinct(fieldName, filter, options)
       .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
-
   function executeFindTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const filter = args.filter;
     const options = Object.assign({}, args);
     delete options.filter;
-
     return collection
       .find(filter, options)
       .toArray()
       .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
-
   function executeDeleteTest(scenarioTest, db, collection) {
     // Unpack the scenario test
     const args = scenarioTest.operation.arguments;
     const filter = args.filter;
     const options = Object.assign({}, args);
     delete options.filter;
-
     return collection[scenarioTest.operation.name](filter, options).then(
       assertWriteExpectations(collection, scenarioTest.outcome)
     );
   }
-
   function executeInsertTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const documents = args.document || args.documents;
     const options = Object.assign({}, args.options);
     delete options.document;
     delete options.documents;
-
     let promise = collection[scenarioTest.operation.name](documents, options);
-
     const outcome = scenarioTest.outcome;
     if (outcome.error) {
       promise = invert(promise);
     }
-
     return promise.then(assertWriteExpectations(collection, scenarioTest.outcome));
   }
-
   function executeBulkTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const operations = args.requests.map(operation => {
@@ -271,17 +230,13 @@ describe('CRUD spec v1', function () {
       return op;
     });
     const options = Object.assign({}, args.options);
-
     let promise = collection.bulkWrite(operations, options);
-
     const outcome = scenarioTest.outcome;
     if (outcome.error) {
       promise = invert(promise);
     }
-
     return promise.then(assertWriteExpectations(collection, scenarioTest.outcome));
   }
-
   function executeReplaceTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const filter = args.filter;
@@ -290,13 +245,11 @@ describe('CRUD spec v1', function () {
     delete options.filter;
     delete options.replacement;
     const opName = scenarioTest.operation.name;
-
     // Get the results
     return collection[opName](filter, replacement, options).then(
       assertWriteExpectations(collection, scenarioTest.outcome)
     );
   }
-
   function executeUpdateTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const filter = args.filter;
@@ -304,12 +257,10 @@ describe('CRUD spec v1', function () {
     const options = Object.assign({}, args);
     delete options.filter;
     delete options.update;
-
     return collection[scenarioTest.operation.name](filter, update, options).then(
       assertWriteExpectations(collection, scenarioTest.outcome)
     );
   }
-
   function executeFindOneTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const filter = args.filter;
@@ -318,29 +269,23 @@ describe('CRUD spec v1', function () {
     if (options.returnDocument) {
       options.returnDocument = options.returnDocument.toLowerCase();
     }
-
     delete options.filter;
     delete options.update;
     delete options.replacement;
-
     const opName = scenarioTest.operation.name;
     const findPromise =
       opName === 'findOneAndDelete'
         ? collection[opName](filter, options)
         : collection[opName](filter, second, options);
-
     return findPromise.then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
-
   function executeScenario(scenario, scenarioTest, configuration, context) {
     const collection = context.db.collection(
       'crud_spec_tests_' + scenario.name + '_' + scenarioTest.operation.name
     );
-
     const errorHandler = err => {
       if (!err.message.match(/ns not found/)) throw err;
     };
-
     const dropPromises = [];
     dropPromises.push(collection.drop().catch(errorHandler));
     if (scenarioTest.outcome.collection && scenarioTest.outcome.collection.name) {
@@ -348,7 +293,6 @@ describe('CRUD spec v1', function () {
         context.db.collection(scenarioTest.outcome.collection.name).drop().catch(errorHandler)
       );
     }
-
     function promiseTry(callback) {
       return new Promise((resolve, reject) => {
         try {
@@ -358,7 +302,6 @@ describe('CRUD spec v1', function () {
         }
       });
     }
-
     const outcome = scenarioTest.outcome;
     return Promise.all(dropPromises)
       .then(() =>
@@ -419,7 +362,6 @@ describe('CRUD spec v1', function () {
       );
   }
 });
-
 describe('CRUD unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('crud', 'unified')));
 });

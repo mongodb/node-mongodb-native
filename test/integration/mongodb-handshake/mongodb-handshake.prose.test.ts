@@ -8,7 +8,6 @@ describe('Handshake Prose Tests', function () {
   afterEach(async function () {
     await client?.close();
   });
-
   type EnvironmentVariables = Array<[string, string]>;
   const tests: Array<{
     context: string;
@@ -77,14 +76,14 @@ describe('Handshake Prose Tests', function () {
       env: [['AWS_EXECUTION_ENV', 'EC2']]
     }
   ];
-
   for (const { context: name, env, expectedProvider } of tests) {
-    context(name, function () {
+    describe(name, function () {
       before(() => {
         for (const [key, value] of env) {
           process.env[key] = value;
         }
       });
+
       after(() => {
         for (const [key] of env) {
           delete process.env[key];

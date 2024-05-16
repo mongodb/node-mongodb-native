@@ -27,7 +27,6 @@ const expectedMongoshScopes = [
   '@mongosh/types',
   '@mongosh/docker-build-scripts'
 ];
-
 describe('mongosh scopes', function () {
   let scopes: Array<string>;
 

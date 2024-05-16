@@ -1,5 +1,4 @@
 'use strict';
-
 const { expect } = require('chai');
 const { BSONRegExp } = require('../../../mongodb');
 
@@ -13,19 +12,16 @@ describe('BSONRegExp', () => {
         try {
           client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
           await client.connect();
-
           const db = client.db('bson_regex_db', passOptionTo === 'db' ? option : undefined);
           const collection = db.collection(
             'bson_regex_coll',
             passOptionTo === 'collection' ? option : undefined
           );
-
           await collection.insertOne({ regex: new BSONRegExp('abc', 'imx') });
           const res = await collection.findOne(
             { regex: new BSONRegExp('abc', 'imx') },
             passOptionTo === 'operation' ? option : undefined
           );
-
           expect(res).has.property('regex').that.is.instanceOf(BSONRegExp);
         } finally {
           await client.close();

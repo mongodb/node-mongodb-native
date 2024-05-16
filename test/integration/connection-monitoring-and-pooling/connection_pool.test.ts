@@ -19,14 +19,14 @@ describe('Connection Pool', function () {
 
   describe('Events', function () {
     describe('ConnectionPoolCreatedEvent', function () {
-      context('when no connection pool options are passed in', function () {
+      describe('when no connection pool options are passed in', function () {
         let pConnectionPoolCreated: Promise<ConnectionPoolCreatedEvent[]>;
         let connectionPoolCreated: ConnectionPoolCreatedEvent;
+
         beforeEach(async function () {
           client = this.configuration.newClient({}, {});
           pConnectionPoolCreated = once(client, 'connectionPoolCreated');
           await client.connect();
-
           connectionPoolCreated = (await pConnectionPoolCreated)[0];
         });
 
@@ -41,7 +41,7 @@ describe('Connection Pool', function () {
         });
       });
 
-      context('when valid non-default connection pool options are passed in', function () {
+      describe('when valid non-default connection pool options are passed in', function () {
         let pConnectionPoolCreated: Promise<ConnectionPoolCreatedEvent[]>;
         let connectionPoolCreated: ConnectionPoolCreatedEvent;
         const options = {
@@ -51,11 +51,11 @@ describe('Connection Pool', function () {
           minPoolSize: 1,
           maxPoolSize: 101
         };
+
         beforeEach(async function () {
           client = this.configuration.newClient({}, options);
           pConnectionPoolCreated = once(client, 'connectionPoolCreated');
           await client.connect();
-
           connectionPoolCreated = (await pConnectionPoolCreated)[0];
         });
 

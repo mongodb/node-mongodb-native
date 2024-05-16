@@ -3,27 +3,21 @@ import ConnectionString from 'mongodb-connection-string-url';
 
 import { LEGACY_HELLO_COMMAND, MongoClient, MongoParseError } from '../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../tools/runner/hooks/configuration';
-
 /**
  * The SOCKS5_CONFIG environment variable is either a JSON 4-tuple
  * [host, port, username, password] or just [host, port].
  */
-
 describe('Socks5 Connectivity', function () {
   if (!process.env.SOCKS5_CONFIG == null) {
     console.error('skipping Socks5 tests, SOCKS5_CONFIG environment variable is not defined');
-
     return;
   }
-
   this.timeout(10000);
-
   const [proxyHost, proxyPort, proxyUsername, proxyPassword] = JSON.parse(
     process.env.SOCKS5_CONFIG
   );
   const rsConnectionString = new ConnectionString(process.env.MONGODB_URI);
   const singleConnectionString = new ConnectionString(process.env.MONGODB_URI_SINGLEHOST);
-
   if (process.env.SSL === 'ssl') {
     rsConnectionString.searchParams.set('tls', 'true');
     rsConnectionString.searchParams.set('tlsCAFile', process.env.SSL_CA_FILE);
@@ -33,11 +27,10 @@ describe('Socks5 Connectivity', function () {
   rsConnectionString.searchParams.set('serverSelectionTimeoutMS', '2000');
   singleConnectionString.searchParams.set('serverSelectionTimeoutMS', '2000');
   singleConnectionString.searchParams.set('readPreference', 'primaryPreferred');
-
   installNodeDNSWorkaroundHooks();
 
-  context((proxyUsername ? 'with' : 'without') + ' Socks5 auth required', function () {
-    context('with missing required Socks5 auth configuration', function () {
+  describe((proxyUsername ? 'with' : 'without') + ' Socks5 auth required', function () {
+    describe('with missing required Socks5 auth configuration', function () {
       if (!proxyUsername) {
         beforeEach(function () {
           this.skip();
@@ -120,7 +113,7 @@ describe('Socks5 Connectivity', function () {
       });
     });
 
-    context('with extraneous Socks5 auth configuration', function () {
+    describe('with extraneous Socks5 auth configuration', function () {
       if (proxyUsername) {
         beforeEach(function () {
           this.skip();
@@ -174,7 +167,7 @@ describe('Socks5 Connectivity', function () {
       });
     });
 
-    context('with matching socks5 authentication', () => {
+    describe('with matching socks5 authentication', () => {
       it('can connect to a single host (connection string, with directConnection)', async function () {
         const cs = singleConnectionString.clone();
         cs.searchParams.set('proxyHost', proxyHost);
@@ -272,7 +265,6 @@ describe('Socks5 Connectivity', function () {
         });
         const seenCommandAddresses = new Set();
         client.on('commandSucceeded', ev => seenCommandAddresses.add(ev.address));
-
         await client.connect();
         await client.db('admin').command({ [LEGACY_HELLO_COMMAND]: 1 });
         await client.close();
@@ -281,7 +273,7 @@ describe('Socks5 Connectivity', function () {
     });
   });
 
-  context('MongoClient option validation', () => {
+  describe('MongoClient option validation', () => {
     for (const proxyOptions of [
       { proxyPort: 1080 },
       { proxyUsername: 'abc' },
@@ -298,12 +290,10 @@ describe('Socks5 Connectivity', function () {
     }
   });
 });
-
 async function testConnection(connectionString, clientOptions) {
   const client = new MongoClient(connectionString, clientOptions);
   let topologyType;
   client.on('topologyDescriptionChanged', ev => (topologyType = ev.newDescription.type));
-
   try {
     await client.connect();
     await client.db('admin').command({ hello: 1 });

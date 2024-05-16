@@ -3,7 +3,7 @@ const { client, handler } = require('./handler');
 
 describe('AWS Lambda Examples', function () {
   describe('#handler', function () {
-    context('when using standard authentication', function () {
+    describe('when using standard authentication', function () {
       let response;
 
       before(async function () {

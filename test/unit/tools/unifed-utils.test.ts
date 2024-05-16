@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { mergeKMSProviders } from '../../tools/unified-spec-runner/unified-utils';
 
 describe('parseOptions', function () {
-  context('aws providers', function () {
+  describe('aws providers', function () {
     it('does not configure the provider if none is given', function () {
       const parsedProviders = mergeKMSProviders({}, {});
       expect(parsedProviders).not.to.have.property('aws');
@@ -75,7 +75,8 @@ describe('parseOptions', function () {
       });
     });
   });
-  context('local providers', function () {
+
+  describe('local providers', function () {
     it('does not configure the provider if none is given', function () {
       const parsedProviders = mergeKMSProviders({}, {});
       expect(parsedProviders).not.to.have.property('local');
@@ -126,7 +127,7 @@ describe('parseOptions', function () {
     });
   });
 
-  context('azure', function () {
+  describe('azure', function () {
     it('does not configure the provider if none is given', function () {
       const parsedProviders = mergeKMSProviders({}, {});
       expect(parsedProviders).not.to.have.property('azure');
@@ -208,7 +209,7 @@ describe('parseOptions', function () {
     });
   });
 
-  context('gcp', function () {
+  describe('gcp', function () {
     it('does not configure the provider if none is given', function () {
       const parsedProviders = mergeKMSProviders({}, {});
       expect(parsedProviders).not.to.have.property('gcp');
@@ -284,7 +285,7 @@ describe('parseOptions', function () {
     });
   });
 
-  context('kmip', function () {
+  describe('kmip', function () {
     it('does not configure the provider if none is given', function () {
       const parsedProviders = mergeKMSProviders({}, {});
       expect(parsedProviders).not.to.have.property('kmip');

@@ -21,27 +21,21 @@ describe('StateMachine', function () {
     _bytesNeeded: number;
     endpoint = 'some.fake.host.com';
     _kmsProvider = 'aws';
-
     constructor(public _message: Buffer, bytesNeeded) {
       this._bytesNeeded = typeof bytesNeeded === 'number' ? bytesNeeded : 1024;
     }
-
     get message() {
       return this._message;
     }
-
     get bytesNeeded() {
       return this._bytesNeeded;
     }
-
     get kmsProvider() {
       return this._kmsProvider;
     }
-
     get status() {
       return { type: 1, code: 2, message: 'something went wrong' };
     }
-
     addResponse(buffer) {
       this._bytesNeeded -= buffer.length;
     }
@@ -62,7 +56,6 @@ describe('StateMachine', function () {
         db: dbStub
       });
     });
-
     const command = {
       encryptedFields: {},
       a: new Long('0'),
@@ -74,7 +67,7 @@ describe('StateMachine', function () {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const callback = () => {};
 
-    context('when executing the command', function () {
+    describe('when executing the command', function () {
       it('does not promote values', function () {
         stateMachine.markCommand(clientStub, 'test.coll', serializedCommand, callback);
         expect(runCommandStub.calledWith(command, options)).to.be.true;
@@ -106,7 +99,7 @@ describe('StateMachine', function () {
       sandbox.restore();
     });
 
-    context('when handling standard kms requests', function () {
+    describe('when handling standard kms requests', function () {
       beforeEach(function () {
         this.fakeSocket = undefined;
         sandbox.stub(tls, 'connect').callsFake((options, callback) => {
@@ -127,7 +120,6 @@ describe('StateMachine', function () {
           )
           // eslint-disable-next-line @typescript-eslint/no-empty-function
           .catch(() => {});
-
         this.fakeSocket.emit('connect');
         setTimeout(() => {
           expect(status).to.equal('pending');
@@ -148,8 +140,8 @@ describe('StateMachine', function () {
       });
     });
 
-    context('when tls options are provided', function () {
-      context('when the options are insecure', function () {
+    describe('when tls options are provided', function () {
+      describe('when the options are insecure', function () {
         [
           'tlsInsecure',
           'tlsAllowInvalidCertificates',
@@ -157,7 +149,7 @@ describe('StateMachine', function () {
           'tlsDisableOCSPEndpointCheck',
           'tlsDisableCertificateRevocationCheck'
         ].forEach(function (option) {
-          context(`when the option is ${option}`, function () {
+          describe(`when the option is ${option}`, function () {
             const stateMachine = new StateMachine({
               tlsOptions: { aws: { [option]: true } }
             } as any);
@@ -173,8 +165,8 @@ describe('StateMachine', function () {
         });
       });
 
-      context('when the options are secure', function () {
-        context('when providing tlsCertificateKeyFile', function () {
+      describe('when the options are secure', function () {
+        describe('when providing tlsCertificateKeyFile', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCertificateKeyFile: 'test.pem' } }
           } as any);
@@ -193,17 +185,15 @@ describe('StateMachine', function () {
               return this.fakeSocket;
             });
             const kmsRequestPromise = stateMachine.kmsRequest(request);
-
             await setTimeoutAsync(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
-
             await kmsRequestPromise;
             expect(connectOptions.cert).to.equal(buffer);
             expect(connectOptions.key).to.equal(buffer);
           });
         });
 
-        context('when providing tlsCAFile', function () {
+        describe('when providing tlsCAFile', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCAFile: 'test.pem' } }
           } as any);
@@ -222,16 +212,14 @@ describe('StateMachine', function () {
               return this.fakeSocket;
             });
             const kmsRequestPromise = stateMachine.kmsRequest(request);
-
             await setTimeoutAsync(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
-
             await kmsRequestPromise;
             expect(connectOptions.ca).to.equal(buffer);
           });
         });
 
-        context('when providing tlsCertificateKeyFilePassword', function () {
+        describe('when providing tlsCertificateKeyFilePassword', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCertificateKeyFilePassword: 'test' } }
           } as any);
@@ -245,10 +233,8 @@ describe('StateMachine', function () {
               return this.fakeSocket;
             });
             const kmsRequestPromise = stateMachine.kmsRequest(request);
-
             await setTimeoutAsync(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
-
             await kmsRequestPromise;
             expect(connectOptions.passphrase).to.equal('test');
           });
@@ -256,8 +242,8 @@ describe('StateMachine', function () {
       });
     });
 
-    context('when server closed the socket', function () {
-      context('Socks5', function () {
+    describe('when server closed the socket', function () {
+      describe('Socks5', function () {
         let server;
 
         beforeEach(async function () {
@@ -280,7 +266,6 @@ describe('StateMachine', function () {
             }
           } as any);
           const request = new MockRequest(Buffer.from('foobar'), 500);
-
           try {
             await stateMachine.kmsRequest(request);
           } catch (err) {
@@ -293,7 +278,7 @@ describe('StateMachine', function () {
         });
       });
 
-      context('endpoint with host and port', function () {
+      describe('endpoint with host and port', function () {
         let server;
         let serverSocket;
 
@@ -328,13 +313,10 @@ describe('StateMachine', function () {
             port: server.address().port
           } as any);
           const request = new MockRequest(Buffer.from('foobar'), 500);
-
           try {
             const kmsRequestPromise = stateMachine.kmsRequest(request);
-
             await setTimeoutAsync(0);
             serverSocket.end();
-
             await kmsRequestPromise;
           } catch (err) {
             expect(err.name).to.equal('MongoCryptError');
@@ -398,7 +380,6 @@ describe('StateMachine', function () {
           proxyPort: socks5srv.address().port
         }
       } as any);
-
       const request = new MockRequest(Buffer.from('foobar'), 500);
       try {
         await stateMachine.kmsRequest(request);
@@ -421,7 +402,6 @@ describe('StateMachine', function () {
           proxyPassword: 'bar'
         }
       } as any);
-
       const request = new MockRequest(Buffer.from('foobar'), 500);
       try {
         await stateMachine.kmsRequest(request);

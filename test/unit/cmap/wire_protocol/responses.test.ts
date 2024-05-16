@@ -16,7 +16,7 @@ describe('class MongoDBResponse', () => {
     expect(new MongoDBResponse(BSON.serialize({ ok: 1 }))).to.be.instanceOf(OnDemandDocument);
   });
 
-  context('get isError', () => {
+  describe('get isError', () => {
     it('returns true when ok is 0', () => {
       const doc = new MongoDBResponse(BSON.serialize({ ok: 0 }));
       expect(doc.isError).to.be.true;
@@ -46,11 +46,12 @@ describe('class MongoDBResponse', () => {
     });
   });
 
-  context('utf8 validation', () => {
+  describe('utf8 validation', () => {
     afterEach(() => sinon.restore());
 
-    context('when enableUtf8Validation is not specified', () => {
+    describe('when enableUtf8Validation is not specified', () => {
       const options = { enableUtf8Validation: undefined };
+
       it('calls BSON deserialize with writeErrors validation turned off', () => {
         const res = new MongoDBResponse(BSON.serialize({}));
         const toObject = sinon.spy(Object.getPrototypeOf(Object.getPrototypeOf(res)), 'toObject');
@@ -61,8 +62,9 @@ describe('class MongoDBResponse', () => {
       });
     });
 
-    context('when enableUtf8Validation is true', () => {
+    describe('when enableUtf8Validation is true', () => {
       const options = { enableUtf8Validation: true };
+
       it('calls BSON deserialize with writeErrors validation turned off', () => {
         const res = new MongoDBResponse(BSON.serialize({}));
         const toObject = sinon.spy(Object.getPrototypeOf(Object.getPrototypeOf(res)), 'toObject');
@@ -73,8 +75,9 @@ describe('class MongoDBResponse', () => {
       });
     });
 
-    context('when enableUtf8Validation is false', () => {
+    describe('when enableUtf8Validation is false', () => {
       const options = { enableUtf8Validation: false };
+
       it('calls BSON deserialize with all validation disabled', () => {
         const res = new MongoDBResponse(BSON.serialize({}));
         const toObject = sinon.spy(Object.getPrototypeOf(Object.getPrototypeOf(res)), 'toObject');
@@ -84,7 +87,6 @@ describe('class MongoDBResponse', () => {
     });
   });
 });
-
 describe('class CursorResponse', () => {
   describe('constructor()', () => {
     it('throws if input does not contain cursor embedded document', () => {

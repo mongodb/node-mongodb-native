@@ -33,7 +33,6 @@ describe('OIDC Auth Spec Prose Tests', function () {
         client = this.configuration.newClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
-
       // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>.
       // Assert that a find operation succeeds.
       // Close the client.
@@ -52,7 +51,6 @@ describe('OIDC Auth Spec Prose Tests', function () {
         });
         collection = client.db('test').collection('test');
       });
-
       // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>,
       //   and an ALLOWED_HOSTS that is an empty list.
       // Assert that a find operation succeeds.
@@ -69,7 +67,6 @@ describe('OIDC Auth Spec Prose Tests', function () {
         client = this.configuration.newClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
-
       // Clear the main OIDC cache.
       // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>.
       // Assert that a find operation succeeds.
@@ -89,7 +86,6 @@ describe('OIDC Auth Spec Prose Tests', function () {
         client = this.configuration.newClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
-
       // Clear the Azure OIDC cache.
       // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>.
       // Assert that a find operation succeeds.
@@ -107,7 +103,6 @@ describe('OIDC Auth Spec Prose Tests', function () {
       const commandStartedEvents: CommandStartedEvent[] = [];
       const commandSucceededEvents: CommandSucceededEvent[] = [];
       const commandFailedEvents: CommandFailedEvent[] = [];
-
       const commandStartedListener = event => {
         if (event.commandName === 'find') {
           commandStartedEvents.push(event);
@@ -123,13 +118,11 @@ describe('OIDC Auth Spec Prose Tests', function () {
           commandFailedEvents.push(event);
         }
       };
-
       const addListeners = () => {
         client.on('commandStarted', commandStartedListener);
         client.on('commandSucceeded', commandSucceededListener);
         client.on('commandFailed', commandFailedListener);
       };
-
       // Sets up the fail point for the find to reauthenticate.
       const setupFailPoint = async () => {
         return await client
@@ -146,7 +139,6 @@ describe('OIDC Auth Spec Prose Tests', function () {
             }
           });
       };
-
       // Removes the fail point.
       const removeFailPoint = async () => {
         return await client.db().admin().command({
@@ -166,7 +158,6 @@ describe('OIDC Auth Spec Prose Tests', function () {
       afterEach(async function () {
         await removeFailPoint();
       });
-
       // Clear the Azure OIDC cache.
       // Create a client with an event listener. The following assumes that the driver does not emit saslStart or saslContinue events. If the driver does emit those events, ignore/filter them for the purposes of this test.
       // Perform a find operation that succeeds.

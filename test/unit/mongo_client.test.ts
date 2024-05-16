@@ -50,7 +50,6 @@ describe('MongoClient', function () {
       tlsCertificateKeyFilePassword: 'tlsCertificateKeyFilePassword'
     });
     fs.unlinkSync(filename);
-
     /*
      * If set TLS enabled, equivalent to setting the ssl option.
      *
@@ -77,7 +76,6 @@ describe('MongoClient', function () {
     expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
     expect(options).has.property('tls', true);
   });
-
   const ALL_OPTIONS = {
     appName: 'cats',
     auth: { username: 'username', password: 'password' },
@@ -153,7 +151,6 @@ describe('MongoClient', function () {
     expect(options.writeConcern).has.property('w', 2);
     expect(options.writeConcern).has.property('j', true);
   });
-
   const allURIOptions =
     'mongodb://myName@localhost:27017/test?' +
     [
@@ -194,7 +191,6 @@ describe('MongoClient', function () {
   it('should parse all options from the URI string', function () {
     const options = parseOptions(allURIOptions);
     expect(options).has.property('zlibCompressionLevel', 2);
-
     expect(options).has.property('writeConcern');
     expect(options.writeConcern).has.property('w', 'majority');
     expect(options.writeConcern).has.property('wtimeout', 2);
@@ -207,13 +203,10 @@ describe('MongoClient', function () {
       randomopt: null,
       otherrandomopt: undefined
     });
-
     // test valid option key with default value
     expect(options).to.have.property('maxPoolSize', 100);
-
     // test valid option key without default value
     expect(options).not.to.have.property('servername');
-
     // test invalid option keys that are null/undefined
     expect(options).not.to.have.property('randomopt');
     expect(options).not.to.have.property('otherrandomopt');
@@ -225,7 +218,6 @@ describe('MongoClient', function () {
         randomopt: 'test'
       })
     ).to.throw(MongoParseError, 'option randomopt is not supported');
-
     expect(() =>
       parseOptions('mongodb://localhost:27017/', {
         randomopt: 'test',
@@ -380,14 +372,12 @@ describe('MongoClient', function () {
     expect(optionsTrue.rejectUnauthorized).to.equal(false);
     expect(optionsTrue.checkServerIdentity).to.be.a('function');
     expect(optionsTrue.checkServerIdentity()).to.equal(undefined);
-
     const optionsFalse = parseOptions('mongodb://localhost/', {
       tlsAllowInvalidCertificates: false,
       tlsAllowInvalidHostnames: false
     });
     expect(optionsFalse.rejectUnauthorized).to.equal(true);
     expect(optionsFalse.checkServerIdentity).to.equal(undefined);
-
     const optionsUndefined = parseOptions('mongodb://localhost/');
     expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
     expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
@@ -411,7 +401,6 @@ describe('MongoClient', function () {
         tlsCertificateKeyFile: 'testCertKey.pem'
       });
       expect(optsFromObject).to.have.property('tlsCertificateKeyFile', 'testCertKey.pem');
-
       const optsFromUri = parseOptions('mongodb://localhost?tlsCertificateKeyFile=testCertKey.pem');
       expect(optsFromUri).to.have.property('tlsCertificateKeyFile', 'testCertKey.pem');
     });
@@ -438,13 +427,11 @@ describe('MongoClient', function () {
     expect(optionsTrue.rejectUnauthorized).to.equal(false);
     expect(optionsTrue.checkServerIdentity).to.be.a('function');
     expect(optionsTrue.checkServerIdentity()).to.equal(undefined);
-
     const optionsFalse = parseOptions('mongodb://localhost/', {
       tlsInsecure: false
     });
     expect(optionsFalse.rejectUnauthorized).to.equal(true);
     expect(optionsFalse.checkServerIdentity).to.equal(undefined);
-
     const optionsUndefined = parseOptions('mongodb://localhost/');
     expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
     expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
@@ -584,13 +571,11 @@ describe('MongoClient', function () {
       ['sockettimeoutms', 0],
       ['waitqueuetimeoutms', 0],
       ['zlibcompressionlevel', 0],
-
       // map to objects that are not worth checking deep equality
       ['compressors', doNotCheckEq],
       ['readpreference', doNotCheckEq],
       ['pkfactory', doNotCheckEq]
     ];
-
     const findMatchingKey = (o, searchKey) => {
       return Object.keys(o).filter(key => {
         return key.toLowerCase() === searchKey;
@@ -600,13 +585,10 @@ describe('MongoClient', function () {
     it(`should define known defaults in client.options`, () => {
       const client = new MongoClient('mongodb://localhost');
       const clientOptions = client.options;
-
       for (const [optionName, value] of KNOWN_DEFAULTS) {
         const camelCaseName = findMatchingKey(clientOptions, optionName);
         expect(camelCaseName, `did not find a camelcase match for ${optionName}`).to.be.a('string');
-
         expect(clientOptions).to.have.property(camelCaseName);
-
         if (value !== doNotCheckEq) {
           expect(clientOptions).to.have.property(camelCaseName).that.deep.equals(value);
         }
@@ -616,7 +598,6 @@ describe('MongoClient', function () {
     it('set monitorCommands to false (NODE-3513)', function () {
       const client = new MongoClient('mongodb://localhost');
       const clientOptions = client.options;
-
       expect(clientOptions).to.have.property('monitorCommands', false);
       expect(client.s.options).to.have.property('monitorCommands', false);
       expect(client).to.have.property('monitorCommands', false);
@@ -627,12 +608,10 @@ describe('MongoClient', function () {
     it('respects monitorCommands option passed in', function () {
       const clientViaOpt = new MongoClient('mongodb://localhost', { monitorCommands: true });
       const clientViaUri = new MongoClient('mongodb://localhost?monitorCommands=true');
-
       const testTable = [
         [clientViaOpt, clientViaOpt.options],
         [clientViaUri, clientViaUri.options]
       ];
-
       for (const [client, clientOptions] of testTable) {
         expect(clientOptions).to.have.property('monitorCommands', true);
         expect(client.s.options).to.have.property('monitorCommands', true);
@@ -643,7 +622,7 @@ describe('MongoClient', function () {
     });
   });
 
-  context('when loadBalanced=true is in the URI', function () {
+  describe('when loadBalanced=true is in the URI', function () {
     it('sets the option', function () {
       const options = parseOptions('mongodb://a/?loadBalanced=true');
       expect(options.loadBalanced).to.be.true;
@@ -671,7 +650,7 @@ describe('MongoClient', function () {
     });
   });
 
-  context('when loadBalanced is in the options object', function () {
+  describe('when loadBalanced is in the options object', function () {
     it('errors when the option is true', function () {
       const parse = () => {
         parseOptions('mongodb://a/', { loadBalanced: true });
@@ -700,7 +679,6 @@ describe('MongoClient', function () {
     expect(() => {
       new MongoClient('mongodb+srv://localhost?loadBalanced=true', { srvMaxHosts: 2 });
     }).to.throw(MongoParseError, 'Cannot limit srv hosts with loadBalanced enabled');
-
     // These should not throw.
     new MongoClient('mongodb+srv://localhost?srvMaxHosts=0&replicaSet=repl');
     new MongoClient('mongodb+srv://localhost', { srvMaxHosts: 0, replicaSet: 'blah' });
@@ -742,7 +720,6 @@ describe('MongoClient', function () {
       srvServiceName: 'a'.repeat(16)
     });
     const error = await resolveSRVRecord(options).catch(error => error);
-
     // Nothing wrong with the name, just DNE
     expect(error).to.have.property('code', 'ENOTFOUND');
   });
@@ -810,7 +787,7 @@ describe('MongoClient', function () {
     });
   });
 
-  context('loggingOptions', function () {
+  describe('loggingOptions', function () {
     const expectedLoggingObject = {
       maxDocumentLength: 20,
       logDestination: new Writable(),
@@ -839,7 +816,7 @@ describe('MongoClient', function () {
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
 
     describe('mongodbLogPath', function () {
-      context('when mongodbLogPath is in options', function () {
+      describe('when mongodbLogPath is in options', function () {
         let stderrStub;
         let stdoutStub;
 
@@ -852,7 +829,7 @@ describe('MongoClient', function () {
           sinon.restore();
         });
 
-        context('when option is `stderr`', function () {
+        describe('when option is `stderr`', function () {
           it('it is accessible through mongoLogger.logDestination', function () {
             const client = new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true,
@@ -865,7 +842,7 @@ describe('MongoClient', function () {
           });
         });
 
-        context('when option is a MongoDBLogWritable stream', function () {
+        describe('when option is a MongoDBLogWritable stream', function () {
           it('it is accessible through mongoLogger.logDestination', function () {
             const writable = {
               buffer: [],
@@ -881,7 +858,7 @@ describe('MongoClient', function () {
           });
         });
 
-        context('when option is `stdout`', function () {
+        describe('when option is `stdout`', function () {
           it('it is accessible through mongoLogger.logDestination', function () {
             const client = new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true,
@@ -894,8 +871,8 @@ describe('MongoClient', function () {
           });
         });
 
-        context('when option is invalid', function () {
-          context(`when option is an string that is not 'stderr' or 'stdout'`, function () {
+        describe('when option is invalid', function () {
+          describe(`when option is an string that is not 'stderr' or 'stdout'`, function () {
             it('should throw error at construction', function () {
               const invalidOption = 'stdnothing';
               expect(
@@ -907,7 +884,8 @@ describe('MongoClient', function () {
               ).to.throw(MongoAPIError);
             });
           });
-          context('when option is not a valid MongoDBLogWritable stream', function () {
+
+          describe('when option is not a valid MongoDBLogWritable stream', function () {
             it('should throw error at construction', function () {
               const writable = {
                 buffer: [],
@@ -915,7 +893,6 @@ describe('MongoClient', function () {
                   this.buffer.push(log);
                 }
               };
-
               expect(
                 () =>
                   new MongoClient('mongodb://a/', {
@@ -928,7 +905,7 @@ describe('MongoClient', function () {
         });
       });
 
-      context('when mongodbLogPath is not in options', function () {
+      describe('when mongodbLogPath is not in options', function () {
         let stderrStub;
 
         beforeEach(() => {
@@ -960,7 +937,8 @@ describe('MongoClient', function () {
         'MONGODB_LOG_CONNECTION',
         'MONGODB_LOG_CLIENT'
       ];
-      context('when only client option is provided', function () {
+
+      describe('when only client option is provided', function () {
         for (let i = 0; i < components.length; i++) {
           it(`it stores severity levels for ${components[i]} component correctly`, function () {
             for (const severityLevel of Object.values(SeverityLevel)) {
@@ -983,7 +961,8 @@ describe('MongoClient', function () {
           });
         }
       });
-      context('when both client and environment option are provided', function () {
+
+      describe('when both client and environment option are provided', function () {
         for (let i = 0; i < components.length; i++) {
           it(`it stores severity level for ${components[i]} component correctly (client options have precedence)`, function () {
             process.env[env_component_names[i]] = 'emergency';
@@ -1008,7 +987,8 @@ describe('MongoClient', function () {
           });
         }
       });
-      context('when default is provided', function () {
+
+      describe('when default is provided', function () {
         it('unspecified components have default value, while specified components retain value', function () {
           for (let i = 0; i < components.length; i++) {
             for (const severityLevel of Object.values(SeverityLevel)) {
@@ -1036,7 +1016,7 @@ describe('MongoClient', function () {
       });
 
       describe('invalid values', function () {
-        context('when invalid client option is provided', function () {
+        describe('when invalid client option is provided', function () {
           const badClientCreator = () =>
             new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true,
@@ -1045,7 +1025,7 @@ describe('MongoClient', function () {
               }
             });
 
-          context('when valid environment option is provided', function () {
+          describe('when valid environment option is provided', function () {
             it('should still throw error at construction', function () {
               process.env.MONGODB_LOG_ALL = 'emergency';
               expect(badClientCreator).to.throw(MongoAPIError);
@@ -1053,13 +1033,13 @@ describe('MongoClient', function () {
             });
           });
 
-          context('when environment option is not provided', function () {
+          describe('when environment option is not provided', function () {
             it('should still throw error at construction', function () {
               expect(badClientCreator).to.throw(MongoAPIError);
             });
           });
 
-          context('when invalid environment option is provided', function () {
+          describe('when invalid environment option is provided', function () {
             afterEach(function () {
               delete process.env.MONGODB_LOG_ALL;
             });
@@ -1071,15 +1051,16 @@ describe('MongoClient', function () {
           });
         });
 
-        context('when invalid environment option is provided', function () {
+        describe('when invalid environment option is provided', function () {
           beforeEach(async function () {
             process.env.MONGODB_LOG_ALL = 'imFakeToo';
           });
+
           afterEach(async function () {
             delete process.env.MONGODB_LOG_ALL;
           });
 
-          context('when client option is not provided', function () {
+          describe('when client option is not provided', function () {
             it(`should not throw error, and set component severity to 'off'`, function () {
               expect(
                 () =>
@@ -1095,7 +1076,8 @@ describe('MongoClient', function () {
               expect(client.mongoLogger?.componentSeverities.command).to.equal('off');
             });
           });
-          context('when valid client option is provided', function () {
+
+          describe('when valid client option is provided', function () {
             it('should not throw error, and set component severity to client value', function () {
               expect(
                 () =>
@@ -1116,8 +1098,8 @@ describe('MongoClient', function () {
     });
 
     describe('mongodbLogMaxDocumentLength', function () {
-      context('when mongodbLogMaxDocumentLength is in options', function () {
-        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
+      describe('when mongodbLogMaxDocumentLength is in options', function () {
+        describe('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
           it('should store value for maxDocumentLength correctly', function () {
             const client = new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true,
@@ -1125,6 +1107,7 @@ describe('MongoClient', function () {
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
           });
+
           it('should throw error for negative input', function () {
             expect(
               () =>
@@ -1135,7 +1118,8 @@ describe('MongoClient', function () {
             ).to.throw(MongoParseError);
           });
         });
-        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
+
+        describe('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
           beforeEach(function () {
             process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '155';
           });
@@ -1151,6 +1135,7 @@ describe('MongoClient', function () {
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
           });
+
           it('should throw error for negative input', function () {
             expect(
               () =>
@@ -1162,8 +1147,9 @@ describe('MongoClient', function () {
           });
         });
       });
-      context('when mongodbLogMaxDocumentLength is not in options', function () {
-        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
+
+      describe('when mongodbLogMaxDocumentLength is not in options', function () {
+        describe('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
           it('should store value for default maxDocumentLength correctly', function () {
             const client = new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true
@@ -1171,7 +1157,8 @@ describe('MongoClient', function () {
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
           });
         });
-        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
+
+        describe('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
           afterEach(function () {
             delete process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH;
           });
@@ -1196,7 +1183,7 @@ describe('MongoClient', function () {
     });
   });
 
-  context('getAuthProvider', function () {
+  describe('getAuthProvider', function () {
     it('throws MongoInvalidArgumentError if provided authMechanism is not supported', function () {
       const client = new MongoClient('mongodb://localhost:27017');
       try {
@@ -1209,8 +1196,8 @@ describe('MongoClient', function () {
     });
   });
 
-  context('timeoutMS', function () {
-    context('when timeoutMS is negative', function () {
+  describe('timeoutMS', function () {
+    describe('when timeoutMS is negative', function () {
       it('throws MongoParseError', function () {
         expect(() => new MongoClient('mongodb://host', { timeoutMS: -1 })).to.throw(
           MongoParseError
@@ -1218,14 +1205,14 @@ describe('MongoClient', function () {
       });
     });
 
-    context('when timeoutMS is positive', function () {
+    describe('when timeoutMS is positive', function () {
       it('sets the value on the MongoClient', function () {
         const client = new MongoClient('mongodb://host', { timeoutMS: 1 });
         expect(client.options.timeoutMS).to.equal(1);
       });
     });
 
-    context('when timeoutMS is zero', function () {
+    describe('when timeoutMS is zero', function () {
       it('sets the value on the MongoClient', function () {
         const client = new MongoClient('mongodb://host', { timeoutMS: 0 });
         expect(client.options.timeoutMS).to.equal(0);

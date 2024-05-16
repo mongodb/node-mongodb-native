@@ -14,14 +14,11 @@ const getKmsProviders = () => {
   const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
     local: unknown;
   };
-
   return { local: result.local };
 };
-
 const metaData: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
-
     // The Range Explicit Encryption tests require MongoDB server 7.0+ for QE v2.
     // The tests must not run against a standalone.
     //
@@ -30,7 +27,6 @@ const metaData: MongoDBMetadataUI = {
     topology: '!single'
   }
 };
-
 /**
  * a comparator function to sort two documents by their _id
  */
@@ -39,12 +35,10 @@ function byId(a, b) {
   if (a._id < b._id) return -1;
   return 0;
 }
-
 const prepareOptions = opts =>
   EJSON.parse(EJSON.stringify(opts, { relaxed: false }), {
     relaxed: false
   }) as any as Document;
-
 const dataTypes: ReadonlyArray<{
   type:
     | 'DecimalNoPrecision'
@@ -117,17 +111,13 @@ const dataTypes: ReadonlyArray<{
     factory: value => Long.fromNumber(value)
   }
 ];
-
 const basePath = '/test/spec/client-side-encryption/etc/data';
-
 const readEncryptedFieldsFile = (dataType: string): Promise<string> =>
   readFile(join(__dirname, '../../..', basePath, `range-encryptedFields-${dataType}.json`), {
     encoding: 'utf8'
   });
-
 describe('Range Explicit Encryption', function () {
   installNodeDNSWorkaroundHooks();
-
   let clientEncryption;
   let keyId;
   let keyVaultClient;
@@ -138,7 +128,7 @@ describe('Range Explicit Encryption', function () {
   let encryptedTwoHundred;
   let compareNumericValues;
   for (const { type: dataType, rangeOptions, factory } of dataTypes) {
-    context(`datatype ${dataType}`, function () {
+    describe(`datatype ${dataType}`, function () {
       beforeEach(async function () {
         compareNumericValues = function (value: unknown, expected: number): void {
           if (dataType === 'DoubleNoPrecision' || dataType === 'DoublePrecision') {
@@ -157,17 +147,13 @@ describe('Range Explicit Encryption', function () {
             relaxed: false
           }
         ) as unknown as Document;
-
         // confirm that this is an ObjectId
         keyId = keyDocument1._id;
         const encryptedFields = EJSON.parse(await readEncryptedFieldsFile(dataType), {
           relaxed: false
         }) as unknown as Document;
-
         const utilClient: MongoClient = await this.configuration.newClient().connect();
-
         await utilClient.db('db').dropDatabase();
-
         await utilClient
           .db('db')
           .dropCollection('explicit_encryption')
@@ -179,7 +165,6 @@ describe('Range Explicit Encryption', function () {
         await utilClient.db('db').createCollection('explicit_encryption', {
           encryptedFields
         });
-
         await utilClient
           .db('keyvault')
           .dropCollection('datakeys')
@@ -188,45 +173,36 @@ describe('Range Explicit Encryption', function () {
               throw e;
             }
           });
-
         await utilClient.db('keyvault').createCollection('datakeys');
-
         await utilClient
           .db('keyvault')
           .collection('datakeys')
           .insertOne(keyDocument1, { writeConcern: { w: 'majority' } });
-
         keyVaultClient = this.configuration.newClient();
-
         const clientEncryptionOpts = {
           keyVaultNamespace: 'keyvault.datakeys',
           kmsProviders: getKmsProviders()
         };
         clientEncryption = new ClientEncryption(keyVaultClient, clientEncryptionOpts);
-
         const autoEncryptionOptions = {
           keyVaultNamespace: 'keyvault.datakeys',
           kmsProviders: getKmsProviders(),
           bypassQueryAnalysis: true
         };
-
         encryptedClient = this.configuration.newClient(
           {},
           { autoEncryption: autoEncryptionOptions }
         );
-
         const opts = {
           keyId,
           algorithm: 'RangePreview',
           contentionFactor: 0,
           rangeOptions // TODO: is this the correct place to encrypt with rangeOpts?
         };
-
         encryptedZero = await clientEncryption.encrypt(factory(0), opts);
         encryptedSix = await clientEncryption.encrypt(factory(6), opts);
         encryptedThirty = await clientEncryption.encrypt(factory(30), opts);
         encryptedTwoHundred = await clientEncryption.encrypt(factory(200), opts);
-
         const key = `encrypted${dataType}`;
         const documents = [
           {
@@ -246,13 +222,11 @@ describe('Range Explicit Encryption', function () {
             _id: 3
           }
         ];
-
         // Queryable encryption only supports single document inserts, so we must insert the documents
         // one at a time.
         for (const doc of documents) {
           await encryptedClient.db('db').collection('explicit_encryption').insertOne(doc);
         }
-
         await utilClient.close();
       });
 
@@ -268,7 +242,6 @@ describe('Range Explicit Encryption', function () {
           contentionFactor: 0,
           rangeOptions
         });
-
         const result = await clientEncryption.decrypt(insertedPayload, { promoteValues: false });
         compareNumericValues(result, 6);
       });
@@ -280,7 +253,6 @@ describe('Range Explicit Encryption', function () {
             { 'encrypted<Type>': { $lte: factory(200) } }
           ]
         };
-
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
           algorithm: 'RangePreview',
@@ -288,7 +260,6 @@ describe('Range Explicit Encryption', function () {
           contentionFactor: 0,
           rangeOptions
         });
-
         const key = `encrypted${dataType}`;
         const result = (
           await encryptedClient
@@ -297,9 +268,7 @@ describe('Range Explicit Encryption', function () {
             .find(findPayload)
             .toArray()
         ).map(doc => ({ _id: doc._id, [key]: doc[key] }));
-
         result.sort(byId);
-
         const expected = [
           {
             [key]: 6,
@@ -314,9 +283,7 @@ describe('Range Explicit Encryption', function () {
             _id: 3
           }
         ];
-
         expect(result).to.have.lengthOf(expected.length);
-
         for (let i = 0; i < expected.length; ++i) {
           const doc = result[i];
           const expectedDoc = expected[i];
@@ -332,7 +299,6 @@ describe('Range Explicit Encryption', function () {
             { 'encrypted<Type>': { $lte: factory(6) } }
           ]
         };
-
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
           algorithm: 'RangePreview',
@@ -340,7 +306,6 @@ describe('Range Explicit Encryption', function () {
           contentionFactor: 0,
           rangeOptions
         });
-
         const key = `encrypted${dataType}`;
         const result = (
           await encryptedClient
@@ -349,9 +314,7 @@ describe('Range Explicit Encryption', function () {
             .find(findPayload)
             .toArray()
         ).map(doc => ({ _id: doc._id, [key]: doc[key] }));
-
         result.sort(byId);
-
         const expected = [
           {
             [key]: 0,
@@ -362,9 +325,7 @@ describe('Range Explicit Encryption', function () {
             _id: 1
           }
         ];
-
         expect(result).to.have.lengthOf(expected.length);
-
         for (let i = 0; i < expected.length; ++i) {
           const doc = result[i];
           const expectedDoc = expected[i];
@@ -377,7 +338,6 @@ describe('Range Explicit Encryption', function () {
         const query = {
           $and: [{ 'encrypted<Type>': { $gt: factory(30) } }]
         };
-
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
           algorithm: 'RangePreview',
@@ -385,7 +345,6 @@ describe('Range Explicit Encryption', function () {
           contentionFactor: 0,
           rangeOptions
         });
-
         const key = `encrypted${dataType}`;
         const result = (
           await encryptedClient
@@ -394,18 +353,14 @@ describe('Range Explicit Encryption', function () {
             .find(findPayload)
             .toArray()
         ).map(doc => ({ _id: doc._id, [key]: doc[key] }));
-
         result.sort(byId);
-
         expect(result).to.have.lengthOf(1);
-
         expect(result[0]).to.have.property('_id', 3);
         compareNumericValues(result[0][key], 200);
       });
 
       it('Case 5: can run an aggregation expression inside $expr', metaData, async function () {
         const query = { $and: [{ $lt: ['$encrypted<Type>', factory(30)] }] };
-
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
           algorithm: 'RangePreview',
@@ -413,7 +368,6 @@ describe('Range Explicit Encryption', function () {
           contentionFactor: 0,
           rangeOptions
         });
-
         const key = `encrypted${dataType}`;
         const result = (
           await encryptedClient
@@ -422,9 +376,7 @@ describe('Range Explicit Encryption', function () {
             .find({ $expr: findPayload })
             .toArray()
         ).map(doc => ({ _id: doc._id, [key]: doc[key] }));
-
         result.sort(byId);
-
         const expected = [
           {
             [key]: 0,
@@ -435,9 +387,7 @@ describe('Range Explicit Encryption', function () {
             _id: 1
           }
         ];
-
         expect(result).to.have.lengthOf(expected.length);
-
         for (let i = 0; i < expected.length; ++i) {
           const doc = result[i];
           const expectedDoc = expected[i];
@@ -463,7 +413,6 @@ describe('Range Explicit Encryption', function () {
               rangeOptions
             })
             .catch(e => e);
-
           expect(resultOrError).to.be.instanceOf(MongoCryptError);
         }
       );
@@ -473,7 +422,6 @@ describe('Range Explicit Encryption', function () {
           this.test.skipReason = 'Case 7 does not apply to DoubleNoPrecision or DecimalNoPrecision';
           this.skip();
         }
-
         const payload = (() => {
           if (dataType === 'Int') {
             return { encryptedInt: new Double(6) };
@@ -481,7 +429,6 @@ describe('Range Explicit Encryption', function () {
             return { [`encrypted${dataType}`]: 6 };
           }
         })();
-
         const resultOrError = await clientEncryption
           .encrypt(payload, {
             keyId,
@@ -490,7 +437,6 @@ describe('Range Explicit Encryption', function () {
             rangeOptions
           })
           .catch(e => e);
-
         expect(resultOrError).to.be.instanceOf(MongoCryptError);
       });
 
@@ -517,14 +463,12 @@ describe('Range Explicit Encryption', function () {
                 ].join(', ');
               this.skip();
             }
-
           const options = {
             min: 0,
             max: 200,
             sparsity: new Long(1),
             precision: 2
           };
-
           const resultOrError = await clientEncryption
             .encrypt(factory(6), {
               keyId,
@@ -533,7 +477,6 @@ describe('Range Explicit Encryption', function () {
               rangeOptions: options
             })
             .catch(e => e);
-
           expect(resultOrError).to.be.instanceOf(TypeError);
         }
       );

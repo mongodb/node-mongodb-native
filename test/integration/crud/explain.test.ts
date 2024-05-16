@@ -10,7 +10,6 @@ import {
 } from '../../mongodb';
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
-
 describe('CRUD API explain option', function () {
   let client: MongoClient;
   let db: Db;
@@ -81,12 +80,13 @@ describe('CRUD API explain option', function () {
     await collection.drop();
     await client.close();
   });
-
   for (const explainValue of explain) {
     for (const op of ops) {
       const name = op.name;
-      context(`When explain is ${explainValue}, operation ${name}`, function () {
-        it(`sets command verbosity to ${explainValue} and includes ${explainValueToExpectation(explainValue)} in the return response`, async function () {
+      describe(`When explain is ${explainValue}, operation ${name}`, function () {
+        it(`sets command verbosity to ${explainValue} and includes ${explainValueToExpectation(
+          explainValue
+        )} in the return response`, async function () {
           const response = await op.op(explainValue).catch(error => error);
           const commandStartedEvent = await commandStartedPromise;
           const explainJson = JSON.stringify(response);
@@ -115,7 +115,6 @@ describe('CRUD API explain option', function () {
     }
   }
 });
-
 function explainValueToExpectation(explainValue: boolean | string) {
   switch (explainValue) {
     case true:

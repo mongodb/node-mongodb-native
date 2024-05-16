@@ -21,14 +21,12 @@ const DISABLE_FAIL_COMMAND = {
     closeConnection: true
   }
 };
-
 describe('Server Selection Sharded Retryable Reads Prose tests', function () {
-  context('Retryable Reads Are Retried on a Different mongos if One is Available', function () {
+  describe('Retryable Reads Are Retried on a Different mongos if One is Available', function () {
     const commandFailedEvents: CommandFailedEvent[] = [];
     let client;
     let utilClientOne;
     let utilClientTwo;
-
     // This test MUST be executed against a sharded cluster that has at least two
     // mongos instances.
     // 1. Ensure that a test is run against a sharded cluster that has at least two
@@ -39,7 +37,6 @@ describe('Server Selection Sharded Retryable Reads Prose tests', function () {
         monitorCommands: true,
         useMultipleMongoses: true
       });
-
       // 3. Create a client with ``retryReads=true`` that connects to the cluster,
       //    providing the two selected mongoses as seeds.
       client = this.configuration.newClient(uri, {
@@ -51,7 +48,6 @@ describe('Server Selection Sharded Retryable Reads Prose tests', function () {
       });
       await client.connect();
       const seeds = client.topology.s.seedlist.map(address => address.toString());
-
       // 2. Create a client per mongos using the direct connection, and configure the
       //    following fail points on each mongos::
       //      {
@@ -80,7 +76,6 @@ describe('Server Selection Sharded Retryable Reads Prose tests', function () {
       await utilClientOne?.close();
       await utilClientTwo?.close();
     });
-
     // 4. Enable command monitoring, and execute a ``find`` command that is
     //    supposed to fail on both mongoses.
     // 5. Asserts that there were failed command events from each mongos.
@@ -95,10 +90,9 @@ describe('Server Selection Sharded Retryable Reads Prose tests', function () {
       expect(commandFailedEvents[0].address).to.not.equal(commandFailedEvents[1].address);
     });
   });
-
   // 1. Ensure that a test is run against a sharded cluster. If there are multiple
   // mongoses in the cluster, pick one to test against.
-  context('Retryable Reads Are Retried on the Same mongos if No Others are Available', function () {
+  describe('Retryable Reads Are Retried on the Same mongos if No Others are Available', function () {
     const commandFailedEvents: CommandFailedEvent[] = [];
     const commandSucceededEvents: CommandSucceededEvent[] = [];
     let client;
@@ -108,7 +102,6 @@ describe('Server Selection Sharded Retryable Reads Prose tests', function () {
       const uri = this.configuration.url({
         monitorCommands: true
       });
-
       // 3. Create a client with ``retryReads=true`` that connects to the cluster,
       //     providing the selected mongos as the seed.
       client = this.configuration.newClient(uri, {
@@ -121,7 +114,6 @@ describe('Server Selection Sharded Retryable Reads Prose tests', function () {
       client.on('commandSucceeded', event => {
         commandSucceededEvents.push(event);
       });
-
       // 2. Create a client that connects to the mongos using the direct connection,
       //     and configure the following fail point on the mongos::
       //       {
@@ -144,7 +136,6 @@ describe('Server Selection Sharded Retryable Reads Prose tests', function () {
       await utilClient?.db('admin').command(DISABLE_FAIL_COMMAND);
       await utilClient?.close();
     });
-
     // 4. Enable command monitoring, and execute a ``find`` command.
     // 5. Asserts that there was a failed command and a successful command event.
     // 6. Disable the fail point.

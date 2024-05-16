@@ -1,9 +1,7 @@
 'use strict';
-
 const { expect } = require('chai');
 const { existsSync } = require('fs');
 const { resolve } = require('path');
-
 const { compress } = require('../../mongodb');
 const { GSSAPI } = require('../../mongodb');
 const { AuthContext } = require('../../mongodb');
@@ -13,9 +11,8 @@ const { HostAddress } = require('../../mongodb');
 function moduleExistsSync(moduleName) {
   return existsSync(resolve(__dirname, `../../../node_modules/${moduleName}`));
 }
-
 describe('optionalRequire', function () {
-  context('Snappy', function () {
+  describe('Snappy', function () {
     it('should error if not installed', function () {
       const moduleName = 'snappy';
       if (moduleExistsSync(moduleName)) {
@@ -36,7 +33,7 @@ describe('optionalRequire', function () {
     });
   });
 
-  context('Kerberos', function () {
+  describe('Kerberos', function () {
     it('should error if not installed', function () {
       const moduleName = 'kerberos';
       if (moduleExistsSync(moduleName)) {
@@ -53,7 +50,7 @@ describe('optionalRequire', function () {
     });
   });
 
-  context('aws4', function () {
+  describe('aws4', function () {
     it('should error if not installed', function () {
       const moduleName = 'aws4';
       if (moduleExistsSync(moduleName)) {

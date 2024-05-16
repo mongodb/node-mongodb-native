@@ -27,7 +27,6 @@ describe('Connections Survive Primary Step Down - prose', function () {
 
   beforeEach(async function () {
     // For each test, make sure the following steps have been completed before running the actual test:
-
     // - Create a ``MongoClient`` with ``retryWrites=false``
     client = this.configuration.newClient({ retryWrites: false, heartbeatFrequencyMS: 500 });
     // - Create a collection object from the ``MongoClient``, using ``step-down`` for the database and collection name.
@@ -38,15 +37,14 @@ describe('Connections Survive Primary Step Down - prose', function () {
     collection = await client
       .db('step-down')
       .createCollection('step-down', { writeConcern: { w: 'majority' } });
-
     poolClearedEvents = [];
     client.on('connectionPoolCleared', poolClearEvent => poolClearedEvents.push(poolClearEvent));
   });
 
-  context('getMore Iteration', { requires: { mongodb: '>4.2', topology: ['replicaset'] } }, () => {
+  describe('getMore Iteration', { requires: { mongodb: '>4.2', topology: ['replicaset'] } }, () => {
     // This test requires a replica set with server version 4.2 or higher.
-
     let cursor: FindCursor;
+
     afterEach(() => cursor.close());
 
     it('survives after primary step down', async () => {
@@ -70,32 +68,27 @@ describe('Connections Survive Primary Step Down - prose', function () {
       // - If the driver implements the `CMAP`_ specification, verify that no new `PoolClearedEvent`_ has been
       //   published. Otherwise verify that `connections.totalCreated`_ in `serverStatus`_ has not changed.
       expect(poolClearedEvents).to.be.empty;
-
       // Referenced python's implementation. Changes from spec:
       //   replSetStepDown: 5 instead of 30
       //   Run these inserts to clear NotWritablePrimary issue
       //   Create client with heartbeatFrequencyMS=500 instead of default of 10_000
-
       // Attempt insertion to mark server description as stale and prevent a
       // NotPrimaryError on the subsequent operation.
       const error = await collection.insertOne({ a: 6 }).catch(error => error);
       expect(error)
         .to.be.instanceOf(MongoServerError)
         .to.have.property('code', MONGODB_ERROR_CODES.NotWritablePrimary);
-
       // Next insert should succeed on the new primary without clearing pool.
       await collection.insertOne({ a: 7 });
-
       expect(poolClearedEvents).to.be.empty;
     });
   });
 
-  context(
+  describe(
     'Not Primary - Keep Connection Pool',
     { requires: { mongodb: '>4.2', topology: ['replicaset'] } },
     () => {
       // This test requires a replica set with server version 4.2 or higher.
-
       // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 10107}}``
       const failPoint: FailPoint = {
         configureFailPoint: 'failCommand',
@@ -118,12 +111,11 @@ describe('Connections Survive Primary Step Down - prose', function () {
     }
   );
 
-  context(
+  describe(
     'Not Primary - Reset Connection Pool',
     { requires: { mongodb: '>=4.0.0 <4.2.0', topology: ['replicaset'] } },
     () => {
       // This test requires a replica set with server version 4.0.
-
       // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 10107}}``
       const failPoint: FailPoint = {
         configureFailPoint: 'failCommand',
@@ -146,12 +138,11 @@ describe('Connections Survive Primary Step Down - prose', function () {
     }
   );
 
-  context(
+  describe(
     'Shutdown in progress - Reset Connection Pool',
     { requires: { mongodb: '>=4.0', topology: ['replicaset'] } },
     () => {
       // This test should be run on all server versions >= 4.0.
-
       // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 91}}``
       const failPoint: FailPoint = {
         configureFailPoint: 'failCommand',
@@ -174,12 +165,11 @@ describe('Connections Survive Primary Step Down - prose', function () {
     }
   );
 
-  context(
+  describe(
     'Interrupted at shutdown - Reset Connection Pool',
     { requires: { mongodb: '>=4.0', topology: ['replicaset'] } },
     () => {
       // This test should be run on all server versions >= 4.0.
-
       // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 11600}}``
       const failPoint: FailPoint = {
         configureFailPoint: 'failCommand',

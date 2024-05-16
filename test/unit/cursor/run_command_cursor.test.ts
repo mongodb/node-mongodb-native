@@ -9,7 +9,7 @@ describe('class RunCommandCursor', () => {
     client = new MongoClient('mongodb://iLoveJavascript');
   });
 
-  context('constructor()', () => {
+  describe('constructor()', () => {
     it('freezes and stores the command on the cursor instance', () => {
       const cursor = client.db().runCursorCommand({ a: 1 });
       expect(cursor).to.have.property('command').that.is.frozen;
@@ -21,7 +21,7 @@ describe('class RunCommandCursor', () => {
     });
   });
 
-  context('setComment()', () => {
+  describe('setComment()', () => {
     it('stores the comment value in getMoreOptions', () => {
       const cursor = client.db().runCursorCommand({ a: 1 });
       cursor.setComment('iLoveJS');
@@ -29,7 +29,7 @@ describe('class RunCommandCursor', () => {
     });
   });
 
-  context('setMaxTimeMS()', () => {
+  describe('setMaxTimeMS()', () => {
     it('stores the maxTimeMS value in getMoreOptions.maxAwaitTimeMS', () => {
       const cursor = client.db().runCursorCommand({ a: 1 });
       cursor.setMaxTimeMS(2);
@@ -44,7 +44,7 @@ describe('class RunCommandCursor', () => {
     });
   });
 
-  context('setBatchSize()', () => {
+  describe('setBatchSize()', () => {
     it('stores the batchSize value in getMoreOptions', () => {
       const cursor = client.db().runCursorCommand({ a: 1 });
       cursor.setBatchSize(2);
@@ -59,7 +59,7 @@ describe('class RunCommandCursor', () => {
     });
   });
 
-  context('Non applicable AbstractCursor methods', () => {
+  describe('Non applicable AbstractCursor methods', () => {
     it('withReadConcern throws', () => {
       expect(() =>
         client.db().runCursorCommand({ a: 1 }).withReadConcern({ level: 'local' })

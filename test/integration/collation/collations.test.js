@@ -10,14 +10,12 @@ describe('Collation', function () {
   it('cursor count method should return the correct number when used with collation set', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-
     const db = client.db(configuration.db);
     const docs = [
       { _id: 0, name: 'foo' },
       { _id: 1, name: 'Foo' }
     ];
     const collation = { locale: 'en_US', strength: 2 };
-
     await Promise.resolve();
     await db.createCollection('cursor_collation_count');
     const collection = db.collection('cursor_collation_count');
@@ -31,10 +29,8 @@ describe('Collation', function () {
   it('should correctly create index with collation', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient();
-
     const db = client.db(configuration.db);
     const col = db.collection('collation_test');
-
     await col.createIndexes([
       { key: { a: 1 }, collation: { locale: 'nn' }, name: 'collation_test' }
     ]);
@@ -49,9 +45,7 @@ describe('Collation', function () {
   it('Should correctly create collection with collation', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient();
-
     const db = client.db(configuration.db);
-
     await db.createCollection('collation_test2', { collation: { locale: 'nn' } });
     const collections = await db.listCollections({ name: 'collation_test2' }).toArray();
     expect(collections).to.have.length(1);

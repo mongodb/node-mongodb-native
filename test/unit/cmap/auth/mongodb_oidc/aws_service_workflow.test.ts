@@ -7,7 +7,7 @@ describe('AwsDeviceWorkFlow', function () {
   describe('#execute', function () {
     const workflow = new AwsServiceWorkflow();
 
-    context('when AWS_WEB_IDENTITY_TOKEN_FILE is not in the env', function () {
+    describe('when AWS_WEB_IDENTITY_TOKEN_FILE is not in the env', function () {
       let file;
       const connection = sinon.createStubInstance(Connection);
       const credentials = sinon.createStubInstance(MongoCredentials);

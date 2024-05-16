@@ -23,7 +23,7 @@ describe('Unified Spec Runner', function () {
         sinon.restore();
       });
 
-      context('$$matchAsDocument', function () {
+      describe('$$matchAsDocument', function () {
         beforeEach(function () {
           expected = {
             $$matchAsDocument: {
@@ -33,7 +33,7 @@ describe('Unified Spec Runner', function () {
           };
         });
 
-        context('when actual value is EJSON string', function () {
+        describe('when actual value is EJSON string', function () {
           it('throws AssertionError when it finds extra keys', function () {
             actual =
               '{"data": {"$numberLong": "100"}, "a": {"$numberInt": "10"}, "b": {"$numberInt": "100"}}';
@@ -49,7 +49,7 @@ describe('Unified Spec Runner', function () {
           });
         });
 
-        context('when actual value is not EJSON string', function () {
+        describe('when actual value is not EJSON string', function () {
           it('throws AssertionError', function () {
             actual = { data: { $numberLong: '100' }, a: { $numberInt: 10 } };
             expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
@@ -60,8 +60,8 @@ describe('Unified Spec Runner', function () {
         });
       });
 
-      context('$$matchAsRoot', function () {
-        context('when expected and actual values are documents', function () {
+      describe('$$matchAsRoot', function () {
+        describe('when expected and actual values are documents', function () {
           beforeEach(function () {
             expected = {
               data: {
@@ -91,7 +91,6 @@ describe('Unified Spec Runner', function () {
                 a: 'string'
               }
             };
-
             expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
               /Expected \[string\] to be one of \[int\]/
@@ -99,7 +98,7 @@ describe('Unified Spec Runner', function () {
           });
         });
 
-        context('when the expected value is not a document', function () {
+        describe('when the expected value is not a document', function () {
           beforeEach(function () {
             expected = { $$matchAsRoot: '{"data": { "data": 10, "a": 11 }}' };
           });
@@ -111,7 +110,6 @@ describe('Unified Spec Runner', function () {
                 a: 11
               }
             };
-
             expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
               /Value of \$\$matchAsRoot must be an object/
@@ -119,14 +117,13 @@ describe('Unified Spec Runner', function () {
           });
         });
 
-        context('when the actual value is not a document', function () {
+        describe('when the actual value is not a document', function () {
           beforeEach(function () {
             expected = { data: { data: 10, a: 11 } };
           });
 
           it('throws AssertionError', function () {
             actual = '{"data": { "data": 10, "a": 11 }}';
-
             expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
               /Expected actual value to be an object/
@@ -151,8 +148,8 @@ describe('Unified Spec Runner', function () {
         sinon.restore();
       });
 
-      context('when failureIsRedacted is present', function () {
-        context('when failureIsRedacted=true', function () {
+      describe('when failureIsRedacted is present', function () {
+        describe('when failureIsRedacted=true', function () {
           beforeEach(function () {
             expected = {
               level: 'debug',
@@ -204,7 +201,7 @@ describe('Unified Spec Runner', function () {
           });
         });
 
-        context('when failureIsRedacted=false', function () {
+        describe('when failureIsRedacted=false', function () {
           beforeEach(function () {
             expected = {
               level: 'debug',
@@ -224,7 +221,6 @@ describe('Unified Spec Runner', function () {
                 }
               }
             };
-
             compareLogsSpy([expected], [actual], entitiesMap);
           });
 
@@ -250,7 +246,6 @@ describe('Unified Spec Runner', function () {
                 failure: {}
               }
             };
-
             expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
               AssertionError,
               /Expected failure to have not been redacted/
@@ -259,7 +254,7 @@ describe('Unified Spec Runner', function () {
         });
       });
 
-      context('when failureIsRedacted is undefined', function () {
+      describe('when failureIsRedacted is undefined', function () {
         beforeEach(function () {
           expected = {
             level: 'debug',
@@ -276,12 +271,11 @@ describe('Unified Spec Runner', function () {
               message: 'some message'
             }
           };
-
           compareLogsSpy([expected], [actual], entitiesMap);
         });
       });
 
-      context('matches data field as root documents', function () {
+      describe('matches data field as root documents', function () {
         beforeEach(function () {
           expected = {
             level: 'debug',
@@ -306,7 +300,6 @@ describe('Unified Spec Runner', function () {
               e: 5
             }
           };
-
           compareLogsSpy([expected], [actual], entitiesMap);
         });
 
@@ -319,7 +312,6 @@ describe('Unified Spec Runner', function () {
               b: 2
             }
           };
-
           expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
             AssertionError,
             /expected undefined to equal 3/

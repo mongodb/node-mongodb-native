@@ -27,9 +27,8 @@ const CONNECT_DEFAULTS = {
   extendedMetadata: addContainerMetadata({} as ClientMetadata),
   loadBalanced: false
 };
-
 describe('Connect Tests', function () {
-  context('when PLAIN auth enabled', () => {
+  describe('when PLAIN auth enabled', () => {
     const test: {
       server?: any;
       connectOptions?: ConnectionOptions;
@@ -56,11 +55,9 @@ describe('Connect Tests', function () {
 
     it('should auth against a non-arbiter', async function () {
       const whatHappened = {};
-
       test.server.setMessageHandler(request => {
         const doc = request.document;
         const $clusterTime = genClusterTime(Date.now());
-
         if (isHello(doc)) {
           whatHappened[LEGACY_HELLO_COMMAND] = true;
           request.reply(
@@ -73,9 +70,7 @@ describe('Connect Tests', function () {
           request.reply({ ok: 1 });
         }
       });
-
       await connect(test.connectOptions);
-
       expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
       expect(whatHappened).to.have.property('saslStart', true);
     });
@@ -98,15 +93,13 @@ describe('Connect Tests', function () {
           request.reply({ ok: 0 });
         }
       });
-
       await connect(test.connectOptions);
-
       expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
       expect(whatHappened).to.not.have.property('saslStart');
     });
   });
 
-  context('when creating a connection', () => {
+  describe('when creating a connection', () => {
     let server;
     let connectOptions;
     let connection: Connection;
@@ -123,7 +116,6 @@ describe('Connect Tests', function () {
         hostAddress: server.hostAddress() as HostAddress,
         socketTimeoutMS: 15000
       };
-
       connection = await connect(connectOptions);
     });
 
@@ -141,11 +133,10 @@ describe('Connect Tests', function () {
       expect(connection).to.have.property('socketTimeoutMS', 15000);
     });
 
-    context('when the provided cancellation token emits cancel', () => {
+    describe('when the provided cancellation token emits cancel', () => {
       it('interrupts the connection with an error', async () => {
         // set no response handler for mock server, effectively black hole requests
         server.setMessageHandler(() => null);
-
         const cancellationToken = new CancellationToken();
         // Make sure the cancel listener is added before emitting cancel
         cancellationToken.addListener('newListener', () => {
@@ -153,7 +144,6 @@ describe('Connect Tests', function () {
             cancellationToken.emit('cancel');
           });
         });
-
         const error = await connect({
           ...connectOptions,
           // Ensure these timeouts do not fire first
@@ -161,20 +151,17 @@ describe('Connect Tests', function () {
           connectTimeoutMS: 5000,
           cancellationToken
         }).catch(error => error);
-
         expect(error, error.stack).to.match(/connection establishment was cancelled/);
       });
     });
 
-    context('when connecting takes longer than connectTimeoutMS', () => {
+    describe('when connecting takes longer than connectTimeoutMS', () => {
       it('interrupts the connection with an error', async () => {
         // set no response handler for mock server, effectively black hole requests
         server.setMessageHandler(() => null);
-
         const error = await connect({ ...connectOptions, connectTimeoutMS: 5 }).catch(
           error => error
         );
-
         expect(error).to.match(/timed out/);
       });
     });
@@ -191,7 +178,7 @@ describe('Connect Tests', function () {
     describe('client environment (containers and FAAS)', () => {
       const cachedEnv = process.env;
 
-      context('when only kubernetes is present', () => {
+      describe('when only kubernetes is present', () => {
         let authContext;
 
         beforeEach(() => {
@@ -224,7 +211,7 @@ describe('Connect Tests', function () {
           expect(handshakeDocument.client.env).to.not.have.property('name');
         });
 
-        context('when 512 byte size limit is exceeded', () => {
+        describe('when 512 byte size limit is exceeded', () => {
           it(`should not 'env' property in client`, async () => {
             // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
             const longAppName = 's'.repeat(493);
@@ -241,7 +228,7 @@ describe('Connect Tests', function () {
         });
       });
 
-      context('when kubernetes and FAAS are both present', () => {
+      describe('when kubernetes and FAAS are both present', () => {
         let authContext;
 
         beforeEach(() => {
@@ -274,7 +261,7 @@ describe('Connect Tests', function () {
           expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
         });
 
-        context('when 512 byte size limit is exceeded', () => {
+        describe('when 512 byte size limit is exceeded', () => {
           it(`should not have 'container' property in client.env`, async () => {
             // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
             const longAppName = 's'.repeat(447);
@@ -295,13 +282,13 @@ describe('Connect Tests', function () {
         });
       });
 
-      context('when container nor FAAS env is not present (empty string case)', () => {
+      describe('when container nor FAAS env is not present (empty string case)', () => {
         const authContext = {
           connection: {},
           options: { ...CONNECT_DEFAULTS }
         };
 
-        context('when process.env.KUBERNETES_SERVICE_HOST = undefined', () => {
+        describe('when process.env.KUBERNETES_SERVICE_HOST = undefined', () => {
           beforeEach(() => {
             delete process.env.KUBERNETES_SERVICE_HOST;
           });
@@ -322,7 +309,7 @@ describe('Connect Tests', function () {
           });
         });
 
-        context('when process.env.KUBERNETES_SERVICE_HOST is an empty string', () => {
+        describe('when process.env.KUBERNETES_SERVICE_HOST is an empty string', () => {
           beforeEach(() => {
             process.env.KUBERNETES_SERVICE_HOST = '';
           });
@@ -343,7 +330,7 @@ describe('Connect Tests', function () {
       });
     });
 
-    context('when serverApi.version is present', () => {
+    describe('when serverApi.version is present', () => {
       const options = { ...CONNECT_DEFAULTS };
       const authContext = {
         connection: { serverApi: { version: '1' } },
@@ -356,7 +343,7 @@ describe('Connect Tests', function () {
       });
     });
 
-    context('when serverApi is not present', () => {
+    describe('when serverApi is not present', () => {
       const options = { ...CONNECT_DEFAULTS };
       const authContext = {
         connection: {},
@@ -369,8 +356,8 @@ describe('Connect Tests', function () {
       });
     });
 
-    context('loadBalanced option', () => {
-      context('when loadBalanced is not set as an option', () => {
+    describe('loadBalanced option', () => {
+      describe('when loadBalanced is not set as an option', () => {
         const authContext = {
           connection: {},
           options: { ...CONNECT_DEFAULTS }
@@ -392,7 +379,7 @@ describe('Connect Tests', function () {
         });
       });
 
-      context('when loadBalanced is set to false', () => {
+      describe('when loadBalanced is set to false', () => {
         const authContext = {
           connection: {},
           options: { ...CONNECT_DEFAULTS, loadBalanced: false }
@@ -414,7 +401,7 @@ describe('Connect Tests', function () {
         });
       });
 
-      context('when loadBalanced is set to true', () => {
+      describe('when loadBalanced is set to true', () => {
         const authContext = {
           connection: {},
           options: { ...CONNECT_DEFAULTS, loadBalanced: true }

@@ -10,7 +10,10 @@ const ignoredCommands = [LEGACY_HELLO_COMMAND];
 let hasInitialPingOccurred = false;
 const test: {
   client: MongoClient;
-  commands: { started: CommandStartedEvent[]; succeeded: CommandSucceededEvent[] };
+  commands: {
+    started: CommandStartedEvent[];
+    succeeded: CommandSucceededEvent[];
+  };
   setup: (config: TestConfiguration) => Promise<void>;
 } = {
   client: null,
@@ -18,7 +21,6 @@ const test: {
   async setup(config) {
     this.commands = { started: [], succeeded: [] };
     this.client = config.newClient({ w: 1 }, { maxPoolSize: 1, monitorCommands: true });
-
     // Because we have a MongoClient.connect method, an extra 'ping' event is sent to the
     // server when authentication is enabled.  We have to detect the scenario when auth is
     // enabled for the test and ignore the initial ping.  This will be addressed in NODE-2149.
@@ -33,17 +35,14 @@ const test: {
         this.commands.started.push(event);
       }
     });
-
     this.client.on('commandSucceeded', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) {
         this.commands.succeeded.push(event);
       }
     });
-
     await this.client.connect();
   }
 };
-
 describe('Sessions Spec', function () {
   let client: MongoClient;
 
@@ -68,14 +67,12 @@ describe('Sessions Spec', function () {
       it('should send endSessions for multiple sessions', function (done) {
         const client = test.client;
         const sessions = [client.startSession(), client.startSession()].map(s => s.id);
-
         client.close(err => {
           expect(err).to.not.exist;
           expect(test.commands.started).to.have.length(1);
           expect(test.commands.started[0].commandName).to.equal('endSessions');
           expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
           expect(client.s.activeSessions.size).to.equal(0);
-
           done();
         });
       });
@@ -91,7 +88,6 @@ describe('Sessions Spec', function () {
       afterEach(async function () {
         await client?.close();
       });
-
       const tests = [
         {
           description: 'should resolve non-async callbacks that return promises',
@@ -132,16 +128,12 @@ describe('Sessions Spec', function () {
           }
         }
       ];
-
       for (const testCase of tests) {
         it(testCase.description, async function () {
           const shouldResolve = testCase.description.startsWith('should resolve');
           const shouldReject = testCase.description.startsWith('should reject');
-
           expect(shouldResolve || shouldReject, 'Check your test description').to.be.true;
-
           let sessionWasEnded = false;
-
           return (
             client
               // @ts-expect-error: some operations return void to test it is handled
@@ -175,7 +167,6 @@ describe('Sessions Spec', function () {
 
       it('supports passing options to ClientSession', async function () {
         let sessionWasEnded = false;
-
         await client.withSession({ causalConsistency: false }, async session => {
           session.on('ended', () => {
             sessionWasEnded = true;
@@ -183,7 +174,6 @@ describe('Sessions Spec', function () {
           expect(session.supports.causalConsistency).to.be.false;
           await client.db('test').collection('foo').find({}, { session }).toArray();
         });
-
         expect(client.s.sessionPool.sessions).to.have.length(1);
         expect(sessionWasEnded).to.be.true;
       });
@@ -196,7 +186,7 @@ describe('Sessions Spec', function () {
       });
     });
 
-    context('unacknowledged writes', () => {
+    describe('unacknowledged writes', () => {
       it('should not include session for unacknowledged writes', async function () {
         const events = [];
         client.on('commandStarted', event => {
@@ -212,29 +202,27 @@ describe('Sessions Spec', function () {
         expect(event).nested.property('command.writeConcern.w').to.equal(0);
         expect(event).to.not.have.nested.property('command.lsid');
       });
-      it('should throw error with explicit session', {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
-        test: async function () {
+
+      it(
+        'should throw error with explicit session',
+        { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
+        async function () {
           const events = [];
           client.on('commandStarted', event => {
             if (event.commandName === 'insert') {
               events.push(event);
             }
           });
-
           const session = client.startSession({ causalConsistency: true });
-
           const error = await client
             .db('test')
             .collection('foo')
             .insertOne({ foo: 'bar' }, { writeConcern: { w: 0 }, session })
             .catch(error => error);
-
           expect(error.message).to.equal('Cannot have explicit session with unacknowledged writes');
-
           await session.endSession();
         }
-      });
+      );
     });
   });
 
@@ -246,7 +234,6 @@ describe('Sessions Spec', function () {
       const config = this.configuration;
       client = config.newClient();
       await client.connect();
-
       try {
         await client
           .db('sessions_functional_test_db')
@@ -255,11 +242,9 @@ describe('Sessions Spec', function () {
       } catch (_) {
         // do not care
       }
-
       collection = await client
         .db('sessions_functional_test_db')
         .createCollection('sessions_functional_test');
-
       await collection.deleteMany({});
     });
 
@@ -276,7 +261,6 @@ describe('Sessions Spec', function () {
         testSession = client.startSession();
         otherSession = client.startSession();
         controlSession = client.startSession();
-
         // set up sessions with two sets of cluster times
         expect(await collection.findOne({}, { session: controlSession })).to.be.null;
         expect(await collection.findOne({}, { session: testSession })).to.be.null;
@@ -300,86 +284,78 @@ describe('Sessions Spec', function () {
 
       it(
         'should result in a usable session when called with a valid cluster time and should not affect any other sessions',
-        {
-          metadata: { requires: { mongodb: '>= 3.6.0', topology: ['replicaset'] } },
-          async test() {
-            // advance cluster time to a new valid value
-            testSession.advanceClusterTime(otherSession.clusterTime);
-            expect(testSession.clusterTime).to.deep.equal(otherSession.clusterTime);
-
-            // check control session
-            expect(controlSession.clusterTime).to.not.deep.equal(testSession.clusterTime);
-
-            // check that the session still works
-            expect(await collection.findOne({}, { session: testSession }))
-              .property('apple')
-              .to.equal('green');
-          }
+        { requires: { mongodb: '>= 3.6.0', topology: ['replicaset'] } },
+        async function () {
+          // advance cluster time to a new valid value
+          testSession.advanceClusterTime(otherSession.clusterTime);
+          expect(testSession.clusterTime).to.deep.equal(otherSession.clusterTime);
+          // check control session
+          expect(controlSession.clusterTime).to.not.deep.equal(testSession.clusterTime);
+          // check that the session still works
+          expect(await collection.findOne({}, { session: testSession }))
+            .property('apple')
+            .to.equal('green');
         }
       );
 
-      it('should not let an invalid cluster time impact existing sessions', {
-        metadata: { requires: { mongodb: '>= 3.6.0', topology: ['replicaset'] } },
-        async test() {
+      it(
+        'should not let an invalid cluster time impact existing sessions',
+        { requires: { mongodb: '>= 3.6.0', topology: ['replicaset'] } },
+        async function () {
           // note, because of our validation, we can't use advanceClusterTime to set an invalid clusterTime
           // so for testing, we have to set it directly
           testSession.clusterTime = { clusterTime: { greaterThan: () => true } };
-
           try {
             await collection.findOne({}, { session: testSession });
             expect.fail('expected findOne to fail, but it passed');
           } catch (err) {
             expect(err).to.be.instanceOf(MongoServerError);
           }
-
           expect(await collection.findOne({}, { session: controlSession }))
             .property('apple')
             .to.equal('green');
         }
-      });
+      );
 
-      it('should not let an invalid cluster time impact new sessions', {
-        metadata: { requires: { mongodb: '>= 3.6.0', topology: ['replicaset'] } },
-        async test() {
+      it(
+        'should not let an invalid cluster time impact new sessions',
+        { requires: { mongodb: '>= 3.6.0', topology: ['replicaset'] } },
+        async function () {
           // note, because of our validation, we can't use advanceClusterTime to set an invalid clusterTime
           // so for testing, we have to set it directly
           testSession.clusterTime = { clusterTime: { greaterThan: () => true } };
-
           try {
             await collection.findOne({}, { session: testSession });
             expect.fail('expected findOne to fail, but it passed');
           } catch (err) {
             expect(err).to.be.instanceOf(MongoServerError);
           }
-
           await otherSession.endSession();
           otherSession = client.startSession();
-
           expect(await collection.findOne({}, { session: otherSession }))
             .property('apple')
             .to.equal('green');
         }
-      });
+      );
 
-      it('should not let an invalid cluster time impact other uses of the client', {
-        metadata: { requires: { mongodb: '>= 3.6.0', topology: ['replicaset'] } },
-        async test() {
+      it(
+        'should not let an invalid cluster time impact other uses of the client',
+        { requires: { mongodb: '>= 3.6.0', topology: ['replicaset'] } },
+        async function () {
           // note, because of our validation, we can't use advanceClusterTime to set an invalid clusterTime
           // so for testing, we have to set it directly
           testSession.clusterTime = { clusterTime: { greaterThan: () => true } };
-
           try {
             await collection.findOne({}, { session: testSession });
             expect.fail('expected findOne to fail, but it passed');
           } catch (err) {
             expect(err).to.be.instanceOf(MongoServerError);
           }
-
           expect(await collection.findOne({}))
             .property('apple')
             .to.equal('green');
         }
-      });
+      );
     });
   });
 
@@ -396,7 +372,6 @@ describe('Sessions Spec', function () {
       testCollection = utilClient.db('test').collection('too.many.sessions');
       await testCollection.drop().catch(() => null);
       await utilClient.close();
-
       // Fresh unused client for the test
       client = await this.configuration.newClient({
         maxPoolSize: 1,
@@ -413,20 +388,18 @@ describe('Sessions Spec', function () {
 
     it('should only use one session for many operations when maxPoolSize is 1', async () => {
       const documents = Array.from({ length: 50 }).map((_, idx) => ({ _id: idx }));
-
       const events: CommandStartedEvent[] = [];
       client.on('commandStarted', ev => events.push(ev));
       const allResults = await Promise.all(documents.map(doc => testCollection.insertOne(doc)));
-
       expect(allResults).to.have.lengthOf(documents.length);
       expect(events).to.have.lengthOf(documents.length);
-
       expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(1);
     });
   });
 
-  context('when using a LegacyMongoClient', () => {
+  describe('when using a LegacyMongoClient', () => {
     let legacyClient;
+
     beforeEach(async function () {
       const options = this.configuration.serverApi
         ? { serverApi: this.configuration.serverApi }

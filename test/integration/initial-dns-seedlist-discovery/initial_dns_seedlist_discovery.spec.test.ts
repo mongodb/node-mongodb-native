@@ -8,14 +8,12 @@ import { HostAddress, MongoClient } from '../../mongodb';
 
 function makeTest(test, topology) {
   let client;
-
   afterEach(async () => {
     if (client) {
       await client.close();
       client = undefined;
     }
   });
-
   it(test.comment, async function () {
     this.test.skipReason =
       'TODO(NODE-3757): These tests require specific environment setups, also the error cases need better assertions';
@@ -23,15 +21,12 @@ function makeTest(test, topology) {
     if (topology === 'replica-set' && this.configuration.topologyType !== 'ReplicaSetWithPrimary') {
       return this.skip();
     }
-
     if (topology === 'sharded' && this.configuration.topologyType !== 'sharded') {
       return this.skip();
     }
-
     if (topology === 'load-balanced' && this.configuration.topologyType !== 'load-balanced') {
       return this.skip();
     }
-
     let thrownError;
     try {
       client = new MongoClient(test.uri, { serverSelectionTimeoutMS: 2000, tls: false });
@@ -39,18 +34,14 @@ function makeTest(test, topology) {
     } catch (error) {
       thrownError = error;
     }
-
     if (test.error) {
       expect(thrownError).to.exist;
       return; // Nothing more to test...
     }
-
     const options = client.options;
     const hosts = Array.from(client.topology.s.description.servers.keys());
-
     expect(thrownError).to.not.exist;
     expect(options).to.exist;
-
     // Implicit SRV options must be set.
     expect(options.directConnection).to.be.false;
     const testOptions = test.options;
@@ -75,12 +66,10 @@ function makeTest(test, topology) {
       expect(options.credentials.username).to.equal(test.parsed_options.user);
       expect(options.credentials.password).to.equal(test.parsed_options.password);
     }
-
     // srvMaxHost limiting happens in the topology constructor
     if (options.srvHost && test.comment.includes('srvMaxHosts')) {
       const initialSeedlist = hosts.map(h => h.toString());
       const selectedHosts = Array.from(topology.s.description.servers.keys());
-
       if (typeof test.numSeeds === 'number') {
         // numSeeds: the expected number of initial seeds discovered from the SRV record.
         expect(initialSeedlist).to.have.lengthOf(test.numSeeds);
@@ -90,7 +79,6 @@ function makeTest(test, topology) {
         // (In our case, its the Topology constructor, but not actual SDAM)
         expect(selectedHosts).to.have.lengthOf(test.numHosts);
       }
-
       if (Array.isArray(test.seeds)) {
         // verify that the set of hosts in the client's initial seedlist
         // matches the list in seeds
@@ -110,13 +98,11 @@ function makeTest(test, topology) {
               ).toString();
             })
         );
-
         expect(actualAddresses).to.deep.equal(test.hosts);
       }
     }
   });
 }
-
 function readTestFilesFor(topology) {
   const specPath = path.join(__dirname, '../../spec', 'initial-dns-seedlist-discovery', topology);
   const testFiles = fs
@@ -133,7 +119,6 @@ function readTestFilesFor(topology) {
     });
   return testFiles;
 }
-
 /**
  * The tests in the replica-set directory MUST be executed against a three-node replica set on localhost ports 27017, 27018, and 27019 with replica set name repl0.
  * The tests in the load-balanced directory MUST be executed against a load-balanced sharded cluster with the mongos servers running on localhost ports 27017 and 27018 (corresponding to the script in drivers-evergreen-tools).

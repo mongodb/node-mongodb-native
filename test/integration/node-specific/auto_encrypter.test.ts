@@ -17,34 +17,27 @@ import { getEncryptExtraOptions } from '../../tools/utils';
 const { EJSON } = BSON;
 const cryptShared = (status: 'enabled' | 'disabled') => () => {
   const isPathPresent = (getEncryptExtraOptions().cryptSharedLibPath ?? '').length > 0;
-
   if (status === 'enabled') {
     return isPathPresent ? true : 'Test requires the shared library.';
   }
-
   return isPathPresent ? 'Test requires that the crypt shared library NOT be present' : true;
 };
-
 const dataPath = (fileName: string) =>
   resolve(__dirname, '../../unit/client-side-encryption/data', fileName);
-
 function readExtendedJsonToBuffer(path) {
   const ejson = EJSON.parse(fs.readFileSync(path, 'utf8'));
   return serialize(ejson);
 }
-
 function readHttpResponse(path) {
   let data = fs.readFileSync(path, 'utf8');
   data = data.split('\n').join('\r\n');
   return Buffer.from(data, 'utf8');
 }
-
 const TEST_COMMAND = JSON.parse(fs.readFileSync(dataPath(`cmd.json`), { encoding: 'utf-8' }));
 const MOCK_COLLINFO_RESPONSE = readExtendedJsonToBuffer(dataPath(`collection-info.json`));
 const MOCK_MONGOCRYPTD_RESPONSE = readExtendedJsonToBuffer(dataPath(`mongocryptd-reply.json`));
 const MOCK_KEYDOCUMENT_RESPONSE = readExtendedJsonToBuffer(dataPath(`key-document.json`));
 const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(dataPath(`kms-decrypt-reply.txt`));
-
 describe('crypt_shared library', function () {
   let client: MongoClient;
   let autoEncrypter: AutoEncrypter | undefined;
@@ -66,28 +59,23 @@ describe('crypt_shared library', function () {
       request.addResponse(MOCK_KMS_DECRYPT_REPLY);
       return Promise.resolve();
     });
-
     sandbox
       .stub(StateMachine.prototype, 'fetchCollectionInfo')
       .callsFake((client, ns, filter, callback) => {
         callback(null, MOCK_COLLINFO_RESPONSE);
       });
-
     sandbox
       .stub(StateMachine.prototype, 'markCommand')
       .callsFake((client, ns, command, callback) => {
         if (ENABLE_LOG_TEST) {
           const response = bson.deserialize(MOCK_MONGOCRYPTD_RESPONSE);
           response.schemaRequiresEncryption = false;
-
           ENABLE_LOG_TEST = false; // disable test after run
           callback(null, bson.serialize(response));
           return;
         }
-
         callback(null, MOCK_MONGOCRYPTD_RESPONSE);
       });
-
     sandbox.stub(StateMachine.prototype, 'fetchKeys').callsFake((client, ns, filter, callback) => {
       // mock data is already serialized, our action deals with the result of a cursor
       const deserializedKey = deserialize(MOCK_KEYDOCUMENT_RESPONSE);
@@ -103,7 +91,6 @@ describe('crypt_shared library', function () {
     it(
       'should autoSpawn a mongocryptd on init by default',
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
-
       async function () {
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
@@ -112,12 +99,9 @@ describe('crypt_shared library', function () {
             local: { key: Buffer.alloc(96) }
           }
         });
-
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
-
         const localMcdm = autoEncrypter._mongocryptdManager;
         sandbox.spy(localMcdm, 'spawn');
-
         await autoEncrypter.init();
         expect(localMcdm.spawn).to.have.been.calledOnce;
       }
@@ -134,10 +118,8 @@ describe('crypt_shared library', function () {
             callback(new Error('msg'));
             return;
           }
-
           callback(null, MOCK_MONGOCRYPTD_RESPONSE);
         });
-
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
           kmsProviders: {
@@ -146,12 +128,9 @@ describe('crypt_shared library', function () {
           }
         });
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
-
         const localMcdm = autoEncrypter._mongocryptdManager;
         await autoEncrypter.init();
-
         sandbox.spy(localMcdm, 'spawn');
-
         const err = await autoEncrypter.encrypt('test.test', TEST_COMMAND).catch(e => e);
         expect(localMcdm.spawn).to.not.have.been.called;
         expect(err).to.be.an.instanceOf(Error);
@@ -169,10 +148,8 @@ describe('crypt_shared library', function () {
             callback(new MongoNetworkTimeoutError('msg'));
             return;
           }
-
           callback(null, MOCK_MONGOCRYPTD_RESPONSE);
         });
-
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
           kmsProviders: {
@@ -181,12 +158,9 @@ describe('crypt_shared library', function () {
           }
         });
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
-
         const localMcdm = autoEncrypter._mongocryptdManager;
         await autoEncrypter.init();
-
         sandbox.spy(localMcdm, 'spawn');
-
         await autoEncrypter.encrypt('test.test', TEST_COMMAND);
         expect(localMcdm.spawn).to.have.been.calledOnce;
       }
@@ -203,10 +177,8 @@ describe('crypt_shared library', function () {
             callback(new MongoNetworkTimeoutError('msg'));
             return;
           }
-
           callback(null, MOCK_MONGOCRYPTD_RESPONSE);
         });
-
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
           kmsProviders: {
@@ -215,12 +187,9 @@ describe('crypt_shared library', function () {
           }
         });
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
-
         const localMcdm = autoEncrypter._mongocryptdManager;
         await autoEncrypter.init();
-
         sandbox.spy(localMcdm, 'spawn');
-
         const err = await autoEncrypter.encrypt('test.test', TEST_COMMAND).catch(e => e);
         expect(localMcdm.spawn).to.have.been.calledOnce;
         expect(err).to.be.an.instanceof(MongoNetworkTimeoutError);
@@ -242,9 +211,7 @@ describe('crypt_shared library', function () {
           }
         });
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
-
         sandbox.stub(MongocryptdManager.prototype, 'spawn').resolves();
-
         const err = await autoEncrypter.init().catch(e => e);
         expect(err).to.exist;
         expect(err).to.be.instanceOf(MongoError);
@@ -266,20 +233,17 @@ describe('crypt_shared library', function () {
         bypassAutoEncryption: opt === 'bypassAutoEncryption',
         bypassQueryAnalysis: opt === 'bypassQueryAnalysis'
       };
-
       it(
         `should not spawn mongocryptd on startup if ${opt} is true`,
         { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
         async function () {
           autoEncrypter = new AutoEncrypter(client, encryptionOptions);
-
           const localMcdm = autoEncrypter._mongocryptdManager || {
             spawn: () => {
               // intentional empty function
             }
           };
           sandbox.spy(localMcdm, 'spawn');
-
           await autoEncrypter.init();
           expect(localMcdm.spawn).to.have.a.callCount(0);
         }
@@ -298,10 +262,8 @@ describe('crypt_shared library', function () {
             callback(timeoutError);
             return;
           }
-
           callback(null, MOCK_MONGOCRYPTD_RESPONSE);
         });
-
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
           kmsProviders: {
@@ -312,13 +274,10 @@ describe('crypt_shared library', function () {
             mongocryptdBypassSpawn: true
           }
         });
-
         const localMcdm = autoEncrypter._mongocryptdManager;
         sandbox.spy(localMcdm, 'spawn');
-
         await autoEncrypter.init();
         expect(localMcdm.spawn).to.not.have.been.called;
-
         const err = await autoEncrypter.encrypt('test.test', TEST_COMMAND).catch(e => e);
         expect(localMcdm.spawn).to.not.have.been.called;
         expect(err).to.equal(timeoutError);
@@ -340,7 +299,6 @@ describe('crypt_shared library', function () {
         env,
         encoding: 'utf-8'
       });
-
       expect(stderr).to.include('`cryptSharedLibRequired` set but no crypt_shared library loaded');
     });
 
@@ -361,11 +319,8 @@ describe('crypt_shared library', function () {
         };
         const file = `${__dirname}/../../tools/fixtures/shared_library_test.js`;
         const { stdout } = spawnSync(process.execPath, [file], { env, encoding: 'utf-8' });
-
         const response = EJSON.parse(stdout, { useBigInt64: true });
-
         expect(response).not.to.be.null;
-
         expect(response).to.have.property('version').that.is.a('bigint');
         expect(response).to.have.property('versionStr').that.is.a('string');
       }
@@ -389,11 +344,8 @@ describe('crypt_shared library', function () {
         };
         const file = `${__dirname}/../../tools/fixtures/shared_library_test.js`;
         const { stdout } = spawnSync(process.execPath, [file], { env, encoding: 'utf-8' });
-
         const response = EJSON.parse(stdout, { useBigInt64: true });
-
         expect(response).not.to.be.null;
-
         expect(response).to.have.property('version').that.is.a('bigint');
         expect(response).to.have.property('versionStr').that.is.a('string');
       }

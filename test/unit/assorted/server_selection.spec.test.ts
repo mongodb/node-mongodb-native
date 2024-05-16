@@ -18,7 +18,6 @@ describe('Server Selection Logic (spec)', function () {
       this.skip();
     }
   });
-
   const selectionSpecDir = join(__dirname, '../../spec/server-selection/server_selection');
   const serverSelectionLogicTests = collectServerSelectionLogicTests(selectionSpecDir);
   for (const topologyType of Object.keys(serverSelectionLogicTests)) {
@@ -35,7 +34,6 @@ describe('Server Selection Logic (spec)', function () {
     });
   }
 });
-
 describe('Server Selection Latency Window Tests (spec)', function () {
   const selectionSpecDir = resolve(__dirname + '../../../spec/server-selection/in_window');
   const tests = loadLatencyWindowTests(selectionSpecDir);
@@ -50,7 +48,6 @@ describe('Server Selection Latency Window Tests (spec)', function () {
   after(() => {
     serverConnect.restore();
   });
-
   for (const test of tests) {
     it(test.description, async function () {
       await runServerSelectionLatencyWindowTest(test);

@@ -20,7 +20,7 @@ import {
 import { sleep } from '../tools/utils';
 
 describe('MONGODB-OIDC', function () {
-  context('when running in the environment', function () {
+  describe('when running in the environment', function () {
     it('contains AWS_WEB_IDENTITY_TOKEN_FILE', function () {
       expect(process.env).to.have.property('AWS_WEB_IDENTITY_TOKEN_FILE');
     });
@@ -47,7 +47,6 @@ describe('MONGODB-OIDC', function () {
         return generateResult(token, expiresInSeconds, extraFields);
       };
     };
-
     // Creates a refresh function for use in the test.
     const createRefreshCallback = (
       username = 'test_user1',
@@ -65,7 +64,6 @@ describe('MONGODB-OIDC', function () {
         return generateResult(token, expiresInSeconds, extraFields);
       };
     };
-
     // Generates the result the request or refresh callback returns.
     const generateResult = (token: string, expiresInSeconds?: number, extraFields?: any) => {
       const response: OIDCRequestTokenResult = { accessToken: token };
@@ -103,7 +101,6 @@ describe('MONGODB-OIDC', function () {
           });
           collection = client.db('test').collection('test');
         });
-
         // Clear the cache.
         // Create a request callback returns a valid token.
         // Create a client that uses the default OIDC url and the request callback.
@@ -124,7 +121,6 @@ describe('MONGODB-OIDC', function () {
           });
           collection = client.db('test').collection('test');
         });
-
         // Clear the cache.
         // Create a request callback that returns a valid token.
         // Create a client with a url of the form mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC and the OIDC request callback.
@@ -148,7 +144,6 @@ describe('MONGODB-OIDC', function () {
           );
           collection = client.db('test').collection('test');
         });
-
         // Clear the cache.
         // Create a request callback that returns a valid token.
         // Create a client with a url of the form mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
@@ -172,7 +167,6 @@ describe('MONGODB-OIDC', function () {
           );
           collection = client.db('test').collection('test');
         });
-
         // Clear the cache.
         // Create a request callback that reads in the generated test_user2 token file.
         // Create a client with a url of the form mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
@@ -196,7 +190,6 @@ describe('MONGODB-OIDC', function () {
           );
           collection = client.db('test').collection('test');
         });
-
         // Clear the cache.
         // Create a client with a url of the form mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
         // Assert that a find operation fails.
@@ -216,13 +209,12 @@ describe('MONGODB-OIDC', function () {
         before(function () {
           cache.clear();
         });
-
         // Clear the cache.
         // Create a client that uses the OIDC url and a request callback, and an
         // ``ALLOWED_HOSTS`` that is an empty list.
         // Assert that a ``find`` operation fails with a client-side error.
         // Close the client.
-        context('when ALLOWED_HOSTS is empty', function () {
+        describe('when ALLOWED_HOSTS is empty', function () {
           before(function () {
             client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
               authMechanismProperties: {
@@ -241,12 +233,11 @@ describe('MONGODB-OIDC', function () {
             );
           });
         });
-
         // Create a client that uses the url ``mongodb://localhost/?authMechanism=MONGODB-OIDC&ignored=example.com`` a request callback, and an
         // ``ALLOWED_HOSTS`` that contains ["example.com"].
         // Assert that a ``find`` operation fails with a client-side error.
         // Close the client.
-        context('when ALLOWED_HOSTS does not match', function () {
+        describe('when ALLOWED_HOSTS does not match', function () {
           beforeEach(function () {
             this.currentTest.skipReason = 'Will fail URI parsing as ignored is not a valid option';
             this.skip();
@@ -271,12 +262,11 @@ describe('MONGODB-OIDC', function () {
             // }
           });
         });
-
         // Create a client that uses the url ``mongodb://evilmongodb.com`` a request
         // callback, and an ``ALLOWED_HOSTS`` that contains ``*mongodb.com``.
         // Assert that a ``find`` operation fails with a client-side error.
         // Close the client.
-        context('when ALLOWED_HOSTS is invalid', function () {
+        describe('when ALLOWED_HOSTS is invalid', function () {
           before(function () {
             client = new MongoClient('mongodb://evilmongodb.com/?authMechanism=MONGODB-OIDC', {
               authMechanismProperties: {
@@ -303,7 +293,6 @@ describe('MONGODB-OIDC', function () {
         before(function () {
           cache.clear();
         });
-
         const requestCallback = async () => {
           requestCounter++;
           if (requestCounter > 1) {
@@ -319,7 +308,6 @@ describe('MONGODB-OIDC', function () {
         const refreshCallback = createRefreshCallback();
         const requestSpy = sinon.spy(requestCallback);
         const refreshSpy = sinon.spy(refreshCallback);
-
         const createClient = () => {
           return new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
@@ -328,18 +316,15 @@ describe('MONGODB-OIDC', function () {
             }
           });
         };
-
         const authenticate = async () => {
           const client = createClient();
           await client.db('test').collection('test').findOne();
           await client.close();
         };
-
         const testPromise = async () => {
           await authenticate();
           await authenticate();
         };
-
         // Clear the cache.
         // Create a request callback that returns a token that will expire soon, and
         // a refresh callback.  Ensure that the request callback has a time delay, and
@@ -380,7 +365,6 @@ describe('MONGODB-OIDC', function () {
           );
           collection = client.db('test').collection('test');
         });
-
         // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws.
         // Perform a find operation that succeeds.
         // Close the client.
@@ -397,7 +381,6 @@ describe('MONGODB-OIDC', function () {
           );
           collection = client.db('test').collection('test');
         });
-
         // Create a client with a url of the form mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws&directConnection=true&readPreference=secondaryPreferred.
         // Perform a find operation that succeeds.
         // Close the client.
@@ -425,7 +408,6 @@ describe('MONGODB-OIDC', function () {
         after(function () {
           process.env.AWS_WEB_IDENTITY_TOKEN_FILE = tokenFile;
         });
-
         // Set the AWS_WEB_IDENTITY_TOKEN_FILE environment variable to the location of valid test_user2 credentials.
         // Create a client with a url of the form mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws&directConnection=true&readPreference=secondaryPreferred.
         // Perform a find operation that succeeds.
@@ -449,7 +431,6 @@ describe('MONGODB-OIDC', function () {
           );
           collection = client.db('test').collection('test');
         });
-
         // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws, and an ALLOWED_HOSTS that is an empty list.
         // Assert that a find operation succeeds.
         // Close the client.
@@ -486,7 +467,6 @@ describe('MONGODB-OIDC', function () {
           expect(requestSpy).to.have.been.calledOnce;
           await client.close();
         });
-
         // Clear the cache.
         // Create request and refresh callback that validate their inputs and return a valid token. The request callback must return a token that expires in one minute.
         // Create a client that uses the above callbacks.
@@ -515,7 +495,6 @@ describe('MONGODB-OIDC', function () {
           });
           collection = client.db('test').collection('test');
         });
-
         // Clear the cache.
         // Create a client with a request callback that returns null.
         // Perform a find operation that fails.
@@ -550,7 +529,6 @@ describe('MONGODB-OIDC', function () {
           await collection.findOne();
           await client.close();
         });
-
         // Clear the cache.
         // Create request callback that returns a valid token that will expire in a minute, and a refresh callback that returns null.
         // Perform a find operation that succeeds.
@@ -573,7 +551,7 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('3.4 Request Callback Returns Invalid Data', function () {
-        context('when the request callback has missing fields', function () {
+        describe('when the request callback has missing fields', function () {
           before(function () {
             cache.clear();
             client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
@@ -585,7 +563,6 @@ describe('MONGODB-OIDC', function () {
             });
             collection = client.db('test').collection('test');
           });
-
           // Clear the cache.
           // Create a client with a request callback that returns data not conforming to the OIDCRequestTokenResult with missing field(s).
           // Perform a find operation that fails.
@@ -603,7 +580,7 @@ describe('MONGODB-OIDC', function () {
           });
         });
 
-        context('when the request callback has extra fields', function () {
+        describe('when the request callback has extra fields', function () {
           before(function () {
             cache.clear();
             client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
@@ -613,7 +590,6 @@ describe('MONGODB-OIDC', function () {
             });
             collection = client.db('test').collection('test');
           });
-
           // Create a client with a request callback that returns data not conforming to the OIDCRequestTokenResult with extra field(s).
           // Perform a find operation that fails.
           // Close the client.
@@ -647,7 +623,6 @@ describe('MONGODB-OIDC', function () {
           await client.db('test').collection('test').findOne();
           await client.close();
         });
-
         // Clear the cache.
         // Create request callback that returns a valid token that will expire in a minute, and a refresh callback that returns data not conforming to the OIDCRequestTokenResult with missing field(s).
         // Create a client with the callbacks.
@@ -686,7 +661,6 @@ describe('MONGODB-OIDC', function () {
           await client.db('test').collection('test').findOne();
           await client.close();
         });
-
         // Clear the cache.
         // Create request callback that returns a valid token that will expire in a minute, and a refresh callback that returns data not conforming to the OIDCRequestTokenResult with extra field(s).
         // Create a client with the callbacks.
@@ -766,7 +740,6 @@ describe('MONGODB-OIDC', function () {
           await client.db('test').collection('test').findOne();
           await client.close();
         });
-
         // Clear the cache.
         // Create a new client with a request callback that gives credentials that expire in one minute.
         // Ensure that a find operation adds credentials to the cache.
@@ -800,7 +773,6 @@ describe('MONGODB-OIDC', function () {
           await client.db('test').collection('test').findOne();
           await client.close();
         });
-
         // Clear the cache.
         // Create a new client with a request callback that does not give an `expiresInSeconds` value.
         // Ensure that a find operation adds credentials to the cache.
@@ -840,7 +812,6 @@ describe('MONGODB-OIDC', function () {
           expect(cache.entries.size).to.equal(1);
           await client.close();
         });
-
         // Clear the cache.
         // Create a new client with a valid request callback that gives credentials that expire within 5 minutes and a refresh callback that gives invalid credentials.
         // Ensure that a find operation adds a new entry to the cache.
@@ -870,7 +841,6 @@ describe('MONGODB-OIDC', function () {
           );
           collection = client.db('test').collection('test');
         });
-
         // Clear the cache.
         // Create a new client that uses the AWS automatic workflow.
         // Ensure that a find operation does not add credentials to the cache.
@@ -888,7 +858,6 @@ describe('MONGODB-OIDC', function () {
       const authMechanismProperties = {
         REQUEST_TOKEN_CALLBACK: requestCallback
       };
-
       // Removes the fail point.
       const removeFailPoint = async () => {
         return await client.db().admin().command({
@@ -896,7 +865,6 @@ describe('MONGODB-OIDC', function () {
           mode: 'off'
         });
       };
-
       // Sets up the fail point for the saslStart
       const setupFailPoint = async () => {
         return await client
@@ -928,7 +896,6 @@ describe('MONGODB-OIDC', function () {
         await client.db('test').collection('test').findOne();
         await client.close();
       });
-
       // Clear the cache.
       // Create a client with a request callback that returns a valid token that will not expire soon.
       // Set a fail point for saslStart commands of the form:
@@ -968,7 +935,6 @@ describe('MONGODB-OIDC', function () {
 
     describe('6. Reauthentication', function () {
       let client: MongoClient;
-
       // Removes the fail point.
       const removeFailPoint = async () => {
         return await client.db().admin().command({
@@ -987,7 +953,6 @@ describe('MONGODB-OIDC', function () {
         const commandStartedEvents: CommandStartedEvent[] = [];
         const commandSucceededEvents: CommandSucceededEvent[] = [];
         const commandFailedEvents: CommandFailedEvent[] = [];
-
         const commandStartedListener = event => {
           if (event.commandName === 'find') {
             commandStartedEvents.push(event);
@@ -1003,13 +968,11 @@ describe('MONGODB-OIDC', function () {
             commandFailedEvents.push(event);
           }
         };
-
         const addListeners = () => {
           client.on('commandStarted', commandStartedListener);
           client.on('commandSucceeded', commandSucceededListener);
           client.on('commandFailed', commandFailedListener);
         };
-
         // Sets up the fail point for the find to reauthenticate.
         const setupFailPoint = async () => {
           return await client
@@ -1041,7 +1004,6 @@ describe('MONGODB-OIDC', function () {
           await removeFailPoint();
           await client.close();
         });
-
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Create a client with the callbacks and an event listener. The following assumes that the driver does not emit saslStart or saslContinue events. If the driver does emit those events, ignore/filter them for the purposes of this test.
@@ -1128,7 +1090,6 @@ describe('MONGODB-OIDC', function () {
           await removeFailPoint();
           await client.close();
         });
-
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Perform a find operation that succeeds.
@@ -1193,7 +1154,6 @@ describe('MONGODB-OIDC', function () {
           await removeFailPoint();
           await client.close();
         });
-
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Perform a find operation that succeeds (to force a speculative auth).

@@ -17,7 +17,6 @@ describe('CRUD Prose Spec Tests', () => {
       client.removeAllListeners();
     }
   });
-
   // TODO(NODE-3888): Implement this test
   it.skip('1. WriteConcernError.details exposes writeConcernError.errInfo', {
     /**
@@ -75,7 +74,6 @@ describe('CRUD Prose Spec Tests', () => {
      * Additionally, assert that a CommandSucceededEvent was observed
      * and that the writeErrors[0].errInfo field in the response document matches the WriteError's details property.
      */
-
     let collection;
 
     beforeEach(async () => {
@@ -84,17 +82,16 @@ describe('CRUD Prose Spec Tests', () => {
       } catch {
         // don't care
       }
-
       collection = await client
         .db()
         .createCollection('wc_details', { validator: { x: { $type: 'string' } } });
     });
 
-    it('test case: insert MongoServerError', {
-      metadata: { requires: { mongodb: '>=5.0.0' } },
-      async test() {
+    it(
+      'test case: insert MongoServerError',
+      { requires: { mongodb: '>=5.0.0' } },
+      async function () {
         const evCapture = once(client, 'commandSucceeded');
-
         let errInfoFromError;
         try {
           await collection.insertOne({ x: /not a string/ });
@@ -105,22 +102,20 @@ describe('CRUD Prose Spec Tests', () => {
           expect(error).to.have.property('errInfo').that.is.an('object');
           errInfoFromError = error.errInfo;
         }
-
         const commandSucceededEvents = await evCapture;
         expect(commandSucceededEvents).to.have.lengthOf(1);
         const ev = commandSucceededEvents[0];
         expect(ev).to.have.nested.property('reply.writeErrors[0].errInfo').that.is.an('object');
-
         const errInfoFromEvent = ev.reply.writeErrors[0].errInfo;
         expect(errInfoFromError).to.deep.equal(errInfoFromEvent);
       }
-    });
+    );
 
-    it('test case: insertMany MongoBulkWriteError', {
-      metadata: { requires: { mongodb: '>=5.0.0' } },
-      async test() {
+    it(
+      'test case: insertMany MongoBulkWriteError',
+      { requires: { mongodb: '>=5.0.0' } },
+      async function () {
         const evCapture = once(client, 'commandSucceeded');
-
         let errInfoFromError;
         try {
           await collection.insertMany([{ x: /not a string/ }]);
@@ -132,15 +127,13 @@ describe('CRUD Prose Spec Tests', () => {
           expect(error.writeErrors[0]).to.have.property('errInfo').that.is.an('object');
           errInfoFromError = error.writeErrors[0].errInfo;
         }
-
         const commandSucceededEvents = await evCapture;
         expect(commandSucceededEvents).to.have.lengthOf(1);
         const ev = commandSucceededEvents[0];
         expect(ev).to.have.nested.property('reply.writeErrors[0].errInfo').that.is.an('object');
-
         const errInfoFromEvent = ev.reply.writeErrors[0].errInfo;
         expect(errInfoFromError).to.deep.equal(errInfoFromEvent);
       }
-    });
+    );
   });
 });

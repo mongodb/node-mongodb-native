@@ -25,7 +25,6 @@ describe('Sessions Prose Tests', () => {
       await client1?.close();
       await client2?.close();
     });
-
     /**
      * Steps:
      * - Create client1 and client2
@@ -38,41 +37,40 @@ describe('Sessions Prose Tests', () => {
      * This validation lives in our executeOperation layer so it applies universally.
      * A find and an insert provide enough coverage, we determined we do not need to enumerate every possible operation.
      */
-    context(
-      'when session is started from a different client than operation is being run on',
-      () => {
-        it('insertOne operation throws a MongoInvalidArgumentError', async () => {
-          const db = client1.db();
-          const collection = db.collection('test');
-          const session = client2.startSession();
-          const error = await collection.insertOne({}, { session }).catch(error => error);
-          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-          expect(error).to.match(/ClientSession must be from the same MongoClient/i);
-        });
+    describe('when session is started from a different client than operation is being run on', () => {
+      it('insertOne operation throws a MongoInvalidArgumentError', async () => {
+        const db = client1.db();
+        const collection = db.collection('test');
+        const session = client2.startSession();
+        const error = await collection.insertOne({}, { session }).catch(error => error);
+        expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+        expect(error).to.match(/ClientSession must be from the same MongoClient/i);
+      });
 
-        it('find operation throws a MongoInvalidArgumentError', async () => {
-          const db = client1.db();
-          const collection = db.collection('test');
-          const session = client2.startSession();
-          const error = await collection
-            .find({}, { session })
-            .toArray()
-            .catch(error => error);
-          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-          expect(error).to.match(/ClientSession must be from the same MongoClient/i);
-        });
-      }
-    );
+      it('find operation throws a MongoInvalidArgumentError', async () => {
+        const db = client1.db();
+        const collection = db.collection('test');
+        const session = client2.startSession();
+        const error = await collection
+          .find({}, { session })
+          .toArray()
+          .catch(error => error);
+        expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+        expect(error).to.match(/ClientSession must be from the same MongoClient/i);
+      });
+    });
   });
 
   describe('14. Implicit sessions only allocate their server session after a successful connection checkout', () => {
     let client: MongoClient;
-    let testCollection: Collection<{ _id: number; a?: number }>;
+    let testCollection: Collection<{
+      _id: number;
+      a?: number;
+    }>;
 
     beforeEach(async function () {
       const configuration = this.configuration;
       client = await configuration.newClient({ maxPoolSize: 1, monitorCommands: true }).connect();
-
       // reset test collection
       testCollection = client.db('test').collection('too.many.sessions');
       await testCollection.drop().catch(() => null);
@@ -81,7 +79,6 @@ describe('Sessions Prose Tests', () => {
     afterEach(async () => {
       await client?.close(true);
     });
-
     /**
      * Create a MongoClient with the following options: maxPoolSize=1 and retryWrites=true
      * Attach a command started listener that collects each command's lsid
@@ -92,7 +89,6 @@ describe('Sessions Prose Tests', () => {
     it('released server sessions are correctly reused', async () => {
       const events: CommandStartedEvent[] = [];
       client.on('commandStarted', ev => events.push(ev));
-
       const operations = [
         testCollection.insertOne({ _id: 1 }),
         testCollection.deleteOne({ _id: 2 }),
@@ -105,12 +101,9 @@ describe('Sessions Prose Tests', () => {
         testCollection.findOneAndReplace({ _id: 7 }, { a: 8 }),
         testCollection.find().toArray()
       ];
-
       const allResults = await Promise.all(operations);
-
       expect(allResults).to.have.lengthOf(operations.length);
       expect(events).to.have.lengthOf(operations.length);
-
       // This is a guarantee in node, unless you are performing a transaction (which is not being done in this test)
       expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex')))).to.have.lengthOf(1);
     });
@@ -135,7 +128,6 @@ describe('Sessions Prose Tests', () => {
         stdio: 'ignore',
         detached: true
       });
-
       childProcess.on('error', err => {
         console.warn('Sessions prose mongocryptd error:', err);
       });
@@ -145,7 +137,6 @@ describe('Sessions Prose Tests', () => {
       client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`, {
         monitorCommands: true
       });
-
       const hello = await client.db().command({ hello: true });
       expect(hello).to.have.property('iscryptd', true); // sanity check
       expect(hello).to.not.have.property('logicalSessionTimeoutMinutes');
@@ -181,7 +172,6 @@ describe('Sessions Prose Tests', () => {
         const readCommandEvent = await Promise.race([readCommandEventPromise, sleep(500)]);
         expect(readCommandEvent).to.have.property('commandName', 'find');
         expect(readCommandEvent).to.not.have.property('lsid');
-
         /**
          * 3. Send a write command to the server (e.g., `insertOne`), ignoring any errors from the server response
          * 4. Check the corresponding `commandStarted` event: verify that `lsid` is not set
@@ -211,7 +201,6 @@ describe('Sessions Prose Tests', () => {
          * 1. Create a new explicit session by calling `startSession` (this MUST NOT error)
          */
         const session = client.startSession();
-
         /**
          * 2. Attempt to send a read command to the server (e.g., `findOne`) with the explicit session passed in
          * 3. Assert that a client-side error is generated indicating that sessions are not supported
@@ -223,7 +212,6 @@ describe('Sessions Prose Tests', () => {
           .catch(err => err);
         expect(readOutcome).to.be.instanceOf(MongoDriverError);
         expect(readOutcome.message).to.match(/does not support sessions/);
-
         /**
          * 4. Attempt to send a write command to the server (e.g., `insertOne`) with the explicit session passed in
          * 5. Assert that a client-side error is generated indicating that sessions are not supported

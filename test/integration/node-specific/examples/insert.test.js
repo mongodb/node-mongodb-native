@@ -1,5 +1,4 @@
 'use strict';
-
 const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
 
@@ -14,7 +13,6 @@ describe('examples(insert):', function () {
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
-
     await db.collection('inventory').deleteMany({});
   });
 
@@ -24,9 +22,10 @@ describe('examples(insert):', function () {
     db = undefined;
   });
 
-  it('Insert a Single Document', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Insert a Single Document',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 1
       await db.collection('inventory').insertOne({
         item: 'canvas',
@@ -35,18 +34,17 @@ describe('examples(insert):', function () {
         size: { h: 28, w: 35.5, uom: 'cm' }
       });
       // End Example 1
-
       // Start Example 2
       const cursor = db.collection('inventory').find({ item: 'canvas' });
       // End Example 2
-
       expect(await cursor.count()).to.equal(1);
     }
-  });
+  );
 
-  it('Insert Multiple Documents', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Insert Multiple Documents',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 3
       await db.collection('inventory').insertMany([
         {
@@ -69,8 +67,7 @@ describe('examples(insert):', function () {
         }
       ]);
       // End Example 3
-
       expect(await db.collection('inventory').count({})).to.equal(3);
     }
-  });
+  );
 });

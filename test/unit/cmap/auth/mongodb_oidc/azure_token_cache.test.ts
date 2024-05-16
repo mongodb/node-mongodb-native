@@ -9,7 +9,7 @@ describe('AzureTokenCache', function () {
   });
 
   describe('#addEntry', function () {
-    context('when expiresInSeconds is provided', function () {
+    describe('when expiresInSeconds is provided', function () {
       const cache = new AzureTokenCache();
       let entry;
 
@@ -62,13 +62,13 @@ describe('AzureTokenCache', function () {
       cache.addEntry('audience2', tokenResultWithExpiration);
     });
 
-    context('when there is a matching entry', function () {
+    describe('when there is a matching entry', function () {
       it('returns the entry', function () {
         expect(cache.getEntry('audience1')?.token).to.equal('test');
       });
     });
 
-    context('when there is no matching entry', function () {
+    describe('when there is no matching entry', function () {
       it('returns undefined', function () {
         expect(cache.getEntry('audience')).to.equal(undefined);
       });

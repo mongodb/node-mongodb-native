@@ -5,10 +5,8 @@ const skipTests = [
   // TODO(NODE-3914): Fix; note that wtimeoutms will be deprecated via DRIVERS-555 (NODE-3078)
   'Deprecated (or unknown) options are ignored if replacement exists'
 ];
-
 describe('Connection String spec tests', function () {
   const suites = loadSpecTests('connection-string');
-
   for (const suite of suites) {
     describe(suite.name, function () {
       for (const test of suite.tests) {
@@ -16,7 +14,6 @@ describe('Connection String spec tests', function () {
           if (skipTests.includes(test.description)) {
             return this.skip();
           }
-
           executeUriValidationTest(test);
         });
       }

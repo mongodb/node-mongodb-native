@@ -34,17 +34,14 @@ import { sleep } from '../tools/utils';
 
 class BufferingStream extends Writable {
   buffer: any[] = [];
-
   constructor(options = {}) {
     super({ ...options, objectMode: true });
   }
-
   override _write(chunk, encoding, callback) {
     this.buffer.push(chunk);
     callback();
   }
 }
-
 describe('meta tests for BufferingStream', function () {
   it('the buffer is empty on construction', function () {
     const stream = new BufferingStream();
@@ -57,7 +54,6 @@ describe('meta tests for BufferingStream', function () {
     expect(stream.buffer).to.deep.equal(['message']);
   });
 });
-
 describe('class MongoLogger', function () {
   describe('#constructor()', function () {
     it('assigns each property from the options object onto the logging class', function () {
@@ -71,32 +67,33 @@ describe('class MongoLogger', function () {
         logDestination: stream,
         logDestinationIsStdErr: false
       });
-
       expect(logger).to.have.property('componentSeverities', componentSeverities);
       expect(logger).to.have.property('maxDocumentLength', 10);
       expect(logger).to.have.property('logDestination', stream);
     });
 
-    context('when logDestination is an object that implements MongoDBLogWritable', function () {
+    describe('when logDestination is an object that implements MongoDBLogWritable', function () {
       it('successfully writes logs to the MongoDBLogWritable', function () {
         const logDestination = {
           buffer: [],
           write(log: Log) {
             this.buffer.push(log);
           }
-        } as { buffer: any[]; write: (log: Log) => void };
+        } as {
+          buffer: any[];
+          write: (log: Log) => void;
+        };
         const logger = new MongoLogger({
           componentSeverities: { command: 'error' } as any,
           logDestination,
           logDestinationIsStdErr: false
         } as any);
-
         logger.error('command', 'Hello world!');
         expect(logDestination.buffer).to.have.lengthOf(1);
       });
     });
 
-    context('when logDestination implements nodejs:stream.Writable', function () {
+    describe('when logDestination implements nodejs:stream.Writable', function () {
       it('successfully writes logs to the Writable', function () {
         const buffer: any[] = [];
         const logDestination = new Writable({
@@ -105,13 +102,11 @@ describe('class MongoLogger', function () {
             buffer.push(log);
           }
         });
-
         const logger = new MongoLogger({
           componentSeverities: { command: 'error' } as any,
           logDestination,
           logDestinationIsStdErr: false
         } as any);
-
         logger.error('command', 'Hello world!');
         expect(buffer).to.have.lengthOf(1);
       });
@@ -127,7 +122,6 @@ describe('class MongoLogger', function () {
         ['MONGODB_LOG_CONNECTION', 'connection'],
         ['MONGODB_LOG_CLIENT', 'client']
       ]);
-
       function* makeValidOptions(): Generator<[string, string]> {
         const validOptions = Object.values(SeverityLevel).filter(option =>
           ['error', 'warn', 'info', 'debug', 'trace'].includes(option)
@@ -137,21 +131,20 @@ describe('class MongoLogger', function () {
           yield [option.toUpperCase(), option];
         }
       }
-
       const invalidOptions = ['', 'invalid-string'];
       const validNonDefaultOptions = new Map(makeValidOptions());
 
-      context('default', () => {
-        context('when MONGODB_LOG_ALL is unset', () => {
+      describe('default', () => {
+        describe('when MONGODB_LOG_ALL is unset', () => {
           it('sets default to OFF', () => {
             const { componentSeverities } = MongoLogger.resolveOptions({}, {});
             expect(componentSeverities.default).to.equal(SeverityLevel.OFF);
           });
         });
 
-        context('when MONGODB_LOG_ALL is invalid', () => {
+        describe('when MONGODB_LOG_ALL is invalid', () => {
           for (const invalidOption of invalidOptions) {
-            context(`{ MONGODB_LOG_ALL: '${invalidOption} }'`, () => {
+            describe(`{ MONGODB_LOG_ALL: '${invalidOption} }'`, () => {
               it('sets default to OFF', () => {
                 const { componentSeverities } = MongoLogger.resolveOptions(
                   {
@@ -165,9 +158,9 @@ describe('class MongoLogger', function () {
           }
         });
 
-        context('when MONGODB_LOG_ALL is valid', () => {
+        describe('when MONGODB_LOG_ALL is valid', () => {
           for (const [validOption, expectedValue] of validNonDefaultOptions) {
-            context(`{ MONGODB_LOG_ALL: '${validOption}' }`, () => {
+            describe(`{ MONGODB_LOG_ALL: '${validOption}' }`, () => {
               it('sets default to the value of MONGODB_LOG_ALL', () => {
                 const { componentSeverities } = MongoLogger.resolveOptions(
                   {
@@ -182,17 +175,17 @@ describe('class MongoLogger', function () {
         });
       });
       for (const [loggingComponent, componentSeverityOption] of components) {
-        context(`when ${loggingComponent} is unset`, () => {
-          context(`when MONGODB_LOG_ALL is unset`, () => {
+        describe(`when ${loggingComponent} is unset`, () => {
+          describe(`when MONGODB_LOG_ALL is unset`, () => {
             it(`sets ${componentSeverityOption} to OFF`, () => {
               const { componentSeverities } = MongoLogger.resolveOptions({}, {});
               expect(componentSeverities[componentSeverityOption]).to.equal(SeverityLevel.OFF);
             });
           });
 
-          context(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
+          describe(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
             for (const invalidOption of invalidOptions) {
-              context(`{ MONGODB_LOG_ALL: ${invalidOption} }`, () => {
+              describe(`{ MONGODB_LOG_ALL: ${invalidOption} }`, () => {
                 it(`sets ${invalidOption} to OFF`, () => {
                   const { componentSeverities } = MongoLogger.resolveOptions(
                     {
@@ -206,9 +199,9 @@ describe('class MongoLogger', function () {
             }
           });
 
-          context(`when MONGODB_LOG_ALL is set to a valid value`, () => {
+          describe(`when MONGODB_LOG_ALL is set to a valid value`, () => {
             for (const [option, expectedValue] of validNonDefaultOptions) {
-              context(`{ MONGODB_LOG_ALL: ${option} }`, () => {
+              describe(`{ MONGODB_LOG_ALL: ${option} }`, () => {
                 it(`sets ${option} to the value of MONGODB_LOG_ALL`, () => {
                   const { componentSeverities } = MongoLogger.resolveOptions(
                     {
@@ -222,11 +215,10 @@ describe('class MongoLogger', function () {
             }
           });
         });
-
-        context(`when ${loggingComponent} is set to an invalid value in the environment`, () => {
-          context(`when MONGODB_LOG_ALL is unset`, () => {
+        describe(`when ${loggingComponent} is set to an invalid value in the environment`, () => {
+          describe(`when MONGODB_LOG_ALL is unset`, () => {
             for (const invalidOption of invalidOptions) {
-              context(`{ ${loggingComponent}: ${invalidOption} }`, () => {
+              describe(`{ ${loggingComponent}: ${invalidOption} }`, () => {
                 it(`sets ${componentSeverityOption} to OFF`, () => {
                   const { componentSeverities } = MongoLogger.resolveOptions(
                     {
@@ -234,63 +226,51 @@ describe('class MongoLogger', function () {
                     },
                     {}
                   );
-
                   expect(componentSeverities[componentSeverityOption]).to.equal(SeverityLevel.OFF);
                 });
               });
             }
           });
 
-          context(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
+          describe(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
             for (const invalidOption of invalidOptions) {
-              context(
-                `{ ${loggingComponent}: ${invalidOption}, MONGODB_LOG_ALL: ${invalidOption} }`,
-                () => {
-                  it(`sets ${componentSeverityOption} to OFF`, () => {
-                    const { componentSeverities } = MongoLogger.resolveOptions(
-                      {
-                        [loggingComponent]: invalidOption,
-                        MONGODB_LOG_ALL: invalidOption
-                      },
-                      {}
-                    );
-
-                    expect(componentSeverities[componentSeverityOption]).to.equal(
-                      SeverityLevel.OFF
-                    );
-                  });
-                }
-              );
+              describe(`{ ${loggingComponent}: ${invalidOption}, MONGODB_LOG_ALL: ${invalidOption} }`, () => {
+                it(`sets ${componentSeverityOption} to OFF`, () => {
+                  const { componentSeverities } = MongoLogger.resolveOptions(
+                    {
+                      [loggingComponent]: invalidOption,
+                      MONGODB_LOG_ALL: invalidOption
+                    },
+                    {}
+                  );
+                  expect(componentSeverities[componentSeverityOption]).to.equal(SeverityLevel.OFF);
+                });
+              });
             }
           });
 
-          context(`when MONGODB_LOG_ALL is set to a valid value`, () => {
+          describe(`when MONGODB_LOG_ALL is set to a valid value`, () => {
             const invalidOption = invalidOptions[0];
-
             for (const [option, expectedValue] of validNonDefaultOptions) {
-              context(
-                `{ MONGODB_LOG_ALL: ${option}, ${componentSeverityOption}: ${option} }`,
-                () => {
-                  it(`sets ${componentSeverityOption} to the value of MONGODB_LOG_ALL`, () => {
-                    const { componentSeverities } = MongoLogger.resolveOptions(
-                      {
-                        [loggingComponent]: invalidOption,
-                        MONGODB_LOG_ALL: option
-                      },
-                      {}
-                    );
-                    expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
-                  });
-                }
-              );
+              describe(`{ MONGODB_LOG_ALL: ${option}, ${componentSeverityOption}: ${option} }`, () => {
+                it(`sets ${componentSeverityOption} to the value of MONGODB_LOG_ALL`, () => {
+                  const { componentSeverities } = MongoLogger.resolveOptions(
+                    {
+                      [loggingComponent]: invalidOption,
+                      MONGODB_LOG_ALL: option
+                    },
+                    {}
+                  );
+                  expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
+                });
+              });
             }
           });
         });
-
-        context(`when ${loggingComponent} is set to a valid value in the environment`, () => {
-          context(`when MONGODB_LOG_ALL is unset`, () => {
+        describe(`when ${loggingComponent} is set to a valid value in the environment`, () => {
+          describe(`when MONGODB_LOG_ALL is unset`, () => {
             for (const [option, expectedValue] of validNonDefaultOptions) {
-              context(`{ ${loggingComponent}: ${option} }`, () => {
+              describe(`{ ${loggingComponent}: ${option} }`, () => {
                 it(`sets ${componentSeverityOption} to the value of ${loggingComponent}`, () => {
                   const { componentSeverities } = MongoLogger.resolveOptions(
                     {
@@ -298,39 +278,34 @@ describe('class MongoLogger', function () {
                     },
                     {}
                   );
-
                   expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
                 });
               });
             }
           });
 
-          context(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
+          describe(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
             const invalidValue = invalidOptions[0];
             for (const [option, expectedValue] of validNonDefaultOptions) {
-              context(
-                `{ ${loggingComponent}: ${option}, MONGODB_LOG_ALL: ${invalidValue} }`,
-                () => {
-                  it(`sets ${componentSeverityOption} to the value of ${loggingComponent}`, () => {
-                    const { componentSeverities } = MongoLogger.resolveOptions(
-                      {
-                        [loggingComponent]: option,
-                        MONGODB_LOG_ALL: invalidValue
-                      },
-                      {}
-                    );
-
-                    expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
-                  });
-                }
-              );
+              describe(`{ ${loggingComponent}: ${option}, MONGODB_LOG_ALL: ${invalidValue} }`, () => {
+                it(`sets ${componentSeverityOption} to the value of ${loggingComponent}`, () => {
+                  const { componentSeverities } = MongoLogger.resolveOptions(
+                    {
+                      [loggingComponent]: option,
+                      MONGODB_LOG_ALL: invalidValue
+                    },
+                    {}
+                  );
+                  expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
+                });
+              });
             }
           });
 
-          context(`when MONGODB_LOG_ALL is set to a valid value`, () => {
+          describe(`when MONGODB_LOG_ALL is set to a valid value`, () => {
             const validOption = validNonDefaultOptions.keys()[0];
             for (const [option, expectedValue] of validNonDefaultOptions) {
-              context(`{ ${loggingComponent}: ${option}, MONGODB_LOG_ALL: ${validOption} }`, () => {
+              describe(`{ ${loggingComponent}: ${option}, MONGODB_LOG_ALL: ${validOption} }`, () => {
                 it(`sets ${componentSeverityOption} to the value of ${loggingComponent}`, () => {
                   const { componentSeverities } = MongoLogger.resolveOptions(
                     {
@@ -339,7 +314,6 @@ describe('class MongoLogger', function () {
                     },
                     {}
                   );
-
                   expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
                 });
               });
@@ -349,7 +323,7 @@ describe('class MongoLogger', function () {
       }
     });
 
-    context('maxDocumentLength', function () {
+    describe('maxDocumentLength', function () {
       const tests: Array<{
         input: undefined | string;
         expected: number;
@@ -381,9 +355,8 @@ describe('class MongoLogger', function () {
           expected: 1000
         }
       ];
-
       for (const { input, outcome, expected, context: _context } of tests) {
-        context(_context, () => {
+        describe(_context, () => {
           it(outcome, () => {
             const options = MongoLogger.resolveOptions(
               { MONGODB_LOG_MAX_DOCUMENT_LENGTH: input },
@@ -395,12 +368,15 @@ describe('class MongoLogger', function () {
       }
     });
 
-    context('logDestination', function () {
+    describe('logDestination', function () {
       let stdoutStub;
       let stderrStub;
       let streamStub;
       let validOptions: Map<any, MongoDBLogWritable>;
-      const stream: { write: (log: Log) => void; buffer: Log[] } = {
+      const stream: {
+        write: (log: Log) => void;
+        buffer: Log[];
+      } = {
         write(log: Log): void {
           this.buffer.push(log);
         },
@@ -429,8 +405,8 @@ describe('class MongoLogger', function () {
         sinon.restore();
       });
 
-      context('when MONGODB_LOG_DESTINATION is unset in the environment', function () {
-        context('when mongodbLogPath is unset as a client option', function () {
+      describe('when MONGODB_LOG_DESTINATION is unset in the environment', function () {
+        describe('when mongodbLogPath is unset as a client option', function () {
           for (const unsetEnvironmentOption of unsetOptions) {
             for (const unsetOption of unsetOptions) {
               it(`{environment: "${unsetEnvironmentOption}", client: "${unsetOption}"} defaults to process.stderr`, function () {
@@ -443,7 +419,6 @@ describe('class MongoLogger', function () {
                 );
                 const log: Log = { t: new Date(), c: 'command', s: 'error' };
                 options.logDestination.write(log);
-
                 const logLine = inspect(log, { breakLength: Infinity, compact: true });
                 expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
               });
@@ -451,7 +426,7 @@ describe('class MongoLogger', function () {
           }
         });
 
-        context('when mongodbLogPath is an invalid client option', function () {
+        describe('when mongodbLogPath is an invalid client option', function () {
           for (const unsetEnvironmentOption of unsetOptions) {
             for (const invalidOption of invalidClientOptions) {
               it(`{environment: "${unsetEnvironmentOption}", client: "${invalidOption}"} defaults to process.stderr`, function () {
@@ -464,7 +439,6 @@ describe('class MongoLogger', function () {
                 );
                 const log: Log = { t: new Date(), c: 'command', s: 'error' };
                 options.logDestination.write(log);
-
                 const logLine = inspect(log, { breakLength: Infinity, compact: true });
                 expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
               });
@@ -472,7 +446,7 @@ describe('class MongoLogger', function () {
           }
         });
 
-        context('when mongodbLogPath is a valid client option', function () {
+        describe('when mongodbLogPath is a valid client option', function () {
           for (const unsetEnvironmentOption of unsetOptions) {
             for (const validOption of validClientOptions) {
               it(`{environment: "${unsetEnvironmentOption}", client: "${validOption}"} uses the value from the client options`, function () {
@@ -483,7 +457,6 @@ describe('class MongoLogger', function () {
                   },
                   { mongodbLogPath: validOption as any }
                 );
-
                 const log: Log = { t: new Date(), c: 'command', s: 'error' };
                 options.logDestination.write(log);
                 const correctDestination = validOptions.get(validOption);
@@ -494,78 +467,70 @@ describe('class MongoLogger', function () {
         });
       });
 
-      context(
-        'when MONGODB_LOG_DESTINATION is set to an invalid value in the environment',
-        function () {
-          context('when mongodbLogPath is unset on the client options', function () {
-            for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
-              for (const unsetClientOption of unsetOptions) {
-                it(`{environment: "${invalidEnvironmentOption}", client: "${unsetClientOption}"} defaults to process.stderr`, function () {
-                  const options = MongoLogger.resolveOptions(
-                    {
-                      MONGODB_LOG_PATH: invalidEnvironmentOption,
-                      MONGODB_LOG_COMMAND: 'error'
-                    },
-                    { mongodbLogPath: unsetClientOption as any }
-                  );
-                  const log: Log = { t: new Date(), c: 'command', s: 'error' };
-                  options.logDestination.write(log);
-
-                  const logLine = inspect(log, { breakLength: Infinity, compact: true });
-                  expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
-                });
-              }
+      describe('when MONGODB_LOG_DESTINATION is set to an invalid value in the environment', function () {
+        describe('when mongodbLogPath is unset on the client options', function () {
+          for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
+            for (const unsetClientOption of unsetOptions) {
+              it(`{environment: "${invalidEnvironmentOption}", client: "${unsetClientOption}"} defaults to process.stderr`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: invalidEnvironmentOption,
+                    MONGODB_LOG_COMMAND: 'error'
+                  },
+                  { mongodbLogPath: unsetClientOption as any }
+                );
+                const log: Log = { t: new Date(), c: 'command', s: 'error' };
+                options.logDestination.write(log);
+                const logLine = inspect(log, { breakLength: Infinity, compact: true });
+                expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
+              });
             }
-          });
+          }
+        });
 
-          context(
-            'when mongodbLogPath is set to an invalid value on the client options',
-            function () {
-              for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
-                for (const invalidOption of invalidClientOptions) {
-                  it(`{environment: "${invalidEnvironmentOption}", client: "${invalidOption}"} defaults to process.stderr`, function () {
-                    const options = MongoLogger.resolveOptions(
-                      {
-                        MONGODB_LOG_PATH: invalidEnvironmentOption,
-                        MONGODB_LOG_COMMAND: 'error'
-                      },
-                      { mongodbLogPath: invalidOption as any }
-                    );
-                    const log: Log = { t: new Date(), c: 'command', s: 'error' };
-                    options.logDestination.write(log);
-
-                    const logLine = inspect(log, { breakLength: Infinity, compact: true });
-                    expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
-                  });
-                }
-              }
+        describe('when mongodbLogPath is set to an invalid value on the client options', function () {
+          for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
+            for (const invalidOption of invalidClientOptions) {
+              it(`{environment: "${invalidEnvironmentOption}", client: "${invalidOption}"} defaults to process.stderr`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: invalidEnvironmentOption,
+                    MONGODB_LOG_COMMAND: 'error'
+                  },
+                  { mongodbLogPath: invalidOption as any }
+                );
+                const log: Log = { t: new Date(), c: 'command', s: 'error' };
+                options.logDestination.write(log);
+                const logLine = inspect(log, { breakLength: Infinity, compact: true });
+                expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
+              });
             }
-          );
+          }
+        });
 
-          context('when mongodbLogPath is set to a valid value on the client options', function () {
-            for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
-              for (const validOption of validClientOptions) {
-                it(`{environment: "${invalidEnvironmentOption}", client: "${validOption}"} uses the value from the client options`, function () {
-                  const options = MongoLogger.resolveOptions(
-                    {
-                      MONGODB_LOG_PATH: invalidEnvironmentOption,
-                      MONGODB_LOG_COMMAND: 'error'
-                    },
-                    { mongodbLogPath: validOption as any }
-                  );
-                  const correctDestination = validOptions.get(validOption);
-                  const log: Log = { t: new Date(), c: 'command', s: 'error' };
-                  options.logDestination.write(log);
-                  expect(correctDestination?.write).to.have.been.calledOnce;
-                });
-              }
+        describe('when mongodbLogPath is set to a valid value on the client options', function () {
+          for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
+            for (const validOption of validClientOptions) {
+              it(`{environment: "${invalidEnvironmentOption}", client: "${validOption}"} uses the value from the client options`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: invalidEnvironmentOption,
+                    MONGODB_LOG_COMMAND: 'error'
+                  },
+                  { mongodbLogPath: validOption as any }
+                );
+                const correctDestination = validOptions.get(validOption);
+                const log: Log = { t: new Date(), c: 'command', s: 'error' };
+                options.logDestination.write(log);
+                expect(correctDestination?.write).to.have.been.calledOnce;
+              });
             }
-          });
-        }
-      );
+          }
+        });
+      });
 
-      context('when MONGODB_LOG_PATH is set to a valid option in the environment', function () {
-        context('when mongodbLogPath is unset on the client options', function () {
+      describe('when MONGODB_LOG_PATH is set to a valid option in the environment', function () {
+        describe('when mongodbLogPath is unset on the client options', function () {
           for (const validEnvironmentOption of validEnvironmentOptions) {
             for (const unsetOption of unsetOptions) {
               it(`{environment: "${validEnvironmentOption}", client: "${unsetOption}"} uses process.${validEnvironmentOption}`, function () {
@@ -578,39 +543,33 @@ describe('class MongoLogger', function () {
                 );
                 const correctDestination = validOptions.get(validEnvironmentOption);
                 options.logDestination.write({ t: new Date(), c: 'command', s: 'error' });
-
                 expect(correctDestination?.write).to.have.been.calledOnce;
               });
             }
           }
         });
 
-        context(
-          'when mongodbLogPath is set to an invalid value on the client options',
-          function () {
-            for (const validEnvironmentOption of validEnvironmentOptions) {
-              for (const invalidValue of invalidClientOptions) {
-                it(`{environment: "${validEnvironmentOption}", client: "${invalidValue}"} uses process.${validEnvironmentOption}`, function () {
-                  const options = MongoLogger.resolveOptions(
-                    {
-                      MONGODB_LOG_PATH: validEnvironmentOption,
-                      MONGODB_LOG_COMMAND: 'error'
-                    },
-                    { mongodbLogPath: invalidValue as any }
-                  );
-
-                  const correctDestination = validOptions.get(validEnvironmentOption);
-                  const log: Log = { t: new Date(), c: 'command', s: 'error' };
-                  options.logDestination.write(log);
-
-                  expect(correctDestination?.write).to.have.been.calledOnce;
-                });
-              }
+        describe('when mongodbLogPath is set to an invalid value on the client options', function () {
+          for (const validEnvironmentOption of validEnvironmentOptions) {
+            for (const invalidValue of invalidClientOptions) {
+              it(`{environment: "${validEnvironmentOption}", client: "${invalidValue}"} uses process.${validEnvironmentOption}`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: validEnvironmentOption,
+                    MONGODB_LOG_COMMAND: 'error'
+                  },
+                  { mongodbLogPath: invalidValue as any }
+                );
+                const correctDestination = validOptions.get(validEnvironmentOption);
+                const log: Log = { t: new Date(), c: 'command', s: 'error' };
+                options.logDestination.write(log);
+                expect(correctDestination?.write).to.have.been.calledOnce;
+              });
             }
           }
-        );
+        });
 
-        context('when mongodbLogPath is set to valid client option', function () {
+        describe('when mongodbLogPath is set to valid client option', function () {
           for (const validEnvironmentOption of validEnvironmentOptions) {
             for (const validValue of validClientOptions) {
               it(`{environment: "${validEnvironmentOption}", client: ${
@@ -651,12 +610,11 @@ describe('class MongoLogger', function () {
             logDestination: stream,
             logDestinationIsStdErr: false
           } as any);
-
           logger[severityLevel]('topology', 'message');
           expect(stream.buffer).to.have.lengthOf(0);
         });
 
-        context('when the log severity is greater than what was configured', function () {
+        describe('when the log severity is greater than what was configured', function () {
           it('does not write to logDestination', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -666,17 +624,15 @@ describe('class MongoLogger', function () {
               logDestination: stream,
               logDestinationIsStdErr: false
             } as any);
-
             for (let i = index + 1; i < severities.length; i++) {
               const severity = severities[i];
               logger[severity]('command', 'Hello');
             }
-
             expect(stream.buffer).to.have.lengthOf(0);
           });
         });
 
-        context('when log severity is equal to or less than what was configured', function () {
+        describe('when log severity is equal to or less than what was configured', function () {
           it('writes log to logDestination', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -686,18 +642,16 @@ describe('class MongoLogger', function () {
               logDestination: stream,
               logDestinationIsStdErr: false
             } as any);
-
             // Calls all severity logging methods with a level less than or equal to what severityLevel
             for (let i = index; i >= 0; i--) {
               const severity = severities[i];
               logger[severity]('command', 'Hello');
             }
-
             expect(stream.buffer).to.have.lengthOf(index + 1);
           });
         });
 
-        context('when object with toLog method is being logged', function () {
+        describe('when object with toLog method is being logged', function () {
           const obj = {
             a: 10,
             b: 12,
@@ -705,6 +659,7 @@ describe('class MongoLogger', function () {
               return { sum: this.a + this.b };
             }
           };
+
           it('calls toLog and constructs log message with the result of toLog', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -712,16 +667,15 @@ describe('class MongoLogger', function () {
               logDestination: stream,
               logDestinationIsStdErr: false
             } as any);
-
             logger[severityLevel]('command', obj);
-
             expect(stream.buffer).to.have.lengthOf(1);
             expect(stream.buffer[0]).to.have.property('sum', 22);
           });
         });
 
-        context('when object without toLog method is being logged', function () {
+        describe('when object without toLog method is being logged', function () {
           const obj = { a: 10, b: 12 };
+
           it('uses the existing fields to build the log message', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -729,7 +683,6 @@ describe('class MongoLogger', function () {
               logDestination: stream,
               logDestinationIsStdErr: false
             } as any);
-
             logger[severityLevel]('command', obj);
             expect(stream.buffer).to.have.lengthOf(1);
             expect(stream.buffer[0]).to.have.property('a', 10);
@@ -737,12 +690,13 @@ describe('class MongoLogger', function () {
           });
         });
 
-        context('when object with nullish top level fields is being logged', function () {
+        describe('when object with nullish top level fields is being logged', function () {
           const obj = {
             A: undefined,
             B: null,
             C: 'Hello World!'
           };
+
           it('emits a log message that omits the nullish top-level fields by default', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -750,9 +704,7 @@ describe('class MongoLogger', function () {
               logDestination: stream,
               logDestinationIsStdErr: false
             } as any);
-
             logger[severityLevel]('command', obj);
-
             expect(stream.buffer).to.have.lengthOf(1);
             expect(stream.buffer[0]).to.not.have.property('A');
             expect(stream.buffer[0]).to.not.have.property('B');
@@ -760,8 +712,9 @@ describe('class MongoLogger', function () {
           });
         });
 
-        context('when string is being logged', function () {
+        describe('when string is being logged', function () {
           const message = 'Hello world';
+
           it('puts the string in the message field of the emitted log message', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -769,14 +722,13 @@ describe('class MongoLogger', function () {
               logDestination: stream,
               logDestinationIsStdErr: false
             } as any);
-
             logger[severityLevel]('command', message);
             expect(stream.buffer).to.have.lengthOf(1);
             expect(stream.buffer[0]).to.have.property('message', message);
           });
         });
 
-        context('spec-required logs', function () {
+        describe('spec-required logs', function () {
           let stream: BufferingStream;
           let logger: MongoLogger;
 
@@ -792,7 +744,7 @@ describe('class MongoLogger', function () {
             } as any);
           });
 
-          context('command component', function () {
+          describe('command component', function () {
             let log;
             const commandStarted = {
               commandName: 'find',
@@ -824,7 +776,6 @@ describe('class MongoLogger', function () {
               failure: 'err',
               name: COMMAND_FAILED
             };
-
             function commonCommandComponentAssertions() {
               const fields = [
                 ['commandName', 'string'],
@@ -841,13 +792,12 @@ describe('class MongoLogger', function () {
               }
             }
 
-            context('when CommandStartedEvent is logged', function () {
+            describe('when CommandStartedEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('command', commandStarted);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
-
               commonCommandComponentAssertions();
 
               it('emits a log with field `message` = "Command started"', function () {
@@ -864,14 +814,14 @@ describe('class MongoLogger', function () {
               });
             });
 
-            context('when CommandSucceededEvent is logged', function () {
+            describe('when CommandSucceededEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('command', commandSucceeded);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0] as any;
               });
-
               commonCommandComponentAssertions();
+
               it('emits a log with field `message` = "Command succeeded"', function () {
                 expect(log).to.have.property('message', 'Command succeeded');
               });
@@ -882,19 +832,18 @@ describe('class MongoLogger', function () {
 
               it('emits a log with field `reply` that is an EJSON string', function () {
                 expect(log).to.have.property('reply').that.is.a('string');
-
                 expect(() => EJSON.parse(log.reply)).to.not.throw();
               });
             });
 
-            context('when CommandFailedEvent is logged', function () {
+            describe('when CommandFailedEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('command', commandFailed);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0] as any;
               });
-
               commonCommandComponentAssertions();
+
               it('emits a log with field `message` = "Command failed"', function () {
                 expect(log).to.have.property('message', 'Command failed');
               });
@@ -909,7 +858,7 @@ describe('class MongoLogger', function () {
             });
           });
 
-          context('connection component', function () {
+          describe('connection component', function () {
             let log;
             const options = {
               maxIdleTimeMS: 0,
@@ -992,55 +941,61 @@ describe('class MongoLogger', function () {
               }
             }
 
-            context('when ConnectionPoolCreatedEvent is logged', function () {
+            describe('when ConnectionPoolCreatedEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('connection', connectionPoolCreated);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection pool created"', function () {
                 expect(log).to.have.property('message', 'Connection pool created');
               });
+
               it('emits a log with field `maxIdleTimeMS` that is a number', function () {
                 expect(log).to.have.property('maxIdleTimeMS').that.is.a('number');
               });
+
               it('emits a log with field `minPoolSize` that is a number', function () {
                 expect(log).to.have.property('minPoolSize').that.is.a('number');
               });
+
               it('emits a log with field `maxPoolSize` that is a number', function () {
                 expect(log).to.have.property('maxPoolSize').that.is.a('number');
               });
+
               it('emits a log with field `maxConnecting` that is a number', function () {
                 expect(log).to.have.property('maxConnecting').that.is.a('number');
               });
+
               it('emits a log with field `waitQueueTimeoutMS` that is a number', function () {
                 expect(log).to.have.property('waitQueueTimeoutMS').that.is.a('number');
               });
             });
 
-            context('when ConnectionPoolReadyEvent is logged', function () {
+            describe('when ConnectionPoolReadyEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('connection', connectionPoolReady);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
-
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection pool ready"', function () {
                 expect(log).to.have.property('message', 'Connection pool ready');
               });
             });
 
-            context('when ConnectionPoolClearedEvent is logged', function () {
-              context('when serviceId is present', function () {
+            describe('when ConnectionPoolClearedEvent is logged', function () {
+              describe('when serviceId is present', function () {
                 beforeEach(function () {
                   logger[severityLevel]('connection', connectionPoolCleared);
                   expect(stream.buffer).to.have.lengthOf(1);
                   log = stream.buffer[0];
                 });
-
                 commonConnectionComponentAssertions();
+
                 it('emits a log with field `message` = "Connection pool cleared"', function () {
                   expect(log).to.have.property('message', 'Connection pool cleared');
                 });
@@ -1050,7 +1005,7 @@ describe('class MongoLogger', function () {
                 });
               });
 
-              context('when serviceId is not present', function () {
+              describe('when serviceId is not present', function () {
                 beforeEach(function () {
                   // eslint-disable-next-line @typescript-eslint/no-unused-vars
                   const { serviceId: _, ...connectionPoolClearedNoServiceId } =
@@ -1059,8 +1014,8 @@ describe('class MongoLogger', function () {
                   expect(stream.buffer).to.have.lengthOf(1);
                   log = stream.buffer[0];
                 });
-
                 commonConnectionComponentAssertions();
+
                 it('emits a log with field `message` = "Connection pool cleared"', function () {
                   expect(log).to.have.property('message', 'Connection pool cleared');
                 });
@@ -1071,39 +1026,38 @@ describe('class MongoLogger', function () {
               });
             });
 
-            context('when ConnectionPoolClosedEvent is logged', function () {
+            describe('when ConnectionPoolClosedEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('connection', connectionPoolClosed);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
-
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection pool closed"', function () {
                 expect(log).to.have.property('message', 'Connection pool closed');
               });
             });
 
-            context('when ConnectionCreatedEvent is logged', function () {
+            describe('when ConnectionCreatedEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('connection', connectionCreated);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
-
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection created"', function () {
                 expect(log).to.have.property('message', 'Connection created');
               });
             });
 
-            context('when ConnectionCheckOutStartedEvent is logged', function () {
+            describe('when ConnectionCheckOutStartedEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('connection', connectionCheckOutStarted);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
-
               commonConnectionComponentAssertions();
 
               it('emits a log with field `message` = "Connection checkout started"', function () {
@@ -1111,13 +1065,13 @@ describe('class MongoLogger', function () {
               });
             });
 
-            context('when ConnectionCheckOutFailedEvent is logged', function () {
+            describe('when ConnectionCheckOutFailedEvent is logged', function () {
               for (const [reason, message] of [
                 ['connectionError', 'An error occurred while trying to establish a new connection'],
                 ['timeout', 'Wait queue timeout elapsed without a connection becoming available'],
                 ['poolClosed', 'Connection pool was closed']
               ]) {
-                context(`with reason = "${reason}"`, function () {
+                describe(`with reason = "${reason}"`, function () {
                   beforeEach(function () {
                     const event =
                       reason === 'connectionError'
@@ -1140,7 +1094,6 @@ describe('class MongoLogger', function () {
                   it(`emits a log with field \`reason\` = "${message}"`, function () {
                     expect(log).to.have.property('reason', message);
                   });
-
                   if (reason === 'connectionError') {
                     it('emits a log with field `error`', function () {
                       expect(log).to.have.property('error').that.is.instanceOf(Error);
@@ -1150,46 +1103,46 @@ describe('class MongoLogger', function () {
               }
             });
 
-            context('when ConnectionCheckedInEvent is logged', function () {
+            describe('when ConnectionCheckedInEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('connection', connectionCheckedIn);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
-
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection checked in"', function () {
                 expect(log).to.have.property('message', 'Connection checked in');
               });
             });
 
-            context('when ConnectionCheckedOutEvent is logged', function () {
+            describe('when ConnectionCheckedOutEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('connection', connectionCheckedOut);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
-
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection checked out"', function () {
                 expect(log).to.have.property('message', 'Connection checked out');
               });
             });
 
-            context('when ConnectionReadyEvent is logged', function () {
+            describe('when ConnectionReadyEvent is logged', function () {
               beforeEach(function () {
                 logger[severityLevel]('connection', connectionReady);
                 expect(stream.buffer).to.have.lengthOf(1);
                 log = stream.buffer[0];
               });
-
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection checked out"', function () {
                 expect(log).to.have.property('message', 'Connection ready');
               });
             });
 
-            context('when ConnectionClosedEvent is logged', function () {
+            describe('when ConnectionClosedEvent is logged', function () {
               for (const [reason, message] of [
                 ['error', 'An error occurred while using the connection'],
                 [
@@ -1199,7 +1152,7 @@ describe('class MongoLogger', function () {
                 ['stale', 'Connection became stale because the pool was cleared'],
                 ['poolClosed', 'Connection pool was closed']
               ]) {
-                context(`with reason = "${reason}"`, function () {
+                describe(`with reason = "${reason}"`, function () {
                   beforeEach(function () {
                     const event =
                       reason === 'error'
@@ -1209,12 +1162,11 @@ describe('class MongoLogger', function () {
                     expect(stream.buffer).to.have.lengthOf(1);
                     log = stream.buffer[0];
                   });
-
                   commonConnectionComponentAssertions();
+
                   it(`emits a log with field \`reason\` = "${message}"`, function () {
                     expect(log).to.have.property('reason', message);
                   });
-
                   if (reason === 'error') {
                     it('emits a log with field `error`', function () {
                       expect(log).to.have.property('error');
@@ -1223,14 +1175,14 @@ describe('class MongoLogger', function () {
                 });
               }
 
-              context('with unknown reason', function () {
+              describe('with unknown reason', function () {
                 beforeEach(function () {
                   logger[severityLevel]('connection', { ...connectionClosed, reason: 'woops' });
                   expect(stream.buffer).to.have.lengthOf(1);
                   log = stream.buffer[0];
                 });
-
                 commonConnectionComponentAssertions();
+
                 it('emits a log with field `reason` prefixed by "Unknown close reason: "', function () {
                   expect(log).to.have.property('reason');
                   expect(log.reason).to.match(/^Unknown close reason: .*$/);
@@ -1240,7 +1192,7 @@ describe('class MongoLogger', function () {
           });
         });
 
-        context('when invalid severity is passed into parseSeverityFromString', function () {
+        describe('when invalid severity is passed into parseSeverityFromString', function () {
           it('should not throw', function () {
             expect(parseSeverityFromString('notARealSeverityLevel')).to.equal(null);
           });
@@ -1259,15 +1211,15 @@ describe('class MongoLogger', function () {
       }
     });
 
-    context('when maxDocumentLength = 0', function () {
+    describe('when maxDocumentLength = 0', function () {
       it('does not truncate document', function () {
         expect(stringifyWithMaxLen(largeDoc, 0)).to.equal(EJSON.stringify(largeDoc));
       });
     });
 
-    context('when maxDocumentLength is non-zero', function () {
-      context('when document has length greater than maxDocumentLength', function () {
-        context('when truncation does not occur mid-multibyte codepoint', function () {
+    describe('when maxDocumentLength is non-zero', function () {
+      describe('when document has length greater than maxDocumentLength', function () {
+        describe('when truncation does not occur mid-multibyte codepoint', function () {
           it('truncates ejson string to length of maxDocumentLength + 3', function () {
             expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.have.lengthOf(
               DEFAULT_MAX_DOCUMENT_LENGTH + 3
@@ -1279,15 +1231,16 @@ describe('class MongoLogger', function () {
           expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.match(/^.*\.\.\.$/);
         });
 
-        context('when truncation occurs mid-multibyte codepoint', function () {
-          const multiByteCodePoint = '\ud83d\ude0d'; // heart eyes emoji
-          context('when maxDocumentLength = 1 but greater than 0', function () {
+        describe('when truncation occurs mid-multibyte codepoint', function () {
+          const multiByteCodePoint = '\ud83d\ude0d';
+          // heart eyes emoji
+          describe('when maxDocumentLength = 1 but greater than 0', function () {
             it('should return an empty string', function () {
               expect(stringifyWithMaxLen(multiByteCodePoint, 1, { relaxed: true })).to.equal('');
             });
           });
 
-          context('when maxDocumentLength > 1', function () {
+          describe('when maxDocumentLength > 1', function () {
             it('should round down maxDocLength to previous codepoint', function () {
               const randomStringMinusACodePoint = `random ${multiByteCodePoint}random random${multiByteCodePoint}`;
               const randomString = `${randomStringMinusACodePoint}${multiByteCodePoint}`;
@@ -1299,17 +1252,19 @@ describe('class MongoLogger', function () {
         });
       });
 
-      context('when document has length less than or equal to maxDocumentLength', function () {
+      describe('when document has length less than or equal to maxDocumentLength', function () {
         it('does not truncate document', function () {
           expect(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.equal(
             EJSON.stringify(smallDoc)
           );
         });
+
         it('does not end with "..."', function () {
           expect(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.not.match(
             /^.*\.\.\./
           );
         });
+
         it('produces valid relaxed EJSON', function () {
           expect(() => {
             EJSON.parse(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH));
@@ -1317,7 +1272,7 @@ describe('class MongoLogger', function () {
         });
       });
 
-      context('EJSON stringify invalid inputs', function () {
+      describe('EJSON stringify invalid inputs', function () {
         const errorInputs = [
           {
             name: 'Map with non-string keys',
@@ -1333,7 +1288,7 @@ describe('class MongoLogger', function () {
           }
         ];
         for (const errorInput of errorInputs) {
-          context(`when value is ${errorInput.name}`, function () {
+          describe(`when value is ${errorInput.name}`, function () {
             it('should output default error message, with no error thrown', function () {
               expect(stringifyWithMaxLen(errorInput.input, 40)).to.equal(
                 'Extended JSON serialization failed with:...'
@@ -1343,7 +1298,7 @@ describe('class MongoLogger', function () {
         }
       });
 
-      context('when given function as input', function () {
+      describe('when given function as input', function () {
         it('should output function.name', function () {
           expect(
             stringifyWithMaxLen(function randomFunc() {
@@ -1369,7 +1324,7 @@ describe('class MongoLogger', function () {
     });
 
     describe('sync stream failure handling', function () {
-      context('when stream is not stderr', function () {
+      describe('when stream is not stderr', function () {
         let stderrStub;
 
         beforeEach(function () {
@@ -1380,7 +1335,7 @@ describe('class MongoLogger', function () {
           sinon.restore();
         });
 
-        context('when stream is user defined and stream.write throws', function () {
+        describe('when stream is user defined and stream.write throws', function () {
           it('should catch error, not crash application, warn user, and start writing to stderr', function () {
             const stream = {
               write(_log) {
@@ -1399,7 +1354,6 @@ describe('class MongoLogger', function () {
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
             const expectedLogLine1 = `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws' }`;
             expect(stderrStubCall).to.equal(`${expectedLogLine1}\n`);
-
             // logging is halted
             logger.debug('client', 'random message 2');
             const stderrStubCall2 = stderrStub.write.getCall(1);
@@ -1411,7 +1365,7 @@ describe('class MongoLogger', function () {
     });
 
     describe('async stream failure handling', function () {
-      context('when stream is not stderr', function () {
+      describe('when stream is not stderr', function () {
         let stderrStub;
 
         beforeEach(function () {
@@ -1422,7 +1376,7 @@ describe('class MongoLogger', function () {
           sinon.restore();
         });
 
-        context('when stream user defined stream and stream.write throws async', function () {
+        describe('when stream user defined stream and stream.write throws async', function () {
           it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
             const stream = {
               async write(_log) {
@@ -1438,19 +1392,15 @@ describe('class MongoLogger', function () {
             });
             // print random message at the debug level
             logger.debug('client', 'random message');
-
             // before timeout resolves, no error
             expect(stderrStub.write.getCall(0)).to.be.null;
-
             // manually wait for timeout to end
             await sleep(600);
-
             // stderr now contains the error message
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
             const expectedLogLine1 = `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws, but only after at least 500ms' }`;
             expect(stderrStubCall).to.equal(`${expectedLogLine1}\n`);
-
             // no more logging in the future
             logger.debug('client', 'random message 2');
             const stderrStubCall2 = stderrStub.write.getCall(1);
@@ -1459,7 +1409,7 @@ describe('class MongoLogger', function () {
           });
         });
 
-        context('when stream is stdout and stdout.write throws', function () {
+        describe('when stream is stdout and stdout.write throws', function () {
           it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
             sinon.stub(process.stdout, 'write').throws(new Error('I am stdout and do not work'));
             // print random message at the debug level
@@ -1470,16 +1420,13 @@ describe('class MongoLogger', function () {
               logDestinationIsStdErr: false
             });
             logger.debug('client', 'random message');
-
             // manually wait for promise to resolve (takes extra time with promisify)
             await sleep(600);
-
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
             expect(stderrStubCall).to.equal(
               `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'I am stdout and do not work' }\n`
             );
-
             // logging is halted
             logger.debug('client', 'random message 2');
             const stderrStubCall2 = stderrStub.write.getCall(1);
@@ -1489,11 +1436,12 @@ describe('class MongoLogger', function () {
         });
       });
 
-      context('when stream is stderr', function () {
-        context('when stderr.write throws', function () {
+      describe('when stream is stderr', function () {
+        describe('when stderr.write throws', function () {
           beforeEach(function () {
             sinon.stub(process.stderr, 'write').throws(new Error('fake stderr failure'));
           });
+
           afterEach(function () {
             sinon.restore();
           });
@@ -1512,7 +1460,8 @@ describe('class MongoLogger', function () {
         });
       });
     });
-    context('when async stream has multiple logs with different timeouts', function () {
+
+    describe('when async stream has multiple logs with different timeouts', function () {
       it('should preserve their order', async function () {
         const stream = {
           buffer: [],
@@ -1531,16 +1480,12 @@ describe('class MongoLogger', function () {
           logDestination: stream,
           logDestinationIsStdErr: false
         });
-
         logger.debug('client', 'longer timeout');
         logger.debug('client', 'shorter timeout');
         logger.debug('client', 'no timeout');
-
         expect(stream.buffer.length).to.equal(0);
-
         await sleep(2100);
         expect(stream.buffer).to.deep.equal(['longer timeout']);
-
         await sleep(600);
         expect(stream.buffer).to.deep.equal(['longer timeout', 'shorter timeout', 'no timeout']);
       });
@@ -1550,13 +1495,12 @@ describe('class MongoLogger', function () {
   describe('#willLog', function () {
     const severityLevels = Object.values(SeverityLevel);
     for (const severityLevel of severityLevels) {
-      context(`when the severity level is ${severityLevel}`, function () {
+      describe(`when the severity level is ${severityLevel}`, function () {
         let logger: MongoLogger;
         let componentSeverities;
         const components = Object.values(MongoLoggableComponent);
-
         for (const component of components) {
-          context(`when ${component} severity level <= ${severityLevel}`, function () {
+          describe(`when ${component} severity level <= ${severityLevel}`, function () {
             beforeEach(function () {
               const index = severityLevels.indexOf(severityLevel);
               componentSeverities = components.reduce((severities, value) => {
@@ -1574,7 +1518,6 @@ describe('class MongoLogger', function () {
                 logDestinationIsStdErr: true
               } as any);
             });
-
             if (severityLevel === 'off') {
               it('returns false always for off', function () {
                 expect(logger.willLog(component, severityLevel)).to.be.false;
@@ -1585,8 +1528,7 @@ describe('class MongoLogger', function () {
               });
             }
           });
-
-          context(`when ${component} severity level > ${severityLevel}`, function () {
+          describe(`when ${component} severity level > ${severityLevel}`, function () {
             if (severityLevel !== 'emergency') {
               beforeEach(function () {
                 const index = severityLevels.indexOf(severityLevel);
@@ -1602,7 +1544,6 @@ describe('class MongoLogger', function () {
                   logDestinationIsStdErr: true
                 } as any);
               });
-
               it('returns false', function () {
                 expect(logger.willLog(component, severityLevel)).to.be.false;
               });
