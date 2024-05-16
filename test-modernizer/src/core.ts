@@ -2,6 +2,7 @@ import assert from 'assert';
 import * as ts from 'typescript';
 
 import { isMochaGroup, isMochaTest } from './driver';
+import { nodeExists } from './utils';
 
 export function makeFunctionParametersUnique(node: ts.SourceFile): ts.Node {
   let count = 0;
@@ -163,16 +164,29 @@ export function arrowFunctionsExpressionToBodiedFunction(node: ts.SourceFile): t
 
 export function getMetadataArgument(node: ts.ObjectLiteralExpression) {
   assert(ts.isObjectLiteralExpression(node));
+  {
+    const metadataNode = node.properties.find(
+      (property): property is ts.PropertyAssignment =>
+        ts.isPropertyAssignment(property) &&
+        ts.isIdentifier(property.name) &&
+        property.name.getText() === 'metadata'
+    );
 
-  const metadataNode = node.properties.find(
-    (property): property is ts.PropertyAssignment =>
-      ts.isPropertyAssignment(property) &&
-      ts.isIdentifier(property.name) &&
-      property.name.getText() === 'metadata'
-  );
+    if (metadataNode) {
+      return metadataNode.initializer;
+    }
+  }
+  {
+    const metadataNode = node.properties.find(
+      (property): property is ts.ShorthandPropertyAssignment =>
+        ts.isShorthandPropertyAssignment(property) &&
+        ts.isIdentifier(property.name) &&
+        property.name.getText() === 'metadata'
+    );
 
-  if (metadataNode) {
-    return metadataNode.initializer;
+    if (metadataNode) {
+      return metadataNode.name;
+    }
   }
 
   // create an empty metadata object
@@ -256,6 +270,9 @@ export function convertTestToSeparateMetadataAndTestFunctionArguments(
             test
           ]);
         }
+        if (ts.isCallExpression(lastArgument)) {
+          return ts.visitEachChild(node, visit, context);
+        }
         throw new Error(`received unparsable test: ${lastArgument.KIND}`);
       }
       return ts.visitEachChild(node, visit, context);
@@ -287,6 +304,17 @@ export function convertContextBlocksToDescribe(node: ts.SourceFile): ts.SourceFi
   };
   const result = ts.transform(node, [transformerFactory]);
   return result.transformed[0];
+}
+
+export function shouldRefactor(node: ts.SourceFile): boolean {
+  return nodeExists(node, node => {
+    return (
+      (isMochaGroup(node) && node.mochaType === 'context') ||
+      (isMochaTest(node) &&
+        (!ts.isArrowFunction(node.arguments.at(-1)) ||
+          ts.isFunctionExpression(node.arguments.at(-1))))
+    );
+  });
 }
 
 export function modernizeTest(node: ts.SourceFile): ts.SourceFile {
