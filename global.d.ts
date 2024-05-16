@@ -26,11 +26,6 @@ declare global {
   type TopologyTypes = 'single' | 'replicaset' | 'sharded' | 'load-balanced';
   type TopologyTypeRequirement = OneOrMore<TopologyTypes> | OneOrMore<WithExclusion<TopologyTypes>>;
 
-  interface MetadataAndTest<Fn> {
-    metadata: MongoDBMetadataUI;
-    test: Fn;
-  }
-
   namespace Chai {
     interface Assertion {
       /** @deprecated Used only by the legacy spec runner, the unified runner implements the unified spec expectations */
@@ -50,29 +45,21 @@ declare global {
     interface ExclusiveSuiteFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
-      (title: string, metadataAndTest: MetadataAndTest<Mocha.Func>): Mocha.Test;
-      (title: string, metadataAndTest: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
     }
 
     interface ExclusiveTestFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
-      (title: string, metadataAndTest: MetadataAndTest<Mocha.Func>): Mocha.Test;
-      (title: string, metadataAndTest: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
     }
 
     interface TestFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
-      (title: string, metadataAndTest: MetadataAndTest<Mocha.Func>): Mocha.Test;
-      (title: string, metadataAndTest: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
     }
 
     interface PendingTestFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
-      (title: string, metadataAndTest: MetadataAndTest<Mocha.Func>): Mocha.Test;
-      (title: string, metadataAndTest: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
     }
 
     interface Context {
