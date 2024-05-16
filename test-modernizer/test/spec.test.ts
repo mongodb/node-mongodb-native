@@ -1,4 +1,3 @@
-import { createProjectSync } from '@ts-morph/bootstrap';
 import { expect } from 'chai';
 import { readFileSync, writeFileSync } from 'fs';
 import { describe } from 'mocha';
@@ -16,13 +15,8 @@ import {
   MochaTest,
   type MochaTestFunction
 } from '../src/driver';
-import { explore, formatSource } from '../src/utils';
+import { explore, formatSource, parseSource } from '../src/utils';
 
-function parseSource(source: string) {
-  const project = createProjectSync();
-  const resultFile = project.createSourceFile('someFileName.ts', source);
-  return resultFile;
-}
 describe('Specification Tests', function () {
   const tests = [
     {

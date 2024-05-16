@@ -85,3 +85,10 @@ export function find(root: ts.Node, predicate: (node: ts.Node) => boolean): ts.N
 export function nodeExists(root: ts.Node, predicate: (node: ts.Node) => boolean) {
   return find(root, predicate).length > 0;
 }
+
+export function parseSource(source: string) {
+  const project = createProjectSync();
+  const resultFile = project.createSourceFile('someFileName.ts', source);
+  annotate(resultFile);
+  return resultFile;
+}
