@@ -15,7 +15,7 @@ import {
   MochaTest,
   type MochaTestFunction
 } from '../src/driver';
-import { explore, formatSource, parseSource } from '../src/utils';
+import { formatSource, parseSource } from '../src/utils';
 
 describe('Specification Tests', function () {
   const tests = [
@@ -60,7 +60,6 @@ describe('Specification Tests', function () {
     `
     }
   ];
-
   for (const test of tests) {
     it(test.description, async function () {
       // const input = parseSource(test.input);
@@ -77,7 +76,6 @@ describe('Specification Tests', function () {
       expect(true).to.be.true;
     });
     `;
-
     const testWithCallback = `
     it('runs', function (done) {
       expect(true).to.be.true;
@@ -86,7 +84,6 @@ describe('Specification Tests', function () {
     `;
     function setup(testSourceString: string = testWithoutCallback) {
       const source = parseSource(testSourceString);
-
       const output: MochaTestFunction[] = [];
       (function extractMochaTest(node: ts.Node, output: MochaTestFunction[]) {
         if (isMochaTest(node)) {
@@ -100,7 +97,6 @@ describe('Specification Tests', function () {
 
     it('constructs fine', function () {
       const test = new MochaTest(setup());
-
       expect(test).to.be.instanceOf(MochaTest);
     });
 
@@ -111,7 +107,6 @@ describe('Specification Tests', function () {
     it('.testFunction returns the test body (callback function)', function () {
       const test = new MochaTest(setup());
       const function_ = test.testFunction;
-
       expect(ts.isFunctionExpression(function_)).to.be.true;
     });
 
@@ -141,7 +136,6 @@ describe('Specification Tests', function () {
     const testWithCallback = `collection.insertOne({}, (err) => {});`;
     function setup(testSourceString: string = testWithCallback) {
       const source = parseSource(testSourceString);
-
       const output: DriverAPI[] = [];
       (function extractMochaTest(node: ts.Node, output: DriverAPI[]) {
         if (isDriverAPI(node)) {
@@ -172,7 +166,6 @@ describe('Specification Tests', function () {
       expect(
         () => new DriverAPICallbackNode(setup(`collection.insertOne({}, ({ name }, result) => {})`))
       );
-
       expect(
         () => new DriverAPICallbackNode(setup(`collection.insertOne({}, (err, { value }) => {})`))
       );
@@ -227,7 +220,6 @@ describe('Specification Tests', function () {
   describe('convert(MochaTest)', function () {
     function setup(testSourceString: string) {
       const source = parseSource(testSourceString);
-
       const output: MochaTest[] = [];
       (function extractMochaTest(node: ts.Node, output: MochaTest[]) {
         if (isMochaTest(node)) {
@@ -242,9 +234,7 @@ describe('Specification Tests', function () {
     it('does nothing to an empty test', async function () {
       const test = setup(`it('does nothing', function () { })`);
       convertTest(test[0]);
-
       const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
       const expected = await formatSource(`it('does nothing', function () { })`);
       expect(resultAsString).to.deep.equal(expected);
     });
@@ -254,9 +244,7 @@ describe('Specification Tests', function () {
         expect(true).to.be.true;
       })`);
       convertTest(test[0]);
-
       const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
       const expected = await formatSource(`it('does nothing', function () {
         expect(true).to.be.true;
       })`);
@@ -268,9 +256,7 @@ describe('Specification Tests', function () {
         expect(true).to.be.true;
       })`);
       convertTest(test[0]);
-
       const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
       const expected = await formatSource(`it('does nothing', async function () {
         expect(true).to.be.true;
       })`);
@@ -282,9 +268,7 @@ describe('Specification Tests', function () {
         expect(true).to.be.true;
       })`);
       convertTest(test[0]);
-
       const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
       const expected = await formatSource(`it('does nothing', function (done) {
         expect(true).to.be.true;
       })`);
@@ -297,9 +281,7 @@ describe('Specification Tests', function () {
           collection.find({}).toArray(() => { done() })
         })`);
         convertTest(test[0]);
-
         const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
         const expected = await formatSource(`it('does nothing', async function () {
           await collection.find({}).toArray();
         })`);
@@ -314,9 +296,7 @@ describe('Specification Tests', function () {
           });
         })`);
         convertTest(test[0]);
-
         const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
         const expected = await formatSource(`it('does nothing', async function () {
           var err;
           try {
@@ -338,9 +318,7 @@ describe('Specification Tests', function () {
           });
         })`);
         convertTest(test[0]);
-
         const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
         const expected = await formatSource(`it('does nothing', async function () {
           var err;
           var result;
@@ -366,9 +344,7 @@ describe('Specification Tests', function () {
           });
         })`);
         convertTest(test[0]);
-
         const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
         const expected = await formatSource(`it('does nothing', async function () {
           const client = this.configuration.newClient();
           const collection = collection.db('foo').collection('bar');
@@ -396,9 +372,7 @@ describe('Specification Tests', function () {
           })
         })`);
         convertTest(test[0]);
-
         const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
         const expected = await formatSource(`it('does nothing', async function () {
           const client = this.configuration.newClient();
           await client.connect();
@@ -421,9 +395,7 @@ describe('Specification Tests', function () {
           })
         })`);
         convertTest(test[0]);
-
         const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
         const expected = await formatSource(`it('does nothing', async function () {
           const client = this.configuration.newClient();
           var error;
@@ -459,9 +431,7 @@ describe('Specification Tests', function () {
           })
         })`);
         convertTest(test[0]);
-
         const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
         const expected = await formatSource(`it('does nothing', async function () {
           const client = this.configuration.newClient();
           var error;
@@ -507,9 +477,7 @@ describe('Specification Tests', function () {
     })
   })`);
         convertTest(test[0]);
-
         const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
         const expected = await formatSource(`it('does nothing', async function () {
     const client = this.configuration.newClient();
     var error;
@@ -553,38 +521,20 @@ describe('Specification Tests', function () {
     });
 
     describe('custom metadata + runner object tests', function () {
-      it.skip('correctly converts test + metadata format', async function () {
+      it('correctly converts test + metadata format', async function () {
         const test = setup(`it('works with custom format', { metadata: {},
           test: function(done) {
             expect(true).to.be.true;
             done();
           }
         )`);
-        explore(test[1]);
-        convertTest(test[0]);
-
-        const resultAsString = await formatSource(test[1], ts.EmitHint.SourceFile);
-
-        const expected = await formatSource(`it('does nothing', async function () {
-      const client = this.configuration.newClient();
-      var error;
-      try {
-        await client.connect();
-      } catch (_error_unique) {
-        error = _error_unique;
-      }
-      expect(error).not.to.exist;
-      const collection = collection.db('foo').collection('bar');
-      var error;
-      var documents;
-      try {
-        documents = await collection.find({}).toArray();
-      } catch (_error_unique) {
-        error = _error_unique;
-      }
-      expect(error).not.to.exist;
-      expect(documents).to.be.an('array');
-    })`);
+        const result = convert(test[1]);
+        const resultAsString = await formatSource(result);
+        const expected = await formatSource(`it('works with custom format', { metadata: {},
+        test: async function() {
+          expect(true).to.be.true;
+        }
+      })`);
         expect(resultAsString).to.deep.equal(expected);
       });
     });
@@ -594,9 +544,7 @@ describe('Specification Tests', function () {
     it('does nothing if there is no mocha group', async function () {
       const test = parseSource(`3 + 3`);
       convert(test);
-
       const resultAsString = await formatSource(test, ts.EmitHint.SourceFile);
-
       const expected = await formatSource(`3 + 3`);
       expect(resultAsString).to.deep.equal(expected);
     });
@@ -604,16 +552,13 @@ describe('Specification Tests', function () {
     it('does nothing if there is no mocha test function', async function () {
       const test = parseSource(`describe('mocha tests', function() { })`);
       convert(test);
-
       const resultAsString = await formatSource(test, ts.EmitHint.SourceFile);
-
       const expected = await formatSource(`describe('mocha tests', function() { })`);
       expect(resultAsString).to.deep.equal(expected);
     });
 
-    it('converts a test  file', async function () {
-      const test = parseSource(
-        `describe('mocha tests', function() {
+    it('converts a test file', async function () {
+      const test = parseSource(`describe('mocha tests', function() {
   it('does nothing', function (done) {
     collection.find({}).toArray((err, result) => {
       if (err) console.log('ahhh');
@@ -621,36 +566,28 @@ describe('Specification Tests', function () {
       done();
     });
   })
-})`
-      );
-      convert(test);
-
-      const resultAsString = await formatSource(test, ts.EmitHint.SourceFile);
-
-      const expected = await formatSource(
-        `describe('mocha tests', function() {
+})`);
+      const result = convert(test);
+      const resultAsString = await formatSource(result, ts.EmitHint.SourceFile);
+      const expected = await formatSource(`describe('mocha tests', function() {
   it('does nothing', async function () {
-    var err;
-    var result;
+    var err_1;
+    var result_2;
     try {
-      result = await collection.find({}).toArray();
+      result_2 = await collection.find({}).toArray();
     } catch (_error_unique) {
-      err = _error_unique;
+      err_1 = _error_unique;
     }
-    if (err) console.log('ahhh');
-    expect(Array.isArray(result)).to.be.true;
+    if (err_1) console.log('ahhh');
+    expect(Array.isArray(result_2)).to.be.true;
   })
-})`
-      );
+})`);
       expect(resultAsString).to.deep.equal(expected);
     });
-
     it.skip('converts a test  file', async function () {
       const test = parseSource(readFileSync(resolve(__dirname, '../../test/find.test'), 'utf-8'));
       const result = convert(test);
-
       const resultAsString = await formatSource(result, ts.EmitHint.SourceFile);
-
       writeFileSync('./test/find_copy.test.js', resultAsString);
     });
   });

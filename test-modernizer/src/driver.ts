@@ -19,7 +19,7 @@ export type MochaTestFunction = ts.CallExpression & {
   mochaType: 'it' | 'test';
 };
 
-export type MochaTestGroup = ts.Node & {
+export type MochaTestGroup = ts.CallExpression & {
   expression: ts.Identifier;
   mochaType: 'describe' | 'context';
 };

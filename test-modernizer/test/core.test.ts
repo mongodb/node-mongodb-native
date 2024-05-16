@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import {
   arrowFunctionsExpressionToBodiedFunction,
+  convertTestToSeparateMetadataAndTestFunctionArguments,
   makeFunctionParametersUnique
 } from '../src/core';
 import { formatSource, parseSource } from '../src/utils';
@@ -376,7 +377,6 @@ describe('makeFunctionParametersUnique()', function () {
     });
   });
 });
-
 describe('arrowFunctionsExpressionToBodiedFunction', function () {
   it('does nothing with no arrow functions', async function () {
     const source = parseSource('3 + 3');
@@ -431,5 +431,69 @@ describe('arrowFunctionsExpressionToBodiedFunction', function () {
       }
     }`);
     expect(result).to.deep.equal(expected);
+  });
+});
+describe('getMetadataArgument()', function () {
+  it('no metadata object', async function () {
+    const source = parseSource(`it('does nothing', { test: () => {
+      expect(true).to.be.true;
+    }})`);
+    const result = convertTestToSeparateMetadataAndTestFunctionArguments(source);
+    expect(await formatSource(result)).to.deep.equal(
+      await formatSource(`it('does nothing', { requires: {} }, () => {
+      expect(true).to.be.true;
+    })`)
+    );
+  });
+
+  it('empty metadata object', async function () {
+    const source = parseSource(`it('does nothing', { metadata: { requires: {} }, test: () => {
+      expect(true).to.be.true;
+    }})`);
+    const result = convertTestToSeparateMetadataAndTestFunctionArguments(source);
+    expect(await formatSource(result)).to.deep.equal(
+      await formatSource(`it('does nothing', { requires: {} }, () => {
+      expect(true).to.be.true;
+    })`)
+    );
+  });
+
+  it('non-empty metadata object', async function () {
+    const source =
+      parseSource(`it('does nothing', { metadata: { requires: { mongodb: '>5' } }, test: () => {
+      expect(true).to.be.true;
+    }})`);
+    const result = convertTestToSeparateMetadataAndTestFunctionArguments(source);
+    expect(await formatSource(result)).to.deep.equal(
+      await formatSource(`it('does nothing', { requires: { mongodb: '>5' } }, () => {
+        expect(true).to.be.true;
+      })`)
+    );
+  });
+
+  it('non-empty test', async function () {
+    const source =
+      parseSource(`it('does nothing', { metadata: { requires: { mongodb: '>5' } }, test: (a, b) => {
+      expect(a).to.equal(b);
+    }})`);
+    const result = convertTestToSeparateMetadataAndTestFunctionArguments(source);
+    expect(await formatSource(result)).to.deep.equal(
+      await formatSource(`it('does nothing', { requires: { mongodb: '>5' } }, (a, b) => {
+          expect(a).to.equal(b);
+        })`)
+    );
+  });
+
+  it('non-empty test', async function () {
+    const source =
+      parseSource(`it('does nothing', { metadata: { requires: { mongodb: '>5' } }, test(a, b) {
+      expect(a).to.equal(b);
+    }})`);
+    const result = convertTestToSeparateMetadataAndTestFunctionArguments(source);
+    expect(await formatSource(result)).to.deep.equal(
+      await formatSource(`it('does nothing', { requires: { mongodb: '>5' } }, function (a, b) {
+          expect(a).to.equal(b);
+        })`)
+    );
   });
 });

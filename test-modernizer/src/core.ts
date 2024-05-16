@@ -1,6 +1,8 @@
 import assert from 'assert';
 import * as ts from 'typescript';
 
+import { isMochaGroup, isMochaTest } from './driver';
+
 export function makeFunctionParametersUnique(node: ts.SourceFile): ts.Node {
   let count = 0;
   const unique = s => `${s}_${count++}`;
@@ -157,4 +159,138 @@ export function arrowFunctionsExpressionToBodiedFunction(node: ts.SourceFile): t
   };
   const result = ts.transform(node, [transformerFactory]);
   return result.transformed[0];
+}
+
+export function getMetadataArgument(node: ts.ObjectLiteralExpression) {
+  assert(ts.isObjectLiteralExpression(node));
+
+  const metadataNode = node.properties.find(
+    (property): property is ts.PropertyAssignment =>
+      ts.isPropertyAssignment(property) &&
+      ts.isIdentifier(property.name) &&
+      property.name.getText() === 'metadata'
+  );
+
+  if (metadataNode) {
+    return metadataNode.initializer;
+  }
+
+  // create an empty metadata object
+  return ts.factory.createObjectLiteralExpression([
+    ts.factory.createPropertyAssignment('requires', ts.factory.createObjectLiteralExpression([]))
+  ]);
+}
+
+export function getTestArgument(
+  node: ts.ObjectLiteralExpression
+): ts.ArrowFunction | ts.FunctionExpression {
+  assert(ts.isObjectLiteralExpression(node));
+
+  {
+    // property assignment: { test: function() { ... } }
+    const metadataNode = node.properties.find(
+      (property): property is ts.PropertyAssignment =>
+        ts.isPropertyAssignment(property) &&
+        ts.isIdentifier(property.name) &&
+        property.name.getText() === 'test'
+    );
+
+    if (metadataNode) {
+      const _function = metadataNode.initializer;
+      assert(
+        ts.isFunctionExpression(_function) || ts.isArrowFunction(_function),
+        `received a mocha test function that is not a function expression or an arrow function: ${_function.KIND}`
+      );
+      return _function;
+    }
+  }
+
+  {
+    // method definition
+    const metadataNode = node.properties.find(
+      (property): property is ts.MethodDeclaration =>
+        ts.isMethodDeclaration(property) &&
+        ts.isIdentifier(property.name) &&
+        property.name.getText() === 'test'
+    );
+
+    if (metadataNode) {
+      return ts.factory.createFunctionExpression(
+        (metadataNode.modifiers ?? []).map(modifier =>
+          ts.factory.createModifier(modifier.kind as any)
+        ),
+        metadataNode.asteriskToken,
+        '',
+        metadataNode.typeParameters,
+        metadataNode.parameters,
+        metadataNode.type,
+        metadataNode.body
+      );
+    }
+  }
+  // create an empty metadata object
+  throw new Error('did not find a property `test` on a mocha test.');
+}
+
+export function convertTestToSeparateMetadataAndTestFunctionArguments(
+  node: ts.SourceFile
+): ts.SourceFile {
+  // @ts-expect-error asdf
+  const transformerFactory: ts.TransformerFactory<ts.SourceFile> = context => {
+    function visit(node: ts.Node): ts.Node {
+      if (isMochaTest(node)) {
+        const lastArgument = node.arguments.at(-1);
+        if (ts.isFunctionExpression(lastArgument) || ts.isArrowFunction(lastArgument)) {
+          // it('does something', ..., function() { ... })
+          // do nothing - function is formatted correctly already.
+          return ts.visitEachChild(node, visit, context);
+        }
+        if (ts.isObjectLiteralExpression(lastArgument)) {
+          // it('does something', { test: function() { ... } })
+          const test = getTestArgument(lastArgument);
+          const metadata = getMetadataArgument(lastArgument);
+          const description = node.arguments.at(0);
+          return ts.factory.updateCallExpression(node, node.expression, node.typeArguments, [
+            description,
+            metadata,
+            test
+          ]);
+        }
+        throw new Error(`received unparsable test: ${lastArgument.KIND}`);
+      }
+      return ts.visitEachChild(node, visit, context);
+    }
+
+    return visit;
+  };
+  const result = ts.transform(node, [transformerFactory]);
+  return result.transformed[0];
+}
+
+export function convertContextBlocksToDescribe(node: ts.SourceFile): ts.SourceFile {
+  // @ts-expect-error asdf
+  const transformerFactory: ts.TransformerFactory<ts.SourceFile> = context => {
+    function visit(node: ts.Node): ts.Node {
+      if (isMochaGroup(node) && node.mochaType === 'context') {
+        const args = node.arguments.map(node => visit(node));
+        return ts.factory.updateCallExpression(
+          node,
+          ts.factory.createIdentifier('describe'),
+          node.typeArguments,
+          args as any
+        );
+      }
+      return ts.visitEachChild(node, visit, context);
+    }
+
+    return visit;
+  };
+  const result = ts.transform(node, [transformerFactory]);
+  return result.transformed[0];
+}
+
+export function modernizeTest(node: ts.SourceFile): ts.SourceFile {
+  return convertTestToSeparateMetadataAndTestFunctionArguments(
+    convertContextBlocksToDescribe(node)
+  );
 }
