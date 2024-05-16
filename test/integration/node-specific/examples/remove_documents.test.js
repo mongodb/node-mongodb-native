@@ -1,5 +1,4 @@
 'use strict';
-
 const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
 
@@ -14,7 +13,6 @@ describe('examples(remove-documents):', function () {
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
-
     await db.collection('inventory').deleteMany({});
     // Start Example 55
     await db.collection('inventory').insertMany([
@@ -58,36 +56,39 @@ describe('examples(remove-documents):', function () {
     db = undefined;
   });
 
-  it('Delete All Documents', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Delete All Documents',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 56
       await db.collection('inventory').deleteMany({});
       // End Example 56
       const cursor = db.collection('inventory').find({});
       expect(await cursor.count()).to.equal(0);
     }
-  });
+  );
 
-  it('Delete All Documents that Match a Condition', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Delete All Documents that Match a Condition',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 57
       await db.collection('inventory').deleteMany({ status: 'A' });
       // End Example 57
       const cursor = db.collection('inventory').find({});
       expect(await cursor.count()).to.equal(3);
     }
-  });
+  );
 
-  it('Delete Only One Document that Matches a Condition', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Delete Only One Document that Matches a Condition',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 58
       await db.collection('inventory').deleteOne({ status: 'D' });
       // End Example 58
       const cursor = db.collection('inventory').find({});
       expect(await cursor.count()).to.equal(4);
     }
-  });
+  );
 });

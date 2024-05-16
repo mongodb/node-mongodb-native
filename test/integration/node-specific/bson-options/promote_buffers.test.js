@@ -1,6 +1,5 @@
 'use strict';
 const { expect } = require('chai');
-
 const { assert: test, setupDatabase } = require('../../shared');
 
 describe('Promote Buffers', function () {
@@ -8,20 +7,17 @@ describe('Promote Buffers', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('should correctly honor promoteBuffers when creating an instance using Db', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteBuffers when creating an instance using Db',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         promoteBuffers: true
       });
-
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer1').insert(
@@ -30,97 +26,80 @@ describe('Promote Buffers', function () {
           },
           function (err) {
             expect(err).to.not.exist;
-
             db.collection('shouldCorrectlyHonorPromoteBuffer1').findOne(function (err, doc) {
               expect(err).to.not.exist;
               test.ok(doc.doc instanceof Buffer);
-
               client.close(done);
             });
           }
         );
       });
     }
-  });
+  );
 
-  it('should correctly honor promoteBuffers when creating an instance using MongoClient', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteBuffers when creating an instance using MongoClient',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       var configuration = this.configuration;
-
       const client = configuration.newClient({}, { promoteBuffers: true });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-
         db.collection('shouldCorrectlyHonorPromoteBuffer2').insert(
           {
             doc: Buffer.alloc(256)
           },
           function (err) {
             expect(err).to.not.exist;
-
             db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function (err, doc) {
               expect(err).to.not.exist;
               test.ok(doc.doc instanceof Buffer);
-
               client.close(done);
             });
           }
         );
       });
     }
-  });
+  );
 
-  it('should correctly honor promoteBuffers at cursor level', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteBuffers at cursor level',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       var configuration = this.configuration;
-
       const client = configuration.newClient({}, { promoteBuffers: true });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-
         db.collection('shouldCorrectlyHonorPromoteBuffer3').insert(
           {
             doc: Buffer.alloc(256)
           },
           function (err) {
             expect(err).to.not.exist;
-
             db.collection('shouldCorrectlyHonorPromoteBuffer3')
               .find()
               .next(function (err, doc) {
                 expect(err).to.not.exist;
                 test.ok(doc.doc instanceof Buffer);
-
                 client.close(done);
               });
           }
         );
       });
     }
-  });
+  );
 
-  it('should correctly honor promoteBuffers at cursor find level', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteBuffers at cursor find level',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       var configuration = this.configuration;
-
       const client = configuration.newClient();
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
@@ -130,34 +109,29 @@ describe('Promote Buffers', function () {
           },
           function (err) {
             expect(err).to.not.exist;
-
             db.collection('shouldCorrectlyHonorPromoteBuffer4')
               .find({}, { promoteBuffers: true })
               .next(function (err, doc) {
                 expect(err).to.not.exist;
                 test.ok(doc.doc instanceof Buffer);
-
                 client.close(done);
               });
           }
         );
       });
     }
-  });
+  );
 
-  it('should correctly honor promoteBuffers at aggregate level', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteBuffers at aggregate level',
+    {
       requires: {
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
         mongodb: '>=2.4.0'
       }
     },
-
-    test: function (done) {
+    function (done) {
       var configuration = this.configuration;
-
       const client = configuration.newClient();
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
@@ -167,18 +141,16 @@ describe('Promote Buffers', function () {
           },
           function (err) {
             expect(err).to.not.exist;
-
             db.collection('shouldCorrectlyHonorPromoteBuffer5')
               .aggregate([{ $match: {} }], { promoteBuffers: true })
               .next(function (err, doc) {
                 expect(err).to.not.exist;
                 test.ok(doc.doc instanceof Buffer);
-
                 client.close(done);
               });
           }
         );
       });
     }
-  });
+  );
 });

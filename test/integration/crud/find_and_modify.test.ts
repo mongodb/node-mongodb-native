@@ -9,7 +9,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndDelete', function () {
-    context('when passing includeResultMetadata: true', function () {
+    describe('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -30,7 +30,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when no options are passed', function () {
+    describe('when no options are passed', function () {
       let client;
       let collection;
 
@@ -45,14 +45,14 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      context('when there is a match', function () {
+      describe('when there is a match', function () {
         it('returns the deleted document', async function () {
           const result = await collection.findOneAndDelete({ a: 1 });
           expect(result.b).to.equal(1);
         });
       });
 
-      context('when there is no match', function () {
+      describe('when there is no match', function () {
         it('returns null', async function () {
           const result = await collection.findOneAndDelete({ a: 2 });
           expect(result).to.equal(null);
@@ -60,7 +60,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing an object id filter', function () {
+    describe('when passing an object id filter', function () {
       let client;
       let collection;
       const started: CommandStartedEvent[] = [];
@@ -88,7 +88,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing in writeConcern', function () {
+    describe('when passing in writeConcern', function () {
       let client;
       let collection;
       let started: CommandStartedEvent[] = [];
@@ -106,7 +106,7 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      context('when provided at the operation level', function () {
+      describe('when provided at the operation level', function () {
         beforeEach(async function () {
           collection = client.db('test').collection('findAndModifyTest');
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
@@ -118,7 +118,7 @@ describe('Collection (#findOneAnd...)', function () {
         });
       });
 
-      context('when provided at the collection level', function () {
+      describe('when provided at the collection level', function () {
         beforeEach(async function () {
           collection = client
             .db('test')
@@ -132,7 +132,7 @@ describe('Collection (#findOneAnd...)', function () {
         });
       });
 
-      context('when provided at the db level', function () {
+      describe('when provided at the db level', function () {
         beforeEach(async function () {
           collection = client
             .db('test', { writeConcern: { j: 1 } })
@@ -149,7 +149,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndUpdate', function () {
-    context('when passing includeResultMetadata: true', function () {
+    describe('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -174,7 +174,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when no options are passed', function () {
+    describe('when no options are passed', function () {
       let client;
       let collection;
 
@@ -189,14 +189,14 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      context('when there is a match', function () {
+      describe('when there is a match', function () {
         it('returns the modified document', async function () {
           const result = await collection.findOneAndUpdate({ a: 1 }, { $set: { a: 1 } });
           expect(result.b).to.equal(1);
         });
       });
 
-      context('when there is no match', function () {
+      describe('when there is no match', function () {
         it('returns null', async function () {
           const result = await collection.findOneAndUpdate({ a: 2 }, { $set: { a: 1 } });
           expect(result).to.equal(null);
@@ -204,7 +204,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing an object id filter', function () {
+    describe('when passing an object id filter', function () {
       let client;
       let collection;
       const started: CommandStartedEvent[] = [];
@@ -234,14 +234,13 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing in a non-primary read preference', {
+    describe('when passing in a non-primary read preference', {
       metadata: {
         requires: { topology: ['replicaset'] }
       },
       test: function () {
         let client;
         let collection;
-
         beforeEach(async function () {
           client = this.configuration.newClient(
             { readPreference: 'secondary' },
@@ -250,12 +249,10 @@ describe('Collection (#findOneAnd...)', function () {
           collection = client.db('test').collection('findAndModifyTest');
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
-
         afterEach(async function () {
           await collection.drop();
           await client?.close();
         });
-
         it('returns the raw result', async function () {
           const result = await collection.findOneAndUpdate(
             { a: 1 },
@@ -267,7 +264,7 @@ describe('Collection (#findOneAnd...)', function () {
       }
     });
 
-    context('when passing in writeConcern', function () {
+    describe('when passing in writeConcern', function () {
       let client;
       let collection;
       const started: CommandStartedEvent[] = [];
@@ -284,7 +281,7 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      context('when provided at the operation level', function () {
+      describe('when provided at the operation level', function () {
         beforeEach(async function () {
           collection = client.db('test').collection('findAndModifyTest');
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
@@ -296,7 +293,7 @@ describe('Collection (#findOneAnd...)', function () {
         });
       });
 
-      context('when provided at the collection level', function () {
+      describe('when provided at the collection level', function () {
         beforeEach(async function () {
           collection = client
             .db('test')
@@ -310,7 +307,7 @@ describe('Collection (#findOneAnd...)', function () {
         });
       });
 
-      context('when provided at the db level', function () {
+      describe('when provided at the db level', function () {
         beforeEach(async function () {
           collection = client
             .db('test', { writeConcern: { j: 1 } })
@@ -327,7 +324,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndReplace', function () {
-    context('when passing includeResultMetadata: true', function () {
+    describe('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -352,7 +349,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when no options are passed', function () {
+    describe('when no options are passed', function () {
       let client;
       let collection;
 
@@ -367,14 +364,14 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      context('when there is a match', function () {
+      describe('when there is a match', function () {
         it('returns the replaced document', async function () {
           const result = await collection.findOneAndReplace({ a: 1 }, { a: 1 });
           expect(result.b).to.equal(1);
         });
       });
 
-      context('when there is no match', function () {
+      describe('when there is no match', function () {
         it('returns null', async function () {
           const result = await collection.findOneAndReplace({ a: 2 }, { a: 1 });
           expect(result).to.equal(null);
@@ -382,7 +379,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing an object id filter', function () {
+    describe('when passing an object id filter', function () {
       let client;
       let collection;
       const started: CommandStartedEvent[] = [];
@@ -410,7 +407,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when providing atomic operators', function () {
+    describe('when providing atomic operators', function () {
       let client;
       let collection;
 
@@ -433,7 +430,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing in writeConcern', function () {
+    describe('when passing in writeConcern', function () {
       let client;
       let collection;
       let started: CommandStartedEvent[] = [];
@@ -451,7 +448,7 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      context('when provided at the operation level', function () {
+      describe('when provided at the operation level', function () {
         beforeEach(async function () {
           collection = client.db('test').collection('findAndModifyTest');
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
@@ -463,7 +460,7 @@ describe('Collection (#findOneAnd...)', function () {
         });
       });
 
-      context('when provided at the collection level', function () {
+      describe('when provided at the collection level', function () {
         beforeEach(async function () {
           collection = client
             .db('test')
@@ -477,7 +474,7 @@ describe('Collection (#findOneAnd...)', function () {
         });
       });
 
-      context('when provided at the db level', function () {
+      describe('when provided at the db level', function () {
         beforeEach(async function () {
           collection = client
             .db('test', { writeConcern: { w: 1 } })

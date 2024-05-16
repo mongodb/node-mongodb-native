@@ -4,7 +4,6 @@ import { expect } from 'chai';
 
 import { sleep } from '../../tools/utils';
 import { runScript } from './resource_tracking_script_builder';
-
 /**
  * This 5MB range is selected arbitrarily and should likely be raised if failures are seen intermittently.
  *
@@ -13,7 +12,6 @@ import { runScript } from './resource_tracking_script_builder';
  * the growth will continue if the script is changed to iterate the the test code more.
  */
 const MB_PERMITTED_OFFSET = 5;
-
 describe('Driver Resources', () => {
   let startingMemoryUsed;
   let endingMemoryUsed;
@@ -32,7 +30,7 @@ describe('Driver Resources', () => {
     }
   });
 
-  context('on MongoClient.close()', () => {
+  describe('on MongoClient.close()', () => {
     before('create leak reproduction script', async function () {
       if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
         return;
@@ -90,15 +88,15 @@ describe('Driver Resources', () => {
     });
   });
 
-  context('when 100s of operations are executed and complete', () => {
+  describe('when 100s of operations are executed and complete', () => {
     beforeEach(function () {
       if (this.currentTest && typeof v8.queryObjects !== 'function') {
         this.currentTest.skipReason = 'Test requires v8.queryObjects API to count Promises';
         this.currentTest?.skip();
       }
     });
-
     let client;
+
     beforeEach(async function () {
       client = this.configuration.newClient();
     });
@@ -115,7 +113,6 @@ describe('Driver Resources', () => {
       }
       await sleep(10);
       const promiseCountAfter = v8.queryObjects(Promise, { format: 'count' });
-
       expect(promiseCountAfter).to.be.within(promiseCountBefore - 5, promiseCountBefore + 5);
     });
   });

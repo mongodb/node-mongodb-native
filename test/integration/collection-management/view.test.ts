@@ -22,18 +22,14 @@ describe('Views', function () {
       viewOn: 'users',
       pipeline: [{ $match: {} }]
     });
-
     expect(result).to.exist;
-
     const newView = await db
       .listCollections({
         type: 'view',
         name: 'test'
       })
       .next();
-
     expect(newView).to.exist;
-
     const options = (newView as CollectionInfo).options ?? null;
     expect(options).to.haveOwnProperty('viewOn', 'users');
     expect(options)

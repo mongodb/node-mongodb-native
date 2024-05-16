@@ -1,6 +1,5 @@
 'use strict';
 /* eslint-disable no-unused-vars */
-
 const setupDatabase = require('../../shared').setupDatabase;
 
 describe('examples.aggregaton:', function () {
@@ -22,9 +21,10 @@ describe('examples.aggregaton:', function () {
     collection = undefined;
   });
 
-  it('supports simple aggregation', {
-    metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
-    test: async function () {
+  it(
+    'supports simple aggregation',
+    { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
+    async function () {
       // Start aggregate example 1
       const cursor = collection.aggregate([
         { $match: { 'items.fruit': 'banana' } },
@@ -32,11 +32,12 @@ describe('examples.aggregaton:', function () {
       ]);
       // End aggregate example 1
     }
-  });
+  );
 
-  it('supports $match, $group, $project, $unwind, $sum, $sort, $dayOfWeek', {
-    metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
-    test: async function () {
+  it(
+    'supports $match, $group, $project, $unwind, $sum, $sort, $dayOfWeek',
+    { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
+    async function () {
       // Start aggregate example 2
       const cursor = collection.aggregate([
         {
@@ -66,11 +67,12 @@ describe('examples.aggregaton:', function () {
       ]);
       // End aggregate example 2
     }
-  });
+  );
 
-  it('supports $unwind, $group, $sum, $dayOfWeek, $multiply, $project, $cond', {
-    metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
-    test: async function () {
+  it(
+    'supports $unwind, $group, $sum, $dayOfWeek, $multiply, $project, $cond',
+    { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
+    async function () {
       // Start aggregate example 3
       const cursor = collection.aggregate([
         {
@@ -96,11 +98,12 @@ describe('examples.aggregaton:', function () {
       ]);
       // End aggregate example 3
     }
-  });
+  );
 
-  it('supports $lookup, $filter, $match', {
-    metadata: { requires: { mongodb: '>=3.6.0', topology: ['single'] } },
-    test: async function () {
+  it(
+    'supports $lookup, $filter, $match',
+    { requires: { mongodb: '>=3.6.0', topology: ['single'] } },
+    async function () {
       // Start aggregate example 4
       const cursor = collection.aggregate([
         {
@@ -131,5 +134,5 @@ describe('examples.aggregaton:', function () {
       ]);
       // End aggregate example 4
     }
-  });
+  );
 });

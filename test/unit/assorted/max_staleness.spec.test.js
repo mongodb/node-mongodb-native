@@ -3,9 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { executeServerSelectionTest } = require('./server_selection_spec_helper');
 const { Server } = require('../../mongodb');
-
 const { EJSON } = require('bson');
-
 const sinon = require('sinon');
 
 const maxStalenessDir = path.join(__dirname, '../../spec/max-staleness');
@@ -13,7 +11,6 @@ function collectStalenessTests(specDir) {
   const testTypes = fs
     .readdirSync(specDir)
     .filter(d => fs.statSync(path.join(specDir, d)).isDirectory());
-
   const tests = {};
   testTypes.forEach(testType => {
     tests[testType] = fs
@@ -30,7 +27,6 @@ function collectStalenessTests(specDir) {
   });
   return tests;
 }
-
 describe('Max Staleness (spec)', function () {
   let serverConnect;
 
@@ -43,7 +39,6 @@ describe('Max Staleness (spec)', function () {
   after(() => {
     serverConnect.restore();
   });
-
   const specTests = collectStalenessTests(maxStalenessDir);
   Object.keys(specTests).forEach(specTestName => {
     describe(specTestName, () => {

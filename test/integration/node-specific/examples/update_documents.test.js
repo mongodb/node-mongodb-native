@@ -1,5 +1,4 @@
 'use strict';
-
 const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
 
@@ -14,7 +13,6 @@ describe('examples(update-documents):', function () {
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
-
     await db.collection('inventory').deleteMany({});
     // Start Example 51
     await db.collection('inventory').insertMany([
@@ -88,9 +86,10 @@ describe('examples(update-documents):', function () {
     db = undefined;
   });
 
-  it('Update a Single Document', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Update a Single Document',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 52
       await db.collection('inventory').updateOne(
         { item: 'paper' },
@@ -103,7 +102,6 @@ describe('examples(update-documents):', function () {
       const cursor = db.collection('inventory').find({
         item: 'paper'
       });
-
       const docs = await cursor.toArray();
       docs.forEach(function (doc) {
         expect(doc).to.have.nested.property('size.uom').that.equals('cm');
@@ -111,11 +109,12 @@ describe('examples(update-documents):', function () {
         expect(doc).to.have.property('lastModified');
       });
     }
-  });
+  );
 
-  it('Update Multiple Documents', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Update Multiple Documents',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 53
       await db.collection('inventory').updateMany(
         { qty: { $lt: 50 } },
@@ -125,11 +124,9 @@ describe('examples(update-documents):', function () {
         }
       );
       // End Example 53
-
       const cursor = db.collection('inventory').find({
         qty: { $lt: 50 }
       });
-
       const docs = await cursor.toArray();
       docs.forEach(function (doc) {
         expect(doc).to.have.nested.property('size.uom').that.equals('in');
@@ -137,11 +134,12 @@ describe('examples(update-documents):', function () {
         expect(doc).to.have.property('lastModified');
       });
     }
-  });
+  );
 
-  it('Replace a Document', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
-    test: async function () {
+  it(
+    'Replace a Document',
+    { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    async function () {
       // Start Example 54
       await db.collection('inventory').replaceOne(
         { item: 'paper' },
@@ -154,9 +152,7 @@ describe('examples(update-documents):', function () {
         }
       );
       // End Example 54
-
       const cursor = db.collection('inventory').find({ item: 'paper' }).project({ _id: 0 });
-
       const docs = await cursor.toArray();
       docs.forEach(function (doc) {
         expect(Object.keys(doc)).to.have.a.lengthOf(2);
@@ -164,5 +160,5 @@ describe('examples(update-documents):', function () {
         expect(doc).to.have.property('instock').that.has.a.lengthOf(2);
       });
     }
-  });
+  );
 });

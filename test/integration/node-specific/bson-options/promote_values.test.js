@@ -8,14 +8,12 @@ describe('Promote Values', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('should correctly honor promoteValues when creating an instance using Db', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteValues when creating an instance using Db',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: async function () {
+    async function () {
       let configuration = this.configuration;
       let client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
@@ -23,7 +21,6 @@ describe('Promote Values', function () {
       });
       await client.connect();
       let db = client.db(configuration.db);
-
       await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
         doc: Long.fromNumber(10),
         int: 10,
@@ -34,48 +31,40 @@ describe('Promote Values', function () {
       expect(Long.fromNumber(10)).deep.equals(doc.doc);
       expect(new Int32(10)).deep.equals(doc.int);
       expect(new Double(2.2222)).deep.equals(doc.double);
-
       await client.close();
     }
-  });
+  );
 
-  it('should correctly honor promoteValues when creating an instance using MongoClient', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteValues when creating an instance using MongoClient',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: async function () {
+    async function () {
       var configuration = this.configuration;
       const client = configuration.newClient({}, { promoteValues: false });
       await client.connect();
       const db = client.db(configuration.db);
-
       await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
         doc: Long.fromNumber(10),
         int: 10,
         double: 2.2222,
         array: [[Long.fromNumber(10)]]
       });
-
       const doc = await db.collection('shouldCorrectlyHonorPromoteValues').findOne();
       expect(Long.fromNumber(10)).deep.equals(doc.doc);
       expect(new Int32(10)).deep.equals(doc.int);
       expect(new Double(2.2222)).deep.equals(doc.double);
-
       await client.close();
     }
-  });
+  );
 
-  it('should correctly honor promoteValues at cursor level', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteValues at cursor level',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: async function () {
+    async function () {
       const configuration = this.configuration;
       const client = configuration.newClient({}, { promoteValues: false });
       await client.connect();
@@ -86,36 +75,30 @@ describe('Promote Values', function () {
         double: 2.2222,
         array: [[Long.fromNumber(10)]]
       });
-
       const doc = await db.collection('shouldCorrectlyHonorPromoteValues').find().next();
       expect(doc.doc).to.deep.equal(Long.fromNumber(10));
       expect(doc.int).to.deep.equal(new Int32(10));
       expect(doc.double).to.deep.equal(new Double(2.2222));
-
       await client.close();
     }
-  });
+  );
 
-  it('should correctly honor promoteValues at cursor find level', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteValues at cursor find level',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: async function () {
+    async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
       await client.connect();
       const db = client.db(configuration.db);
-
       await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
         doc: Long.fromNumber(10),
         int: 10,
         double: 2.2222,
         array: [[Long.fromNumber(10)]]
       });
-
       const doc = await db
         .collection('shouldCorrectlyHonorPromoteValues')
         .find({}, { promoteValues: false })
@@ -123,19 +106,16 @@ describe('Promote Values', function () {
       expect(doc.doc).to.deep.equal(Long.fromNumber(10));
       expect(doc.int).to.deep.equal(new Int32(10));
       expect(doc.double).to.deep.equal(new Double(2.2222));
-
       await client.close();
     }
-  });
+  );
 
-  it('should correctly honor promoteValues at aggregate level', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
+  it(
+    'should correctly honor promoteValues at aggregate level',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: async function () {
+    async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
       await client.connect();
@@ -153,19 +133,18 @@ describe('Promote Values', function () {
       expect(doc.doc, Long.fromNumber(10));
       expect(doc.int, new Int32(10));
       expect(doc.double, new Double(2.2222));
-
       await client.close();
     }
-  });
+  );
 
-  it('Should correctly promoteValues when calling getMore on queries', {
-    metadata: {
+  it(
+    'Should correctly promoteValues when calling getMore on queries',
+    {
       requires: {
         topology: ['single', 'ssl', 'wiredtiger']
       }
     },
-
-    test: function (done) {
+    function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient();
       client.connect(function (err, client) {
@@ -178,9 +157,7 @@ describe('Promote Values', function () {
             int: 1234
           };
         });
-
         var db = client.db(configuration.db);
-
         db.collection('haystack').insertMany(docs, function (errInsert) {
           if (errInsert) throw errInsert;
           // change limit from 102 to 101 and this test passes.
@@ -205,5 +182,5 @@ describe('Promote Values', function () {
         });
       });
     }
-  });
+  );
 });

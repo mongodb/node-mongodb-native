@@ -12,7 +12,6 @@ describe('abstract operation', function () {
       subclassType: any;
       correctCommandName: string;
     }
-
     const WrapperandServerlessSubclasses = [
       'RunAdminCommandOperation',
       'RunCommandOperation',
@@ -22,9 +21,7 @@ describe('abstract operation', function () {
       'IndexOperation',
       'CollectionsOperation'
     ];
-
     const sameServerOnlyOperationSubclasses = ['GetMoreOperation', 'KillCursorsOperation'];
-
     let client;
     let db;
     let admin;
@@ -310,14 +307,12 @@ describe('abstract operation', function () {
       await client.close();
       sinon.restore();
     });
-
     for (const { subclassCreator, subclassType, correctCommandName } of subclassArray) {
-      context(`when subclass is ${subclassType.name}`, function () {
+      describe(`when subclass is ${subclassType.name}`, function () {
         it(`operation.commandName equals correct string`, async function () {
           const subclassInstance = subclassCreator();
           expect(subclassInstance.commandName).to.equal(correctCommandName);
         });
-
         if (!WrapperandServerlessSubclasses.includes(subclassType.name.toString())) {
           it(`operation.commandName equals key in command document`, async function () {
             const subclassInstance = subclassCreator();

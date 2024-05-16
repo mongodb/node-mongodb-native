@@ -20,16 +20,17 @@ describe('Search Index Management Integration Tests', function () {
       await client.close();
     });
 
-    context('when listSearchIndexes operation is run with causalConsistency', function () {
-      it('should not include write concern or read concern in command', {
-        metadata: {
+    describe('when listSearchIndexes operation is run with causalConsistency', function () {
+      it(
+        'should not include write concern or read concern in command',
+        {
           requires: {
             topology: '!single',
             mongodb: '>=7.0',
             serverless: 'forbid'
           }
         },
-        test: async function () {
+        async function () {
           await client.withSession({ causalConsistency: true }, async session => {
             const res = collection.listSearchIndexes({ session });
             await res.toArray().catch(e => expect(e.errmsg).to.match(/^.*Atlas.*$/));
@@ -38,20 +39,21 @@ describe('Search Index Management Integration Tests', function () {
             expect(commandStartedEvents[0]?.command?.writeConcern).to.not.exist;
           });
         }
-      });
+      );
     });
 
-    context('when listSearchIndexes operation is run with snapshot on', function () {
+    describe('when listSearchIndexes operation is run with snapshot on', function () {
       // TODO(NODE-6047): Ignore read/write concern in applySession for Atlas Search Index Helpers
-      it('should include write concern or read concern in command - TODO(NODE-6047)', {
-        metadata: {
+      it(
+        'should include write concern or read concern in command - TODO(NODE-6047)',
+        {
           requires: {
             topology: ['replicaset', 'sharded'],
             mongodb: '>=7.0',
             serverless: 'forbid'
           }
         },
-        test: async function () {
+        async function () {
           await client.withSession({ snapshot: true }, async session => {
             const res = collection.listSearchIndexes({ session });
             const error = await res.toArray().catch(e => e);
@@ -62,7 +64,7 @@ describe('Search Index Management Integration Tests', function () {
             expect(commandStartedEvents[0]?.command?.writeConcern).to.not.exist;
           });
         }
-      });
+      );
     });
   });
 });

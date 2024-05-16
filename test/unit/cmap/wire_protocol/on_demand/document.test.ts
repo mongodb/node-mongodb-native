@@ -11,7 +11,7 @@ import {
 } from '../../../../mongodb';
 
 describe('class OnDemandDocument', () => {
-  context('when given an empty BSON sequence', () => {
+  describe('when given an empty BSON sequence', () => {
     it('sets exists cache to false for any key requested', () => {
       const emptyDocument = BSON.serialize({});
       const doc = new OnDemandDocument(emptyDocument, 0, false);
@@ -22,7 +22,7 @@ describe('class OnDemandDocument', () => {
     });
   });
 
-  context('when given a BSON document with ok set to 1', () => {
+  describe('when given a BSON document with ok set to 1', () => {
     it('sets exists cache to true for ok', () => {
       const emptyDocument = BSON.serialize({ ok: 1 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
@@ -38,7 +38,7 @@ describe('class OnDemandDocument', () => {
     });
   });
 
-  context('when given a BSON document with ok set to 0 and code set to 2', () => {
+  describe('when given a BSON document with ok set to 0 and code set to 2', () => {
     it('tracks element position when finding match', () => {
       const emptyDocument = BSON.serialize({ ok: 0, code: 2 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
@@ -49,7 +49,7 @@ describe('class OnDemandDocument', () => {
     });
   });
 
-  context('toObject()', () => {
+  describe('toObject()', () => {
     it('returns the results of calling BSON.deserialize on the document bytes', () => {
       const offsetDocument = new Uint8Array([0, 0, 0, ...BSON.serialize({ ok: 0, code: 2 })]);
       const doc = new OnDemandDocument(offsetDocument, 3, false);
@@ -71,7 +71,7 @@ describe('class OnDemandDocument', () => {
     });
   });
 
-  context('get()', () => {
+  describe('get()', () => {
     let document: OnDemandDocument;
     let array: OnDemandDocument;
     const input = {
@@ -235,7 +235,7 @@ describe('class OnDemandDocument', () => {
     });
   });
 
-  context('getNumber()', () => {
+  describe('getNumber()', () => {
     let document: OnDemandDocument;
     const input = {
       int: 1,
@@ -271,7 +271,6 @@ describe('class OnDemandDocument', () => {
     it('returns null if required is set to false and element is not numeric', () => {
       // just making sure this test does not fail for the non-exist reason
       expect(document.has('string')).to.be.true;
-
       expect(document.getNumber('string', false)).to.be.null;
       expect(document.getNumber('string')).to.be.null;
     });

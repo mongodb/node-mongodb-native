@@ -4,7 +4,7 @@ import { AuthProvider, MongoRuntimeError } from '../../../mongodb';
 
 describe('AuthProvider', function () {
   describe('#reauth', function () {
-    context('when the provider is already reauthenticating', function () {
+    describe('when the provider is already reauthenticating', function () {
       const provider = new AuthProvider();
       const context = { reauthenticating: true };
 

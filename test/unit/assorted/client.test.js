@@ -1,5 +1,4 @@
 'use strict';
-
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
 const { MongoClient } = require('../../mongodb');
@@ -29,7 +28,6 @@ describe('Client (unit)', function () {
         request.reply({ ok: 1 });
       }
     });
-
     client = new MongoClient(`mongodb://${server.uri()}/`, {
       driverInfo: {
         name: 'mongoose',
@@ -37,7 +35,6 @@ describe('Client (unit)', function () {
         platform: 'llama edition'
       }
     });
-
     return client.connect().then(() => {
       expect(handshake).to.have.nested.property('client.driver');
       expect(handshake)

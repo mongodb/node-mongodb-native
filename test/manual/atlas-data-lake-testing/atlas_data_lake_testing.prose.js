@@ -1,6 +1,5 @@
 'use strict';
 const { MongoClient } = require('../../mongodb');
-
 // TODO(NODE-3880): These tests are not fully implemented per the spec
 describe('Atlas Data Lake - prose', function () {
   let client;
@@ -12,7 +11,6 @@ describe('Atlas Data Lake - prose', function () {
   afterEach(async function () {
     if (client != null) await client.close();
   });
-
   /**
    * For this test, configure an APM listener on a client and execute a query on the test.driverdata collection
    * that will leave a cursor open on the server (e.g. specify batchSize=2 for a query that would match 3+ documents).
@@ -36,7 +34,6 @@ describe('Atlas Data Lake - prose', function () {
     const db = client.db('admin');
     await db.command({ killCursors: 'kill_cursor_collection' });
   });
-
   /**
    * For these tests, create a MongoClient using a valid connection string without auth credentials and execute a ping command.
    */
@@ -46,7 +43,6 @@ describe('Atlas Data Lake - prose', function () {
     const db = client.db('admin');
     await db.command({ ping: 1 });
   });
-
   /**
    * For these tests, create a MongoClient using a valid connection string with SCRAM-SHA-1 and credentials
    * from the drivers-evergreen-tools ADL configuration and execute a ping command.
@@ -60,7 +56,6 @@ describe('Atlas Data Lake - prose', function () {
     await db.command({ ping: 1 });
     await db.command({ killCursors: 'kill_cursor_collection' });
   });
-
   /**
    * Repeat the authentication test using SCRAM-SHA-256.
    */

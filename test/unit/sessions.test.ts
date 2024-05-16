@@ -53,13 +53,11 @@ describe('Sessions - unit', function () {
         const invalidInputs = Array(5)
           .fill(1)
           .map(time => genClusterTime(time));
-
         delete invalidInputs[0].clusterTime;
         invalidInputs[1].clusterTime = null;
         invalidInputs[2].clusterTime = 5;
         invalidInputs[3].clusterTime = 'not a timestamp';
         invalidInputs[4].clusterTime = new Date('1');
-
         for (const input of invalidInputs) {
           expect(
             () => session.advanceClusterTime(input),
@@ -72,7 +70,6 @@ describe('Sessions - unit', function () {
         const invalidInputs = Array(9)
           .fill(1)
           .map(time => genClusterTime(time));
-
         // null types
         delete invalidInputs[0].signature;
         delete invalidInputs[1].signature.hash;
@@ -86,7 +83,6 @@ describe('Sessions - unit', function () {
         invalidInputs[6].signature.keyId = 'not BSON Long';
         invalidInputs[7].signature.hash = 123;
         invalidInputs[8].signature.hash = 'not BSON Binary';
-
         for (const input of invalidInputs) {
           expect(
             () => session.advanceClusterTime(input),
@@ -102,12 +98,10 @@ describe('Sessions - unit', function () {
         const validTime = genClusterTime(100);
         session.advanceClusterTime(validTime);
         expect(session).property('clusterTime').to.equal(validTime);
-
         session.clusterTime = null;
         expect(session).property('clusterTime').to.be.null;
         session.advanceClusterTime(validTime);
         expect(session).property('clusterTime').to.equal(validTime);
-
         // extra test case for valid alternative keyId type in signature
         const alsoValidTime = genClusterTime(200);
         alsoValidTime.signature.keyId = 10;
@@ -122,7 +116,6 @@ describe('Sessions - unit', function () {
           clusterTime: new BSON.Timestamp(BSON.Long.fromNumber(1, true)),
           signature: { hash: new BSON.Binary(Buffer.from('test', 'utf8')), keyId: 100n }
         };
-
         session.advanceClusterTime(validClusterTime);
         expect(session.clusterTime.signature.keyId).to.equal(100n);
       });
@@ -130,10 +123,8 @@ describe('Sessions - unit', function () {
       it('should set the session clusterTime to the one provided if it is greater than the the existing session clusterTime', () => {
         const validInitialTime = genClusterTime(100);
         const validGreaterTime = genClusterTime(200);
-
         session.advanceClusterTime(validInitialTime);
         expect(session).property('clusterTime').to.equal(validInitialTime);
-
         session.advanceClusterTime(validGreaterTime);
         expect(session).property('clusterTime').to.equal(validGreaterTime);
       });
@@ -142,13 +133,10 @@ describe('Sessions - unit', function () {
         const validInitialTime = genClusterTime(100);
         const validEqualTime = genClusterTime(100);
         const validLesserTime = genClusterTime(50);
-
         session.advanceClusterTime(validInitialTime);
         expect(session).property('clusterTime').to.equal(validInitialTime);
-
         session.advanceClusterTime(validEqualTime);
         expect(session).property('clusterTime').to.equal(validInitialTime); // the reference check ensures no update happened
-
         session.advanceClusterTime(validLesserTime);
         expect(session).property('clusterTime').to.equal(validInitialTime);
       });
@@ -159,11 +147,9 @@ describe('Sessions - unit', function () {
         expect(() => {
           new ClientSession();
         }).to.throw(/ClientSession requires a MongoClient/);
-
         expect(() => {
           new ClientSession({});
         }).to.throw(/ClientSession requires a ServerSessionPool/);
-
         expect(() => {
           new ClientSession({}, {});
         }).to.throw(/ClientSession requires a ServerSessionPool/);
@@ -286,19 +272,19 @@ describe('Sessions - unit', function () {
           await mock.cleanup();
         });
 
-        context('when client has defined timeoutMS', function () {
+        describe('when client has defined timeoutMS', function () {
           beforeEach(async () => {
             client = new MongoClient(`mongodb://${server.hostAddress()}`, { timeoutMS: 100 });
           });
 
-          context('when defaultTimeoutMS is defined', function () {
+          describe('when defaultTimeoutMS is defined', function () {
             it(`overrides client's timeoutMS value`, function () {
               session = new ClientSession(client, serverSessionPool, { defaultTimeoutMS: 200 });
               expect(session).to.have.property('timeoutMS', 200);
             });
           });
 
-          context('when defaultTimeoutMS is not defined', function () {
+          describe('when defaultTimeoutMS is not defined', function () {
             it(`inherits client's timeoutMS value`, function () {
               session = new ClientSession(client, serverSessionPool, {});
               expect(session).to.have.property('timeoutMS', 100);
@@ -306,19 +292,19 @@ describe('Sessions - unit', function () {
           });
         });
 
-        context('when client has not defined timeoutMS', function () {
+        describe('when client has not defined timeoutMS', function () {
           beforeEach(async () => {
             client = new MongoClient(`mongodb://${server.hostAddress()}`, {});
           });
 
-          context('when defaultTimeoutMS is defined', function () {
+          describe('when defaultTimeoutMS is defined', function () {
             it(`sets timeoutMS to defaultTimeoutMS`, function () {
               session = new ClientSession(client, serverSessionPool, { defaultTimeoutMS: 200 });
               expect(session).to.have.property('timeoutMS', 200);
             });
           });
 
-          context('when defaultTimeoutMS is not defined', function () {
+          describe('when defaultTimeoutMS is not defined', function () {
             it(`leaves timeoutMS as undefined`, function () {
               session = new ClientSession(client, serverSessionPool, {});
               expect(session.timeoutMS).to.be.undefined;
@@ -386,19 +372,15 @@ describe('Sessions - unit', function () {
           const firstServerSessionGetResult = session.serverSession;
           expect(firstServerSessionGetResult).to.be.instanceOf(ServerSession);
           expect(acquireSpy.calledOnce).to.be.true;
-
           // call the getter a bunch more times
           expect(session.serverSession).to.be.instanceOf(ServerSession);
           expect(session.serverSession).to.be.instanceOf(ServerSession);
           expect(session.serverSession).to.be.instanceOf(ServerSession);
-
           expect(session.serverSession.id.id.buffer.toString('hex')).to.equal(
             firstServerSessionGetResult.id.id.buffer.toString('hex')
           );
-
           // acquire never called again
           expect(acquireSpy.calledOnce).to.be.true;
-
           acquireSpy.restore();
         });
 
@@ -409,21 +391,16 @@ describe('Sessions - unit', function () {
           const firstServerSessionGetResult = session.serverSession;
           expect(firstServerSessionGetResult).to.be.instanceOf(ServerSession);
           expect(acquireSpy.calledOnce).to.be.true;
-
           session.hasEnded = true;
-
           // call the getter a bunch more times
           expect(session.serverSession).to.be.instanceOf(ServerSession);
           expect(session.serverSession).to.be.instanceOf(ServerSession);
           expect(session.serverSession).to.be.instanceOf(ServerSession);
-
           expect(session.serverSession.id.id.buffer.toString('hex')).to.equal(
             firstServerSessionGetResult.id.id.buffer.toString('hex')
           );
-
           // acquire never called again
           expect(acquireSpy.calledOnce).to.be.true;
-
           acquireSpy.restore();
         });
       });
@@ -433,10 +410,8 @@ describe('Sessions - unit', function () {
       it('should not allocate serverSession', () => {
         const session = new ClientSession(client, serverSessionPool);
         const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
-
         session.incrementTransactionNumber();
         expect(session).to.have.property(txnNumberIncrementSymbol, 1);
-
         const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
         expect(session).to.have.property(serverSessionSymbol, null);
       });
@@ -444,11 +419,9 @@ describe('Sessions - unit', function () {
       it('should save increments to txnNumberIncrement symbol', () => {
         const session = new ClientSession(client, serverSessionPool);
         const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
-
         session.incrementTransactionNumber();
         session.incrementTransactionNumber();
         session.incrementTransactionNumber();
-
         expect(session).to.have.property(txnNumberIncrementSymbol, 3);
       });
     });
@@ -457,10 +430,8 @@ describe('Sessions - unit', function () {
       it('should allocate serverSession', () => {
         const session = new ClientSession(client, serverSessionPool);
         const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-
         const command = { magic: 1 };
         const result = applySession(session, command, {});
-
         expect(result).to.not.exist;
         expect(command).to.have.property('lsid');
         expect(session).to.have.property(serverSessionSymbol).that.is.instanceOf(ServerSession);
@@ -469,17 +440,14 @@ describe('Sessions - unit', function () {
       it('should apply saved txnNumberIncrements', () => {
         const session = new ClientSession(client, serverSessionPool);
         const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-
         session.incrementTransactionNumber();
         session.incrementTransactionNumber();
         session.incrementTransactionNumber();
-
         const command = { magic: 1 };
         const result = applySession(session, command, {
           // txnNumber will be applied for retryable write command
           willRetryWrite: true
         });
-
         expect(result).to.not.exist;
         expect(command).to.have.property('lsid');
         expect(command).to.have.property('txnNumber').instanceOf(Long);
@@ -501,7 +469,6 @@ describe('Sessions - unit', function () {
           request.reply(Object.assign({}, mock.HELLO, { logicalSessionTimeoutMinutes: 10 }));
         }
       });
-
       client = new MongoClient(`mongodb://${server.hostAddress()}`);
       await client.connect();
     });
@@ -518,12 +485,10 @@ describe('Sessions - unit', function () {
     it('should create a new session if the pool is empty', function (done) {
       const pool = new ServerSessionPool(client);
       expect(pool.sessions).to.have.length(0);
-
       const session = pool.acquire();
       expect(session).to.exist;
       expect(pool.sessions).to.have.length(0);
       pool.release(session);
-
       done();
     });
 
@@ -531,27 +496,22 @@ describe('Sessions - unit', function () {
       const oldSession = new ServerSession();
       const pool = new ServerSessionPool(client);
       pool.sessions.push(oldSession);
-
       const session = pool.acquire();
       expect(session).to.exist;
       expect(session).to.eql(oldSession);
       pool.release(session);
-
       done();
     });
 
     it('should remove sessions which have timed out on acquire, and return a fresh session', function (done) {
       const oldSession = new ServerSession();
       oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
-
       const pool = new ServerSessionPool(client);
       pool.sessions.push(oldSession);
-
       const session = pool.acquire();
       expect(session).to.exist;
       expect(session).to.not.eql(oldSession);
       pool.release(session);
-
       done();
     });
 
@@ -567,9 +527,7 @@ describe('Sessions - unit', function () {
         // old sessions at the start
         pool.sessions.pushMany(Array.from({ length: 3 }, () => makeOldSession()));
         pool.sessions.pushMany([new ServerSession(), new ServerSession()]);
-
         pool.release(new ServerSession());
-
         expect(pool.sessions).to.have.lengthOf(3);
         const anyTimedOutSessions = pool.sessions
           .toArray()
@@ -583,9 +541,7 @@ describe('Sessions - unit', function () {
         pool.sessions.push(new ServerSession()); // one fresh before
         pool.sessions.pushMany(Array.from({ length: 3 }, () => makeOldSession()));
         pool.sessions.push(new ServerSession()); // one fresh after
-
         pool.release(new ServerSession());
-
         expect(pool.sessions).to.have.lengthOf(3);
         const anyTimedOutSessions = pool.sessions
           .toArray()
@@ -597,12 +553,9 @@ describe('Sessions - unit', function () {
       it('should remove old sessions if they are at the end of the pool', () => {
         const pool = new ServerSessionPool(client);
         pool.sessions.pushMany([new ServerSession(), new ServerSession()]);
-
         const oldSession = makeOldSession();
         pool.sessions.push(oldSession);
-
         pool.release(new ServerSession());
-
         expect(pool.sessions).to.have.lengthOf(3);
         const anyTimedOutSessions = pool.sessions
           .toArray()
@@ -620,9 +573,7 @@ describe('Sessions - unit', function () {
           new ServerSession(),
           makeOldSession()
         ]);
-
         pool.release(new ServerSession());
-
         expect(pool.sessions).to.have.lengthOf(3);
         const anyTimedOutSessions = pool.sessions
           .toArray()
@@ -635,9 +586,7 @@ describe('Sessions - unit', function () {
     it('should not reintroduce a soon-to-expire session to the pool on release', function (done) {
       const session = new ServerSession();
       session.lastUse = now() - 9.5 * 60 * 1000; // add 9.5min
-
       const pool = new ServerSessionPool(client);
-
       pool.release(session);
       expect(pool.sessions).to.have.length(0);
       done();
@@ -645,19 +594,14 @@ describe('Sessions - unit', function () {
 
     it('should maintain a LIFO queue of sessions', function (done) {
       const pool = new ServerSessionPool(client);
-
       const sessionA = new ServerSession();
       const sessionB = new ServerSession();
-
       pool.release(sessionA);
       pool.release(sessionB);
-
       const sessionC = pool.acquire();
       const sessionD = pool.acquire();
-
       expect(sessionC.id).to.eql(sessionB.id);
       expect(sessionD.id).to.eql(sessionA.id);
-
       pool.release(sessionC);
       pool.release(sessionD);
       done();

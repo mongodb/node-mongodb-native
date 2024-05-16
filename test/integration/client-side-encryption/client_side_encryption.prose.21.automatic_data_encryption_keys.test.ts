@@ -14,17 +14,13 @@ const metadata: MongoDBMetadataUI = {
     topology: '!single'
   }
 } as const;
-
 const documentValidationFailureCode = 121;
 const typeMismatchCode = 14;
-
 describe('21. Automatic Data Encryption Keys', () => {
   installNodeDNSWorkaroundHooks();
-
   let db: Db;
   let clientEncryption;
   let client;
-
   const runProseTestsFor = provider => {
     const masterKey = {
       aws: {
@@ -35,53 +31,42 @@ describe('21. Automatic Data Encryption Keys', () => {
     }[provider];
     beforeEach(async function () {
       client = this.configuration.newClient();
-
       if (typeof process.env.CSFLE_KMS_PROVIDERS !== 'string') {
         if (this.currentTest) {
           this.currentTest.skipReason = 'This test requires env CSFLE_KMS_PROVIDERS to be set';
         }
         return this.currentTest?.skip();
       }
-
       const { aws, local } = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
-
       clientEncryption = new ClientEncryption(client, {
         keyVaultClient: client,
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: { aws, local }
       });
-
       db = client.db('automatic_data_encryption_keys');
       await db.dropDatabase().catch(() => null);
     });
-
     afterEach(async function () {
       await db?.dropDatabase().catch(() => null);
       await client?.close();
     });
-
     it('Case 1: Simple Creation and Validation', metadata, async () => {
       const createCollectionOptions = {
         encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
       };
-
       const { collection } = await clientEncryption.createEncryptedCollection(db, 'testing1', {
         provider,
         createCollectionOptions,
         masterKey
       });
-
       expect(collection).to.be.instanceOf(Collection);
       expect(collection.namespace).to.equal('automatic_data_encryption_keys.testing1');
-
       const result = await collection.insertOne({ ssn: '123-45-6789' }).catch(error => error);
       expect(result).to.be.instanceOf(MongoServerError);
       expect(result).to.have.property('code', documentValidationFailureCode);
     });
-
     it('Case 2: Missing encryptedFields', metadata, async () => {
       const createCollectionOptions = {};
-
       const result = await clientEncryption
         .createEncryptedCollection(db, 'testing1', {
           provider,
@@ -89,15 +74,12 @@ describe('21. Automatic Data Encryption Keys', () => {
           masterKey
         })
         .catch(error => error);
-
       expect(result).to.be.instanceOf(TypeError);
     });
-
     it('Case 3: Invalid keyId', metadata, async () => {
       const createCollectionOptions = {
         encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: false }] }
       };
-
       const result = await clientEncryption
         .createEncryptedCollection(db, 'testing1', {
           provider,
@@ -105,7 +87,6 @@ describe('21. Automatic Data Encryption Keys', () => {
           masterKey
         })
         .catch(error => error);
-
       expect(result).to.be.instanceOf(MongoCryptCreateEncryptedCollectionError);
       expect(result).nested.property('cause.code', typeMismatchCode);
       // BSON field 'create.encryptedFields.fields.keyId' is the wrong type 'bool', expected type 'binData'
@@ -114,12 +95,10 @@ describe('21. Automatic Data Encryption Keys', () => {
         .and.match(/binData/i)
         .and.match(/keyId/i);
     });
-
     it('Case 4: Insert encrypted value', metadata, async () => {
       const createCollectionOptions = {
         encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
       };
-
       const { collection, encryptedFields } = await clientEncryption.createEncryptedCollection(
         db,
         'testing1',
@@ -129,15 +108,12 @@ describe('21. Automatic Data Encryption Keys', () => {
           masterKey
         }
       );
-
       expect(collection).to.be.instanceOf(Collection);
       expect(collection.namespace).to.equal('automatic_data_encryption_keys.testing1');
-
       const ssn = clientEncryption.encrypt('123-45-6789', {
         algorithm: 'Unindexed',
         keyId: encryptedFields.fields[0].keyId
       });
-
       const result = await collection.insertOne({ ssn }).catch(error => error);
       expect(result).to.be.instanceOf(MongoServerError);
       expect(result).to.have.property('code', documentValidationFailureCode);
@@ -147,9 +123,8 @@ describe('21. Automatic Data Encryption Keys', () => {
       );
     });
   };
-
   for (const provider of ['local', 'aws']) {
-    context(`${provider}`, () => {
+    describe(`${provider}`, () => {
       runProseTestsFor(provider);
     });
   }

@@ -10,7 +10,6 @@ describe('Feature Flags', () => {
         this.skip();
       }
     });
-
     const tests = [
       // only skipInitiaPing=true will have no events upon connect
       { description: 'should skip ping command when set to true', value: true, expectEvents: 0 },
@@ -28,13 +27,11 @@ describe('Feature Flags', () => {
         const client = this.configuration.newClient({}, { ...options, monitorCommands: true });
         const events = [];
         client.on('commandStarted', event => events.push(event));
-
         try {
           await client.connect();
         } finally {
           await client.close();
         }
-
         expect(events).to.have.lengthOf(expectEvents);
         if (expectEvents > 1) {
           for (const event of events) {
@@ -44,7 +41,6 @@ describe('Feature Flags', () => {
       });
     }
   });
-
   // TODO(NODE-5672): Release Standardized Logger
   describe('@@mdb.enableMongoLogger', () => {
     let cachedEnv;
@@ -58,8 +54,8 @@ describe('Feature Flags', () => {
       process.env = cachedEnv;
     });
 
-    context('when enabled', () => {
-      context('when logging is enabled for any component', () => {
+    describe('when enabled', () => {
+      describe('when logging is enabled for any component', () => {
         before(() => {
           process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
         });
@@ -75,7 +71,7 @@ describe('Feature Flags', () => {
         });
       });
 
-      context('when logging is not enabled for any component', () => {
+      describe('when logging is not enabled for any component', () => {
         before(() => {
           process.env = {};
         });
@@ -88,10 +84,9 @@ describe('Feature Flags', () => {
         });
       });
     });
-
     for (const featureFlagValue of [false, undefined]) {
-      context(`when set to ${featureFlagValue}`, () => {
-        context('when logging is enabled for a component', () => {
+      describe(`when set to ${featureFlagValue}`, () => {
+        describe('when logging is enabled for a component', () => {
           before(() => {
             process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
           });
@@ -104,7 +99,7 @@ describe('Feature Flags', () => {
           });
         });
 
-        context('when logging is not enabled for any component', () => {
+        describe('when logging is not enabled for any component', () => {
           before(() => {
             process.env = {};
           });
@@ -131,7 +126,7 @@ describe('Feature Flags', () => {
       process.env = cachedEnv;
     });
 
-    context('when undefined', function () {
+    describe('when undefined', function () {
       before(() => {
         process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
       });
@@ -141,7 +136,6 @@ describe('Feature Flags', () => {
           [Symbol.for('@@mdb.enableMongoLogger')]: true,
           [Symbol.for('@@mdb.internalLoggerConfig')]: undefined
         });
-
         expect(client.mongoLogger?.componentSeverities).to.have.property(
           'command',
           SeverityLevel.EMERGENCY
@@ -149,7 +143,7 @@ describe('Feature Flags', () => {
       });
     });
 
-    context('when defined', function () {
+    describe('when defined', function () {
       it('overrides environment options', function () {
         const client = new MongoClient('mongodb://localhost:27017', {
           [Symbol.for('@@mdb.enableMongoLogger')]: true,
@@ -157,7 +151,6 @@ describe('Feature Flags', () => {
             MONGODB_LOG_COMMAND: SeverityLevel.ALERT
           }
         });
-
         expect(client.mongoLogger?.componentSeverities).to.have.property(
           'command',
           SeverityLevel.ALERT

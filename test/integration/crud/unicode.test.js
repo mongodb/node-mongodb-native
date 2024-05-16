@@ -7,12 +7,12 @@ describe('Unicode', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('shouldCorrectlyInsertUnicodeContainingDocument', {
-    metadata: {
+  it(
+    'shouldCorrectlyInsertUnicodeContainingDocument',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
@@ -60,12 +60,10 @@ describe('Unicode', function () {
           profile_image_url:
             'http://a3.twimg.com/profile_images/107142257/passbild-square_normal.jpg'
         };
-
         db.createCollection(
           'test_should_correctly_insert_unicode_containing_document',
           function (err, collection) {
             doc['_id'] = 'felixge';
-
             collection.insertOne(doc, { writeConcern: { w: 1 } }, function (err) {
               expect(err).to.not.exist;
               collection.findOne(function (err, doc) {
@@ -77,7 +75,7 @@ describe('Unicode', function () {
         );
       });
     }
-  });
+  );
 
   it('should Correctly Insert Unicode Characters', function (done) {
     const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
@@ -108,14 +106,13 @@ describe('Unicode', function () {
     });
   });
 
-  it('shouldCreateObjectWithChineseObjectName', {
-    metadata: {
+  it(
+    'shouldCreateObjectWithChineseObjectName',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       var object = { 客家话: 'Hello' };
-
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
@@ -127,7 +124,6 @@ describe('Unicode', function () {
             expect(err).to.not.exist;
             collection.findOne(function (err, item) {
               test.equal(object['客家话'], item['客家话']);
-
               collection.find().toArray(function (err, items) {
                 test.equal(object['客家话'], items[0]['客家话']);
                 client.close(done);
@@ -137,14 +133,14 @@ describe('Unicode', function () {
         });
       });
     }
-  });
+  );
 
-  it('shouldCorrectlyHandleUT8KeyNames', {
-    metadata: {
+  it(
+    'shouldCorrectlyHandleUT8KeyNames',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-
-    test: function (done) {
+    function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
@@ -164,5 +160,5 @@ describe('Unicode', function () {
         });
       });
     }
-  });
+  );
 });

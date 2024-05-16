@@ -1,5 +1,4 @@
 'use strict';
-
 const setupDatabase = require('../../shared').setupDatabase;
 
 describe('examples.runCommand:', function () {
@@ -13,7 +12,6 @@ describe('examples.runCommand:', function () {
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
-
     // Done to ensure existence of collection
     await db.collection('restaurants').insertOne({});
   });
@@ -24,21 +22,15 @@ describe('examples.runCommand:', function () {
     db = undefined;
   });
 
-  it('supports runCommand 1', {
-    metadata: { requires: { topology: ['single'] } },
-    test: async function () {
-      // Start runCommand example 1
-      await db.command({ buildInfo: 1 });
-      // End runCommand example 1
-    }
+  it('supports runCommand 1', { requires: { topology: ['single'] } }, async function () {
+    // Start runCommand example 1
+    await db.command({ buildInfo: 1 });
+    // End runCommand example 1
   });
 
-  it('supports runCommand 2', {
-    metadata: { requires: { topology: ['single'] } },
-    test: async function () {
-      // Start runCommand example 2
-      await db.command({ collStats: 'restaurants' });
-      // End runCommand example 2
-    }
+  it('supports runCommand 2', { requires: { topology: ['single'] } }, async function () {
+    // Start runCommand example 2
+    await db.command({ collStats: 'restaurants' });
+    // End runCommand example 2
   });
 });

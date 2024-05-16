@@ -12,21 +12,18 @@ const metadata: MongoDBMetadataUI = {
     clientSideEncryption: true
   }
 } as const;
-
 const dataKeyOptions = {
   masterKey: {
     keyVaultEndpoint: 'https://drivers-2411-keyvault.vault.azure.net/',
     keyName: 'drivers-2411-keyname'
   }
 };
-
 describe('19. On-demand Azure Credentials', () => {
   let clientEncryption;
   let keyVaultClient;
 
   beforeEach(async function () {
     keyVaultClient = this.configuration.newClient();
-
     if (typeof env.AZUREKMS_VMNAME === 'string') {
       // If azure cloud env is present then EXPECTED_AZUREKMS_OUTCOME MUST be set
       expect(
@@ -36,7 +33,6 @@ describe('19. On-demand Azure Credentials', () => {
         .to.be.a('string')
         .that.satisfies(s => s === 'success' || s === 'failure');
     }
-
     clientEncryption = new ClientEncryption(keyVaultClient, {
       keyVaultClient,
       keyVaultNamespace: 'keyvault.datakeys',
@@ -53,7 +49,6 @@ describe('19. On-demand Azure Credentials', () => {
       this.skipReason = 'This test is supposed to run in the environment where failure is expected';
       this.skip();
     }
-
     const error = await clientEncryption
       .createDataKey('azure', dataKeyOptions)
       .catch(error => error);
@@ -65,7 +60,6 @@ describe('19. On-demand Azure Credentials', () => {
       this.skipReason = 'This test is supposed to run in the environment where success is expected';
       this.skip();
     }
-
     const dk = await clientEncryption.createDataKey('azure', dataKeyOptions);
     expect(dk).to.be.instanceOf(Binary);
   });

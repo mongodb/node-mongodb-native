@@ -22,7 +22,6 @@ describe('client metadata module', () => {
     // We test document: { _id: ObjectId() }
     // 4 bytes + 1 type byte + 4 bytes for key + 12 bytes Oid + 1 null term byte
     // = 22 bytes
-
     it('allows setting a key and value that fit within maxSize', () => {
       const doc = new LimitedSizeDocument(22);
       expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
@@ -46,24 +45,28 @@ describe('client metadata module', () => {
       ['VERCEL', 'vercel']
     ];
     for (const [envVariable, provider] of tests) {
-      context(`when ${envVariable} is set to a non-empty string`, () => {
+      describe(`when ${envVariable} is set to a non-empty string`, () => {
         before(() => {
           process.env[envVariable] = 'non_empty_string';
         });
+
         after(() => {
           delete process.env[envVariable];
         });
+
         it('determines the correct provider', () => {
           expect(getFAASEnv()?.get('name')).to.equal(provider);
         });
 
-        context(`when ${envVariable} is set to an empty string`, () => {
+        describe(`when ${envVariable} is set to an empty string`, () => {
           before(() => {
             process.env[envVariable] = '';
           });
+
           after(() => {
             delete process.env[envVariable];
           });
+
           it('returns null', () => {
             expect(getFAASEnv()).to.be.null;
           });
@@ -71,54 +74,60 @@ describe('client metadata module', () => {
       });
     }
 
-    context('when AWS_EXECUTION_ENV starts with "AWS_Lambda_"', () => {
+    describe('when AWS_EXECUTION_ENV starts with "AWS_Lambda_"', () => {
       before(() => {
         process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_correctStartString';
       });
+
       after(() => {
         delete process.env.AWS_EXECUTION_ENV;
       });
+
       it('indicates the runtime is aws lambda', () => {
         expect(getFAASEnv()?.get('name')).to.equal('aws.lambda');
       });
     });
 
-    context('when AWS_EXECUTION_ENV does not start with "AWS_Lambda_"', () => {
+    describe('when AWS_EXECUTION_ENV does not start with "AWS_Lambda_"', () => {
       before(() => {
         process.env.AWS_EXECUTION_ENV = 'AWS_LambdaIncorrectStartString';
       });
+
       after(() => {
         delete process.env.AWS_EXECUTION_ENV;
       });
+
       it('returns null', () => {
         expect(getFAASEnv()).to.be.null;
       });
     });
 
-    context('when there is no FAAS provider data in the env', () => {
+    describe('when there is no FAAS provider data in the env', () => {
       it('returns null', () => {
         expect(getFAASEnv()).to.be.null;
       });
     });
 
-    context('when there is data from multiple cloud providers in the env', () => {
-      context('unrelated environments', () => {
+    describe('when there is data from multiple cloud providers in the env', () => {
+      describe('unrelated environments', () => {
         before(() => {
           // aws
           process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_non_empty_string';
           // azure
           process.env.FUNCTIONS_WORKER_RUNTIME = 'non_empty_string';
         });
+
         after(() => {
           delete process.env.AWS_EXECUTION_ENV;
           delete process.env.FUNCTIONS_WORKER_RUNTIME;
         });
+
         it('returns null', () => {
           expect(getFAASEnv()).to.be.null;
         });
       });
 
-      context('vercel and aws which share env variables', () => {
+      describe('vercel and aws which share env variables', () => {
         before(() => {
           // vercel
           process.env.VERCEL = 'non_empty_string';
@@ -126,6 +135,7 @@ describe('client metadata module', () => {
           process.env.AWS_EXECUTION_ENV = 'non_empty_string';
           process.env.AWS_LAMBDA_RUNTIME_API = 'non_empty_string';
         });
+
         after(() => {
           delete process.env.VERCEL;
           delete process.env.AWS_EXECUTION_ENV;
@@ -140,7 +150,7 @@ describe('client metadata module', () => {
   });
 
   describe('makeClientMetadata()', () => {
-    context('when no FAAS environment is detected', () => {
+    describe('when no FAAS environment is detected', () => {
       it('does not append FAAS metadata', () => {
         const metadata = makeClientMetadata({ driverInfo: {} });
         expect(metadata).not.to.have.property(
@@ -163,7 +173,7 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when driverInfo.platform is provided', () => {
+    describe('when driverInfo.platform is provided', () => {
       it('throws an error if driverInfo.platform is too large', () => {
         expect(() => makeClientMetadata({ driverInfo: { platform: 'a'.repeat(512) } })).to.throw(
           MongoInvalidArgumentError,
@@ -192,7 +202,7 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when driverInfo.name is provided', () => {
+    describe('when driverInfo.name is provided', () => {
       it('throws an error if driverInfo.name is too large', () => {
         expect(() => makeClientMetadata({ driverInfo: { name: 'a'.repeat(512) } })).to.throw(
           MongoInvalidArgumentError,
@@ -221,7 +231,7 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when driverInfo.version is provided', () => {
+    describe('when driverInfo.version is provided', () => {
       it('throws an error if driverInfo.version is too large', () => {
         expect(() => makeClientMetadata({ driverInfo: { version: 'a'.repeat(512) } })).to.throw(
           MongoInvalidArgumentError,
@@ -250,7 +260,7 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when no custom driverInto is provided', () => {
+    describe('when no custom driverInto is provided', () => {
       const metadata = makeClientMetadata({ driverInfo: {} });
 
       it('does not append the driver info to the metadata', () => {
@@ -274,8 +284,8 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when app name is provided', () => {
-      context('when the app name is over 128 bytes', () => {
+    describe('when app name is provided', () => {
+      describe('when the app name is over 128 bytes', () => {
         const longString = 'a'.repeat(300);
         const options = {
           appName: longString,
@@ -292,27 +302,24 @@ describe('client metadata module', () => {
         });
       });
 
-      context(
-        'TODO(NODE-5150): fix appName truncation when multi-byte unicode charaters straddle byte 128',
-        () => {
-          const longString = '€'.repeat(300);
-          const options = {
-            appName: longString,
-            driverInfo: {}
-          };
-          const metadata = makeClientMetadata(options);
+      describe('TODO(NODE-5150): fix appName truncation when multi-byte unicode charaters straddle byte 128', () => {
+        const longString = '€'.repeat(300);
+        const options = {
+          appName: longString,
+          driverInfo: {}
+        };
+        const metadata = makeClientMetadata(options);
 
-          it('truncates the application name to 129 bytes', () => {
-            expect(metadata.application?.name).to.be.a('string');
-            // the above assertion fails if `metadata.application?.name` is undefined, so
-            // we can safely assert that it exists
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            expect(Buffer.byteLength(metadata.application!.name, 'utf8')).to.equal(129);
-          });
-        }
-      );
+        it('truncates the application name to 129 bytes', () => {
+          expect(metadata.application?.name).to.be.a('string');
+          // the above assertion fails if `metadata.application?.name` is undefined, so
+          // we can safely assert that it exists
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          expect(Buffer.byteLength(metadata.application!.name, 'utf8')).to.equal(129);
+        });
+      });
 
-      context('when the app name is under 128 bytes', () => {
+      describe('when the app name is under 128 bytes', () => {
         const options = {
           appName: 'myApplication',
           driverInfo: {}
@@ -325,8 +332,8 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when globalThis indicates alternative runtime', () => {
-      context('deno', () => {
+    describe('when globalThis indicates alternative runtime', () => {
+      describe('deno', () => {
         afterEach(() => {
           expect(delete globalThis.Deno, 'failed to delete Deno global').to.be.true;
         });
@@ -368,7 +375,7 @@ describe('client metadata module', () => {
         });
       });
 
-      context('bun', () => {
+      describe('bun', () => {
         afterEach(() => {
           expect(delete globalThis.Bun, 'failed to delete Bun global').to.be.true;
         });
@@ -519,10 +526,9 @@ describe('client metadata module', () => {
         }
       ]
     };
-
     for (const [provider, testsForEnv] of Object.entries(tests)) {
       for (const { context: title, env: faasVariables, outcome } of testsForEnv) {
-        context(`${provider} - ${title}`, () => {
+        describe(`${provider} - ${title}`, () => {
           beforeEach(() => {
             sinon.stub(process, 'env').get(() => Object.fromEntries(faasVariables));
           });
@@ -540,7 +546,7 @@ describe('client metadata module', () => {
       }
     }
 
-    context('when a numeric FAAS env variable is not numerically parsable', () => {
+    describe('when a numeric FAAS env variable is not numerically parsable', () => {
       before(() => {
         process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_non_empty_string';
         process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '123not numeric';
@@ -558,7 +564,7 @@ describe('client metadata module', () => {
   });
 
   describe('metadata truncation', function () {
-    context('when faas region is too large', () => {
+    describe('when faas region is too large', () => {
       beforeEach('1. Omit fields from `env` except `env.name`.', () => {
         sinon.stub(process, 'env').get(() => ({
           AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
@@ -574,8 +580,8 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when os information is too large', () => {
-      context('release too large', () => {
+    describe('when os information is too large', () => {
+      describe('release too large', () => {
         beforeEach('2. Omit fields from `os` except `os.type`.', () => {
           sinon.stub(process, 'env').get(() => ({
             AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
@@ -592,7 +598,7 @@ describe('client metadata module', () => {
         });
       });
 
-      context('os.type too large', () => {
+      describe('os.type too large', () => {
         beforeEach(() => {
           sinon.stub(process, 'env').get(() => ({
             AWS_EXECUTION_ENV: 'iLoveJavaScript',
@@ -608,7 +614,7 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when there is no space for FaaS env', () => {
+    describe('when there is no space for FaaS env', () => {
       beforeEach('3. Omit the `env` document entirely.', () => {
         sinon.stub(process, 'env').get(() => ({
           AWS_EXECUTION_ENV: 'iLoveJavaScript',

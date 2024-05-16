@@ -1,5 +1,4 @@
 'use strict';
-
 const expect = require('chai').expect;
 const mock = require('../../tools/mongodb-mock/index');
 const { ReplSetFixture } = require('../../tools/common');
@@ -26,7 +25,6 @@ describe('Sessions - client/unit', function () {
           request.reply({ ok: 1 });
         }
       });
-
       const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
       return client.connect().then(() => {
         expect(() => client.startSession()).to.not.throw(
@@ -52,7 +50,6 @@ describe('Sessions - client/unit', function () {
               request.reply({ ok: 1 });
             }
           });
-
           replicaSetMock.secondSecondaryServer.setMessageHandler(request => {
             var doc = request.document;
             if (isHello(doc)) {
@@ -63,7 +60,6 @@ describe('Sessions - client/unit', function () {
               request.reply({ ok: 1 });
             }
           });
-
           replicaSetMock.arbiterServer.setMessageHandler(request => {
             var doc = request.document;
             if (isHello(doc)) {
@@ -74,7 +70,6 @@ describe('Sessions - client/unit', function () {
               request.reply({ ok: 1 });
             }
           });
-
           replicaSetMock.primaryServer.setMessageHandler(request => {
             var doc = request.document;
             if (isHello(doc)) {
@@ -85,7 +80,6 @@ describe('Sessions - client/unit', function () {
               request.reply({ ok: 1 });
             }
           });
-
           return replicaSetMock.uri();
         })
         .then(uri => {
@@ -118,13 +112,11 @@ describe('Sessions - client/unit', function () {
           request.reply({ ok: 1 });
         }
       });
-
       const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         let session = client.startSession();
         expect(session).to.exist;
-
         session.endSession({ skipCommand: true });
         client.close(done);
       });

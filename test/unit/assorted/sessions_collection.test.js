@@ -32,18 +32,15 @@ describe('Sessions - unit/sessions', function () {
           request.reply({ ok: 1 });
         }
       });
-
       const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
       const session = client.startSession({ causalConsistency: true });
       const coll = client.db('foo').collection('bar');
-
       return coll
         .insertOne({ a: 42 }, { session: session })
         .then(() => coll.findOne({}, { session: session, readConcern: { level: 'majority' } }))
         .then(() => {
           expect(findCommand.readConcern).to.have.keys(['level', 'afterClusterTime']);
           expect(findCommand.readConcern.afterClusterTime).to.eql(insertOperationTime);
-
           session.endSession({ skipCommand: true });
           return client.close();
         });
@@ -59,11 +56,9 @@ describe('Sessions - unit/sessions', function () {
           request.reply({ ok: 1 });
         }
       });
-
       const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
       return client.connect().then(client => {
         const coll = client.db('foo').collection('bar');
-
         return coll.countDocuments({}, options).then(() => {
           expect(options).to.deep.equal({});
           return client.close();

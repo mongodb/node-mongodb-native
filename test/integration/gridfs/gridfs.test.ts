@@ -19,13 +19,11 @@ describe('GridFS', () => {
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
     db = client.db('gridfsTest');
-
     // Reset namespace
     await db.dropCollection('fs.files').catch(() => null);
     await db.dropCollection('fs.chunks').catch(() => null);
     await db.dropDatabase().catch(() => null);
     await sleep(100);
-
     commandStartedEvents = [];
     client.on('commandStarted', e => commandStartedEvents.push(e));
     bucket = new GridFSBucket(db);
@@ -39,10 +37,8 @@ describe('GridFS', () => {
   describe('class GridFSBucket', () => {
     const assertIndexesExist = () => {
       expect(bucket.s).to.have.property('checkedIndexes', true);
-
       const listIndexes = commandStartedEvents.filter(e => e.commandName === 'listIndexes');
       expect(listIndexes).to.have.lengthOf(2);
-
       const createIndexes = commandStartedEvents.filter(e => e.commandName === 'createIndexes');
       expect(createIndexes).to.have.lengthOf(2);
       expect(createIndexes[0]).to.have.deep.nested.property('command.createIndexes', 'fs.files');
@@ -68,11 +64,9 @@ describe('GridFS', () => {
       expect(
         (await db.collections()).filter(({ namespace }) => namespace.startsWith('fs'))
       ).to.have.lengthOf(0);
-
       const upload = bucket.openUploadStream('test.txt');
       await once(bucket, 'index');
       await upload.abort();
-
       assertIndexesExist();
     });
 
@@ -80,49 +74,41 @@ describe('GridFS', () => {
       // Ensure the namespace does exist
       await db.createCollection('fs.files');
       await db.createCollection('fs.chunks');
-
       const upload = bucket.openUploadStream('test.txt');
       await once(bucket, 'index');
       await upload.abort();
-
       assertIndexesExist();
     });
 
     it('skips creating required indexes if they already exist', async () => {
       const files = await db.createCollection('fs.files');
       const chunks = await db.createCollection('fs.chunks');
-
       await files.createIndex(
         new Map([
           ['filename', 1],
           ['uploadDate', 1]
         ])
       );
-
       await chunks.createIndex(
         new Map([
           ['files_id', 1],
           ['n', 1]
         ])
       );
-
       // reset events array
       commandStartedEvents = [];
-
       const upload = bucket.openUploadStream('test.txt');
       await once(bucket, 'index');
       await upload.abort();
-
       // Still listed indexes
       const listIndexes = commandStartedEvents.filter(e => e.commandName === 'listIndexes');
       expect(listIndexes).to.have.lengthOf(2);
-
       // But since it found them, we didn't attempt creation
       const createIndexes = commandStartedEvents.filter(e => e.commandName === 'createIndexes');
       expect(createIndexes).to.have.lengthOf(0);
     });
 
-    context('find(oid)', () => {
+    describe('find(oid)', () => {
       let findsStarted;
 
       beforeEach(function () {
@@ -137,7 +123,7 @@ describe('GridFS', () => {
         await client.close();
       });
 
-      context('when passed an ObjectId instance as the filter', () => {
+      describe('when passed an ObjectId instance as the filter', () => {
         it('wraps the objectId in a document with _id as the only key', async () => {
           const oid = new ObjectId();
           await bucket.find(oid).toArray();

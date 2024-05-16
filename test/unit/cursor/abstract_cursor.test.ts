@@ -10,7 +10,6 @@ import {
   ns,
   type Server
 } from '../../mongodb';
-
 /** Minimal do nothing cursor to focus on testing the base cursor behavior */
 class ConcreteCursor extends AbstractCursor {
   constructor(client: MongoClient, options: AbstractCursorOptions = {}) {
@@ -23,7 +22,6 @@ class ConcreteCursor extends AbstractCursor {
     return callback(undefined, { server: {} as Server, session, response: { ok: 1 } });
   }
 }
-
 describe('class AbstractCursor', () => {
   let client: MongoClient;
 
@@ -31,7 +29,7 @@ describe('class AbstractCursor', () => {
     client = new MongoClient('mongodb://iLoveJavascript');
   });
 
-  context('#constructor', () => {
+  describe('#constructor', () => {
     it('creates a session if none passed in', () => {
       const cursor = new ConcreteCursor(client);
       expect(cursor).to.have.property('session').that.is.instanceOf(ClientSession);

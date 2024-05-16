@@ -56,7 +56,6 @@ describe('ServerDescription', function () {
         equal: false
       }
     ];
-
     for (const test of errorEqualityTests) {
       it(test.description, function () {
         expect(test.lhs.equals(test.rhs)).to.equal(test.equal);
@@ -85,7 +84,6 @@ describe('ServerDescription', function () {
       newTv?: TopologyVersion | null;
       out: 0 | -1 | 1;
     };
-
     const compareTopologyVersionEqualTests: CompareTopologyVersionTest[] = [
       {
         title: 'when process ids are equal and both counter values are Long.ZERO',
@@ -180,7 +178,6 @@ describe('ServerDescription', function () {
         out: 1
       }
     ];
-
     const makeTopologyVersionComparisonTests = tests => {
       for (const { title, currentTv, newTv, out } of tests) {
         it(title, () => {
@@ -188,13 +185,16 @@ describe('ServerDescription', function () {
         });
       }
     };
-    context('should return that versions are equal', () => {
+
+    describe('should return that versions are equal', () => {
       makeTopologyVersionComparisonTests(compareTopologyVersionEqualTests);
     });
-    context('should return that current version is less than', () => {
+
+    describe('should return that current version is less than', () => {
       makeTopologyVersionComparisonTests(compareTopologyVersionLessThanTests);
     });
-    context('should return that current version is greater than', () => {
+
+    describe('should return that current version is greater than', () => {
       makeTopologyVersionComparisonTests(compareTopologyVersionGreaterThanTests);
     });
   });

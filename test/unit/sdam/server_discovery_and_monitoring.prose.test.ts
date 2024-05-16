@@ -18,16 +18,13 @@ describe('Heartbeat tests', function () {
     // and pushing "client connection created" to shared array
     server = createServer(clientSocket => {
       events.push('client connected');
-
       clientSocket.once('data', () => {
         events.push('client hello received');
         clientSocket.destroy();
       });
     });
     server.listen(PORT);
-
     await once(server, 'listening');
-
     // set up client to connect to mock server with the following configuration
     // {
     //    serverSelectionTimeoutMS: 500,
@@ -35,7 +32,6 @@ describe('Heartbeat tests', function () {
     client = new MongoClient(CONN_STRING, {
       serverSelectionTimeoutMS: 500
     });
-
     // Listen to `ServerHeartbeatStartedEvent` and `ServerHeartbeatSucceededEvent`, pushing the
     // event name to the shared array when event is emitted
     for (const e of [SERVER_HEARTBEAT_STARTED, SERVER_HEARTBEAT_FAILED]) {
@@ -54,7 +50,6 @@ describe('Heartbeat tests', function () {
     const maybeError = await client.connect().catch(e => e);
     // Catch error
     expect(maybeError).to.be.instanceOf(Error);
-
     expect(events).to.deep.equal([
       SERVER_HEARTBEAT_STARTED,
       'client connected',

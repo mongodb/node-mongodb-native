@@ -28,7 +28,6 @@ describe('IPv6 Addresses', () => {
       }
       return this.skip();
     }
-
     ipv6Hosts = this.configuration.options.hostAddresses.map(({ port }) => `[::1]:${port}`);
     client = this.configuration.newClient(`mongodb://${ipv6Hosts.join(',')}/test`, {
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
@@ -59,10 +58,8 @@ describe('IPv6 Addresses', () => {
     // After running the first command we should receive the hosts back as reported by the mongod in a hello response
     // mongodb will report the bound host address, in this case "localhost"
     expect(client.topology).to.exist;
-
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const hosts = Array.from(client.topology!.s.description.servers.keys());
-
     for (const key of localhostHosts) {
       expect(hosts).to.include(key);
     }
@@ -70,19 +67,14 @@ describe('IPv6 Addresses', () => {
 
   it('should createConnection with IPv6 addresses initially then switch to mongodb bound addresses', async () => {
     const createConnectionSpy = sinon.spy(net, 'createConnection');
-
     const connectionCreatedEvents: ConnectionCreatedEvent[] = [];
     client.on('connectionCreated', ev => connectionCreatedEvents.push(ev));
-
     await client.db().command({ ping: 1 }, { readPreference: ReadPreference.primary });
-
     const callArgs = createConnectionSpy.getCalls().map(({ args }) => args[0]);
-
     for (let index = 0; index < ipv6Hosts.length; index++) {
       // The first 3 connections (monitoring) are made using the user provided addresses
       expect(callArgs[index]).to.have.property('host', '::1');
     }
-
     for (let index = ipv6Hosts.length; index < callArgs.length; index++) {
       // MongoDB sends back hellos that have the bound address 'localhost'
       // We make new connection using that address instead

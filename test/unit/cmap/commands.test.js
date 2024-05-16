@@ -4,8 +4,8 @@ const { OpReply } = require('../../mongodb');
 describe('commands', function () {
   describe('Response', function () {
     describe('#parse', function () {
-      context('when the message body is invalid', function () {
-        context('when the buffer is empty', function () {
+      describe('when the message body is invalid', function () {
+        describe('when the buffer is empty', function () {
           const message = Buffer.from([]);
           const header = {
             length: 0,
@@ -21,7 +21,7 @@ describe('commands', function () {
           });
         });
 
-        context('when numReturned is invalid', function () {
+        describe('when numReturned is invalid', function () {
           const message = Buffer.from([]);
           const header = {
             length: 0,
@@ -41,7 +41,7 @@ describe('commands', function () {
     });
 
     describe('#constructor', function () {
-      context('when the message body is invalid', function () {
+      describe('when the message body is invalid', function () {
         const message = Buffer.from([]);
         const header = {
           length: 0,

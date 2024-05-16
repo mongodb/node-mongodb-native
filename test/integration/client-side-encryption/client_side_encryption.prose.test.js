@@ -3,7 +3,6 @@ const BSON = require('bson');
 const { expect } = require('chai');
 const fs = require('fs');
 const path = require('path');
-
 const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
@@ -12,7 +11,6 @@ const { MongoServerError, MongoServerSelectionError, MongoClient } = require('..
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 const { coerce, gte } = require('semver');
-
 const {
   externalSchema
 } = require('../../spec/client-side-encryption/external/external-schema.json');
@@ -27,18 +25,14 @@ const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => 
   result.kmip = {
     endpoint: kmipEndpoint || 'localhost:5698'
   };
-
   if (result.azure && azureEndpoint) {
     result.azure.identityPlatformEndpoint = azureEndpoint;
   }
-
   if (result.gcp && gcpEndpoint) {
     result.gcp.endpoint = gcpEndpoint;
   }
-
   return result;
 };
-
 const noop = () => {};
 const metadata = {
   requires: {
@@ -47,7 +41,6 @@ const metadata = {
     topology: '!load-balanced'
   }
 };
-
 const eeMetadata = {
   requires: {
     clientSideEncryption: true,
@@ -55,13 +48,9 @@ const eeMetadata = {
     topology: ['replicaset', 'sharded']
   }
 };
-
 // Tests for the ClientEncryption type are not included as part of the YAML tests.
-
 // In the prose tests LOCAL_MASTERKEY refers to the following base64:
-
 // .. code:: javascript
-
 //   Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
 describe('Client Side Encryption Prose Tests', metadata, function () {
   const dataDbName = 'db';
@@ -70,12 +59,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-
   const LOCAL_KEY = Buffer.from(
     'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
     'base64'
   );
-
   installNodeDNSWorkaroundHooks();
 
   describe('Data key and double encryption', function () {
@@ -85,11 +72,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     beforeEach(function () {
       // 1. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
       this.client = this.configuration.newClient({}, { monitorCommands: true });
-
       this.commandStartedEvents = new APMEventCollector(this.client, 'commandStarted', {
         exclude: [LEGACY_HELLO_COMMAND]
       });
-
       const schemaMap = {
         [dataNamespace]: {
           bsonType: 'object',
@@ -104,7 +89,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           }
         }
       };
-
       return (
         Promise.resolve()
           .then(() => this.client.connect())
@@ -347,7 +331,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         );
     });
   });
-
   // TODO(NODE-4000): We cannot implement these tests according to spec b/c the tests require a
   // connect-less client. So instead we are implementing the tests via APM,
   // and confirming that the externalClient is firing off keyVault requests during
@@ -358,13 +341,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/external', file))
       );
     }
-
     const externalKey = loadExternal('external-key.json');
     const externalSchema = loadExternal('external-schema.json');
 
     beforeEach(function () {
       this.client = this.configuration.newClient();
-
       // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
       return (
         this.client
@@ -392,7 +373,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         .then(() => this.clientEncrypted && this.clientEncrypted.close())
         .then(() => this.client && this.client.close());
     });
-
     function defineTest(withExternalKeyVault) {
       it(
         `should work ${withExternalKeyVault ? 'with' : 'without'} external key vault`,
@@ -409,7 +389,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                   {},
                   { monitorCommands: true }
                 );
-
                 this.commandStartedEvents = new APMEventCollector(
                   this.externalClient,
                   'commandStarted',
@@ -434,11 +413,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                   kmsProviders: getKmsProviders(LOCAL_KEY),
                   extraOptions: getEncryptExtraOptions()
                 };
-
                 if (withExternalKeyVault) {
                   options.keyVaultClient = this.externalClient;
                 }
-
                 this.clientEncryption = new ClientEncryption(
                   this.client,
                   Object.assign({}, options)
@@ -559,11 +536,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/limits', file))
       );
     }
-
     const limitsSchema = loadLimits('limits-schema.json');
     const limitsKey = loadLimits('limits-key.json');
     const limitsDoc = loadLimits('limits-doc.json');
-
     let hasRunFirstTimeSetup = false;
 
     beforeEach(async function () {
@@ -575,10 +550,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       }
       hasRunFirstTimeSetup = true;
       // First, perform the setup.
-
       // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
       this.client = this.configuration.newClient();
-
       await this.client
         .connect()
         // 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
@@ -636,15 +609,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     afterEach(function () {
       return this.client && this.client.close();
     });
-
     // Using ``client_encrypted`` perform the following operations:
-
     function repeatedChar(char, length) {
       return Array.from({ length })
         .map(() => char)
         .join('');
     }
-
     const testCases = [
       // 1. Insert ``{ "_id": "over_2mib_under_16mib", "unencrypted": <the string "a" repeated 2097152 times> }``.
       //    Expect this to succeed since this is still under the ``maxBsonObjectSize`` limit.
@@ -717,7 +687,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         error: true
       }
     ];
-
     testCases.forEach(testCase => {
       it(testCase.description, metadata, function () {
         return this.encryptedColl.insertMany(testCase.docs()).then(
@@ -727,7 +696,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             }
             const expectedEvents = Array.from(testCase.expectedEvents);
             const actualEvents = pruneEvents(this.commandStartedEvents.events);
-
             expect(actualEvents)
               .to.have.a.lengthOf(expectedEvents.length)
               .and.to.containSubset(expectedEvents);
@@ -740,7 +708,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         );
       });
     });
-
     function pruneEvents(events) {
       return events.map(event => {
         // We are pruning out the bunch of repeating As, mostly
@@ -762,10 +729,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   describe('Views are prohibited', function () {
     beforeEach(function () {
       // First, perform the setup.
-
       // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
       this.client = this.configuration.newClient();
-
       // 2. Using client, drop and create a view named db.view with an empty pipeline.
       // E.g. using the command { "create": "view", "viewOn": "coll" }.
       return this.client
@@ -799,14 +764,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           }
         }
       );
-
       return this.clientEncrypted.connect();
     });
 
     afterEach(function () {
       return this.clientEncrypted && this.clientEncrypted.close();
     });
-
     // 4. Using client_encrypted, attempt to insert a document into db.view.
     // Expect an exception to be thrown containing the message: "cannot auto encrypt a view".
     it('should error when inserting into a view with autoEncryption', metadata, function () {
@@ -837,7 +800,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
   describe('Custom Endpoint Test', function () {
     // Data keys created with AWS KMS may specify a custom endpoint to contact (instead of the default endpoint derived from the AWS region).
-
     beforeEach(function () {
       // 1. Create a ``ClientEncryption`` object (referred to as ``client_encryption``)
       //    Configure with ``aws`` KMS providers as follows:
@@ -847,16 +809,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       //       }
       //    Configure with ``keyVaultNamespace`` set to ``keyvault.datakeys``, and a default MongoClient as the ``keyVaultClient``.
       this.client = this.configuration.newClient();
-
       const customKmsProviders = getKmsProviders();
       customKmsProviders.azure.identityPlatformEndpoint = 'login.microsoftonline.com:443';
       customKmsProviders.gcp.endpoint = 'oauth2.googleapis.com:443';
-
       const invalidKmsProviders = getKmsProviders();
       invalidKmsProviders.azure.identityPlatformEndpoint = 'doesnotexist.invalid:443';
       invalidKmsProviders.gcp.endpoint = 'doesnotexist.invalid:443';
       invalidKmsProviders.kmip.endpoint = 'doesnotexist.local:5698';
-
       return this.client.connect().then(() => {
         this.clientEncryption = new ClientEncryption(this.client, {
           bson: BSON,
@@ -870,7 +829,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           },
           extraOptions: getEncryptExtraOptions()
         });
-
         this.clientEncryptionInvalid = new ClientEncryption(this.client, {
           keyVaultNamespace,
           kmsProviders: invalidKmsProviders,
@@ -888,7 +846,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     afterEach(function () {
       return this.client && this.client.close();
     });
-
     const testCases = [
       {
         description: '1. aws: no custom endpoint',
@@ -1041,7 +998,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       }
     ];
-
     testCases.forEach(testCase => {
       it(testCase.description, metadata, function () {
         // Call `client_encryption.createDataKey()` with <provider> as the provider and the following masterKey:
@@ -1050,7 +1006,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         //      ...
         //    }
         const masterKey = testCase.masterKey;
-
         const promises = [];
         promises.push(
           this.clientEncryption.createDataKey(testCase.provider, { masterKey }).then(
@@ -1075,12 +1030,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               if (!testCase.errorValidator) {
                 throw new Error('Invalid Error validator');
               }
-
               testCase.errorValidator(err);
             }
           )
         );
-
         if (testCase.checkAgainstInvalid) {
           promises.push(
             this.clientEncryptionInvalid.createDataKey(testCase.provider, { masterKey }).then(
@@ -1095,7 +1048,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             )
           );
         }
-
         return Promise.all(promises);
       });
     });
@@ -1171,9 +1123,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .collection(dataCollName)
           .insertOne({ encrypted: 'test' })
           .catch(e => e);
-
         expect(insertError).to.be.instanceOf(MongoServerSelectionError);
-
         expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
           error =>
             /ECONNREFUSED/.test(error.message) ||
@@ -1222,14 +1172,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             }
           }
         );
-
         // Use client_encrypted to insert the document {"unencrypted": "test"} into db.coll.
         await clientEncrypted.connect();
         const insertResult = await clientEncrypted
           .db(dataDbName)
           .collection(dataCollName)
           .insertOne({ unencrypted: 'test' });
-
         // Expect this to succeed.
         expect(insertResult).to.have.property('insertedId');
       });
@@ -1251,14 +1199,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         await clientEncrypted?.close();
         await client?.close();
       });
-
       // Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021
       // (or whatever was passed via --port) with serverSelectionTimeoutMS=1000. Run a handshake
       // command and ensure it fails with a server selection timeout.
       it('does not spawn mongocryptd', metadata, async function () {
         client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
         const error = await client.connect().catch(e => e);
-
         expect(error, 'Error MUST be a MongoServerSelectionError error').to.be.instanceOf(
           MongoServerSelectionError
         );
@@ -1282,7 +1228,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           this.skip();
         }
       });
-
       // Setup
       beforeEach(async function () {
         const { cryptSharedLibPath } = getEncryptExtraOptions();
@@ -1334,7 +1279,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         await clientEncrypted?.close();
         await client?.close();
       });
-
       // 4. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or
       // whatever was passed via `--port` with serverSelectionTimeoutMS=1000.) Run a handshake
       // command and ensure it fails with a server selection timeout
@@ -1345,19 +1289,17 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
   });
-
   // TODO(NODE-3151): Implement kms prose tests
   describe('KMS TLS Tests', () => {
     it.skip('TBD', () => {}).skipReason = 'TODO(NODE-3151): Implement "KMS TLS Tests"';
   });
-
   /**
    * - Create client encryption no tls
    * - Create client encryption with tls
    * - Create client encryption expired
    * - Create client encryption invalid hostname
    */
-  context('KMS TLS Options Tests', metadata, function () {
+  describe('KMS TLS Options Tests', metadata, function () {
     let clientNoTls;
     let clientWithTls;
     let clientWithTlsExpired;
@@ -1423,7 +1365,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         tlsOptions: tlsCaOptions,
         extraOptions: getEncryptExtraOptions()
       };
-
       switch (this.currentTest.title) {
         case 'should fail with no TLS':
           clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
@@ -1484,9 +1425,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       }
     });
-
     // Case 1.
-    context('Case 1: AWS', metadata, function () {
+    describe('Case 1: AWS', metadata, function () {
       const masterKey = {
         region: 'us-east-1',
         key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
@@ -1540,9 +1480,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
     });
-
     // Case 2.
-    context('Case 2: Azure', metadata, function () {
+    describe('Case 2: Azure', metadata, function () {
       const masterKey = {
         keyVaultEndpoint: 'doesnotexist.local',
         keyName: 'foo'
@@ -1589,9 +1528,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
     });
-
     // Case 3.
-    context('Case 3: GCP', metadata, function () {
+    describe('Case 3: GCP', metadata, function () {
       const masterKey = {
         projectId: 'foo',
         location: 'bar',
@@ -1640,9 +1578,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
     });
-
     // Case 4.
-    context('Case 4: KMIP', metadata, function () {
+    describe('Case 4: KMIP', metadata, function () {
       const masterKey = {};
 
       it('should fail with no TLS', metadata, async function () {
@@ -1687,7 +1624,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context('12. Explicit Encryption', eeMetadata, function () {
+  describe('12. Explicit Encryption', eeMetadata, function () {
     const data = path.join(__dirname, '..', '..', 'spec', 'client-side-encryption', 'etc', 'data');
     let encryptedFields;
     let key1Document;
@@ -1760,7 +1697,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       await encryptedClient.close();
     });
 
-    context('Case 1: can insert encrypted indexed and find', eeMetadata, function () {
+    describe('Case 1: can insert encrypted indexed and find', eeMetadata, function () {
       let insertPayload;
       let findPayload;
 
@@ -1807,7 +1744,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
-    context(
+    describe(
       'Case 2: can insert encrypted indexed and find with non-zero contention',
       eeMetadata,
       function () {
@@ -1894,7 +1831,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       }
     );
 
-    context('Case 3: can insert encrypted unindexed', eeMetadata, function () {
+    describe('Case 3: can insert encrypted unindexed', eeMetadata, function () {
       let insertPayload;
 
       beforeEach(async function () {
@@ -1927,7 +1864,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
-    context('Case 4: can roundtrip encrypted indexed', eeMetadata, function () {
+    describe('Case 4: can roundtrip encrypted indexed', eeMetadata, function () {
       let payload;
 
       beforeEach(async function () {
@@ -1952,7 +1889,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
-    context('Case 5: can roundtrip encrypted unindexed', eeMetadata, function () {
+    describe('Case 5: can roundtrip encrypted unindexed', eeMetadata, function () {
       let payload;
 
       beforeEach(async function () {
@@ -1977,20 +1914,18 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context('13. Unique Index on keyAltNames', function () {
+  describe('13. Unique Index on keyAltNames', function () {
     let client, clientEncryption, setupKeyId;
 
     beforeEach(async function () {
       // Create a MongoClient object (referred to as client).
       client = this.configuration.newClient();
       await client.connect();
-
       // Using client, drop the collection keyvault.datakeys.
       await client
         .db('keyvault')
         .dropCollection('datakeys')
         .catch(() => null);
-
       await client
         .db('keyvault')
         .collection('datakeys')
@@ -2002,14 +1937,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             writeConcern: { w: 'majority' }
           }
         );
-
       // Create a ClientEncryption object (referred to as client_encryption) with client set as the keyVaultClient.
       clientEncryption = new ClientEncryption(client, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: getKmsProviders(),
         extraOptions: getEncryptExtraOptions()
       });
-
       // Using client_encryption, create a data key with a local KMS provider and the keyAltName "def".
       setupKeyId = await clientEncryption.createDataKey('local', {
         keyAltNames: ['def']
@@ -2022,13 +1955,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       await client.close();
     });
 
-    context('Case 1', metadata, function () {
+    describe('Case 1', metadata, function () {
       it('createDataKey() handles duplicate key errors on the keyvault collection', async function () {
         // 1. Use client_encryption to create a new local data key with a keyAltName "abc" and assert the operation does not fail.
         await clientEncryption.createDataKey('local', {
           keyAltNames: ['abc']
         });
-
         // 2. Repeat Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
         const resultStep2 = await clientEncryption
           .createDataKey('local', {
@@ -2040,7 +1972,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           'Error in step 2) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
         ).to.be.instanceof(MongoServerError);
         expect(resultStep2).have.property('code', 11000);
-
         // 3. Use client_encryption to create a new local data key with a keyAltName "def" and assert the operation fails due to a duplicate key server error (error code 11000).
         const resultStep3 = await clientEncryption
           .createDataKey('local', {
@@ -2055,18 +1986,15 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
-    context('Case 2', metadata, function () {
+    describe('Case 2', metadata, function () {
       it('addKeyAltName() handles duplicate key errors on the keyvault collection', async function () {
         // 1. Use client_encryption to create a new local data key and assert the operation does not fail.
         const _id = await clientEncryption.createDataKey('local');
-
         // 2. Use client_encryption to add a keyAltName "abc" to the key created in Step 1 and assert the operation does not fail.
         await clientEncryption.addKeyAltName(_id, 'abc');
-
         // 3. Repeat Step 2, assert the operation does not fail, and assert the returned key document contains the keyAltName "abc" added in Step 2.
         const resultStep3 = await clientEncryption.addKeyAltName(_id, 'abc');
         expect(resultStep3).to.have.property('keyAltNames').to.include('abc');
-
         // 4. Use client_encryption to add a keyAltName "def" to the key created in Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
         const resultStep4 = await clientEncryption.addKeyAltName(_id, 'def').catch(e => e);
         expect(
@@ -2074,7 +2002,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           'Error in step 4) expected clientEncryption.addKeyAltName to throw duplicate key error but it did not'
         ).to.be.instanceof(MongoServerError);
         expect(resultStep4).to.have.property('code', 11000);
-
         // 5. Use client_encryption to add a keyAltName "def" to the existing key, assert the operation does not fail, and assert the returned key document contains the keyAltName "def" added during Setup.
         const resultStep5 = await clientEncryption.addKeyAltName(setupKeyId, 'def');
         expect(resultStep5).to.have.property('keyAltNames').to.include('def');
@@ -2082,7 +2009,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context('16. Rewrap', function () {
+  describe('16. Rewrap', function () {
     const masterKeys = {
       aws: {
         region: 'us-east-1',
@@ -2126,7 +2053,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         await client1.close();
         await client2.close();
       });
-
       for (const { srcProvider, dstProvider } of generateTestCombinations()) {
         it(
           `should rewrap data key from ${srcProvider} to ${dstProvider}`,
@@ -2137,7 +2063,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               .db('keyvault')
               .dropCollection('datakeys')
               .catch(() => null);
-
             // Step 2. Create a ``ClientEncryption`` object named ``clientEncryption1``
             const clientEncryption1 = new ClientEncryption(client1, {
               keyVaultNamespace: 'keyvault.datakeys',
@@ -2151,18 +2076,15 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               extraOptions: getEncryptExtraOptions(),
               bson: BSON
             });
-
             // Step 3. Call ``clientEncryption1.createDataKey`` with ``srcProvider``
             const keyId = await clientEncryption1.createDataKey(srcProvider, {
               masterKey: masterKeys[srcProvider]
             });
-
             // Step 4. Call ``clientEncryption1.encrypt`` with the value "test"
             const cipherText = await clientEncryption1.encrypt('test', {
               keyId,
               algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
             });
-
             // Step 5. Create a ``ClientEncryption`` object named ``clientEncryption2``
             const clientEncryption2 = new ClientEncryption(client2, {
               keyVaultNamespace: 'keyvault.datakeys',
@@ -2176,7 +2098,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               extraOptions: getEncryptExtraOptions(),
               bson: BSON
             });
-
             // Step 6. Call ``clientEncryption2.rewrapManyDataKey`` with an empty ``filter``
             const rewrapManyDataKeyResult = await clientEncryption2.rewrapManyDataKey(
               {},
@@ -2185,14 +2106,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 masterKey: masterKeys[dstProvider]
               }
             );
-
             expect(rewrapManyDataKeyResult).to.have.property('bulkWriteResult');
             expect(rewrapManyDataKeyResult.bulkWriteResult).to.have.property('modifiedCount', 1);
-
             // 7. Call ``clientEncryption1.decrypt`` with the ``ciphertext``. Assert the return value is "test".
             const decryptResult1 = await clientEncryption1.decrypt(cipherText);
             expect(decryptResult1).to.equal('test');
-
             // 8. Call ``clientEncryption2.decrypt`` with the ``ciphertext``. Assert the return value is "test".
             const decryptResult2 = await clientEncryption2.decrypt(cipherText);
             expect(decryptResult2).to.equal('test');
@@ -2204,7 +2122,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     describe('Case 2: RewrapManyDataKeyOpts.provider is not optional', function () {
       let client;
       let clientEncryption;
-
       // 1. Create a ``ClientEncryption`` object named ``clientEncryption`` with these options:
       //    class ClientEncryptionOpts {
       //       keyVaultClient: <new MongoClient>,
@@ -2223,14 +2140,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       after(async function () {
         await client?.close();
       });
-
       // 2. Call ``clientEncryption.rewrapManyDataKey`` with an empty ``filter`` and these options:
       //    class RewrapManyDataKeyOpts {
       //       masterKey: {}
       //    }
       // Assert that `clientEncryption.rewrapManyDataKey` raises a client error indicating that the
       // required ``RewrapManyDataKeyOpts.provider`` field is missing.
-      context('when provider field is missing', function () {
+      describe('when provider field is missing', function () {
         it('raises an error', async function () {
           const error = await clientEncryption
             .rewrapManyDataKey({}, { masterKey: {} })

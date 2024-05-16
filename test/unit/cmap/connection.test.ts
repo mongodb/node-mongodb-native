@@ -20,7 +20,6 @@ const connectionOptionsDefaults = {
   metadata: undefined,
   loadBalanced: false
 };
-
 describe('new Connection()', function () {
   let server;
 
@@ -34,17 +33,14 @@ describe('new Connection()', function () {
       if (isHello(doc)) {
         request.reply(mock.HELLO);
       }
-
       // black hole all other requests
     });
-
     const options = {
       ...connectionOptionsDefaults,
       connectionType: Connection,
       hostAddress: server.hostAddress(),
       authProviders: new MongoClientAuthProviders()
     };
-
     const conn = await connect(options);
     const readSpy = sinon.spy(conn, 'readMany');
     await conn.command(ns('$admin.cmd'), { ping: 1 }, { noResponse: true });
@@ -57,17 +53,14 @@ describe('new Connection()', function () {
       if (isHello(doc)) {
         request.reply(mock.HELLO);
       }
-
       // black hole all other requests
     });
-
     const options = {
       ...connectionOptionsDefaults,
       connectionType: Connection,
       hostAddress: server.hostAddress(),
       authProviders: new MongoClientAuthProviders()
     };
-
     const conn = await connect(options);
     const error = await conn
       .command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 })
@@ -84,19 +77,15 @@ describe('new Connection()', function () {
       }
       // respond to no other requests to trigger timeout event
     });
-
     const options = {
       hostAddress: server.hostAddress(),
       ...connectionOptionsDefaults,
       authProviders: new MongoClientAuthProviders()
     };
-
     const conn = await connect(options);
-
     const error = await conn
       .command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 })
       .catch(error => error);
-
     const beforeHandshakeSymbol = getSymbolFrom(error, 'beforeHandshake', false);
     expect(beforeHandshakeSymbol).to.be.a('symbol');
     expect(error).to.have.property(beforeHandshakeSymbol, false);
@@ -110,16 +99,13 @@ describe('new Connection()', function () {
       }
       request.reply({ ok: 1 });
     });
-
     const options = {
       ...connectionOptionsDefaults,
       hostAddress: server.hostAddress(),
       authProviders: new MongoClientAuthProviders()
     };
-
     const connection = await connect(options);
     const commandSpy = sinon.spy(connection, 'command');
-
     await connection.command(ns('dummy'), { ping: 1 }, {});
     expect(commandSpy).to.have.been.calledOnce;
   });
@@ -128,16 +114,13 @@ describe('new Connection()', function () {
     server.setMessageHandler(() => {
       // respond to no requests to trigger timeout event
     });
-
     const options = {
       ...connectionOptionsDefaults,
       hostAddress: server.hostAddress(),
       socketTimeoutMS: 50,
       authProviders: new MongoClientAuthProviders()
     };
-
     const error = await connect(options).catch(error => error);
-
     const beforeHandshakeSymbol = getSymbolFrom(error, 'beforeHandshake', false);
     expect(beforeHandshakeSymbol).to.be.a('symbol');
     expect(error).to.have.property(beforeHandshakeSymbol, true);

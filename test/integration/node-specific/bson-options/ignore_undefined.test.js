@@ -7,7 +7,6 @@ describe('Ignore Undefined', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
-
   let client;
 
   beforeEach(async function () {
@@ -18,24 +17,21 @@ describe('Ignore Undefined', function () {
     await client.close();
   });
 
-  it('Should correctly insert document ignoring undefined field', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function (done) {
+  it(
+    'Should correctly insert document ignoring undefined field',
+    { requires: { topology: ['single'] } },
+    function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         ignoreUndefined: true
       });
-
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue');
-
         // Ignore the undefined field
         collection.insert({ a: 1, b: undefined }, configuration.writeConcernMax(), function (err) {
           expect(err).to.not.exist;
-
           // Locate the doument
           collection.findOne(function (err, item) {
             test.equal(1, item.a);
@@ -45,72 +41,61 @@ describe('Ignore Undefined', function () {
         });
       });
     }
-  });
+  );
 
   it(
     'Should correctly connect using MongoClient and perform insert document ignoring undefined field',
-    {
-      metadata: { requires: { topology: ['single'] } },
-
-      test: function (done) {
-        var configuration = this.configuration;
-        const client = configuration.newClient(
-          {},
-          {
-            ignoreUndefined: true
-          }
-        );
-
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
-          collection.insert({ a: 1, b: undefined }, function (err) {
-            expect(err).to.not.exist;
-
-            collection.findOne(function (err, item) {
-              test.equal(1, item.a);
-              test.ok(item.b === undefined);
-
-              collection.insertOne({ a: 2, b: undefined }, function (err) {
-                expect(err).to.not.exist;
-
-                collection.findOne({ a: 2 }, function (err, item) {
-                  test.equal(2, item.a);
-                  test.ok(item.b === undefined);
-
-                  collection.insertMany([{ a: 3, b: undefined }], function (err) {
-                    expect(err).to.not.exist;
-
-                    collection.findOne({ a: 3 }, function (err, item) {
-                      test.equal(3, item.a);
-                      test.ok(item.b === undefined);
-                      client.close(done);
-                    });
+    { requires: { topology: ['single'] } },
+    function (done) {
+      var configuration = this.configuration;
+      const client = configuration.newClient(
+        {},
+        {
+          ignoreUndefined: true
+        }
+      );
+      client.connect(function (err, client) {
+        var db = client.db(configuration.db);
+        var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
+        collection.insert({ a: 1, b: undefined }, function (err) {
+          expect(err).to.not.exist;
+          collection.findOne(function (err, item) {
+            test.equal(1, item.a);
+            test.ok(item.b === undefined);
+            collection.insertOne({ a: 2, b: undefined }, function (err) {
+              expect(err).to.not.exist;
+              collection.findOne({ a: 2 }, function (err, item) {
+                test.equal(2, item.a);
+                test.ok(item.b === undefined);
+                collection.insertMany([{ a: 3, b: undefined }], function (err) {
+                  expect(err).to.not.exist;
+                  collection.findOne({ a: 3 }, function (err, item) {
+                    test.equal(3, item.a);
+                    test.ok(item.b === undefined);
+                    client.close(done);
                   });
                 });
               });
             });
           });
         });
-      }
+      });
     }
   );
 
-  it('Should correctly update document ignoring undefined field', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function (done) {
+  it(
+    'Should correctly update document ignoring undefined field',
+    { requires: { topology: ['single'] } },
+    function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         ignoreUndefined: true
       });
-
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue2');
         var id = new ObjectId();
-
         collection.updateOne(
           { _id: id, a: 1, b: undefined },
           { $set: { a: 1, b: undefined } },
@@ -121,7 +106,6 @@ describe('Ignore Undefined', function () {
               test.equal(1, item.a);
               test.ok(item.b === undefined);
               var id = new ObjectId();
-
               collection.updateMany(
                 { _id: id, a: 1, b: undefined },
                 { $set: { a: 1, b: undefined } },
@@ -132,7 +116,6 @@ describe('Ignore Undefined', function () {
                     test.equal(1, item.a);
                     test.ok(item.b === undefined);
                     var id = new ObjectId();
-
                     collection.update(
                       { _id: id, a: 1, b: undefined },
                       { $set: { a: 1, b: undefined } },
@@ -154,7 +137,7 @@ describe('Ignore Undefined', function () {
         );
       });
     }
-  });
+  );
 
   it('Should correctly inherit ignore undefined field from db during insert', async function () {
     const configuration = this.configuration;
@@ -162,15 +145,12 @@ describe('Ignore Undefined', function () {
       maxPoolSize: 1,
       ignoreUndefined: false
     });
-
     const db = client.db(configuration.db, { ignoreUndefined: true });
     const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue3');
-
     await collection.insert({ a: 1, b: undefined });
     const item = await collection.findOne();
     expect(item).to.have.property('a', 1);
     expect(item).to.not.have.property('b');
-
     await client.close();
   });
 
@@ -179,11 +159,9 @@ describe('Ignore Undefined', function () {
     const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue4', {
       ignoreUndefined: true
     });
-
     // Ignore the undefined field
     collection.insert({ a: 1, b: undefined }, err => {
       expect(err).to.not.exist;
-
       // Locate the doument
       collection.findOne((err, item) => {
         expect(err).to.not.exist;
@@ -199,11 +177,9 @@ describe('Ignore Undefined', function () {
     const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue5', {
       ignoreUndefined: false
     });
-
     // Ignore the undefined field
     collection.insert({ a: 1, b: undefined }, { ignoreUndefined: true }, err => {
       expect(err).to.not.exist;
-
       // Locate the doument
       collection.findOne({}, (err, item) => {
         expect(err).to.not.exist;
@@ -219,14 +195,11 @@ describe('Ignore Undefined', function () {
     const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue6', {
       ignoreUndefined: false
     });
-
     collection.insert({ a: 1, b: 2 }, err => {
       expect(err).to.not.exist;
-
       // Replace the doument, ignoring undefined fields
       collection.findOneAndReplace({}, { a: 1, b: undefined }, { ignoreUndefined: true }, err => {
         expect(err).to.not.exist;
-
         // Locate the doument
         collection.findOne((err, item) => {
           expect(err).to.not.exist;
@@ -241,14 +214,12 @@ describe('Ignore Undefined', function () {
   it('Should correctly ignore undefined field during bulk write', function (done) {
     const db = client.db('shouldCorrectlyIgnoreUndefinedValue7');
     const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue7');
-
     // Ignore the undefined field
     collection.bulkWrite(
       [{ insertOne: { a: 1, b: undefined } }],
       { ignoreUndefined: true },
       err => {
         expect(err).to.not.exist;
-
         // Locate the doument
         collection.findOne((err, item) => {
           expect(err).to.not.exist;
@@ -261,9 +232,10 @@ describe('Ignore Undefined', function () {
   });
 
   describe('ignoreUndefined A server', function () {
-    it('should correctly execute insert culling undefined', {
-      metadata: { requires: { mongodb: '>=3.2' } },
-      test: function (done) {
+    it(
+      'should correctly execute insert culling undefined',
+      { requires: { mongodb: '>=3.2' } },
+      function (done) {
         const coll = client.db().collection('insert1');
         coll.drop(() => {
           const objectId = new ObjectId();
@@ -273,10 +245,8 @@ describe('Ignore Undefined', function () {
             (err, res) => {
               expect(err).to.not.exist;
               expect(res).property('insertedId').to.exist;
-
               const cursor = coll.find({ _id: objectId });
               this.defer(() => cursor.close());
-
               cursor.next((err, doc) => {
                 expect(err).to.not.exist;
                 expect(doc).to.not.have.property('b');
@@ -286,11 +256,12 @@ describe('Ignore Undefined', function () {
           );
         });
       }
-    });
+    );
 
-    it('should correctly execute update culling undefined', {
-      metadata: { requires: { mongodb: '>=3.2' } },
-      test: function (done) {
+    it(
+      'should correctly execute update culling undefined',
+      { requires: { mongodb: '>=3.2' } },
+      function (done) {
         const coll = client.db().collection('update1');
         coll.drop(() => {
           const objectId = new ObjectId();
@@ -301,10 +272,8 @@ describe('Ignore Undefined', function () {
             (err, res) => {
               expect(err).to.not.exist;
               expect(res).property('upsertedCount').to.equal(1);
-
               const cursor = coll.find({ _id: objectId });
               this.defer(() => cursor.close());
-
               cursor.next((err, doc) => {
                 expect(err).to.not.exist;
                 expect(doc).to.not.have.property('b');
@@ -314,11 +283,12 @@ describe('Ignore Undefined', function () {
           );
         });
       }
-    });
+    );
 
-    it('should correctly execute remove culling undefined', {
-      metadata: { requires: { mongodb: '>=3.2' } },
-      test: function (done) {
+    it(
+      'should correctly execute remove culling undefined',
+      { requires: { mongodb: '>=3.2' } },
+      function (done) {
         const coll = client.db().collection('remove1');
         coll.drop(() => {
           const objectId = new ObjectId();
@@ -330,7 +300,6 @@ describe('Ignore Undefined', function () {
             (err, res) => {
               expect(err).to.not.exist;
               expect(res).property('insertedCount').to.equal(2);
-
               coll.deleteMany({ b: undefined }, { ignoreUndefined: true }, (err, res) => {
                 expect(err).to.not.exist;
                 expect(res).property('deletedCount').to.equal(2);
@@ -340,11 +309,12 @@ describe('Ignore Undefined', function () {
           );
         });
       }
-    });
+    );
 
-    it('should correctly execute remove not culling undefined', {
-      metadata: { requires: { mongodb: '>=3.2' } },
-      test: function (done) {
+    it(
+      'should correctly execute remove not culling undefined',
+      { requires: { mongodb: '>=3.2' } },
+      function (done) {
         const coll = client.db().collection('remove1');
         coll.drop(() => {
           const objectId = new ObjectId();
@@ -356,7 +326,6 @@ describe('Ignore Undefined', function () {
             (err, res) => {
               expect(err).to.not.exist;
               expect(res).property('insertedCount').to.equal(2);
-
               coll.deleteMany({ b: null }, (err, res) => {
                 expect(err).to.not.exist;
                 expect(res).property('deletedCount').to.equal(1);
@@ -366,6 +335,6 @@ describe('Ignore Undefined', function () {
           );
         });
       }
-    });
+    );
   });
 });

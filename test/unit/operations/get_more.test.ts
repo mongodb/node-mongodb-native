@@ -46,7 +46,7 @@ describe('GetMoreOperation', function () {
   });
 
   describe('#execute', function () {
-    context('when the server is the same as the instance', function () {
+    describe('when the server is the same as the instance', function () {
       it('executes a getMore on the provided server', async function () {
         const server = new Server(
           topologyWithPlaceholderClient([], {} as any),
@@ -56,14 +56,12 @@ describe('GetMoreOperation', function () {
         const opts = { ...options, documentsReturnedIn: 'nextBatch', returnFieldSelector: null };
         const operation = new GetMoreOperation(namespace, cursorId, server, opts);
         const stub = sinon.stub(server, 'command').resolves({});
-
         const expectedGetMoreCommand = {
           getMore: cursorId,
           collection: namespace.collection,
           batchSize: 100,
           maxTimeMS: 500
         };
-
         await operation.execute(server, undefined);
         expect(stub.calledOnce).to.be.true;
         const call = stub.getCall(0);
@@ -73,7 +71,7 @@ describe('GetMoreOperation', function () {
       });
     });
 
-    context('when the server is not the same as the instance', function () {
+    describe('when the server is not the same as the instance', function () {
       it('errors in the callback', async function () {
         const server1 = new Server(
           topologyWithPlaceholderClient([], {} as any),
@@ -94,8 +92,8 @@ describe('GetMoreOperation', function () {
       });
     });
 
-    context('command construction', () => {
-      const cursorId = Long.fromBigInt(0xffff_ffffn);
+    describe('command construction', () => {
+      const cursorId = Long.fromBigInt(0xffffffffn);
       const namespace = ns('db.collection');
       const server = new Server(
         topologyWithPlaceholderClient([], {} as any),
@@ -139,12 +137,11 @@ describe('GetMoreOperation', function () {
         );
       });
 
-      context('comment', function () {
+      describe('comment', function () {
         const optionsWithComment = {
           ...options,
           comment: 'test'
         };
-
         const serverVersions = [
           {
             serverVersion: 8,
@@ -197,7 +194,7 @@ describe('GetMoreOperation', function () {
       });
     });
 
-    context('error cases', () => {
+    describe('error cases', () => {
       const server = new Server(
         topologyWithPlaceholderClient([], {} as any),
         new ServerDescription('a:1'),
@@ -249,25 +246,25 @@ describe('GetMoreOperation', function () {
     );
     const operation = new GetMoreOperation(namespace, cursorId, server, options);
 
-    context('when the aspect is must select same server', function () {
+    describe('when the aspect is must select same server', function () {
       it('returns true', function () {
         expect(operation.hasAspect(Aspect.MUST_SELECT_SAME_SERVER)).to.be.true;
       });
     });
 
-    context('when the aspect is read', function () {
+    describe('when the aspect is read', function () {
       it('returns true', function () {
         expect(operation.hasAspect(Aspect.READ_OPERATION)).to.be.true;
       });
     });
 
-    context('when the aspect is write', function () {
+    describe('when the aspect is write', function () {
       it('returns false', function () {
         expect(operation.hasAspect(Aspect.WRITE_OPERATION)).to.be.false;
       });
     });
 
-    context('when the aspect is retryable', function () {
+    describe('when the aspect is retryable', function () {
       it('returns false', function () {
         expect(operation.hasAspect(Aspect.RETRYABLE)).to.be.false;
       });

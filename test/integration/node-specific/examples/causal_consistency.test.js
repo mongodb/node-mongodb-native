@@ -1,5 +1,4 @@
 'use strict';
-
 const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
 
@@ -22,7 +21,6 @@ describe('examples(causal-consistency):', function () {
       await session.endSession();
       session = undefined;
     }
-
     await client.close();
     client = undefined;
     collection = undefined;
@@ -30,14 +28,10 @@ describe('examples(causal-consistency):', function () {
 
   it('supports causal consistency', async function () {
     const session = client.startSession({ causalConsistency: true });
-
     collection.insertOne({ darmok: 'jalad' }, { session });
     collection.updateOne({ darmok: 'jalad' }, { $set: { darmok: 'tanagra' } }, { session });
-
     const results = await collection.find({}, { session }).toArray();
-
     expect(results).to.exist;
-
     await session.endSession();
   });
 });

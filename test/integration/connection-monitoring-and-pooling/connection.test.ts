@@ -35,7 +35,6 @@ const commonConnectOptions = {
   hostAddress: HostAddress.fromString('127.0.0.1:1'),
   authProviders: new MongoClientAuthProviders()
 };
-
 describe('Connection', function () {
   beforeEach(
     skipBrokenAuthTestBeforeEachHook({
@@ -51,9 +50,10 @@ describe('Connection', function () {
   });
 
   describe('Connection.command', function () {
-    it('should execute a command against a server', {
-      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
-      test: async function () {
+    it(
+      'should execute a command against a server',
+      { requires: { apiVersion: false, topology: '!load-balanced' } },
+      async function () {
         const connectOptions: ConnectionOptions = {
           ...commonConnectOptions,
           connectionType: Connection,
@@ -61,7 +61,6 @@ describe('Connection', function () {
           metadata: makeClientMetadata({ driverInfo: {} }),
           extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
         };
-
         let conn;
         try {
           conn = await connect(connectOptions);
@@ -71,11 +70,12 @@ describe('Connection', function () {
           conn?.destroy();
         }
       }
-    });
+    );
 
-    it('should emit command monitoring events', {
-      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
-      test: async function () {
+    it(
+      'should emit command monitoring events',
+      { requires: { apiVersion: false, topology: '!load-balanced' } },
+      async function () {
         const connectOptions: ConnectionOptions = {
           ...commonConnectOptions,
           connectionType: Connection,
@@ -84,16 +84,13 @@ describe('Connection', function () {
           metadata: makeClientMetadata({ driverInfo: {} }),
           extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
         };
-
         let conn;
         try {
           conn = await connect(connectOptions);
-
           const events: any[] = [];
           conn.on('commandStarted', event => events.push(event));
           conn.on('commandSucceeded', event => events.push(event));
           conn.on('commandFailed', event => events.push(event));
-
           const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
           expect(hello).to.have.property('ok', 1);
           expect(events).to.have.lengthOf(2);
@@ -101,13 +98,14 @@ describe('Connection', function () {
           conn?.destroy();
         }
       }
-    });
+    );
 
     afterEach(() => sinon.restore());
 
-    it('command monitoring event do not deserialize more than once', {
-      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
-      test: async function () {
+    it(
+      'command monitoring event do not deserialize more than once',
+      { requires: { apiVersion: false, topology: '!load-balanced' } },
+      async function () {
         const connectOptions: ConnectionOptions = {
           ...commonConnectOptions,
           connectionType: Connection,
@@ -116,25 +114,19 @@ describe('Connection', function () {
           metadata: makeClientMetadata({ driverInfo: {} }),
           extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
         };
-
         let conn;
         try {
           conn = await connect(connectOptions);
-
           const toObjectSpy = sinon.spy(MongoDBResponse.prototype, 'toObject');
-
           const events: any[] = [];
           conn.on('commandStarted', event => events.push(event));
           conn.on('commandSucceeded', event => events.push(event));
           conn.on('commandFailed', event => events.push(event));
-
           const hello = await conn.command(ns('admin.$cmd'), { ping: 1 });
           expect(toObjectSpy).to.have.been.calledOnce;
           expect(hello).to.have.property('ok', 1);
           expect(events).to.have.lengthOf(2);
-
           toObjectSpy.resetHistory();
-
           const garbage = await conn.command(ns('admin.$cmd'), { garbage: 1 }).catch(e => e);
           expect(toObjectSpy).to.have.been.calledOnce;
           expect(garbage).to.have.property('ok', 0);
@@ -143,7 +135,7 @@ describe('Connection', function () {
           conn?.destroy();
         }
       }
-    });
+    );
   });
 
   describe('Connection - functional', function () {
@@ -155,9 +147,10 @@ describe('Connection', function () {
       if (testClient) await testClient.close();
     });
 
-    it('should correctly start monitoring for single server connection', {
-      metadata: { requires: { topology: 'single', os: '!win32' } },
-      test: async function () {
+    it(
+      'should correctly start monitoring for single server connection',
+      { requires: { topology: 'single', os: '!win32' } },
+      async function () {
         const configuration = this.configuration;
         client = configuration.newClient(
           `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
@@ -166,55 +159,48 @@ describe('Connection', function () {
             heartbeatFrequencyMS: 250
           }
         );
-
         let isMonitoring = false;
         client.once('serverHeartbeatStarted', event => {
           // just to be sure we get what we expect, checking the instanceof
           isMonitoring = event instanceof ServerHeartbeatStartedEvent;
         });
-
         await client.connect();
         expect(isMonitoring).to.be.true;
       }
-    });
+    );
 
-    it('should correctly connect to server using domain socket', {
-      metadata: {
+    it(
+      'should correctly connect to server using domain socket',
+      {
         requires: { topology: 'single', os: '!win32' }
       },
-
-      test: function (done) {
+      function (done) {
         const configuration = this.configuration;
         client = configuration.newClient(
           `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
           { maxPoolSize: 1 }
         );
-
         const db = client.db(configuration.db);
-
         db.collection('domainSocketCollection0').insert(
           { a: 1 },
           { writeConcern: { w: 1 } },
           function (err) {
             expect(err).to.not.exist;
-
             db.collection('domainSocketCollection0')
               .find({ a: 1 })
               .toArray(function (err, items) {
                 expect(err).to.not.exist;
                 test.equal(1, items.length);
-
                 done();
               });
           }
         );
       }
-    });
+    );
 
     it('should only pass one argument (topology and not error) for topology "open" events', function (done) {
       const configuration = this.configuration;
       client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-
       client.on('topologyOpening', () => {
         client.topology.on('open', (...args) => {
           expect(args).to.have.lengthOf(1);
@@ -222,20 +208,17 @@ describe('Connection', function () {
           done();
         });
       });
-
       client.connect();
     });
 
     it('should correctly connect to server using just events', function (done) {
       const configuration = this.configuration;
       client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-
       client.on('open', clientFromEvent => {
         expect(clientFromEvent).to.be.instanceOf(MongoClient);
         expect(clientFromEvent).to.equal(client);
         done();
       });
-
       client.connect();
     });
 
@@ -245,11 +228,10 @@ describe('Connection', function () {
       client.on('open', function () {
         done();
       });
-
       client.connect();
     });
 
-    context(
+    describe(
       'when a large message is written to the socket',
       { requires: { topology: 'single', auth: 'disabled' } },
       () => {
@@ -257,7 +239,6 @@ describe('Connection', function () {
 
         beforeEach(async function () {
           mockServer = await mock.createServer();
-
           mockServer
             .addMessageHandler('insert', req => {
               setTimeout(() => {
@@ -270,7 +251,6 @@ describe('Connection', function () {
             .addMessageHandler(LEGACY_HELLO_COMMAND, req => {
               req.reply(Object.assign({}, mock.HELLO));
             });
-
           client = new MongoClient(`mongodb://${mockServer.uri()}`, {
             minPoolSize: 1,
             maxPoolSize: 1
@@ -287,39 +267,30 @@ describe('Connection', function () {
           const connectionReady = once(client, 'connectionReady');
           await client.connect();
           await connectionReady;
-
           // Get the only connection
           const pool = [...client.topology.s.servers.values()][0].pool;
-
           const connections = pool[getSymbolFrom(pool, 'connections')];
           expect(connections).to.have.lengthOf(1);
-
           const connection = connections.first();
           const socket: EventEmitter = connection.socket;
-
           // Spy on the socket event listeners
           const addedListeners: string[] = [];
           const removedListeners: string[] = [];
           socket
             .on('removeListener', name => removedListeners.push(name))
             .on('newListener', name => addedListeners.push(name));
-
           // Make server sockets block
           for (const s of mockServer.sockets) s.pause();
-
           const insert = client
             .db('test')
             .collection('test')
             // Anything above 16Kb should work I think (10mb to be extra sure)
             .insertOne({ a: new Binary(Buffer.alloc(10 * (2 ** 10) ** 2), 127) });
-
           // Sleep a bit and unblock server sockets
           await sleep(10);
           for (const s of mockServer.sockets) s.resume();
-
           // Let the operation finish
           await insert;
-
           // Ensure that we used the drain event for this write
           expect(addedListeners).to.deep.equal(['drain', 'error']);
           expect(removedListeners).to.deep.equal(['drain', 'error']);
@@ -327,7 +298,7 @@ describe('Connection', function () {
       }
     );
 
-    context('when connecting with a username and password', () => {
+    describe('when connecting with a username and password', () => {
       let utilClient: MongoClient;
       let client: MongoClient;
       const username = 'spot';

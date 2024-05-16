@@ -15,7 +15,7 @@ import {
 } from '../mongodb';
 
 describe('class OpCompressedRequest', () => {
-  context('canCompress()', () => {
+  describe('canCompress()', () => {
     for (const command of uncompressibleCommands) {
       it(`returns true when the command is ${command}`, () => {
         const msg = new OpMsgRequest('db', { [command]: 1 }, {});
@@ -29,9 +29,9 @@ describe('class OpCompressedRequest', () => {
     });
   });
 
-  context('toBin()', () => {
+  describe('toBin()', () => {
     for (const protocol of [OpMsgRequest, OpQueryRequest]) {
-      context(`when ${protocol.name} is used`, () => {
+      describe(`when ${protocol.name} is used`, () => {
         let msg;
         const serializedFindCommand = Buffer.concat(
           new protocol('db', { find: 1 }, { requestId: 1 }).toBin()
@@ -50,6 +50,7 @@ describe('class OpCompressedRequest', () => {
             zlibCompressionLevel: 0
           }).toBin();
         });
+
         afterEach(() => sinon.restore());
 
         it('returns an array of buffers', async () => {
@@ -95,11 +96,8 @@ describe('class OpCompressedRequest', () => {
             agreedCompressor: 'snappy',
             zlibCompressionLevel: 3
           }).toBin();
-
           expect(messageHeader.readInt32LE(12), 'opcode is not OP_COMPRESSED').to.equal(2012);
-
           expect(spy).to.have.been.called;
-
           expect(spy.args[0][0]).to.deep.equal({
             agreedCompressor: 'snappy',
             zlibCompressionLevel: 3

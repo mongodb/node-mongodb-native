@@ -20,15 +20,12 @@ const metadata: MongoDBMetadataUI = {
     topology: '!load-balanced'
   }
 };
-
 const LOCAL_KEY = Buffer.from(
   'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
   'base64'
 );
-
 describe('14. Decryption Events', metadata, function () {
   installNodeDNSWorkaroundHooks();
-
   let setupClient: MongoClient;
   let clientEncryption;
   let keyId: Binary;
@@ -82,7 +79,6 @@ describe('14. Decryption Events', metadata, function () {
     const replacementByte = lastByte === 0 ? 1 : 0;
     buffer.writeUInt8(replacementByte, buffer.length - 1);
     malformedCiphertext = new Binary(buffer, 6);
-
     // Create a MongoClient named ``encryptedClient`` with these ``AutoEncryptionOpts``:
     //   AutoEncryptionOpts {
     //     keyVaultNamespace: "keyvault.datakeys";
@@ -128,7 +124,7 @@ describe('14. Decryption Events', metadata, function () {
     await encryptedClient.close();
   });
 
-  context('Case 1: Command Error', metadata, function () {
+  describe('Case 1: Command Error', metadata, function () {
     beforeEach(async function () {
       // Use ``setupClient`` to configure the following failpoint:
       //    {
@@ -162,18 +158,16 @@ describe('14. Decryption Events', metadata, function () {
       // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
       // Expect an exception to be thrown from the command error. Expect a CommandFailedEvent.
       const collection = encryptedClient.db('db').collection('decryption_events');
-
       const error = await collection
         .aggregate([])
         .toArray()
         .catch(error => error);
-
       expect(error).to.have.property('code', 123);
       expect(aggregateFailed).to.have.nested.property('failure.code', 123);
     });
   });
 
-  context('Case 2: Network Error', metadata, function () {
+  describe('Case 2: Network Error', metadata, function () {
     beforeEach(async function () {
       // Use ``setupClient`` to configure the following failpoint:
       //    {
@@ -209,18 +203,16 @@ describe('14. Decryption Events', metadata, function () {
       // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
       // Expect an exception to be thrown from the network error. Expect a CommandFailedEvent.
       const collection = encryptedClient.db('db').collection('decryption_events');
-
       const error = await collection
         .aggregate([])
         .toArray()
         .catch(error => error);
-
       expect(error).to.be.instanceOf(MongoNetworkError);
       expect(aggregateFailed).to.have.nested.property('failure.message').to.include('closed');
     });
   });
 
-  context('Case 3: Decrypt Error', metadata, function () {
+  describe('Case 3: Decrypt Error', metadata, function () {
     it('errors on decryption but command succeeds', async function () {
       // Use ``encryptedClient`` to insert the document ``{ "encrypted": <malformedCiphertext> }``
       // into ``db.decryption_events``.
@@ -234,17 +226,14 @@ describe('14. Decryption Events', metadata, function () {
         { encrypted: malformedCiphertext },
         { writeConcern: { w: 'majority' } }
       );
-
       /// Verify the malformedCiphertext was inserted with a plain client
       const docs = await setupClient.db('db').collection('decryption_events').find({}).toArray();
       expect(docs).to.have.lengthOf(1);
       expect(docs).to.have.deep.nested.property('[0].encrypted', malformedCiphertext);
-
       const error = await collection
         .aggregate([])
         .toArray()
         .catch(error => error);
-
       expect(error).to.have.property('message').to.include('HMAC validation failure');
       expect(aggregateSucceeded)
         .to.have.nested.property('reply.cursor.firstBatch[0].encrypted')
@@ -252,7 +241,7 @@ describe('14. Decryption Events', metadata, function () {
     });
   });
 
-  context('Case 4: Decrypt Success', metadata, function () {
+  describe('Case 4: Decrypt Success', metadata, function () {
     it('succeeds on decryption and command succeeds', async function () {
       // Use ``encryptedClient`` to insert the document ``{ "encrypted": <ciphertext> }``
       // into ``db.decryption_events``.
@@ -262,9 +251,7 @@ describe('14. Decryption Events', metadata, function () {
       // to contain BSON binary for the field ``cursor.firstBatch.encrypted``.
       const collection = encryptedClient.db('db').collection('decryption_events');
       await collection.insertOne({ encrypted: cipherText });
-
       const result = await collection.aggregate([]).toArray();
-
       expect(result).to.have.nested.property('[0].encrypted', 'hello');
       expect(aggregateSucceeded)
         .to.have.nested.property('reply.cursor.firstBatch[0].encrypted')

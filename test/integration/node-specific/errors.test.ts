@@ -11,7 +11,7 @@ describe('Error (Integration)', function () {
     expect(error.message).not.to.be.empty;
   });
 
-  context('when a server selection error is stringified', function () {
+  describe('when a server selection error is stringified', function () {
     it(
       'the error"s topology description correctly displays the `servers`',
       { requires: { topology: 'replicaset' } },
@@ -21,7 +21,6 @@ describe('Error (Integration)', function () {
         });
         try {
           await client.connect();
-
           const error = await client
             .db('foo')
             .collection('bar')
@@ -34,7 +33,6 @@ describe('Error (Integration)', function () {
             )
             .toArray()
             .catch(e => JSON.parse(JSON.stringify(e)));
-
           const servers = error.reason.servers;
           expect(Object.keys(servers).length > 0).to.be.true;
         } finally {

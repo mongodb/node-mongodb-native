@@ -31,7 +31,6 @@ describe('Retryable Writes Spec Prose', () => {
     beforeEach(async function () {
       client = this.configuration.newClient();
       await client.connect();
-
       failPointName = 'failCommand';
       const failPoint = await client.db('admin').command({
         configureFailPoint: failPointName,
@@ -42,7 +41,6 @@ describe('Retryable Writes Spec Prose', () => {
           closeConnection: false
         }
       });
-
       expect(failPoint).to.have.property('ok', 1);
     });
 
@@ -56,18 +54,17 @@ describe('Retryable Writes Spec Prose', () => {
         await client?.close();
       }
     });
-
     for (const testTopology of ['replicaset', 'sharded'] as const) {
       const minFailPointVersion = testTopology === 'replicaset' ? '>=4.0.0' : '>=4.1.5';
-      it(`should error with the correct error message when topology is ${testTopology}`, {
-        metadata: { requires: { mongodb: minFailPointVersion, topology: [testTopology] } },
-        test: async function () {
+      it(
+        `should error with the correct error message when topology is ${testTopology}`,
+        { requires: { mongodb: minFailPointVersion, topology: [testTopology] } },
+        async function () {
           const error = await client
             .db('test')
             .collection('test')
             .insertOne({ a: 1 })
             .catch(error => error);
-
           expect(error).to.exist;
           expect(error).that.is.instanceOf(MongoServerError);
           expect(error).to.have.property('originalError').that.instanceOf(MongoError);
@@ -77,17 +74,19 @@ describe('Retryable Writes Spec Prose', () => {
             'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.'
           );
         }
-      });
+      );
     }
   });
 
   describe('2. Test that drivers properly retry after encountering PoolClearedErrors.', () => {
     // This test MUST be implemented by any driver that implements the CMAP specification.
     // This test requires MongoDB 4.2.9+ for blockConnection support in the failpoint.
-
     let client: MongoClient;
     let failPointName: string | undefined;
-    let cmapEvents: Array<{ name: string; event: Record<string, any> }>;
+    let cmapEvents: Array<{
+      name: string;
+      event: Record<string, any>;
+    }>;
     let commandStartedEvents: Array<Record<string, any>>;
     let testCollection: Collection;
 
@@ -99,10 +98,8 @@ describe('Retryable Writes Spec Prose', () => {
         }),
         { maxPoolSize: 1, retryWrites: true, monitorCommands: true }
       );
-
       testCollection = client.db('retryable-writes-prose').collection('pool-clear-retry');
       await testCollection.drop().catch(() => null);
-
       // ii. Enable the following failpoint:
       // NOTE: "ix. Disable the failpoint" is done in afterEach
       failPointName = 'failCommand';
@@ -117,9 +114,7 @@ describe('Retryable Writes Spec Prose', () => {
           errorLabels: ['RetryableWriteError']
         }
       });
-
       expect(failPoint).to.have.property('ok', 1);
-
       cmapEvents = [];
       commandStartedEvents = [];
       for (const observedEvent of [
@@ -148,27 +143,25 @@ describe('Retryable Writes Spec Prose', () => {
       }
     });
 
-    it('should emit events in the expected sequence', {
-      metadata: { requires: { mongodb: '>=4.2.9', topology: ['replicaset', 'sharded'] } },
-      test: async function () {
+    it(
+      'should emit events in the expected sequence',
+      { requires: { mongodb: '>=4.2.9', topology: ['replicaset', 'sharded'] } },
+      async function () {
         // iii. Start two threads and attempt to perform an insertOne simultaneously on both.
         await Promise.all([
           testCollection.insertOne({ test: 1 }),
           testCollection.insertOne({ test: 2 })
         ]);
-
         client.removeAllListeners();
         // iv. Verify that both insertOne attempts succeed.
         const result = await testCollection.find().toArray();
         expect(result).to.have.lengthOf(2);
         const mappedAndSortedResult = result.map(item => item.test).sort();
         expect(mappedAndSortedResult).to.deep.equal([1, 2]);
-
         // NOTE: For the subsequent checks, we rely on the exact sequence of ALL events
         // for ease of readability; however, only the relative order matters for
         // the purposes of this test, so if this ever becomes an issue, the test
         // can be refactored to assert on relative index values instead
-
         // v. Via CMAP monitoring, assert that the first check out succeeds.
         expect(cmapEvents.shift()).to.have.property(
           'name',
@@ -185,14 +178,12 @@ describe('Retryable Writes Spec Prose', () => {
           'connectionCheckedOut',
           'expected 3) first checkout to succeed'
         );
-
         // vi. Via CMAP monitoring, assert that a PoolClearedEvent is then emitted.
         expect(cmapEvents.shift()).to.have.property(
           'name',
           'connectionPoolCleared',
           'expected 4) pool to clear'
         );
-
         // vii. Via CMAP monitoring, assert that the second check out then fails due to a connection error.
         const nextEvent = cmapEvents.shift();
         expect(nextEvent).to.have.property(
@@ -201,7 +192,6 @@ describe('Retryable Writes Spec Prose', () => {
           'expected 5) checkout 2 to fail'
         );
         expect(nextEvent!.event).to.have.property('reason', 'connectionError');
-
         // viii. Via Command Monitoring, assert that exactly three insert CommandStartedEvents were observed in total.
         const observedInsertCommandStartedEvents = commandStartedEvents.filter(
           ({ commandName }) => commandName === 'insert'
@@ -211,12 +201,14 @@ describe('Retryable Writes Spec Prose', () => {
           'expected 3 insert command started events'
         );
       }
-    });
+    );
   });
 
   describe('3. Test that drivers return the original error after encountering a WriteConcernError with a RetryableWriteError label', () => {
     let client: MongoClient;
-    let collection: Collection<{ _id: 1 }>;
+    let collection: Collection<{
+      _id: 1;
+    }>;
 
     beforeEach(async function () {
       client = this.configuration.newClient({ monitorCommands: true, retryWrites: true });
@@ -232,7 +224,6 @@ describe('Retryable Writes Spec Prose', () => {
       sinon.restore();
       await client.close();
     });
-
     /**
      * This test MUST be implemented by any driver that implements the Command Monitoring specification,
      * only run against replica sets as mongos does not propagate the NoWritesPerformed label to the drivers.
@@ -294,15 +285,12 @@ describe('Retryable Writes Spec Prose', () => {
               )
             )
           );
-
         const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
         sinon.restore();
-
         expect(insertResult).to.be.instanceOf(MongoServerError);
         expect(insertResult).to.have.property('code', 91);
       }
     );
-
     // This is an extra test that is a complimentary test to prose test #3. We basically want to
     // test that in the case of a write concern error with ok: 1 in the response, that
     // a command succeeded event is emitted but that the driver still treats it as a failure
@@ -326,15 +314,12 @@ describe('Retryable Writes Spec Prose', () => {
             failCommands: ['insert']
           }
         });
-
         const willBeCommandSucceeded = once(client, 'commandSucceeded').catch(error => error);
         const willBeCommandFailed = Promise.race([
           once(client, 'commandFailed'),
           sleep(1000).then(() => Promise.reject(new Error('timeout')))
         ]).catch(error => error);
-
         const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
-
         const [commandSucceeded] = await willBeCommandSucceeded;
         expect(commandSucceeded.commandName).to.equal('insert');
         expect(commandSucceeded.reply).to.have.nested.property('writeConcernError.code', 91);

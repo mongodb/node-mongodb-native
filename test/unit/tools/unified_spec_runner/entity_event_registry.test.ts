@@ -21,7 +21,7 @@ import { EntityEventRegistry } from '../../../tools/unified-spec-runner/entity_e
 
 describe('EntityEventRegistry', function () {
   describe('#register', function () {
-    context('when storeEventsAsEntities exists on the client entity', function () {
+    describe('when storeEventsAsEntities exists on the client entity', function () {
       const clientEntity = {
         id: 'client0',
         storeEventsAsEntities: [
@@ -116,7 +116,7 @@ describe('EntityEventRegistry', function () {
       });
     });
 
-    context('when storeEventsAsEntities does not exist on the client entity', function () {
+    describe('when storeEventsAsEntities does not exist on the client entity', function () {
       const clientEntity = { id: 'client0' };
       const entitesMap = new EntitiesMap();
       const uri = 'mongodb://127.0.0.1:27017';

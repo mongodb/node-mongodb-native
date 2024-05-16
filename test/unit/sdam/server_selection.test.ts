@@ -54,7 +54,7 @@ describe('server selection', function () {
     let selector;
     let servers;
 
-    context('when the topology is sharded', function () {
+    describe('when the topology is sharded', function () {
       const topologyDescription = new TopologyDescription(
         TopologyType.Sharded,
         new Map(),
@@ -68,8 +68,8 @@ describe('server selection', function () {
         selector = readPreferenceServerSelector(ReadPreference.secondaryPreferred);
       });
 
-      context('when there are deprioritized servers', function () {
-        context('when there are other servers', function () {
+      describe('when there are deprioritized servers', function () {
+        describe('when there are other servers', function () {
           beforeEach(function () {
             servers = selector(topologyDescription, [mongos], [mongosTwo]);
           });
@@ -79,7 +79,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when there are no other servers', function () {
+        describe('when there are no other servers', function () {
           beforeEach(function () {
             servers = selector(topologyDescription, [], [mongosTwo]);
           });
@@ -90,7 +90,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when there are no deprioritised servers', function () {
+      describe('when there are no deprioritised servers', function () {
         beforeEach(function () {
           servers = selector(topologyDescription, [mongos]);
         });
@@ -101,7 +101,7 @@ describe('server selection', function () {
       });
     });
 
-    context('when the topology is not sharded', function () {
+    describe('when the topology is not sharded', function () {
       const topologyDescription = new TopologyDescription(
         TopologyType.ReplicaSetWithPrimary,
         new Map(),
@@ -115,7 +115,7 @@ describe('server selection', function () {
         selector = readPreferenceServerSelector(ReadPreference.secondary);
       });
 
-      context('when there are deprioritized servers', function () {
+      describe('when there are deprioritized servers', function () {
         beforeEach(function () {
           servers = selector(topologyDescription, [secondaryTwo], [secondary]);
         });
@@ -125,7 +125,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when there are no deprioritised servers', function () {
+      describe('when there are no deprioritised servers', function () {
         beforeEach(function () {
           servers = selector(topologyDescription, [secondary], []);
         });
@@ -149,7 +149,7 @@ describe('server selection', function () {
       servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
     });
 
-    context('when the server is unknown', function () {
+    describe('when the server is unknown', function () {
       before(function () {
         selector = sameServerSelector(unknown);
       });
@@ -159,7 +159,7 @@ describe('server selection', function () {
       });
     });
 
-    context('when the server is not unknown', function () {
+    describe('when the server is not unknown', function () {
       before(function () {
         selector = sameServerSelector(primary);
       });
@@ -169,7 +169,7 @@ describe('server selection', function () {
       });
     });
 
-    context('when no server description provided', function () {
+    describe('when no server description provided', function () {
       before(function () {
         selector = sameServerSelector();
       });
@@ -179,7 +179,7 @@ describe('server selection', function () {
       });
     });
 
-    context('when the server is not the same', function () {
+    describe('when the server is not the same', function () {
       before(function () {
         selector = sameServerSelector(secondary);
       });
@@ -191,12 +191,12 @@ describe('server selection', function () {
   });
 
   describe('#secondaryWritableServerSelector', function () {
-    context('when the topology is a replica set', function () {
+    describe('when the topology is a replica set', function () {
       const serverDescriptions = new Map();
       serverDescriptions.set(primary.address, primary);
       serverDescriptions.set(secondary.address, secondary);
 
-      context('when the common server version is >= 5.0', function () {
+      describe('when the common server version is >= 5.0', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.ReplicaSetWithPrimary,
           serverDescriptions,
@@ -206,7 +206,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
 
-        context('when a read preference is provided', function () {
+        describe('when a read preference is provided', function () {
           const selector = secondaryWritableServerSelector(
             MIN_SECONDARY_WRITE_WIRE_VERSION,
             ReadPreference.secondary
@@ -218,7 +218,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when a read preference is not provided', function () {
+        describe('when a read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
           const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
@@ -228,7 +228,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when the common server version is < 5.0', function () {
+      describe('when the common server version is < 5.0', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.ReplicaSetWithPrimary,
           serverDescriptions,
@@ -238,7 +238,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION - 1
         );
 
-        context('when a read preference is provided', function () {
+        describe('when a read preference is provided', function () {
           const selector = secondaryWritableServerSelector(
             MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
             ReadPreference.secondary
@@ -250,7 +250,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when read preference is not provided', function () {
+        describe('when read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION - 1);
           const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
@@ -260,7 +260,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when a common wire version is not provided', function () {
+      describe('when a common wire version is not provided', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.ReplicaSetWithPrimary,
           serverDescriptions,
@@ -278,11 +278,11 @@ describe('server selection', function () {
       });
     });
 
-    context('when the topology is sharded', function () {
+    describe('when the topology is sharded', function () {
       const serverDescriptions = new Map();
       serverDescriptions.set(mongos.address, mongos);
 
-      context('when the common server version is >= 5.0', function () {
+      describe('when the common server version is >= 5.0', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.Sharded,
           serverDescriptions,
@@ -292,7 +292,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
 
-        context('when a read preference is provided', function () {
+        describe('when a read preference is provided', function () {
           const selector = secondaryWritableServerSelector(
             MIN_SECONDARY_WRITE_WIRE_VERSION,
             ReadPreference.secondary
@@ -304,7 +304,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when a read preference is not provided', function () {
+        describe('when a read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
           const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
@@ -314,7 +314,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when the common server version is < 5.0', function () {
+      describe('when the common server version is < 5.0', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.Sharded,
           serverDescriptions,
@@ -324,7 +324,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION - 1
         );
 
-        context('when a read preference is provided', function () {
+        describe('when a read preference is provided', function () {
           const selector = secondaryWritableServerSelector(
             MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
             ReadPreference.secondary
@@ -336,7 +336,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when read preference is not provided', function () {
+        describe('when read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION - 1);
           const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
@@ -346,7 +346,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when a common wire version is not provided', function () {
+      describe('when a common wire version is not provided', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.Sharded,
           serverDescriptions,
@@ -364,11 +364,11 @@ describe('server selection', function () {
       });
     });
 
-    context('when the topology is load balanced', function () {
+    describe('when the topology is load balanced', function () {
       const serverDescriptions = new Map();
       serverDescriptions.set(loadBalancer.address, loadBalancer);
 
-      context('when the common server version is >= 5.0', function () {
+      describe('when the common server version is >= 5.0', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.LoadBalanced,
           serverDescriptions,
@@ -378,7 +378,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
 
-        context('when a read preference is provided', function () {
+        describe('when a read preference is provided', function () {
           const selector = secondaryWritableServerSelector(
             MIN_SECONDARY_WRITE_WIRE_VERSION,
             ReadPreference.secondary
@@ -390,7 +390,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when a read preference is not provided', function () {
+        describe('when a read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
           const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
@@ -400,7 +400,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when the common server version is < 5.0', function () {
+      describe('when the common server version is < 5.0', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.LoadBalanced,
           serverDescriptions,
@@ -410,7 +410,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION - 1
         );
 
-        context('when a read preference is provided', function () {
+        describe('when a read preference is provided', function () {
           const selector = secondaryWritableServerSelector(
             MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
             ReadPreference.secondary
@@ -422,7 +422,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when read preference is not provided', function () {
+        describe('when read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION - 1);
           const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
@@ -432,7 +432,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when a common wire version is not provided', function () {
+      describe('when a common wire version is not provided', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.LoadBalanced,
           serverDescriptions,
@@ -450,11 +450,11 @@ describe('server selection', function () {
       });
     });
 
-    context('when the topology is single', function () {
+    describe('when the topology is single', function () {
       const serverDescriptions = new Map();
       serverDescriptions.set(single.address, single);
 
-      context('when the common server version is >= 5.0', function () {
+      describe('when the common server version is >= 5.0', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.Single,
           serverDescriptions,
@@ -464,7 +464,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
 
-        context('when a read preference is provided', function () {
+        describe('when a read preference is provided', function () {
           const selector = secondaryWritableServerSelector(
             MIN_SECONDARY_WRITE_WIRE_VERSION,
             ReadPreference.secondary
@@ -476,7 +476,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when a read preference is not provided', function () {
+        describe('when a read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
           const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
@@ -486,7 +486,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when the common server version is < 5.0', function () {
+      describe('when the common server version is < 5.0', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.Single,
           serverDescriptions,
@@ -496,7 +496,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION - 1
         );
 
-        context('when a read preference is provided', function () {
+        describe('when a read preference is provided', function () {
           const selector = secondaryWritableServerSelector(
             MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
             ReadPreference.secondary
@@ -508,7 +508,7 @@ describe('server selection', function () {
           });
         });
 
-        context('when read preference is not provided', function () {
+        describe('when read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION - 1);
           const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
@@ -518,7 +518,7 @@ describe('server selection', function () {
         });
       });
 
-      context('when a common wire version is not provided', function () {
+      describe('when a common wire version is not provided', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.Single,
           serverDescriptions,
@@ -536,8 +536,9 @@ describe('server selection', function () {
       });
     });
 
-    context('localThresholdMS is respected as an option', function () {
+    describe('localThresholdMS is respected as an option', function () {
       let serverDescription1, serverDescription2, serverDescription3, serverDescriptions;
+
       beforeEach(() => {
         serverDescription1 = new ServerDescription(
           '127.0.0.1:27017',
@@ -571,6 +572,7 @@ describe('server selection', function () {
         serverDescriptions.set(serverDescription2.address, serverDescription2);
         serverDescriptions.set(serverDescription3.address, serverDescription3);
       });
+
       it('includes servers inside the latency window with default localThresholdMS', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.Single,
@@ -632,9 +634,10 @@ describe('server selection', function () {
       await mock.cleanup();
     });
 
-    context('when willLog returns false', function () {
+    describe('when willLog returns false', function () {
       const original = Object.getPrototypeOf(ServerSelectionEvent);
       let serverSelectionEventStub;
+
       beforeEach(() => {
         sinon.stub(MongoLogger.prototype, 'willLog').callsFake((_v, _w) => false);
         serverSelectionEventStub = sinon.stub();

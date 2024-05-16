@@ -14,7 +14,7 @@ describe('CallbackLockCache', function () {
     const connection = sinon.createStubInstance(Connection);
     connection.address = 'localhost:27017';
 
-    context('when a request callback does not exist', function () {
+    describe('when a request callback does not exist', function () {
       const credentials = new MongoCredentials({
         username: 'test_user',
         password: 'pwd',
@@ -36,11 +36,10 @@ describe('CallbackLockCache', function () {
       });
     });
 
-    context('when no entry exists in the cache', function () {
-      context('when a refresh callback exists', function () {
+    describe('when no entry exists in the cache', function () {
+      describe('when a refresh callback exists', function () {
         let requestCount = 0;
         let refreshCount = 0;
-
         const request = async () => {
           requestCount++;
           if (requestCount > 1) {
@@ -98,9 +97,8 @@ describe('CallbackLockCache', function () {
         });
       });
 
-      context('when a refresh function does not exist', function () {
+      describe('when a refresh function does not exist', function () {
         let requestCount = 0;
-
         const request = async () => {
           requestCount++;
           if (requestCount > 1) {

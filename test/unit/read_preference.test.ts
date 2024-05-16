@@ -79,7 +79,7 @@ describe('class ReadPreference', function () {
       expect(readPreference).to.be.undefined;
     });
 
-    context('readPreference is string', () => {
+    describe('readPreference is string', () => {
       it('should accept { readPreference }', function () {
         const readPreference = ReadPreference.fromOptions({
           readPreference: PRIMARY

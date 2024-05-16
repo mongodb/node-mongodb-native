@@ -1,5 +1,4 @@
 'use strict';
-
 const { expect } = require('chai');
 const { ConnectionPoolMetrics } = require('../../mongodb');
 
@@ -37,7 +36,7 @@ describe('ConnectionPoolMetrics', function () {
   describe('#markPinned', function () {
     const metrics = new ConnectionPoolMetrics();
 
-    context('when the type is TXN', function () {
+    describe('when the type is TXN', function () {
       before(function () {
         metrics.reset();
         metrics.markPinned(ConnectionPoolMetrics.TXN);
@@ -52,7 +51,7 @@ describe('ConnectionPoolMetrics', function () {
       });
     });
 
-    context('when the type is CURSOR', function () {
+    describe('when the type is CURSOR', function () {
       before(function () {
         metrics.reset();
         metrics.markPinned(ConnectionPoolMetrics.CURSOR);
@@ -67,7 +66,7 @@ describe('ConnectionPoolMetrics', function () {
       });
     });
 
-    context('when the type is OTHER', function () {
+    describe('when the type is OTHER', function () {
       before(function () {
         metrics.reset();
         metrics.markPinned(ConnectionPoolMetrics.OTHER);
@@ -86,7 +85,7 @@ describe('ConnectionPoolMetrics', function () {
   describe('#markUnpinned', function () {
     const metrics = new ConnectionPoolMetrics();
 
-    context('when the type is TXN', function () {
+    describe('when the type is TXN', function () {
       before(function () {
         metrics.reset();
         metrics.markUnpinned(ConnectionPoolMetrics.TXN);
@@ -101,7 +100,7 @@ describe('ConnectionPoolMetrics', function () {
       });
     });
 
-    context('when the type is CURSOR', function () {
+    describe('when the type is CURSOR', function () {
       before(function () {
         metrics.reset();
         metrics.markUnpinned(ConnectionPoolMetrics.CURSOR);
@@ -116,7 +115,7 @@ describe('ConnectionPoolMetrics', function () {
       });
     });
 
-    context('when the type is OTHER', function () {
+    describe('when the type is OTHER', function () {
       before(function () {
         metrics.reset();
         metrics.markUnpinned(ConnectionPoolMetrics.OTHER);

@@ -15,14 +15,12 @@ const metadata = {
     clientSideEncryption: true
   }
 };
-
 describe('Client Side Encryption Functional', function () {
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-
   installNodeDNSWorkaroundHooks();
 
   it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
@@ -62,7 +60,7 @@ describe('Client Side Encryption Functional', function () {
 
   describe('Collection', metadata, function () {
     describe('#bulkWrite()', metadata, function () {
-      context('when encryption errors', function () {
+      describe('when encryption errors', function () {
         let client: MongoClient;
 
         beforeEach(function () {
@@ -119,7 +117,6 @@ describe('Client Side Encryption Functional', function () {
 
     beforeEach(async function () {
       client = this.configuration.newClient();
-
       const encryptSchema = (keyId: unknown, bsonType: string) => ({
         encrypt: {
           bsonType,
@@ -127,26 +124,20 @@ describe('Client Side Encryption Functional', function () {
           keyId: [keyId]
         }
       });
-
       const kmsProviders = this.configuration.kmsProviders(crypto.randomBytes(96));
-
       await client.connect();
-
       const encryption = new ClientEncryption(client, {
         bson: BSON,
         keyVaultNamespace,
         kmsProviders,
         extraOptions: getEncryptExtraOptions()
       });
-
       const dataDb = client.db(dataDbName);
       const keyVaultDb = client.db(keyVaultDbName);
-
       await dataDb.dropCollection(dataCollName).catch(() => null);
       await keyVaultDb.dropCollection(keyVaultCollName).catch(() => null);
       await keyVaultDb.createCollection(keyVaultCollName);
       const dataKey = await encryption.createDataKey('local');
-
       const $jsonSchema = {
         bsonType: 'object',
         properties: {
@@ -156,11 +147,9 @@ describe('Client Side Encryption Functional', function () {
           d: encryptSchema(dataKey, 'double')
         }
       };
-
       await dataDb.createCollection(dataCollName, {
         validator: { $jsonSchema }
       });
-
       encryptedClient = this.configuration.newClient(
         {},
         {
@@ -171,7 +160,6 @@ describe('Client Side Encryption Functional', function () {
           }
         }
       );
-
       await encryptedClient.connect();
     });
 
@@ -180,7 +168,6 @@ describe('Client Side Encryption Functional', function () {
         .then(() => encryptedClient?.close())
         .then(() => client?.close());
     });
-
     const testCases = [
       {},
       { promoteValues: true },
@@ -190,10 +177,8 @@ describe('Client Side Encryption Functional', function () {
       { bsonRegExp: true },
       { ignoreUndefined: true }
     ];
-
     for (const bsonOptions of testCases) {
       const name = `should respect bson options ${JSON.stringify(bsonOptions)}`;
-
       it(name, metadata, async function () {
         const data = {
           _id: new BSON.ObjectId(),
@@ -205,15 +190,12 @@ describe('Client Side Encryption Functional', function () {
           f: new BSON.BSONRegExp('[A-Za-z0-9]*'),
           g: undefined
         };
-
         const expected = BSON.deserialize(BSON.serialize(data, bsonOptions), bsonOptions);
-
         const coll = encryptedClient.db(dataDbName).collection(dataCollName);
         const result = await coll.insertOne(data, bsonOptions);
         const actual = await coll.findOne({ _id: result.insertedId }, bsonOptions);
         const gValue = actual?.g;
         delete actual?.g;
-
         expect(actual).to.deep.equal(expected);
         expect(gValue).to.equal(bsonOptions.ignoreUndefined ? data.g : null);
       });
@@ -228,7 +210,6 @@ describe('Client Side Encryption Functional', function () {
       if (!this.configuration.clientSideEncryption.enabled) {
         return;
       }
-
       const encryptionOptions = {
         monitorCommands: true,
         autoEncryption: {
@@ -307,7 +288,6 @@ describe('Client Side Encryption Functional', function () {
 
       beforeEach(async function () {
         client = this.configuration.newClient();
-
         const encryptSchema = (keyId: unknown, bsonType: string) => ({
           encrypt: {
             bsonType,
@@ -315,25 +295,19 @@ describe('Client Side Encryption Functional', function () {
             keyId: [keyId]
           }
         });
-
         const kmsProviders = this.configuration.kmsProviders(crypto.randomBytes(96));
-
         await client.connect();
-
         const encryption = new ClientEncryption(client, {
           keyVaultNamespace,
           kmsProviders,
           extraOptions: getEncryptExtraOptions()
         });
-
         const dataDb = client.db(dataDbName);
         const keyVaultDb = client.db(keyVaultDbName);
-
         await dataDb.dropCollection(dataCollName).catch(() => null);
         await keyVaultDb.dropCollection(keyVaultCollName).catch(() => null);
         await keyVaultDb.createCollection(keyVaultCollName);
         const dataKey = await encryption.createDataKey('local');
-
         const $jsonSchema = {
           bsonType: 'object',
           properties: {
@@ -353,11 +327,9 @@ describe('Client Side Encryption Functional', function () {
             }
           }
         };
-
         await dataDb.createCollection(dataCollName, {
           validator: { $jsonSchema }
         });
-
         encryptedClient = this.configuration.newClient(
           {},
           {
@@ -368,7 +340,6 @@ describe('Client Side Encryption Functional', function () {
             }
           }
         );
-
         encryptedClient.autoEncrypter[Symbol.for('@@mdb.decorateDecryptionResult')] = true;
         await encryptedClient.connect();
       });
@@ -380,22 +351,18 @@ describe('Client Side Encryption Functional', function () {
 
       it('adds decrypted keys to result at @@mdb.decryptedKeys', async function () {
         const coll = encryptedClient.db(dataDbName).collection(dataCollName);
-
         const data = {
           _id: new BSON.ObjectId(),
           a: 1,
           b: 'abc',
           c: { d: 'def' }
         };
-
         const result = await coll.insertOne(data);
         const decrypted = await coll.findOne({ _id: result.insertedId });
-
         expect(decrypted).to.deep.equal(data);
         expect(decrypted)
           .to.have.property(Symbol.for('@@mdb.decryptedKeys'))
           .that.deep.equals(['a', 'b']);
-
         // Nested
         expect(decrypted).to.have.property('c');
         expect(decrypted.c)

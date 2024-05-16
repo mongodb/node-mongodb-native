@@ -10,7 +10,6 @@ describe('ReadConcern', function () {
   });
 
   afterEach(() => client.close());
-
   function validateTestResults(started, succeeded, commandName, level) {
     expect(started.length).to.equal(succeeded.length);
     for (let i = 0; i < started.length; i++) {
@@ -23,7 +22,6 @@ describe('ReadConcern', function () {
       }
     }
   }
-
   const tests = [
     {
       description: 'Should set local readConcern on db level when using collection method',
@@ -51,12 +49,11 @@ describe('ReadConcern', function () {
       readConcern: { level: 'majority' }
     }
   ];
-
   tests.forEach(test => {
-    it(test.description, {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
-
-      test: function (done) {
+    it(
+      test.description,
+      { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
+      function (done) {
         const started = [];
         const succeeded = [];
         // Get a new instance
@@ -65,23 +62,17 @@ describe('ReadConcern', function () {
           { w: 1 },
           { maxPoolSize: 1, readConcern: test.readConcern, monitorCommands: true }
         );
-
         client.connect((err, client) => {
           expect(err).to.not.exist;
-
           const db = client.db(configuration.db);
           expect(db.readConcern).to.deep.equal(test.readConcern);
-
           // Get a collection
           const collection = db.collection('readConcernCollection');
-
           // Validate readConcern
           expect(collection.readConcern).to.deep.equal(test.readConcern);
-
           // commandMonitoring
           client.on('commandStarted', filterForCommands(test.commandName, started));
           client.on('commandSucceeded', filterForCommands(test.commandName, succeeded));
-
           // Execute find
           if (test.commandName === 'find') {
             collection.find().toArray(err => {
@@ -98,7 +89,7 @@ describe('ReadConcern', function () {
           }
         });
       }
-    });
+    );
   });
 
   describe('client-url specific ReadConcern', function () {
@@ -118,16 +109,15 @@ describe('ReadConcern', function () {
         readConcern: { level: 'majority' }
       }
     ];
-
     urlTests.forEach(test => {
-      it(test.description, {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
-        test: function (done) {
+      it(
+        test.description,
+        { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
+        function (done) {
           const started = [];
           const succeeded = [];
           // Get a new instance
           const configuration = this.configuration;
-
           let url = configuration.url();
           if (test.urlReadConcernLevel != null) {
             url =
@@ -141,23 +131,17 @@ describe('ReadConcern', function () {
               monitorCommands: true
             });
           }
-
           client.connect((err, client) => {
             expect(err).to.not.exist;
-
             const db = client.db(configuration.db);
             expect(db.readConcern).to.deep.equal(test.readConcern);
-
             // Get a collection
             const collection = db.collection('readConcernCollection');
-
             // Validate readConcern
             expect(collection.readConcern).to.deep.equal(test.readConcern);
-
             // commandMonitoring
             client.on('commandStarted', filterForCommands('find', started));
             client.on('commandSucceeded', filterForCommands('find', succeeded));
-
             // Execute find
             collection.find().toArray(err => {
               expect(err).to.not.exist;
@@ -166,10 +150,9 @@ describe('ReadConcern', function () {
             });
           });
         }
-      });
+      );
     });
   });
-
   const insertTests = [
     {
       description: 'Should set majority readConcern distinct command',
@@ -184,12 +167,11 @@ describe('ReadConcern', function () {
       readConcern: { level: 'majority' }
     }
   ];
-
   insertTests.forEach(test => {
-    it(test.description, {
-      metadata: { requires: { topology: 'replicaset', mongodb: test.mongodbVersion } },
-
-      test: function (done) {
+    it(
+      test.description,
+      { requires: { topology: 'replicaset', mongodb: test.mongodbVersion } },
+      function (done) {
         const started = [];
         const succeeded = [];
         // Get a new instance
@@ -198,16 +180,12 @@ describe('ReadConcern', function () {
           { w: 1 },
           { maxPoolSize: 1, readConcern: test.readConcern, monitorCommands: true }
         );
-
         client.connect((err, client) => {
           expect(err).to.not.exist;
-
           const db = client.db(configuration.db);
           expect(db.readConcern).to.deep.equal(test.readConcern);
-
           // Get the collection
           const collection = db.collection('readConcernCollection');
-
           // Insert documents to perform distinct against
           collection.insertMany(
             [
@@ -221,11 +199,9 @@ describe('ReadConcern', function () {
             configuration.writeConcernMax(),
             err => {
               expect(err).to.not.exist;
-
               // Listen to apm events
               client.on('commandStarted', filterForCommands(test.commandName, started));
               client.on('commandSucceeded', filterForCommands(test.commandName, succeeded));
-
               // Perform a distinct query against the a field
               if (test.commandName === 'distinct') {
                 collection.distinct('a', err => {
@@ -244,13 +220,13 @@ describe('ReadConcern', function () {
           );
         });
       }
-    });
+    );
   });
 
-  it('Should set majority readConcern aggregate command but ignore due to out', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2 < 4.1' } },
-
-    test: function (done) {
+  it(
+    'Should set majority readConcern aggregate command but ignore due to out',
+    { requires: { topology: 'replicaset', mongodb: '>= 3.2 < 4.1' } },
+    function (done) {
       const started = [];
       const succeeded = [];
       // Get a new instance
@@ -259,29 +235,23 @@ describe('ReadConcern', function () {
         { w: 1 },
         { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
-
       client.connect((err, client) => {
         expect(err).to.not.exist;
-
         const db = client.db(configuration.db);
         expect(db.readConcern).to.deep.equal({ level: 'majority' });
-
         // Get a collection
         const collection = db.collection('readConcernCollectionAggregate1');
         // Validate readConcern
         expect(collection.readConcern).to.deep.equal({ level: 'majority' });
-
         // Listen to apm events
         client.on('commandStarted', filterForCommands('aggregate', started));
         client.on('commandSucceeded', filterForCommands('aggregate', succeeded));
-
         // Execute find
         collection
           .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
           .toArray(err => {
             expect(err).to.not.exist;
             validateTestResults(started, succeeded, 'aggregate');
-
             // Execute find
             collection
               .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
@@ -293,12 +263,12 @@ describe('ReadConcern', function () {
           });
       });
     }
-  });
+  );
 
-  it('Should set majority readConcern aggregate command against server >= 4.1', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.1' } },
-
-    test: function (done) {
+  it(
+    'Should set majority readConcern aggregate command against server >= 4.1',
+    { requires: { topology: 'replicaset', mongodb: '>= 4.1' } },
+    function (done) {
       const started = [];
       const succeeded = [];
       // Get a new instance
@@ -307,7 +277,6 @@ describe('ReadConcern', function () {
         { w: 1 },
         { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
       );
-
       client
         .connect()
         .then(() => {
@@ -315,18 +284,15 @@ describe('ReadConcern', function () {
           const collection = client
             .db(configuration.db)
             .collection('readConcernCollectionAggregate1');
-
           // Listen to apm events
           client.on('commandStarted', filterForCommands('aggregate', started));
           client.on('commandSucceeded', filterForCommands('aggregate', succeeded));
-
           // Execute find
           return collection
             .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
             .toArray()
             .then(() => {
               validateTestResults(started, succeeded, 'aggregate', 'majority');
-
               // Execute find
               return collection
                 .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
@@ -341,12 +307,12 @@ describe('ReadConcern', function () {
           e => client.close(() => done(e))
         );
     }
-  });
+  );
 
-  it('Should set local readConcern on db level when using createCollection method', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
-
-    test: function (done) {
+  it(
+    'Should set local readConcern on db level when using createCollection method',
+    { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
+    function (done) {
       // Get a new instance
       const configuration = this.configuration;
       client = configuration.newClient(
@@ -357,16 +323,14 @@ describe('ReadConcern', function () {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
         expect(db.readConcern).to.deep.equal({ level: 'local' });
-
         // Get a collection using createCollection
         db.createCollection('readConcernCollection_createCollection', (err, collection) => {
           expect(err).to.not.exist;
-
           // Validate readConcern
           expect(collection.readConcern).to.deep.equal({ level: 'local' });
           done();
         });
       });
     }
-  });
+  );
 });

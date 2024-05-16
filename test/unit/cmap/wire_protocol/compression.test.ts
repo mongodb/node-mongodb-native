@@ -4,10 +4,10 @@ import { compress, Compressor, decompress } from '../../../mongodb';
 
 describe('compression', function () {
   describe('.compress()', function () {
-    context('when the compression library is zstd', function () {
+    describe('when the compression library is zstd', function () {
       const buffer = Buffer.from('test', 'utf8');
 
-      context('when a level is not provided', function () {
+      describe('when a level is not provided', function () {
         const options = { agreedCompressor: 'zstd' as const, zlibCompressionLevel: 0 };
 
         it('compresses the data', async function () {
@@ -18,7 +18,7 @@ describe('compression', function () {
         });
       });
 
-      context('when a level is provided', function () {
+      describe('when a level is provided', function () {
         const options = { agreedCompressor: 'zstd' as const, zlibCompressionLevel: 2 };
 
         it('compresses the data', async function () {
@@ -30,7 +30,7 @@ describe('compression', function () {
       });
     });
 
-    context('when the agreed compressor is zlib', () => {
+    describe('when the agreed compressor is zlib', () => {
       const options = { agreedCompressor: 'zlib' as const, zlibCompressionLevel: 2 };
       const input = Buffer.from('test', 'utf8');
 
@@ -41,7 +41,7 @@ describe('compression', function () {
       });
     });
 
-    context('when the agreed compressor is snappy', () => {
+    describe('when the agreed compressor is snappy', () => {
       const options = { agreedCompressor: 'snappy' as const, zlibCompressionLevel: 2 };
       const input = Buffer.from('test', 'utf8');
 
@@ -55,7 +55,7 @@ describe('compression', function () {
   });
 
   describe('.decompress()', function () {
-    context('when the compression library is zstd', function () {
+    describe('when the compression library is zstd', function () {
       const buffer = Buffer.from('test', 'utf8');
       const options = { agreedCompressor: 'zstd' as const, zlibCompressionLevel: 0 };
 
@@ -66,7 +66,7 @@ describe('compression', function () {
       });
     });
 
-    context('when the input has a compressorID corresponding to zlib', () => {
+    describe('when the input has a compressorID corresponding to zlib', () => {
       // zlib compressed string "test"
       const input = Buffer.from('785e2b492d2e0100045d01c1', 'hex');
 
@@ -76,7 +76,7 @@ describe('compression', function () {
       });
     });
 
-    context('when the agreed compressor is snappy', () => {
+    describe('when the agreed compressor is snappy', () => {
       // https://github.com/google/snappy/blob/main/format_description.txt#L18
       // 0x04 is the size, 0x0c are flags
       const input = Buffer.from('040c' + Buffer.from('test', 'utf8').toString('hex'), 'hex');

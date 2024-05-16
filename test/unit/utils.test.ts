@@ -20,41 +20,40 @@ import {
 
 describe('driver utils', function () {
   describe('.hostMatchesWildcards', function () {
-    context('when using domains', function () {
-      context('when using exact match', function () {
-        context('when the host matches at least one', function () {
+    describe('when using domains', function () {
+      describe('when using exact match', function () {
+        describe('when the host matches at least one', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('localhost', ['localhost', 'other'])).to.be.true;
           });
         });
 
-        context('when the host does not match any', function () {
+        describe('when the host does not match any', function () {
           it('returns false', function () {
             expect(hostMatchesWildcards('localhost', ['test1', 'test2'])).to.be.false;
           });
         });
 
-        context('when the host matches a FQDN', function () {
+        describe('when the host matches a FQDN', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('mongodb.net', ['mongodb.net', 'other'])).to.be.true;
           });
         });
 
-        context('when the host does not match a FQDN', function () {
+        describe('when the host does not match a FQDN', function () {
           it('returns false', function () {
             expect(hostMatchesWildcards('mongodb.net', ['mongodb.com', 'other'])).to.be.false;
           });
         });
 
-        context('when the host matches a FQDN with subdomain', function () {
+        describe('when the host matches a FQDN with subdomain', function () {
           it('returns true', function () {
-            expect(
-              hostMatchesWildcards('prod.mongodb.net', ['prod.mongodb.net', 'other'])
-            ).to.be.true;
+            expect(hostMatchesWildcards('prod.mongodb.net', ['prod.mongodb.net', 'other'])).to.be
+              .true;
           });
         });
 
-        context('when the host does not match a FQDN with subdomain', function () {
+        describe('when the host does not match a FQDN with subdomain', function () {
           it('returns false', function () {
             expect(
               hostMatchesWildcards('prod.mongodb.net', ['dev.mongodb.net', 'prod.mongodb.com'])
@@ -63,46 +62,45 @@ describe('driver utils', function () {
         });
       });
 
-      context('when using a leading * with domains', function () {
-        context('when the host matches at least one', function () {
+      describe('when using a leading * with domains', function () {
+        describe('when the host matches at least one', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('localhost', ['*.localhost', 'other'])).to.be.true;
           });
         });
 
-        context('when the host does not match any', function () {
+        describe('when the host does not match any', function () {
           it('returns false', function () {
             expect(hostMatchesWildcards('localhost', ['*.test1', 'test2'])).to.be.false;
           });
         });
 
-        context('when the wildcard does not start with *.', function () {
+        describe('when the wildcard does not start with *.', function () {
           it('returns false', function () {
             expect(hostMatchesWildcards('evilmongodb.com', ['*mongodb.com', 'test2'])).to.be.false;
           });
         });
 
-        context('when the host matches a FQDN', function () {
+        describe('when the host matches a FQDN', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('mongodb.net', ['*.mongodb.net', 'other'])).to.be.true;
           });
         });
 
-        context('when the host does not match a FQDN', function () {
+        describe('when the host does not match a FQDN', function () {
           it('returns false', function () {
             expect(hostMatchesWildcards('mongodb.net', ['*.mongodb.com', 'other'])).to.be.false;
           });
         });
 
-        context('when the host matches a FQDN with subdomain', function () {
+        describe('when the host matches a FQDN with subdomain', function () {
           it('returns true', function () {
-            expect(
-              hostMatchesWildcards('prod.mongodb.net', ['*.prod.mongodb.net', 'other'])
-            ).to.be.true;
+            expect(hostMatchesWildcards('prod.mongodb.net', ['*.prod.mongodb.net', 'other'])).to.be
+              .true;
           });
         });
 
-        context('when the host does not match a FQDN with subdomain', function () {
+        describe('when the host does not match a FQDN with subdomain', function () {
           it('returns false', function () {
             expect(
               hostMatchesWildcards('prod.mongodb.net', ['*.dev.mongodb.net', '*.prod.mongodb.com'])
@@ -112,29 +110,29 @@ describe('driver utils', function () {
       });
     });
 
-    context('when using IP addresses', function () {
-      context('when using IPv4', function () {
-        context('when the host matches at least one', function () {
+    describe('when using IP addresses', function () {
+      describe('when using IPv4', function () {
+        describe('when the host matches at least one', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('127.0.0.1', ['127.0.0.1', 'other'])).to.be.true;
           });
         });
 
-        context('when the host does not match any', function () {
+        describe('when the host does not match any', function () {
           it('returns false', function () {
             expect(hostMatchesWildcards('127.0.0.1', ['127.0.0.2', 'test2'])).to.be.false;
           });
         });
       });
 
-      context('when using IPv6', function () {
-        context('when the host matches at least one', function () {
+      describe('when using IPv6', function () {
+        describe('when the host matches at least one', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('::1', ['::1', 'other'])).to.be.true;
           });
         });
 
-        context('when the host does not match any', function () {
+        describe('when the host does not match any', function () {
           it('returns false', function () {
             expect(hostMatchesWildcards('::1', ['::2', 'test2'])).to.be.false;
           });
@@ -142,20 +140,18 @@ describe('driver utils', function () {
       });
     });
 
-    context('when using unix domain sockets', function () {
-      context('when the host matches at least one', function () {
+    describe('when using unix domain sockets', function () {
+      describe('when the host matches at least one', function () {
         it('returns true', function () {
-          expect(
-            hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongodb-27017.sock', 'other'])
-          ).to.be.true;
+          expect(hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongodb-27017.sock', 'other']))
+            .to.be.true;
         });
       });
 
-      context('when the host does not match any', function () {
+      describe('when the host does not match any', function () {
         it('returns false', function () {
-          expect(
-            hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongod-27017.sock', 'test2'])
-          ).to.be.false;
+          expect(hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongod-27017.sock', 'test2']))
+            .to.be.false;
         });
       });
     });
@@ -330,14 +326,11 @@ describe('driver utils', function () {
         const list = new List<number>();
         list.push(2);
         list.unshift(1);
-
         // head node from constructor
         expect(Object.keys(list.head)).to.deep.equal(['next', 'prev', 'value']);
-
         // 1 node from push
         expect(list.head.prev).to.have.property('value', 2);
         expect(Object.keys(list.head.prev)).to.deep.equal(['next', 'prev', 'value']);
-
         // 2 node from unshift
         expect(list.head.next).to.have.property('value', 1);
         expect(Object.keys(list.head.next)).to.deep.equal(['next', 'prev', 'value']);
@@ -410,24 +403,19 @@ describe('driver utils', function () {
         list.push(2);
         list.push(3);
         const iterator = list[Symbol.iterator]();
-
         const first = iterator.next();
         expect(first).to.have.property('done', false);
         expect(first).to.have.property('value', 1);
-
         const second = iterator.next();
         expect(second).to.have.property('done', false);
         expect(second).to.have.property('value', 2);
-
         const third = iterator.next();
         expect(third).to.have.property('done', false);
         expect(third).to.have.property('value', 3);
-
         // finished
         const fourth = iterator.next();
         expect(fourth).to.have.property('done', true);
         expect(fourth).to.have.property('value', undefined);
-
         // beyond finished
         const fifth = iterator.next();
         expect(fifth).to.have.property('done', true);
@@ -666,7 +654,7 @@ describe('driver utils', function () {
     });
   });
 
-  context('isHello()', function () {
+  describe('isHello()', function () {
     it('should return true if document has legacy hello property set to true', function () {
       const doc = { [LEGACY_HELLO_COMMAND]: true };
       expect(isHello(doc)).to.be.true;
@@ -767,7 +755,6 @@ describe('driver utils', function () {
         const ha = new HostAddress('iLoveJavascript:22');
         expect(ha).to.be.frozen;
       });
-
       const socketPath = '/tmp/mongodb-27017.sock';
 
       it('should handle decoded unix socket path', () => {
@@ -845,7 +832,6 @@ describe('driver utils', function () {
         result: 'throws'
       }
     ];
-
     for (const { oid1, oid2, result } of table) {
       if (result === 'throws') {
         it('passing non-objectId values throw', () =>
@@ -853,7 +839,6 @@ describe('driver utils', function () {
           expect(() => compareObjectId(oid1, oid2)).to.throw());
         continue;
       }
-
       const title = `comparing ${oid1} to ${oid2} returns ${
         result === 0 ? 'equal' : result === -1 ? 'less than' : 'greater than'
       }`;
@@ -862,8 +847,8 @@ describe('driver utils', function () {
     }
   });
 
-  context('const ByteUtils', () => {
-    context('toLocalBufferType()', () => {
+  describe('const ByteUtils', () => {
+    describe('toLocalBufferType()', () => {
       it('returns identical Node.js buffer instance when input is Buffer', () => {
         const buffer = Buffer.from([1, 2, 3]);
         // Note: **Not** a deep.equal check
@@ -882,13 +867,12 @@ describe('driver utils', function () {
       });
     });
 
-    context('equals()', () => {
+    describe('equals()', () => {
       it('is a function', () => expect(ByteUtils).property('equals').is.a('function'));
 
       it('returns true for equal Buffer or Uint8Array', () => {
         const buffer = Buffer.from([1, 2, 3]);
         const uint8array = new Uint8Array([1, 2, 3]);
-
         expect(ByteUtils.equals(buffer, uint8array)).to.be.true;
         expect(ByteUtils.equals(uint8array, buffer)).to.be.true;
         expect(ByteUtils.equals(uint8array, uint8array)).to.be.true;
@@ -898,19 +882,17 @@ describe('driver utils', function () {
       it('returns false for nonequal Buffer or Uint8Array', () => {
         const buffer = Buffer.from([1, 2, 3]);
         const uint8array = new Uint8Array([1, 2, 4]);
-
         expect(ByteUtils.equals(buffer, uint8array)).to.be.false;
         expect(ByteUtils.equals(uint8array, buffer)).to.be.false;
       });
     });
 
-    context('compare()', () => {
+    describe('compare()', () => {
       it('is a function', () => expect(ByteUtils).property('compare').is.a('function'));
 
       it('returns 0 for equal Buffer or Uint8Array', () => {
         const buffer = Buffer.from([1, 2, 3]);
         const uint8array = new Uint8Array([1, 2, 3]);
-
         expect(ByteUtils.compare(buffer, uint8array)).to.equal(0);
         expect(ByteUtils.compare(uint8array, buffer)).to.equal(0);
         expect(ByteUtils.compare(uint8array, uint8array)).to.equal(0);
@@ -920,15 +902,13 @@ describe('driver utils', function () {
       it('returns +/- 1 for Buffer or UInt8Array if one is greater or less than', () => {
         const buffer = Buffer.from([1, 2, 3]);
         const uint8array = new Uint8Array([1, 2, 4]);
-
         expect(ByteUtils.compare(buffer, uint8array)).to.equal(-1);
         expect(ByteUtils.compare(uint8array, buffer)).to.equal(1);
       });
     });
 
-    context('toBase64()', () => {
+    describe('toBase64()', () => {
       it('is a function', () => expect(ByteUtils).property('toBase64').is.a('function'));
-
       const oneTwoThreeBase64 = 'AQID';
 
       it('converts a Buffer to a base64 string', () => {
@@ -949,7 +929,7 @@ describe('driver utils', function () {
     const exampleHostNamThatDoNotMatchParent = 'i-love-javascript-00.evil-mongodb.io';
     const exampleHostNamThatDoNotMatchParentWithDot = 'i-love-javascript-00.evil-mongodb.io.';
 
-    context('when address does not match parent domain', () => {
+    describe('when address does not match parent domain', () => {
       it('without a trailing dot returns false', () => {
         expect(matchesParentDomain(exampleHostNamThatDoNotMatchParent, exampleSrvName)).to.be.false;
       });
@@ -960,13 +940,13 @@ describe('driver utils', function () {
       });
     });
 
-    context('when addresses in SRV record end with a dot', () => {
+    describe('when addresses in SRV record end with a dot', () => {
       it('accepts address since it is considered to still match the parent domain', () => {
         expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
       });
     });
 
-    context('when SRV host ends with a dot', () => {
+    describe('when SRV host ends with a dot', () => {
       it('accepts address if it ends with a dot', () => {
         expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvNameWithDot)).to.be.true;
       });
@@ -976,7 +956,7 @@ describe('driver utils', function () {
       });
     });
 
-    context('when addresses in SRV record end without dots', () => {
+    describe('when addresses in SRV record end without dots', () => {
       it('accepts address since it matches the parent domain', () => {
         expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
       });

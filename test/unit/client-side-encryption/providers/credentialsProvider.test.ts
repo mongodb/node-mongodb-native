@@ -27,9 +27,8 @@ import * as requirements from '../requirements.helper';
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 const originalSessionToken = process.env.AWS_SESSION_TOKEN;
-
 describe('#refreshKMSCredentials', function () {
-  context('isEmptyCredentials()', () => {
+  describe('isEmptyCredentials()', () => {
     it('returns true for an empty object', () => {
       expect(isEmptyCredentials('aws', { aws: {} })).to.be.true;
     });
@@ -56,7 +55,7 @@ describe('#refreshKMSCredentials', function () {
     });
   });
 
-  context('when using aws', () => {
+  describe('when using aws', () => {
     const accessKey = 'example';
     const secretKey = 'example';
     const sessionToken = 'example';
@@ -68,14 +67,14 @@ describe('#refreshKMSCredentials', function () {
       process.env.AWS_SESSION_TOKEN = originalSessionToken;
     });
 
-    context('when the credential provider finds credentials', function () {
+    describe('when the credential provider finds credentials', function () {
       before(function () {
         process.env.AWS_ACCESS_KEY_ID = accessKey;
         process.env.AWS_SECRET_ACCESS_KEY = secretKey;
         process.env.AWS_SESSION_TOKEN = sessionToken;
       });
 
-      context('when the credentials are empty', function () {
+      describe('when the credentials are empty', function () {
         const kmsProviders = { aws: {} };
 
         before(function () {
@@ -98,8 +97,8 @@ describe('#refreshKMSCredentials', function () {
         });
       });
 
-      context('when the credentials are not empty', function () {
-        context('when aws is empty', function () {
+      describe('when the credentials are not empty', function () {
+        describe('when aws is empty', function () {
           const kmsProviders = {
             local: {
               key: Buffer.alloc(96)
@@ -130,7 +129,7 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        context('when aws is not empty', function () {
+        describe('when aws is not empty', function () {
           const kmsProviders: KMSProviders = {
             local: {
               key: Buffer.alloc(96)
@@ -156,7 +155,7 @@ describe('#refreshKMSCredentials', function () {
       });
     });
 
-    context('when the AWS SDK returns unknown fields', function () {
+    describe('when the AWS SDK returns unknown fields', function () {
       beforeEach(() => {
         sinon.stub(AWSSDKCredentialProvider.prototype, 'getCredentials').resolves({
           Token: 'example',
@@ -165,7 +164,9 @@ describe('#refreshKMSCredentials', function () {
           Expiration: new Date()
         });
       });
+
       afterEach(() => sinon.restore());
+
       it('only returns fields libmongocrypt expects', async function () {
         const credentials = await refreshKMSCredentials({ aws: {} });
         expect(credentials).to.deep.equal({
@@ -179,7 +180,7 @@ describe('#refreshKMSCredentials', function () {
     });
   });
 
-  context('when using gcp', () => {
+  describe('when using gcp', () => {
     const setupHttpServer = status => {
       let httpServer;
       before(() => {
@@ -202,14 +203,13 @@ describe('#refreshKMSCredentials', function () {
           .listen(5001);
         process.env.GCE_METADATA_HOST = 'http://127.0.0.1:5001';
       });
-
       after(() => {
         httpServer.close();
         delete process.env.GCE_METADATA_HOST;
       });
     };
 
-    context('and gcp-metadata is installed', () => {
+    describe('and gcp-metadata is installed', () => {
       beforeEach(function () {
         if (!requirements.credentialProvidersInstalled.gcp && this.currentTest) {
           this.currentTest.skipReason = 'Tests require gcp-metadata to be installed';
@@ -218,9 +218,10 @@ describe('#refreshKMSCredentials', function () {
         }
       });
 
-      context('when metadata http response is 200 ok', () => {
+      describe('when metadata http response is 200 ok', () => {
         setupHttpServer(200);
-        context('when the credentials are empty', function () {
+
+        describe('when the credentials are empty', function () {
           const kmsProviders = { gcp: {} };
 
           it('refreshes the gcp credentials', async function () {
@@ -234,9 +235,10 @@ describe('#refreshKMSCredentials', function () {
         });
       });
 
-      context('when metadata http response is 401 bad', () => {
+      describe('when metadata http response is 401 bad', () => {
         setupHttpServer(401);
-        context('when the credentials are empty', function () {
+
+        describe('when the credentials are empty', function () {
           const kmsProviders = { gcp: {} };
 
           it('surfaces error from server', async function () {
@@ -247,7 +249,7 @@ describe('#refreshKMSCredentials', function () {
       });
     });
 
-    context('and gcp-metadata is not installed', () => {
+    describe('and gcp-metadata is not installed', () => {
       beforeEach(function () {
         if (requirements.credentialProvidersInstalled.gcp && this.currentTest) {
           this.currentTest.skipReason = 'Tests require gcp-metadata to be installed';
@@ -256,7 +258,7 @@ describe('#refreshKMSCredentials', function () {
         }
       });
 
-      context('when the credentials are empty', function () {
+      describe('when the credentials are empty', function () {
         const kmsProviders = { gcp: {} };
 
         it('does not modify the gcp credentials', async function () {
@@ -267,43 +269,45 @@ describe('#refreshKMSCredentials', function () {
     });
   });
 
-  context('when using azure', () => {
+  describe('when using azure', () => {
     afterEach(() => tokenCache.resetCache());
+
     afterEach(() => sinon.restore());
-    context('credential caching', () => {
+
+    describe('credential caching', () => {
       const cache = tokenCache;
 
       beforeEach(() => {
         cache.resetCache();
       });
 
-      context('when there is no cached token', () => {
+      describe('when there is no cached token', () => {
         const mockToken = {
           accessToken: 'mock token',
           expiresOnTimestamp: Date.now()
         };
-
         let token;
 
         beforeEach(async () => {
           sinon.stub(cache, '_getToken').resolves(mockToken);
           token = await cache.getToken();
         });
+
         it('fetches a token', async () => {
           expect(token).to.have.property('accessToken', mockToken.accessToken);
         });
+
         it('caches the token on the class', async () => {
           expect(cache.cachedToken).to.equal(mockToken);
         });
       });
 
-      context('when there is a cached token', () => {
-        context('when the cached token expires <= 1 minute from the current time', () => {
+      describe('when there is a cached token', () => {
+        describe('when the cached token expires <= 1 minute from the current time', () => {
           const mockToken = {
             accessToken: 'mock token',
             expiresOnTimestamp: Date.now()
           };
-
           let token;
 
           beforeEach(async () => {
@@ -318,22 +322,21 @@ describe('#refreshKMSCredentials', function () {
           it('fetches a token', () => {
             expect(token).to.have.property('accessToken', mockToken.accessToken);
           });
+
           it('caches the token on the class', () => {
             expect(cache.cachedToken).to.equal(mockToken);
           });
         });
 
-        context('when the cached token expires > 1 minute from the current time', () => {
+        describe('when the cached token expires > 1 minute from the current time', () => {
           const expiredToken = {
             token: 'mock token',
             expiresOnTimestamp: Date.now()
           };
-
           const expectedMockToken = {
             accessToken: 'a new key',
             expiresOnTimestamp: Date.now() + 10000
           };
-
           let token;
 
           beforeEach(async () => {
@@ -341,6 +344,7 @@ describe('#refreshKMSCredentials', function () {
             sinon.stub(cache, '_getToken').resolves(expectedMockToken);
             token = await cache.getToken();
           });
+
           it('returns the cached token', () => {
             expect(token).to.have.property('accessToken', expectedMockToken.accessToken);
           });
@@ -348,18 +352,16 @@ describe('#refreshKMSCredentials', function () {
       });
     });
 
-    context('request configuration', () => {
+    describe('request configuration', () => {
       const mockResponse = {
         status: 200,
         body: '{ "access_token": "token", "expires_in": "10000" }'
       };
-
       let httpSpy;
 
       beforeEach(async () => {
         httpSpy = sinon.stub(utils, 'get');
         httpSpy.resolves(mockResponse);
-
         await refreshKMSCredentials({ azure: {} });
       });
 
@@ -393,7 +395,7 @@ describe('#refreshKMSCredentials', function () {
           .to.have.property('Content-Type', 'application/json');
       });
 
-      context('prose test specific requirements', () => {
+      describe('prose test specific requirements', () => {
         /**
          * the driver prose tests require the ability to set custom URL endpoints
          * for the IMDS call and set custom headers
@@ -433,9 +435,10 @@ describe('#refreshKMSCredentials', function () {
       });
     });
 
-    context('error handling', () => {
+    describe('error handling', () => {
       afterEach(() => sinon.restore());
-      context('when the request times out', () => {
+
+      describe('when the request times out', () => {
         before(() => {
           sinon
             .stub(utils, 'get')
@@ -448,8 +451,8 @@ describe('#refreshKMSCredentials', function () {
         });
       });
 
-      context('when the request returns a non-200 error', () => {
-        context('when the request has no body', () => {
+      describe('when the request returns a non-200 error', () => {
+        describe('when the request has no body', () => {
           before(() => {
             sinon.stub(utils, 'get').resolves({ status: 400 } as any);
           });
@@ -461,7 +464,7 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        context('when the request has a non-json body', () => {
+        describe('when the request has a non-json body', () => {
           before(() => {
             sinon.stub(utils, 'get').resolves({ status: 400, body: 'non-json body' });
           });
@@ -473,7 +476,7 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        context('when the request has a json body', () => {
+        describe('when the request has a json body', () => {
           beforeEach(() => {
             sinon
               .stub(utils, 'get')
@@ -492,8 +495,8 @@ describe('#refreshKMSCredentials', function () {
         });
       });
 
-      context('when the request returns a 200 response', () => {
-        context('when the request has no body', () => {
+      describe('when the request returns a 200 response', () => {
+        describe('when the request has no body', () => {
           before(() => {
             sinon.stub(utils, 'get').resolves({ status: 200 } as any);
           });
@@ -505,7 +508,7 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        context('when the request has a non-json body', () => {
+        describe('when the request has a non-json body', () => {
           before(() => {
             sinon.stub(utils, 'get').resolves({ status: 200, body: 'non-json body' });
           });
@@ -517,7 +520,7 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        context('when the body has no access_token', () => {
+        describe('when the body has no access_token', () => {
           beforeEach(() => {
             sinon.stub(utils, 'get').resolves({ status: 200, body: '{ "expires_in": "10000" }' });
           });
@@ -529,7 +532,7 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        context('when the body has no expires_in', () => {
+        describe('when the body has no expires_in', () => {
           beforeEach(() => {
             sinon.stub(utils, 'get').resolves({ status: 200, body: '{ "access_token": "token" }' });
           });
@@ -541,7 +544,7 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        context('when expires_in cannot be parsed into a number', () => {
+        describe('when expires_in cannot be parsed into a number', () => {
           beforeEach(() => {
             sinon.stub(utils, 'get').resolves({
               status: 200,
@@ -557,7 +560,7 @@ describe('#refreshKMSCredentials', function () {
         });
       });
 
-      context('when a valid token was returned', () => {
+      describe('when a valid token was returned', () => {
         beforeEach(() => {
           sinon
             .stub(utils, 'get')

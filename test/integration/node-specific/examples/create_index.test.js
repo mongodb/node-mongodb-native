@@ -1,5 +1,4 @@
 'use strict';
-
 const setupDatabase = require('../../shared').setupDatabase;
 
 describe('examples.createIndex:', function () {
@@ -21,18 +20,20 @@ describe('examples.createIndex:', function () {
     collection = undefined;
   });
 
-  it('supports building simple ascending index', {
-    metadata: { requires: { topology: ['single'] } },
-    test: async function () {
+  it(
+    'supports building simple ascending index',
+    { requires: { topology: ['single'] } },
+    async function () {
       // Start createIndex example 1
       await collection.createIndex({ score: 1 });
       // End createIndex example 1
     }
-  });
+  );
 
-  it('supports building multikey index with partial filter expression', {
-    metadata: { requires: { topology: ['single'], mongodb: '>=3.2.x' } },
-    test: async function () {
+  it(
+    'supports building multikey index with partial filter expression',
+    { requires: { topology: ['single'], mongodb: '>=3.2.x' } },
+    async function () {
       // Start createIndex example 2
       await collection.createIndex(
         { cuisine: 1, name: 1 },
@@ -40,5 +41,5 @@ describe('examples.createIndex:', function () {
       );
       // End createIndex example 2
     }
-  });
+  );
 });

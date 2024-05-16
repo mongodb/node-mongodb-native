@@ -6,7 +6,6 @@ import { Connection, LEGACY_HELLO_COMMAND, type MongoClient, ScramSHA256 } from 
 function makeConnectionString(config, username, password) {
   return `mongodb://${username}:${password}@${config.host}:${config.port}/admin?`;
 }
-
 const metadata: MongoDBMetadataUI = {
   requires: {
     auth: 'enabled',
@@ -15,7 +14,6 @@ const metadata: MongoDBMetadataUI = {
       process.env.LOAD_BALANCER ? 'TODO(NODE-5631): fix tests to run in load balancer mode.' : true
   }
 };
-
 describe('Authentication Spec Prose Tests', function () {
   describe('SCRAM-SHA-256 and mechanism negotiation', () => {
     describe('Steps 1-3', function () {
@@ -42,7 +40,6 @@ describe('Authentication Spec Prose Tests', function () {
       const users = Object.keys(userMap).map(name => userMap[name]);
       let utilClient: MongoClient;
       let client: MongoClient;
-
       /**
        * Step 1
        * Create three test users, one with only SHA-1, one with only SHA-256 and one with
@@ -53,14 +50,12 @@ describe('Authentication Spec Prose Tests', function () {
        */
       beforeEach(async function () {
         utilClient = this.configuration.newClient();
-
         const createUserCommands = users.map(user => ({
           createUser: user.username,
           pwd: user.password,
           roles: ['root'],
           mechanisms: user.mechanisms
         }));
-
         await Promise.all(createUserCommands.map(cmd => utilClient.db('admin').command(cmd)));
       });
 
@@ -70,7 +65,6 @@ describe('Authentication Spec Prose Tests', function () {
         await client?.close();
         sinon.restore();
       });
-
       /**
        * Step 2
        * For each test user, verify that you can connect and run a command requiring
@@ -92,33 +86,28 @@ describe('Authentication Spec Prose Tests', function () {
                 authMechanism: mechanism,
                 authSource: 'admin'
               };
-
               client = this.configuration.newClient({}, options);
               const stats = await client.db('test').stats();
               expect(stats).to.exist;
             }
           );
-
           it(
             `authenticates ${user.description} when explicitly specifying ${mechanism} in url`,
             metadata,
             async function () {
               const username = encodeURIComponent(user.username);
               const password = encodeURIComponent(user.password);
-
               const url = `${makeConnectionString(
                 this.configuration,
                 username,
                 password
               )}authMechanism=${mechanism}`;
-
               client = this.configuration.newClient(url);
               const stats = await client.db('test').stats();
               expect(stats).to.exist;
             }
           );
         }
-
         it(
           `authenticates ${user.description} using mechanism negotiaton`,
           metadata,
@@ -130,13 +119,11 @@ describe('Authentication Spec Prose Tests', function () {
               },
               authSource: 'admin'
             };
-
             client = this.configuration.newClient({}, options);
             const stats = await client.db('test').stats();
             expect(stats).to.exist;
           }
         );
-
         it(
           `authenticates ${user.description} using mechanism negotiaton and url`,
           metadata,
@@ -144,14 +131,12 @@ describe('Authentication Spec Prose Tests', function () {
             const username = encodeURIComponent(user.username);
             const password = encodeURIComponent(user.password);
             const url = makeConnectionString(this.configuration, username, password);
-
             client = this.configuration.newClient(url);
             const stats = await client.db('test').stats();
             expect(stats).to.exist;
           }
         );
       }
-
       /**
        * Step 2
        * For a test user supporting both SCRAM-SHA-1 and SCRAM-SHA-256, drivers should verify
@@ -170,7 +155,6 @@ describe('Authentication Spec Prose Tests', function () {
             },
             authSource: this.configuration.db
           };
-
           client = this.configuration.newClient({}, options);
           const spy = sinon.spy(ScramSHA256.prototype, 'auth');
           const stats = await client.db('test').stats();
@@ -178,7 +162,6 @@ describe('Authentication Spec Prose Tests', function () {
           expect(spy.called).to.equal(true);
         }
       ).skipReason = 'todo(NODE-5629): Test passes locally but will fail on CI runs.';
-
       /**
        * Step 3
        * For test users that support only one mechanism, verify that explictly specifying
@@ -196,7 +179,6 @@ describe('Authentication Spec Prose Tests', function () {
             authSource: 'admin',
             authMechanism: 'SCRAM-SHA-1'
           };
-
           client = this.configuration.newClient({}, options);
           const error = await client
             .db('test')
@@ -218,7 +200,6 @@ describe('Authentication Spec Prose Tests', function () {
             authSource: 'admin',
             authMechanism: 'SCRAM-SHA-256'
           };
-
           client = this.configuration.newClient({}, options);
           const error = await client
             .db('test')
@@ -227,7 +208,6 @@ describe('Authentication Spec Prose Tests', function () {
           expect(error.message).to.match(/Authentication failed|SCRAM/);
         }
       );
-
       /*
        * Step 3
        * For a non-existent username, verify that not specifying a mechanism when
@@ -248,7 +228,6 @@ describe('Authentication Spec Prose Tests', function () {
             },
             authSource: 'admin'
           };
-
           const badPasswordOptions = {
             auth: {
               username: 'both',
@@ -256,7 +235,6 @@ describe('Authentication Spec Prose Tests', function () {
             },
             authSource: 'admin'
           };
-
           try {
             this.configuration.newClient({}, noUsernameOptions);
             expect.fail('Creating a new client with a password and no user must fail validation.');
@@ -287,7 +265,6 @@ describe('Authentication Spec Prose Tests', function () {
             },
             authSource: 'admin'
           };
-
           client = this.configuration.newClient({}, options);
           const commandSpy = sinon.spy(Connection.prototype, 'command');
           await client.connect();
@@ -297,7 +274,6 @@ describe('Authentication Spec Prose Tests', function () {
             .filter(
               c => c.args[1][process.env.MONGODB_API_VERSION ? 'hello' : LEGACY_HELLO_COMMAND]
             );
-
           expect(calls).to.have.length(1);
           const handshakeDoc = calls[0].args[1];
           expect(handshakeDoc).to.have.property('speculativeAuthenticate');
@@ -341,20 +317,17 @@ describe('Authentication Spec Prose Tests', function () {
       beforeEach(async function () {
         utilClient = this.configuration.newClient(this.configuration.url());
         const db = utilClient.db('admin');
-
         try {
           await Promise.all(users.map(user => db.removeUser(user.username)));
         } catch (err) {
           /** We ensure that users are deleted. No action needed. */
         }
-
         const createUserCommands = users.map(user => ({
           createUser: user.username,
           pwd: user.password,
           roles: ['root'],
           mechanisms: user.mechanisms
         }));
-
         await Promise.all(createUserCommands.map(cmd => db.command(cmd)));
       });
 
@@ -363,14 +336,13 @@ describe('Authentication Spec Prose Tests', function () {
         await client?.close();
       });
 
-      context('auth credentials in options', () => {
+      describe('auth credentials in options', () => {
         it('logs in with non-normalized username and password', metadata, async function () {
           const options = {
             auth: { username: 'IX', password: 'IX' },
             authSource: 'admin',
             authMechanism: 'SCRAM-SHA-256'
           };
-
           client = this.configuration.newClient({}, options);
           const stats = await client.db('admin').stats();
           expect(stats).to.exist;
@@ -385,7 +357,6 @@ describe('Authentication Spec Prose Tests', function () {
               authSource: 'admin',
               authMechanism: 'SCRAM-SHA-256'
             };
-
             client = this.configuration.newClient({}, options);
             const stats = await client.db('admin').stats();
             expect(stats).to.exist;
@@ -401,7 +372,6 @@ describe('Authentication Spec Prose Tests', function () {
               authSource: 'admin',
               authMechanism: 'SCRAM-SHA-256'
             };
-
             client = this.configuration.newClient({}, options);
             const stats = await client.db('admin').stats();
             expect(stats).to.exist;
@@ -414,15 +384,14 @@ describe('Authentication Spec Prose Tests', function () {
             authSource: 'admin',
             authMechanism: 'SCRAM-SHA-256'
           };
-
           client = this.configuration.newClient({}, options);
           const stats = await client.db('admin').stats();
           expect(stats).to.exist;
         });
       });
 
-      context('auth credentials in url', () => {
-        context('encoded', () => {
+      describe('auth credentials in url', () => {
+        describe('encoded', () => {
           it('logs in with not encoded username and password', metadata, async function () {
             const options = {
               authSource: 'admin',
@@ -476,7 +445,7 @@ describe('Authentication Spec Prose Tests', function () {
           });
         });
 
-        context('normalized', () => {
+        describe('normalized', () => {
           it('logs in with non-normalized username and password', metadata, async function () {
             const options = {
               authSource: 'admin',

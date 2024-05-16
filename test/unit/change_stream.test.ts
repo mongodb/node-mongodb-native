@@ -10,7 +10,7 @@ describe('ChangeStreamCursor', function () {
   });
 
   describe('get resumeOptions()', function () {
-    context('when there is a cached resumeToken', function () {
+    describe('when there is a cached resumeToken', function () {
       it('copies all non-resume related options from the original cursor', function () {
         const cursor = new ChangeStreamCursor(
           new MongoClient('mongodb://localhost:27027'),
@@ -19,14 +19,13 @@ describe('ChangeStreamCursor', function () {
           { promoteBuffers: true, promoteLongs: false, maxAwaitTimeMS: 5000 }
         );
         cursor.resumeToken = 'resume token';
-
         const options = cursor.resumeOptions;
         expect(options).to.haveOwnProperty('promoteBuffers', true);
         expect(options).to.haveOwnProperty('promoteLongs', false);
         expect(options).to.haveOwnProperty('maxAwaitTimeMS', 5000);
       });
 
-      context('when the cursor was started with startAfter', function () {
+      describe('when the cursor was started with startAfter', function () {
         let cursor: ChangeStreamCursor;
 
         beforeEach(function () {
@@ -39,7 +38,7 @@ describe('ChangeStreamCursor', function () {
           cursor.resumeToken = 'resume token';
         });
 
-        context('when the cursor has not yet returned a document', function () {
+        describe('when the cursor has not yet returned a document', function () {
           beforeEach(function () {
             cursor.hasReceived = false;
           });
@@ -52,13 +51,13 @@ describe('ChangeStreamCursor', function () {
             expect(cursor.resumeOptions).not.to.haveOwnProperty('resumeAfter');
           });
 
-          context('when the startAtOperationTime option is NOT set', function () {
+          describe('when the startAtOperationTime option is NOT set', function () {
             it('does NOT set the startAtOperationTime option', function () {
               expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
             });
           });
 
-          context('when the startAtOperationTime option is set', function () {
+          describe('when the startAtOperationTime option is set', function () {
             it('does NOT set the startAtOperationTime option', function () {
               cursor.startAtOperationTime = new Timestamp(Long.ZERO);
               expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
@@ -66,7 +65,7 @@ describe('ChangeStreamCursor', function () {
           });
         });
 
-        context('when the cursor has returned a document', function () {
+        describe('when the cursor has returned a document', function () {
           beforeEach(function () {
             cursor.hasReceived = true;
           });
@@ -79,13 +78,13 @@ describe('ChangeStreamCursor', function () {
             expect(cursor.resumeOptions).to.haveOwnProperty('resumeAfter', 'resume token');
           });
 
-          context('when the startAtOperationTime option is NOT set', function () {
+          describe('when the startAtOperationTime option is NOT set', function () {
             it('does NOT set the startAtOperationTime option', function () {
               expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
             });
           });
 
-          context('when the startAtOperationTime option is set', function () {
+          describe('when the startAtOperationTime option is set', function () {
             it('does NOT set the startAtOperationTime option', function () {
               cursor.startAtOperationTime = new Timestamp(Long.ZERO);
               expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
@@ -94,8 +93,9 @@ describe('ChangeStreamCursor', function () {
         });
       });
 
-      context('when the cursor was not initialized with startAfter set', function () {
+      describe('when the cursor was not initialized with startAfter set', function () {
         let cursor: ChangeStreamCursor;
+
         beforeEach(function () {
           cursor = new ChangeStreamCursor(
             new MongoClient('mongodb://localhost:27027'),
@@ -114,25 +114,24 @@ describe('ChangeStreamCursor', function () {
           expect(cursor.resumeOptions).not.to.haveOwnProperty('startAfter');
         });
 
-        context('when the startAtOperationTime option is NOT set', function () {
+        describe('when the startAtOperationTime option is NOT set', function () {
           it('does NOT set the startAtOperationTime option', function () {
             expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
           });
         });
 
-        context('when the startAtOperationTime option is set', function () {
+        describe('when the startAtOperationTime option is set', function () {
           it('does NOT set the startAtOperationTime option', function () {
             cursor.startAtOperationTime = new Timestamp(Long.ZERO);
             cursor.resumeToken = 'resume token';
-
             expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
           });
         });
       });
     });
 
-    context('when there is no cached resumeToken', function () {
-      context('when the cursor has a saved operation time', function () {
+    describe('when there is no cached resumeToken', function () {
+      describe('when the cursor has a saved operation time', function () {
         it('copies all non-resume related options from the original cursor', function () {
           const cursor = new ChangeStreamCursor(
             new MongoClient('mongodb://localhost:27027'),
@@ -148,15 +147,15 @@ describe('ChangeStreamCursor', function () {
             }
           );
           cursor.resumeToken = null;
-
           const options = cursor.resumeOptions;
           expect(options).to.haveOwnProperty('promoteBuffers', true);
           expect(options).to.haveOwnProperty('promoteLongs', false);
           expect(options).to.haveOwnProperty('maxAwaitTimeMS', 5000);
         });
 
-        context('when the maxWireVersion >= 7', function () {
+        describe('when the maxWireVersion >= 7', function () {
           let cursor: ChangeStreamCursor;
+
           beforeEach(function () {
             cursor = new ChangeStreamCursor(
               new MongoClient('mongodb://localhost:27027'),
@@ -185,8 +184,9 @@ describe('ChangeStreamCursor', function () {
           });
         });
 
-        context('when the maxWireVersion < 7', function () {
+        describe('when the maxWireVersion < 7', function () {
           let cursor: ChangeStreamCursor;
+
           beforeEach(function () {
             cursor = new ChangeStreamCursor(
               new MongoClient('mongodb://localhost:27027'),
@@ -216,7 +216,7 @@ describe('ChangeStreamCursor', function () {
         });
       });
 
-      context('when the cursor does NOT have a saved operation time', function () {
+      describe('when the cursor does NOT have a saved operation time', function () {
         it('copies all non-resume related options from the original cursor', function () {
           const cursor = new ChangeStreamCursor(
             new MongoClient('mongodb://localhost:27027'),
@@ -231,15 +231,15 @@ describe('ChangeStreamCursor', function () {
             }
           );
           cursor.resumeToken = null;
-
           const options = cursor.resumeOptions;
           expect(options).to.haveOwnProperty('promoteBuffers', true);
           expect(options).to.haveOwnProperty('promoteLongs', false);
           expect(options).to.haveOwnProperty('maxAwaitTimeMS', 5000);
         });
 
-        context('when the maxWireVersion >= 7', function () {
+        describe('when the maxWireVersion >= 7', function () {
           let cursor: ChangeStreamCursor;
+
           beforeEach(function () {
             cursor = new ChangeStreamCursor(
               new MongoClient('mongodb://localhost:27027'),
@@ -267,8 +267,9 @@ describe('ChangeStreamCursor', function () {
           });
         });
 
-        context('when the maxWireVersion < 7', function () {
+        describe('when the maxWireVersion < 7', function () {
           let cursor: ChangeStreamCursor;
+
           beforeEach(function () {
             cursor = new ChangeStreamCursor(
               new MongoClient('mongodb://localhost:27027'),

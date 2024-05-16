@@ -34,7 +34,7 @@ describe('FindOperation', function () {
   });
 
   describe('#execute', function () {
-    context('command construction', () => {
+    describe('command construction', () => {
       const namespace = ns('db.collection');
       const topology = topologyWithPlaceholderClient([], {} as any);
       const server = new Server(topology, new ServerDescription('a:1'), {} as any);

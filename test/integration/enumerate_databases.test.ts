@@ -8,37 +8,31 @@ const metadata: MongoDBMetadataUI = {
   requires: {
     mongodb: '>=4.0.6',
     auth: 'enabled',
-
     // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
     //   These tests should work on a load balanced topology
     topology: '!load-balanced'
   }
 };
-
 describe('listDatabases()', function () {
   describe('authorizedDatabases option', () => {
     const username = 'a';
     const password = 'b';
     const mockAuthorizedDb = 'enumerate_databases';
     const mockAuthorizedCollection = 'enumerate_databases_collection';
-
     let adminClient: MongoClient;
     let authorizedClient: MongoClient;
 
     beforeEach(async function () {
       adminClient = this.configuration.newClient();
-
       await adminClient
         .db(mockAuthorizedDb)
         .createCollection(mockAuthorizedCollection)
         .catch(() => null);
-
       await adminClient.db('admin').command({
         createUser: username,
         pwd: password,
         roles: [{ role: 'read', db: mockAuthorizedDb }]
       });
-
       authorizedClient = this.configuration.newClient({
         auth: { username: username, password: password }
       });
@@ -60,7 +54,6 @@ describe('listDatabases()', function () {
           .admin()
           .listDatabases({ authorizedDatabases: true });
         const adminDbs = adminListDbs.databases.map(({ name }) => name);
-
         // no change in the dbs listed since we're using the admin user
         expect(adminDbs).to.have.length.greaterThan(1);
         expect(adminDbs.filter(db => db === mockAuthorizedDb)).to.have.lengthOf(1);
@@ -77,7 +70,6 @@ describe('listDatabases()', function () {
           .admin()
           .listDatabases({ authorizedDatabases: false });
         const adminDbs = adminListDbs.databases.map(({ name }) => name);
-
         // no change in the dbs listed since we're using the admin user
         expect(adminDbs).to.have.length.greaterThan(1);
         expect(adminDbs.filter(db => db === mockAuthorizedDb)).to.have.lengthOf(1);
@@ -96,10 +88,8 @@ describe('listDatabases()', function () {
           .listDatabases({ authorizedDatabases: true });
         const adminDbs = adminListDbs.databases;
         const authorizedDbs = authorizedListDbs.databases;
-
         expect(adminDbs).to.have.length.greaterThan(1);
         expect(authorizedDbs).to.have.lengthOf(1);
-
         expect(adminDbs.filter(db => db.name === mockAuthorizedDb)).to.have.lengthOf(1);
         expect(adminDbs.filter(db => db.name !== mockAuthorizedDb)).to.have.length.greaterThan(1);
         expect(authorizedDbs.filter(db => db.name === mockAuthorizedDb)).to.have.lengthOf(1);
@@ -114,10 +104,8 @@ describe('listDatabases()', function () {
         const authorizedListDbs = await authorizedClient.db().admin().listDatabases();
         const adminDbs = adminListDbs.databases;
         const authorizedDbs = authorizedListDbs.databases;
-
         expect(adminDbs).to.have.length.greaterThan(1);
         expect(authorizedDbs).to.have.lengthOf(1);
-
         expect(adminDbs.filter(db => db.name === mockAuthorizedDb)).to.have.lengthOf(1);
         expect(adminDbs.filter(db => db.name !== mockAuthorizedDb)).to.have.length.greaterThan(1);
         expect(authorizedDbs.filter(db => db.name === mockAuthorizedDb)).to.have.lengthOf(1);
@@ -134,7 +122,6 @@ describe('listDatabases()', function () {
         } catch (error) {
           thrownError = error;
         }
-
         // check correctly produces an 'Insufficient permissions to list all databases' error
         expect(thrownError).to.be.instanceOf(MongoServerError);
         expect(thrownError).to.have.property('message').that.includes('list');
@@ -162,16 +149,13 @@ describe('listDatabases()', function () {
         await client.close();
       }
     });
-
     for (const nameOnly of nameOnlyOptions) {
-      context(`when options.nameOnly is ${nameOnly ?? 'not defined'}`, function () {
+      describe(`when options.nameOnly is ${nameOnly ?? 'not defined'}`, function () {
         it(`sends command ${optionToExpectation[String(nameOnly)]}`, async function () {
           const promise = once(client, 'commandStarted');
           await client.db().admin().listDatabases({ nameOnly });
-
           const commandStarted = (await promise)[0];
           expect(commandStarted.command).to.haveOwnProperty('listDatabases', 1);
-
           switch (nameOnly) {
             case true:
               expect(commandStarted.command).to.have.property('nameOnly', true);
@@ -189,7 +173,6 @@ describe('listDatabases()', function () {
       });
     }
   });
-
   UnifiedTestSuiteBuilder.describe('comment option')
     .createEntities(UnifiedTestSuiteBuilder.defaultEntities)
     .initialData({
@@ -256,7 +239,6 @@ describe('listDatabases()', function () {
           name: 'listDatabases',
           arguments: {
             filter: {},
-
             comment: {
               key: 'value'
             }

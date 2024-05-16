@@ -18,7 +18,6 @@ function readHttpResponse(path) {
   data = data.split('\n').join('\r\n');
   return Buffer.from(data, 'utf8');
 }
-
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true
@@ -56,7 +55,6 @@ describe('ClientEncryption integration tests', function () {
         return Promise.resolve();
       });
     });
-
     [
       {
         name: 'local',
@@ -77,18 +75,14 @@ describe('ClientEncryption integration tests', function () {
             keyVaultNamespace: 'client.encryption',
             kmsProviders: providerTest.kmsProviders
           });
-
           const dataKeyOptions = providerTest.options || {};
-
           const dataKey = await encryption.createDataKey(providerName, dataKeyOptions);
           expect(dataKey).property('_bsontype', 'Binary');
-
           const doc = await client.db('client').collection('encryption').findOne({ _id: dataKey });
           expect(doc).to.have.property('masterKey');
           expect(doc.masterKey).property('provider', providerName);
         }
       );
-
       it(
         `should create a data key with the "${providerTest.name}" KMS provider (fixed key material)`,
         metadata,
@@ -98,15 +92,12 @@ describe('ClientEncryption integration tests', function () {
             keyVaultNamespace: 'client.encryption',
             kmsProviders: providerTest.kmsProviders
           });
-
           const dataKeyOptions = {
             ...providerTest.options,
             keyMaterial: new Binary(Buffer.alloc(96))
           };
-
           const dataKey = await encryption.createDataKey(providerName, dataKeyOptions);
           expect(dataKey).property('_bsontype', 'Binary');
-
           const doc = await client.db('client').collection('encryption').findOne({ _id: dataKey });
           expect(doc).to.have.property('masterKey');
           expect(doc.masterKey).property('provider', providerName);
@@ -128,7 +119,6 @@ describe('ClientEncryption integration tests', function () {
             }
           }
         });
-
         const dataKeyOptions = {
           keyMaterial: new Binary(
             Buffer.from(
@@ -139,7 +129,6 @@ describe('ClientEncryption integration tests', function () {
         };
         const dataKey = await encryption.createDataKey('local', dataKeyOptions);
         expect(dataKey._bsontype).to.equal('Binary');
-
         // Remove and re-insert with a fixed UUID to guarantee consistent output
         const doc = (
           await keyVaultColl.findOneAndDelete(
@@ -149,7 +138,6 @@ describe('ClientEncryption integration tests', function () {
         ).value;
         doc._id = new Binary(Buffer.alloc(16), 4);
         await keyVaultColl.insertOne(doc, { writeConcern: { w: 'majority' } });
-
         const encrypted = await encryption.encrypt('test', {
           keyId: doc._id,
           algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
@@ -166,7 +154,6 @@ describe('ClientEncryption integration tests', function () {
         keyVaultNamespace: 'client.encryption',
         kmsProviders: { local: { key: 'A'.repeat(128) } }
       });
-
       const dataKeyOptions = {
         keyMaterial: new Binary(Buffer.alloc(97))
       };
@@ -182,18 +169,14 @@ describe('ClientEncryption integration tests', function () {
           keyVaultNamespace: 'client.encryption',
           kmsProviders: { local: { key: Buffer.alloc(96) } }
         });
-
         const dataKey = await encryption.createDataKey('local');
-
         const encryptOptions = {
           keyId: dataKey,
           algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
         };
-
         const encrypted = await encryption.encrypt('hello', encryptOptions);
         expect(encrypted._bsontype).to.equal('Binary');
         expect(encrypted.sub_type).to.equal(6);
-
         const decrypted = await encryption.decrypt(encrypted);
         expect(decrypted).to.equal('hello');
       }
@@ -207,19 +190,15 @@ describe('ClientEncryption integration tests', function () {
           keyVaultNamespace: 'client.encryption',
           kmsProviders: { local: { key: Buffer.alloc(96) } }
         });
-
         const dataKey = await encryption.createDataKey('local');
         const encryptOptions = {
           keyId: dataKey,
           algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
         };
-
         const encrypted = await encryption.encrypt('hello', encryptOptions);
         expect(encrypted._bsontype).to.equal('Binary');
         expect(encrypted.sub_type).to.equal(6);
-
         const decrypted = await encryption.decrypt(encrypted);
-
         expect(decrypted).to.equal('hello');
       }
     );
@@ -236,14 +215,12 @@ describe('ClientEncryption integration tests', function () {
             keyVaultNamespace: 'client.encryption',
             kmsProviders: { local: { key: 'A'.repeat(128) } }
           });
-
         const dataKey = await newClientEncryption().createDataKey('local');
         const encryptOptions = {
           keyId: dataKey,
           algorithm: 'Indexed',
           contentionFactor: 0
         };
-
         const encrypted = await newClientEncryption().encrypt('hello', encryptOptions);
         expect(encrypted._bsontype).to.equal('Binary');
         expect(encrypted.sub_type).to.equal(6);
@@ -259,11 +236,9 @@ describe('ClientEncryption integration tests', function () {
         keyVaultNamespace: 'client.encryption',
         kmsProviders: { local: { key: 'A'.repeat(128) } }
       });
-
       const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey({ _id: 12345 });
       expect(rewrapManyDataKeyResult.bulkWriteResult).to.equal(undefined);
     });
-
     // TODO(NODE-3371): resolve KMS JSON response does not include string 'Plaintext'. HTTP status=200 error
     it.skip(
       'should explicitly encrypt and decrypt with the "aws" KMS provider',
@@ -273,25 +248,20 @@ describe('ClientEncryption integration tests', function () {
           keyVaultNamespace: 'client.encryption',
           kmsProviders: { aws: { accessKeyId: 'example', secretAccessKey: 'example' } }
         });
-
         const dataKeyOptions = {
           masterKey: { region: 'region', key: 'cmk' }
         };
-
         encryption.createDataKey('aws', dataKeyOptions, (err, dataKey) => {
           expect(err).to.not.exist;
-
           const encryptOptions = {
             keyId: dataKey,
             algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
           };
-
           encryption.encrypt('hello', encryptOptions, (err, encrypted) => {
             expect(err).to.not.exist;
             expect(encrypted).to.have.property('v');
             expect(encrypted.v._bsontype).to.equal('Binary');
             expect(encrypted.v.sub_type).to.equal(6);
-
             encryption.decrypt(encrypted, (err, decrypted) => {
               expect(err).to.not.exist;
               expect(decrypted).to.equal('hello');
@@ -314,12 +284,10 @@ describe('ClientEncryption integration tests', function () {
         keyVaultNamespace: 'client.encryption',
         kmsProviders: { local: { key: Buffer.alloc(96) } }
       });
-
       dataKey = await clientEncryption.createDataKey('local', {
         name: 'local',
         kmsProviders: { local: { key: Buffer.alloc(96) } }
       });
-
       completeOptions = {
         algorithm: 'RangePreview',
         contentionFactor: 0,
@@ -332,14 +300,13 @@ describe('ClientEncryption integration tests', function () {
       };
     });
 
-    context('when expressionMode is incorrectly provided as an argument', function () {
+    describe('when expressionMode is incorrectly provided as an argument', function () {
       it(
         'overrides the provided option with the correct value for expression mode',
         metadata,
         async function () {
           const optionsWithExpressionMode = { ...completeOptions, expressionMode: true };
           const result = await clientEncryption.encrypt(new Long(0), optionsWithExpressionMode);
-
           expect(result).to.be.instanceof(Binary);
         }
       );
@@ -359,12 +326,10 @@ describe('ClientEncryption integration tests', function () {
         keyVaultNamespace: 'client.encryption',
         kmsProviders: { local: { key: Buffer.alloc(96) } }
       });
-
       dataKey = await clientEncryption.createDataKey('local', {
         name: 'local',
         kmsProviders: { local: { key: Buffer.alloc(96) } }
       });
-
       completeOptions = {
         algorithm: 'RangePreview',
         queryType: 'rangePreview',
@@ -383,7 +348,6 @@ describe('ClientEncryption integration tests', function () {
       const errorOrResult = await clientEncryption
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
-
       expect(errorOrResult).to.be.instanceof(TypeError);
     });
 
@@ -392,7 +356,6 @@ describe('ClientEncryption integration tests', function () {
       const errorOrResult = await clientEncryption
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
-
       expect(errorOrResult).to.be.instanceof(TypeError);
     });
 
@@ -401,7 +364,6 @@ describe('ClientEncryption integration tests', function () {
       const errorOrResult = await clientEncryption
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
-
       expect(errorOrResult).to.be.instanceof(TypeError);
     });
 
@@ -413,12 +375,11 @@ describe('ClientEncryption integration tests', function () {
         const errorOrResult = await clientEncryption
           .encryptExpression(expression, completeOptions)
           .catch(e => e);
-
         expect(errorOrResult).not.to.be.instanceof(Error);
       }
     );
 
-    context('when expressionMode is incorrectly provided as an argument', function () {
+    describe('when expressionMode is incorrectly provided as an argument', function () {
       it(
         'overrides the provided option with the correct value for expression mode',
         metadata,
@@ -428,7 +389,6 @@ describe('ClientEncryption integration tests', function () {
             expression,
             optionsWithExpressionMode
           );
-
           expect(result).not.to.be.instanceof(Binary);
         }
       );
@@ -450,7 +410,6 @@ describe('ClientEncryption integration tests', function () {
         name: 'local',
         kmsProviders: { local: { key: Buffer.alloc(96) } }
       });
-
       expect(dataKey).to.be.instanceOf(UUID);
     });
   });
@@ -464,7 +423,6 @@ describe('ClientEncryption integration tests', function () {
     const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
     const AWS_REGION = process.env.AWS_REGION;
     const AWS_CMK_ID = process.env.AWS_CMK_ID;
-
     const kmsProviders = {
       aws: { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY }
     };
@@ -482,12 +440,10 @@ describe('ClientEncryption integration tests', function () {
     afterEach(async function () {
       await client?.close();
     });
-
     function makeOptions(keyAltNames) {
       expect(dataKeyOptions.masterKey).to.be.an('object');
       expect(dataKeyOptions.masterKey.key).to.be.a('string');
       expect(dataKeyOptions.masterKey.region).to.be.a('string');
-
       return {
         masterKey: {
           key: dataKeyOptions.masterKey.key,
@@ -505,7 +461,6 @@ describe('ClientEncryption integration tests', function () {
           expect(error).to.be.instanceOf(MongoCryptInvalidArgumentError);
         });
       }
-
       for (const val of [undefined, null, 42, { keyAltNames: 'foobar' }, ['foobar'], /foobar/]) {
         it(`should fail if typeof keyAltNames[x] = ${typeof val}`, metadata, async function () {
           const options = makeOptions([val]);
@@ -550,9 +505,7 @@ describe('ClientEncryption integration tests', function () {
       async function () {
         const keyAltName = 'mySpecialKey';
         const algorithm = 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic';
-
         const valueToEncrypt = 'foobar';
-
         const keyId = await clientEncryption.createDataKey('aws', makeOptions([keyAltName]));
         const encryptedValue = await clientEncryption.encrypt(valueToEncrypt, { keyId, algorithm });
         const encryptedValue2 = await clientEncryption.encrypt(valueToEncrypt, {

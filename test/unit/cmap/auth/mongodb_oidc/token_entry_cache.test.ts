@@ -14,7 +14,7 @@ describe('TokenEntryCache', function () {
   const callbackHash = '1';
 
   describe('#addEntry', function () {
-    context('when expiresInSeconds is provided', function () {
+    describe('when expiresInSeconds is provided', function () {
       const cache = new TokenEntryCache();
       let entry;
 
@@ -36,10 +36,9 @@ describe('TokenEntryCache', function () {
       });
     });
 
-    context('when expiresInSeconds is not provided', function () {
+    describe('when expiresInSeconds is not provided', function () {
       const cache = new TokenEntryCache();
       let entry: TokenEntry | undefined;
-
       const expiredResult = Object.freeze({ accessToken: 'test' });
 
       before(function () {
@@ -52,10 +51,9 @@ describe('TokenEntryCache', function () {
       });
     });
 
-    context('when expiresInSeconds is null', function () {
+    describe('when expiresInSeconds is null', function () {
       const cache = new TokenEntryCache();
       let entry: TokenEntry | undefined;
-
       const expiredResult = Object.freeze({
         accessToken: 'test',
         expiredInSeconds: null
@@ -87,7 +85,6 @@ describe('TokenEntryCache', function () {
 
   describe('#deleteExpiredEntries', function () {
     const cache = new TokenEntryCache();
-
     const nonExpiredResult = Object.freeze({
       accessToken: 'test',
       expiresInSeconds: 600
@@ -127,7 +124,7 @@ describe('TokenEntryCache', function () {
       cache.addEntry('localhost', 'user2', callbackHash, tokenResultWithExpiration, serverResult);
     });
 
-    context('when there is a matching entry', function () {
+    describe('when there is a matching entry', function () {
       it('returns the entry', function () {
         expect(cache.getEntry('localhost', 'user', callbackHash)?.tokenResult).to.equal(
           tokenResultWithExpiration
@@ -135,7 +132,7 @@ describe('TokenEntryCache', function () {
       });
     });
 
-    context('when there is no matching entry', function () {
+    describe('when there is no matching entry', function () {
       it('returns undefined', function () {
         expect(cache.getEntry('localhost', 'user1', callbackHash)).to.equal(undefined);
       });

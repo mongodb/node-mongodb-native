@@ -7,10 +7,8 @@ import {
   MongoServerError,
   MongoServerSelectionError
 } from '../../src';
-
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const connectionString = new ConnectionString(process.env.MONGODB_URI!);
-
 describe('x509 Authentication', function () {
   let client: MongoClient;
   const validOptions: MongoClientOptions = {
@@ -20,13 +18,13 @@ describe('x509 Authentication', function () {
     authMechanism: 'MONGODB-X509' as const,
     authSource: '$external'
   };
-
   this.afterEach(() => {
     return client?.close();
   });
 
-  context('When the user provides a valid certificate', function () {
+  describe('When the user provides a valid certificate', function () {
     before('create x509 user', createX509User);
+
     after('drop x509 user', dropX509User);
 
     it('successfully authenticates using x509', async function () {
@@ -36,38 +34,32 @@ describe('x509 Authentication', function () {
         .collection('x509_test')
         .estimatedDocumentCount()
         .catch(error => error);
-
       expect(result).to.not.be.instanceOf(MongoServerError);
       expect(result).to.be.a('number');
     });
 
-    context('when an incorrect username is supplied', function () {
+    describe('when an incorrect username is supplied', function () {
       it('fails to authenticate', async function () {
         const uri = connectionString.clone();
         uri.username = 'bob';
         client = new MongoClient(uri.toString(), validOptions);
         const error = await client.connect().catch(error => error);
-
         expect(error).to.be.instanceOf(MongoServerError);
         expect(error.codeName).to.match(/AuthenticationFailed/i);
       });
     });
   });
 
-  context(
-    'when a valid cert is provided but the certificate does not correspond to a user',
-    function () {
-      it('fails to authenticate', async function () {
-        client = new MongoClient(connectionString.toString(), validOptions);
-        const error = await client.connect().catch(e => e);
+  describe('when a valid cert is provided but the certificate does not correspond to a user', function () {
+    it('fails to authenticate', async function () {
+      client = new MongoClient(connectionString.toString(), validOptions);
+      const error = await client.connect().catch(e => e);
+      expect(error).to.be.instanceOf(MongoServerError);
+      expect(error.codeName).to.match(/UserNotFound/i);
+    });
+  });
 
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(error.codeName).to.match(/UserNotFound/i);
-      });
-    }
-  );
-
-  context('when the client connects with an invalid certificate', function () {
+  describe('when the client connects with an invalid certificate', function () {
     // unlike other authentication mechanisms, x509 authentication 1) requires TLS and
     // 2) the server uses the client certificate to derive a username to authenticate with
     // against the $external database.  This means that if a user attempts to connect to a
@@ -86,12 +78,10 @@ describe('x509 Authentication', function () {
         serverSelectionTimeoutMS: 5000
       });
       const error = await client.connect().catch(e => e);
-
       expect(error).to.be.instanceOf(MongoServerSelectionError);
     });
   });
 });
-
 async function createX509User() {
   const utilClient = new MongoClient(connectionString.toString(), {
     tls: true,
@@ -99,7 +89,6 @@ async function createX509User() {
     tlsCAFile: process.env.SSL_CA_FILE,
     serverSelectionTimeoutMS: 2000
   });
-
   try {
     await utilClient.connect();
     await utilClient.db('$external').command({
@@ -114,7 +103,6 @@ async function createX509User() {
     await utilClient.close();
   }
 }
-
 async function dropX509User() {
   const utilClient = new MongoClient(connectionString.toString(), {
     tls: true,

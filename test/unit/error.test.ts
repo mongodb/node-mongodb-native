@@ -47,7 +47,6 @@ describe('MongoErrors', () => {
     MongoPoolClosedError,
     MongoWaitQueueTimeoutError
   };
-
   const errorClassesFromErrorSrc = Object.fromEntries(
     Object.entries(importsFromErrorSrc).filter(
       ([key, value]) => key.endsWith('Error') && value.toString().startsWith('class')
@@ -58,7 +57,6 @@ describe('MongoErrors', () => {
     expect(
       setDifference(Object.keys(errorClassesFromEntryPoint), Object.keys(errorClassesFromErrorSrc))
     ).to.have.property('size', 9);
-
     expect(
       setDifference(Object.keys(errorClassesFromErrorSrc), Object.keys(errorClassesFromEntryPoint))
     ).to.have.property('size', 0);
@@ -73,7 +71,6 @@ describe('MongoErrors', () => {
         });
         // expect name property to be class name
         expect(error).to.have.property('name', errorName);
-
         try {
           error.name = 'renamed by test';
           // eslint-disable-next-line no-empty
@@ -113,13 +110,15 @@ describe('MongoErrors', () => {
       expect(err.message).to.equal(errorMessage);
       expect(err.someData).to.equal(12345);
     });
-    context('errorResponse property', function () {
+
+    describe('errorResponse property', function () {
       it(`should set errorResponse to raw results document passed in`, function () {
         const errorDoc = { message: 'A test error', someData: 12345 };
         const err = new MongoServerError(errorDoc);
         expect(err).to.be.an.instanceof(Error);
         expect(err.errorResponse).to.deep.equal(errorDoc);
       });
+
       it(`should not construct enumerated key 'errorResponse' if present`, function () {
         const errorDoc = {
           message: 'A test error',
@@ -145,32 +144,29 @@ describe('MongoErrors', () => {
   });
 
   describe('MongoSystemError#constructor', () => {
-    context('when the topology description contains an error code', () => {
+    describe('when the topology description contains an error code', () => {
       it('contains the specified code as a top level property', () => {
         const topologyDescription = {
           error: {
             code: 123
           }
         } as TopologyDescription;
-
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', 123);
       });
     });
 
-    context('when the topology description does not contain an error code', () => {
+    describe('when the topology description does not contain an error code', () => {
       it('contains the code as a top level property that is undefined', () => {
         const topologyDescription = { error: {} } as TopologyDescription;
-
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', undefined);
       });
     });
 
-    context('when the topology description does not contain an error property', () => {
+    describe('when the topology description does not contain an error property', () => {
       it('contains the code as a top level property that is undefined', () => {
         const topologyDescription = {} as TopologyDescription;
-
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', undefined);
       });
@@ -178,14 +174,14 @@ describe('MongoErrors', () => {
   });
 
   describe('MongoMissingDependencyError#constructor', () => {
-    context('when options.cause is set', () => {
+    describe('when options.cause is set', () => {
       it('attaches the cause property to the instance', () => {
         const error = new MongoMissingDependencyError('missing!', { cause: new Error('hello') });
         expect(error).to.have.property('cause');
       });
     });
 
-    context('when options.cause is not set', () => {
+    describe('when options.cause is not set', () => {
       it('attaches the cause property to the instance', () => {
         const error = new MongoMissingDependencyError('missing!', { cause: undefined });
         expect(error).to.have.property('cause').that.is.undefined;
@@ -194,20 +190,20 @@ describe('MongoErrors', () => {
   });
 
   describe('#isSDAMUnrecoverableError', function () {
-    context('when the error is a MongoParseError', function () {
+    describe('when the error is a MongoParseError', function () {
       it('returns true', function () {
         const error = new MongoParseError('');
         expect(isSDAMUnrecoverableError(error)).to.be.true;
       });
     });
 
-    context('when the error is null', function () {
+    describe('when the error is null', function () {
       it('returns true', function () {
         expect(isSDAMUnrecoverableError(null)).to.be.true;
       });
     });
 
-    context('when the error has a "node is recovering" error code', function () {
+    describe('when the error has a "node is recovering" error code', function () {
       it('returns true', function () {
         const error = new MongoError('');
         // Code for NotPrimaryOrSecondary
@@ -216,7 +212,7 @@ describe('MongoErrors', () => {
       });
     });
 
-    context('when the error has a "not writable primary" error code', function () {
+    describe('when the error has a "not writable primary" error code', function () {
       it('returns true', function () {
         const error = new MongoError('');
         // Code for NotWritablePrimary
@@ -225,67 +221,52 @@ describe('MongoErrors', () => {
       });
     });
 
-    context(
-      'when the code is not a "node is recovering" error and not a "not writable primary" error',
-      function () {
-        it('returns false', function () {
-          // If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not writable primary" error.
-          const error = new MongoError(NODE_IS_RECOVERING_ERROR_MESSAGE.source);
-          error.code = 555;
-          expect(isSDAMUnrecoverableError(error)).to.be.false;
-        });
-      }
-    );
+    describe('when the code is not a "node is recovering" error and not a "not writable primary" error', function () {
+      it('returns false', function () {
+        // If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not writable primary" error.
+        const error = new MongoError(NODE_IS_RECOVERING_ERROR_MESSAGE.source);
+        error.code = 555;
+        expect(isSDAMUnrecoverableError(error)).to.be.false;
+      });
+    });
 
-    context(
-      'when the error message contains the legacy "not primary" message and no error code is used',
-      function () {
-        it('returns true', function () {
-          const error = new MongoError(
-            `this is ${LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE.source}.`
-          );
-          expect(isSDAMUnrecoverableError(error)).to.be.true;
-        });
-      }
-    );
+    describe('when the error message contains the legacy "not primary" message and no error code is used', function () {
+      it('returns true', function () {
+        const error = new MongoError(
+          `this is ${LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE.source}.`
+        );
+        expect(isSDAMUnrecoverableError(error)).to.be.true;
+      });
+    });
 
-    context(
-      'when the error message contains "node is recovering" and no error code is used',
-      function () {
-        it('returns true', function () {
-          const error = new MongoError(`the ${NODE_IS_RECOVERING_ERROR_MESSAGE} from an error`);
-          expect(isSDAMUnrecoverableError(error)).to.be.true;
-        });
-      }
-    );
+    describe('when the error message contains "node is recovering" and no error code is used', function () {
+      it('returns true', function () {
+        const error = new MongoError(`the ${NODE_IS_RECOVERING_ERROR_MESSAGE} from an error`);
+        expect(isSDAMUnrecoverableError(error)).to.be.true;
+      });
+    });
 
-    context(
-      'when the error message contains the legacy "not primary or secondary" message and no error code is used',
-      function () {
-        it('returns true', function () {
-          const error = new MongoError(
-            `this is ${LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE}, so we have a problem `
-          );
-          expect(isSDAMUnrecoverableError(error)).to.be.true;
-        });
-      }
-    );
+    describe('when the error message contains the legacy "not primary or secondary" message and no error code is used', function () {
+      it('returns true', function () {
+        const error = new MongoError(
+          `this is ${LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE}, so we have a problem `
+        );
+        expect(isSDAMUnrecoverableError(error)).to.be.true;
+      });
+    });
   });
 
   describe('when MongoNetworkError is constructed', () => {
     it('should only define beforeHandshake symbol if boolean option passed in', function () {
       const errorWithOptionTrue = new MongoNetworkError('', { beforeHandshake: true });
       expect(getSymbolFrom(errorWithOptionTrue, 'beforeHandshake', false)).to.be.a('symbol');
-
       const errorWithOptionFalse = new MongoNetworkError('', { beforeHandshake: false });
       expect(getSymbolFrom(errorWithOptionFalse, 'beforeHandshake', false)).to.be.a('symbol');
-
       const errorWithBadOption = new MongoNetworkError('', {
         // @ts-expect-error: beforeHandshake must be a boolean value
         beforeHandshake: 'not boolean'
       });
       expect(getSymbolFrom(errorWithBadOption, 'beforeHandshake', false)).to.be.an('undefined');
-
       const errorWithoutOption = new MongoNetworkError('');
       expect(getSymbolFrom(errorWithoutOption, 'beforeHandshake', false)).to.be.an('undefined');
     });
@@ -299,7 +280,6 @@ describe('MongoErrors', () => {
       roles: ['read'],
       writeConcern: { w: 'majority', wtimeoutMS: 1 }
     };
-
     const RAW_USER_WRITE_CONCERN_ERROR = {
       ok: 0,
       errmsg: 'waiting for replication timed out',
@@ -314,7 +294,6 @@ describe('MongoErrors', () => {
         }
       }
     };
-
     const RAW_USER_WRITE_CONCERN_ERROR_INFO = {
       ok: 0,
       errmsg: 'waiting for replication timed out',
@@ -339,14 +318,12 @@ describe('MongoErrors', () => {
     afterEach(() => cleanup());
 
     beforeEach(() => test.setup());
-
     function makeAndConnectReplSet(cb) {
       let invoked = false;
       const replSet = topologyWithPlaceholderClient(
         [test.primaryServer.hostAddress(), test.firstSecondaryServer.hostAddress()],
         { replicaSet: 'rs' } as TopologyOptions
       );
-
       replSet.once('error', err => {
         if (invoked) {
           return;
@@ -354,16 +331,13 @@ describe('MongoErrors', () => {
         invoked = true;
         cb(err);
       });
-
       replSet.on('connect', () => {
         if (invoked) {
           return;
         }
-
         invoked = true;
         cb(undefined, replSet);
       });
-
       replSet.connect();
     }
 
@@ -380,7 +354,6 @@ describe('MongoErrors', () => {
         [test.primaryServer.hostAddress(), test.firstSecondaryServer.hostAddress()],
         { replicaSet: 'rs' } as TopologyOptions
       );
-
       return replSet
         .connect()
         .then(topology => topology.selectServer('primary', {}))
@@ -413,18 +386,15 @@ describe('MongoErrors', () => {
           setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR_INFO));
         }
       });
-
       makeAndConnectReplSet((err, topology) => {
         // cleanup the server before calling done
         const cleanup = err => {
           topology.close();
           done(err);
         };
-
         if (err) {
           return cleanup(err);
         }
-
         topology.selectServer('primary', {}).then(server => {
           server
             .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
@@ -452,10 +422,8 @@ describe('MongoErrors', () => {
       // Note the wireVersions used below are used to represent
       // 8 - below server version 4.4
       // 9 - above server version 4.4
-
       const ABOVE_4_4 = 9;
       const BELOW_4_4 = 8;
-
       const tests: {
         description: string;
         result: boolean;
@@ -540,7 +508,11 @@ describe('MongoErrors', () => {
     });
 
     describe('#isRetryableReadError', () => {
-      const tests: { description: string; result: boolean; error: MongoError }[] = [
+      const tests: {
+        description: string;
+        result: boolean;
+        error: MongoError;
+      }[] = [
         {
           description: 'plain error',
           result: false,
@@ -573,7 +545,6 @@ describe('MongoErrors', () => {
           error: new MongoError('node is recovering')
         }
       ];
-
       for (const { description, result, error } of tests) {
         it(`${description} is${result ? '' : ' not'} a retryable read`, () => {
           expect(isRetryableReadError(error)).to.be.equal(result);
@@ -627,7 +598,6 @@ describe('MongoErrors', () => {
         expect(isResumableError(new Error('ah!'))).to.be.false;
         expect(isResumableError(new Error('ah!'), 9)).to.be.false;
         expect(isResumableError(new Error('ah!'), 8)).to.be.false;
-
         const errorWithCode = new (class extends Error {
           get code() {
             throw new Error('code on a non-MongoError should not be inspected');
@@ -684,16 +654,14 @@ describe('MongoErrors', () => {
   });
 
   describe('MongoError#buildErrorMessage', function () {
-    context(
-      'when passed an AggregateError with an empty message and non-empty errors array',
-      function () {
-        it('returns error messages separated by commas', function () {
-          const aggErr = new AggregateError([new Error('message 1'), new Error('message 2')], '');
-          expect(MongoError.buildErrorMessage(aggErr)).to.deep.equal('message 1, message 2');
-        });
-      }
-    );
-    context('when passed an AggregateError with a non-empty message', function () {
+    describe('when passed an AggregateError with an empty message and non-empty errors array', function () {
+      it('returns error messages separated by commas', function () {
+        const aggErr = new AggregateError([new Error('message 1'), new Error('message 2')], '');
+        expect(MongoError.buildErrorMessage(aggErr)).to.deep.equal('message 1, message 2');
+      });
+    });
+
+    describe('when passed an AggregateError with a non-empty message', function () {
       it('returns message field', function () {
         const aggErr = new AggregateError(
           [new Error('message 1'), new Error('message 2')],
@@ -702,25 +670,24 @@ describe('MongoErrors', () => {
         expect(MongoError.buildErrorMessage(aggErr)).to.deep.equal(aggErr.message);
       });
     });
-    context(
-      'when passed an AggregateError with an empty errors array and empty message',
-      function () {
-        it('returns string instructing user to check `cause` property', function () {
-          const aggErr = new AggregateError([], '');
-          expect(MongoError.buildErrorMessage(aggErr)).to.match(
-            /Please check the `cause` property for more information./
-          );
-        });
-      }
-    );
-    context('when passed an Error that is not an AggregateError', function () {
+
+    describe('when passed an AggregateError with an empty errors array and empty message', function () {
+      it('returns string instructing user to check `cause` property', function () {
+        const aggErr = new AggregateError([], '');
+        expect(MongoError.buildErrorMessage(aggErr)).to.match(
+          /Please check the `cause` property for more information./
+        );
+      });
+    });
+
+    describe('when passed an Error that is not an AggregateError', function () {
       it("returns the Error's message property", function () {
         const err = new Error('error message');
         expect(MongoError.buildErrorMessage(err)).to.deep.equal('error message');
       });
     });
 
-    context('when passed a string', function () {
+    describe('when passed a string', function () {
       it('returns the string', function () {
         expect(MongoError.buildErrorMessage('message')).to.deep.equal('message');
       });

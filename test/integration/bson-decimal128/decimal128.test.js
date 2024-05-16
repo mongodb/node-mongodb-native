@@ -17,10 +17,8 @@ describe('Decimal128', function () {
       id: 1,
       value: Decimal128.fromString('1.28')
     };
-
     db.collection('decimal128').insertOne(object, function (err) {
       expect(err).to.not.exist;
-
       db.collection('decimal128').findOne(
         {
           id: 1
@@ -29,7 +27,6 @@ describe('Decimal128', function () {
           expect(err).to.not.exist;
           test.ok(doc.value instanceof Decimal128);
           test.equal('1.28', doc.value.toString());
-
           client.close(done);
         }
       );

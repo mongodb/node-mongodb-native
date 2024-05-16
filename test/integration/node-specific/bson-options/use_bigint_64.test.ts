@@ -19,11 +19,9 @@ describe('useBigInt64 option', function () {
       if (coll) {
         await coll.drop().catch(() => null);
       }
-
       if (db) {
         await db.dropDatabase().catch(() => null);
       }
-
       await client.close();
     }
   });
@@ -67,7 +65,6 @@ describe('useBigInt64 option', function () {
           }
         )
         .connect();
-
       db = client.db(this.configuration.db, { useBigInt64: true });
     });
 
@@ -80,7 +77,6 @@ describe('useBigInt64 option', function () {
   describe('when set at collection level', function () {
     beforeEach(async function () {
       client = await this.configuration.newClient().connect();
-
       db = client.db(this.configuration.db, { useBigInt64: false });
       await db.dropCollection('useBigInt64Test').catch(() => null);
       coll = await db.createCollection('useBigInt64Test', { useBigInt64: true });
@@ -105,7 +101,6 @@ describe('useBigInt64 option', function () {
       coll = await db.createCollection('useBigInt64Test', { useBigInt64: true });
       await coll.insertMany([{ a: 1n }, { a: 2n }, { a: 3n }, { a: 4n }]);
       res = await coll.findOne({}, { useBigInt64: false });
-
       expect(res).to.exist;
       expect(typeof res?.a).to.equal('number');
     });
@@ -124,7 +119,6 @@ describe('useBigInt64 option', function () {
       coll = await db.createCollection('useBigInt64Test', { useBigInt64: false });
       await coll.insertMany([{ a: 1n }, { a: 2n }, { a: 3n }, { a: 4n }]);
       res = await coll.findOne({}, { useBigInt64: true });
-
       expect(res).to.exist;
       expect(typeof res?.a).to.equal('bigint');
     });
@@ -135,13 +129,10 @@ describe('useBigInt64 option', function () {
 
     beforeEach(async function () {
       client = await this.configuration.newClient({}, { useBigInt64: true }).connect();
-
       db = client.db(this.configuration.db);
       await db.dropCollection('useBigInt64Test').catch(() => null);
-
       coll = await db.createCollection('useBigInt64Test');
       await coll.insertOne({ a: new BSON.Long(1) });
-
       res = await coll.findOne({ a: 1n });
     });
 
@@ -196,7 +187,6 @@ describe('useBigInt64 option', function () {
     describe('when set at the operation level', function () {
       beforeEach(async function () {
         client = await this.configuration.newClient().connect();
-
         db = client.db('bsonOptions');
         coll = db.collection('bsonError');
       });
@@ -205,7 +195,6 @@ describe('useBigInt64 option', function () {
         const e = await coll
           .insertOne({ a: 10n }, { promoteLongs: false, useBigInt64: true })
           .catch(e => e);
-
         expect(e).to.be.instanceOf(BSON.BSONError);
       });
     });
@@ -263,7 +252,6 @@ describe('useBigInt64 option', function () {
         const e = await coll
           .insertOne({ a: 10n }, { promoteValues: false, useBigInt64: true })
           .catch(e => e);
-
         expect(e).to.be.instanceOf(BSON.BSONError);
       });
     });

@@ -36,28 +36,23 @@ describe('Operations', function () {
       ]
     })
   );
-
   /**************************************************************************
    *
    * COLLECTION TESTS
    *
    *************************************************************************/
-
   /**
    * Call toArray on an aggregation cursor using a Promise
    *
    * example-class Collection
    * example-method aggregate
    */
-  it('aggregationExample2WithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { mongodb: '>2.1.0', topology: ['single'] } },
-
-    test: function () {
+  it(
+    'aggregationExample2WithPromises',
+    { requires: { mongodb: '>2.1.0', topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -83,16 +78,13 @@ describe('Operations', function () {
             ]
           }
         ];
-
         // Create a collection
         const collection = db.collection('aggregationExample2_with_promise');
-
         // Insert the docs
         return collection
           .insertMany(docs, { writeConcern: { w: 1 } })
           .then(function (result) {
             expect(result).to.exist;
-
             // Execute aggregate, notice the pipeline is expressed as an Array
             const cursor = collection.aggregate(
               [
@@ -112,7 +104,6 @@ describe('Operations', function () {
               ],
               { cursor: { batchSize: 1 } }
             );
-
             // Get all the aggregation results
             return cursor.toArray();
           })
@@ -123,23 +114,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Call next on an aggregation cursor using a Promise
    *
    * example-class AggregationCursor
    * example-method next
    */
-  it('Aggregation Cursor next Test With Promises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { mongodb: '>2.1.0', topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Aggregation Cursor next Test With Promises',
+    { requires: { mongodb: '>2.1.0', topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -164,17 +151,14 @@ describe('Operations', function () {
             ]
           }
         ];
-
         // Create a collection
         const collection = db.collection('aggregation_next_example_with_promise');
-
         let cursor;
         // Insert the docs
         return collection
           .insertMany(docs, { writeConcern: { w: 1 } })
           .then(function (result) {
             expect(result).to.exist;
-
             // Execute aggregate, notice the pipeline is expressed as an Array
             cursor = collection.aggregate(
               [
@@ -194,13 +178,11 @@ describe('Operations', function () {
               ],
               { cursor: { batchSize: 1 } }
             );
-
             // Get all the aggregation results
             return cursor.next();
           })
           .then(function (docs) {
             expect(docs).to.exist;
-
             // Need to close cursor to close implicit session,
             // since cursor is not exhausted
             return cursor.close();
@@ -209,21 +191,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of running simple count commands against a collection using a Promise.
    *
    * example-class Collection
    * example-method count
    */
-  it('shouldCorrectlyDoSimpleCountExamplesWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyDoSimpleCountExamplesWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -236,19 +216,16 @@ describe('Operations', function () {
         // BEGIN
         // Crete the collection for the distinct example
         const collection = db.collection('countExample1_with_promise');
-
         // Insert documents to perform distinct against
         return collection
           .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], { writeConcern: { w: 1 } })
           .then(function (ids) {
             expect(ids).to.exist;
-
             // Perform a total count command
             return collection.count();
           })
           .then(function (count) {
             expect(count).to.equal(4);
-
             // Perform a partial account where b=1
             return collection.count({ b: 1 });
           })
@@ -259,23 +236,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A more complex createIndex using a Promise and a compound unique index in the background and dropping duplicated documents
    *
    * example-class Collection
    * example-method createIndex
    */
-  it('shouldCreateComplexIndexOnTwoFieldsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCreateComplexIndexOnTwoFieldsWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -288,7 +263,6 @@ describe('Operations', function () {
         // BEGIN
         // Create a collection we want to drop later
         const collection = db.collection('createIndexExample1_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -302,7 +276,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Create an index on the a field
             return collection.createIndex(
               { a: 1, b: 1 },
@@ -311,13 +284,11 @@ describe('Operations', function () {
           })
           .then(function (indexName) {
             expect(indexName).to.exist;
-
             // Show that duplicate records got dropped
             return collection.find({}).toArray();
           })
           .then(function (items) {
             expect(items.length).to.equal(4);
-
             // Perform a query, with explain to show we hit the query
             return collection.find({ a: 2 }).explain();
           })
@@ -328,21 +299,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of running the distinct command using a Promise against a collection
    *
    * example-class Collection
    * example-method distinct
    */
-  it('shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -355,7 +324,6 @@ describe('Operations', function () {
         // BEGIN
         // Crete the collection for the distinct example
         const collection = db.collection('distinctExample1_with_promise');
-
         // Insert documents to perform distinct against
         return collection
           .insertMany(
@@ -371,13 +339,11 @@ describe('Operations', function () {
           )
           .then(function (ids) {
             expect(ids).to.exist;
-
             // Perform a distinct query against the a field
             return collection.distinct('a');
           })
           .then(function (docs) {
             expect(docs.sort()).to.deep.equal([0, 1, 2, 3]);
-
             // Perform a distinct query against the sub-field b.c
             return collection.distinct('b.c');
           })
@@ -388,18 +354,16 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of running the distinct command against a collection using a Promise with a filter query
    */
-  it('shouldCorrectlyHandleDistinctIndexesWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyHandleDistinctIndexesWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -410,10 +374,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Crete the collection for the distinct example
         const collection = db.collection('distinctExample2_with_promise');
-
         // Insert documents to perform distinct against
         return collection
           .insertMany(
@@ -430,7 +392,6 @@ describe('Operations', function () {
           )
           .then(function (ids) {
             expect(ids).to.exist;
-
             // Perform a distinct query with a filter against the documents
             return collection.distinct('a', { c: 1 });
           })
@@ -441,21 +402,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of Collection.prototype.drop using a Promise
    *
    * example-class Collection
    * example-method drop
    */
-  it('shouldCorrectlyDropCollectionWithDropFunctionWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyDropCollectionWithDropFunctionWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -466,7 +425,6 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         return db
           .createCollection('test_other_drop_with_promise')
@@ -476,7 +434,6 @@ describe('Operations', function () {
           })
           .then(function (reply) {
             expect(reply).to.exist;
-
             // Ensure we don't have the collection in the set of names
             return db.listCollections().toArray();
           })
@@ -490,73 +447,61 @@ describe('Operations', function () {
                 return;
               }
             });
-
             // Ensure the collection is not found
             expect(found).to.equal(false);
-
             // Let's close the db
             return client.close();
           });
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a how to drop all the indexes on a collection using dropIndexes with a Promise
    *
    * example-class Collection
    * example-method dropIndexes
    */
-  it('dropIndexesExample1WithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
-      return client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-        return db
-          .createCollection('dropExample1_with_promise')
-          .then(function (r) {
-            expect(r).to.exist;
-
-            // Drop the collection
-            return db.collection('dropExample1_with_promise').dropIndexes();
-          })
-          .then(function (reply) {
-            expect(reply).to.exist;
-
-            // Let's close the db
-            return client.close();
-          });
-      });
-      // END
-    }
+  it('dropIndexesExample1WithPromises', { requires: { topology: ['single'] } }, function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    return client.connect().then(function (client) {
+      const db = client.db(configuration.db);
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+      // LINE client.connect().then(() => {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE done();
+      // BEGIN
+      return db
+        .createCollection('dropExample1_with_promise')
+        .then(function (r) {
+          expect(r).to.exist;
+          // Drop the collection
+          return db.collection('dropExample1_with_promise').dropIndexes();
+        })
+        .then(function (reply) {
+          expect(reply).to.exist;
+          // Let's close the db
+          return client.close();
+        });
+    });
+    // END
   });
-
   /**
    * An examples showing the creation and dropping of an index using a Promise
    *
    * example-class Collection
    * example-method dropIndex
    */
-  it('shouldCorrectlyCreateAndDropIndexWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyCreateAndDropIndexWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -568,7 +513,6 @@ describe('Operations', function () {
         // REMOVE-LINE done();
         // BEGIN
         const collection = db.collection('dropIndexExample1_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -582,7 +526,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Create an index on the a field
             return collection.createIndex(
               { a: 1, b: 1 },
@@ -591,7 +534,6 @@ describe('Operations', function () {
           })
           .then(function (indexName) {
             expect(indexName).to.exist;
-
             // Drop the index
             return collection.dropIndex('a_1_b_1');
           })
@@ -608,23 +550,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
    *
    * example-class Collection
    * example-method ensureIndex
    */
-  it('shouldCreateComplexEnsureIndexWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCreateComplexEnsureIndexWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -636,7 +576,6 @@ describe('Operations', function () {
         // REMOVE-LINE done();
         // BEGIN
         const collection = db.collection('ensureIndexExample1_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -650,7 +589,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Create an index on the a field
             return db.createIndex(
               'ensureIndexExample1_with_promise',
@@ -660,13 +598,11 @@ describe('Operations', function () {
           })
           .then(function (indexName) {
             expect(indexName).to.exist;
-
             // Show that duplicate records got dropped
             return collection.find({}).toArray();
           })
           .then(function (items) {
             expect(items.length).to.equal(4);
-
             // Perform a query, with explain to show we hit the query
             return collection.find({ a: 2 }).explain();
           })
@@ -677,21 +613,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A more complex ensureIndex using a compound unique index in the background using a Promise.
    *
    * example-class Collection
    * example-method ensureIndex
    */
-  it('ensureIndexExampleWithCompountIndexWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'ensureIndexExampleWithCompountIndexWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -703,7 +637,6 @@ describe('Operations', function () {
         // REMOVE-LINE done();
         // BEGIN
         const collection = db.collection('ensureIndexExample2_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -717,7 +650,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Create an index on the a field
             return collection.createIndex(
               { a: 1, b: 1 },
@@ -726,13 +658,11 @@ describe('Operations', function () {
           })
           .then(function (indexName) {
             expect(indexName).to.exist;
-
             // Show that duplicate records got dropped
             return collection.find({}).toArray();
           })
           .then(function (items) {
             expect(items.length).to.equal(4);
-
             // Perform a query, with explain to show we hit the query
             return collection.find({ a: 2 }).explain();
           })
@@ -743,70 +673,59 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple query using the find method and toArray method with a Promise.
    *
    * example-class Collection
    * example-method find
    */
-  it('shouldPerformASimpleQueryWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
-
-      return client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Create a collection we want to drop later
-        const collection = db.collection('simple_query_with_promise');
-
-        // Insert a bunch of documents for the testing
-        return collection
-          .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
-          .then(function (result) {
-            expect(result).to.exist;
-
-            // Perform a simple find and return all the documents
-            return collection.find().toArray();
-          })
-          .then(function (docs) {
-            expect(docs.length).to.equal(3);
-            return client.close();
-          });
-      });
-      // END
-    }
+  it('shouldPerformASimpleQueryWithPromises', { requires: { topology: ['single'] } }, function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), {
+      maxPoolSize: 1
+    });
+    return client.connect().then(function (client) {
+      const db = client.db(configuration.db);
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+      // LINE client.connect().then(() => {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE done();
+      // BEGIN
+      // Create a collection we want to drop later
+      const collection = db.collection('simple_query_with_promise');
+      // Insert a bunch of documents for the testing
+      return collection
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
+        .then(function (result) {
+          expect(result).to.exist;
+          // Perform a simple find and return all the documents
+          return collection.find().toArray();
+        })
+        .then(function (docs) {
+          expect(docs.length).to.equal(3);
+          return client.close();
+        });
+    });
+    // END
   });
-
   /**
    * A simple query showing the explain for a query using a Promise.
    *
    * example-class Collection
    * example-method find
    */
-  it('shouldPerformASimpleExplainQueryWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldPerformASimpleExplainQueryWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -817,16 +736,13 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('simple_explain_query_with_promise');
-
         // Insert a bunch of documents for the testing
         return collection
           .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
           .then(function (result) {
             expect(result).to.exist;
-
             // Perform a simple find and return all the documents
             return collection.find({}).explain();
           })
@@ -837,23 +753,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple query showing skip and limit using a Promise.
    *
    * example-class Collection
    * example-method find
    */
-  it('shouldPerformASimpleLimitSkipQueryWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldPerformASimpleLimitSkipQueryWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -864,10 +778,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('simple_limit_skip_query_with_promise');
-
         // Insert a bunch of documents for the testing
         return collection
           .insertMany(
@@ -880,7 +792,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Perform a simple find and return all the documents
             return collection.find({}).skip(1).limit(1).project({ b: 1 }).toArray();
           })
@@ -893,8 +804,7 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A whole set of different ways to use the findAndModify command with a Promise..
    *
@@ -905,15 +815,14 @@ describe('Operations', function () {
    * example-class Collection
    * example-method findAndModify
    */
-  it('shouldPerformSimpleFindAndModifyOperationsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldPerformSimpleFindAndModifyOperationsWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -926,13 +835,11 @@ describe('Operations', function () {
         // BEGIN
         // Create a collection we want to drop later
         const collection = db.collection('simple_find_and_modify_operations_with_promise');
-
         // Insert some test documentations
         return collection
           .insertMany([{ a: 1 }, { b: 1 }, { c: 1 }], configuration.writeConcernMax())
           .then(function (result) {
             expect(result).to.exist;
-
             // Simple findAndModify command returning the new document
             return collection.findOneAndUpdate(
               { a: 1 },
@@ -943,7 +850,6 @@ describe('Operations', function () {
           .then(function (doc) {
             expect(doc.value.a).to.equal(1);
             expect(doc.value.b1).to.equal(1);
-
             // Simple findAndModify command returning the new document and
             // removing it at the same time
             return collection.findOneAndUpdate(
@@ -954,13 +860,11 @@ describe('Operations', function () {
           })
           .then(function (doc) {
             expect(doc).to.exist;
-
             // Verify that the document is gone
             return collection.findOne({ b: 1 });
           })
           .then(function (item) {
             expect(item).to.not.exist;
-
             // Simple findAndModify command performing an upsert and returning the new document
             // executing the command safely
             return collection.findOneAndUpdate(
@@ -982,23 +886,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An example of using findOneAndDelete using a Promise.
    *
    * example-class Collection
    * example-method findOneAndDelete
    */
-  it('shouldPerformSimplefindOneAndDeleteWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldPerformSimplefindOneAndDeleteWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1009,16 +911,13 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('simple_find_and_modify_operations_2_with_promise');
-
         // Insert some test documentations
         return collection
           .insertMany([{ a: 1 }, { b: 1, d: 1 }, { c: 1 }], configuration.writeConcernMax())
           .then(function (result) {
             expect(result).to.exist;
-
             // Simple findAndModify command returning the old document and
             // removing it at the same time
             return collection.findOneAndDelete(
@@ -1031,7 +930,6 @@ describe('Operations', function () {
           .then(function (doc) {
             expect(doc.value.b).to.equal(1);
             expect(doc.value.d).to.equal(1);
-
             // Verify that the document is gone
             return collection.findOne({ b: 1 });
           })
@@ -1042,23 +940,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple query using findOne with a Promise.
    *
    * example-class Collection
    * example-method findOne
    */
-  it('shouldPerformASimpleLimitSkipFindOneQueryWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldPerformASimpleLimitSkipFindOneQueryWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1069,10 +965,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('simple_limit_skip_find_one_query_with_promise');
-
         // Insert a bunch of documents for the testing
         return collection
           .insertMany(
@@ -1085,7 +979,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Perform a simple find and return all the documents
             return collection.findOne({ a: 2 }, { projection: { b: 1 } });
           })
@@ -1097,21 +990,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of retrieving a collections indexes using a Promise.
    *
    * example-class Collection
    * example-method indexes
    */
-  it('shouldCorrectlyRetrieveACollectionsIndexesWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRetrieveACollectionsIndexesWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1124,19 +1015,16 @@ describe('Operations', function () {
         // BEGIN
         // Crete the collection for the distinct example
         const collection = db.collection('simple_key_based_distinct_with_promise');
-
         // Create a geo 2d index
         return collection
           .createIndex({ loc: '2d' }, configuration.writeConcernMax())
           .then(function (result) {
             expect(result).to.exist;
-
             // Create a simple single field index
             return collection.createIndex({ a: 1 }, configuration.writeConcernMax());
           })
           .then(function (result) {
             expect(result).to.exist;
-
             return delay(1000);
           })
           .then(function () {
@@ -1150,21 +1038,19 @@ describe('Operations', function () {
       });
     }
     // END
-  });
-
+  );
   /**
    * An example showing the use of the indexExists function using a Promise for a single index name and a list of index names.
    *
    * example-class Collection
    * example-method indexExists
    */
-  it('shouldCorrectlyExecuteIndexExistsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyExecuteIndexExistsWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1180,25 +1066,21 @@ describe('Operations', function () {
           'test_collection_index_exists_with_promise',
           configuration.writeConcernMax()
         );
-
         // Create an index on the collection
         return collection
           .createIndex('a', configuration.writeConcernMax())
           .then(function (indexName) {
             expect(indexName).to.exist;
-
             // Let's test to check if a single index exists
             return collection.indexExists('a_1');
           })
           .then(function (result) {
             expect(result).to.equal(true);
-
             // Let's test to check if multiple indexes are available
             return collection.indexExists(['a_1', '_id_']);
           })
           .then(function (result) {
             expect(result).to.equal(true);
-
             // Check if a non existing index exists
             return collection.indexExists('c_1');
           })
@@ -1209,23 +1091,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An example showing the information returned by indexInformation using a Promise.
    *
    * example-class Collection
    * example-method indexInformation
    */
-  it('shouldCorrectlyShowTheResultsFromIndexInformationWithPromises', {
-    metadata: {
+  it(
+    'shouldCorrectlyShowTheResultsFromIndexInformationWithPromises',
+    {
       requires: { topology: ['single', 'replicaset'] }
     },
-
-    test: function () {
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1236,10 +1116,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('more_index_information_test_2_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -1253,7 +1131,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Create an index on the a field
             return collection.createIndex(
               { a: 1, b: 1 },
@@ -1262,7 +1139,6 @@ describe('Operations', function () {
           })
           .then(function (indexName) {
             expect(indexName).to.exist;
-
             // Fetch basic indexInformation for collection
             return db.indexInformation('more_index_information_test_2_with_promise');
           })
@@ -1272,7 +1148,6 @@ describe('Operations', function () {
               ['a', 1],
               ['b', 1]
             ]);
-
             // Fetch full index information
             return collection.indexInformation({ full: true });
           })
@@ -1284,21 +1159,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An examples showing the information returned by indexInformation using a Promise.
    *
    * example-class Collection
    * example-method indexInformation
    */
-  it('shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1309,10 +1182,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('more_index_information_test_3_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -1326,7 +1197,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Create an index on the a field
             return collection.createIndex(
               { a: 1, b: 1 },
@@ -1335,7 +1205,6 @@ describe('Operations', function () {
           })
           .then(function (indexName) {
             expect(indexName).to.exist;
-
             // Fetch basic indexInformation for collection
             return collection.indexInformation();
           })
@@ -1345,7 +1214,6 @@ describe('Operations', function () {
               ['a', 1],
               ['b', 1]
             ]);
-
             // Fetch full index information
             return collection.indexInformation({ full: true });
           })
@@ -1357,19 +1225,17 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple document insert using a Promise example, not using safe mode to ensure document persistance on MongoDB
    *
    * example-class Collection
    * example-method insert
    */
-  it('shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'] } },
-    test: function () {
+  it(
+    'shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       return client.connect().then(function (client) {
@@ -1383,7 +1249,6 @@ describe('Operations', function () {
         // REMOVE-LINE done();
         // BEGIN
         const collection = db.collection('simple_document_insert_collection_no_safe_with_promise');
-
         // Insert a single document
         return collection
           .insertOne({ hello: 'world_no_safe' })
@@ -1398,20 +1263,17 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A batch document insert using a Promise example, using safe mode to ensure document persistance on MongoDB
    *
    * example-class Collection
    * example-method insert
    */
-  it('shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       return client.connect().then(function (client) {
@@ -1426,7 +1288,6 @@ describe('Operations', function () {
         // BEGIN
         // Fetch a collection to insert document into
         const collection = db.collection('batch_document_insert_collection_safe_with_promise');
-
         // Insert a single document
         return collection
           .insertMany(
@@ -1435,7 +1296,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Fetch the document
             return collection.findOne({ hello: 'world_safe2' });
           })
@@ -1446,20 +1306,17 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of inserting a document containing functions using a Promise.
    *
    * example-class Collection
    * example-method insert
    */
-  it('shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       return client.connect().then(function (client) {
@@ -1474,10 +1331,8 @@ describe('Operations', function () {
         // BEGIN
         // Fetch a collection to insert document into
         const collection = db.collection('simple_document_insert_with_function_safe_with_promise');
-
         const o = configuration.writeConcernMax();
         o.serializeFunctions = true;
-
         // Insert a single document
         return collection
           .insertOne(
@@ -1489,7 +1344,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Fetch the document
             return collection.findOne({ hello: 'world' });
           })
@@ -1500,21 +1354,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An example showing how to establish if it's a capped collection using a Promise.
    *
    * example-class Collection
    * example-method isCapped
    */
-  it('shouldCorrectlyExecuteIsCappedWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyExecuteIsCappedWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1525,13 +1377,11 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a test collection that we are getting the options back from
         return db
           .createCollection('test_collection_is_capped_with_promise', { capped: true, size: 1024 })
           .then(function (collection) {
             expect(collection.collectionName).to.equal('test_collection_is_capped_with_promise');
-
             // Let's fetch the collection options
             return collection.isCapped();
           })
@@ -1542,21 +1392,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An example returning the options for a collection using a Promise.
    *
    * example-class Collection
    * example-method options
    */
-  it('shouldCorrectlyRetrieveCollectionOptionsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRetrieveCollectionOptionsWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1567,13 +1415,11 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a test collection that we are getting the options back from
         return db
           .createCollection('test_collection_options_with_promise', { capped: true, size: 1024 })
           .then(function (collection) {
             expect(collection.collectionName).to.equal('test_collection_options_with_promise');
-
             // Let's fetch the collection options
             return collection.options();
           })
@@ -1585,8 +1431,7 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An example removing all documents in a collection not using safe mode using a Promise.
    *
@@ -1597,7 +1442,6 @@ describe('Operations', function () {
     const db = client.db();
     // Fetch a collection to insert document into
     const collection = db.collection('remove_all_documents_no_safe_with_promise');
-
     // Insert a bunch of documents
     const result = await collection.insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } });
     expect(result).to.exist;
@@ -1605,20 +1449,18 @@ describe('Operations', function () {
     const items = await collection.find().toArray();
     expect(items).to.have.lengthOf(0);
   });
-
   /**
    * An example removing a subset of documents using safe mode to ensure removal of documents using a Promise.
    *
    * example-class Collection
    * example-method remove
    */
-  it('shouldRemoveSubsetOfDocumentsSafeModeWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldRemoveSubsetOfDocumentsSafeModeWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1629,16 +1471,13 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Fetch a collection to insert document into
         const collection = db.collection('remove_subset_of_documents_safe_with_promise');
-
         // Insert a bunch of documents
         return collection
           .insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } })
           .then(function (result) {
             expect(result).to.exist;
-
             // Remove all the document
             return collection.deleteOne({ a: 1 }, { writeConcern: { w: 1 } });
           })
@@ -1649,21 +1488,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple document update with safe set to false on an existing document using a Promise.
    *
    * example-class Collection
    * example-method update
    */
-  it('shouldCorrectlyUpdateASimpleDocumentWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyUpdateASimpleDocumentWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ w: 0 }, { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1674,10 +1511,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Get a collection
         const collection = db.collection('update_a_simple_document_with_promise');
-
         // Insert a document, then update it
         return collection
           .insertOne({ a: 1 }, configuration.writeConcernMax())
@@ -1698,21 +1533,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple document update using upsert (the document will be inserted if it does not exist) using a Promise.
    *
    * example-class Collection
    * example-method update
    */
-  it('shouldCorrectlyUpsertASimpleDocumentWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyUpsertASimpleDocumentWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1723,16 +1556,13 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Get a collection
         const collection = db.collection('update_a_simple_document_upsert_with_promise');
-
         // Update the document using an upsert operation, ensuring creation if it does not exist
         return collection
           .updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, writeConcern: { w: 1 } })
           .then(function (result) {
             expect(result).property('upsertedCount').to.equal(1);
-
             // Fetch the document that we modified and check if it got inserted correctly
             return collection.findOne({ a: 1 });
           })
@@ -1744,21 +1574,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of an update across multiple documents using the multi option and using a Promise.
    *
    * example-class Collection
    * example-method update
    */
-  it('shouldCorrectlyUpdateMultipleDocumentsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyUpdateMultipleDocumentsWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1769,10 +1597,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Get a collection
         const collection = db.collection('update_a_simple_document_multi_with_promise');
-
         // Insert a couple of documentations
         return collection
           .insertMany(
@@ -1784,13 +1610,11 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             const o = configuration.writeConcernMax();
             return collection.updateMany({ a: 1 }, { $set: { b: 0 } }, o);
           })
           .then(function (r) {
             expect(r).property('matchedCount').to.equal(2);
-
             // Fetch all the documents and verify that we have changed the b value
             return collection.find().toArray();
           })
@@ -1804,21 +1628,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An examples showing the creation and dropping of an index using Promises.
    *
    * example-class Collection
    * example-method dropIndexes
    */
-  it('shouldCorrectlyCreateAndDropAllIndexWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyCreateAndDropAllIndexWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -1829,7 +1651,6 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('shouldCorrectlyCreateAndDropAllIndex_with_promise');
         // Insert a bunch of documents for the index
@@ -1847,7 +1668,6 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Create an index on the a field
             return collection.createIndex(
               { a: 1, b: 1 },
@@ -1881,29 +1701,26 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**************************************************************************
    *
    * DB TESTS
    *
    *************************************************************************/
-
   /**
    * An example of a simple single server db connection and close function using a Promise.
    *
    * example-class Db
    * example-method close
    */
-  it('shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1913,31 +1730,28 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Close the connection with a callback that is optional
         return client.close();
       });
       // END
     }
-  });
-
+  );
   /**
    * An example of retrieving the collections list for a database using a Promise.
    *
    * example-class Db
    * example-method listCollections
    */
-  it('shouldCorrectlyRetrievelistCollectionsWithPromises', {
-    metadata: {
+  it(
+    'shouldCorrectlyRetrievelistCollectionsWithPromises',
+    {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] }
     },
-
-    test: function () {
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
@@ -1949,10 +1763,8 @@ describe('Operations', function () {
         // BEGIN
         // Get an empty db
         const db1 = client.db('listCollectionTestDb2');
-
         // Create a collection
         const collection = db1.collection('shouldCorrectlyRetrievelistCollections_with_promise');
-
         // Ensure the collection was created
         return collection
           .insertOne({ a: 1 })
@@ -1964,7 +1776,6 @@ describe('Operations', function () {
           })
           .then(function (items) {
             expect(items.length).to.equal(1);
-
             // Return the information of a all collections, using the callback format
             return db1.listCollections().toArray();
           })
@@ -1975,24 +1786,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
+  );
 
-  it('shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises', {
-    metadata: { requires: { topology: ['wiredtiger'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises',
+    { requires: { topology: ['wiredtiger'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         // Get an empty db
         const db1 = client.db('listCollectionTestDb2');
-
         // Create a collection
         const collection = db1.collection('shouldCorrectlyRetrievelistCollections_with_promise');
-
         // Ensure the collection was created
         return collection
           .insertOne({ a: 1 })
@@ -2004,7 +1812,6 @@ describe('Operations', function () {
           })
           .then(function (items) {
             expect(items.length).to.equal(1);
-
             // Return the information of a all collections, using the callback format
             return db1.listCollections().toArray();
           })
@@ -2014,23 +1821,21 @@ describe('Operations', function () {
           });
       });
     }
-  });
-
+  );
   /**
    * An example of retrieving all collections for a db as Collection objects using a Promise.
    *
    * example-class Db
    * example-method collections
    */
-  it('shouldCorrectlyRetrieveAllCollectionsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRetrieveAllCollectionsWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2049,23 +1854,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example showing the creation of a collection using a Promise.
    *
    * example-class Db
    * example-method createCollection
    */
-  it('shouldCorrectlyCreateACollectionWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyCreateACollectionWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2095,23 +1898,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example creating, dropping a collection and then verifying that the collection is gone using a Promise.
    *
    * example-class Db
    * example-method dropCollection
    */
-  it('shouldCorrectlyExecuteACommandAgainstTheServerWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyExecuteACommandAgainstTheServerWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2158,23 +1959,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example executing a command against the server using a Promise.
    *
    * example-class Db
    * example-method command
    */
-  it('shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2193,23 +1992,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example creating, dropping a collection and then verifying that the collection is gone.
    *
    * example-class Db
    * example-method renameCollection
    */
-  it('shouldCorrectlyRenameACollectionWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRenameACollectionWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2221,7 +2018,6 @@ describe('Operations', function () {
         // REMOVE-LINE done();
         // BEGIN
         // Create a collection
-
         return db
           .createCollection(
             'simple_rename_collection_with_promise',
@@ -2241,7 +2037,6 @@ describe('Operations', function () {
           })
           .then(function (count) {
             expect(count).to.equal(1);
-
             // Rename the collection
             return db.renameCollection(
               'simple_rename_collection_with_promise',
@@ -2254,13 +2049,11 @@ describe('Operations', function () {
           })
           .then(function (count) {
             expect(count).to.equal(1);
-
             // Verify that the collection is gone
             return db.listCollections({ name: 'simple_rename_collection_with_promise' }).toArray();
           })
           .then(function (names) {
             expect(names.length).to.equal(0);
-
             // Verify that the new collection exists
             return db
               .listCollections({ name: 'simple_rename_collection_2_with_promise' })
@@ -2273,23 +2066,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A more complex createIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
    *
    * example-class Db
    * example-method createIndex
    */
-  it('shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2300,10 +2091,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('more_complex_index_test_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -2331,7 +2120,6 @@ describe('Operations', function () {
           })
           .then(function (items) {
             expect(items.length).to.equal(4);
-
             // Perform a query, with explain to show we hit the query
             return collection.find({ a: 2 }).explain();
           })
@@ -2342,23 +2130,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
    *
    * example-class Db
    * example-method ensureIndex
    */
-  it('shouldCreateComplexEnsureIndexDbWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCreateComplexEnsureIndexDbWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2369,10 +2155,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection we want to drop later
         const collection = db.collection('more_complex_ensure_index_db_test_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -2400,7 +2184,6 @@ describe('Operations', function () {
           })
           .then(function (items) {
             expect(items.length).to.equal(4);
-
             // Perform a query, with explain to show we hit the query
             return collection.find({ a: 2 }).explain();
           })
@@ -2411,23 +2194,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An examples showing the dropping of a database using a Promise.
    *
    * example-class Db
    * example-method dropDatabase
    */
-  it('shouldCorrectlyDropTheDatabaseWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyDropTheDatabaseWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2438,10 +2219,8 @@ describe('Operations', function () {
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection
         const collection = db.collection('more_index_information_test_1_with_promise');
-
         // Insert a bunch of documents for the index
         return collection
           .insertMany(
@@ -2456,13 +2235,11 @@ describe('Operations', function () {
           )
           .then(function (result) {
             expect(result).to.exist;
-
             // Let's drop the database
             return db.dropDatabase();
           })
           .then(function (result) {
             expect(result).to.exist;
-
             // Get the admin database
             return db.admin().listDatabases();
           })
@@ -2471,35 +2248,30 @@ describe('Operations', function () {
             dbs = dbs.databases;
             // Did we find the db
             let found = false;
-
             // Check if we have the db in the list
             for (let i = 0; i < dbs.length; i++) {
               if (dbs[i].name === 'integration_tests_to_drop') found = true;
             }
-
             // We should not find the databases
             if (process.env['JENKINS'] == null) expect(found).to.equal(false);
-
             return client.close();
           });
       });
       // END
     }
-  });
-
+  );
   /**
    * An example showing how to retrieve the db statistics using a Promise.
    *
    * example-class Db
    * example-method stats
    */
-  it('shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2517,21 +2289,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Simple example connecting to two different databases sharing the socket connections below using a Promise.
    *
    * example-class Db
    * example-method db
    */
-  it('shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2545,11 +2315,9 @@ describe('Operations', function () {
         // Reference a different database sharing the same connections
         // for the data transfer
         const secondDb = client.db('integration_tests_2');
-
         // Fetch the collections
         const multipleColl1 = db.collection('multiple_db_instances_with_promise');
         const multipleColl2 = secondDb.collection('multiple_db_instances_with_promise');
-
         // Write a record into each and then count the records stored
         return multipleColl1
           .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
@@ -2564,7 +2332,6 @@ describe('Operations', function () {
           })
           .then(function (count) {
             expect(count).to.equal(1);
-
             return multipleColl2.count();
           })
           .then(function (count) {
@@ -2574,27 +2341,24 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**************************************************************************
    *
    * ADMIN TESTS
    *
    *************************************************************************/
-
   /**
    * Retrieve the buildInfo for the current MongoDB instance using a Promise.
    *
    * example-class Admin
    * example-method buildInfo
    */
-  it('shouldCorrectlyRetrieveBuildInfoWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRetrieveBuildInfoWithPromises',
+    { requires: { topology: 'single' } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2606,10 +2370,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Use the admin database for the operation
         const adminDb = db.admin();
-
         // Retrieve the build information for the MongoDB instance
         return adminDb.buildInfo().then(function (info) {
           expect(info).to.exist;
@@ -2618,21 +2380,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Retrieve the buildInfo using the command function using a Promise.
    *
    * example-class Admin
    * example-method command
    */
-  it('shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises',
+    { requires: { topology: 'single' } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2644,10 +2404,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Use the admin database for the operation
         const adminDb = db.admin();
-
         // Retrieve the build information using the admin command
         return adminDb.command({ buildInfo: 1 }).then(function (info) {
           expect(info).to.exist;
@@ -2656,21 +2414,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Retrieve the current profiling level set for the MongoDB instance using a Promise.
    *
    * example-class Db
    * example-method profilingLevel
    */
-  it('shouldCorrectlySetDefaultProfilingLevelWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
+  it(
+    'shouldCorrectlySetDefaultProfilingLevelWithPromises',
+    { requires: { topology: 'single' } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2682,10 +2438,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Grab a collection object
         const collection = db.collection('test_with_promise');
-
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
         return collection
@@ -2694,7 +2448,6 @@ describe('Operations', function () {
             expect(doc).to.exist;
             // Use the admin database for the operation
             const adminDb = client.db('admin');
-
             // Retrieve the profiling level
             return adminDb.profilingLevel();
           })
@@ -2705,8 +2458,7 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An example of how to use the setProfilingInfo using a Promise.
    * Use this command to set the Profiling level on the MongoDB server
@@ -2719,7 +2471,6 @@ describe('Operations', function () {
     { requires: { topology: 'single' } },
     async function () {
       const configuration = this.configuration;
-
       const db = client.db(configuration.db);
       // LINE var MongoClient = require('mongodb').MongoClient,
       // LINE   test = require('assert');
@@ -2730,11 +2481,9 @@ describe('Operations', function () {
       // REMOVE-LINE restartAndDone
       // REMOVE-LINE done();
       // BEGIN
-
       // Grab a collection object
       const collection = db.collection('test_with_promise');
       const adminDb = client.db('admin');
-
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
       await collection
@@ -2751,7 +2500,6 @@ describe('Operations', function () {
         })
         .then(function (level) {
           expect(level).to.equal('slow_only');
-
           // Turn profiling off
           return adminDb.setProfilingLevel('off');
         })
@@ -2762,7 +2510,6 @@ describe('Operations', function () {
         })
         .then(function (level) {
           expect(level).to.equal('off');
-
           // Set the profiling level to log all queries
           return adminDb.setProfilingLevel('all');
         })
@@ -2773,7 +2520,6 @@ describe('Operations', function () {
         })
         .then(function (level) {
           expect(level).to.equal('all');
-
           // Attempt to set an illegal profiling level
           return adminDb.setProfilingLevel('medium');
         })
@@ -2786,7 +2532,6 @@ describe('Operations', function () {
       // END
     }
   );
-
   /**
    * An example of how to use the validateCollection command using a Promise.
    * Use this command to check that a collection is valid (not corrupt) and to get various statistics.
@@ -2794,13 +2539,12 @@ describe('Operations', function () {
    * example-class Admin
    * example-method validateCollection
    */
-  it('shouldCorrectlyCallValidateCollectionWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyCallValidateCollectionWithPromises',
+    { requires: { topology: 'single' } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2812,10 +2556,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Grab a collection object
         const collection = db.collection('test_with_promise');
-
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
         return collection
@@ -2824,7 +2566,6 @@ describe('Operations', function () {
             expect(doc).to.exist;
             // Use the admin database for the operation
             const adminDb = db.admin();
-
             // Validate the 'test' collection
             return adminDb.validateCollection('test_with_promise');
           })
@@ -2834,21 +2575,19 @@ describe('Operations', function () {
           });
       });
     }
-  });
-
+  );
   /**
    * An example of how to add a user to the admin database using a Promise.
    *
    * example-class Admin
    * example-method ping
    */
-  it('shouldCorrectlyPingTheMongoDbInstanceWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyPingTheMongoDbInstanceWithPromises',
+    { requires: { topology: 'single' } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2860,10 +2599,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Use the admin database for the operation
         const adminDb = db.admin();
-
         // Ping the server
         return adminDb.ping().then(function (pingResult) {
           expect(pingResult).to.exist;
@@ -2872,21 +2609,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * An example of listing all available databases. using a Promise.
    *
    * example-class Admin
    * example-method listDatabases
    */
-  it('shouldCorrectlyListAllAvailableDatabasesWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyListAllAvailableDatabasesWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2898,10 +2633,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Use the admin database for the operation
         const adminDb = db.admin();
-
         // List all the available databases
         return adminDb.listDatabases().then(function (dbs) {
           expect(dbs.databases.length > 0).to.exist;
@@ -2910,21 +2643,19 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Retrieve the current server Info using a Promise.
    *
    * example-class Admin
    * example-method serverStatus
    */
-  it('shouldCorrectlyRetrieveServerInfoWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyRetrieveServerInfoWithPromises',
+    { requires: { topology: 'single' } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2936,13 +2667,10 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Grab a collection object
         const collection = db.collection('test_with_promise');
-
         // Use the admin database for the operation
         const adminDb = db.admin();
-
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
         return collection
@@ -2959,31 +2687,26 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**************************************************************************
    *
    * CURSOR TESTS
    *
    *************************************************************************/
-
   /**
    * An example showing the information returned by indexInformation using a Promise.
    *
    * example-class Cursor
    * example-method toArray
    */
-  it('shouldCorrectlyExecuteToArrayWithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyExecuteToArrayWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -2995,10 +2718,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection to hold our documents
         const collection = db.collection('test_array_with_promise');
-
         // Insert a test document
         return collection
           .insertOne({ b: [1, 2, 3] }, configuration.writeConcernMax())
@@ -3015,25 +2736,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example showing the count function of the cursor using a Promise.
    *
    * example-class Cursor
    * example-method count
    */
-  it('shouldCorrectlyUseCursorCountFunctionWithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyUseCursorCountFunctionWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3045,10 +2762,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Creat collection
         const collection = db.collection('cursor_count_collection_with_promise');
-
         // Insert some docs
         return collection
           .insertMany([{ a: 1 }, { a: 2 }], configuration.writeConcernMax())
@@ -3064,25 +2779,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example showing the use of next using a Promise.
    *
    * example-class Cursor
    * example-method next
    */
-  it('shouldCorrectlyPerformNextOnCursorWithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyPerformNextOnCursorWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3094,10 +2805,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection
         const collection = db.collection('simple_next_object_collection_with_promise');
-
         // Insert some documents we can sort on
         return collection
           .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
@@ -3113,25 +2822,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example showing the use of the cursor explain function using a Promise.
    *
    * example-class Cursor
    * example-method explain
    */
-  it('shouldCorrectlyPerformSimpleExplainCursorWithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldCorrectlyPerformSimpleExplainCursorWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3143,10 +2848,8 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a collection
         const collection = db.collection('simple_explain_collection_with_promise');
-
         // Insert some documents we can sort on
         return collection
           .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
@@ -3162,25 +2865,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example showing the use of the cursor close function using a Promise.
    *
    * example-class Cursor
    * example-method close
    */
-  it('shouldStreamDocumentsUsingTheCloseFunctionWithPromises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'shouldStreamDocumentsUsingTheCloseFunctionWithPromises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3192,19 +2891,15 @@ describe('Operations', function () {
         // REMOVE-LINE restartAndDone
         // REMOVE-LINE done();
         // BEGIN
-
         // Create a lot of documents to insert
         const docs = [];
         for (let i = 0; i < 100; i++) {
           docs.push({ a: i });
         }
-
         // Create a collection
         const collection = db.collection('test_close_function_on_cursor_with_promise');
-
         // Perform a find to get a cursor
         const cursor = collection.find();
-
         // Insert documents into collection
         return collection
           .insertMany(docs, configuration.writeConcernMax())
@@ -3224,25 +2919,23 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**************************************************************************
    *
    * MONGOCLIENT TESTS
    *
    *************************************************************************/
-
   /**
    * Example of a simple url connection string to a replicaset, with acknowledgement of writes using a Promise.
    *
    * example-class MongoClient
    */
-  it('Should correctly connect to a replicaset With Promises', {
-    metadata: {
+  it(
+    'Should correctly connect to a replicaset With Promises',
+    {
       requires: { topology: 'replicaset' }
     },
-
-    test: function () {
+    function () {
       const configuration = this.configuration;
       const url = f(
         'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
@@ -3252,7 +2945,6 @@ describe('Operations', function () {
         configuration.replicasetName,
         'primary'
       );
-
       const client = configuration.newClient(url);
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
@@ -3266,7 +2958,6 @@ describe('Operations', function () {
         // REMOVE-LINE done();
         // BEGIN
         expect(db != null).to.exist;
-
         return db
           .collection('replicaset_mongo_client_collection_with_promise')
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
@@ -3277,19 +2968,18 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple url connection string to a shard, with acknowledgement of writes using a Promise.
    *
    * example-class MongoClient
    */
-  it('Should connect to mongos proxies using connectiong string With Promises', {
-    metadata: {
+  it(
+    'Should connect to mongos proxies using connectiong string With Promises',
+    {
       requires: { topology: 'sharded' }
     },
-
-    test: function () {
+    function () {
       const configuration = this.configuration;
       const url = f(
         'mongodb://%s:%s,%s:%s/sharded_test_db?w=1',
@@ -3298,7 +2988,6 @@ describe('Operations', function () {
         configuration.host,
         configuration.port + 1
       );
-
       const client = configuration.newClient(url);
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
@@ -3312,7 +3001,6 @@ describe('Operations', function () {
         // REMOVE-LINE done();
         // BEGIN
         expect(db != null).to.exist;
-
         return db
           .collection('replicaset_mongo_client_collection_with_promise')
           .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
@@ -3323,22 +3011,18 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple url connection string for a single server connection
    *
    * example-class MongoClient
    */
-  it('Should correctly connect using MongoClient to a single server using connect With Promises', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
+  it(
+    'Should correctly connect using MongoClient to a single server using connect With Promises',
+    { requires: { topology: 'single' } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
-
       // DOC_START
       // Connect using the connection string
       return client.connect().then(function (client) {
@@ -3362,29 +3046,26 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**************************************************************************
    *
    * BULK TESTS
    *
    *************************************************************************/
-
   /**
    * Example of a simple ordered insert/update/upsert/remove ordered collection using a Promise.
    *
    * example-class Collection
    * example-method initializeOrderedBulkOp
    */
-  it('Should correctly execute ordered batch with no errors using write commands With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute ordered batch with no errors using write commands With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3408,7 +3089,6 @@ describe('Operations', function () {
           .updateOne({ $set: { b: 2 } });
         batch.insert({ a: 3 });
         batch.find({ a: 3 }).delete({ a: 3 });
-
         // Execute the operations
         return batch.execute().then(function (result) {
           // Check state of result
@@ -3419,24 +3099,20 @@ describe('Operations', function () {
             1 === result.modifiedCount || result.modifiedCount === 0 || result.modifiedCount == null
           ).to.exist;
           expect(result.deletedCount).to.equal(1);
-
           const upserts = result.result.upserted;
           expect(upserts.length).to.equal(1);
           expect(upserts[0].index).to.equal(2);
           expect(upserts[0]._id != null).to.exist;
-
           const upsert = result.getUpsertedIdAt(0);
           expect(upsert.index).to.equal(2);
           expect(upsert._id != null).to.exist;
-
           // Finish up test
           return client.close();
         });
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple ordered insert/update/upsert/remove ordered collection using a Promise.
    *
@@ -3444,15 +3120,14 @@ describe('Operations', function () {
    * example-class Collection
    * example-method initializeUnorderedBulkOp
    */
-  it('Should correctly execute unordered batch with no errors With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute unordered batch with no errors With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3467,7 +3142,6 @@ describe('Operations', function () {
         const col = db.collection('batch_write_unordered_ops_legacy_0_with_promise');
         // Initialize the unordered Batch
         const batch = col.initializeUnorderedBulkOp();
-
         // Add some operations to be executed in order
         batch.insert({ a: 1 });
         batch.find({ a: 1 }).updateOne({ $set: { b: 1 } });
@@ -3477,7 +3151,6 @@ describe('Operations', function () {
           .updateOne({ $set: { b: 2 } });
         batch.insert({ a: 3 });
         batch.find({ a: 3 }).delete({ a: 3 });
-
         // Execute the operations
         return batch.execute().then(function (result) {
           // Check state of result
@@ -3488,45 +3161,39 @@ describe('Operations', function () {
             1 === result.modifiedCount || result.modifiedCount === 0 || result.modifiedCount == null
           ).to.exist;
           expect(result.deletedCount).to.equal(1);
-
           const upserts = result.result.upserted;
           expect(upserts.length).to.equal(1);
           expect(upserts[0].index).to.equal(2);
           expect(upserts[0]._id != null).to.exist;
-
           const upsert = result.getUpsertedIdAt(0);
           expect(upsert.index).to.equal(2);
           expect(upsert._id != null).to.exist;
-
           // Finish up test
           return client.close();
         });
       });
       // END
     }
-  });
-
+  );
   /**************************************************************************
    *
    * CRUD TESTS
    *
    *************************************************************************/
-
   /**
    * Example of a simple insertOne operation using a Promise.
    *
    * example-class Collection
    * example-method insertOne
    */
-  it('Should correctly execute insertOne operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute insertOne operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3547,23 +3214,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple insertMany operation using a Promise.
    *
    * example-class Collection
    * example-method insertMany
    */
-  it('Should correctly execute insertMany operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute insertMany operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3584,23 +3249,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple updateOne operation using a Promise.
    *
    * example-class Collection
    * example-method updateOne
    */
-  it('Should correctly execute updateOne operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute updateOne operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3622,23 +3285,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple updateMany operation using a Promise.
    *
    * example-class Collection
    * example-method updateMany
    */
-  it('Should correctly execute updateMany operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute updateMany operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3655,7 +3316,6 @@ describe('Operations', function () {
           .insertMany([{ a: 1 }, { a: 1 }])
           .then(function (r) {
             expect(r.insertedCount).to.equal(2);
-
             // Update all documents
             return col.updateMany({ a: 1 }, { $set: { b: 1 } });
           })
@@ -3666,30 +3326,27 @@ describe('Operations', function () {
               expect(r.matchedCount).to.equal(2);
               expect(r.modifiedCount).to.equal(2);
             }
-
             // Finish up test
             return client.close();
           });
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple deleteOne operation using a Promise.
    *
    * example-class Collection
    * example-method deleteOne
    */
-  it('Should correctly execute deleteOne operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute deleteOne operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3706,7 +3363,6 @@ describe('Operations', function () {
           .insertMany([{ a: 1 }, { a: 1 }])
           .then(function (r) {
             expect(r.insertedCount).to.equal(2);
-
             return col.deleteOne({ a: 1 });
           })
           .then(function (r) {
@@ -3717,23 +3373,21 @@ describe('Operations', function () {
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple deleteMany operation using a Promise.
    *
    * example-class Collection
    * example-method deleteMany
    */
-  it('Should correctly execute deleteMany operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute deleteMany operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3750,36 +3404,32 @@ describe('Operations', function () {
           .insertMany([{ a: 1 }, { a: 1 }])
           .then(function (r) {
             expect(r.insertedCount).to.equal(2);
-
             // Update all documents
             return col.deleteMany({ a: 1 });
           })
           .then(function (r) {
             expect(r.deletedCount).to.equal(2);
-
             // Finish up test
             return client.close();
           });
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple bulkWrite operation using a Promise.
    *
    * example-class Collection
    * example-method bulkWrite
    */
-  it('Should correctly execute bulkWrite operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute bulkWrite operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3816,27 +3466,24 @@ describe('Operations', function () {
             expect(r.deletedCount).to.equal(0);
             expect(r.upsertedCount).to.equal(2);
             expect(Object.keys(r.upsertedIds).length).to.equal(2);
-
             // Ordered bulk operation
             return client.close();
           });
       });
       // END
     }
-  });
-
+  );
   /**
    * Duplicate key error
    */
-  it('Should correctly handle duplicate key error with bulkWrite', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly handle duplicate key error with bulkWrite',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // Get the collection
@@ -3853,23 +3500,21 @@ describe('Operations', function () {
           });
       });
     }
-  });
-
+  );
   /**
    * Example of a simple findOneAndDelete operation using a Promise.
    *
    * example-class Collection
    * example-method findOneAndDelete
    */
-  it('Should correctly execute findOneAndDelete operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute findOneAndDelete operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3894,29 +3539,26 @@ describe('Operations', function () {
           .then(function (r) {
             expect(r.lastErrorObject.n).to.equal(1);
             expect(r.value.b).to.equal(1);
-
             return client.close();
           });
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple findOneAndReplace operation using a Promise.
    *
    * example-class Collection
    * example-method findOneAndReplace
    */
-  it('Should correctly execute findOneAndReplace operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute findOneAndReplace operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3931,7 +3573,6 @@ describe('Operations', function () {
         const col = db.collection('find_one_and_replace_with_promise');
         return col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
           expect(r).property('insertedCount').to.equal(1);
-
           return col
             .findOneAndReplace(
               { a: 1 },
@@ -3948,30 +3589,27 @@ describe('Operations', function () {
               expect(r.lastErrorObject.n).to.equal(1);
               expect(r.value.b).to.equal(1);
               expect(r.value.c).to.equal(1);
-
               return client.close();
             });
         });
       });
       // END
     }
-  });
-
+  );
   /**
    * Example of a simple findOneAndUpdate operation using a Promise.
    *
    * example-class Collection
    * example-method findOneAndUpdate
    */
-  it('Should correctly execute findOneAndUpdate operation With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
+  it(
+    'Should correctly execute findOneAndUpdate operation With Promises',
+    { requires: { topology: ['single'] } },
+    function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       return client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -3988,7 +3626,6 @@ describe('Operations', function () {
           .insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } })
           .then(function (r) {
             expect(r).property('insertedCount').to.equal(1);
-
             return col.findOneAndUpdate(
               { a: 1 },
               { $set: { d: 1 } },
@@ -4005,29 +3642,26 @@ describe('Operations', function () {
             expect(r.lastErrorObject.n).to.equal(1);
             expect(r.value.b).to.equal(1);
             expect(r.value.d).to.equal(1);
-
             return client.close();
           });
       });
       // END
     }
-  });
-
+  );
   /**
    * A simple example showing the listening to a capped collection using a Promise.
    *
    * example-class Db
    * example-method createCollection
    */
-  it('Should correctly add capped collection options to cursor With Promises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function (done) {
+  it(
+    'Should correctly add capped collection options to cursor With Promises',
+    { requires: { topology: ['single'] } },
+    function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-
       client.connect().then(function (client) {
         const db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
@@ -4040,7 +3674,6 @@ describe('Operations', function () {
         // BEGIN
         // Create a capped collection with a maximum of 1000 documents
         let collection;
-
         db.createCollection('a_simple_collection_2_with_promise', {
           capped: true,
           size: 100000,
@@ -4049,34 +3682,29 @@ describe('Operations', function () {
         })
           .then(function (_collection) {
             collection = _collection;
-
-            const docs: Array<{ a: number }> = [];
+            const docs: Array<{
+              a: number;
+            }> = [];
             for (let i = 0; i < 1000; i++) docs.push({ a: i });
-
             // Insert a document in the capped collection
             return collection.insertMany(docs, configuration.writeConcernMax());
           })
           .then(function (result) {
             expect(result).to.exist;
-
             let total = 0;
-
             // Get the cursor
             const cursor = collection
               .find({ a: { $gte: 0 } })
               .addCursorFlag('tailable', true)
               .addCursorFlag('awaitData', true);
-
             const stream = cursor.stream();
             stream.on('data', function (d) {
               expect(d).to.exist;
               total = total + 1;
-
               if (total === 1000) {
                 cursor.close();
               }
             });
-
             cursor.on('close', function () {
               // TODO: forced because the cursor is still open/active
               client.close(true, done);
@@ -4085,27 +3713,25 @@ describe('Operations', function () {
       });
       // END
     }
-  });
+  );
 
   describe('Transaction Examples', function () {
     before(function () {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax());
-
       return client
         .connect()
         .then(() => client.db('hr').createCollection('employees'))
         .then(() => client.db('reporting').createCollection('events'))
         .then(() => client.close());
     });
-
     // Start Transactions Intro Example 1
-    it('should be able to run transactions example 1', {
-      metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
-      test: function () {
+    it(
+      'should be able to run transactions example 1',
+      { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
+      function () {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.writeConcernMax());
-
         // BEGIN
         function updateEmployeeInfo(client) {
           return client.withSession(session => {
@@ -4115,20 +3741,16 @@ describe('Operations', function () {
                   // LINE console.log('Transaction aborted. Caught exception during transaction.');
                   return commit();
                 }
-
                 // LINE console.log('Error during commit ...');
                 throw e;
               });
             }
-
             const employeesCollection = client.db('hr').collection('employees');
             const eventsCollection = client.db('reporting').collection('events');
-
             session.startTransaction({
               readConcern: { level: 'snapshot' },
               writeConcern: { w: 'majority' }
             });
-
             return employeesCollection
               .updateOne({ employee: 3 }, { $set: { status: 'Inactive' } }, { session })
               .then(() => {
@@ -4151,44 +3773,38 @@ describe('Operations', function () {
           });
           // END
         }
-
         return client
           .connect()
           .then(() => updateEmployeeInfo(client))
           .then(() => client.close());
       }
-    });
+    );
     // End Transactions Intro Example 1
-
     // Start Transactions Retry Example 1
-    it('should be able to run transactions retry example 1', {
-      metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
-      test: function () {
+    it(
+      'should be able to run transactions retry example 1',
+      { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
+      function () {
         // BEGIN
         function runTransactionWithRetry(txnFunc, client, session) {
           return txnFunc(client, session).catch(error => {
             // LINE console.log('Transaction aborted. Caught exception during transaction.');
-
             // If transient error, retry the whole transaction
             if (error.hasErrorLabel('TransientTransactionError')) {
               // LINE console.log('TransientTransactionError, retrying transaction ...');
               return runTransactionWithRetry(txnFunc, client, session);
             }
-
             throw error;
           });
         }
         // END
-
         function updateEmployeeInfo(client, session) {
           session.startTransaction({
             readConcern: { level: 'snapshot' },
             writeConcern: { w: 'majority' }
           });
-
           const employeesCollection = client.db('hr').collection('employees');
           const eventsCollection = client.db('reporting').collection('events');
-
           return employeesCollection
             .updateOne({ employee: 3 }, { $set: { status: 'Inactive' } }, { session })
             .then(() => {
@@ -4207,7 +3823,6 @@ describe('Operations', function () {
         }
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.writeConcernMax());
-
         return client
           .connect()
           .then(() =>
@@ -4217,14 +3832,13 @@ describe('Operations', function () {
           )
           .then(() => client.close());
       }
-    });
-
+    );
     // End Transactions Retry Example 1
-
     // Start Transactions Retry Example 2
-    it('should be able to run transactions retry example 2', {
-      metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
-      test: function () {
+    it(
+      'should be able to run transactions retry example 2',
+      { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
+      function () {
         // BEGIN
         function commitWithRetry(session) {
           return (
@@ -4242,16 +3856,13 @@ describe('Operations', function () {
           );
         }
         // END
-
         function updateEmployeeInfo(client, session) {
           session.startTransaction({
             readConcern: { level: 'snapshot' },
             writeConcern: { w: 'majority' }
           });
-
           const employeesCollection = client.db('hr').collection('employees');
           const eventsCollection = client.db('reporting').collection('events');
-
           return employeesCollection
             .updateOne({ employee: 3 }, { $set: { status: 'Inactive' } }, { session })
             .then(() => {
@@ -4270,22 +3881,20 @@ describe('Operations', function () {
         }
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.writeConcernMax());
-
         return client
           .connect()
           .then(() => client.withSession(session => updateEmployeeInfo(client, session)))
           .then(() => client.close());
       }
-    });
+    );
     // End Transactions Retry Example 2
-
     // Start Transactions Retry Example 3
-    it('should be able to run transactions retry example 3', {
-      metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
-      test: function () {
+    it(
+      'should be able to run transactions retry example 3',
+      { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
+      function () {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.writeConcernMax());
-
         // BEGIN
         function commitWithRetry(session) {
           return (
@@ -4302,30 +3911,24 @@ describe('Operations', function () {
               })
           );
         }
-
         function runTransactionWithRetry(txnFunc, client, session) {
           return txnFunc(client, session).catch(error => {
             // LINE console.log('Transaction aborted. Caught exception during transaction.');
-
             // If transient error, retry the whole transaction
             if (error.hasErrorLabel('TransientTransactionError')) {
               // LINE console.log('TransientTransactionError, retrying transaction ...');
               return runTransactionWithRetry(txnFunc, client, session);
             }
-
             throw error;
           });
         }
-
         function updateEmployeeInfo(client, session) {
           const employeesCollection = client.db('hr').collection('employees');
           const eventsCollection = client.db('reporting').collection('events');
-
           session.startTransaction({
             readConcern: { level: 'snapshot' },
             writeConcern: { w: 'majority' }
           });
-
           return employeesCollection
             .updateOne({ employee: 3 }, { $set: { status: 'Inactive' } }, { session })
             .then(() => {
@@ -4343,7 +3946,6 @@ describe('Operations', function () {
             })
             .then(() => commitWithRetry(session));
         }
-
         // LINE const { MongoClient } = require('mongodb'),
         // LINE const client = new MongoClient('myRepl/mongodb0.example.net:27017,mongodb1.example.net:27017,mongodb2.example.net:27017');
         return client
@@ -4356,7 +3958,7 @@ describe('Operations', function () {
           .then(() => client.close());
         // END
       }
-    });
+    );
     // End Transactions Retry Example 3
   });
 });

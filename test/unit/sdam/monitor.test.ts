@@ -49,14 +49,12 @@ class MockServer {
     };
   }
 }
-
 describe('monitoring', function () {
   let mockServer;
 
   beforeEach(function () {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const test = this.currentTest!;
-
     const failingTests = [
       'should connect and issue an initial server check',
       'should ignore attempts to connect when not already closed',
@@ -69,7 +67,6 @@ describe('monitoring', function () {
       satisfies(process.version, '>=18.0.0') && failingTests.includes(test.title)
         ? 'TODO(NODE-5666): fix failing unit tests on Node18'
         : undefined;
-
     if (test.skipReason) this.skip();
   });
 
@@ -78,7 +75,6 @@ describe('monitoring', function () {
   beforeEach(function () {
     return mock.createServer().then(server => (mockServer = server));
   });
-
   // TODO(NODE-3819): Unskip flaky tests.
   it.skip('should record roundTripTime', function (done) {
     mockServer.setMessageHandler(request => {
@@ -89,26 +85,21 @@ describe('monitoring', function () {
         request.reply({ ok: 1 });
       }
     });
-
     // set `heartbeatFrequencyMS` to 250ms to force a quick monitoring check, and wait 500ms to validate below
     const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {
       heartbeatFrequencyMS: 250
     });
     topology.connect(err => {
       expect(err).to.not.exist;
-
       setTimeout(() => {
         expect(topology).property('description').property('servers').to.have.length(1);
-
         const serverDescription = Array.from(topology.description.servers.values())[0];
         expect(serverDescription).property('roundTripTime').to.be.greaterThan(0);
-
         topology.close();
         done();
       }, 500);
     });
   }).skipReason = 'TODO(NODE-3819): Unskip flaky tests';
-
   // TODO(NODE-3600): Unskip flaky test
   it.skip('should recover on error during initial connect', function (done) {
     // This test should take ~1s because initial server selection fails and an immediate check
@@ -116,14 +107,12 @@ describe('monitoring', function () {
     // to complete. We want to ensure validation of the immediate check behavior, and therefore
     // hardcode the test timeout to 2s.
     this.timeout(2000);
-
     let acceptConnections = false;
     mockServer.setMessageHandler(request => {
       if (!acceptConnections) {
         request.connection.destroy();
         return;
       }
-
       const doc = request.document;
       if (isHello(doc)) {
         request.reply(Object.assign({}, mock.HELLO));
@@ -131,19 +120,15 @@ describe('monitoring', function () {
         request.reply({ ok: 1 });
       }
     });
-
     setTimeout(() => {
       acceptConnections = true;
     }, 250);
-
     const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
     topology.connect(err => {
       expect(err).to.not.exist;
       expect(topology).property('description').property('servers').to.have.length(1);
-
       const serverDescription = Array.from(topology.description.servers.values())[0];
       expect(serverDescription).property('roundTripTime').to.be.greaterThan(0);
-
       topology.close({}, done);
     });
   }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
@@ -168,16 +153,12 @@ describe('monitoring', function () {
           request.reply(Object.assign({}, mock.HELLO));
         }
       });
-
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
-
       const heartbeatFailed = once(monitor, 'serverHeartbeatFailed');
       const heartbeatSucceeded = once(monitor, 'serverHeartbeatSucceeded');
       monitor.connect();
-
       const res = await Promise.race([heartbeatFailed, heartbeatSucceeded]);
-
       expect(res[0]).to.be.instanceOf(ServerHeartbeatSucceededEvent);
       expect(monitor.connection).to.have.property('id', '<monitor>');
     });
@@ -189,16 +170,12 @@ describe('monitoring', function () {
           request.reply(Object.assign({}, mock.HELLO));
         }
       });
-
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
-
       const heartbeatFailed = once(monitor, 'serverHeartbeatFailed');
       const heartbeatSucceeded = once(monitor, 'serverHeartbeatSucceeded');
       monitor.connect();
-
       const res = await Promise.race([heartbeatFailed, heartbeatSucceeded]);
-
       expect(res[0]).to.be.instanceOf(ServerHeartbeatSucceededEvent);
       monitor.connect();
     });
@@ -210,14 +187,11 @@ describe('monitoring', function () {
           setTimeout(() => request.reply(Object.assign({}, mock.HELLO)), 250);
         }
       });
-
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
-
       const startedEvents: ServerHeartbeatStartedEvent[] = [];
       monitor.on('serverHeartbeatStarted', event => startedEvents.push(event));
       const monitorClose = once(monitor, 'close');
-
       monitor.connect();
       await once(monitor, 'serverHeartbeatSucceeded');
       monitor.requestCheck();
@@ -225,13 +199,10 @@ describe('monitoring', function () {
       monitor.requestCheck();
       monitor.requestCheck();
       monitor.requestCheck();
-
       const minHeartbeatFrequencyMS = 500;
       await setTimeoutPromise(minHeartbeatFrequencyMS);
-
       await once(monitor, 'serverHeartbeatSucceeded');
       monitor.close();
-
       await monitorClose;
       expect(startedEvents).to.have.length(2);
     });
@@ -246,16 +217,13 @@ describe('monitoring', function () {
             request.reply({ ok: 0, errmsg: 'forced from mock server' });
             return;
           }
-
           if (helloCount === 3) {
             request.connection.destroy();
             return;
           }
-
           request.reply(mock.HELLO);
         }
       });
-
       const server = new MockServer(mockServer.address());
       server.description = new ServerDescription(server.description.hostAddress);
       monitor = new Monitor(
@@ -265,17 +233,14 @@ describe('monitoring', function () {
           minHeartbeatFrequencyMS: 50
         } as any
       );
-
       const events: ServerHeartbeatFailedEvent[] = [];
       monitor.on('serverHeartbeatFailed', event => events.push(event));
-
       let successCount = 0;
       monitor.on('serverHeartbeatSucceeded', () => {
         if (successCount++ === 2) {
           monitor?.close();
         }
       });
-
       monitor.connect();
       await once(monitor, 'close');
       expect(events).to.have.length(2);
@@ -295,10 +260,8 @@ describe('monitoring', function () {
           setTimeout(() => request.reply(Object.assign({ helloOk: true }, mock.HELLO)), 250);
         }
       });
-
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
-
       monitor.connect();
       monitor.once('serverHeartbeatSucceeded', () => {
         const minHeartbeatFrequencyMS = 500;
@@ -307,7 +270,6 @@ describe('monitoring', function () {
           monitor.once('serverHeartbeatSucceeded', () => {
             monitor.close();
           });
-
           monitor.requestCheck();
         }, minHeartbeatFrequencyMS);
       });
@@ -325,9 +287,10 @@ describe('monitoring', function () {
         { serverMonitoringMode: 'poll', topologyVersion: undefined }
       ];
       for (const { serverMonitoringMode, topologyVersion } of table) {
-        context(`when serverMonitoringMode = ${serverMonitoringMode}`, () => {
-          context('when more than one heartbeatSucceededEvent has been captured', () => {
+        describe(`when serverMonitoringMode = ${serverMonitoringMode}`, () => {
+          describe('when more than one heartbeatSucceededEvent has been captured', () => {
             let heartbeatDurationMS = 100;
+
             it('correctly returns the mean of the heartbeat durations', async () => {
               mockServer.setMessageHandler(request => {
                 setTimeout(
@@ -340,18 +303,15 @@ describe('monitoring', function () {
               if (topologyVersion) server.description.topologyVersion = topologyVersion;
               monitor = new Monitor(server as any, { serverMonitoringMode } as any);
               monitor.connect();
-
               for (let i = 0; i < 5; i++) {
                 await once(monitor, 'serverHeartbeatSucceeded');
                 monitor.requestCheck();
               }
-
               const avgRtt = monitor.roundTripTime;
               // expected avgRtt = (100 + 200 + 300 + 400 + 500)/5 = 300ms
               // avgRtt will strictly be greater than 300ms since setTimeout sets a minimum
               // delay from the time of scheduling to the time of callback execution
               expect(avgRtt).to.be.within(300, 350);
-
               monitor.close();
             });
           });
@@ -379,8 +339,8 @@ describe('monitoring', function () {
       timerSandbox.restore();
     });
 
-    context('#constructor()', function () {
-      context('when the immediate option is provided', function () {
+    describe('#constructor()', function () {
+      describe('when the immediate option is provided', function () {
         it('executes the function immediately and schedules the next execution on the interval', function () {
           executor = new MonitorInterval(fnSpy, {
             immediate: true,
@@ -398,7 +358,7 @@ describe('monitoring', function () {
         });
       });
 
-      context('when the immediate option is not provided', function () {
+      describe('when the immediate option is not provided', function () {
         it('executes the function on the provided interval', function () {
           executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
@@ -418,76 +378,71 @@ describe('monitoring', function () {
     });
 
     describe('#wake()', function () {
-      context('when fn()  has not executed yet', function () {
+      describe('when fn()  has not executed yet', function () {
         beforeEach(function () {
           executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
-
           // tick less than heartbeatFrequencyMS
           clock.tick(5);
-
           executor.wake();
         });
+
         it('executes immediately', function () {
           expect(fnSpy.calledOnce).to.be.true;
         });
+
         it('schedules fn() for heartbeatFrequencyMS away', function () {
           // advance the clock almost heartbeatFrequencyMS away
           clock.tick(29);
           expect(fnSpy.calledOnce).to.be.true;
-
           // advance it to heartbeatFrequencyMS
           clock.tick(1);
           expect(fnSpy.calledTwice).to.be.true;
         });
       });
 
-      context('when fn() is in progress', function () {
+      describe('when fn() is in progress', function () {
         beforeEach(function () {
           // create an asynchronous spy
           fnSpy = sinon.spy(cb => setTimeout(cb, 5));
-
           executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
-
           // advance to point of execution
           clock.tick(30);
         });
+
         it('does not trigger another call to fn()', function () {
           executor.wake();
           executor.wake();
           executor.wake();
           executor.wake();
-
           expect(fnSpy.calledOnce).to.be.true;
         });
       });
 
-      context('when it has been >=minHeartbeatFrequencyMS since fn() last completed', function () {
+      describe('when it has been >=minHeartbeatFrequencyMS since fn() last completed', function () {
         beforeEach(function () {
           executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
-
           // call fn() once
           clock.tick(30);
           expect(fnSpy.calledOnce).to.be.true;
-
           fnSpy.callCount = 0;
-
           // advance further than minHeartbeatFrequency
           clock.tick(20);
-
           executor.wake();
         });
+
         it('executes fn() immediately', function () {
           expect(fnSpy.calledOnce).to.be.true;
         });
+
         it('schedules fn() for heartbeatFrequencyMS away', function () {
           clock.tick(29);
           expect(fnSpy.calledOnce).to.be.true;
@@ -496,54 +451,45 @@ describe('monitoring', function () {
         });
       });
 
-      context(
-        'when it has been < minHeartbeatFrequencyMS and >= 0 since fn() last completed',
-        function () {
-          beforeEach(function () {
-            executor = new MonitorInterval(fnSpy, {
-              minHeartbeatFrequencyMS: 10,
-              heartbeatFrequencyMS: 30
-            });
-
-            // call fn() once
-            clock.tick(30);
-            expect(fnSpy.calledOnce).to.be.true;
-
-            fnSpy.callCount = 0;
-
-            // advance less than minHeartbeatFrequency
-            clock.tick(5);
-
-            executor.wake();
-          });
-
-          it('reschedules fn() to minHeartbeatFrequencyMS after the last call', function () {
-            expect(fnSpy.callCount).to.equal(0);
-            clock.tick(5);
-            expect(fnSpy.calledOnce).to.be.true;
-          });
-
-          context('when wake() is called more than once', function () {
-            it('schedules fn() minHeartbeatFrequencyMS after the last call to fn()', function () {
-              executor.wake();
-              executor.wake();
-              executor.wake();
-
-              expect(fnSpy.callCount).to.equal(0);
-              clock.tick(5);
-              expect(fnSpy.calledOnce).to.be.true;
-            });
-          });
-        }
-      );
-
-      context('when it has been <0 since fn() has last executed', function () {
+      describe('when it has been < minHeartbeatFrequencyMS and >= 0 since fn() last completed', function () {
         beforeEach(function () {
           executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
+          // call fn() once
+          clock.tick(30);
+          expect(fnSpy.calledOnce).to.be.true;
+          fnSpy.callCount = 0;
+          // advance less than minHeartbeatFrequency
+          clock.tick(5);
+          executor.wake();
+        });
 
+        it('reschedules fn() to minHeartbeatFrequencyMS after the last call', function () {
+          expect(fnSpy.callCount).to.equal(0);
+          clock.tick(5);
+          expect(fnSpy.calledOnce).to.be.true;
+        });
+
+        describe('when wake() is called more than once', function () {
+          it('schedules fn() minHeartbeatFrequencyMS after the last call to fn()', function () {
+            executor.wake();
+            executor.wake();
+            executor.wake();
+            expect(fnSpy.callCount).to.equal(0);
+            clock.tick(5);
+            expect(fnSpy.calledOnce).to.be.true;
+          });
+        });
+      });
+
+      describe('when it has been <0 since fn() has last executed', function () {
+        beforeEach(function () {
+          executor = new MonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30
+          });
           // negative ticks aren't supported, so manually set execution time
           executor.lastExecutionEnded = Infinity;
           executor.wake();
@@ -555,10 +501,8 @@ describe('monitoring', function () {
 
         it('reschedules fn() to minHeartbeatFrequency away', function () {
           fnSpy.callCount = 0;
-
           clock.tick(29);
           expect(fnSpy.callCount).to.equal(0);
-
           clock.tick(1);
           expect(fnSpy.calledOnce).to.be.true;
         });
@@ -566,63 +510,57 @@ describe('monitoring', function () {
     });
 
     describe('#stop()', function () {
-      context('when fn() is executing', function () {
+      describe('when fn() is executing', function () {
         beforeEach(function () {
           // create an asynchronous spy
           fnSpy = sinon.spy(cb => setTimeout(cb, 5));
-
           executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
-
           // advance to point of execution
           clock.tick(30);
-
           executor.stop();
         });
+
         it('does not reschedule fn() after fn() finishes executing', function () {
           // exhaust the spy fn
           clock.tick(5);
-
           expect(fnSpy.calledOnce).to.be.true;
-
           // advance heartbeatFrequencyMS
           clock.tick(30);
           expect(fnSpy.calledOnce).to.be.true;
         });
       });
-      context('when fn() is not executing', function () {
+
+      describe('when fn() is not executing', function () {
         beforeEach(function () {
           executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
-
           executor.stop();
-
           // advance heartbeatFrequencyMS
           clock.tick(30);
         });
+
         it('clears any scheduled executions of fn()', function () {
           expect(fnSpy.callCount).to.equal(0);
         });
       });
     });
 
-    context('when fn() returns an error', function () {
+    describe('when fn() returns an error', function () {
       let uncaughtErrors = [];
+
       beforeEach(function () {
         uncaughtErrors = [];
         process.on('uncaughtException', e => uncaughtErrors.push(e));
-
         fnSpy = sinon.spy(cb => cb(new Error('ahh')));
-
         executor = new MonitorInterval(fnSpy, {
           minHeartbeatFrequencyMS: 10,
           heartbeatFrequencyMS: 30
         });
-
         clock.tick(30);
       });
 
@@ -631,6 +569,7 @@ describe('monitoring', function () {
       it('no error is thrown by the MonitorInterval', function () {
         expect(uncaughtErrors).to.have.lengthOf(0);
       });
+
       it('reschedules another call to fn() for heartbeatFrequencyMS in the future', function () {
         clock.tick(30);
         expect(fnSpy.calledTwice).to.be.true;
@@ -653,7 +592,6 @@ describe('monitoring', function () {
         socket.on('data', () => socket.destroy(new Error('I am not real!')));
         return socket;
       });
-
       client = new MongoClient(`mongodb://localhost:1`, { serverSelectionTimeoutMS: 200 });
       client.on('serverHeartbeatFailed', ev => (serverHeartbeatFailed = ev));
     });
@@ -681,17 +619,16 @@ describe('monitoring', function () {
     });
 
     describe('addSample', () => {
-      context('when length < windowSize', () => {
+      describe('when length < windowSize', () => {
         it('increments the length', () => {
           const sampler = new RTTSampler(10);
           expect(sampler).to.have.property('length', 0);
-
           sampler.addSample(1);
-
           expect(sampler).to.have.property('length', 1);
         });
       });
-      context('when length === windowSize', () => {
+
+      describe('when length === windowSize', () => {
         let sampler: RTTSampler;
         const size = 10;
 
@@ -723,20 +660,20 @@ describe('monitoring', function () {
     });
 
     describe('min()', () => {
-      context('when length < 2', () => {
+      describe('when length < 2', () => {
         it('returns 0', () => {
           const sampler = new RTTSampler(10);
           // length 0
           expect(sampler.min()).to.equal(0);
-
           sampler.addSample(1);
           // length 1
           expect(sampler.min()).to.equal(0);
         });
       });
 
-      context('when 2 <= length < windowSize', () => {
+      describe('when 2 <= length < windowSize', () => {
         let sampler: RTTSampler;
+
         beforeEach(() => {
           sampler = new RTTSampler(10);
           for (let i = 1; i <= 3; i++) {
@@ -749,7 +686,7 @@ describe('monitoring', function () {
         });
       });
 
-      context('when length == windowSize', () => {
+      describe('when length == windowSize', () => {
         let sampler: RTTSampler;
         const size = 10;
 
@@ -770,25 +707,23 @@ describe('monitoring', function () {
       it('correctly computes the mean', () => {
         const sampler = new RTTSampler(10);
         let sum = 0;
-
         for (let i = 1; i <= 10; i++) {
           sum += i;
           sampler.addSample(i);
         }
-
         expect(sampler.average()).to.equal(sum / 10);
       });
     });
 
     describe('last', () => {
-      context('when length == 0', () => {
+      describe('when length == 0', () => {
         it('returns null', () => {
           const sampler = new RTTSampler(10);
           expect(sampler.last).to.be.null;
         });
       });
 
-      context('when length > 0', () => {
+      describe('when length > 0', () => {
         it('returns the most recently inserted element', () => {
           const sampler = new RTTSampler(10);
           for (let i = 0; i < 11; i++) {

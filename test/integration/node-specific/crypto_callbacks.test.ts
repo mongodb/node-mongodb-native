@@ -6,26 +6,21 @@ import { ClientEncryption } from '../../../src/client-side-encryption/client_enc
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import * as cryptoCallbacks from '../../../src/client-side-encryption/crypto_callbacks';
 import { type MongoClient } from '../../mongodb';
-
 // Data Key Stuff
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_CMK_ID = process.env.AWS_CMK_ID;
-
 const kmsProviders = {
   aws: { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY }
 };
 const dataKeyOptions = { masterKey: { key: AWS_CMK_ID, region: AWS_REGION } };
-
 const SKIP_AWS_TESTS = [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_CMK_ID].some(
   secret => !secret
 );
-
 describe('cryptoCallbacks', function () {
   let client: MongoClient;
   let sandbox;
-
   const hookNames = new Set([
     'aes256CbcEncryptHook',
     'aes256CbcDecryptHook',
@@ -40,12 +35,9 @@ describe('cryptoCallbacks', function () {
       this.currentTest?.skip();
       return;
     }
-
     sandbox = sinon.createSandbox();
     sandbox.spy(cryptoCallbacks);
-
     client = this.configuration.newClient();
-
     return client.connect();
   });
 
@@ -64,13 +56,11 @@ describe('cryptoCallbacks', function () {
       'VocBRhpMmQ2XCzVehWSqheQLnU889gf3dhU4AnVnQTJjsKx/CM23qKDPkZDd2A/BnQsp99SN7ksIX5Raj0TPwyN5OCN/YrNFNGoOFlTsGhgP/hyE8X3Duiq6sNO0SMvRYNPFFGlJFsp1Fw3Z94eYMg4/Wpw5s4+Jo5Zm/qY7aTJIqDKDQ3CNHLeJgcMUOc9sz01/GzoUYKDVODHSxrYEk5ireFJFz9vP8P7Ha+VDUZuQIQdXer9NBbGFtYmWprY3nn4D3Dw93Sn0V0dIqYeIo91oKyslvMebmUM95S2PyIJdEpPb2DJDxjvX/0LLwSWlSXRWy9gapWoBkb4ynqZBsg==',
       'base64'
     );
-
     const { signRsaSha256Hook } = cryptoCallbacks;
     const err = signRsaSha256Hook(key, input, output);
     if (err instanceof Error) {
       expect(err).to.not.exist;
     }
-
     expect(output).to.deep.equal(expectedOutput);
   });
 
@@ -84,31 +74,24 @@ describe('cryptoCallbacks', function () {
         } else {
           expect(hook).to.not.have.been.called;
         }
-
         hook.resetHistory();
       }
     }
-
     const encryption = new ClientEncryption(client, {
       keyVaultNamespace: 'test.encryption',
       kmsProviders
     });
-
     assertCertainHooksCalled();
-
     const dataKeyId = await encryption.createDataKey('aws', dataKeyOptions);
     assertCertainHooksCalled(new Set(['hmacSha256Hook', 'sha256Hook', 'randomHook']));
-
     const encryptOptions = {
       keyId: dataKeyId,
       algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
     };
-
     const encryptedValue = await encryption.encrypt('hello', encryptOptions);
     assertCertainHooksCalled(
       new Set(['aes256CbcEncryptHook', 'hmacSha512Hook', 'hmacSha256Hook', 'sha256Hook'])
     );
-
     await encryption.decrypt(encryptedValue);
     assertCertainHooksCalled(new Set(['aes256CbcDecryptHook', 'hmacSha512Hook']));
   });
@@ -117,47 +100,39 @@ describe('cryptoCallbacks', function () {
     beforeEach(async function () {
       sandbox?.restore();
     });
-
     for (const hookName of ['aes256CbcEncryptHook', 'aes256CbcDecryptHook', 'hmacSha512Hook']) {
       it(`should properly propagate an error when ${hookName} fails`, async function () {
         const error = new Error('some random error text');
         sandbox.stub(cryptoCallbacks, hookName).returns(error);
-
         const encryption = new ClientEncryption(client, {
           keyVaultNamespace: 'test.encryption',
           kmsProviders
         });
-
         const result = await (async () => {
           const dataKeyId = await encryption.createDataKey('aws', dataKeyOptions);
           const encryptOptions = {
             keyId: dataKeyId,
             algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
           };
-
           const encryptedValue = await encryption.encrypt('hello', encryptOptions);
           await encryption.decrypt(encryptedValue);
         })().then(
           () => null,
           error => error
         );
-
         expect(result).to.be.instanceOf(Error);
       });
     }
-
     // These ones will fail with an error, but that error will get overridden
     // with "failed to create KMS message" in mongocrypt-kms-ctx.c
     for (const hookName of ['hmacSha256Hook', 'sha256Hook']) {
       it(`should error with a specific kms error when ${hookName} fails`, async function () {
         const error = new Error('some random error text');
         sandbox.stub(cryptoCallbacks, hookName).returns(error);
-
         const encryption = new ClientEncryption(client, {
           keyVaultNamespace: 'test.encryption',
           kmsProviders
         });
-
         const result = await encryption.createDataKey('aws', dataKeyOptions).catch(error => error);
         expect(result).to.match(/failed to create KMS message/);
       });
@@ -166,12 +141,10 @@ describe('cryptoCallbacks', function () {
     it('should error asynchronously with error when randomHook fails', async function () {
       const error = new Error('some random error text');
       sandbox.stub(cryptoCallbacks, 'randomHook').returns(error);
-
       const encryption = new ClientEncryption(client, {
         keyVaultNamespace: 'test.encryption',
         kmsProviders
       });
-
       const result = await encryption.createDataKey('aws', dataKeyOptions).catch(error => error);
       expect(result).to.have.property('message', 'some random error text');
     });

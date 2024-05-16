@@ -18,7 +18,6 @@ describe('MongocryptdManager', function () {
     const mcdm = new MongocryptdManager({
       mongocryptdSpawnArgs: ['--idleShutdownTimeoutSecs', '12']
     });
-
     expect(mcdm.spawnArgs).to.deep.equal(['--idleShutdownTimeoutSecs', '12']);
   });
 
@@ -26,7 +25,6 @@ describe('MongocryptdManager', function () {
     const mcdm = new MongocryptdManager({
       mongocryptdSpawnArgs: ['--idleShutdownTimeoutSecs=12']
     });
-
     expect(mcdm.spawnArgs).to.deep.equal(['--idleShutdownTimeoutSecs=12']);
   });
 
@@ -37,7 +35,6 @@ describe('MongocryptdManager', function () {
       mongocryptdSpawnPath: 'some-spawn-path',
       mongocryptdSpawnArgs: ['--idleShutdownTimeoutSecs=12']
     });
-
     expect(mcdm).to.eql({
       uri: 'some-uri',
       bypassSpawn: true,
