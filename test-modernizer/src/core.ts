@@ -9,6 +9,7 @@ export function makeFunctionParametersUnique(node: ts.SourceFile): ts.Node {
     scopes: { [key: string]: string }[] = [];
 
     enterFunctionScope(parameters: ts.ParameterDeclaration[]) {
+      const scope = Object.create(null);
       const newParameters: [string, string][] = parameters
         .filter(node => ts.isIdentifier(node.name))
         .map(parameter => {
@@ -17,7 +18,10 @@ export function makeFunctionParametersUnique(node: ts.SourceFile): ts.Node {
 
           return [name, String(newName)];
         });
-      this.scopes.unshift(Object.fromEntries(newParameters));
+      for (const [name, value] of newParameters) {
+        scope[name] = value;
+      }
+      this.scopes.unshift(scope);
     }
 
     exitScope() {
@@ -124,6 +128,31 @@ export function makeFunctionParametersUnique(node: ts.SourceFile): ts.Node {
       if (ts.isArrowFunction(node)) return visitFunction(node);
       return ts.visitEachChild(node, visit, context);
     }
+    return visit;
+  };
+  const result = ts.transform(node, [transformerFactory]);
+  return result.transformed[0];
+}
+
+export function arrowFunctionsExpressionToBodiedFunction(node: ts.SourceFile): ts.SourceFile {
+  // @ts-expect-error asdf
+  const transformerFactory: ts.TransformerFactory<ts.SourceFile> = context => {
+    function visit(node: ts.Node): ts.Node {
+      if (ts.isArrowFunction(node) && !ts.isBlock(node.body)) {
+        const body = visit(node.body) as ts.Expression;
+        return ts.factory.updateArrowFunction(
+          node,
+          node.modifiers,
+          node.typeParameters,
+          node.parameters,
+          node.type,
+          node.equalsGreaterThanToken,
+          ts.factory.createBlock([ts.factory.createReturnStatement(body)])
+        );
+      }
+      return ts.visitEachChild(node, visit, context);
+    }
+
     return visit;
   };
   const result = ts.transform(node, [transformerFactory]);

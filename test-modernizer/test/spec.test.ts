@@ -647,11 +647,11 @@ describe('Specification Tests', function () {
 
     it.skip('converts a test  file', async function () {
       const test = parseSource(readFileSync(resolve(__dirname, '../../test/find.test'), 'utf-8'));
-      convert(test);
+      const result = convert(test);
 
-      const resultAsString = await formatSource(test, ts.EmitHint.SourceFile);
+      const resultAsString = await formatSource(result, ts.EmitHint.SourceFile);
 
-      writeFileSync('out.js', resultAsString);
+      writeFileSync('./test/find_copy.test.js', resultAsString);
     });
   });
 });

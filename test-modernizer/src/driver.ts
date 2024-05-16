@@ -4,6 +4,7 @@ import { Writable } from 'stream';
 import * as ts from 'typescript';
 import * as util from 'util';
 
+import { makeFunctionParametersUnique } from './core';
 import { annotate, explore, find, nodeExists } from './utils';
 
 export type MochaNode = MochaTestHook | MochaTestFunction | MochaTestGroup;
@@ -60,11 +61,27 @@ export class StringStream extends Writable {
 }
 
 export class MochaTest {
-  get testFunction(): ts.FunctionExpression {
-    const testFunction = this.node.arguments.at(-1);
-    if (!ts.isFunctionExpression(testFunction))
-      throw new Error('expected function expression - received ' + this.node.KIND);
-    return testFunction;
+  get testFunction(): ts.FunctionExpression | ts.ArrowFunction {
+    const lastArgument = this.node.arguments.at(-1);
+    if (ts.isFunctionExpression(lastArgument) || ts.isArrowFunction(lastArgument)) {
+      // it('does something', ..., function() { ... })
+      return lastArgument;
+    }
+    if (ts.isObjectLiteralExpression(lastArgument)) {
+      // it('does something', { test: function() { ... } })
+      const test = lastArgument.properties.find(
+        (property): property is ts.PropertyAssignment =>
+          ts.isPropertyAssignment(property) &&
+          ts.isIdentifier(property.name) &&
+          property.name.getText() === 'test'
+      );
+      assert(test && ts.isPropertyAssignment(test));
+      if (ts.isFunctionExpression(test.initializer) || ts.isArrowFunction(test.initializer)) {
+        return test.initializer;
+      }
+      throw new Error('received a test that does not have a function initializer');
+    }
+    throw new Error(`received unparsable test: ${lastArgument.KIND}`);
   }
   get isCallbackTest(): boolean {
     const doneParameter = this.testFunction.parameters.at(0);
@@ -73,7 +90,12 @@ export class MochaTest {
   }
 
   get testBody(): ts.Block {
-    return this.testFunction.body;
+    const body = this.testFunction.body;
+    if (ts.isBlock(body)) {
+      return body;
+    }
+
+    return ts.factory.createBlock([ts.factory.createReturnStatement(body)]);
   }
 
   constructor(public node: MochaTestFunction) {
@@ -201,10 +223,15 @@ export function convert(sourceFile: ts.SourceFile) {
     return;
   }
 
-  const tests = find(sourceFile, node => isMochaTest(node));
+  // const transformedFile = makeFunctionParametersUnique(sourceFile);
+  const transformedFile = makeFunctionParametersUnique(sourceFile);
+
+  const tests = find(transformedFile, node => isMochaTest(node));
   for (const test of tests) {
     convertTest(new MochaTest(test as MochaTestFunction));
   }
+
+  return transformedFile;
 }
 
 export class DriverAPICallbackNode extends DriverAPINode {

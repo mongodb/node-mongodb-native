@@ -1,9 +1,27 @@
 import { expect } from 'chai';
 
-import { makeFunctionParametersUnique } from '../src/core';
+import {
+  arrowFunctionsExpressionToBodiedFunction,
+  makeFunctionParametersUnique
+} from '../src/core';
 import { formatSource, parseSource } from '../src/utils';
 
 describe('makeFunctionParametersUnique()', function () {
+  describe('regression tests', function () {
+    it('handles object prototype methods properly', async function () {
+      const source2 = `
+      client.connect((err, client) => {
+        client.toString();
+      })`;
+      const sourceFile = parseSource(source2);
+      expect(await formatSource(makeFunctionParametersUnique(sourceFile))).to.deep.equal(
+        await formatSource(`client.connect((err_0, client_1) => {
+          client_1.toString();
+        })`)
+      );
+    });
+  });
+
   describe('function declarations', function () {
     it('renames no parameters', async function () {
       const source = parseSource(`function foo() {
@@ -356,5 +374,62 @@ describe('makeFunctionParametersUnique()', function () {
           }`)
       );
     });
+  });
+});
+
+describe('arrowFunctionsExpressionToBodiedFunction', function () {
+  it('does nothing with no arrow functions', async function () {
+    const source = parseSource('3 + 3');
+    const result = await formatSource(arrowFunctionsExpressionToBodiedFunction(source));
+    const expected = await formatSource('3 + 3');
+    expect(result).to.deep.equal(expected);
+  });
+
+  it('converts an arrow function with expression', async function () {
+    const source = parseSource('() => 3');
+    const result = await formatSource(arrowFunctionsExpressionToBodiedFunction(source));
+    const expected = await formatSource('() => { return 3; }');
+    expect(result).to.deep.equal(expected);
+  });
+
+  it('handles arrow functions with parameters', async function () {
+    const source = parseSource('(a, b, c) => a + b + c');
+    const result = await formatSource(arrowFunctionsExpressionToBodiedFunction(source));
+    const expected = await formatSource('(a, b, c) => { return a + b + c; }');
+    expect(result).to.deep.equal(expected);
+  });
+
+  it('handles nested arrow functions', async function () {
+    const source = parseSource('a => b => c => a + b + c');
+    const result = await formatSource(arrowFunctionsExpressionToBodiedFunction(source));
+    const expected = await formatSource(`(a) => {
+      return b => {
+        return c => {
+          return a + b + c;
+        }
+      }
+    }`);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it('handles mixed arrow functions with and without expressions', async function () {
+    const source = parseSource(`a => b => {
+      const x = a + b;
+      return (c) => function() {
+        return x + c;
+      }
+    `);
+    const result = await formatSource(arrowFunctionsExpressionToBodiedFunction(source));
+    const expected = await formatSource(`(a) => {
+      return b => {
+        const x = a + b;
+        return c => {
+          return function() {
+            return x + c;
+          }
+        }
+      }
+    }`);
+    expect(result).to.deep.equal(expected);
   });
 });
