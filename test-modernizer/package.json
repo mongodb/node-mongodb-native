@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npx tsc",
-    "test": "npm run build && npx mocha --config .mocharc dist/test/*test.js",
+    "test": "npm run build && npx mocha --config .mocharc dist/test/**/*test.js",
     "run": "ts-node src/index.ts"
   },
   "keywords": [],
@@ -14,13 +14,17 @@
   "dependencies": {
     "@ts-morph/bootstrap": "^0.23.0",
     "@types/prettier": "^3.0.0",
+    "joi": "^17.13.1",
+    "js-yaml": "^4.1.0",
     "prettier": "^3.2.5",
     "ts-morph": "^22.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "devDependencies": {
+    "@types/joi": "^17.2.3",
     "@types/mocha": "^10.0.6",
+    "@types/node": "^20.12.12",
     "mocha": "^10.4.0"
   }
 }

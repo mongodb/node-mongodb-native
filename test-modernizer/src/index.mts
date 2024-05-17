@@ -36,6 +36,5 @@ const files = Array.from(walk(process.argv.at(-1))).filter(p => {
   return name.includes('test') && ['.js', '.ts'].includes(ext);
 });
 for (const file of files) {
-  console.log('converting file: ', file);
   await makeTestDefinitionsUniform(file);
 }

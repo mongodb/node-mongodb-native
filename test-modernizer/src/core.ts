@@ -4,6 +4,12 @@ import * as ts from 'typescript';
 import { isMochaGroup, isMochaTest } from './driver';
 import { nodeExists } from './utils';
 
+declare module 'typescript' {
+  export interface Node {
+    KIND?: string;
+  }
+}
+
 export function makeFunctionParametersUnique(node: ts.SourceFile): ts.Node {
   let count = 0;
   const unique = s => `${s}_${count++}`;

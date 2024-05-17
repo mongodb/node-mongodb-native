@@ -1,0 +1,71 @@
+
+Cursor:
+  id:
+    type: int64
+    required: true
+
+  namespace:
+    required: false
+    type: string
+
+  firstBatch:
+    type: array
+
+  nextBatch:
+    type: array
+
+ClusterTime:
+  clusterTime:
+    type: timestamp
+    required: true
+
+  signature:
+    type: object
+    # deserialize immediately by calling toObject
+    forceDeserialize: true
+    required: false
+
+ServerResponse:
+  ok:
+    type: number
+    required: true
+
+  operationTime:
+    type: timestamp
+    required: false
+
+  cursor:
+    type: Cursor
+    required: false
+
+  atClusterTime:
+    required: false
+    type: timestamp
+    $oneOf:
+      # cursor must implicitly be interpreted as an Object
+      - cursor.atClusterTime
+      - atClusterTime
+
+  $err:
+    type: string
+    required: false
+
+  errmsg:
+    type: string
+    required: false
+
+  code:
+    type: number
+    required: false
+
+  clusterTime:
+    type: ClusterTime
+    required: false
+
+  recoveryToken:
+    type: object
+    required: false
+    deserializeOptions:
+      promoteValues: false
+      promoteLongs: false
+      promoteBuffers: false

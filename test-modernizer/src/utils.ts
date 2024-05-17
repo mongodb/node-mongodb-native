@@ -2,6 +2,7 @@ import { createProjectSync } from '@ts-morph/bootstrap';
 import * as prettier from 'prettier';
 import { type Writable } from 'stream';
 import * as ts from 'typescript';
+import { inspect } from 'util';
 
 export function annotate(child: ts.Node) {
   child.KIND = ts.SyntaxKind[child.kind];
@@ -91,4 +92,8 @@ export function parseSource(source: string) {
   const resultFile = project.createSourceFile('someFileName.ts', source);
   annotate(resultFile);
   return resultFile;
+}
+
+export async function log(...args) {
+  console.error(inspect(args, { depth: Infinity }));
 }
