@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, isHello, type MongoClient, MongoServerError } from '../../mongodb';
-import * as mock from '../../tools/mongodb-mock/index';
+import { Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 

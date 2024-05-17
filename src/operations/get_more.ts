@@ -1,4 +1,4 @@
-import type { Document, Long } from '../bson';
+import type { Long } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
@@ -56,7 +56,10 @@ export class GetMoreOperation extends AbstractOperation {
    * Although there is a server already associated with the get more operation, the signature
    * for execute passes a server so we will just use that one.
    */
-  override async execute(server: Server, _session: ClientSession | undefined): Promise<CursorResponse> {
+  override async execute(
+    server: Server,
+    _session: ClientSession | undefined
+  ): Promise<CursorResponse> {
     if (server !== this.server) {
       throw new MongoRuntimeError('Getmore must run on the same server operation began on');
     }
@@ -97,12 +100,7 @@ export class GetMoreOperation extends AbstractOperation {
       ...this.options
     };
 
-    return await server.command(
-      this.ns,
-      getMoreCmd,
-      commandOptions,
-      CursorResponse
-    );
+    return await server.command(this.ns, getMoreCmd, commandOptions, CursorResponse);
   }
 }
 

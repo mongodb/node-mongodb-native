@@ -1,7 +1,7 @@
 import { Readable, Transform } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
-import { CursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorResponse } from '../cmap/wire_protocol/responses';
 import {
   type AnyError,
   MongoAPIError,
