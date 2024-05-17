@@ -468,7 +468,7 @@ describe('Collection', function () {
       });
     });
 
-    context('when aggregation fails', () => {
+    describe('when aggregation fails', { requires: { mongodb: '>=4.4' } }, () => {
       beforeEach(async function () {
         await client
           .db()
