@@ -4,8 +4,6 @@ import * as joi from 'joi';
 import { load } from 'js-yaml';
 import * as ts from 'typescript';
 
-import { log } from '../utils';
-
 async function readYaml(filename: string): Promise<any> {
   const contents = await readFile(filename, 'utf-8');
   return load(contents);
@@ -55,6 +53,52 @@ export async function readSpecification(filename: string) {
   return readInputSchema(await readYaml(filename));
 }
 
+function getBSONType(
+  bsonType: string,
+  representation: 'on demand bson access type'
+): ts.PropertyAccessExpression;
+function getBSONType(bsonType: string, representation: 'type literal node'): ts.TypeReferenceNode;
+function getBSONType(
+  bsonType: string,
+  representation: 'on demand bson access type' | 'type literal node'
+): ts.TypeReferenceNode | ts.PropertyAccessExpression {
+  const BSON_TYPES: {
+    [key: string]: {
+      typeLiteral: string;
+      node: () => ts.PropertyAccessExpression;
+    };
+  } = {
+    int64: {
+      typeLiteral: 'BigInt',
+      node: () => {
+        return ts.factory.createPropertyAccessExpression(
+          ts.factory.createIdentifier('BSONType'),
+          'long'
+        );
+      }
+    },
+    array: {
+      typeLiteral: 'OnDemandArray',
+      node: () => {
+        return ts.factory.createPropertyAccessExpression(
+          ts.factory.createIdentifier('BSONType'),
+          'array'
+        );
+      }
+    }
+  };
+
+  const type = BSON_TYPES[bsonType];
+  switch (representation) {
+    case 'on demand bson access type':
+      return type.node();
+    case 'type literal node':
+      return ts.factory.createTypeReferenceNode(type.typeLiteral);
+    default:
+      throw new Error(`unsupported bson type: ${bsonType}`);
+  }
+}
+
 function generateClassDefinition(
   model: ReturnType<typeof readInputSchema>[number]
 ): ts.ClassDeclaration {
@@ -64,23 +108,16 @@ function generateClassDefinition(
   const getterProperties = modelProperties.filter(property => property.lazy);
   const constructorProperties = modelProperties.filter(property => !property.lazy);
 
-  function getType(type: string) {
-    switch (type) {
-      case 'int64':
-        return 'BigInt';
-      case 'array':
-        return 'OnDemandArray';
-    }
-  }
-
   function makePropertyGetters() {
     return getterProperties.map(property => {
       assert(property.lazy);
 
+      const literal = getBSONType(property.type, 'type literal node');
+
       const typeNode = property.required
-        ? ts.factory.createTypeReferenceNode(getType(property.type))
+        ? literal
         : ts.factory.createUnionTypeNode([
-            ts.factory.createTypeReferenceNode(getType(property.type)),
+            literal,
             ts.factory.createLiteralTypeNode(ts.factory.createNull())
           ]);
 
@@ -94,26 +131,6 @@ function generateClassDefinition(
     });
   }
 
-  // given a bson type, return the appropropriate BSON type access (i.e., int64 -> BSONType.long)
-  function makeBSONType(type: string): ts.Expression {
-    const _type = (() => {
-      switch (type) {
-        case 'int64':
-          return 'long';
-        case 'string':
-          return 'string';
-        case 'array':
-          return 'array';
-        default:
-          throw new Error('unsupported type.');
-      }
-    })();
-    return ts.factory.createPropertyAccessExpression(
-      ts.factory.createIdentifier('BSONType'),
-      _type
-    );
-  }
-
   function makeOnDemandBSONAccess(property: (typeof model)['properties'][number]): ts.Expression {
     const required = property.required ? ts.factory.createTrue() : ts.factory.createFalse();
     return ts.factory.createCallExpression(
@@ -122,7 +139,11 @@ function generateClassDefinition(
         'get'
       ),
       [] /** type arguments */,
-      [ts.factory.createStringLiteral(property.name), makeBSONType(property.type), required]
+      [
+        ts.factory.createStringLiteral(property.name),
+        getBSONType(property.type, 'on demand bson access type'),
+        required
+      ]
     );
   }
 
@@ -160,10 +181,11 @@ function generateClassDefinition(
 
   function makeConstructedFieldPropertyDeclarations() {
     return constructorProperties.map(property => {
+      const literal = getBSONType(property.type, 'type literal node');
       const typeNode = property.required
-        ? ts.factory.createTypeReferenceNode(getType(property.type))
+        ? literal
         : ts.factory.createUnionTypeNode([
-            ts.factory.createTypeReferenceNode(getType(property.type)),
+            literal,
             ts.factory.createLiteralTypeNode(ts.factory.createNull())
           ]);
 
