@@ -653,9 +653,6 @@ export abstract class AbstractCursor<
       const state = await this._initialize(this[kSession]);
       const response = state.response;
       this[kServer] = state.server;
-
-      if (!CursorResponse.is(response)) throw new Error('ah');
-
       this[kId] = response.id;
       this[kNamespace] = response.ns ?? this[kNamespace];
       this[kDocuments] = response;

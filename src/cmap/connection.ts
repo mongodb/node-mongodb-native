@@ -1,14 +1,15 @@
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
-import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
-import type { AutoEncrypter } from '../client-side-encryption/auto_encrypter';
+import { type BSONSerializeOptions, deserialize, type Document, type ObjectId } from '../bson';
+import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import {
   CLOSE,
   CLUSTER_TIME_RECEIVED,
   COMMAND_FAILED,
   COMMAND_STARTED,
   COMMAND_SUCCEEDED,
+  kDecorateResult,
   PINNED,
   UNPINNED
 } from '../constants';
@@ -33,6 +34,7 @@ import {
   BufferPool,
   calculateDurationInMs,
   type Callback,
+  decorateDecryptionResult,
   HostAddress,
   maxWireVersion,
   type MongoDBNamespace,
@@ -721,7 +723,7 @@ export class CryptoConnection extends Connection {
     ns: MongoDBNamespace,
     cmd: Document,
     options?: CommandOptions,
-    _responseType?: T | undefined
+    responseType?: T | undefined
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {
@@ -735,7 +737,7 @@ export class CryptoConnection extends Connection {
     const serverWireVersion = maxWireVersion(this);
     if (serverWireVersion === 0) {
       // This means the initial handshake hasn't happened yet
-      return await super.command<T>(ns, cmd, options, undefined);
+      return await super.command<T>(ns, cmd, options, responseType);
     }
 
     if (serverWireVersion < 8) {
@@ -769,8 +771,25 @@ export class CryptoConnection extends Connection {
       }
     }
 
-    const response = await super.command<T>(ns, encrypted, options, undefined);
+    const encryptedResponse: MongoDBResponse = (await super.command<T>(
+      ns,
+      encrypted,
+      options,
+      (responseType ?? MongoDBResponse) as any
+    )) as unknown as MongoDBResponse;
 
-    return await autoEncrypter.decrypt(response, options);
+    const result = await autoEncrypter.decrypt(encryptedResponse.toBytes(), options);
+
+    const decryptedResponse = responseType?.make(result) ?? deserialize(result, options);
+
+    if (autoEncrypter[kDecorateResult]) {
+      if (responseType == null) {
+        decorateDecryptionResult(decryptedResponse, encryptedResponse.toObject(), true);
+      } else {
+        decryptedResponse.encryptedResponse = encryptedResponse;
+      }
+    }
+
+    return decryptedResponse;
   }
 }

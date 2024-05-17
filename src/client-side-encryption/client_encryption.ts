@@ -5,7 +5,7 @@ import type {
   MongoCryptOptions
 } from 'mongodb-client-encryption';
 
-import { type Binary, type Document, type Long, serialize, type UUID } from '../bson';
+import { type Binary, deserialize, type Document, type Long, serialize, type UUID } from '../bson';
 import { type AnyBulkWriteOperation, type BulkWriteResult } from '../bulk/common';
 import { type ProxyOptions } from '../cmap/connection';
 import { type Collection } from '../collection';
@@ -202,7 +202,7 @@ export class ClientEncryption {
       tlsOptions: this._tlsOptions
     });
 
-    const dataKey = await stateMachine.execute<DataKey>(this, context);
+    const dataKey = deserialize(await stateMachine.execute(this, context)) as DataKey;
 
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
       this._keyVaultNamespace
@@ -259,7 +259,7 @@ export class ClientEncryption {
       tlsOptions: this._tlsOptions
     });
 
-    const { v: dataKeys } = await stateMachine.execute<{ v: DataKey[] }>(this, context);
+    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context));
     if (dataKeys.length === 0) {
       return {};
     }
@@ -640,7 +640,7 @@ export class ClientEncryption {
       tlsOptions: this._tlsOptions
     });
 
-    const { v } = await stateMachine.execute<{ v: T }>(this, context);
+    const { v } = deserialize(await stateMachine.execute(this, context));
 
     return v;
   }
@@ -719,7 +719,7 @@ export class ClientEncryption {
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
-    const result = await stateMachine.execute<{ v: Binary }>(this, context);
+    const result = deserialize(await stateMachine.execute(this, context));
     return result.v;
   }
 }

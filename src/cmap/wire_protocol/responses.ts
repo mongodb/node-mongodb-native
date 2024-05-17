@@ -10,7 +10,7 @@ import {
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
-import { ns } from '../../utils';
+import { decorateDecryptionResult, ns } from '../../utils';
 import { OnDemandDocument } from './on_demand/document';
 
 // eslint-disable-next-line no-restricted-syntax
@@ -169,6 +169,9 @@ export class MongoDBResponse extends OnDemandDocument {
     }
     return { utf8: { writeErrors: false } };
   }
+
+  // TODO: Supports decorating result
+  encryptedResponse?: MongoDBResponse;
 }
 
 // Here's a litle blast from the past.
@@ -220,6 +223,21 @@ export class CursorResponse extends MongoDBResponse {
     return Math.max(this.batchSize - this.iterated, 0);
   }
 
+  private _encryptedBatch: OnDemandDocument | null = null;
+  get encryptedBatch() {
+    if (this.encryptedResponse == null) return null;
+    if (this._encryptedBatch != null) return this._encryptedBatch;
+
+    const cursor = this.encryptedResponse?.get('cursor', BSONType.object);
+    if (cursor?.has('firstBatch'))
+      this._encryptedBatch = cursor.get('firstBatch', BSONType.array, true);
+    else if (cursor?.has('nextBatch'))
+      this._encryptedBatch = cursor.get('nextBatch', BSONType.array, true);
+    else throw new MongoUnexpectedServerResponseError('Cursor document did not contain a batch');
+
+    return this._encryptedBatch;
+  }
+
   private get batch() {
     if (this._batch != null) return this._batch;
     const cursor = this.cursor;
@@ -249,12 +267,18 @@ export class CursorResponse extends MongoDBResponse {
     }
 
     const result = this.batch.get(this.iterated, BSONType.object, true) ?? null;
+    const encryptedResult = this.encryptedBatch?.get(this.iterated, BSONType.object, true) ?? null;
+
     this.iterated += 1;
 
     if (options?.raw) {
       return result.toBytes();
     } else {
-      return result.toObject(options);
+      const object = result.toObject(options);
+      if (encryptedResult) {
+        decorateDecryptionResult(object, encryptedResult.toObject(options), true);
+      }
+      return object;
     }
   }
 
