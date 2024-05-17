@@ -53,49 +53,158 @@ export async function readSpecification(filename: string) {
   return readInputSchema(await readYaml(filename));
 }
 
-function getBSONType(
-  bsonType: string,
-  representation: 'on demand bson access type'
-): ts.PropertyAccessExpression;
-function getBSONType(bsonType: string, representation: 'type literal node'): ts.TypeReferenceNode;
-function getBSONType(
-  bsonType: string,
-  representation: 'on demand bson access type' | 'type literal node'
-): ts.TypeReferenceNode | ts.PropertyAccessExpression {
+function getType(bsonType: string) {
   const BSON_TYPES: {
     [key: string]: {
       typeLiteral: string;
-      node: () => ts.PropertyAccessExpression;
+      bsonType: string;
     };
   } = {
     int64: {
       typeLiteral: 'BigInt',
-      node: () => {
-        return ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier('BSONType'),
-          'long'
-        );
-      }
+      bsonType: 'long'
     },
     array: {
       typeLiteral: 'OnDemandArray',
-      node: () => {
-        return ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier('BSONType'),
-          'array'
-        );
-      }
+      bsonType: 'array'
+    },
+    string: {
+      typeLiteral: 'string',
+      bsonType: 'string'
+    },
+    null: {
+      typeLiteral: 'null',
+      bsonType: 'null'
+    },
+    undefined: {
+      typeLiteral: 'null',
+      bsonType: 'undefined'
+    },
+    double: {
+      typeLiteral: 'number',
+      bsonType: 'double'
+    },
+    int32: {
+      typeLiteral: 'number',
+      bsonType: 'int'
+    },
+    timestamp: {
+      typeLiteral: 'Timestamp',
+      bsonType: 'timestamp'
+    },
+    binData: {
+      typeLiteral: 'Binary',
+      bsonType: 'binData'
+    },
+    boolean: {
+      typeLiteral: 'boolean',
+      bsonType: 'bool'
+    },
+    objectId: {
+      typeLiteral: 'ObjectId',
+      bsonType: 'objectId'
+    },
+    date: {
+      typeLiteral: 'Date',
+      bsonType: 'date'
+    },
+    object: {
+      typeLiteral: 'OnDemandDocument',
+      bsonType: 'object'
+    }
+  };
+  return bsonType in BSON_TYPES;
+}
+
+function getBSONType(
+  bsonType: string,
+  representation: 'on demand bson access type'
+): ts.PropertyAccessExpression | ts.NewExpression;
+function getBSONType(bsonType: string, representation: 'type literal node'): ts.TypeReferenceNode;
+function getBSONType(
+  bsonType: string,
+  representation: 'on demand bson access type' | 'type literal node'
+): ts.TypeReferenceNode | ts.PropertyAccessExpression | ts.NewExpression {
+  const BSON_TYPES: {
+    [key: string]: {
+      typeLiteral: string;
+      bsonType: string;
+    };
+  } = {
+    int64: {
+      typeLiteral: 'BigInt',
+      bsonType: 'long'
+    },
+    array: {
+      typeLiteral: 'OnDemandArray',
+      bsonType: 'array'
+    },
+    string: {
+      typeLiteral: 'string',
+      bsonType: 'string'
+    },
+    null: {
+      typeLiteral: 'null',
+      bsonType: 'null'
+    },
+    undefined: {
+      typeLiteral: 'null',
+      bsonType: 'undefined'
+    },
+    double: {
+      typeLiteral: 'number',
+      bsonType: 'double'
+    },
+    int32: {
+      typeLiteral: 'number',
+      bsonType: 'int'
+    },
+    timestamp: {
+      typeLiteral: 'Timestamp',
+      bsonType: 'timestamp'
+    },
+    binData: {
+      typeLiteral: 'Binary',
+      bsonType: 'binData'
+    },
+    boolean: {
+      typeLiteral: 'boolean',
+      bsonType: 'bool'
+    },
+    objectId: {
+      typeLiteral: 'ObjectId',
+      bsonType: 'objectId'
+    },
+    date: {
+      typeLiteral: 'Date',
+      bsonType: 'date'
+    },
+    object: {
+      typeLiteral: 'OnDemandDocument',
+      bsonType: 'object'
     }
   };
 
   const type = BSON_TYPES[bsonType];
+  if (type) {
+    switch (representation) {
+      case 'on demand bson access type':
+        return ts.factory.createPropertyAccessExpression(
+          ts.factory.createIdentifier('BSONType'),
+          type.bsonType
+        );
+      case 'type literal node':
+        return ts.factory.createTypeReferenceNode(type.typeLiteral);
+    }
+  }
+  // not a known BSON type - wrapper type.
   switch (representation) {
     case 'on demand bson access type':
-      return type.node();
+      return ts.factory.createNewExpression(ts.factory.createIdentifier(bsonType), undefined, [
+        ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response')
+      ]);
     case 'type literal node':
-      return ts.factory.createTypeReferenceNode(type.typeLiteral);
-    default:
-      throw new Error(`unsupported bson type: ${bsonType}`);
+      return ts.factory.createTypeReferenceNode(bsonType);
   }
 }
 
@@ -149,6 +258,9 @@ function generateClassDefinition(
 
   function makeConstructor(): ts.ConstructorDeclaration {
     const constructorAssignedProperties = constructorProperties.map(property => {
+      const initializer = getType(property.type)
+        ? makeOnDemandBSONAccess(property)
+        : getBSONType(property.type, 'on demand bson access type');
       return ts.factory.createExpressionStatement(
         ts.factory.createAssignment(
           ts.factory.createPropertyAccessChain(
@@ -156,7 +268,7 @@ function generateClassDefinition(
             undefined,
             property.name
           ),
-          makeOnDemandBSONAccess(property)
+          initializer
         )
       );
     });
@@ -166,7 +278,7 @@ function generateClassDefinition(
       [
         ts.factory.createParameterDeclaration(
           [
-            ts.factory.createModifier(ts.SyntaxKind.PublicKeyword),
+            ts.factory.createModifier(ts.SyntaxKind.PrivateKeyword),
             ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)
           ],
           undefined,
