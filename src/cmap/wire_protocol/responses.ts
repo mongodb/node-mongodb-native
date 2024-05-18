@@ -7,9 +7,9 @@ import {
   type Timestamp
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
-import { type ClusterTime } from '../../sdam/common';
+// import { type ClusterTime } from '../../sdam/common';
 import { type MongoDBNamespace, ns } from '../../utils';
-import { OnDemandDocument } from './on_demand/document';
+import { type OnDemandArray, OnDemandDocument } from './on_demand/document';
 
 // eslint-disable-next-line no-restricted-syntax
 const enum BSONElementOffset {
@@ -62,6 +62,12 @@ export type MongoDBResponseConstructor = {
   new (bson: Uint8Array, offset?: number, isArray?: boolean): MongoDBResponse;
 };
 
+export function isError(response: MongoDBResponse) {
+  return (
+    response.ok !== 0 || response.has('errmsg') || response.has('code') || response.has('$err')
+  );
+}
+
 /** @internal */
 export class MongoDBResponse extends OnDemandDocument {
   static is(value: unknown): value is MongoDBResponse {
@@ -70,15 +76,6 @@ export class MongoDBResponse extends OnDemandDocument {
 
   // {ok:1}
   static empty = new MongoDBResponse(new Uint8Array([13, 0, 0, 0, 16, 111, 107, 0, 1, 0, 0, 0, 0]));
-
-  /** Indicates this document is a server error */
-  public get isError() {
-    let isError = this.ok === 0;
-    isError ||= this.has('errmsg');
-    isError ||= this.has('code');
-    isError ||= this.has('$err'); // The '$err' field is used in OP_REPLY responses
-    return isError;
-  }
 
   /**
    * Drivers can safely assume that the `recoveryToken` field is always a BSON document but drivers MUST NOT modify the
@@ -142,29 +139,29 @@ export class MongoDBResponse extends OnDemandDocument {
     return this.clusterTime ?? null;
   }
 
-  public override toObject(options?: BSONSerializeOptions): Record<string, any> {
-    const exactBSONOptions = {
-      useBigInt64: options?.useBigInt64,
-      promoteLongs: options?.promoteLongs,
-      promoteValues: options?.promoteValues,
-      promoteBuffers: options?.promoteBuffers,
-      bsonRegExp: options?.bsonRegExp,
-      raw: options?.raw ?? false,
-      fieldsAsRaw: options?.fieldsAsRaw ?? {},
-      validation: this.parseBsonSerializationOptions(options)
-    };
-    return super.toObject(exactBSONOptions);
-  }
+  // public override toObject(options?: BSONSerializeOptions): Record<string, any> {
+  //   const exactBSONOptions = {
+  //     useBigInt64: options?.useBigInt64,
+  //     promoteLongs: options?.promoteLongs,
+  //     promoteValues: options?.promoteValues,
+  //     promoteBuffers: options?.promoteBuffers,
+  //     bsonRegExp: options?.bsonRegExp,
+  //     raw: options?.raw ?? false,
+  //     fieldsAsRaw: options?.fieldsAsRaw ?? {},
+  //     validation: this.parseBsonSerializationOptions(options)
+  //   };
+  //   return super.toObject(exactBSONOptions);
+  // }
 
-  private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
-    utf8: { writeErrors: false } | false;
-  } {
-    const enableUtf8Validation = options?.enableUtf8Validation;
-    if (enableUtf8Validation === false) {
-      return { utf8: false };
-    }
-    return { utf8: { writeErrors: false } };
-  }
+  // private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
+  //   utf8: { writeErrors: false } | false;
+  // } {
+  //   const enableUtf8Validation = options?.enableUtf8Validation;
+  //   if (enableUtf8Validation === false) {
+  //     return { utf8: false };
+  //   }
+  //   return { utf8: { writeErrors: false } };
+  // }
 }
 
 /** @internal */
@@ -233,5 +230,69 @@ export class CursorResponse extends MongoDBResponse {
 
   push() {
     throw new Error('push Unsupported method');
+  }
+}
+
+export class Cursor {
+  readonly id: bigint;
+  readonly ns: string | null = null;
+  readonly firstBatch: OnDemandArray | null = null;
+  readonly nextBatch: OnDemandArray | null = null;
+  readonly atClusterTime: Timestamp | null = null;
+  constructor(private readonly response: MongoDBResponse) {
+    this.id = this.response.get('id', BSONType.long, true);
+    this.ns = this.response.get('ns', BSONType.string, false);
+    this.firstBatch = this.response.get('firstBatch', BSONType.array, false);
+    this.nextBatch = this.response.get('nextBatch', BSONType.array, false);
+    this.atClusterTime = this.response.get('atClusterTime', BSONType.timestamp, false);
+  }
+}
+export class ClusterTime {
+  readonly clusterTime: Timestamp;
+  readonly signature: Document | null = null;
+  constructor(private readonly response: MongoDBResponse) {
+    this.clusterTime = this.response.get('clusterTime', BSONType.timestamp, true);
+    const signature = this.response.get('signature', BSONType.object, false);
+    if (signature != null) {
+      this.signature = signature.toObject();
+    }
+  }
+}
+export class ServerResponse {
+  get operationTime(): Timestamp | null {
+    return this.response.get('operationTime', BSONType.timestamp, false);
+  }
+  get cursor(): Cursor | null {
+    return new Cursor(this.response);
+  }
+  get atClusterTime(): Timestamp | null {
+    return this.response.get('atClusterTime', BSONType.timestamp, false);
+  }
+  get $err(): string | null {
+    return this.response.get('$err', BSONType.string, false);
+  }
+  get errmsg(): string | null {
+    return this.response.get('errmsg', BSONType.string, false);
+  }
+  get code(): number | null {
+    return this.response.getNumber('code', false);
+  }
+  get clusterTime(): ClusterTime | null {
+    return new ClusterTime(this.response);
+  }
+  get recoveryToken(): Document | null {
+    const recoveryToken = this.response.get('recoveryToken', BSONType.object, false);
+    if (recoveryToken != null) {
+      return recoveryToken.toObject({
+        promoteLongs: false,
+        promoteValues: false,
+        promoteBuffers: false
+      });
+    }
+    return null;
+  }
+  readonly ok: bigint;
+  constructor(private readonly response: MongoDBResponse) {
+    this.ok = this.response.get('ok', BSONType.long, true);
   }
 }

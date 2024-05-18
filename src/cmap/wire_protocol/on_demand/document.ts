@@ -336,3 +336,5 @@ export class OnDemandDocument {
     return this.bson.subarray(this.offset, this.offset + size);
   }
 }
+
+export class OnDemandArray extends OnDemandDocument {}

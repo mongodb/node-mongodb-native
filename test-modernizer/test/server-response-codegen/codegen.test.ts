@@ -1,14 +1,15 @@
 import { expect } from 'chai';
+import { readFileSync, writeFileSync } from 'fs';
+import { load } from 'js-yaml';
 import { test } from 'mocha';
+import { resolve } from 'path';
 
-import {
-  generateModelClasses,
-  type readInputSchema
-} from '../../src/server-response-codegen/codegen';
+import { generateModelClasses, readInputSchema } from '../../src/server-response-codegen/codegen';
 import { explore, formatSource, parseSource } from '../../src/utils';
 
 type Models = ReturnType<typeof readInputSchema>;
 type Model = Models[number];
+
 describe('Response Model Codegen', function () {
   describe('model generation', function () {
     it('does nothing on an empty specification', async function () {
@@ -42,7 +43,7 @@ describe('Response Model Codegen', function () {
           await formatSource(
             parseSource(
               `export class Cursor {
-	  readonly id: BigInt;
+	  readonly id: bigint;
 	  constructor(private readonly response: MongoDBResponse) {
 		  this.id = this.response.get('id', BSONType.long, true);
 	  }
@@ -64,7 +65,7 @@ describe('Response Model Codegen', function () {
           await formatSource(
             parseSource(
               `export class Cursor {
-	  get id() : BigInt {
+	  get id() : bigint {
       return this.response.get('id', BSONType.long, true);
 	  }
 	  constructor(private readonly response: MongoDBResponse) { }
@@ -86,7 +87,7 @@ describe('Response Model Codegen', function () {
           await formatSource(
             parseSource(
               `export class Cursor {
-	  readonly id: BigInt | null = null;
+	  readonly id: bigint | null = null;
 
 	  constructor(private readonly response: MongoDBResponse) {
 		this.id = this.response.get('id', BSONType.long, false);
@@ -109,7 +110,7 @@ describe('Response Model Codegen', function () {
           await formatSource(
             parseSource(
               `export class Cursor {
-	  get id() : BigInt | null {
+	  get id() : bigint | null {
 		return this.response.get('id', BSONType.long, false);
 	  }
 	  constructor(private readonly response: MongoDBResponse) { }
@@ -135,7 +136,7 @@ describe('Response Model Codegen', function () {
             await formatSource(
               parseSource(
                 `export class Cursor {
-		  readonly id: BigInt;
+		  readonly id: bigint;
 		  readonly batch: OnDemandArray;
 		  constructor(private readonly response: MongoDBResponse) {
 			  this.id = this.response.get('id', BSONType.long, true);
@@ -165,7 +166,7 @@ describe('Response Model Codegen', function () {
       get batch(): OnDemandArray | null {
         return this.response.get('batch', BSONType.array, false);
       }
-			readonly id: BigInt;
+			readonly id: bigint;
 			constructor(private readonly response: MongoDBResponse) {
 				this.id = this.response.get('id', BSONType.long, true);
 			}
@@ -202,7 +203,7 @@ class Foo {
           await formatSource(
             parseSource(
               `export class Cursor {
-	  readonly id: BigInt;
+	  readonly id: bigint;
 	  constructor(private readonly response: MongoDBResponse) {
 		  this.id = this.response.get('id', BSONType.long, true);
 	  }
@@ -496,7 +497,7 @@ class Foo {
             parseSource(
               `
 export class Cursor {
-  readonly id: BigInt;
+  readonly id: bigint;
   constructor(private readonly response: MongoDBResponse) {
     this.id = this.response.get('id', BSONType.long, true);
   }
@@ -513,6 +514,273 @@ export class CursorWrapper {
           )
         );
       });
+    });
+
+    describe('force deserialization', function () {
+      describe('no custom deserialization options', function () {
+        it('supports a custom type, deserializedObject (required eager property)', async function () {
+          const models: Model[] = [
+            {
+              className: 'Cursor',
+              properties: [{ type: 'deserializedObject', name: 'id', lazy: false, required: true }]
+            }
+          ];
+          const output = generateModelClasses(models);
+
+          expect(await formatSource(output)).to.deep.equal(
+            await formatSource(
+              parseSource(
+                `
+  export class Cursor {
+    readonly id: Document;
+    constructor(private readonly response: MongoDBResponse) {
+      this.id = this.response
+        .get('id', BSONType.object, true)
+        .toObject();
+    }
+  }
+  `
+              )
+            )
+          );
+        });
+
+        it('supports a custom type, deserializedObject (optional eager property)', async function () {
+          const models: Model[] = [
+            {
+              className: 'Cursor',
+              properties: [{ type: 'deserializedObject', name: 'id', lazy: false, required: false }]
+            }
+          ];
+          const output = generateModelClasses(models);
+
+          expect(await formatSource(output)).to.deep.equal(
+            await formatSource(
+              parseSource(
+                `
+  export class Cursor {
+    readonly id: Document | null = null;
+    constructor(private readonly response: MongoDBResponse) {
+      const id = this.response.get('id', BSONType.object, false);
+      if (id != null) {
+        this.id = id.toObject();
+      }
+    }
+  }
+  `
+              )
+            )
+          );
+        });
+
+        it('supports a custom type, deserializedObject (optional lazy property)', async function () {
+          const models: Model[] = [
+            {
+              className: 'Cursor',
+              properties: [{ type: 'deserializedObject', name: 'id', lazy: true, required: false }]
+            }
+          ];
+          const output = generateModelClasses(models);
+
+          expect(await formatSource(output)).to.deep.equal(
+            await formatSource(
+              parseSource(
+                `
+  export class Cursor {
+    get id() : Document | null {
+      const id = this.response.get('id', BSONType.object, false);
+      if (id != null) {
+        return id.toObject();
+      }
+      return null;
+    }
+    constructor(private readonly response: MongoDBResponse) { }
+  }
+  `
+              )
+            )
+          );
+        });
+
+        it('supports a custom type, deserializedObject (required lazy property)', async function () {
+          const models: Model[] = [
+            {
+              className: 'Cursor',
+              properties: [{ type: 'deserializedObject', name: 'id', lazy: true, required: true }]
+            }
+          ];
+          const output = generateModelClasses(models);
+
+          expect(await formatSource(output)).to.deep.equal(
+            await formatSource(
+              parseSource(
+                `
+  export class Cursor {
+    get id() : Document {
+      return this.response.get('id', BSONType.object, true).toObject();
+    }
+    constructor(private readonly response: MongoDBResponse) { }
+  }
+  `
+              )
+            )
+          );
+        });
+      });
+
+      describe('custom deserialization options', function () {
+        it('supports a custom type, deserializedObject (required eager property)', async function () {
+          const models: Model[] = [
+            {
+              className: 'Cursor',
+              properties: [
+                {
+                  type: 'deserializedObject',
+                  name: 'id',
+                  lazy: false,
+                  required: true,
+                  deserializeOptions: { promoteLongs: false, promoteValues: false }
+                }
+              ]
+            }
+          ];
+          const output = generateModelClasses(models);
+
+          expect(await formatSource(output)).to.deep.equal(
+            await formatSource(
+              parseSource(
+                `
+  export class Cursor {
+    readonly id: Document;
+    constructor(private readonly response: MongoDBResponse) {
+      this.id = this.response
+        .get('id', BSONType.object, true)
+        .toObject({ promoteLongs: false, promoteValues: false });
+    }
+  }
+  `
+              )
+            )
+          );
+        });
+
+        it('supports a custom type, deserializedObject (optional eager property)', async function () {
+          const models: Model[] = [
+            {
+              className: 'Cursor',
+              properties: [
+                {
+                  type: 'deserializedObject',
+                  name: 'id',
+                  lazy: false,
+                  required: false,
+                  deserializeOptions: { promoteLongs: false, promoteValues: false }
+                }
+              ]
+            }
+          ];
+          const output = generateModelClasses(models);
+
+          expect(await formatSource(output)).to.deep.equal(
+            await formatSource(
+              parseSource(
+                `
+  export class Cursor {
+    readonly id: Document | null = null;
+    constructor(private readonly response: MongoDBResponse) {
+      const id = this.response.get('id', BSONType.object, false);
+      if (id != null) {
+        this.id = id.toObject({ promoteLongs: false, promoteValues: false });
+      }
+    }
+  }
+  `
+              )
+            )
+          );
+        });
+
+        it('supports a custom type, deserializedObject (optional lazy property)', async function () {
+          const models: Model[] = [
+            {
+              className: 'Cursor',
+              properties: [
+                {
+                  type: 'deserializedObject',
+                  name: 'id',
+                  lazy: true,
+                  required: false,
+                  deserializeOptions: { promoteLongs: false, promoteValues: false }
+                }
+              ]
+            }
+          ];
+          const output = generateModelClasses(models);
+
+          expect(await formatSource(output)).to.deep.equal(
+            await formatSource(
+              parseSource(
+                `
+  export class Cursor {
+    get id() : Document | null {
+      const id = this.response.get('id', BSONType.object, false);
+      if (id != null) {
+        return id.toObject({ promoteLongs: false, promoteValues: false });
+      }
+      return null;
+    }
+    constructor(private readonly response: MongoDBResponse) { }
+  }
+  `
+              )
+            )
+          );
+        });
+
+        it('supports a custom type, deserializedObject (required lazy property)', async function () {
+          const models: Model[] = [
+            {
+              className: 'Cursor',
+              properties: [
+                {
+                  type: 'deserializedObject',
+                  name: 'id',
+                  lazy: true,
+                  required: true,
+                  deserializeOptions: { promoteLongs: false, promoteValues: false }
+                }
+              ]
+            }
+          ];
+          const output = generateModelClasses(models);
+
+          expect(await formatSource(output)).to.deep.equal(
+            await formatSource(
+              parseSource(
+                `
+  export class Cursor {
+    get id() : Document {
+      return this.response.get('id', BSONType.object, true).toObject({ promoteLongs: false, promoteValues: false });
+    }
+    constructor(private readonly response: MongoDBResponse) { }
+  }
+  `
+              )
+            )
+          );
+        });
+      });
+    });
+  });
+
+  describe('integration test', function () {
+    test('asdf', async function () {
+      const yaml = readFileSync(
+        resolve(__dirname, '../../../src/server-response-codegen/cursor_response.yml'),
+        'utf-8'
+      );
+      const classes = generateModelClasses(readInputSchema(load(yaml)));
+      writeFileSync('out.ts', await formatSource(classes));
     });
   });
 });

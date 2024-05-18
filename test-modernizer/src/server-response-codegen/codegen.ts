@@ -13,12 +13,19 @@ export function readInputSchema(input: Record<string, unknown>) {
   const classes: ReturnType<typeof Model>[] = [];
 
   function Model(className: string, object: any) {
-    const result: { type: string; required: boolean; lazy: boolean; name: string }[] = [];
+    const result: {
+      type: string;
+      required: boolean;
+      lazy: boolean;
+      name: string;
+      deserializeOptions?: Record<string, boolean>;
+    }[] = [];
 
     const fieldSchema = joi.object({
       type: joi.string().required(),
       required: joi.boolean().default(false),
-      lazy: joi.boolean().default(false)
+      lazy: joi.boolean().default(false),
+      deserializeOptions: joi.object()
     });
 
     for (const [property, definition] of Object.entries(object)) {
@@ -61,7 +68,7 @@ function getType(bsonType: string) {
     };
   } = {
     int64: {
-      typeLiteral: 'BigInt',
+      typeLiteral: 'bigint',
       bsonType: 'long'
     },
     array: {
@@ -132,7 +139,7 @@ function getBSONType(
     };
   } = {
     int64: {
-      typeLiteral: 'BigInt',
+      typeLiteral: 'bigint',
       bsonType: 'long'
     },
     array: {
@@ -197,6 +204,18 @@ function getBSONType(
         return ts.factory.createTypeReferenceNode(type.typeLiteral);
     }
   }
+
+  if (bsonType === 'deserializedObject') {
+    switch (representation) {
+      case 'on demand bson access type':
+        return ts.factory.createPropertyAccessExpression(
+          ts.factory.createIdentifier('BSONType'),
+          'object'
+        );
+      case 'type literal node':
+        return ts.factory.createTypeReferenceNode('Document');
+    }
+  }
   // not a known BSON type - wrapper type.
   switch (representation) {
     case 'on demand bson access type':
@@ -206,6 +225,19 @@ function getBSONType(
     case 'type literal node':
       return ts.factory.createTypeReferenceNode(bsonType);
   }
+}
+
+function accessThis(property: string, initializer: ts.Expression): ts.ExpressionStatement {
+  return ts.factory.createExpressionStatement(
+    ts.factory.createAssignment(
+      ts.factory.createPropertyAccessChain(
+        ts.factory.createIdentifier('this'),
+        undefined,
+        property
+      ),
+      initializer
+    )
+  );
 }
 
 function generateClassDefinition(
@@ -230,12 +262,26 @@ function generateClassDefinition(
             ts.factory.createLiteralTypeNode(ts.factory.createNull())
           ]);
 
+      const statement = (() => {
+        if (property.type === 'deserializedObject') {
+          return makeOpaqueObjectInitializationExpression(property);
+        }
+        if (property.type === 'number') {
+          return [ts.factory.createReturnStatement(makeGetNumber(property))];
+        }
+        const initializer = getType(property.type)
+          ? makeOnDemandBSONAccess(property)
+          : getBSONType(property.type, 'on demand bson access type');
+
+        return [ts.factory.createReturnStatement(initializer)];
+      })();
+
       return ts.factory.createGetAccessorDeclaration(
         [],
         property.name,
         [],
         typeNode,
-        ts.factory.createBlock([ts.factory.createReturnStatement(makeOnDemandBSONAccess(property))])
+        ts.factory.createBlock([...statement])
       );
     });
   }
@@ -256,21 +302,112 @@ function generateClassDefinition(
     );
   }
 
+  function makeGetNumber(property: (typeof model)['properties'][number]): ts.Expression {
+    const required = property.required ? ts.factory.createTrue() : ts.factory.createFalse();
+    return ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(
+        ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response'),
+        'getNumber'
+      ),
+      [] /** type arguments */,
+      [ts.factory.createStringLiteral(property.name), required]
+    );
+  }
+  function makeOpaqueObjectInitializationExpression(
+    property: (typeof model)['properties'][number]
+  ): ts.Statement[] {
+    // this.response.get(<name>, BSONType.object, required?);
+    const onDemandAccessExpression = makeOnDemandBSONAccess(property);
+    const deserializationOptions =
+      property.deserializeOptions &&
+      ts.factory.createObjectLiteralExpression(
+        Object.entries(property.deserializeOptions).map(([option, value]) => {
+          return ts.factory.createPropertyAssignment(
+            option,
+            value ? ts.factory.createTrue() : ts.factory.createFalse()
+          );
+        })
+      );
+    if (property.required) {
+      // <onDemandAccessExpression>.toObject(...);
+      if (property.lazy) {
+        return [
+          ts.factory.createReturnStatement(
+            ts.factory.createCallExpression(
+              ts.factory.createPropertyAccessExpression(onDemandAccessExpression, 'toObject'),
+              [],
+              deserializationOptions ? [deserializationOptions] : []
+            )
+          )
+        ];
+      }
+      return [
+        accessThis(
+          property.name,
+          ts.factory.createCallExpression(
+            ts.factory.createPropertyAccessExpression(onDemandAccessExpression, 'toObject'),
+            [],
+            deserializationOptions ? [deserializationOptions] : []
+          )
+        )
+      ];
+    }
+
+    const assignment = ts.factory.createVariableStatement(
+      [],
+      ts.factory.createVariableDeclarationList(
+        [
+          ts.factory.createVariableDeclaration(
+            property.name,
+            undefined,
+            undefined,
+            onDemandAccessExpression
+          )
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+
+    const callExpression = ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(
+        ts.factory.createIdentifier(property.name),
+        'toObject'
+      ),
+      [],
+      deserializationOptions ? [deserializationOptions] : []
+    );
+
+    const ifStatement = ts.factory.createIfStatement(
+      ts.factory.createBinaryExpression(
+        ts.factory.createIdentifier(property.name),
+        ts.SyntaxKind.ExclamationEqualsToken,
+        ts.factory.createNull()
+      ),
+      ts.factory.createBlock([
+        property.lazy
+          ? ts.factory.createReturnStatement(callExpression)
+          : accessThis(property.name, callExpression)
+      ])
+    );
+
+    return property.lazy
+      ? [assignment, ifStatement, ts.factory.createReturnStatement(ts.factory.createNull())]
+      : [assignment, ifStatement];
+  }
+
   function makeConstructor(): ts.ConstructorDeclaration {
-    const constructorAssignedProperties = constructorProperties.map(property => {
+    const constructorAssignedProperties = constructorProperties.flatMap(property => {
+      if (property.type === 'deserializedObject') {
+        return makeOpaqueObjectInitializationExpression(property);
+      }
+      if (property.type === 'number') {
+        return [accessThis(property.name, makeGetNumber(property))];
+      }
       const initializer = getType(property.type)
         ? makeOnDemandBSONAccess(property)
         : getBSONType(property.type, 'on demand bson access type');
-      return ts.factory.createExpressionStatement(
-        ts.factory.createAssignment(
-          ts.factory.createPropertyAccessChain(
-            ts.factory.createIdentifier('this'),
-            undefined,
-            property.name
-          ),
-          initializer
-        )
-      );
+
+      return [accessThis(property.name, initializer)];
     });
 
     return ts.factory.createConstructorDeclaration(
@@ -343,230 +480,3 @@ export function generateModelClasses(schema: ReturnType<typeof readInputSchema>)
 
   return sourceFile;
 }
-
-// function onDemandBSONGet(name: string, bsonType: string, required: boolean) {
-//   const _bsonType = getBSONType(bsonType);
-//   const _required = required ? ts.factory.createTrue() : ts.factory.createFalse();
-//   const call = ts.factory.createCallExpression(
-//     ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier('response'), 'get'),
-//     undefined,
-//     [ts.factory.createStringLiteral(name), _bsonType, _required]
-//   );
-
-//   const assignment = ts.factory.createAssignment(
-//     ts.factory.createPropertyAccessExpression(ts.factory.createThis(), name),
-//     call
-//   );
-
-//   return assignment;
-// }
-
-// class ClassDefinitionBuilder {
-//   exported?: boolean;
-//   private members: ts.ClassElement[] = [];
-//   private constructorInitilizers: ts.Statement[] = [];
-
-//   constructor(private name: string) {
-//     this.name = name;
-//   }
-
-//   addMember(member: ts.ClassElement) {
-//     this.members.push(member);
-//   }
-
-//   addInit(init: ts.Statement) {
-//     this.constructorInitilizers.push(init);
-//   }
-
-//   build() {
-//     const exported = this.exported ? [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)] : [];
-//     const constructor_ = ts.factory.createConstructorDeclaration(
-//       undefined,
-//       [
-//         ts.factory.createParameterDeclaration(
-//           undefined,
-//           undefined,
-//           'response',
-//           undefined,
-//           ts.factory.createTypeReferenceNode('MongoDBResponse'),
-//           undefined /** initializer */
-//         )
-//       ],
-//       ts.factory.createBlock(this.constructorInitilizers, true /** multiline */)
-//     );
-//     return ts.factory.createClassDeclaration(exported, this.name, undefined, undefined, [
-//       ...this.members,
-//       constructor_
-//     ]);
-//   }
-// }
-
-// async function main(sourceFile: string, destination: string) {
-//   const contents = await readYaml(sourceFile);
-
-//   const classDef = {
-//     name: 'Cursor',
-//     fields: {
-//       id: {
-//         type: 'int64',
-//         required: true
-//       },
-//       namespace: {
-//         type: 'string',
-//         required: false
-//       },
-//       firstBatch: {
-//         type: 'array',
-//         required: false
-//       },
-//       nextBatch: {
-//         type: 'array',
-//         required: false
-//       }
-//     }
-//   };
-
-//   const { name, fields } = classDef;
-//   const builder = new ClassDefinitionBuilder(name);
-//   builder.exported = true;
-//   for (const [field, definition] of Object.entries(fields)) {
-//     const node = ts.factory.createPropertyDeclaration(
-//       /** modifiers */ undefined,
-//       field,
-//       /** required? */ undefined,
-//       ts.factory.createKeywordTypeNode(ts.SyntaxKind.BigIntKeyword),
-//       undefined
-//     );
-
-//     const _initStatement = onDemandBSONGet(field, definition.type, definition.required);
-
-//     builder.addMember(node);
-//     builder.addInit(ts.factory.createExpressionStatement(_initStatement));
-//   }
-
-//   const _class = builder.build();
-
-//   //   await write(_class, destination);
-//   //   log(await write(onDemandBSONGet('id', 'int64', true), 'out.txt'));
-//   //   log(await write(_class, 'methods.txt'));
-//   console.log(await formatSource(_class));
-// }
-
-`
-function _throw(e: Error): never {
-  throw e;
-}
-
-class Cursor {
-  id: bigint;
-  namespace: string | null;
-  batch: OnDemandDocument;
-  constructor(response: OnDemandDocument) {
-    this.id = response.get('id', BSONType.long, true);
-    this.namespace = response.get('namespace', BSONType.string);
-    this.batch =
-      response.get('firstBatch', BSONType.array) ??
-      response.get('nextBatch', BSONType.array) ??
-      _throw(new Error('ahhh'));
-  }
-}
-
-export class CursorResponse2<T> implements ICursorIterable<T> {
-  private cursor: Cursor;
-  batchSize: number;
-  private iterated = 0;
-
-  get ns() {
-    return this.cursor.namespace ? ns(this.cursor.namespace) : null;
-  }
-
-  constructor(response: MongoDBResponse) {
-    this.cursor = new Cursor(response.get('cursor', BSONType.object, true));
-    this.batchSize = this.cursor.batch.size();
-  }
-
-  shift(options?: BSONSerializeOptions): any {
-    if (this.iterated >= this.batchSize) {
-      return null;
-    }
-
-    const result = this.cursor.batch.get(this.iterated, BSONType.object, true) ?? null;
-    this.iterated += 1;
-
-    if (options?.raw) {
-      return result.toBytes();
-    } else {
-      return result.toObject(options);
-    }
-  }
-
-  get length() {
-    return Math.max(this.batchSize - this.iterated, 0);
-  }
-
-  clear() {
-    this.iterated = this.batchSize;
-  }
-
-  pushMany() {
-    throw new Error('pushMany Unsupported method');
-  }
-
-  push() {
-    throw new Error('push Unsupported method');
-  }
-}
-
-
-class Hello {
-  isWriteablePrimary: boolean;
-  connectionId: bigint;
-  reply: Document;
-  hosts: OnDemandArray | null;
-  passives: OnDemandArray | null;
-  arbiters: OnDemandArray | null;
-  tags: OnDemandDocument | null;
-
-  minWireVersion: number;
-  maxWireVersion: number;
-
-  lastWrite: number | null;
-
-  topologyVersion: unknown;
-
-  setName: string | null;
-  setVersion: OnDemandDocument | null;
-  electionId: ObjectId | null;
-  logicalSessionTimeoutMinutes: number | null;
-  primary: string | null;
-  me: string | null;
-
-  $clusterTime: ClusterTime | null;
-
-  constructor(response: MongoDBResponse) {
-    this.isWriteablePrimary = response.get('isWriteablePrimary', BSONType.bool, true);
-    this.connectionId = response.get('connectionId', BSONType.long, true);
-    this.reply = response.get('reply', BSONType.object, true);
-    this.hosts = response.get('hosts', BSONType.array);
-    this.passives = response.get('passives', BSONType.array);
-    this.arbiters = response.get('arbiters', BSONType.array);
-
-    // TODO - figure out how to make this have optional defaults
-    this.tags = response.get('tags', BSONType.object);
-    this.minWireVersion = response.getNumber('minWireVersion', true);
-    this.maxWireVersion = response.getNumber('maxWireVersion', true);
-
-    this.lastWrite = response.get('lastWrite', BSONType.object)?.getNumber('lastWriteDate') ?? null;
-    this.setName = response.get('setName', BSONType.string);
-    this.setVersion = response.get('setVersion', BSONType.object);
-    this.electionId = response.get('electionId', BSONType.objectId);
-
-    this.logicalSessionTimeoutMinutes = response.getNumber('logicalSessionTimeoutMinutes');
-    this.primary = response.get('primary', BSONType.string);
-    this.me = response.get('me', BSONType.string);
-
-    this.$clusterTime = response.$clusterTime;
-  }
-}
-
-`;

@@ -4,8 +4,7 @@ Cursor:
     type: int64
     required: true
 
-  namespace:
-    required: false
+  ns:
     type: string
 
   firstBatch:
@@ -14,58 +13,71 @@ Cursor:
   nextBatch:
     type: array
 
+  atClusterTime:
+    type: timestamp
+
 ClusterTime:
   clusterTime:
     type: timestamp
     required: true
 
   signature:
-    type: object
+    type: deserializedObject
     # deserialize immediately by calling toObject
-    forceDeserialize: true
     required: false
 
 ServerResponse:
   ok:
-    type: number
+    type: int64
     required: true
+    lazy: false
 
   operationTime:
     type: timestamp
     required: false
+    lazy: true
 
   cursor:
     type: Cursor
     required: false
+    lazy: true
+
 
   atClusterTime:
     required: false
     type: timestamp
-    $oneOf:
-      # cursor must implicitly be interpreted as an Object
-      - cursor.atClusterTime
-      - atClusterTime
+    lazy: true
+
 
   $err:
     type: string
     required: false
+    lazy: true
 
   errmsg:
     type: string
     required: false
+    lazy: true
+
 
   code:
     type: number
     required: false
+    lazy: true
+
 
   clusterTime:
     type: ClusterTime
     required: false
+    lazy: true
 
   recoveryToken:
-    type: object
-    required: false
+    # some objects are expected to be opaque to the driver
+    # but also perfectly roundtrip-able
+    type: deserializedObject
     deserializeOptions:
-      promoteValues: false
       promoteLongs: false
+      promoteValues: false
       promoteBuffers: false
+    required: false
+    lazy: true

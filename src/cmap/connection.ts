@@ -63,6 +63,7 @@ import { StreamDescription, type StreamDescriptionOptions } from './stream_descr
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
 import {
+  isError,
   isErrorResponse,
   MongoDBResponse,
   type MongoDBResponseConstructor
@@ -521,7 +522,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           throw new MongoWriteConcernError(object.writeConcernError, object);
         }
 
-        if (document.isError) {
+        if (isError(document)) {
           throw new MongoServerError((object ??= document.toObject(bsonOptions)));
         }
 
