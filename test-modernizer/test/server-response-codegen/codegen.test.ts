@@ -573,10 +573,7 @@ export class CursorWrapper {
   export class Cursor {
     readonly id: Document | null = null;
     constructor(private readonly response: MongoDBResponse) {
-      const id = this.response.get('id', BSONType.object, false);
-      if (id != null) {
-        this.id = id.toObject();
-      }
+      this.id = this.response.get('id', BSONType.object, false)?.toObject() ?? null;
     }
   }
   `
@@ -608,11 +605,7 @@ export class CursorWrapper {
                 `
   export class Cursor {
     get id() : Document | null {
-      const id = this.response.get('id', BSONType.object, false);
-      if (id != null) {
-        return id.toObject();
-      }
-      return null;
+      return this.response.get('id', BSONType.object, false)?.toObject() ?? null;
     }
     constructor(private readonly response: MongoDBResponse) { }
   }
@@ -712,10 +705,7 @@ export class CursorWrapper {
   export class Cursor {
     readonly id: Document | null = null;
     constructor(private readonly response: MongoDBResponse) {
-      const id = this.response.get('id', BSONType.object, false);
-      if (id != null) {
-        this.id = id.toObject({ promoteLongs: false, promoteValues: false });
-      }
+      this.id = this.response.get('id', BSONType.object, false)?.toObject({ promoteLongs: false, promoteValues: false }) ?? null;
     }
   }
   `
@@ -748,11 +738,7 @@ export class CursorWrapper {
                 `
   export class Cursor {
     get id() : Document | null {
-      const id = this.response.get('id', BSONType.object, false);
-      if (id != null) {
-        return id.toObject({ promoteLongs: false, promoteValues: false });
-      }
-      return null;
+      return this.response.get('id', BSONType.object, false)?.toObject({ promoteLongs: false, promoteValues: false }) ?? null;
     }
     constructor(private readonly response: MongoDBResponse) { }
   }

@@ -1,7 +1,5 @@
 import assert from 'assert';
-import { readFile } from 'fs/promises';
 import * as joi from 'joi';
-import { load } from 'js-yaml';
 import * as ts from 'typescript';
 
 const BSON_TYPES = {
@@ -72,7 +70,10 @@ export function readInputSchema(input: Record<string, unknown>) {
   return classes;
 }
 
-function typeMetadata(property: ReturnType<typeof readInputSchema>[number]['properties'][number]) {
+export type Model = ReturnType<typeof readInputSchema>;
+export type ModelProperty = Model[number]['properties'][number];
+
+function typeMetadata(property: ModelProperty) {
   if (property.type in BSON_TYPES) return 'bson type' as const;
   if (property.type === 'number') return 'flexible number';
   if (property.type === 'deserializedObject') return 'eagerly deserialized object';
@@ -102,9 +103,7 @@ function tsTypeRepresentationFactory() {
     object: 'OnDemandDocument'
   };
 
-  function getType(
-    property: ReturnType<typeof readInputSchema>[number]['properties'][number]
-  ): string {
+  function getType(property: ModelProperty): string {
     switch (typeMetadata(property)) {
       case 'bson type':
         return BSON_TYPES[property.type];
@@ -117,9 +116,7 @@ function tsTypeRepresentationFactory() {
     }
   }
 
-  return function (
-    property: ReturnType<typeof readInputSchema>[number]['properties'][number]
-  ): ts.TypeReferenceNode | ts.UnionTypeNode {
+  return function (property: ModelProperty): ts.TypeReferenceNode | ts.UnionTypeNode {
     const type = ts.factory.createTypeReferenceNode(getType(property));
 
     if (property.required) return type;
@@ -129,6 +126,13 @@ function tsTypeRepresentationFactory() {
       ts.factory.createLiteralTypeNode(ts.factory.createNull())
     ]);
   };
+}
+
+function getInitializationForClassReference(property: ModelProperty) {
+  const className = property.type;
+  return ts.factory.createNewExpression(ts.factory.createIdentifier(className), undefined, [
+    ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response')
+  ]);
 }
 
 function getBSONTypeEnumForProperty() {
@@ -150,7 +154,7 @@ function getBSONTypeEnumForProperty() {
     object: 'object'
   };
 
-  function getType(property: ReturnType<typeof readInputSchema>[number]['properties'][number]) {
+  function getType(property: ModelProperty) {
     switch (typeMetadata(property)) {
       case 'bson type':
         return BSON_TYPES[property.type];
@@ -164,169 +168,13 @@ function getBSONTypeEnumForProperty() {
     }
   }
 
-  return function (property: ReturnType<typeof readInputSchema>[number]['properties'][number]) {
+  return function (property: ModelProperty) {
     const type = getType(property);
     return ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier('BSONType'), type);
   };
 }
 
-function getType(bsonType: string) {
-  const BSON_TYPES: {
-    [key: string]: {
-      typeLiteral: string;
-      bsonType: string;
-    };
-  } = {
-    int64: {
-      typeLiteral: 'bigint',
-      bsonType: 'long'
-    },
-    array: {
-      typeLiteral: 'OnDemandArray',
-      bsonType: 'array'
-    },
-    string: {
-      typeLiteral: 'string',
-      bsonType: 'string'
-    },
-    null: {
-      typeLiteral: 'null',
-      bsonType: 'null'
-    },
-    undefined: {
-      typeLiteral: 'null',
-      bsonType: 'undefined'
-    },
-    double: {
-      typeLiteral: 'number',
-      bsonType: 'double'
-    },
-    int32: {
-      typeLiteral: 'number',
-      bsonType: 'int'
-    },
-    timestamp: {
-      typeLiteral: 'Timestamp',
-      bsonType: 'timestamp'
-    },
-    binData: {
-      typeLiteral: 'Binary',
-      bsonType: 'binData'
-    },
-    boolean: {
-      typeLiteral: 'boolean',
-      bsonType: 'bool'
-    },
-    objectId: {
-      typeLiteral: 'ObjectId',
-      bsonType: 'objectId'
-    },
-    date: {
-      typeLiteral: 'Date',
-      bsonType: 'date'
-    },
-    object: {
-      typeLiteral: 'OnDemandDocument',
-      bsonType: 'object'
-    }
-  };
-  return bsonType in BSON_TYPES;
-}
-
-function getBSONType(
-  bsonType: string,
-  representation: 'on demand bson access type'
-): ts.PropertyAccessExpression | ts.NewExpression {
-  const BSON_TYPES: {
-    [key: string]: {
-      typeLiteral: string;
-      bsonType: string;
-    };
-  } = {
-    int64: {
-      typeLiteral: 'bigint',
-      bsonType: 'long'
-    },
-    array: {
-      typeLiteral: 'OnDemandArray',
-      bsonType: 'array'
-    },
-    string: {
-      typeLiteral: 'string',
-      bsonType: 'string'
-    },
-    null: {
-      typeLiteral: 'null',
-      bsonType: 'null'
-    },
-    undefined: {
-      typeLiteral: 'null',
-      bsonType: 'undefined'
-    },
-    double: {
-      typeLiteral: 'number',
-      bsonType: 'double'
-    },
-    int32: {
-      typeLiteral: 'number',
-      bsonType: 'int'
-    },
-    timestamp: {
-      typeLiteral: 'Timestamp',
-      bsonType: 'timestamp'
-    },
-    binData: {
-      typeLiteral: 'Binary',
-      bsonType: 'binData'
-    },
-    boolean: {
-      typeLiteral: 'boolean',
-      bsonType: 'bool'
-    },
-    objectId: {
-      typeLiteral: 'ObjectId',
-      bsonType: 'objectId'
-    },
-    date: {
-      typeLiteral: 'Date',
-      bsonType: 'date'
-    },
-    object: {
-      typeLiteral: 'OnDemandDocument',
-      bsonType: 'object'
-    }
-  };
-
-  const type = BSON_TYPES[bsonType];
-  if (type) {
-    switch (representation) {
-      case 'on demand bson access type':
-        return ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier('BSONType'),
-          type.bsonType
-        );
-    }
-  }
-
-  if (bsonType === 'deserializedObject') {
-    switch (representation) {
-      case 'on demand bson access type':
-        return ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier('BSONType'),
-          'object'
-        );
-    }
-  }
-  // not a known BSON type - wrapper type.
-  switch (representation) {
-    case 'on demand bson access type':
-      return ts.factory.createNewExpression(ts.factory.createIdentifier(bsonType), undefined, [
-        ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response')
-      ]);
-  }
-}
-
-function accessThis(
+function assignPropertyOntoThis(
   property: string | ts.Identifier,
   initializer: ts.Expression
 ): ts.ExpressionStatement {
@@ -342,6 +190,262 @@ function accessThis(
   );
 }
 
+/**
+ * Constructs a call to OnDemandDocument's `getNumber` method, if the property has specified a
+ * general type of "number".
+ *
+ * i.e.,
+ *
+ * ```typescript
+ * this.response.getNumber(<property name>, <required?>)
+ * ```
+ */
+function makeGetNumber(property: ModelProperty): ts.Expression {
+  const required = property.required ? ts.factory.createTrue() : ts.factory.createFalse();
+  return ts.factory.createCallExpression(
+    ts.factory.createPropertyAccessExpression(
+      ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response'),
+      'getNumber'
+    ),
+    [] /** type arguments */,
+    [ts.factory.createStringLiteral(property.name), required]
+  );
+}
+
+function makeForcedDeserializationExpression(property: ModelProperty): ts.Expression {
+  /**
+   * constructs an AST object literal containing the BSON deserialization options for the property.
+   */
+  function makeDeserializationOptions(): ts.ObjectLiteralExpression {
+    return (
+      property.deserializeOptions &&
+      ts.factory.createObjectLiteralExpression(
+        Object.entries(property.deserializeOptions).map(([option, value]) => {
+          return ts.factory.createPropertyAssignment(
+            option,
+            value ? ts.factory.createTrue() : ts.factory.createFalse()
+          );
+        })
+      )
+    );
+  }
+  // this.response.get(<name>, BSONType.object, required?);
+  const onDemandAccessExpression = makeOnDemandBSONAccess(property);
+  const deserializationOptions = makeDeserializationOptions();
+
+  if (property.required) {
+    // <onDemandAccessExpression>.toObject(...);
+    const callExpression = ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(onDemandAccessExpression, 'toObject'),
+      [],
+      deserializationOptions ? [deserializationOptions] : []
+    );
+    return callExpression;
+  }
+
+  // <onDemandAccessExpression>()?.toObject();
+  const toObjectCall = ts.factory.createCallChain(
+    ts.factory.createPropertyAccessChain(
+      onDemandAccessExpression,
+      ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
+      'toObject'
+    ),
+    undefined,
+    [],
+    deserializationOptions ? [deserializationOptions] : []
+  );
+
+  // <onDemandAccessExpression>()?.toObject() ?? null;
+  return ts.factory.createBinaryExpression(
+    toObjectCall,
+    ts.SyntaxKind.QuestionQuestionToken,
+    ts.factory.createNull()
+  );
+}
+
+/**
+ * Given a property, constructs a getter AST Node that gets the property.
+ *
+ * the general structure for a required property is:
+ * get <propertyName>(): <type node> {
+ *   return this.response.get(<property name>, <bson enum access type>, true);
+ * }
+ *
+ * the general structure for an optional property is:
+ * get <propertyName>(): <type node> {
+ *   return this.response.get(<property name>, <bson enum access type>, false) ?? null;
+ * }
+ */
+function makeGetterProperty(property: ModelProperty) {
+  assert(property.lazy);
+
+  const typeNode = tsTypeRepresentationFactory()(property);
+
+  function getterBody(): ts.Statement[] {
+    switch (typeMetadata(property)) {
+      case 'bson type':
+        return [ts.factory.createReturnStatement(makeOnDemandBSONAccess(property))];
+      case 'flexible number':
+        return [ts.factory.createReturnStatement(makeGetNumber(property))];
+      case 'eagerly deserialized object':
+        return [ts.factory.createReturnStatement(makeForcedDeserializationExpression(property))];
+      case 'custom class reference':
+        return [ts.factory.createReturnStatement(getInitializationForClassReference(property))];
+    }
+  }
+
+  // TODO: Add caching logic in second pass of AST
+  // if (property.cache && !property.required) {
+  //   // private ___<property name>?: <type>;
+  //   const cacheProperty = ts.factory.createIdentifier(`___${property.name}`);
+  //   const cache = ts.factory.createPropertyDeclaration(
+  //     [ts.factory.createModifier(ts.SyntaxKind.PrivateKeyword)],
+  //     cacheProperty,
+  //     ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+  //     typeNode,
+  //     undefined
+  //   );
+
+  //   // eslint-disable-next-line no-inner-declarations
+  //   function makeDeserializedObject() {
+  //     // this.response.get(<name>, BSONType.object, false);
+  //     const initializer = makeOnDemandBSONAccess({ ...property, type: 'object' });
+
+  //     const deserializationOptions =
+  //       property.deserializeOptions &&
+  //       ts.factory.createObjectLiteralExpression(
+  //         Object.entries(property.deserializeOptions).map(([option, value]) => {
+  //           return ts.factory.createPropertyAssignment(
+  //             option,
+  //             value ? ts.factory.createTrue() : ts.factory.createFalse()
+  //           );
+  //         })
+  //       );
+  //     const toObjectCall = ts.factory.createCallChain(
+  //       ts.factory.createPropertyAccessChain(
+  //         initializer,
+  //         ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
+  //         'toObject'
+  //       ),
+  //       undefined,
+  //       [],
+  //       deserializationOptions ? [deserializationOptions] : []
+  //     );
+
+  //     return ts.factory.createBinaryExpression(
+  //       toObjectCall,
+  //       ts.SyntaxKind.QuestionQuestionToken,
+  //       ts.factory.createNull()
+  //     );
+  //   }
+  //   const initializer =
+  //     property.type === 'number'
+  //       ? makeGetNumber(property)
+  //       : property.type === 'deserializedObject'
+  //       ? makeDeserializedObject()
+  //       : getType(property.type)
+  //       ? makeOnDemandBSONAccess(property)
+  //       : getBSONType(property.type, 'on demand bson access type');
+
+  //   // this.<cache> = ....
+  //   const cacheAssignment = accessThis(cacheProperty, initializer);
+
+  //   const cacheGuardCondition = ts.factory.createPrefixUnaryExpression(
+  //     ts.SyntaxKind.ExclamationToken,
+  //     ts.factory.createBinaryExpression(
+  //       ts.factory.createStringLiteral(`___${property.name}`),
+  //       ts.SyntaxKind.InKeyword,
+  //       ts.factory.createThis()
+  //     )
+  //   );
+  //   // if (!(cache name> in this)) { ... }
+  //   const ifStatement = ts.factory.createIfStatement(cacheGuardCondition, cacheAssignment);
+
+  //   const getter = ts.factory.createGetAccessorDeclaration(
+  //     [],
+  //     property.name,
+  //     [],
+  //     typeNode,
+  //     ts.factory.createBlock([
+  //       ifStatement,
+  //       ts.factory.createReturnStatement(
+  //         ts.factory.createBinaryExpression(
+  //           ts.factory.createPropertyAccessExpression(ts.factory.createThis(), cacheProperty),
+  //           ts.SyntaxKind.QuestionQuestionToken,
+  //           ts.factory.createNull()
+  //         )
+  //       )
+  //     ])
+  //   );
+
+  //   return [cache, getter];
+  // }
+
+  return ts.factory.createGetAccessorDeclaration(
+    [],
+    property.name,
+    [],
+    typeNode,
+    ts.factory.createBlock(getterBody())
+  );
+}
+
+function makeOnDemandBSONAccess(property: ModelProperty): ts.Expression {
+  const required = property.required ? ts.factory.createTrue() : ts.factory.createFalse();
+  return ts.factory.createCallExpression(
+    // this.response.get
+    ts.factory.createPropertyAccessExpression(
+      ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response'),
+      'get'
+    ),
+    [] /** type arguments */,
+    [
+      ts.factory.createStringLiteral(property.name),
+      getBSONTypeEnumForProperty()(property),
+      required
+    ]
+  );
+}
+
+function makeConstructor(properties: Model[number]['properties']): ts.ConstructorDeclaration {
+  const constructorAssignedProperties = properties.flatMap(property => {
+    assert(!property.lazy, 'cannot create a constructor initializer for a non-lazy property.');
+    switch (typeMetadata(property)) {
+      case 'bson type':
+        return [assignPropertyOntoThis(property.name, makeOnDemandBSONAccess(property))];
+      case 'flexible number':
+        return [assignPropertyOntoThis(property.name, makeGetNumber(property))];
+
+      case 'eagerly deserialized object':
+        return [
+          assignPropertyOntoThis(property.name, makeForcedDeserializationExpression(property))
+        ];
+
+      case 'custom class reference':
+        return [
+          assignPropertyOntoThis(property.name, getInitializationForClassReference(property))
+        ];
+    }
+  });
+
+  // `private readonly response: MongoDBResponse`
+  const mongodbResponseParameter = ts.factory.createParameterDeclaration(
+    [
+      ts.factory.createModifier(ts.SyntaxKind.PrivateKeyword),
+      ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)
+    ],
+    undefined,
+    'response',
+    undefined,
+    ts.factory.createTypeReferenceNode('MongoDBResponse')
+  );
+  return ts.factory.createConstructorDeclaration(
+    [] /** modifiers */,
+    [mongodbResponseParameter],
+    ts.factory.createBlock(constructorAssignedProperties) /** body */
+  );
+}
+
 function generateClassDefinition(
   model: ReturnType<typeof readInputSchema>[number]
 ): ts.ClassDeclaration {
@@ -352,262 +456,11 @@ function generateClassDefinition(
   const constructorProperties = modelProperties.filter(property => !property.lazy);
 
   function makePropertyGetters(): (ts.GetAccessorDeclaration | ts.PropertyDeclaration)[] {
-    return getterProperties.flatMap(property => {
-      assert(property.lazy);
-
-      const typeNode = tsTypeRepresentationFactory()(property);
-
-      const statement = (() => {
-        if (property.type === 'deserializedObject') {
-          return makeOpaqueObjectInitializationExpression(property);
-        }
-        if (property.type === 'number') {
-          return [ts.factory.createReturnStatement(makeGetNumber(property))];
-        }
-        const initializer = getType(property.type)
-          ? makeOnDemandBSONAccess(property)
-          : getBSONTypeEnumForProperty()(property);
-
-        return [ts.factory.createReturnStatement(initializer)];
-      })();
-
-      if (property.cache && !property.required) {
-        // private ___<property name>?: <type>;
-        const cacheProperty = ts.factory.createIdentifier(`___${property.name}`);
-        const cache = ts.factory.createPropertyDeclaration(
-          [ts.factory.createModifier(ts.SyntaxKind.PrivateKeyword)],
-          cacheProperty,
-          ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-          typeNode,
-          undefined
-        );
-
-        // eslint-disable-next-line no-inner-declarations
-        function makeDeserializedObject() {
-          // this.response.get(<name>, BSONType.object, false);
-          const initializer = makeOnDemandBSONAccess({ ...property, type: 'object' });
-
-          const deserializationOptions =
-            property.deserializeOptions &&
-            ts.factory.createObjectLiteralExpression(
-              Object.entries(property.deserializeOptions).map(([option, value]) => {
-                return ts.factory.createPropertyAssignment(
-                  option,
-                  value ? ts.factory.createTrue() : ts.factory.createFalse()
-                );
-              })
-            );
-          const toObjectCall = ts.factory.createCallChain(
-            ts.factory.createPropertyAccessChain(
-              initializer,
-              ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
-              'toObject'
-            ),
-            undefined,
-            [],
-            deserializationOptions ? [deserializationOptions] : []
-          );
-
-          return ts.factory.createBinaryExpression(
-            toObjectCall,
-            ts.SyntaxKind.QuestionQuestionToken,
-            ts.factory.createNull()
-          );
-        }
-        const initializer =
-          property.type === 'number'
-            ? makeGetNumber(property)
-            : property.type === 'deserializedObject'
-            ? makeDeserializedObject()
-            : getType(property.type)
-            ? makeOnDemandBSONAccess(property)
-            : getBSONType(property.type, 'on demand bson access type');
-
-        // this.<cache> = ....
-        const cacheAssignment = accessThis(cacheProperty, initializer);
-
-        const cacheGuardCondition = ts.factory.createPrefixUnaryExpression(
-          ts.SyntaxKind.ExclamationToken,
-          ts.factory.createBinaryExpression(
-            ts.factory.createStringLiteral(`___${property.name}`),
-            ts.SyntaxKind.InKeyword,
-            ts.factory.createThis()
-          )
-        );
-        // if (!(cache name> in this)) { ... }
-        const ifStatement = ts.factory.createIfStatement(cacheGuardCondition, cacheAssignment);
-
-        const getter = ts.factory.createGetAccessorDeclaration(
-          [],
-          property.name,
-          [],
-          typeNode,
-          ts.factory.createBlock([
-            ifStatement,
-            ts.factory.createReturnStatement(
-              ts.factory.createBinaryExpression(
-                ts.factory.createPropertyAccessExpression(ts.factory.createThis(), cacheProperty),
-                ts.SyntaxKind.QuestionQuestionToken,
-                ts.factory.createNull()
-              )
-            )
-          ])
-        );
-
-        return [cache, getter];
-      }
-
-      return ts.factory.createGetAccessorDeclaration(
-        [],
-        property.name,
-        [],
-        typeNode,
-        ts.factory.createBlock([...statement])
-      );
-    });
+    return getterProperties.flatMap(makeGetterProperty);
   }
 
-  function makeOnDemandBSONAccess(property: (typeof model)['properties'][number]): ts.Expression {
-    const required = property.required ? ts.factory.createTrue() : ts.factory.createFalse();
-    return ts.factory.createCallExpression(
-      // this.response.get
-      ts.factory.createPropertyAccessExpression(
-        ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response'),
-        'get'
-      ),
-      [] /** type arguments */,
-      [
-        ts.factory.createStringLiteral(property.name),
-        getBSONTypeEnumForProperty()(property),
-        required
-      ]
-    );
-  }
-
-  function makeGetNumber(property: (typeof model)['properties'][number]): ts.Expression {
-    const required = property.required ? ts.factory.createTrue() : ts.factory.createFalse();
-    return ts.factory.createCallExpression(
-      ts.factory.createPropertyAccessExpression(
-        ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response'),
-        'getNumber'
-      ),
-      [] /** type arguments */,
-      [ts.factory.createStringLiteral(property.name), required]
-    );
-  }
-  function makeOpaqueObjectInitializationExpression(
-    property: (typeof model)['properties'][number]
-  ): ts.Statement[] {
-    // this.response.get(<name>, BSONType.object, required?);
-    const onDemandAccessExpression = makeOnDemandBSONAccess(property);
-    const deserializationOptions =
-      property.deserializeOptions &&
-      ts.factory.createObjectLiteralExpression(
-        Object.entries(property.deserializeOptions).map(([option, value]) => {
-          return ts.factory.createPropertyAssignment(
-            option,
-            value ? ts.factory.createTrue() : ts.factory.createFalse()
-          );
-        })
-      );
-    if (property.required) {
-      // <onDemandAccessExpression>.toObject(...);
-      if (property.lazy) {
-        return [
-          ts.factory.createReturnStatement(
-            ts.factory.createCallExpression(
-              ts.factory.createPropertyAccessExpression(onDemandAccessExpression, 'toObject'),
-              [],
-              deserializationOptions ? [deserializationOptions] : []
-            )
-          )
-        ];
-      }
-      return [
-        accessThis(
-          property.name,
-          ts.factory.createCallExpression(
-            ts.factory.createPropertyAccessExpression(onDemandAccessExpression, 'toObject'),
-            [],
-            deserializationOptions ? [deserializationOptions] : []
-          )
-        )
-      ];
-    }
-
-    const assignment = ts.factory.createVariableStatement(
-      [],
-      ts.factory.createVariableDeclarationList(
-        [
-          ts.factory.createVariableDeclaration(
-            property.name,
-            undefined,
-            undefined,
-            onDemandAccessExpression
-          )
-        ],
-        ts.NodeFlags.Const
-      )
-    );
-
-    const callExpression = ts.factory.createCallExpression(
-      ts.factory.createPropertyAccessExpression(
-        ts.factory.createIdentifier(property.name),
-        'toObject'
-      ),
-      [],
-      deserializationOptions ? [deserializationOptions] : []
-    );
-
-    const ifStatement = ts.factory.createIfStatement(
-      ts.factory.createBinaryExpression(
-        ts.factory.createIdentifier(property.name),
-        ts.SyntaxKind.ExclamationEqualsToken,
-        ts.factory.createNull()
-      ),
-      ts.factory.createBlock([
-        property.lazy
-          ? ts.factory.createReturnStatement(callExpression)
-          : accessThis(property.name, callExpression)
-      ])
-    );
-
-    return property.lazy
-      ? [assignment, ifStatement, ts.factory.createReturnStatement(ts.factory.createNull())]
-      : [assignment, ifStatement];
-  }
-
-  function makeConstructor(): ts.ConstructorDeclaration {
-    const constructorAssignedProperties = constructorProperties.flatMap(property => {
-      if (property.type === 'deserializedObject') {
-        return makeOpaqueObjectInitializationExpression(property);
-      }
-      if (property.type === 'number') {
-        return [accessThis(property.name, makeGetNumber(property))];
-      }
-      const initializer = getType(property.type)
-        ? makeOnDemandBSONAccess(property)
-        : getBSONType(property.type, 'on demand bson access type');
-
-      return [accessThis(property.name, initializer)];
-    });
-
-    return ts.factory.createConstructorDeclaration(
-      [] /** modifiers */,
-      [
-        ts.factory.createParameterDeclaration(
-          [
-            ts.factory.createModifier(ts.SyntaxKind.PrivateKeyword),
-            ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)
-          ],
-          undefined,
-          'response',
-          undefined,
-          ts.factory.createTypeReferenceNode('MongoDBResponse')
-        )
-      ],
-      ts.factory.createBlock([...constructorAssignedProperties]) /** body */
-    );
+  function makeConstructorDeclaration() {
+    return makeConstructor(constructorProperties);
   }
 
   function makeConstructedFieldPropertyDeclarations() {
@@ -629,7 +482,7 @@ function generateClassDefinition(
   properties.push(
     ...makePropertyGetters(),
     ...makeConstructedFieldPropertyDeclarations(),
-    makeConstructor()
+    makeConstructorDeclaration()
   );
 
   return ts.factory.createClassDeclaration(
