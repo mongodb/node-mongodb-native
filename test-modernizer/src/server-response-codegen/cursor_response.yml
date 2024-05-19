@@ -36,40 +36,47 @@ ServerResponse:
     type: timestamp
     required: false
     lazy: true
+    cache: true
 
   cursor:
     type: Cursor
     required: false
     lazy: true
+    cache: true
 
 
   atClusterTime:
     required: false
     type: timestamp
     lazy: true
+    cache: true
 
 
   $err:
     type: string
     required: false
     lazy: true
+    cache: true
 
   errmsg:
     type: string
     required: false
     lazy: true
+    cache: true
 
 
   code:
     type: number
     required: false
     lazy: true
+    cache: true
 
 
   clusterTime:
     type: ClusterTime
     required: false
     lazy: true
+    cache: true
 
   recoveryToken:
     # some objects are expected to be opaque to the driver
@@ -81,3 +88,62 @@ ServerResponse:
       promoteBuffers: false
     required: false
     lazy: true
+    cache: true
+
+Hello:
+  tags:
+    type: object
+    required: false
+    lazy: false
+
+  minWireVersion:
+    type: number
+    required: false
+    lazy: false
+
+  maxWireVersion:
+    type: number
+    required: false
+    lazy: false
+
+  lastWriteDate:
+    type: LastWrite
+    required: false
+    lazy: false
+
+  hosts:
+    type: array
+    required: false
+    lazy: false
+
+  passives:
+    type: array
+    required: false
+    lazy: false
+
+  arbiters:
+    type: array
+    required: false
+    lazy: false
+
+  me:
+    type: string
+    required: false
+
+  setName:
+    type: string
+    required: false
+
+  setVersion:
+    type: number
+    required: false
+
+  electionId:
+    type: number
+    required: false
+
+LastWrite:
+  lastWriteDate:
+    type: number
+    required: false
+    lazy: false

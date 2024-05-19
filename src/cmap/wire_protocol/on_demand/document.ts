@@ -37,7 +37,7 @@ export type JSTypeOf = {
   [BSONType.string]: string;
   [BSONType.date]: Date;
   [BSONType.object]: OnDemandDocument;
-  [BSONType.array]: OnDemandDocument;
+  [BSONType.array]: OnDemandArray;
 };
 
 /** @internal */
@@ -337,4 +337,8 @@ export class OnDemandDocument {
   }
 }
 
-export class OnDemandArray extends OnDemandDocument {}
+export class OnDemandArray extends OnDemandDocument {
+  toArray(): Array<any> {
+    return [];
+  }
+}

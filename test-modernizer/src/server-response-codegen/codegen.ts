@@ -19,19 +19,24 @@ export function readInputSchema(input: Record<string, unknown>) {
       lazy: boolean;
       name: string;
       deserializeOptions?: Record<string, boolean>;
+      cache: boolean;
     }[] = [];
 
     const fieldSchema = joi.object({
       type: joi.string().required(),
       required: joi.boolean().default(false),
       lazy: joi.boolean().default(false),
-      deserializeOptions: joi.object()
+      deserializeOptions: joi.object(),
+      cache: joi.boolean().default(false)
     });
 
     for (const [property, definition] of Object.entries(object)) {
       joi.assert(definition, fieldSchema);
       const { value: schema } = fieldSchema.validate(definition, { stripUnknown: true });
 
+      if (!schema.lazy && schema.cache) {
+        throw new Error(`property ${property} specifies cache: true and lazy: false`);
+      }
       result.push(
         Object.assign(Object.create(null), {
           ...schema,
@@ -227,7 +232,10 @@ function getBSONType(
   }
 }
 
-function accessThis(property: string, initializer: ts.Expression): ts.ExpressionStatement {
+function accessThis(
+  property: string | ts.Identifier,
+  initializer: ts.Expression
+): ts.ExpressionStatement {
   return ts.factory.createExpressionStatement(
     ts.factory.createAssignment(
       ts.factory.createPropertyAccessChain(
@@ -249,8 +257,8 @@ function generateClassDefinition(
   const getterProperties = modelProperties.filter(property => property.lazy);
   const constructorProperties = modelProperties.filter(property => !property.lazy);
 
-  function makePropertyGetters() {
-    return getterProperties.map(property => {
+  function makePropertyGetters(): (ts.GetAccessorDeclaration | ts.PropertyDeclaration)[] {
+    return getterProperties.flatMap(property => {
       assert(property.lazy);
 
       const literal = getBSONType(property.type, 'type literal node');
@@ -275,6 +283,92 @@ function generateClassDefinition(
 
         return [ts.factory.createReturnStatement(initializer)];
       })();
+
+      if (property.cache && !property.required) {
+        // private ___<property name>?: <type>;
+        const cacheProperty = ts.factory.createIdentifier(`___${property.name}`);
+        const cache = ts.factory.createPropertyDeclaration(
+          [ts.factory.createModifier(ts.SyntaxKind.PrivateKeyword)],
+          cacheProperty,
+          ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+          typeNode,
+          undefined
+        );
+
+        // eslint-disable-next-line no-inner-declarations
+        function makeDeserializedObject() {
+          // this.response.get(<name>, BSONType.object, false);
+          const initializer = makeOnDemandBSONAccess({ ...property, type: 'object' });
+
+          const deserializationOptions =
+            property.deserializeOptions &&
+            ts.factory.createObjectLiteralExpression(
+              Object.entries(property.deserializeOptions).map(([option, value]) => {
+                return ts.factory.createPropertyAssignment(
+                  option,
+                  value ? ts.factory.createTrue() : ts.factory.createFalse()
+                );
+              })
+            );
+          const toObjectCall = ts.factory.createCallChain(
+            ts.factory.createPropertyAccessChain(
+              initializer,
+              ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
+              'toObject'
+            ),
+            undefined,
+            [],
+            deserializationOptions ? [deserializationOptions] : []
+          );
+
+          return ts.factory.createBinaryExpression(
+            toObjectCall,
+            ts.SyntaxKind.QuestionQuestionToken,
+            ts.factory.createNull()
+          );
+        }
+        const initializer =
+          property.type === 'number'
+            ? makeGetNumber(property)
+            : property.type === 'deserializedObject'
+            ? makeDeserializedObject()
+            : getType(property.type)
+            ? makeOnDemandBSONAccess(property)
+            : getBSONType(property.type, 'on demand bson access type');
+
+        // this.<cache> = ....
+        const cacheAssignment = accessThis(cacheProperty, initializer);
+
+        const cacheGuardCondition = ts.factory.createPrefixUnaryExpression(
+          ts.SyntaxKind.ExclamationToken,
+          ts.factory.createBinaryExpression(
+            ts.factory.createStringLiteral(`___${property.name}`),
+            ts.SyntaxKind.InKeyword,
+            ts.factory.createThis()
+          )
+        );
+        // if (!(cache name> in this)) { ... }
+        const ifStatement = ts.factory.createIfStatement(cacheGuardCondition, cacheAssignment);
+
+        const getter = ts.factory.createGetAccessorDeclaration(
+          [],
+          property.name,
+          [],
+          typeNode,
+          ts.factory.createBlock([
+            ifStatement,
+            ts.factory.createReturnStatement(
+              ts.factory.createBinaryExpression(
+                ts.factory.createPropertyAccessExpression(ts.factory.createThis(), cacheProperty),
+                ts.SyntaxKind.QuestionQuestionToken,
+                ts.factory.createNull()
+              )
+            )
+          ])
+        );
+
+        return [cache, getter];
+      }
 
       return ts.factory.createGetAccessorDeclaration(
         [],

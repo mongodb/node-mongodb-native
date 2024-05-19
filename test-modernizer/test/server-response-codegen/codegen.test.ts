@@ -5,7 +5,7 @@ import { test } from 'mocha';
 import { resolve } from 'path';
 
 import { generateModelClasses, readInputSchema } from '../../src/server-response-codegen/codegen';
-import { explore, formatSource, parseSource } from '../../src/utils';
+import { explore, formatSource, parseSource, print } from '../../src/utils';
 
 type Models = ReturnType<typeof readInputSchema>;
 type Model = Models[number];
@@ -35,7 +35,7 @@ describe('Response Model Codegen', function () {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'int64', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'int64', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -57,7 +57,7 @@ describe('Response Model Codegen', function () {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'int64', name: 'id', lazy: true, required: true }]
+            properties: [{ type: 'int64', name: 'id', lazy: true, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -79,7 +79,7 @@ describe('Response Model Codegen', function () {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'int64', name: 'id', lazy: false, required: false }]
+            properties: [{ type: 'int64', name: 'id', lazy: false, required: false, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -102,7 +102,7 @@ describe('Response Model Codegen', function () {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'int64', name: 'id', lazy: true, required: false }]
+            properties: [{ type: 'int64', name: 'id', lazy: true, required: false, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -126,8 +126,8 @@ describe('Response Model Codegen', function () {
             {
               className: 'Cursor',
               properties: [
-                { type: 'int64', name: 'id', lazy: false, required: true },
-                { type: 'array', name: 'batch', lazy: false, required: true }
+                { type: 'int64', name: 'id', lazy: false, required: true, cache: false },
+                { type: 'array', name: 'batch', lazy: false, required: true, cache: false }
               ]
             }
           ];
@@ -153,8 +153,8 @@ describe('Response Model Codegen', function () {
             {
               className: 'Cursor',
               properties: [
-                { type: 'int64', name: 'id', lazy: false, required: true },
-                { type: 'array', name: 'batch', lazy: true, required: false }
+                { type: 'int64', name: 'id', lazy: false, required: true, cache: false },
+                { type: 'array', name: 'batch', lazy: true, required: false, cache: false }
               ]
             }
           ];
@@ -176,18 +176,6 @@ describe('Response Model Codegen', function () {
           );
         });
       });
-
-      it.skip('foo', function () {
-        const source = parseSource(
-          `
-class Foo {
-	constructor( response: MongoDBResponse ) {
-		this.id = this.response.get('id', BSONType.long, true);
-	}
-}`
-        );
-        explore(source);
-      });
     });
 
     describe('all allowed BSON types', function () {
@@ -195,7 +183,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'int64', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'int64', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -217,7 +205,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'array', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'array', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -239,7 +227,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'string', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'string', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -261,7 +249,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'null', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'null', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -283,7 +271,9 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'undefined', name: 'id', lazy: false, required: true }]
+            properties: [
+              { type: 'undefined', name: 'id', lazy: false, required: true, cache: false }
+            ]
           }
         ];
         const output = generateModelClasses(models);
@@ -305,7 +295,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'double', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'double', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -327,7 +317,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'int32', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'int32', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -349,7 +339,9 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'timestamp', name: 'id', lazy: false, required: true }]
+            properties: [
+              { type: 'timestamp', name: 'id', lazy: false, required: true, cache: false }
+            ]
           }
         ];
         const output = generateModelClasses(models);
@@ -371,7 +363,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'binData', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'binData', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -393,7 +385,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'boolean', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'boolean', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -415,7 +407,9 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'objectId', name: 'id', lazy: false, required: true }]
+            properties: [
+              { type: 'objectId', name: 'id', lazy: false, required: true, cache: false }
+            ]
           }
         ];
         const output = generateModelClasses(models);
@@ -437,7 +431,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'date', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'date', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -459,7 +453,7 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'object', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'object', name: 'id', lazy: false, required: true, cache: false }]
           }
         ];
         const output = generateModelClasses(models);
@@ -483,11 +477,13 @@ class Foo {
         const models: Model[] = [
           {
             className: 'Cursor',
-            properties: [{ type: 'int64', name: 'id', lazy: false, required: true }]
+            properties: [{ type: 'int64', name: 'id', lazy: false, required: true, cache: false }]
           },
           {
             className: 'CursorWrapper',
-            properties: [{ type: 'Cursor', name: 'cursor', lazy: false, required: true }]
+            properties: [
+              { type: 'Cursor', name: 'cursor', lazy: false, required: true, cache: false }
+            ]
           }
         ];
         const output = generateModelClasses(models);
@@ -522,7 +518,15 @@ export class CursorWrapper {
           const models: Model[] = [
             {
               className: 'Cursor',
-              properties: [{ type: 'deserializedObject', name: 'id', lazy: false, required: true }]
+              properties: [
+                {
+                  type: 'deserializedObject',
+                  name: 'id',
+                  lazy: false,
+                  required: true,
+                  cache: false
+                }
+              ]
             }
           ];
           const output = generateModelClasses(models);
@@ -549,7 +553,15 @@ export class CursorWrapper {
           const models: Model[] = [
             {
               className: 'Cursor',
-              properties: [{ type: 'deserializedObject', name: 'id', lazy: false, required: false }]
+              properties: [
+                {
+                  type: 'deserializedObject',
+                  name: 'id',
+                  lazy: false,
+                  required: false,
+                  cache: false
+                }
+              ]
             }
           ];
           const output = generateModelClasses(models);
@@ -577,7 +589,15 @@ export class CursorWrapper {
           const models: Model[] = [
             {
               className: 'Cursor',
-              properties: [{ type: 'deserializedObject', name: 'id', lazy: true, required: false }]
+              properties: [
+                {
+                  type: 'deserializedObject',
+                  name: 'id',
+                  lazy: true,
+                  required: false,
+                  cache: false
+                }
+              ]
             }
           ];
           const output = generateModelClasses(models);
@@ -606,7 +626,9 @@ export class CursorWrapper {
           const models: Model[] = [
             {
               className: 'Cursor',
-              properties: [{ type: 'deserializedObject', name: 'id', lazy: true, required: true }]
+              properties: [
+                { type: 'deserializedObject', name: 'id', lazy: true, required: true, cache: false }
+              ]
             }
           ];
           const output = generateModelClasses(models);
@@ -639,6 +661,7 @@ export class CursorWrapper {
                   name: 'id',
                   lazy: false,
                   required: true,
+                  cache: false,
                   deserializeOptions: { promoteLongs: false, promoteValues: false }
                 }
               ]
@@ -674,6 +697,7 @@ export class CursorWrapper {
                   name: 'id',
                   lazy: false,
                   required: false,
+                  cache: false,
                   deserializeOptions: { promoteLongs: false, promoteValues: false }
                 }
               ]
@@ -710,6 +734,7 @@ export class CursorWrapper {
                   name: 'id',
                   lazy: true,
                   required: false,
+                  cache: false,
                   deserializeOptions: { promoteLongs: false, promoteValues: false }
                 }
               ]
@@ -747,6 +772,7 @@ export class CursorWrapper {
                   name: 'id',
                   lazy: true,
                   required: true,
+                  cache: false,
                   deserializeOptions: { promoteLongs: false, promoteValues: false }
                 }
               ]
@@ -770,6 +796,164 @@ export class CursorWrapper {
           );
         });
       });
+    });
+  });
+
+  describe('automatic caching of getters', function () {
+    it('cache: true has no affect on eager properties', async function () {
+      const models: Model[] = [
+        {
+          className: 'Cursor',
+          properties: [
+            { type: 'int64', name: 'id', lazy: false, required: true, cache: true },
+            { type: 'int64', name: 'value', lazy: false, required: false, cache: true }
+          ]
+        }
+      ];
+      const output = generateModelClasses(models);
+      expect(await formatSource(output)).to.deep.equal(
+        await formatSource(
+          parseSource(
+            `export class Cursor {
+  readonly id: bigint;
+  readonly value: bigint | null = null;
+  constructor(private readonly response: MongoDBResponse) {
+    this.id = this.response.get('id', BSONType.long, true);
+    this.value = this.response.get('value', BSONType.long, false);
+  }
+  }`
+          )
+        )
+      );
+    });
+
+    it('cache: true does nothing for a required getter', async function () {
+      const models: Model[] = [
+        {
+          className: 'Cursor',
+          properties: [{ type: 'int64', name: 'id', lazy: true, required: true, cache: true }]
+        }
+      ];
+      const output = generateModelClasses(models);
+      expect(await formatSource(output)).to.deep.equal(
+        await formatSource(
+          parseSource(
+            `export class Cursor {
+  get id(): bigint {
+    return this.response.get('id', BSONType.long, true);
+  }
+  constructor(private readonly response: MongoDBResponse) { }
+  }`
+          )
+        )
+      );
+    });
+
+    it('cache: true adds caching logic to optional getters', async function () {
+      const models: Model[] = [
+        {
+          className: 'Cursor',
+          properties: [{ type: 'int64', name: 'id', lazy: true, required: false, cache: true }]
+        }
+      ];
+      const output = generateModelClasses(models);
+      expect(await formatSource(output)).to.deep.equal(
+        await formatSource(
+          parseSource(
+            `export class Cursor {
+  private ___id?: bigint | null;
+  get id(): bigint | null {
+    if (!('___id' in this)) this.___id = this.response.get('id', BSONType.long, false);
+    return this.___id ?? null;
+  }
+  constructor(private readonly response: MongoDBResponse) { }
+  }`
+          )
+        )
+      );
+    });
+
+    it('cache: true adds caching logic to optional getters of type `number`', async function () {
+      const models: Model[] = [
+        {
+          className: 'Cursor',
+          properties: [{ type: 'number', name: 'id', lazy: true, required: false, cache: true }]
+        }
+      ];
+      const output = generateModelClasses(models);
+      expect(await formatSource(output)).to.deep.equal(
+        await formatSource(
+          parseSource(
+            `export class Cursor {
+  private ___id?: number | null;
+  get id(): number | null {
+    if (!('___id' in this)) this.___id = this.response.getNumber('id', false);
+    return this.___id ?? null;
+  }
+  constructor(private readonly response: MongoDBResponse) { }
+  }`
+          )
+        )
+      );
+    });
+
+    it('cache: true adds caching logic to optional getters of type `deserializedObject`', async function () {
+      const models: Model[] = [
+        {
+          className: 'Cursor',
+          properties: [
+            { type: 'deserializedObject', name: 'id', lazy: true, required: false, cache: true }
+          ]
+        }
+      ];
+      const output = generateModelClasses(models);
+      expect(await formatSource(output)).to.deep.equal(
+        await formatSource(
+          parseSource(
+            `export class Cursor {
+  private ___id?: Document | null;
+  get id(): Document | null {
+    if (!('___id' in this)) this.___id = this.response.get('id', BSONType.object, false)?.toObject() ?? null;
+    return this.___id ?? null;
+  }
+  constructor(private readonly response: MongoDBResponse) { }
+  }`
+          )
+        )
+      );
+    });
+
+    it('cache: true adds caching logic to optional getters of type `deserializedObject` with deserialize options', async function () {
+      const models: Model[] = [
+        {
+          className: 'Cursor',
+          properties: [
+            {
+              type: 'deserializedObject',
+              name: 'id',
+              lazy: true,
+              required: false,
+              cache: true,
+              deserializeOptions: { promoteValues: false, promoteLongs: true }
+            }
+          ]
+        }
+      ];
+      const output = generateModelClasses(models);
+      expect(await formatSource(output)).to.deep.equal(
+        await formatSource(
+          parseSource(
+            `export class Cursor {
+  private ___id?: Document | null;
+  get id(): Document | null {
+    if (!('___id' in this)) this.___id = this.response.get('id', BSONType.object, false)?.toObject({ promoteValues: false, promoteLongs: true }) ?? null;
+    return this.___id ?? null;
+  }
+  constructor(private readonly response: MongoDBResponse) { }
+  }`
+          )
+        )
+      );
     });
   });
 

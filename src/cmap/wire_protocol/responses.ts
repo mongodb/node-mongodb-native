@@ -232,7 +232,6 @@ export class CursorResponse extends MongoDBResponse {
     throw new Error('push Unsupported method');
   }
 }
-
 export class Cursor {
   readonly id: bigint;
   readonly ns: string | null = null;
@@ -259,37 +258,52 @@ export class ClusterTime {
   }
 }
 export class ServerResponse {
+  private ___operationTime?: Timestamp | null;
   get operationTime(): Timestamp | null {
-    return this.response.get('operationTime', BSONType.timestamp, false);
+    if (!('___operationTime' in this))
+      this.___operationTime = this.response.get('operationTime', BSONType.timestamp, false);
+    return this.___operationTime ?? null;
   }
+  private ___cursor?: Cursor | null;
   get cursor(): Cursor | null {
-    return new Cursor(this.response);
+    if (!('___cursor' in this)) this.___cursor = new Cursor(this.response);
+    return this.___cursor ?? null;
   }
+  private ___atClusterTime?: Timestamp | null;
   get atClusterTime(): Timestamp | null {
-    return this.response.get('atClusterTime', BSONType.timestamp, false);
+    if (!('___atClusterTime' in this))
+      this.___atClusterTime = this.response.get('atClusterTime', BSONType.timestamp, false);
+    return this.___atClusterTime ?? null;
   }
+  private ___$err?: string | null;
   get $err(): string | null {
-    return this.response.get('$err', BSONType.string, false);
+    if (!('___$err' in this)) this.___$err = this.response.get('$err', BSONType.string, false);
+    return this.___$err ?? null;
   }
+  private ___errmsg?: string | null;
   get errmsg(): string | null {
-    return this.response.get('errmsg', BSONType.string, false);
+    if (!('___errmsg' in this))
+      this.___errmsg = this.response.get('errmsg', BSONType.string, false);
+    return this.___errmsg ?? null;
   }
+  private ___code?: number | null;
   get code(): number | null {
-    return this.response.getNumber('code', false);
+    if (!('___code' in this)) this.___code = this.response.getNumber('code', false);
+    return this.___code ?? null;
   }
+  private ___clusterTime?: ClusterTime | null;
   get clusterTime(): ClusterTime | null {
-    return new ClusterTime(this.response);
+    if (!('___clusterTime' in this)) this.___clusterTime = new ClusterTime(this.response);
+    return this.___clusterTime ?? null;
   }
+  private ___recoveryToken?: Document | null;
   get recoveryToken(): Document | null {
-    const recoveryToken = this.response.get('recoveryToken', BSONType.object, false);
-    if (recoveryToken != null) {
-      return recoveryToken.toObject({
-        promoteLongs: false,
-        promoteValues: false,
-        promoteBuffers: false
-      });
-    }
-    return null;
+    if (!('___recoveryToken' in this))
+      this.___recoveryToken =
+        this.response
+          .get('recoveryToken', BSONType.object, false)
+          ?.toObject({ promoteLongs: false, promoteValues: false, promoteBuffers: false }) ?? null;
+    return this.___recoveryToken ?? null;
   }
   readonly ok: bigint;
   constructor(private readonly response: MongoDBResponse) {
