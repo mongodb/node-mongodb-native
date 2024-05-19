@@ -10,7 +10,7 @@ import { explore, formatSource, parseSource, print } from '../../src/utils';
 type Models = ReturnType<typeof readInputSchema>;
 type Model = Models[number];
 
-describe('Response Model Codegen', function () {
+describe.only('Response Model Codegen', function () {
   describe('model generation', function () {
     it('does nothing on an empty specification', async function () {
       const models = [];

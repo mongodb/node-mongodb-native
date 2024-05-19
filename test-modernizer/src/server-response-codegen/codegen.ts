@@ -4,10 +4,21 @@ import * as joi from 'joi';
 import { load } from 'js-yaml';
 import * as ts from 'typescript';
 
-async function readYaml(filename: string): Promise<any> {
-  const contents = await readFile(filename, 'utf-8');
-  return load(contents);
-}
+const BSON_TYPES = {
+  int64: 'bigint',
+  array: 'OnDemandArray',
+  string: 'string',
+  null: 'null',
+  undefined: 'null',
+  double: 'number',
+  int32: 'number',
+  timestamp: 'Timestamp',
+  binData: 'Binary',
+  boolean: 'boolean',
+  objectId: 'ObjectId',
+  date: 'Date',
+  object: 'OnDemandDocument'
+};
 
 export function readInputSchema(input: Record<string, unknown>) {
   const classes: ReturnType<typeof Model>[] = [];
@@ -61,8 +72,102 @@ export function readInputSchema(input: Record<string, unknown>) {
   return classes;
 }
 
-export async function readSpecification(filename: string) {
-  return readInputSchema(await readYaml(filename));
+function typeMetadata(property: ReturnType<typeof readInputSchema>[number]['properties'][number]) {
+  if (property.type in BSON_TYPES) return 'bson type' as const;
+  if (property.type === 'number') return 'flexible number';
+  if (property.type === 'deserializedObject') return 'eagerly deserialized object';
+  return 'custom class reference';
+}
+
+/**
+ * Determines the typescript "type" of a property.  For example, an `int64` property will have
+ * a type of `bigint`.
+ */
+function tsTypeRepresentationFactory() {
+  const BSON_TYPES: {
+    [key: string]: string;
+  } = {
+    int64: 'bigint',
+    array: 'OnDemandArray',
+    string: 'string',
+    null: 'null',
+    undefined: 'null',
+    double: 'number',
+    int32: 'number',
+    timestamp: 'Timestamp',
+    binData: 'Binary',
+    boolean: 'boolean',
+    objectId: 'ObjectId',
+    date: 'Date',
+    object: 'OnDemandDocument'
+  };
+
+  function getType(
+    property: ReturnType<typeof readInputSchema>[number]['properties'][number]
+  ): string {
+    switch (typeMetadata(property)) {
+      case 'bson type':
+        return BSON_TYPES[property.type];
+      case 'flexible number':
+        return 'number';
+      case 'eagerly deserialized object':
+        return 'Document';
+      case 'custom class reference':
+        return property.type;
+    }
+  }
+
+  return function (
+    property: ReturnType<typeof readInputSchema>[number]['properties'][number]
+  ): ts.TypeReferenceNode | ts.UnionTypeNode {
+    const type = ts.factory.createTypeReferenceNode(getType(property));
+
+    if (property.required) return type;
+
+    return ts.factory.createUnionTypeNode([
+      type,
+      ts.factory.createLiteralTypeNode(ts.factory.createNull())
+    ]);
+  };
+}
+
+function getBSONTypeEnumForProperty() {
+  const BSON_TYPES: {
+    [key: string]: string;
+  } = {
+    int64: 'long',
+    array: 'array',
+    string: 'string',
+    null: 'null',
+    undefined: 'undefined',
+    double: 'double',
+    int32: 'int',
+    timestamp: 'timestamp',
+    binData: 'binData',
+    boolean: 'bool',
+    objectId: 'objectId',
+    date: 'date',
+    object: 'object'
+  };
+
+  function getType(property: ReturnType<typeof readInputSchema>[number]['properties'][number]) {
+    switch (typeMetadata(property)) {
+      case 'bson type':
+        return BSON_TYPES[property.type];
+      case 'flexible number':
+        return 'number';
+      case 'eagerly deserialized object':
+        return 'object';
+      case 'custom class reference':
+        // in the else case, we support a reference to another generated class
+        throw new Error(`attempted to get bson type enum for unknown type: ${property.type}`);
+    }
+  }
+
+  return function (property: ReturnType<typeof readInputSchema>[number]['properties'][number]) {
+    const type = getType(property);
+    return ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier('BSONType'), type);
+  };
 }
 
 function getType(bsonType: string) {
@@ -131,12 +236,7 @@ function getType(bsonType: string) {
 function getBSONType(
   bsonType: string,
   representation: 'on demand bson access type'
-): ts.PropertyAccessExpression | ts.NewExpression;
-function getBSONType(bsonType: string, representation: 'type literal node'): ts.TypeReferenceNode;
-function getBSONType(
-  bsonType: string,
-  representation: 'on demand bson access type' | 'type literal node'
-): ts.TypeReferenceNode | ts.PropertyAccessExpression | ts.NewExpression {
+): ts.PropertyAccessExpression | ts.NewExpression {
   const BSON_TYPES: {
     [key: string]: {
       typeLiteral: string;
@@ -205,8 +305,6 @@ function getBSONType(
           ts.factory.createIdentifier('BSONType'),
           type.bsonType
         );
-      case 'type literal node':
-        return ts.factory.createTypeReferenceNode(type.typeLiteral);
     }
   }
 
@@ -217,8 +315,6 @@ function getBSONType(
           ts.factory.createIdentifier('BSONType'),
           'object'
         );
-      case 'type literal node':
-        return ts.factory.createTypeReferenceNode('Document');
     }
   }
   // not a known BSON type - wrapper type.
@@ -227,8 +323,6 @@ function getBSONType(
       return ts.factory.createNewExpression(ts.factory.createIdentifier(bsonType), undefined, [
         ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response')
       ]);
-    case 'type literal node':
-      return ts.factory.createTypeReferenceNode(bsonType);
   }
 }
 
@@ -261,14 +355,7 @@ function generateClassDefinition(
     return getterProperties.flatMap(property => {
       assert(property.lazy);
 
-      const literal = getBSONType(property.type, 'type literal node');
-
-      const typeNode = property.required
-        ? literal
-        : ts.factory.createUnionTypeNode([
-            literal,
-            ts.factory.createLiteralTypeNode(ts.factory.createNull())
-          ]);
+      const typeNode = tsTypeRepresentationFactory()(property);
 
       const statement = (() => {
         if (property.type === 'deserializedObject') {
@@ -279,7 +366,7 @@ function generateClassDefinition(
         }
         const initializer = getType(property.type)
           ? makeOnDemandBSONAccess(property)
-          : getBSONType(property.type, 'on demand bson access type');
+          : getBSONTypeEnumForProperty()(property);
 
         return [ts.factory.createReturnStatement(initializer)];
       })();
@@ -383,6 +470,7 @@ function generateClassDefinition(
   function makeOnDemandBSONAccess(property: (typeof model)['properties'][number]): ts.Expression {
     const required = property.required ? ts.factory.createTrue() : ts.factory.createFalse();
     return ts.factory.createCallExpression(
+      // this.response.get
       ts.factory.createPropertyAccessExpression(
         ts.factory.createPropertyAccessExpression(ts.factory.createThis(), 'response'),
         'get'
@@ -390,7 +478,7 @@ function generateClassDefinition(
       [] /** type arguments */,
       [
         ts.factory.createStringLiteral(property.name),
-        getBSONType(property.type, 'on demand bson access type'),
+        getBSONTypeEnumForProperty()(property),
         required
       ]
     );
@@ -524,13 +612,7 @@ function generateClassDefinition(
 
   function makeConstructedFieldPropertyDeclarations() {
     return constructorProperties.map(property => {
-      const literal = getBSONType(property.type, 'type literal node');
-      const typeNode = property.required
-        ? literal
-        : ts.factory.createUnionTypeNode([
-            literal,
-            ts.factory.createLiteralTypeNode(ts.factory.createNull())
-          ]);
+      const typeNode = tsTypeRepresentationFactory()(property);
 
       const initializer = property.required ? undefined : ts.factory.createNull();
 
