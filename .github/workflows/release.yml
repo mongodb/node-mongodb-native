@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
 
       # If release-please created a release, publish to npm
       - if: ${{ steps.release.outputs.release_created }}
