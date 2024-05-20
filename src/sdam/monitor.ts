@@ -219,8 +219,8 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     return this.rttSampler.min();
   }
 
-  get latestRtt(): number {
-    return this.rttSampler.last ?? 0; // FIXME: Check if this is acceptable
+  get latestRtt(): number | null {
+    return this.rttSampler.last;
   }
 
   addRttSample(rtt: number) {
@@ -304,7 +304,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     }
 
     // NOTE: here we use the latestRtt as this measurement corresponds with the value
-    // obtained for this successful heartbeat
+    // obtained for this successful heartbeat, if there is no latestRtt, then we calculate the
+    // duration
     const duration =
       isAwaitable && monitor.rttPinger
         ? monitor.rttPinger.latestRtt ?? calculateDurationInMs(start)
@@ -498,7 +499,7 @@ export class RTTPinger {
     this[kCancellationToken] = monitor[kCancellationToken];
     this.closed = false;
     this.monitor = monitor;
-    this.latestRtt = monitor.latestRtt;
+    this.latestRtt = monitor.latestRtt ?? undefined;
 
     const heartbeatFrequencyMS = monitor.options.heartbeatFrequencyMS;
     this[kMonitorId] = setTimeout(() => this.measureRoundTripTime(), heartbeatFrequencyMS);
@@ -520,10 +521,7 @@ export class RTTPinger {
     this.connection = undefined;
   }
 
-  private measureAndReschedule(start?: number, conn?: Connection) {
-    if (start == null) {
-      start = now();
-    }
+  private measureAndReschedule(start: number, conn?: Connection) {
     if (this.closed) {
       conn?.destroy();
       return;
@@ -565,7 +563,7 @@ export class RTTPinger {
       connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
     // eslint-disable-next-line github/no-then
     connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
-      () => this.measureAndReschedule(),
+      () => this.measureAndReschedule(start),
       () => {
         this.connection?.destroy();
         this.connection = undefined;

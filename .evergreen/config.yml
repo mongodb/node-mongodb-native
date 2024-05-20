@@ -1368,6 +1368,57 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-8.0-server
+    tags:
+      - '8.0'
+      - server
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NPM_VERSION, value: '9'}
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-8.0-replica_set
+    tags:
+      - '8.0'
+      - replica_set
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NPM_VERSION, value: '9'}
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-8.0-sharded_cluster
+    tags:
+      - '8.0'
+      - sharded_cluster
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NPM_VERSION, value: '9'}
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-7.0-server
     tags:
       - '7.0'
@@ -1824,6 +1875,25 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+  - name: test-8.0-load-balanced
+    tags:
+      - latest
+      - sharded_cluster
+      - load_balancer
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: LOAD_BALANCER, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: start-load-balancer
+      - func: run-lb-tests
+      - func: stop-load-balancer
   - name: test-rapid-load-balanced
     tags:
       - latest
@@ -1977,6 +2047,34 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
+            - {key: SSL, value: ssl}
+            - {key: TOPOLOGY, value: server}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tls tests
+  - name: test-tls-support-8.0
+    tags:
+      - tls-support
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: SSL, value: ssl}
+            - {key: TOPOLOGY, value: server}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tls tests
+  - name: test-tls-support-7.0
+    tags:
+      - tls-support
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
@@ -2242,6 +2340,434 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws ECS auth test
+  - name: aws-8.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with regular aws credentials
+  - name: aws-8.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with assume role credentials
+  - name: aws-8.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws EC2 credentials
+  - name: aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials as environment variables
+  - name: aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials and session token as environment variables
+  - name: aws-8.0-auth-test-run-aws-ECS-auth-test
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws ECS auth test
+  - name: aws-8.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
+  - name: aws-8.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
+  - name: aws-8.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws auth test with regular aws credentials
+  - name: aws-8.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws auth test with assume role credentials
+  - name: aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws auth test with aws credentials as environment variables
+  - name: >-
+      aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws auth test with aws credentials and session token as environment variables
+  - name: aws-8.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws ECS auth test
+  - name: aws-7.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with regular aws credentials
+  - name: aws-7.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with assume role credentials
+  - name: aws-7.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws EC2 credentials
+  - name: aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials as environment variables
+  - name: aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials and session token as environment variables
+  - name: aws-7.0-auth-test-run-aws-ECS-auth-test
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws ECS auth test
+  - name: aws-7.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
+  - name: aws-7.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
+  - name: aws-7.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws auth test with regular aws credentials
+  - name: aws-7.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws auth test with assume role credentials
+  - name: aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws auth test with aws credentials as environment variables
+  - name: >-
+      aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: remove aws-credential-providers
+      - func: run aws auth test with aws credentials and session token as environment variables
+  - name: aws-7.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -3237,6 +3763,60 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-8.0-server-noauth
+    tags:
+      - '8.0'
+      - server
+      - noauth
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NPM_VERSION, value: '9'}
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-8.0-replica_set-noauth
+    tags:
+      - '8.0'
+      - replica_set
+      - noauth
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NPM_VERSION, value: '9'}
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-8.0-sharded_cluster-noauth
+    tags:
+      - '8.0'
+      - sharded_cluster
+      - noauth
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NPM_VERSION, value: '9'}
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-7.0-server-noauth
     tags:
       - '7.0'
@@ -3683,6 +4263,23 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-8.0-csfle-mongocryptd
+    tags:
+      - '8.0'
+      - sharded_cluster
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: TEST_NPM_SCRIPT, value: check:csfle}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-7.0-csfle-mongocryptd
     tags:
       - '7.0'
@@ -3983,6 +4580,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
       - test-7.0-server
       - test-7.0-replica_set
       - test-7.0-sharded_cluster
@@ -4010,6 +4610,7 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-7.0-load-balanced
+      - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
@@ -4019,6 +4620,8 @@ buildvariants:
       - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
@@ -4037,6 +4640,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
       - test-7.0-server
       - test-7.0-replica_set
       - test-7.0-sharded_cluster
@@ -4064,6 +4670,7 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-7.0-load-balanced
+      - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
@@ -4073,6 +4680,8 @@ buildvariants:
       - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
@@ -4091,6 +4700,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
       - test-7.0-server
       - test-7.0-replica_set
       - test-7.0-sharded_cluster
@@ -4118,6 +4730,7 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-7.0-load-balanced
+      - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
@@ -4127,6 +4740,8 @@ buildvariants:
       - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
@@ -4144,6 +4759,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
       - test-7.0-server
       - test-7.0-replica_set
       - test-7.0-sharded_cluster
@@ -4171,6 +4789,7 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-7.0-load-balanced
+      - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
@@ -4180,6 +4799,8 @@ buildvariants:
       - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
@@ -4197,6 +4818,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
       - test-7.0-server
       - test-7.0-replica_set
       - test-7.0-sharded_cluster
@@ -4222,6 +4846,8 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
@@ -4239,6 +4865,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
       - test-7.0-server
       - test-7.0-replica_set
       - test-7.0-sharded_cluster
@@ -4264,6 +4893,8 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
@@ -4281,6 +4912,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
       - test-7.0-server
       - test-7.0-replica_set
       - test-7.0-sharded_cluster
@@ -4306,6 +4940,8 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
@@ -4321,6 +4957,7 @@ buildvariants:
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
+      - test-8.0-csfle-mongocryptd
       - test-7.0-csfle-mongocryptd
       - test-6.0-csfle-mongocryptd
       - test-5.0-csfle-mongocryptd
@@ -4337,6 +4974,7 @@ buildvariants:
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
+      - test-8.0-csfle-mongocryptd
       - test-7.0-csfle-mongocryptd
       - test-6.0-csfle-mongocryptd
       - test-5.0-csfle-mongocryptd
@@ -4382,6 +5020,34 @@ buildvariants:
       - >-
         aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
       - aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
+      - aws-8.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+      - aws-8.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+      - aws-8.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+      - aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+      - aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+      - aws-8.0-auth-test-run-aws-ECS-auth-test
+      - aws-8.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
+      - aws-8.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
+      - aws-8.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
+      - aws-8.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
+      - aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
+      - >-
+        aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
+      - aws-8.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
+      - aws-7.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+      - aws-7.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+      - aws-7.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+      - aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+      - aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+      - aws-7.0-auth-test-run-aws-ECS-auth-test
+      - aws-7.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
+      - aws-7.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
+      - aws-7.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
+      - aws-7.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
+      - aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
+      - >-
+        aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
+      - aws-7.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
       - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
@@ -4489,6 +5155,9 @@ buildvariants:
       - test-rapid-server-noauth
       - test-rapid-replica_set-noauth
       - test-rapid-sharded_cluster-noauth
+      - test-8.0-server-noauth
+      - test-8.0-replica_set-noauth
+      - test-8.0-sharded_cluster-noauth
       - test-7.0-server-noauth
       - test-7.0-replica_set-noauth
       - test-7.0-sharded_cluster-noauth
