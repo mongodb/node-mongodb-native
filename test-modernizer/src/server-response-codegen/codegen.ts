@@ -70,8 +70,13 @@ export function readInputSchema(input: Record<string, unknown>) {
   return classes;
 }
 
-export type Model = ReturnType<typeof readInputSchema>;
-export type ModelProperty = Model[number]['properties'][number];
+export type ModelSchema = ReturnType<typeof readInputSchema>;
+export type Model = ModelSchema[number];
+export type ModelProperty = Model['properties'][number];
+
+function getModelForClassName(schema: ModelSchema, className?: string): Model | null {
+  return (className && schema.find(model => className && model.className === className)) ?? null;
+}
 
 function typeMetadata(property: ModelProperty) {
   if (property.type in BSON_TYPES) return 'bson type' as const;
@@ -407,7 +412,7 @@ function makeOnDemandBSONAccess(property: ModelProperty): ts.Expression {
   );
 }
 
-function makeConstructor(properties: Model[number]['properties']): ts.ConstructorDeclaration {
+function makeConstructor(properties: ModelSchema[number]['properties']): ts.ConstructorDeclaration {
   const constructorAssignedProperties = properties.flatMap(property => {
     assert(!property.lazy, 'cannot create a constructor initializer for a non-lazy property.');
     switch (typeMetadata(property)) {
@@ -494,6 +499,126 @@ function generateClassDefinition(
   );
 }
 
+function addCaching(sourceFile: ts.SourceFile, schema: ModelSchema) {
+  const transformerFactory: ts.TransformerFactory<ts.SourceFile> = context => {
+    /**
+     * Given a getter with a single return statement body, returns a getter that
+     * caches the result of the getter lazily.
+     */
+    function addCachingToGetter(getter: ts.GetAccessorDeclaration) {
+      assert(ts.isIdentifier(getter.name));
+      const body = getter.body;
+      // getters can have no bodies if the getter is abstract
+      assert(ts.isBlock(body), 'encountered a getter without a body');
+      const statements = body.statements;
+      assert(statements.length === 1, 'can only process a single statement body');
+      const statement = statements[0];
+      assert(ts.isReturnStatement(statement));
+
+      const { expression } = statement;
+      const getterName = getter.name?.escapedText;
+      const cacheNode = context.factory.createPropertyDeclaration(
+        [ts.factory.createModifier(ts.SyntaxKind.PrivateKeyword)],
+        `___${getterName}`,
+        ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+        getter.type,
+        undefined
+      );
+
+      /**
+       * transforms an expression into a list of statements in the template of:
+       *
+       * ```typescript
+       * if (!('<cache name>' in this)) {
+       *   this.<cache name> = <initializer>
+       * }
+       * return this.<cache name>
+       * ```
+       */
+      function makeCacheStatements(initializer: ts.Expression) {
+        // this.<cache> = ....
+        const cacheAssignment = assignPropertyOntoThis(`___${getterName}`, initializer);
+
+        const cacheGuardCondition = ts.factory.createPrefixUnaryExpression(
+          ts.SyntaxKind.ExclamationToken,
+          ts.factory.createBinaryExpression(
+            ts.factory.createStringLiteral(`___${getterName}`),
+            ts.SyntaxKind.InKeyword,
+            ts.factory.createThis()
+          )
+        );
+        // if (!(<cache name> in this)) { ... }
+        const ifStatement = ts.factory.createIfStatement(cacheGuardCondition, cacheAssignment);
+        const _return = ts.factory.createReturnStatement(
+          ts.factory.createBinaryExpression(
+            ts.factory.createPropertyAccessExpression(ts.factory.createThis(), `___${getterName}`),
+            ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
+            ts.factory.createNull()
+          )
+        );
+
+        return ts.factory.createBlock([ifStatement, _return]);
+      }
+
+      return [
+        cacheNode,
+        ts.factory.updateGetAccessorDeclaration(
+          getter,
+          getter.modifiers,
+          getter.name,
+          getter.parameters,
+          getter.type,
+          makeCacheStatements(expression)
+        )
+      ];
+    }
+    function visitClassDeclaration(node: ts.ClassDeclaration): ts.ClassDeclaration {
+      assert(!!node, 'encountered undefined node');
+      const className = node.name?.escapedText;
+      const model = getModelForClassName(schema, String(className));
+
+      const shouldCacheProperty = (propertyName = ''): boolean => {
+        const property =
+          propertyName && model?.properties.find(property => property.name === propertyName);
+
+        return property && property.cache && !property.required;
+      };
+
+      const members = node.members.flatMap(member => {
+        if (
+          !ts.isGetAccessorDeclaration(member) ||
+          !(ts.isIdentifier(member.name) && shouldCacheProperty(String(member.name.escapedText)))
+        ) {
+          return member;
+        }
+
+        return addCachingToGetter(member);
+      });
+
+      return context.factory.updateClassDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        members
+      );
+    }
+
+    function visitStatement(statement: ts.Statement): ts.Statement {
+      if (!ts.isClassDeclaration(statement)) return statement;
+      return visitClassDeclaration(statement);
+    }
+    function visitSource(node: ts.SourceFile) {
+      const children = node.statements.map(visitStatement);
+
+      return ts.factory.updateSourceFile(node, children);
+    }
+    return visitSource;
+  };
+  return ts.transform(sourceFile, [transformerFactory]);
+}
+
 export function generateModelClasses(schema: ReturnType<typeof readInputSchema>): ts.SourceFile {
   const statements: ts.Statement[] = [];
 
@@ -507,5 +632,6 @@ export function generateModelClasses(schema: ReturnType<typeof readInputSchema>)
     ts.NodeFlags.None
   );
 
-  return sourceFile;
+  const { transformed } = addCaching(sourceFile, schema);
+  return transformed[0];
 }

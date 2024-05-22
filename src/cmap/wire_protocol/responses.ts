@@ -251,10 +251,7 @@ export class ClusterTime {
   readonly signature: Document | null = null;
   constructor(private readonly response: MongoDBResponse) {
     this.clusterTime = this.response.get('clusterTime', BSONType.timestamp, true);
-    const signature = this.response.get('signature', BSONType.object, false);
-    if (signature != null) {
-      this.signature = signature.toObject();
-    }
+    this.signature = this.response.get('signature', BSONType.object, false)?.toObject() ?? null;
   }
 }
 export class ServerResponse {
@@ -308,5 +305,37 @@ export class ServerResponse {
   readonly ok: bigint;
   constructor(private readonly response: MongoDBResponse) {
     this.ok = this.response.get('ok', BSONType.long, true);
+  }
+}
+export class Hello {
+  readonly tags: OnDemandDocument | null = null;
+  readonly minWireVersion: number | null = null;
+  readonly maxWireVersion: number | null = null;
+  readonly lastWriteDate: LastWrite | null = null;
+  readonly hosts: OnDemandArray | null = null;
+  readonly passives: OnDemandArray | null = null;
+  readonly arbiters: OnDemandArray | null = null;
+  readonly me: string | null = null;
+  readonly setName: string | null = null;
+  readonly setVersion: number | null = null;
+  readonly electionId: number | null = null;
+  constructor(private readonly response: MongoDBResponse) {
+    this.tags = this.response.get('tags', BSONType.object, false);
+    this.minWireVersion = this.response.getNumber('minWireVersion', false);
+    this.maxWireVersion = this.response.getNumber('maxWireVersion', false);
+    this.lastWriteDate = new LastWrite(this.response);
+    this.hosts = this.response.get('hosts', BSONType.array, false);
+    this.passives = this.response.get('passives', BSONType.array, false);
+    this.arbiters = this.response.get('arbiters', BSONType.array, false);
+    this.me = this.response.get('me', BSONType.string, false);
+    this.setName = this.response.get('setName', BSONType.string, false);
+    this.setVersion = this.response.getNumber('setVersion', false);
+    this.electionId = this.response.getNumber('electionId', false);
+  }
+}
+export class LastWrite {
+  readonly lastWriteDate: number | null = null;
+  constructor(private readonly response: MongoDBResponse) {
+    this.lastWriteDate = this.response.getNumber('lastWriteDate', false);
   }
 }

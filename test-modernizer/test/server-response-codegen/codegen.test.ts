@@ -943,6 +943,15 @@ export class CursorWrapper {
     });
   });
 
+  it('scratch', function () {
+    const source = parseSource(`
+    class Foo() {
+
+    }
+    `);
+    explore(source);
+  });
+
   describe('integration test', function () {
     test('asdf', async function () {
       const yaml = readFileSync(
