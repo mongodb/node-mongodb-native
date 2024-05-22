@@ -1,8 +1,6 @@
 import { BSONType, type Document, type Timestamp } from 'bson';
-
 import { type OnDemandArray, type OnDemandDocument } from './on_demand/document';
 import { type MongoDBResponse } from './responses';
-
 export class Cursor {
   readonly id: bigint;
   readonly ns: string | null = null;

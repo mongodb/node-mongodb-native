@@ -1,11 +1,13 @@
 import { expect } from 'chai';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { readFile, writeFile } from 'fs/promises';
 import { load } from 'js-yaml';
 import { test } from 'mocha';
 import { resolve } from 'path';
+import * as ts from 'typescript';
 
 import { generateModelClasses, readInputSchema } from '../../src/server-response-codegen/codegen';
-import { explore, formatSource, parseSource, print } from '../../src/utils';
+import { explore, formatSource, parseSource } from '../../src/utils';
 
 type Models = ReturnType<typeof readInputSchema>;
 type Model = Models[number];
@@ -953,13 +955,36 @@ export class CursorWrapper {
   });
 
   describe('integration test', function () {
-    test('asdf', async function () {
+    const driverRoot = resolve(__dirname, '../../../..');
+    const responseFile = resolve(driverRoot, 'src/cmap/wire_protocol', 'generated.ts');
+
+    async function resolveOutput({ statements }: ts.SourceFile): Promise<ts.SourceFile> {
+      const responses = parseSource(await readFile(responseFile, 'utf-8'));
+
+      const { transformed } = ts.transform(responses, [
+        context => {
+          return (node: ts.SourceFile) => {
+            const nonClassDeclarations = node.statements.filter(
+              node => !ts.isClassDeclaration(node)
+            );
+            const newClasses = statements.filter(statement => ts.isClassDeclaration(statement));
+
+            return context.factory.updateSourceFile(node, [...nonClassDeclarations, ...newClasses]);
+          };
+        }
+      ]);
+      return transformed[0];
+    }
+
+    test.only('asdf', async function () {
       const yaml = readFileSync(
         resolve(__dirname, '../../../src/server-response-codegen/cursor_response.yml'),
         'utf-8'
       );
       const classes = generateModelClasses(readInputSchema(load(yaml)));
-      writeFileSync('out.ts', await formatSource(classes));
+
+      const responsesFile = await resolveOutput(classes);
+      await writeFile(responseFile, await formatSource(responsesFile));
     });
   });
 });

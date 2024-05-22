@@ -6,7 +6,8 @@
   "scripts": {
     "build": "npx tsc",
     "test": "npm run build && npx mocha --config .mocharc dist/test/**/*test.js",
-    "run": "ts-node src/index.ts"
+    "run": "ts-node src/index.ts",
+    "test-demo": "npm run test && cd .. && npm run check:eslint -- --fix"
   },
   "keywords": [],
   "author": "",
