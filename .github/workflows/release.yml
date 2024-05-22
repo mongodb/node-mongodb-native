@@ -15,20 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: release
-        uses: google-github-actions/release-please-action@v3
-        with:
-          release-type: node
-          package-name: mongodb
-          # Example: chore(main): release 5.7.0 [skip-ci]
-          # ${scope} - parenthesis included, base branch name
-          pull-request-title-pattern: 'chore${scope}: release ${version} [skip-ci]'
-          pull-request-header: 'Please run the release_notes action before releasing to generate release highlights'
-          changelog-path: HISTORY.md
-          default-branch: main
+        uses: google-github-actions/release-please-action@v4
 
       # If release-please created a release, publish to npm
       - if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - if: ${{ steps.release.outputs.release_created }}
         name: actions/setup
         uses: ./.github/actions/setup
