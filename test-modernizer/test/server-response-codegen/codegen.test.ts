@@ -976,9 +976,9 @@ export class CursorWrapper {
       return transformed[0];
     }
 
-    test.only('asdf', async function () {
+    test('asdf', async function () {
       const yaml = readFileSync(
-        resolve(__dirname, '../../../src/server-response-codegen/cursor_response.yml'),
+        resolve(__dirname, '../../../src/server-response-codegen/schema.yml'),
         'utf-8'
       );
       const classes = generateModelClasses(readInputSchema(load(yaml)));
