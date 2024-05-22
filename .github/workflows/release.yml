@@ -27,42 +27,12 @@ jobs:
           default-branch: main
 
       # If release-please created a release, publish to npm
-      - if: ${{ true }}
+      - if: ${{ steps.release.outputs.release_created }}
         uses: actions/checkout@v3
-      - if: ${{ true }}
+      - if: ${{ steps.release.outputs.release_created }}
         name: actions/setup
         uses: ./.github/actions/setup
-      - if: true
-        run: npm pack
-        shell: bash
-      - if: true
-        name: Get release version and release package file name
-        run: |
-          PACKAGE_VERSION=$(jq '.version' package.json | tr -d '"')
-          echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> "$GITHUB_ENV"
-          echo "PACKAGE_FILE=mongodb-${PACKAGE_VERSION}.tgz" >> "$GITHUB_ENV"
-      - if: true
-        name: Create detached signature
-        uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@main
-        with:
-          filenames: ${{ env.PACKAGE_FILE }}
-          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      - if: true
-        name: "Upload artifacts"
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.PACKAGE_FILE }}
-          path: |
-            ${{ env.PACKAGE_FILE }}
-            ${{ env.PACKAGE_FILE }}.sig
-          retention-days: 3
-      - if: false
+      - if: ${{ steps.release.outputs.release_created }}
         run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-
-
