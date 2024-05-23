@@ -1,25 +1,22 @@
 // @ts-check
 import * as process from 'node:process';
-import { Octokit } from '@octokit/core';
 import { output } from './util.mjs';
 
 const {
   GITHUB_TOKEN = '',
   PR_LIST = '',
-  owner = 'mongodb',
-  repo = 'node-mongodb-native'
+  REPOSITORY = ''
 } = process.env;
 if (GITHUB_TOKEN === '') throw new Error('GITHUB_TOKEN cannot be empty');
+if (REPOSITORY === '') throw new Error('REPOSITORY cannot be empty')
 
-const octokit = new Octokit({
-  auth: GITHUB_TOKEN,
-  log: {
-    debug: msg => console.error('Octokit.debug', msg),
-    info: msg => console.error('Octokit.info', msg),
-    warn: msg => console.error('Octokit.warn', msg),
-    error: msg => console.error('Octokit.error', msg)
+const API_REQ_INFO = {
+  headers: {
+    Accept: 'application/vnd.github.v3+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    Authorization: `Bearer ${GITHUB_TOKEN}`
   }
-});
+}
 
 const prs = PR_LIST.split(',').map(pr => {
   const prNum = Number(pr);
@@ -35,13 +32,10 @@ async function getPullRequestContent(pull_number) {
 
   let body;
   try {
-    const res = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-      owner,
-      repo,
-      pull_number,
-      headers: { 'X-GitHub-Api-Version': '2022-11-28' }
-    });
-    body = res.data.body;
+    const response = await fetch(new URL(`https://api.github.com/repos/${REPOSITORY}/pulls/${pull_number}`), API_REQ_INFO);
+    if (!response.ok) throw new Error(await response.text());
+    const pr = await response.json();
+    body = pr.body;
   } catch (error) {
     console.log(`Could not get PR ${pull_number}, skipping. ${error.status}`);
     return '';

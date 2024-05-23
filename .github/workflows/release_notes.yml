@@ -64,6 +64,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR_LIST: ${{ steps.pr_list.outputs.pr_list }}
+          REPOSITORY: ${{ github.repository }}
 
       # The combined output is available
       - id: release_notes
