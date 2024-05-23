@@ -11,19 +11,28 @@ permissions:
 name: release
 
 jobs:
-  release-please:
+  release_please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - id: release
-        uses: googleapis/release-please-action@v4
+        uses: google-github-actions/release-please-action@v4
 
-      # If release-please created a release, publish to npm
-      - if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v4
-      - if: ${{ steps.release.outputs.release_created }}
-        name: actions/setup
+  compress_sign_and_upload:
+    needs: [release_please]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: actions/setup
         uses: ./.github/actions/setup
-      - if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance
+      - name: actions/compress_sign_and_upload
+        uses: ./.github/actions/compress_sign_and_upload
+        with: 
+          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      - run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
