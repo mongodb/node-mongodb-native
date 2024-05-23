@@ -18,14 +18,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: actions/setup
         uses: ./.github/actions/setup
       - run: sudo apt-get install hugo
       - name: Build Docs
         run: npm run build:docs -- --yes
       - name: Open Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v6
         with:
           title: 'docs: generate docs from latest main [skip-ci]'
           delete-branch: true

@@ -130,6 +130,22 @@ describe('ServerDescription', function () {
         currentTv: { processId: processIdZero, counter: Long.fromNumber(2) },
         newTv: { processId: processIdZero, counter: Long.fromNumber(2) },
         out: 0
+      },
+      {
+        title: 'when process ids are equal and both counter values are zero bigints',
+        // @ts-expect-error: Testing that the function handles bigints
+        currentTv: { processId: processIdZero, counter: 0n },
+        // @ts-expect-error: Testing that the function handles bigints
+        newTv: { processId: processIdZero, counter: 0n },
+        out: 0
+      },
+      {
+        title: 'when process ids are equal and both counter values are non-zero bigints',
+        // @ts-expect-error: Testing that the function handles bigints
+        currentTv: { processId: processIdZero, counter: 2n },
+        // @ts-expect-error: Testing that the function handles bigints
+        newTv: { processId: processIdZero, counter: 2n },
+        out: 0
       }
     ];
     const compareTopologyVersionLessThanTests: CompareTopologyVersionTest[] = [
@@ -177,6 +193,12 @@ describe('ServerDescription', function () {
         title: 'when processIds are equal but new counter is less than current',
         currentTv: { processId: processIdZero, counter: Long.fromNumber(3) },
         newTv: { processId: processIdZero, counter: Long.fromNumber(2) },
+        out: 1
+      },
+      {
+        title: 'when processIds are equal but new counter is less than current (bigint)',
+        currentTv: { processId: processIdZero, counter: 3n },
+        newTv: { processId: processIdZero, counter: 2n },
         out: 1
       }
     ];
