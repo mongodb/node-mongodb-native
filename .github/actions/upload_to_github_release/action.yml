@@ -1,0 +1,17 @@
+name: Upload to Github Release
+description: 'uploads a file to the specified Github release'
+
+inputs:
+    release_tag:
+      description: 'The release tag, in the form v<semver version>'
+      required: true
+    file:
+      description: 'the file to upload'
+      required: true
+
+runs:
+  using: composite
+  steps:
+    - name: "Upload release artifacts"
+      run: gh release upload v${{ steps.vars.package_version }} ${{ steps.vars.package_file }}.sig
+      shell: bash

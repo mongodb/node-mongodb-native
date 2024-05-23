@@ -1,0 +1,26 @@
+name: Generate Augmented SBOM
+description: 'generates an augmented SBOM lite file'
+
+inputs:
+    output_path:
+      description: 'the output path of the generated SBOM file.'
+      required: true
+    asset_group:
+      description: 'the silk asset group'
+      required: true
+
+runs:
+  using: composite
+  steps:
+    - name: "Upload release artifacts"
+      run: |
+        cat << EOF > silkbomb.env
+          SILK_CLIENT_ID=${{ secrets.SILK_CLIENT_ID }}
+          SILK_CLIENT_SECRET=${{ secrets.SILK_CLIENT_SECRET }}
+        EOF
+
+        docker run --platform="linux/amd64" -it --rm -v ${PWD}:/pwd \
+        --env-file silkbomb.env \
+        artifactory.corp.mongodb.com/release-tools-container-registry-public-local/silkbomb:1.0 \
+        download --silk-asset-group ${{ inputs.asset_group }} --sbom-out /pwd/${{ inputs.output_path }}
+      shell: bash
