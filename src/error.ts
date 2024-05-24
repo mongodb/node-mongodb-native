@@ -769,15 +769,6 @@ export class MongoOperationTimeoutError extends MongoRuntimeError {
 }
 
 /**
- * @internal
- */
-export class MongoOperationTimeoutError extends MongoRuntimeError {
-  override get name(): string {
-    return 'MongoOperationTimeoutError';
-  }
-}
-
-/**
  * An error thrown when the user attempts to add options to a cursor that has already been
  * initialized
  *
