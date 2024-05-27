@@ -25,6 +25,8 @@ const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
 const CALLBACK_RESULT_ERROR =
   'User provided OIDC callbacks must return a valid object with an accessToken.';
 
+export type RequestAccessTokenFunction = (credentials: MongoCredentials) => Promise<OIDCResponse>;
+
 /**
  * OIDC implementation of a callback based workflow.
  * @internal
