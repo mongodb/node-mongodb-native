@@ -127,7 +127,7 @@ export abstract class CallbackWorkflow implements Workflow {
   /**
    * Ensure the callback is only executed one at a time.
    */
-  protected withLock(callback: OIDCCallbackFunction) {
+  protected withLock(callback: OIDCCallbackFunction): OIDCCallbackFunction {
     let lock: Promise<any> = Promise.resolve();
     return async (params: OIDCCallbackParams): Promise<OIDCResponse> => {
       // We do this to ensure that we would never return the result of the

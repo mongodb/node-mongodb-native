@@ -84,12 +84,13 @@ export abstract class MachineWorkflow implements Workflow {
   /**
    * Ensure the callback is only executed one at a time.
    */
-  private withLock(callback: OIDCTokenFunction) {
+  private withLock(callback: OIDCTokenFunction): OIDCTokenFunction {
     let lock: Promise<any> = Promise.resolve();
     return async (credentials: MongoCredentials): Promise<AccessToken> => {
+      // We do this to ensure that we would never return the result of the
+      // previous lock, only the current callback's value would get returned.
       await lock;
-      // eslint-disable-next-line github/no-then
-      lock = lock.then(() => callback(credentials));
+      lock = callback(credentials);
       return await lock;
     };
   }

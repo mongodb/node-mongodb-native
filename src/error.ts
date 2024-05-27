@@ -565,7 +565,7 @@ export class MongoOIDCError extends MongoRuntimeError {
  * @public
  * @category Error
  */
-export class MongoAzureError extends MongoRuntimeError {
+export class MongoAzureError extends MongoOIDCError {
   /**
    * **Do not use this constructor!**
    *
@@ -593,7 +593,7 @@ export class MongoAzureError extends MongoRuntimeError {
  * @public
  * @category Error
  */
-export class MongoGCPError extends MongoRuntimeError {
+export class MongoGCPError extends MongoOIDCError {
   /**
    * **Do not use this constructor!**
    *

@@ -1,11 +1,9 @@
+import { getAzureURL } from '../../../client-side-encryption/providers/azure';
 import { MongoAzureError } from '../../../error';
 import { get } from '../../../utils';
 import type { MongoCredentials } from '../mongo_credentials';
 import { type AccessToken, MachineWorkflow } from './machine_workflow';
 import { type TokenCache } from './token_cache';
-
-/** Base URL for getting Azure tokens. */
-const AZURE_BASE_URL = 'http://169.254.169.254/metadata/identity/oauth2/token?';
 
 /** Azure request headers. */
 const AZURE_HEADERS = Object.freeze({ Metadata: 'true', Accept: 'application/json' });
@@ -52,12 +50,7 @@ export class AzureMachineWorkflow extends MachineWorkflow {
  * Hit the Azure endpoint to get the token data.
  */
 async function getAzureTokenData(tokenAudience: string, username?: string): Promise<AccessToken> {
-  const url = new URL(AZURE_BASE_URL);
-  url.searchParams.append('api-version', '2018-02-01');
-  url.searchParams.append('resource', tokenAudience);
-  if (username) {
-    url.searchParams.append('client_id', username);
-  }
+  const url = getAzureURL(tokenAudience, username);
   const response = await get(url, {
     headers: AZURE_HEADERS
   });
@@ -78,5 +71,10 @@ function isEndpointResultValid(
   token: unknown
 ): token is { access_token: unknown; expires_in: unknown } {
   if (token == null || typeof token !== 'object') return false;
-  return 'access_token' in token && 'expires_in' in token;
+  return (
+    'access_token' in token &&
+    typeof token.access_token === 'string' &&
+    'expires_in' in token &&
+    typeof token.expires_in === 'number'
+  );
 }
