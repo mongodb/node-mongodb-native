@@ -1,5 +1,3 @@
-import { setTimeout } from 'timers/promises';
-
 import { MONGODB_ERROR_CODES, MongoError, MongoOIDCError } from '../../../error';
 import { Timeout, TimeoutError } from '../../../timeout';
 import { type Connection } from '../../connection';
@@ -12,6 +10,7 @@ import {
 } from '../mongodb_oidc';
 import { AUTOMATED_TIMEOUT_MS, CallbackWorkflow } from './callback_workflow';
 import { type TokenCache } from './token_cache';
+import { WorkflowExecutor } from './workflow_executor';
 
 /** Must wait at least 100ms between invocations */
 const CALLBACK_DEBOUNCE_MS = 100;
@@ -21,14 +20,14 @@ const CALLBACK_DEBOUNCE_MS = 100;
  * @internal
  */
 export class AutomatedCallbackWorkflow extends CallbackWorkflow {
-  private lastInvocationTime: number;
+  private workflowExecutor: WorkflowExecutor;
 
   /**
    * Instantiate the human callback workflow.
    */
   constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
     super(cache, callback);
-    this.lastInvocationTime = Date.now();
+    this.workflowExecutor = new WorkflowExecutor(CALLBACK_DEBOUNCE_MS);
   }
 
   /**
@@ -67,19 +66,10 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
         }
       }
     }
-    let response: OIDCResponse;
-    const now = Date.now();
-    if (now - this.lastInvocationTime > CALLBACK_DEBOUNCE_MS) {
-      response = await this.fetchAccessToken(credentials);
-    } else {
-      // Ensure a delay between invokations to not overload the callback.
-      const responses = await Promise.all([
-        setTimeout(CALLBACK_DEBOUNCE_MS - (now - this.lastInvocationTime)),
-        this.fetchAccessToken(credentials)
-      ]);
-      response = responses[1];
-    }
-    this.lastInvocationTime = now;
+    const response = await this.workflowExecutor.execute(
+      this.fetchAccessToken.bind(this),
+      credentials
+    );
     this.cache.put(response);
     await this.finishAuthentication(connection, credentials, response.accessToken);
   }
