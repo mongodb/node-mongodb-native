@@ -1,4 +1,4 @@
-import { getAzureURL } from '../../../client-side-encryption/providers/azure';
+import { addAzureParams, AZURE_BASE_URL } from '../../../client-side-encryption/providers/azure';
 import { MongoAzureError } from '../../../error';
 import { get } from '../../../utils';
 import type { MongoCredentials } from '../mongo_credentials';
@@ -50,7 +50,8 @@ export class AzureMachineWorkflow extends MachineWorkflow {
  * Hit the Azure endpoint to get the token data.
  */
 async function getAzureTokenData(tokenAudience: string, username?: string): Promise<AccessToken> {
-  const url = getAzureURL(tokenAudience, username);
+  const url = new URL(AZURE_BASE_URL);
+  addAzureParams(url, tokenAudience, username);
   const response = await get(url, {
     headers: AZURE_HEADERS
   });

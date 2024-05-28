@@ -6,7 +6,7 @@ import { type KMSProviders } from './index';
 
 const MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS = 6000;
 /** Base URL for getting Azure tokens. */
-const AZURE_BASE_URL = 'http://169.254.169.254/metadata/identity/oauth2/token?';
+export const AZURE_BASE_URL = 'http://169.254.169.254/metadata/identity/oauth2/token?';
 
 /**
  * The access token that libmongocrypt expects for Azure kms.
@@ -120,8 +120,7 @@ export interface AzureKMSRequestOptions {
  * @internal
  * Get the Azure endpoint URL.
  */
-export function getAzureURL(resource: string, username?: string): URL {
-  const url = new URL(AZURE_BASE_URL);
+export function addAzureParams(url: URL, resource: string, username?: string): URL {
   url.searchParams.append('api-version', '2018-02-01');
   url.searchParams.append('resource', resource);
   if (username) {
@@ -140,7 +139,8 @@ export function prepareRequest(options: AzureKMSRequestOptions): {
   headers: Document;
   url: URL;
 } {
-  const url = getAzureURL('https://vault.azure.net');
+  const url = new URL(options.url?.toString() ?? AZURE_BASE_URL);
+  addAzureParams(url, 'https://vault.azure.net');
   const headers = { ...options.headers, 'Content-Type': 'application/json', Metadata: true };
   return { headers, url };
 }
