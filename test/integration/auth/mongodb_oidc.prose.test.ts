@@ -1026,7 +1026,6 @@ describe('OIDC Auth Spec Tests', function () {
             retryReads: false
           });
           collection = client.db('test').collection('testHuman');
-          console.log('setting fail point');
           await utilClient
             .db()
             .admin()
@@ -1051,7 +1050,6 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('does not successfully authenticate', async function () {
-          console.log('execute find');
           const error = await collection.findOne().catch(error => error);
           expect(error).to.exist;
         });
