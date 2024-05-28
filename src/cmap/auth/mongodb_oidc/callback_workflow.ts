@@ -1,4 +1,5 @@
 import { type Document } from 'bson';
+import { setTimeout } from 'timers';
 
 import { MongoMissingCredentialsError } from '../../../error';
 import { ns } from '../../../utils';
@@ -25,7 +26,8 @@ const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
 const CALLBACK_RESULT_ERROR =
   'User provided OIDC callbacks must return a valid object with an accessToken.';
 
-export type RequestAccessTokenFunction = (credentials: MongoCredentials) => Promise<OIDCResponse>;
+/** The time to throttle callback calls. */
+const THROTTLE_MS = 100;
 
 /**
  * OIDC implementation of a callback based workflow.
@@ -34,6 +36,7 @@ export type RequestAccessTokenFunction = (credentials: MongoCredentials) => Prom
 export abstract class CallbackWorkflow implements Workflow {
   cache: TokenCache;
   callback: OIDCCallbackFunction;
+  lastExecutionTime: number;
 
   /**
    * Instantiate the callback workflow.
@@ -41,6 +44,7 @@ export abstract class CallbackWorkflow implements Workflow {
   constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
     this.cache = cache;
     this.callback = this.withLock(callback);
+    this.lastExecutionTime = Date.now() - THROTTLE_MS;
   }
 
   /**
@@ -116,14 +120,26 @@ export abstract class CallbackWorkflow implements Workflow {
    * Executes the callback and validates the output.
    */
   protected async executeAndValidateCallback(params: OIDCCallbackParams): Promise<OIDCResponse> {
-    // With no token in the cache we use the request callback.
-    const result = await this.callback(params);
+    // With no token in the cache we use the request callback this needs to be throttled
+    // every 100ms.
+    let result;
+    const difference = Date.now() - this.lastExecutionTime;
+    if (difference > THROTTLE_MS) {
+      result = await this.callback(params);
+    } else {
+      result = await new Promise(resolve => {
+        setTimeout(() => {
+          this.lastExecutionTime = Date.now();
+          resolve(this.callback(params));
+        }, THROTTLE_MS - difference);
+      });
+    }
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
     if (isCallbackResultInvalid(result)) {
       throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
-    return result;
+    return result as OIDCResponse;
   }
 
   /**

@@ -10,24 +10,17 @@ import {
 } from '../mongodb_oidc';
 import { AUTOMATED_TIMEOUT_MS, CallbackWorkflow } from './callback_workflow';
 import { type TokenCache } from './token_cache';
-import { WorkflowExecutor } from './workflow_executor';
-
-/** Must wait at least 100ms between invocations */
-const CALLBACK_DEBOUNCE_MS = 100;
 
 /**
  * Class implementing behaviour for the non human callback workflow.
  * @internal
  */
 export class AutomatedCallbackWorkflow extends CallbackWorkflow {
-  private workflowExecutor: WorkflowExecutor;
-
   /**
    * Instantiate the human callback workflow.
    */
   constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
     super(cache, callback);
-    this.workflowExecutor = new WorkflowExecutor(CALLBACK_DEBOUNCE_MS);
   }
 
   /**
@@ -66,10 +59,7 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
         }
       }
     }
-    const response = await this.workflowExecutor.execute(
-      this.fetchAccessToken.bind(this),
-      credentials
-    );
+    const response = await this.fetchAccessToken(credentials);
     this.cache.put(response);
     await this.finishAuthentication(connection, credentials, response.accessToken);
   }

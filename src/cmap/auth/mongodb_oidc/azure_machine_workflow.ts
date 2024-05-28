@@ -60,7 +60,11 @@ async function getAzureTokenData(tokenAudience: string, username?: string): Prom
       `Status code ${response.status} returned from the Azure endpoint. Response body: ${response.body}`
     );
   }
-  return JSON.parse(response.body);
+  const result = JSON.parse(response.body);
+  return {
+    access_token: result.access_token,
+    expires_in: Number(result.expires_in)
+  };
 }
 
 /**
