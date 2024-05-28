@@ -32,6 +32,8 @@ jobs:
 
     - name: "Export SARIF file from code scanning alerts"
       uses: "alcaeus/drivers-github-tools/code-scanning-export@export-code-scanning-report"
+      with:
+        ref: 'main'
 
     - name: 'asdf'
       shell: bash
