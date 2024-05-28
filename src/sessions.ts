@@ -369,6 +369,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /**
    * Starts a new transaction with the given options.
    *
+   * @remarks
+   * **IMPORTANT**: Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
+   * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
+   * undefined behaviour.
+   *
    * @param options - Options for the transaction
    */
   startTransaction(options?: TransactionOptions): void {
@@ -442,6 +447,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * Starts a transaction and runs a provided function, ensuring the commitTransaction is always attempted when all operations run in the function have completed.
    *
    * **IMPORTANT:** This method requires the function passed in to return a Promise. That promise must be made by `await`-ing all operations in such a way that rejections are propagated to the returned promise.
+   *
+   * **IMPORTANT:** Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
+   * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
+   * undefined behaviour.
+   *
    *
    * @remarks
    * - If all operations successfully complete and the `commitTransaction` operation is successful, then the provided function will return the result of the provided function.
