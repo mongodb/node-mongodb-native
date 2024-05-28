@@ -362,6 +362,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /**
    * Starts a new transaction with the given options.
    *
+   * @remarks
+   * **IMPORTANT**: Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
+   * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
+   * undefined behaviour.
+   *
    * @param options - Options for the transaction
    */
   startTransaction(options?: TransactionOptions): void {
@@ -438,6 +443,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    *
    * **IMPORTANT:** This method requires the user to return a Promise, and `await` all operations.
    * Any callbacks that do not return a Promise will result in undefined behavior.
+   *
+   * **IMPORTANT**: Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
+   * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
+   * undefined behaviour.
    *
    * @remarks
    * This function:
