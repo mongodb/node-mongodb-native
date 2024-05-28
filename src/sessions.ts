@@ -448,15 +448,17 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    *
    * **IMPORTANT:** This method requires the function passed in to return a Promise. That promise must be made by `await`-ing all operations in such a way that rejections are propagated to the returned promise.
    *
+   * **IMPORTANT:** Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
+   * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
+   * undefined behaviour.
+   *
+   *
    * @remarks
    * - If all operations successfully complete and the `commitTransaction` operation is successful, then the provided function will return the result of the provided function.
    * - If the transaction is unable to complete or an error is thrown from within the provided function, then the provided function will throw an error.
    *   - If the transaction is manually aborted within the provided function it will not throw.
    * - If the driver needs to attempt to retry the operations, the provided function may be called multiple times.
    *
-   * **IMPORTANT:** Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
-   * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
-   * undefined behaviour.
    *
    * Checkout a descriptive example here:
    * @see https://www.mongodb.com/blog/post/quick-start-nodejs--mongodb--how-to-implement-transactions
