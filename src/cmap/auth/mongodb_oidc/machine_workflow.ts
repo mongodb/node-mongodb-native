@@ -1,4 +1,5 @@
 import { type Document } from 'bson';
+import { setTimeout } from 'timers';
 
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
@@ -6,6 +7,9 @@ import type { MongoCredentials } from '../mongo_credentials';
 import type { Workflow } from '../mongodb_oidc';
 import { finishCommandDocument } from './command_builders';
 import { type TokenCache } from './token_cache';
+
+/** The time to throttle callback calls. */
+const THROTTLE_MS = 100;
 
 /**
  * The access token format.
@@ -26,6 +30,7 @@ export type OIDCTokenFunction = (credentials: MongoCredentials) => Promise<Acces
 export abstract class MachineWorkflow implements Workflow {
   cache: TokenCache;
   callback: OIDCTokenFunction;
+  lastExecutionTime: number;
 
   /**
    * Instantiate the machine workflow.
@@ -33,6 +38,7 @@ export abstract class MachineWorkflow implements Workflow {
   constructor(cache: TokenCache) {
     this.cache = cache;
     this.callback = this.withLock(this.getToken.bind(this));
+    this.lastExecutionTime = Date.now() - THROTTLE_MS;
   }
 
   /**
@@ -82,7 +88,8 @@ export abstract class MachineWorkflow implements Workflow {
   }
 
   /**
-   * Ensure the callback is only executed one at a time.
+   * Ensure the callback is only executed one at a time, and throttled to
+   * only once per 100ms.
    */
   private withLock(callback: OIDCTokenFunction): OIDCTokenFunction {
     let lock: Promise<any> = Promise.resolve();
@@ -91,7 +98,21 @@ export abstract class MachineWorkflow implements Workflow {
       // previous lock, only the current callback's value would get returned.
       await lock;
       // eslint-disable-next-line github/no-then
-      lock = lock.then(() => callback(credentials));
+      lock = lock.then(async () => {
+        let result;
+        const difference = Date.now() - this.lastExecutionTime;
+        if (difference > THROTTLE_MS) {
+          result = await callback(credentials);
+        } else {
+          result = await new Promise(resolve => {
+            setTimeout(() => {
+              this.lastExecutionTime = Date.now();
+              resolve(callback(credentials));
+            }, THROTTLE_MS - difference);
+          });
+        }
+        return result;
+      });
       return await lock;
     };
   }

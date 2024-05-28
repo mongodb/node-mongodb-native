@@ -120,30 +120,18 @@ export abstract class CallbackWorkflow implements Workflow {
    * Executes the callback and validates the output.
    */
   protected async executeAndValidateCallback(params: OIDCCallbackParams): Promise<OIDCResponse> {
-    // With no token in the cache we use the request callback this needs to be throttled
-    // every 100ms.
-    let result;
-    const difference = Date.now() - this.lastExecutionTime;
-    if (difference > THROTTLE_MS) {
-      result = await this.callback(params);
-    } else {
-      result = await new Promise(resolve => {
-        setTimeout(() => {
-          this.lastExecutionTime = Date.now();
-          resolve(this.callback(params));
-        }, THROTTLE_MS - difference);
-      });
-    }
+    const result = await this.callback(params);
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
     if (isCallbackResultInvalid(result)) {
       throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
-    return result as OIDCResponse;
+    return result;
   }
 
   /**
-   * Ensure the callback is only executed one at a time.
+   * Ensure the callback is only executed one at a time and throttles the calls
+   * to every 100ms.
    */
   protected withLock(callback: OIDCCallbackFunction): OIDCCallbackFunction {
     let lock: Promise<any> = Promise.resolve();
@@ -152,7 +140,21 @@ export abstract class CallbackWorkflow implements Workflow {
       // previous lock, only the current callback's value would get returned.
       await lock;
       // eslint-disable-next-line github/no-then
-      lock = lock.then(() => callback(params));
+      lock = lock.then(async () => {
+        let result;
+        const difference = Date.now() - this.lastExecutionTime;
+        if (difference > THROTTLE_MS) {
+          result = await callback(params);
+        } else {
+          result = await new Promise(resolve => {
+            setTimeout(() => {
+              this.lastExecutionTime = Date.now();
+              resolve(callback(params));
+            }, THROTTLE_MS - difference);
+          });
+        }
+        return result;
+      });
       return await lock;
     };
   }
