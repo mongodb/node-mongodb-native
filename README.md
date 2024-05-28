@@ -25,7 +25,7 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 ### Release Integrity
 
 The GitHub release contains a detached signature file for the NPM package (named
-`bson-X.Y.Z.tgz.sig`).
+`mongodb-X.Y.Z.tgz.sig`).
 
 The following command returns the link npm package. 
 ```shell
