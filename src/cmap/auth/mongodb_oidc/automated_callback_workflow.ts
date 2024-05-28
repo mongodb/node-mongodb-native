@@ -24,17 +24,6 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
   }
 
   /**
-   * Reauthenticate the callback workflow. For this we invalidated the access token
-   * in the cache and run the authentication steps again. No initial handshake needs
-   * to be sent.
-   */
-  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void> {
-    // Reauthentication should always remove the access token.
-    this.cache.removeAccessToken();
-    await this.execute(connection, credentials);
-  }
-
-  /**
    * Execute the OIDC callback workflow.
    */
   async execute(connection: Connection, credentials: MongoCredentials): Promise<void> {
@@ -61,6 +50,7 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     }
     const response = await this.fetchAccessToken(credentials);
     this.cache.put(response);
+    connection.accessToken = response.accessToken;
     await this.finishAuthentication(connection, credentials, response.accessToken);
   }
 

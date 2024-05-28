@@ -45,7 +45,7 @@ export abstract class MachineWorkflow implements Workflow {
    * Execute the workflow. Gets the token from the subclass implementation.
    */
   async execute(connection: Connection, credentials: MongoCredentials): Promise<void> {
-    const token = await this.getTokenFromCacheOrEnv(credentials);
+    const token = await this.getTokenFromCacheOrEnv(connection, credentials);
     const command = finishCommandDocument(token);
     await connection.command(ns(credentials.source), command, undefined);
   }
@@ -55,20 +55,32 @@ export abstract class MachineWorkflow implements Workflow {
    * has said the current access token is invalid or expired.
    */
   async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void> {
-    // Reauthentication implies the token has expired.
-    this.cache.removeAccessToken();
+    if (this.cache.hasAccessToken) {
+      // Reauthentication implies the token has expired.
+      if (connection.accessToken === this.cache.getAccessToken()) {
+        // If connection's access token is the same as the cache's, remove
+        // the token from the cache and connection.
+        this.cache.removeAccessToken();
+        delete connection.accessToken;
+      } else {
+        // If the connection's access token is different from the cache's, set
+        // the cache's token on the connection and do not remove from the
+        // cache.
+        connection.accessToken = this.cache.getAccessToken();
+      }
+    }
     await this.execute(connection, credentials);
   }
 
   /**
    * Get the document to add for speculative authentication.
    */
-  async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
+  async speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     // The spec states only cached access tokens can use speculative auth.
     if (!this.cache.hasAccessToken) {
       return {};
     }
-    const token = await this.getTokenFromCacheOrEnv(credentials);
+    const token = await this.getTokenFromCacheOrEnv(connection, credentials);
     const document = finishCommandDocument(token);
     document.db = credentials.source;
     return { speculativeAuthenticate: document };
@@ -77,12 +89,17 @@ export abstract class MachineWorkflow implements Workflow {
   /**
    * Get the token from the cache or environment.
    */
-  private async getTokenFromCacheOrEnv(credentials: MongoCredentials): Promise<string> {
+  private async getTokenFromCacheOrEnv(
+    connection: Connection,
+    credentials: MongoCredentials
+  ): Promise<string> {
     if (this.cache.hasAccessToken) {
       return this.cache.getAccessToken();
     } else {
       const token = await this.callback(credentials);
       this.cache.put({ accessToken: token.access_token, expiresInSeconds: token.expires_in });
+      // Put the access token on the connection as well.
+      connection.accessToken = token.access_token;
       return token.access_token;
     }
   }

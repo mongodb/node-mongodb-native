@@ -111,7 +111,7 @@ export interface Workflow {
   /**
    * Get the document to add for speculative authentication.
    */
-  speculativeAuth(credentials: MongoCredentials): Promise<Document>;
+  speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document>;
 }
 
 /** @internal */
@@ -160,8 +160,9 @@ export class MongoDBOIDC extends AuthProvider {
     handshakeDoc: HandshakeDocument,
     authContext: AuthContext
   ): Promise<HandshakeDocument> {
+    const { connection } = authContext;
     const credentials = getCredentials(authContext);
-    const result = await this.workflow.speculativeAuth(credentials);
+    const result = await this.workflow.speculativeAuth(connection, credentials);
     return { ...handshakeDoc, ...result };
   }
 }

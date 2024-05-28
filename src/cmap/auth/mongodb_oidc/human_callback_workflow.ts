@@ -27,19 +27,6 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
   }
 
   /**
-   * Reauthenticate the callback workflow. For this we invalidated the access token
-   * in the cache and run the authentication steps again. No initial handshake needs
-   * to be sent.
-   */
-  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void> {
-    // Reauthentication should always remove the access token, but in the
-    // human workflow we need to pass the refesh token through if it
-    // exists.
-    this.cache.removeAccessToken();
-    await this.execute(connection, credentials);
-  }
-
-  /**
    * Execute the OIDC human callback workflow.
    */
   async execute(connection: Connection, credentials: MongoCredentials): Promise<void> {
@@ -106,6 +93,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     const idpInfo = BSON.deserialize(startResponse.payload.buffer) as IdPInfo;
     const callbackResponse = await this.fetchAccessToken(idpInfo, credentials);
     this.cache.put(callbackResponse, idpInfo);
+    connection.accessToken = callbackResponse.accessToken;
     return await this.finishAuthentication(
       connection,
       credentials,

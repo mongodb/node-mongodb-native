@@ -174,6 +174,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public authContext?: AuthContext;
   public delayedTimeoutId: NodeJS.Timeout | null = null;
   public generation: number;
+  public accessToken?: string;
   public readonly description: Readonly<StreamDescription>;
   /**
    * Represents if the connection has been established:

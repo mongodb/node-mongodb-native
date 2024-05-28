@@ -51,12 +51,14 @@ export abstract class CallbackWorkflow implements Workflow {
    * Get the document to add for speculative authentication. This also needs
    * to add a db field from the credentials source.
    */
-  async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
+  async speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     // Check if the Client Cache has an access token.
     // If it does, cache the access token in the Connection Cache and send a JwtStepRequest
     // with the cached access token in the speculative authentication SASL payload.
     if (this.cache.hasAccessToken) {
-      const document = finishCommandDocument(this.cache.getAccessToken());
+      const accessToken = this.cache.getAccessToken();
+      connection.accessToken = accessToken;
+      const document = finishCommandDocument(accessToken);
       document.db = credentials.source;
       return { speculativeAuthenticate: document };
     }
@@ -64,9 +66,27 @@ export abstract class CallbackWorkflow implements Workflow {
   }
 
   /**
-   * Each workflow should specify the correct custom behaviour for reauthentication.
+   * Reauthenticate the callback workflow. For this we invalidated the access token
+   * in the cache and run the authentication steps again. No initial handshake needs
+   * to be sent.
    */
-  abstract reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void>;
+  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void> {
+    if (this.cache.hasAccessToken) {
+      // Reauthentication implies the token has expired.
+      if (connection.accessToken === this.cache.getAccessToken()) {
+        // If connection's access token is the same as the cache's, remove
+        // the token from the cache and connection.
+        this.cache.removeAccessToken();
+        delete connection.accessToken;
+      } else {
+        // If the connection's access token is different from the cache's, set
+        // the cache's token on the connection and do not remove from the
+        // cache.
+        connection.accessToken = this.cache.getAccessToken();
+      }
+    }
+    await this.execute(connection, credentials);
+  }
 
   /**
    * Execute the OIDC callback workflow.
