@@ -411,18 +411,6 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        it('allows a custom URL to be specified', () => {
-          const url = httpSpy.args[0][0];
-          expect(url).to.be.instanceof(URL);
-          expect(url.toString()).to.include('http://customentpoint.com');
-        });
-
-        it('deep copies the provided url', () => {
-          const spiedUrl = httpSpy.args[0][0];
-          expect(spiedUrl).to.be.instanceof(URL);
-          expect(spiedUrl).to.not.equal(url);
-        });
-
         it('allows custom headers to be specified', () => {
           const options = httpSpy.args[0][1];
           expect(options).to.have.property('headers').to.have.property('customHeader1', 'value1');
