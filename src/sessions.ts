@@ -459,7 +459,6 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    *   - If the transaction is manually aborted within the provided function it will not throw.
    * - If the driver needs to attempt to retry the operations, the provided function may be called multiple times.
    *
-   *
    * Checkout a descriptive example here:
    * @see https://www.mongodb.com/blog/post/quick-start-nodejs--mongodb--how-to-implement-transactions
    *
