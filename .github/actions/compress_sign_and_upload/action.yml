@@ -22,7 +22,7 @@ runs:
       shell: bash
 
     - name: Get release version and release package file name
-      id: vars
+      id: get_vars
       shell: bash
       run: |
         package_version=$(jq --raw-output '.version' package.json)
@@ -31,12 +31,14 @@ runs:
     - name: Create detached signature
       uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
       with:
-        filenames: ${{ steps.vars.package_file }}
+        filenames: ${{ steps.get_vars.outputs.package_file }}
         garasign_username: ${{ inputs.garasign_username }}
         garasign_password: ${{ inputs.garasign_password }}
         artifactory_username: ${{ inputs.artifactory_username }}
         artifactory_password: ${{ inputs.artifactory_password }}
 
     - name: "Upload release artifacts"
-      run: gh release upload v${{ steps.vars.package_version }} ${{ steps.vars.package_file }}.sig
+      run: gh release upload v${{ steps.get_vars.outputs.package_version }} ${{ steps.get_vars.outputs.package_file }}.sig
       shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
