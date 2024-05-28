@@ -369,6 +369,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /**
    * Starts a new transaction with the given options.
    *
+   * @remarks
+   * **IMPORTANT**: Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
+   * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
+   * undefined behaviour.
+   *
    * @param options - Options for the transaction
    */
   startTransaction(options?: TransactionOptions): void {
@@ -448,6 +453,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * - If the transaction is unable to complete or an error is thrown from within the provided function, then the provided function will throw an error.
    *   - If the transaction is manually aborted within the provided function it will not throw.
    * - If the driver needs to attempt to retry the operations, the provided function may be called multiple times.
+   *
+   * **IMPORTANT:** Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
+   * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
+   * undefined behaviour.
    *
    * Checkout a descriptive example here:
    * @see https://www.mongodb.com/blog/post/quick-start-nodejs--mongodb--how-to-implement-transactions
