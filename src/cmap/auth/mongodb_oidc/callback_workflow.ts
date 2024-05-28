@@ -151,7 +151,8 @@ export abstract class CallbackWorkflow implements Workflow {
       // We do this to ensure that we would never return the result of the
       // previous lock, only the current callback's value would get returned.
       await lock;
-      lock = callback(params);
+      // eslint-disable-next-line github/no-then
+      lock = lock.then(() => callback(params));
       return await lock;
     };
   }

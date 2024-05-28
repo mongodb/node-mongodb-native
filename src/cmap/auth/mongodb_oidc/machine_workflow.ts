@@ -90,7 +90,8 @@ export abstract class MachineWorkflow implements Workflow {
       // We do this to ensure that we would never return the result of the
       // previous lock, only the current callback's value would get returned.
       await lock;
-      lock = callback(credentials);
+      // eslint-disable-next-line github/no-then
+      lock = lock.then(() => callback(credentials));
       return await lock;
     };
   }
