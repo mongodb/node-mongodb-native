@@ -1,5 +1,5 @@
 import { type Document } from 'bson';
-import { setTimeout } from 'timers';
+import { setTimeout } from 'timers/promises';
 
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
@@ -114,22 +114,18 @@ export abstract class MachineWorkflow implements Workflow {
       // We do this to ensure that we would never return the result of the
       // previous lock, only the current callback's value would get returned.
       await lock;
-      // eslint-disable-next-line github/no-then
-      lock = lock.then(async () => {
-        let result;
-        const difference = Date.now() - this.lastExecutionTime;
-        if (difference > THROTTLE_MS) {
-          result = await callback(credentials);
-        } else {
-          result = await new Promise(resolve => {
-            setTimeout(() => {
-              this.lastExecutionTime = Date.now();
-              resolve(callback(credentials));
-            }, THROTTLE_MS - difference);
-          });
-        }
-        return result;
-      });
+      lock = lock
+        // eslint-disable-next-line github/no-then
+        .catch(() => null)
+        // eslint-disable-next-line github/no-then
+        .then(async () => {
+          const difference = Date.now() - this.lastExecutionTime;
+          if (difference <= THROTTLE_MS) {
+            await setTimeout(THROTTLE_MS - difference);
+          }
+          this.lastExecutionTime = Date.now();
+          return await callback(credentials);
+        });
       return await lock;
     };
   }
