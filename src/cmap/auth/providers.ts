@@ -8,7 +8,6 @@ export const AuthMechanism = Object.freeze({
   MONGODB_SCRAM_SHA1: 'SCRAM-SHA-1',
   MONGODB_SCRAM_SHA256: 'SCRAM-SHA-256',
   MONGODB_X509: 'MONGODB-X509',
-  /** @experimental */
   MONGODB_OIDC: 'MONGODB-OIDC'
 } as const);
 

@@ -3,10 +3,7 @@ import * as http from 'http';
 import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import {
-  MongoCryptAzureKMSRequestError,
-  MongoCryptKMSRequestNetworkTimeoutError
-} from '../../../../src/client-side-encryption/errors';
+import { MongoCryptAzureKMSRequestError } from '../../../../src/client-side-encryption/errors';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   isEmptyCredentials,
@@ -19,9 +16,10 @@ import {
   tokenCache
 } from '../../../../src/client-side-encryption/providers/azure';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import * as utils from '../../../../src/client-side-encryption/providers/utils';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as utils from '../../../../src/utils';
+import { MongoNetworkTimeoutError } from '../../../mongodb';
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -413,18 +411,6 @@ describe('#refreshKMSCredentials', function () {
           });
         });
 
-        it('allows a custom URL to be specified', () => {
-          const url = httpSpy.args[0][0];
-          expect(url).to.be.instanceof(URL);
-          expect(url.toString()).to.include('http://customentpoint.com');
-        });
-
-        it('deep copies the provided url', () => {
-          const spiedUrl = httpSpy.args[0][0];
-          expect(spiedUrl).to.be.instanceof(URL);
-          expect(spiedUrl).to.not.equal(url);
-        });
-
         it('allows custom headers to be specified', () => {
           const options = httpSpy.args[0][1];
           expect(options).to.have.property('headers').to.have.property('customHeader1', 'value1');
@@ -437,9 +423,7 @@ describe('#refreshKMSCredentials', function () {
       afterEach(() => sinon.restore());
       context('when the request times out', () => {
         before(() => {
-          sinon
-            .stub(utils, 'get')
-            .rejects(new MongoCryptKMSRequestNetworkTimeoutError('request timed out'));
+          sinon.stub(utils, 'get').rejects(new MongoNetworkTimeoutError('request timed out'));
         });
 
         it('throws a MongoCryptKMSRequestError', async () => {

@@ -1,6 +1,12 @@
 import { expect } from 'chai';
 
-import { MongoAPIError, MongoClient, MongoParseError, MongoRuntimeError } from '../mongodb';
+import {
+  MongoAPIError,
+  MongoClient,
+  MongoInvalidArgumentError,
+  MongoParseError,
+  MongoRuntimeError
+} from '../mongodb';
 
 type HostObject = {
   type: 'ipv4' | 'ip_literal' | 'hostname' | 'unix';
@@ -69,7 +75,9 @@ export function executeUriValidationTest(
       new MongoClient(test.uri);
       expect.fail(`Expected "${test.uri}" to be invalid${test.valid ? ' because of warning' : ''}`);
     } catch (err) {
-      if (err instanceof MongoRuntimeError) {
+      if (err instanceof MongoInvalidArgumentError) {
+        // Azure URI errors don't have an underlying cause.
+      } else if (err instanceof MongoRuntimeError) {
         expect(err).to.have.nested.property('cause.code').equal('ERR_INVALID_URL');
       } else if (
         // most of our validation is MongoParseError, which does not extend from MongoAPIError
@@ -91,15 +99,11 @@ export function executeUriValidationTest(
   const CALLBACKS = {
     oidcRequest: async () => {
       return { accessToken: '<test>' };
-    },
-    oidcRefresh: async () => {
-      return { accessToken: '<test>' };
     }
   };
 
   const CALLBACK_MAPPINGS = {
-    oidcRequest: 'REQUEST_TOKEN_CALLBACK',
-    oidcRefresh: 'REFRESH_TOKEN_CALLBACK'
+    oidcRequest: 'OIDC_TOKEN_CALLBACK'
   };
 
   const mongoClientOptions = {};
@@ -223,10 +227,7 @@ export function executeUriValidationTest(
             // TODO(NODE-3925): Ensure default SERVICE_NAME is set on the parsed mechanism properties
             continue;
           }
-          if (
-            expectedMechProp === 'REQUEST_TOKEN_CALLBACK' ||
-            expectedMechProp === 'REFRESH_TOKEN_CALLBACK'
-          ) {
+          if (expectedMechProp === 'OIDC_TOKEN_CALLBACK') {
             expect(
               options,
               `${errorMessage} credentials.mechanismProperties.${expectedMechProp}`

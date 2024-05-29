@@ -166,23 +166,6 @@ TASKS.push(
       commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
     },
     {
-      name: 'test-auth-oidc',
-      tags: ['latest', 'replica_set', 'oidc'],
-      commands: [
-        updateExpansions({
-          VERSION: 'latest',
-          TOPOLOGY: 'replica_set',
-          AUTH: 'auth',
-          ORCHESTRATION_FILE: 'auth-oidc.json'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap oidc' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'setup oidc roles' },
-        { func: 'run oidc tests aws' }
-      ]
-    },
-    {
       name: 'test-socks5',
       tags: [],
       commands: [
@@ -705,16 +688,20 @@ BUILD_VARIANTS.push({
   tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });
 
-// TODO(DRIVERS-2416/NODE-4929) - Azure credentials are expired, a new drivers ticket
-//   should be created but at the moment for our test failures we will reference the
-//   open DRIVERS ticket and completed NODE ticket.
-// BUILD_VARIANTS.push({
-//   name: 'ubuntu20-test-azure-oidc',
-//   display_name: 'Azure OIDC',
-//   run_on: UBUNTU_20_OS,
-//   batchtime: 20160,
-//   tasks: ['testazureoidc_task_group']
-// });
+BUILD_VARIANTS.push({
+  name: 'ubuntu20-test-all-oidc',
+  display_name: 'MONGODB-OIDC Auth Tests',
+  run_on: UBUNTU_20_OS,
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS
+  },
+  batchtime: 20160,
+  tasks: [
+    'testtestoidc_task_group',
+    'testazureoidc_task_group',
+    'testgcpoidc_task_group'
+  ]
+});
 
 BUILD_VARIANTS.push({
   name: 'rhel8-test-atlas',

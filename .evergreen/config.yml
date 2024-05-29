@@ -96,55 +96,6 @@ functions:
           - .evergreen/run-azure-kms-mock-server.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-  bootstrap oidc:
-    - command: ec2.assume_role
-      params:
-        role_arn: ${OIDC_AWS_ROLE_ARN}
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: src
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          cd "${DRIVERS_TOOLS}"/.evergreen/auth_oidc
-
-          # This is a bit confusing but the ec2.assume_role command before
-          # this task will overwrite these variables to a different value
-          # than we have set in our evergreen project config. As these are
-          # now specific to the OIDC ARN, we re-export for the python
-          # scripts.
-          export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-          export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-          export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
-          export OIDC_TOKEN_DIR=/tmp/tokens
-
-          . ./activate-authoidcvenv.sh
-          python oidc_write_orchestration.py
-          python oidc_get_tokens.py
-  setup oidc roles:
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        binary: bash
-        args:
-          - .evergreen/setup-oidc-roles.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-  run oidc tests aws:
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: src
-        timeout_secs: 300
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-
-          OIDC_TOKEN_DIR="/tmp/tokens" \
-          AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test_user1" \
-          PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
   run tests:
     - command: shell.exec
       type: test
@@ -1211,23 +1162,73 @@ tasks:
             - src/.evergreen/run-azure-kms-tests.sh
   - name: oidc-auth-test-azure-latest
     commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
       - command: subprocess.exec
+        type: test
         params:
           working_dir: src
           binary: bash
           env:
             DRIVERS_TOOLS: ${DRIVERS_TOOLS}
             PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-            AZUREOIDC_CLIENTID: ${testazureoidc_clientid}
-            PROVIDER_NAME: azure
+            ENVIRONMENT: azure
+            SCRIPT: run-oidc-prose-tests.sh
           args:
             - .evergreen/run-oidc-tests-azure.sh
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: azure
+            SCRIPT: run-oidc-unified-tests.sh
+          args:
+            - .evergreen/run-oidc-tests-azure.sh
+  - name: oidc-auth-test-test-latest
+    commands:
+      - func: install dependencies
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: test
+            SCRIPT: run-oidc-prose-tests.sh
+          args:
+            - .evergreen/run-oidc-tests-test.sh
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: test
+            SCRIPT: run-oidc-unified-tests.sh
+          args:
+            - .evergreen/run-oidc-tests-test.sh
+  - name: oidc-auth-test-gcp-latest
+    commands:
+      - func: install dependencies
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: gcp
+            SCRIPT: run-oidc-prose-tests.sh
+          args:
+            - .evergreen/run-oidc-tests-gcp.sh
   - name: test-aws-lambda-deployed
     commands:
       - command: expansions.update
@@ -1946,25 +1947,6 @@ tasks:
     commands:
       - func: install dependencies
       - func: run ldap tests
-  - name: test-auth-oidc
-    tags:
-      - latest
-      - replica_set
-      - oidc
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-oidc.json}
-      - func: install dependencies
-      - func: bootstrap oidc
-      - func: bootstrap mongo-orchestration
-      - func: setup oidc roles
-      - func: run oidc tests aws
   - name: test-socks5
     tags: []
     commands:
@@ -4467,6 +4449,27 @@ task_groups:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
     tasks:
       - test-azurekms-task
+  - name: testtestoidc_task_group
+    setup_group:
+      - func: fetch source
+      - command: ec2.assume_role
+        params:
+          role_arn: ${OIDC_AWS_ROLE_ARN}
+      - command: subprocess.exec
+        params:
+          binary: bash
+          include_expansions_in_env:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_SESSION_TOKEN
+          env:
+            MONGODB_VERSION: '8.0'
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-test-latest
   - name: testazureoidc_task_group
     setup_group:
       - func: fetch source
@@ -4476,24 +4479,41 @@ task_groups:
           script: |-
             set -o errexit
             ${PREPARE_SHELL}
-            export AZUREOIDC_CLIENTID="${testazureoidc_clientid}"
-            export AZUREOIDC_TENANTID="${testazureoic_tenantid}"
-            export AZUREOIDC_SECRET="${testazureoidc_secret}"
-            export AZUREOIDC_KEYVAULT=${testazureoidc_keyvault}
-            export AZUREOIDC_DRIVERS_TOOLS="$DRIVERS_TOOLS"
             export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
-            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/create-and-setup-vm.sh
-    teardown_group:
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/setup.sh
+    teardown_task:
       - command: shell.exec
         params:
           shell: bash
           script: |-
             ${PREPARE_SHELL}
-            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/delete-vm.sh
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/teardown.sh
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
       - oidc-auth-test-azure-latest
+  - name: testgcpoidc_task_group
+    setup_group:
+      - func: fetch source
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            export GCPOIDC_VMNAME_PREFIX="NODE_DRIVER"
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/setup.sh
+    teardown_task:
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            ${PREPARE_SHELL}
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-gcp-latest
   - name: test_atlas_task_group
     setup_group:
       - func: fetch source
@@ -4509,7 +4529,7 @@ task_groups:
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
-    teardown_group:
+    teardown_task:
       - command: subprocess.exec
         params:
           working_dir: src
@@ -4536,7 +4556,7 @@ task_groups:
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
-    teardown_group:
+    teardown_task:
       - command: subprocess.exec
         params:
           working_dir: src
@@ -4615,7 +4635,6 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
-      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -4675,7 +4694,6 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
-      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -4735,7 +4753,6 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
-      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -4794,7 +4811,6 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
-      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -5138,6 +5154,16 @@ buildvariants:
     tasks:
       - test_azurekms_task_group
       - test-azurekms-fail-task
+  - name: ubuntu20-test-all-oidc
+    display_name: MONGODB-OIDC Auth Tests
+    run_on: ubuntu2004-small
+    expansions:
+      NODE_LTS_VERSION: 20
+    batchtime: 20160
+    tasks:
+      - testtestoidc_task_group
+      - testazureoidc_task_group
+      - testgcpoidc_task_group
   - name: rhel8-test-atlas
     display_name: Atlas Cluster Tests
     run_on: rhel80-large

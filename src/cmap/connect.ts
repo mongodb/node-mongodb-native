@@ -91,7 +91,10 @@ export async function performInitialHandshake(
   if (credentials) {
     if (
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
-      !options.authProviders.getOrCreateProvider(credentials.mechanism)
+      !options.authProviders.getOrCreateProvider(
+        credentials.mechanism,
+        credentials.mechanismProperties
+      )
     ) {
       throw new MongoInvalidArgumentError(`AuthMechanism '${credentials.mechanism}' not supported`);
     }
@@ -146,7 +149,10 @@ export async function performInitialHandshake(
     authContext.response = response;
 
     const resolvedCredentials = credentials.resolveAuthMechanism(response);
-    const provider = options.authProviders.getOrCreateProvider(resolvedCredentials.mechanism);
+    const provider = options.authProviders.getOrCreateProvider(
+      resolvedCredentials.mechanism,
+      resolvedCredentials.mechanismProperties
+    );
     if (!provider) {
       throw new MongoInvalidArgumentError(
         `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
@@ -218,7 +224,8 @@ export async function prepareHandshakeDocument(
       handshakeDoc.saslSupportedMechs = `${credentials.source}.${credentials.username}`;
 
       const provider = authContext.options.authProviders.getOrCreateProvider(
-        AuthMechanism.MONGODB_SCRAM_SHA256
+        AuthMechanism.MONGODB_SCRAM_SHA256,
+        credentials.mechanismProperties
       );
       if (!provider) {
         // This auth mechanism is always present.
@@ -228,7 +235,10 @@ export async function prepareHandshakeDocument(
       }
       return await provider.prepare(handshakeDoc, authContext);
     }
-    const provider = authContext.options.authProviders.getOrCreateProvider(credentials.mechanism);
+    const provider = authContext.options.authProviders.getOrCreateProvider(
+      credentials.mechanism,
+      credentials.mechanismProperties
+    );
     if (!provider) {
       throw new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`);
     }

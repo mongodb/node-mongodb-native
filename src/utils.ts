@@ -3,6 +3,7 @@ import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
+import { clearTimeout, setTimeout } from 'timers';
 import * as url from 'url';
 import { URL } from 'url';
 import { promisify } from 'util';
@@ -1155,6 +1156,38 @@ interface RequestOptions {
   method?: string;
   timeout?: number;
   headers?: http.OutgoingHttpHeaders;
+}
+
+/**
+ * Perform a get request that returns status and body.
+ * @internal
+ */
+export function get(
+  url: URL | string,
+  options: http.RequestOptions = {}
+): Promise<{ body: string; status: number | undefined }> {
+  return new Promise((resolve, reject) => {
+    /* eslint-disable prefer-const */
+    let timeoutId: NodeJS.Timeout;
+    const request = http
+      .get(url, options, response => {
+        response.setEncoding('utf8');
+        let body = '';
+        response.on('data', chunk => (body += chunk));
+        response.on('end', () => {
+          clearTimeout(timeoutId);
+          resolve({ status: response.statusCode, body });
+        });
+      })
+      .on('error', error => {
+        clearTimeout(timeoutId);
+        reject(error);
+      })
+      .end();
+    timeoutId = setTimeout(() => {
+      request.destroy(new MongoNetworkTimeoutError(`request timed out after 10 seconds`));
+    }, 10000);
+  });
 }
 
 export async function request(uri: string): Promise<Record<string, any>>;

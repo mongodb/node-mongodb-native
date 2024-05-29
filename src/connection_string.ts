@@ -698,6 +698,9 @@ export const OPTIONS = {
       });
     }
   },
+  // Note that if the authMechanismProperties contain a TOKEN_RESOURCE that has a
+  // comma in it, it MUST be supplied as a MongoClient option instead of in the
+  // connection string.
   authMechanismProperties: {
     target: 'credentials',
     transform({ options, values }): MongoCredentials {
