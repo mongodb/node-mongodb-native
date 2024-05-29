@@ -600,6 +600,21 @@
       }
     },
     {
+      "description": "should handle a complicated url-encoded TOKEN_RESOURCE (MONGODB-OIDC)",
+      "uri": "mongodb://user@localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:azure,TOKEN_RESOURCE:abcd%25ef%3Ag%26hi",
+      "valid": false,
+      "credential": {
+        "username": "user",
+        "password": null,
+        "source": "$external",
+        "mechanism": "MONGODB-OIDC",
+        "mechanism_properties": {
+          "ENVIRONMENT": "azure",
+          "TOKEN_RESOURCE": "abcd%ef:g&hi"
+        }
+      }
+    },
+    {
       "description": "should url-encode a TOKEN_RESOURCE (MONGODB-OIDC)",
       "uri": "mongodb://user@localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:azure,TOKEN_RESOURCE:a$b",
       "valid": true,
