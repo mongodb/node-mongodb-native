@@ -37,6 +37,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     // and restart the authentication flow. Raise any other errors to the user. On success, exit the algorithm.
     if (this.cache.hasAccessToken) {
       const token = this.cache.getAccessToken();
+      connection.accessToken = token;
       try {
         return await this.finishAuthentication(connection, credentials, token);
       } catch (error) {
@@ -45,6 +46,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
           error.code === MONGODB_ERROR_CODES.AuthenticationFailed
         ) {
           this.cache.removeAccessToken();
+          delete connection.accessToken;
           return await this.execute(connection, credentials);
         } else {
           throw error;
@@ -66,6 +68,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
         refreshToken
       );
       this.cache.put(result);
+      connection.accessToken = result.accessToken;
       try {
         return await this.finishAuthentication(connection, credentials, result.accessToken);
       } catch (error) {
@@ -74,6 +77,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
           error.code === MONGODB_ERROR_CODES.AuthenticationFailed
         ) {
           this.cache.removeRefreshToken();
+          delete connection.accessToken;
           return await this.execute(connection, credentials);
         } else {
           throw error;
