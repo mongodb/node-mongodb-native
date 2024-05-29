@@ -602,7 +602,7 @@
     {
       "description": "should handle a complicated url-encoded TOKEN_RESOURCE (MONGODB-OIDC)",
       "uri": "mongodb://user@localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:azure,TOKEN_RESOURCE:abcd%25ef%3Ag%26hi",
-      "valid": false,
+      "valid": true,
       "credential": {
         "username": "user",
         "password": null,

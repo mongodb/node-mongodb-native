@@ -135,13 +135,6 @@ export class MongoCredentials {
       };
     }
 
-    if (this.mechanism === AuthMechanism.MONGODB_OIDC && this.mechanismProperties.TOKEN_RESOURCE) {
-      this.mechanismProperties = {
-        ...this.mechanismProperties,
-        TOKEN_RESOURCE: decodeURIComponent(this.mechanismProperties.TOKEN_RESOURCE)
-      };
-    }
-
     Object.freeze(this.mechanismProperties);
     Object.freeze(this);
   }
