@@ -166,7 +166,7 @@ export abstract class CallbackWorkflow implements Workflow {
         .then(async () => {
           const difference = Date.now() - this.lastExecutionTime;
           if (difference <= THROTTLE_MS) {
-            await setTimeout(THROTTLE_MS - difference);
+            await setTimeout(THROTTLE_MS - difference, { signal: params.timeoutContext });
           }
           this.lastExecutionTime = Date.now();
           return await callback(params);
