@@ -52,6 +52,7 @@ export {
   MongoDriverError,
   MongoError,
   MongoExpiredSessionError,
+  MongoGCPError,
   MongoGridFSChunkError,
   MongoGridFSStreamError,
   MongoInvalidArgumentError,
@@ -61,6 +62,7 @@ export {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoNotConnectedError,
+  MongoOIDCError,
   MongoParseError,
   MongoRuntimeError,
   MongoServerClosedError,
@@ -250,12 +252,14 @@ export type {
   MongoCredentialsOptions
 } from './cmap/auth/mongo_credentials';
 export type {
-  IdPServerInfo,
+  IdPInfo,
   IdPServerResponse,
-  OIDCCallbackContext,
-  OIDCRefreshFunction,
-  OIDCRequestFunction
+  OIDCCallbackFunction,
+  OIDCCallbackParams,
+  OIDCResponse
 } from './cmap/auth/mongodb_oidc';
+export type { Workflow } from './cmap/auth/mongodb_oidc';
+export type { TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 export type {
   MessageHeader,
   OpCompressedRequest,

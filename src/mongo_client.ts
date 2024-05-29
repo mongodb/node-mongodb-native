@@ -10,6 +10,7 @@ import {
   DEFAULT_ALLOWED_HOSTS,
   type MongoCredentials
 } from './cmap/auth/mongo_credentials';
+import { type TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
@@ -524,7 +525,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     if (options.credentials?.mechanism === AuthMechanism.MONGODB_OIDC) {
       const allowedHosts =
         options.credentials?.mechanismProperties?.ALLOWED_HOSTS || DEFAULT_ALLOWED_HOSTS;
-      const isServiceAuth = !!options.credentials?.mechanismProperties?.PROVIDER_NAME;
+      const isServiceAuth = !!options.credentials?.mechanismProperties?.ENVIRONMENT;
       if (!isServiceAuth) {
         for (const host of options.hosts) {
           if (!hostMatchesWildcards(host.toHostPort().host, allowedHosts)) {
@@ -828,6 +829,8 @@ export interface MongoOptions
   extendedMetadata: Promise<Document>;
   /** @internal */
   autoEncrypter?: AutoEncrypter;
+  /** @internal */
+  tokenCache?: TokenCache;
   proxyHost?: string;
   proxyPort?: number;
   proxyUsername?: string;

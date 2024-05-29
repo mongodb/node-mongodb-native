@@ -36,6 +36,7 @@ export const NODE_IS_RECOVERING_ERROR_MESSAGE = new RegExp('node is recovering',
 export const MONGODB_ERROR_CODES = Object.freeze({
   HostUnreachable: 6,
   HostNotFound: 7,
+  AuthenticationFailed: 18,
   NetworkTimeout: 89,
   ShutdownInProgress: 91,
   PrimarySteppedDown: 189,
@@ -531,12 +532,40 @@ export class MongoAWSError extends MongoRuntimeError {
 
 /**
  * A error generated when the user attempts to authenticate
+ * via OIDC callbacks, but fails.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoOIDCError extends MongoRuntimeError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message: string) {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoOIDCError';
+  }
+}
+
+/**
+ * A error generated when the user attempts to authenticate
  * via Azure, but fails.
  *
  * @public
  * @category Error
  */
-export class MongoAzureError extends MongoRuntimeError {
+export class MongoAzureError extends MongoOIDCError {
   /**
    * **Do not use this constructor!**
    *
@@ -554,6 +583,34 @@ export class MongoAzureError extends MongoRuntimeError {
 
   override get name(): string {
     return 'MongoAzureError';
+  }
+}
+
+/**
+ * A error generated when the user attempts to authenticate
+ * via GCP, but fails.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoGCPError extends MongoOIDCError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message: string) {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoGCPError';
   }
 }
 

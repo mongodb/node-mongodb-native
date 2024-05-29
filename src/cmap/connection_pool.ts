@@ -551,7 +551,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello);
     const provider = this[kServer].topology.client.s.authProviders.getOrCreateProvider(
-      resolvedCredentials.mechanism
+      resolvedCredentials.mechanism,
+      resolvedCredentials.mechanismProperties
     );
 
     if (!provider) {

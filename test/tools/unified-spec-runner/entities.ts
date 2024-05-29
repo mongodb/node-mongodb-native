@@ -350,6 +350,10 @@ export class UnifiedMongoClient extends MongoClient {
 }
 
 export class FailPointMap extends Map<string, Document> {
+  constructor() {
+    super();
+  }
+
   async enableFailPoint(
     addressOrClient: string | HostAddress | UnifiedMongoClient,
     failPoint: Document
@@ -567,10 +571,13 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
-        const uri = makeConnectionString(
-          config.url({ useMultipleMongoses }),
-          entity.client.uriOptions
-        );
+        let uri: string;
+        // For OIDC we need to ensure we use MONGODB_URI_SINGLE for the MongoClient.
+        if (process.env.MONGODB_URI_SINGLE?.includes('MONGODB-OIDC')) {
+          uri = makeConnectionString(process.env.MONGODB_URI_SINGLE, entity.client.uriOptions);
+        } else {
+          uri = makeConnectionString(config.url({ useMultipleMongoses }), entity.client.uriOptions);
+        }
         const client = new UnifiedMongoClient(uri, entity.client);
         new EntityEventRegistry(client, entity.client, map).register();
         try {
