@@ -21,6 +21,7 @@ jobs:
 
   compress_sign_and_upload:
     needs: [release_please]
+    if: ${{ needs.release_please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
