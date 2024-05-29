@@ -26,14 +26,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install
-      shell: bash
-      run: npm install
-
     - name: "Export SARIF file from code scanning alerts"
       uses: "alcaeus/drivers-github-tools/code-scanning-export@export-code-scanning-report"
       with:
-        ref: 'v6.7.0'
+        ref: main
 
     - name: 'asdf'
       shell: bash
