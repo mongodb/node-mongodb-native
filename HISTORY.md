@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.7.0](https://github.com/mongodb/node-mongodb-native/compare/v6.6.2...v6.7.0) (2024-05-29)
+
+
+### Features
+
+* **NODE-5464:** OIDC machine and callback workflow ([#3912](https://github.com/mongodb/node-mongodb-native/issues/3912)) ([2ba8434](https://github.com/mongodb/node-mongodb-native/commit/2ba8434d10aa02ddf281482cc02ef168c1b2965c))
+
+
+### Bug Fixes
+
+* **NODE-6165:** useBigInt64 causes compareTopologyVersion to throw ([#4109](https://github.com/mongodb/node-mongodb-native/issues/4109)) ([21b729b](https://github.com/mongodb/node-mongodb-native/commit/21b729b983e2ddbe1dd9cff31f996825a45ec4e0))
+
 ## [6.6.2](https://github.com/mongodb/node-mongodb-native/compare/v6.6.1...v6.6.2) (2024-05-15)
 
 
