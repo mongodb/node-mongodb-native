@@ -21,9 +21,10 @@ jobs:
         with:
           target-branch: 5.x
   
-  compress-sign-and-upload:
+  compress_sign_and_upload:
     needs: [release_please]
     if: ${{ needs.release_please.outputs.release_created }}
+    environment: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,10 +33,10 @@ jobs:
       - name: actions/compress_sign_and_upload
         uses: ./.github/actions/compress_sign_and_upload
         with:
-          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
+          aws_region_name: 'us-east-1'
+          aws_secret_id: ${{ secrets.AWS_SECRET_ID }}
+          npm_package_name: 'mongodb'
       - run: npm publish --provenance --tag=5x
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
