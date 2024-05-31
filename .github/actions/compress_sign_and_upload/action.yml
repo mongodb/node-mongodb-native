@@ -2,17 +2,17 @@ name: Compress and Sign
 description: 'Compresses package and signs with garasign'
 
 inputs: 
-    garasign_username:
-      description: 'Garasign username input for drivers-github-tools/garasign/gpg-sign'
+    aws_role_arn:
+      description: 'AWS role input for drivers-github-tools/gpg-sign@v2'
       required: true
-    garasign_password:
-      description: 'Garasign password input for drivers-github-tools/garasign/gpg-sign'
+    aws_region_name:
+      description: 'AWS region name input for drivers-github-tools/gpg-sign@v2'
       required: true
-    artifactory_username:
-      description: 'Artifactory username input for drivers-github-tools/garasign/gpg-sign'
+    aws_secret_id:
+      description: 'AWS secret id input for drivers-github-tools/gpg-sign@v2'
       required: true
-    artifactory_password:
-      description: 'Artifactory password input for drivers-github-tools/garasign/gpg-sign'
+    npm_package_name:
+      description: 'The name for the npm package this repository represents'
       required: true
 
 runs:
@@ -27,15 +27,25 @@ runs:
       run: |
         package_version=$(jq --raw-output '.version' package.json)
         echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
-        echo "package_file=mongodb-${package_version}.tgz" >> "$GITHUB_OUTPUT"
+        echo "package_file=${{ inputs.npm_package_name }}-${package_version}.tgz" >> "$GITHUB_OUTPUT"
+
+    - name: Set up drivers-github-tools
+      uses: mongodb-labs/drivers-github-tools/setup@v2
+      with: 
+        aws_region_name: ${{ inputs.aws_region_name }}
+        aws_role_arn: ${{ inputs.aws_role_arn }}
+        aws_secret_id: ${{ inputs.aws_secret_id }}
+
     - name: Create detached signature
-      uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
-      with:
+      uses: mongodb-labs/drivers-github-tools/gpg-sign@v2
+      with: 
         filenames: ${{ steps.get_vars.outputs.package_file }}
-        garasign_username: ${{ inputs.garasign_username }}
-        garasign_password: ${{ inputs.garasign_password }}
-        artifactory_username: ${{ inputs.artifactory_username }}
-        artifactory_password: ${{ inputs.artifactory_password }}
+      env: 
+        RELEASE_ASSETS: ${{ steps.get_vars.outputs.package_file }}.temp.sig
+
+    - name: Name release asset correctly 
+      run: mv ${{ steps.get_vars.outputs.package_file }}.temp.sig ${{ steps.get_vars.outputs.package_file }}.sig
+      shell: bash
 
     - name: "Upload release artifacts"
       run: gh release upload v${{ steps.get_vars.outputs.package_version }} ${{ steps.get_vars.outputs.package_file }}.sig
