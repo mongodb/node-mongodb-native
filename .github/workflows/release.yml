@@ -17,7 +17,7 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - id: release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
 
   compress_sign_and_upload:
     needs: [release_please]
