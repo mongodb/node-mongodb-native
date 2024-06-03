@@ -1,7 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
-import { MongoInvalidArgumentError } from './error';
-import { noop } from './utils';
+import { MongoInvalidArgumentError, MongoRuntimeError } from './error';
+import { csotMin, noop } from './utils';
 
 /** @internal */
 export class TimeoutError extends Error {
@@ -106,5 +106,85 @@ export class Timeout extends Promise<never> {
       // eslint-disable-next-line github/no-then
       typeof timeout.then === 'function'
     );
+  }
+}
+
+export type TimeoutContextOptions = {
+  timeoutMS?: number;
+  serverSelectionTimeoutMS: number;
+  waitQueueTimeoutMS: number;
+  socketTimeoutMS: number;
+};
+
+export class TimeoutContext {
+  timeoutMS?: number;
+  serverSelectionTimeoutMS: number;
+  waitQueueTimeoutMS: number;
+  socketTimeoutMS: number;
+
+  private _maxTimeMS?: number;
+
+  private _serverSelectionTimeout?: Timeout | null;
+  private _connectionCheckoutTimeout?: Timeout | null;
+  private _socketWriteTimeout?: Timeout;
+  private _socketReadTimeout?: Timeout;
+
+  constructor(options: TimeoutContextOptions) {
+    this.timeoutMS = options.timeoutMS;
+    this.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
+    this.waitQueueTimeoutMS = options.waitQueueTimeoutMS;
+    this.socketTimeoutMS = options.socketTimeoutMS;
+  }
+
+  get maxTimeMS(): number {
+    return this._maxTimeMS ?? -1;
+  }
+
+  set maxTimeMS(v: number) {
+    this._maxTimeMS = v;
+  }
+
+  get serverSelectionTimeout(): Timeout | null {
+    if (typeof this._serverSelectionTimeout === 'undefined') {
+      if (this.timeoutMS != null) {
+        if (this.timeoutMS > 0 && this.serverSelectionTimeoutMS > 0) {
+          if (
+            this.timeoutMS === this.serverSelectionTimeoutMS ||
+            csotMin(this.timeoutMS, this.serverSelectionTimeoutMS) < this.serverSelectionTimeoutMS
+          ) {
+            this._serverSelectionTimeout = Timeout.expires(this.timeoutMS);
+          } else {
+            this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
+          }
+        } else {
+          this._serverSelectionTimeout = null;
+        }
+      } else {
+        this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
+      }
+    }
+
+    return this._serverSelectionTimeout;
+  }
+
+  get connectionCheckoutTimeout(): Timeout | null {
+    if (!this._connectionCheckoutTimeout) {
+      if (this.timeoutMS != null) {
+        if (typeof this._serverSelectionTimeout === 'object') {
+          // null or Timeout
+          this._connectionCheckoutTimeout = this._serverSelectionTimeout;
+        } else {
+          throw new MongoRuntimeError(
+            'Unreachable. If you are seeing this error, please file a ticket on the NODE driver project on Jira'
+          );
+        }
+      } else {
+        this._connectionCheckoutTimeout = Timeout.expires(this.waitQueueTimeoutMS);
+      }
+
+      return this._connectionCheckoutTimeout;
+    } else {
+      return this._connectionCheckoutTimeout;
+    }
   }
 }
