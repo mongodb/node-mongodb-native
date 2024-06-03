@@ -773,6 +773,7 @@ export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
     | AWSEncryptionKeyOptions
     | AzureEncryptionKeyOptions
     | GCPEncryptionKeyOptions
+    | KMIPEncryptionKeyOptions
     | undefined;
 }
 
@@ -885,6 +886,26 @@ export interface AzureEncryptionKeyOptions {
   keyVersion?: string | undefined;
 }
 
+
+/**
+ * @public
+ * Configuration options for making an Azure encryption key
+ */
+export interface KMIPEncryptionKeyOptions {
+  /**
+   * keyId is the KMIP Unique Identifier to a 96 byte KMIP Secret Data managed object.
+   *
+   * If keyId is omitted, the driver creates a random 96 byte KMIP Secret Data managed object.
+   */
+  keyId?: string;
+
+  /**
+   * Host with optional port.
+   */
+  endpoint?: string;
+}
+
+
 /**
  * @public
  * Options to provide when creating a new data key.
@@ -897,6 +918,7 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
     | AWSEncryptionKeyOptions
     | AzureEncryptionKeyOptions
     | GCPEncryptionKeyOptions
+    | KMIPEncryptionKeyOptions
     | undefined;
 
   /**
@@ -907,19 +929,6 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
 
   /** @experimental */
   keyMaterial?: Buffer | Binary;
-}
-
-/**
- * @public
- * @experimental
- */
-export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
-  provider: ClientEncryptionDataKeyProvider;
-  masterKey?:
-    | AWSEncryptionKeyOptions
-    | AzureEncryptionKeyOptions
-    | GCPEncryptionKeyOptions
-    | undefined;
 }
 
 /**
