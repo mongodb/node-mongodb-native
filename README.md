@@ -20,6 +20,25 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | Contributing             | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                                           |
 | Changelog                | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                                     |
 
+
+
+### Release Integrity
+
+The GitHub release contains a detached signature file for the NPM package (named
+`mongodb-X.Y.Z.tgz.sig`).
+
+The following command returns the link npm package. 
+```shell
+npm view mongodb@vX.Y.Z dist.tarball 
+```
+
+Using the result of the above command, a `curl` command can return the official npm package for the release.
+
+To verify the integrity of the downloaded package, run the following command:
+```shell
+gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
+```
+
 ### Bugs / Feature Requests
 
 Think you’ve found a bug? Want to see a new feature in `node-mongodb-native`? Please open a

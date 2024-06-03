@@ -11,21 +11,32 @@ permissions:
 name: release-5x
 
 jobs:
-  release-please:
+  release_please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - id: release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         with:
           target-branch: 5.x
-
-      # If release-please created a release, publish to npm
-      - if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v4
-      - if: ${{ steps.release.outputs.release_created }}
-        name: actions/setup
+  
+  compress_sign_and_upload:
+    needs: [release_please]
+    if: ${{ needs.release_please.outputs.release_created }}
+    environment: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: actions/setup
         uses: ./.github/actions/setup
-      - if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance --tag=5x
+      - name: actions/compress_sign_and_upload
+        uses: ./.github/actions/compress_sign_and_upload
+        with:
+          aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
+          aws_region_name: 'us-east-1'
+          aws_secret_id: ${{ secrets.AWS_SECRET_ID }}
+          npm_package_name: 'mongodb'
+      - run: npm publish --provenance --tag=5x
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
