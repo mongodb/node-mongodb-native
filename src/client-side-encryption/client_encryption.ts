@@ -895,7 +895,7 @@ export interface KMIPEncryptionKeyOptions {
   /**
    * keyId is the KMIP Unique Identifier to a 96 byte KMIP Secret Data managed object.
    *
-   * If keyId is omitted, the driver creates a random 96 byte KMIP Secret Data managed object.
+   * If keyId is omitted, a random 96 byte KMIP Secret Data managed object will be created.
    */
   keyId?: string;
 
