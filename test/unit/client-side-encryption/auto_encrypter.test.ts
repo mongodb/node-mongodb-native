@@ -162,7 +162,7 @@ describe('AutoEncrypter', function () {
           local: { key: Buffer.alloc(96) }
         }
       });
-      const decrypted = await mc.decrypt(input);
+      const decrypted = BSON.deserialize(await mc.decrypt(input));
       expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
       expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
       expect(decrypted.filter).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
@@ -186,7 +186,7 @@ describe('AutoEncrypter', function () {
         }
       });
       mc[Symbol.for('@@mdb.decorateDecryptionResult')] = true;
-      let decrypted = await mc.decrypt(input);
+      let decrypted = BSON.deserialize(await mc.decrypt(input));
       expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
       expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
       expect(decrypted.filter[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['ssn']);
@@ -243,7 +243,7 @@ describe('AutoEncrypter', function () {
             aws: {}
           }
         });
-        const decrypted = await mc.decrypt(input);
+        const decrypted = BSON.deserialize(await mc.decrypt(input));
         expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
       });
     });

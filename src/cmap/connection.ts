@@ -20,8 +20,7 @@ import {
   MongoNetworkTimeoutError,
   MongoParseError,
   MongoServerError,
-  MongoUnexpectedServerResponseError,
-  MongoWriteConcernError
+  MongoUnexpectedServerResponseError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
@@ -510,7 +509,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
         }
 
-        if (document.isError) {
+        if (document.ok === 0) {
           throw new MongoServerError((object ??= document.toObject(bsonOptions)));
         }
 
@@ -573,16 +572,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): Promise<Document> {
     this.throwIfAborted();
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
-      if (
-        (MongoDBResponse.is(document) && document.has('writeConcernError')) ||
-        (!MongoDBResponse.is(document) && document.writeConcernError)
-      ) {
-        const object = MongoDBResponse.is(document) ? document.toObject(options) : document;
-        throw new MongoWriteConcernError(object.writeConcernError, object);
-      }
       return document;
     }
-
     throw new MongoUnexpectedServerResponseError('Unable to get response from server');
   }
 

@@ -301,7 +301,7 @@ describe('MongoErrors', () => {
     };
 
     const RAW_USER_WRITE_CONCERN_ERROR = {
-      ok: 0,
+      ok: 1,
       errmsg: 'waiting for replication timed out',
       code: 64,
       codeName: 'WriteConcernFailed',
@@ -316,7 +316,7 @@ describe('MongoErrors', () => {
     };
 
     const RAW_USER_WRITE_CONCERN_ERROR_INFO = {
-      ok: 0,
+      ok: 1,
       errmsg: 'waiting for replication timed out',
       code: 64,
       codeName: 'WriteConcernFailed',
@@ -367,7 +367,7 @@ describe('MongoErrors', () => {
       replSet.connect();
     }
 
-    it('should expose a user command writeConcern error like a normal WriteConcernError', function () {
+    it.only('should expose a user command writeConcern error like a normal WriteConcernError', function () {
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {

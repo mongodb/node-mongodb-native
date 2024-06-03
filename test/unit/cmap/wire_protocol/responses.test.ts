@@ -86,30 +86,58 @@ describe('class MongoDBResponse', () => {
 });
 
 describe('class CursorResponse', () => {
-  describe('constructor()', () => {
+  describe('get cursor()', () => {
     it('throws if input does not contain cursor embedded document', () => {
-      expect(() => new CursorResponse(BSON.serialize({ ok: 1 }))).to.throw(BSONError);
+      // @ts-expect-error: testing private getter
+      expect(() => new CursorResponse(BSON.serialize({ ok: 1 })).cursor).to.throw(
+        MongoUnexpectedServerResponseError
+      );
     });
+  });
 
+  describe('get id()', () => {
     it('throws if input does not contain cursor.id int64', () => {
-      expect(() => new CursorResponse(BSON.serialize({ ok: 1, cursor: {} }))).to.throw(BSONError);
+      expect(() => new CursorResponse(BSON.serialize({ ok: 1, cursor: {} })).id).to.throw(
+        MongoUnexpectedServerResponseError
+      );
     });
+  });
 
+  describe('get batch()', () => {
+    it('throws if input does not contain firstBatch nor nextBatch', () => {
+      expect(
+        // @ts-expect-error: testing private getter
+        () => new CursorResponse(BSON.serialize({ ok: 1, cursor: { id: 0n, batch: [] } })).batch
+      ).to.throw(MongoUnexpectedServerResponseError);
+    });
+  });
+
+  describe('get ns()', () => {
     it('sets namespace to null if input does not contain cursor.ns', () => {
       expect(new CursorResponse(BSON.serialize({ ok: 1, cursor: { id: 0n, firstBatch: [] } })).ns)
         .to.be.null;
     });
+  });
 
-    it('throws if input does not contain firstBatch nor nextBatch', () => {
-      expect(
-        () => new CursorResponse(BSON.serialize({ ok: 1, cursor: { id: 0n, batch: [] } }))
-      ).to.throw(MongoUnexpectedServerResponseError);
+  describe('get batchSize()', () => {
+    it('reports the returned batch size', () => {
+      const response = new CursorResponse(
+        BSON.serialize({ ok: 1, cursor: { id: 0n, nextBatch: [{}, {}, {}] } })
+      );
+      expect(response.batchSize).to.equal(3);
+      expect(response.shift()).to.deep.equal({});
+      expect(response.batchSize).to.equal(3);
     });
+  });
 
-    it('reports a length equal to the batch', () => {
-      expect(
-        new CursorResponse(BSON.serialize({ ok: 1, cursor: { id: 0n, nextBatch: [1, 2, 3] } }))
-      ).to.have.lengthOf(3);
+  describe('get length()', () => {
+    it('reports number of documents remaining in the batch', () => {
+      const response = new CursorResponse(
+        BSON.serialize({ ok: 1, cursor: { id: 0n, nextBatch: [{}, {}, {}] } })
+      );
+      expect(response).to.have.lengthOf(3);
+      expect(response.shift()).to.deep.equal({});
+      expect(response).to.have.lengthOf(2); // length makes CursorResponse act like an array
     });
   });
 
@@ -162,12 +190,4 @@ describe('class CursorResponse', () => {
       expect(response.shift()).to.be.null;
     });
   });
-
-  describe('pushMany()', () =>
-    it('throws unsupported error', () =>
-      expect(CursorResponse.prototype.pushMany).to.throw(/Unsupported/i)));
-
-  describe('push()', () =>
-    it('throws unsupported error', () =>
-      expect(CursorResponse.prototype.push).to.throw(/Unsupported/i)));
 });

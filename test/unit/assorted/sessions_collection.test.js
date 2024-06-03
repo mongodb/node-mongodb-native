@@ -48,27 +48,5 @@ describe('Sessions - unit/sessions', function () {
           return client.close();
         });
     });
-
-    it('does not mutate command options', function () {
-      const options = Object.freeze({});
-      test.server.setMessageHandler(request => {
-        const doc = request.document;
-        if (isHello(doc)) {
-          request.reply(mock.HELLO);
-        } else if (doc.count || doc.aggregate || doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
-      return client.connect().then(client => {
-        const coll = client.db('foo').collection('bar');
-
-        return coll.countDocuments({}, options).then(() => {
-          expect(options).to.deep.equal({});
-          return client.close();
-        });
-      });
-    });
   });
 });

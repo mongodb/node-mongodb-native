@@ -81,15 +81,6 @@ export class MongoDBResponse extends OnDemandDocument {
   // {ok:1}
   static empty = new MongoDBResponse(new Uint8Array([13, 0, 0, 0, 16, 111, 107, 0, 1, 0, 0, 0, 0]));
 
-  /** Indicates this document is a server error */
-  public get isError() {
-    let isError = this.ok === 0;
-    isError ||= this.has('errmsg');
-    isError ||= this.has('code');
-    isError ||= this.has('$err'); // The '$err' field is used in OP_REPLY responses
-    return isError;
-  }
-
   /**
    * Drivers can safely assume that the `recoveryToken` field is always a BSON document but drivers MUST NOT modify the
    * contents of the document.
@@ -120,6 +111,7 @@ export class MongoDBResponse extends OnDemandDocument {
     return this.get('operationTime', BSONType.timestamp);
   }
 
+  /** Normalizes whatever BSON value is "ok" to a JS number 1 or 0. */
   public get ok(): 0 | 1 {
     return this.getNumber('ok') ? 1 : 0;
   }
@@ -174,7 +166,7 @@ export class MongoDBResponse extends OnDemandDocument {
   encryptedResponse?: MongoDBResponse;
 }
 
-// Here's a litle blast from the past.
+// Here's a little blast from the past.
 // OLD style method definition so that I can override get without redefining ALL the fancy TS :/
 Object.defineProperty(MongoDBResponse.prototype, 'get', {
   value: function get(name: any, as: any, required: any) {
@@ -210,7 +202,11 @@ export class CursorResponse extends MongoDBResponse {
   }
 
   public get id(): Long {
-    return Long.fromBigInt(this.cursor.get('id', BSONType.long, true));
+    try {
+      return Long.fromBigInt(this.cursor.get('id', BSONType.long, true));
+    } catch (cause) {
+      throw new MongoUnexpectedServerResponseError(cause.message, { cause });
+    }
   }
 
   public get ns() {

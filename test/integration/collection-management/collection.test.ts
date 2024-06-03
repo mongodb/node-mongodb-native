@@ -458,6 +458,13 @@ describe('Collection', function () {
       expect(countC).to.be.a('number').that.equals(0);
     });
 
+    it('does not mutate options', async () => {
+      const options = Object.freeze(Object.create(null));
+      const count = await collection.countDocuments({}, options);
+      expect(count).to.be.a('number').that.equals(100);
+      expect(options).to.deep.equal({});
+    });
+
     context('when a filter is applied', () => {
       it('adds a $match pipeline', async () => {
         await collection.countDocuments({ test: 'a' });
