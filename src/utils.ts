@@ -11,6 +11,7 @@ import { promisify } from 'util';
 import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
+import { MongoDBResponse } from './cmap/wire_protocol/responses';
 import type { Collection } from './collection';
 import { kDecoratedKeys, LEGACY_HELLO_COMMAND } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
@@ -23,7 +24,8 @@ import {
   MongoNetworkTimeoutError,
   MongoNotConnectedError,
   MongoParseError,
-  MongoRuntimeError
+  MongoRuntimeError,
+  MongoWriteConcernError
 } from './error';
 import type { Explain } from './explain';
 import type { MongoClient } from './mongo_client';
@@ -1414,5 +1416,17 @@ export function decorateDecryptionResult(
     }
 
     decorateDecryptionResult(decrypted[k], originalValue, false);
+  }
+}
+
+/** Called with either a plain object or MongoDBResponse */
+export function throwIfWriteConcernError(response: unknown): void {
+  if (typeof response === 'object' && response != null) {
+    if (MongoDBResponse.is(response) && response.has('writeConcernError')) {
+      const object = response.toObject();
+      throw new MongoWriteConcernError(object.writeConcernError, object);
+    } else if ('writeConcernError' in response) {
+      throw new MongoWriteConcernError(response.writeConcernError as any, response);
+    }
   }
 }
