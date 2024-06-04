@@ -8,7 +8,14 @@ declare global {
       mongodb?: string;
       os?: NodeJS.Platform | `!${NodeJS.Platform}`;
       apiVersion?: '1' | boolean;
-      clientSideEncryption?: boolean;
+
+      /**
+       * require FLE to be set up to run the test
+       *
+       * A semver range may be provided as well to enforce a particular version range
+       * of mongodb-client-encryption.  Ex: `clientSideEncryption: '>=6.0.1'`
+       */
+      clientSideEncryption?: string | true;
       serverless?: 'forbid' | 'allow' | 'require';
       auth?: 'enabled' | 'disabled';
       idmsMockServer?: true;
