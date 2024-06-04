@@ -178,8 +178,6 @@ export interface SelectServerOptions {
   session?: ClientSession;
   operationName: string;
   previousServer?: ServerDescription;
-  /** @internal*/
-  timeout?: Timeout;
   /** @internal */
   timeoutContext?: TimeoutContext;
 }
@@ -463,8 +461,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const serverSelectionTimeoutMS = this.client.options.serverSelectionTimeoutMS;
     const readPreference = options.readPreference ?? ReadPreference.primary;
 
-    // TODO: figure out if there is a way we can remove this and use the command that initiated the
-    // autoconnect's timeoutContext
     const timeoutContext = TimeoutContext.create({
       timeoutMS,
       serverSelectionTimeoutMS,
@@ -574,6 +570,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       );
     }
     let timeout;
+    // TODO: make timeoutContext required
     if (options.timeoutContext) timeout = options.timeoutContext.serverSelectionTimeout;
     else {
       timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
@@ -600,7 +597,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      if (timeout !== options.timeout) timeout?.clear();
+      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
       return transaction.server;
     }
 
