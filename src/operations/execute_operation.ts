@@ -275,7 +275,6 @@ async function retryOperation<
   // select a new server, and attempt to retry the operation
   const server = await topology.selectServer(selector, {
     session,
-    timeout: operation.timeout,
     operationName: operation.commandName,
     previousServer,
     timeoutContext: operation.timeoutContext
