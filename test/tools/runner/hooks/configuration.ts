@@ -1,18 +1,30 @@
-'use strict';
+/* eslint-disable simple-import-sort/imports */
+/* eslint-disable import/first */
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('source-map-support').install({
   hookRequire: true
 });
 
-const path = require('path');
-const fs = require('fs');
-const { MongoClient } = require('../../../mongodb');
-const { AstrolabeTestConfiguration, TestConfiguration } = require('../config');
-const { getEnvironmentalOptions } = require('../../utils');
-const mock = require('../../mongodb-mock/index');
-const { inspect } = require('util');
-const { setDefaultResultOrder } = require('dns');
-const { coerce, gte } = require('semver');
+import { MongoClient } from '../../../mongodb';
+import { AstrolabeTestConfiguration, TestConfiguration } from '../config';
+import { getEnvironmentalOptions } from '../../utils';
+import * as mock from '../../mongodb-mock/index';
+import { inspect } from 'util';
+import { setDefaultResultOrder } from 'dns';
+import { coerce, gte } from 'semver';
+
+import { ApiVersionFilter } from '../filters/api_version_filter';
+import { AuthFilter } from '../filters/auth_filter';
+import { ClientSideEncryptionFilter } from '../filters/client_encryption_filter';
+import { GenericPredicateFilter } from '../filters/generic_predicate_filter';
+import { IDMSMockServerFilter } from '../filters/idms_mock_server_filter';
+import { MongoDBTopologyFilter } from '../filters/mongodb_topology_filter';
+import { MongoDBVersionFilter } from '../filters/mongodb_version_filter';
+import { NodeVersionFilter } from '../filters/node_version_filter';
+import { OSFilter } from '../filters/os_filter';
+import { ServerlessFilter } from '../filters/serverless_filter';
+import { type Filter } from '../filters/filter';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -34,34 +46,30 @@ const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
 // Load balancer fronting 2 mongoses.
 const MULTI_MONGOS_LB_URI = process.env.MULTI_MONGOS_LB_URI;
 const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
-const filters = [];
+const filters: Filter[] = [];
 
 let initializedFilters = false;
-async function initializeFilters(client) {
+async function initializeFilters(client): Promise<Record<string, any>> {
   if (initializedFilters) {
-    return;
+    return {};
   }
   initializedFilters = true;
   const context = {};
 
-  const filterFiles = fs
-    .readdirSync(path.join(__dirname, '../filters'))
-    .filter(x => x.indexOf('js') !== -1);
-
-  for (const filterName of filterFiles) {
-    const FilterModule = require(path.join(__dirname, '../filters', filterName));
-    const filter = new FilterModule();
-
-    console.assert(typeof filter === 'object');
-    console.assert(filter.filter && typeof filter.filter === 'function');
-
+  for (const filter of [
+    new ApiVersionFilter(),
+    new AuthFilter(),
+    new ClientSideEncryptionFilter(),
+    new GenericPredicateFilter(),
+    new IDMSMockServerFilter(),
+    new MongoDBTopologyFilter(),
+    new MongoDBVersionFilter(),
+    new NodeVersionFilter(),
+    new OSFilter(),
+    new ServerlessFilter()
+  ]) {
     filters.push(filter);
-
-    if (typeof filter.initializeFilter === 'function') {
-      await new Promise((resolve, reject) =>
-        filter.initializeFilter(client, context, e => (e ? reject(e) : resolve()))
-      );
-    }
+    await filter.initializeFilter(client, context);
   }
 
   return context;
@@ -96,10 +104,12 @@ const testSkipBeforeEachHook = async function () {
 
 /**
  * TODO: NODE-3891 - fix tests that are broken with auth enabled and remove this hook
- * @param {{ skippedTests: string[] }} skippedTests - define list of tests to skip
+ * @param skippedTests - define list of tests to skip
  * @returns
  */
-const skipBrokenAuthTestBeforeEachHook = function ({ skippedTests } = { skippedTests: [] }) {
+const skipBrokenAuthTestBeforeEachHook = function (
+  { skippedTests }: { skippedTests: string[] } = { skippedTests: [] }
+) {
   return function () {
     if (process.env.AUTH === 'auth' && skippedTests.includes(this.currentTest.title)) {
       this.currentTest.skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';

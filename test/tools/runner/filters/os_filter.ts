@@ -1,22 +1,26 @@
-'use strict';
+import { Filter } from './filter';
 
 /**
  * Filter for the OS required for the test
  *
- * example:
+ * @example
+ * ```js
  * metadata: {
  *    requires: {
  *      os: 'osName'
  *    }
  * }
+ * ```
  */
-class OSFilter {
+export class OSFilter extends Filter {
+  platform: string;
   constructor() {
+    super();
     // Get environmental variables that are known
     this.platform = process.platform;
   }
 
-  filter(test) {
+  filter(test: { metadata?: MongoDBMetadataUI }) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.os) return true;
@@ -29,5 +33,3 @@ class OSFilter {
     return false;
   }
 }
-
-module.exports = OSFilter;

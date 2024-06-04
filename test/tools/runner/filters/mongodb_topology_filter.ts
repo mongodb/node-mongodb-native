@@ -1,25 +1,29 @@
-'use strict';
-const { TopologyType } = require('../../../mongodb');
+import { type MongoClient, TopologyType } from '../../../mongodb';
+import { Filter } from './filter';
 
 /**
  * Filter for the MongoDB topology required for the test
  *
- * example:
+ * @example
+ * ```js
  * metadata: {
  *    requires: {
  *      topology: 'single' | 'replicaset' | 'sharded'
  *    }
  * }
+ * ```
  */
-class MongoDBTopologyFilter {
-  initializeFilter(client, context, callback) {
-    let type = client.topology.description.type;
+export class MongoDBTopologyFilter extends Filter {
+  runtimeTopology: string;
+
+  override async initializeFilter(client: MongoClient, context: Record<string, any>) {
+    const type = client.topology?.description.type;
+    if (type == null) throw new Error('unexpected nullish type' + client.topology?.description);
     context.topologyType = type;
     this.runtimeTopology = topologyTypeToString(type);
-    callback();
   }
 
-  filter(test) {
+  filter(test: { metadata?: MongoDBMetadataUI }) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.topology) return true;
@@ -72,5 +76,3 @@ function topologyTypeToString(topologyType) {
 
   return 'single';
 }
-
-module.exports = MongoDBTopologyFilter;
