@@ -225,6 +225,7 @@ export type {
   ClientEncryptionRewrapManyDataKeyResult,
   DataKey,
   GCPEncryptionKeyOptions,
+  KMIPEncryptionKeyOptions,
   RangeOptions
 } from './client-side-encryption/client_encryption';
 export {
