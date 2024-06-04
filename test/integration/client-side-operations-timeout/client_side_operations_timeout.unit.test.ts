@@ -33,16 +33,20 @@ describe('CSOT spec unit tests', function () {
       client = this.configuration.newClient({ timeoutMS: 1000 });
       // Spy on connection checkout and pull options argument
       const checkoutSpy = sinon.spy(ConnectionPool.prototype, 'checkOut');
-      const selectServerSpy = sinon.spy(Topology.prototype, 'selectServer');
       const expiresSpy = sinon.spy(Timeout, 'expires');
 
       await client.db('db').collection('collection').insertOne({ x: 1 });
 
       expect(checkoutSpy).to.have.been.calledOnce;
-      expect(checkoutSpy.firstCall.args[0].timeout).to.exist;
+      const timeoutContext = checkoutSpy.lastCall.args[0].timeoutContext;
+      expect(timeoutContext).to.exist;
       // Check that we passed through the timeout
-      expect(checkoutSpy.firstCall.args[0].timeout).to.equal(
-        selectServerSpy.lastCall.lastArg.timeout
+      //  @ts-expect-error accessing private properties
+      expect(timeoutContext._serverSelectionTimeout).to.be.instanceOf(Timeout);
+      //  @ts-expect-error accessing private properties
+      expect(timeoutContext._serverSelectionTimeout).to.equal(
+        //  @ts-expect-error accessing private properties
+        timeoutContext._connectionCheckoutTimeout
       );
 
       // Check that no more Timeouts are constructed after we enter checkout
