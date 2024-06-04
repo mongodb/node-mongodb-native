@@ -886,10 +886,9 @@ export interface AzureEncryptionKeyOptions {
   keyVersion?: string | undefined;
 }
 
-
 /**
  * @public
- * Configuration options for making an Azure encryption key
+ * Configuration options for making a KMIP encryption key
  */
 export interface KMIPEncryptionKeyOptions {
   /**
@@ -904,7 +903,6 @@ export interface KMIPEncryptionKeyOptions {
    */
   endpoint?: string;
 }
-
 
 /**
  * @public
