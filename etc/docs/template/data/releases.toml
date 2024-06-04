@@ -136,140 +136,140 @@ tag = "5.0"
 
 [[versions]]
 version = "4.17 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.17"
 usesMongoDBManual = true
 tag = "4.17"
 
 [[versions]]
 version = "4.16 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.16"
 usesMongoDBManual = true
 tag = "4.16"
 
 [[versions]]
 version = "4.15 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.15"
 usesMongoDBManual = true
 tag = "4.15"
 
 [[versions]]
 version = "4.14 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.14"
 usesMongoDBManual = true
 tag = "4.14"
 
 [[versions]]
 version = "4.13 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.13"
 usesMongoDBManual = true
 tag = "4.13"
 
 [[versions]]
 version = "4.12 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.12"
 usesMongoDBManual = true
 tag = "4.12"
 
 [[versions]]
 version = "4.11 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.11"
 usesMongoDBManual = true
 tag = "4.11"
 
 [[versions]]
 version = "4.10 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.10"
 usesMongoDBManual = true
 tag = "4.10"
 
 [[versions]]
 version = "4.9 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.9"
 usesMongoDBManual = true
 tag = "4.9"
 
 [[versions]]
 version = "4.8 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.8"
 usesMongoDBManual = true
 tag = "4.8"
 
 [[versions]]
 version = "4.7 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.7"
 usesMongoDBManual = true
 tag = "4.7"
 
 [[versions]]
 version = "4.6 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.6"
 usesMongoDBManual = true
 tag = "4.6"
 
 [[versions]]
 version = "4.5 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.5"
 usesMongoDBManual = true
 tag = "4.5"
 
 [[versions]]
 version = "4.4 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.4"
 usesMongoDBManual = true
 tag = "4.4"
 
 [[versions]]
 version = "4.3 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.3"
 usesMongoDBManual = true
 tag = "4.3"
 
 [[versions]]
 version = "4.2 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.2"
 usesMongoDBManual = true
 tag = "4.2"
 
 [[versions]]
 version = "4.1 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.1"
 usesMongoDBManual = true
 tag = "4.1"
 
 [[versions]]
 version = "4.0 Driver"
-status = "supported"
+status = "not-supported"
 api = "./4.0"
 usesMongoDBManual = true
 tag = "4.0"
 
 [[versions]]
 version = "3.7 Driver"
-status = "supported"
+status = "not-supported"
 docs = "./3.7"
 api = "./3.7/api"
 tag = "3.7"
 
 [[versions]]
 version = "3.6 Driver"
-status = "supported"
+status = "not-supported"
 docs = "./3.6"
 api = "./3.6/api"
 tag = "3.6"

@@ -403,3 +403,15 @@ code {
   background-color: #ddd;
   color: #494747;
 }
+
+.legacy-summary {
+  font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  color: #313030;
+  font-size: 30px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  line-height: 1.1;
+  box-sizing: border-box;
+  display: list-item;
+}
