@@ -1,6 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoInvalidArgumentError, MongoRuntimeError } from './error';
+import { type OperationOptions } from './operations/operation';
 import { csotMin, noop } from './utils';
 
 /** @internal */
@@ -109,17 +110,47 @@ export class Timeout extends Promise<never> {
   }
 }
 
-export type TimeoutContextOptions = {
-  timeoutMS?: number;
+/** @internal */
+export type TimeoutContextOptions = Pick<OperationOptions, 'timeoutMS' | 'session'> & {
   serverSelectionTimeoutMS: number;
   waitQueueTimeoutMS: number;
-  socketTimeoutMS: number;
+  socketTimeoutMS?: number;
 };
 
-export class TimeoutContext {
-  timeoutMS?: number;
+/** @internal */
+export abstract class TimeoutContext {
+  private _csotEnabled: boolean;
+  clearServerSelectionTimeout: boolean;
+  clearConnectionCheckoutTimeout: boolean;
+
+  constructor(options: TimeoutContextOptions) {
+    this._csotEnabled = options.timeoutMS != null;
+    this.clearServerSelectionTimeout = true;
+    this.clearConnectionCheckoutTimeout = true;
+  }
+
+  static create(options: TimeoutContextOptions): CSOTTimeoutContext | LegacyTimeoutContext {
+    if (options.timeoutMS != null) return new CSOTTimeoutContext(options);
+    else return new LegacyTimeoutContext(options);
+  }
+
+  get serverSelectionTimeout(): Timeout | null {
+    return null;
+  }
+
+  get connectionCheckoutTimeout(): Timeout | null {
+    return null;
+  }
+
+  csotEnabled(): this is CSOTTimeoutContext {
+    return this._csotEnabled;
+  }
+}
+
+/** @internal */
+export class CSOTTimeoutContext extends TimeoutContext {
+  timeoutMS: number;
   serverSelectionTimeoutMS: number;
-  waitQueueTimeoutMS: number;
   socketTimeoutMS: number;
 
   private _maxTimeMS?: number;
@@ -129,11 +160,23 @@ export class TimeoutContext {
   private _socketWriteTimeout?: Timeout;
   private _socketReadTimeout?: Timeout;
 
+  usingServerSelectionTimeoutMS: boolean;
+
   constructor(options: TimeoutContextOptions) {
-    this.timeoutMS = options.timeoutMS;
-    this.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
-    this.waitQueueTimeoutMS = options.waitQueueTimeoutMS;
-    this.socketTimeoutMS = options.socketTimeoutMS;
+    super(options);
+    this.timeoutMS = options.timeoutMS as number;
+
+    this.serverSelectionTimeoutMS =
+      options.serverSelectionTimeoutMS ??
+      options.session?.clientOptions?.serverSelectionTimeoutMS ??
+      0;
+
+    this.socketTimeoutMS =
+      options.socketTimeoutMS ?? options.session?.clientOptions?.socketTimeoutMS ?? 0;
+
+    this.usingServerSelectionTimeoutMS =
+      this.serverSelectionTimeoutMS !== 0 &&
+      csotMin(this.timeoutMS, this.serverSelectionTimeoutMS) === this.serverSelectionTimeoutMS;
   }
 
   get maxTimeMS(): number {
@@ -144,47 +187,59 @@ export class TimeoutContext {
     this._maxTimeMS = v;
   }
 
-  get serverSelectionTimeout(): Timeout | null {
-    if (typeof this._serverSelectionTimeout === 'undefined') {
-      if (this.timeoutMS != null) {
-        if (this.timeoutMS > 0 && this.serverSelectionTimeoutMS > 0) {
-          if (
-            this.timeoutMS === this.serverSelectionTimeoutMS ||
-            csotMin(this.timeoutMS, this.serverSelectionTimeoutMS) < this.serverSelectionTimeoutMS
-          ) {
-            this._serverSelectionTimeout = Timeout.expires(this.timeoutMS);
-          } else {
-            this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
-          }
+  override get serverSelectionTimeout(): Timeout | null {
+    if (typeof this._serverSelectionTimeout !== 'object') {
+      // check for undefined
+      if (this.usingServerSelectionTimeoutMS) {
+        this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
+      } else {
+        if (this.timeoutMS > 0) {
+          this._serverSelectionTimeout = Timeout.expires(this.timeoutMS);
         } else {
           this._serverSelectionTimeout = null;
         }
-      } else {
-        this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
       }
+      this.clearServerSelectionTimeout = false;
     }
 
     return this._serverSelectionTimeout;
   }
 
-  get connectionCheckoutTimeout(): Timeout | null {
-    if (!this._connectionCheckoutTimeout) {
-      if (this.timeoutMS != null) {
-        if (typeof this._serverSelectionTimeout === 'object') {
-          // null or Timeout
-          this._connectionCheckoutTimeout = this._serverSelectionTimeout;
-        } else {
-          throw new MongoRuntimeError(
-            'Unreachable. If you are seeing this error, please file a ticket on the NODE driver project on Jira'
-          );
-        }
+  override get connectionCheckoutTimeout(): Timeout | null {
+    if (typeof this._connectionCheckoutTimeout !== 'object') {
+      if (typeof this._serverSelectionTimeout === 'object') {
+        // null or Timeout
+        this._connectionCheckoutTimeout = this._serverSelectionTimeout;
       } else {
-        this._connectionCheckoutTimeout = Timeout.expires(this.waitQueueTimeoutMS);
+        throw new MongoRuntimeError(
+          'Unreachable. If you are seeing this error, please file a ticket on the NODE driver project on Jira'
+        );
       }
-
-      return this._connectionCheckoutTimeout;
-    } else {
-      return this._connectionCheckoutTimeout;
     }
+    return this._connectionCheckoutTimeout;
+  }
+}
+
+/** @internal */
+export class LegacyTimeoutContext extends TimeoutContext {
+  options: TimeoutContextOptions;
+
+  constructor(options: TimeoutContextOptions) {
+    super(options);
+    this.options = options;
+    this.clearServerSelectionTimeout = true;
+    this.clearConnectionCheckoutTimeout = true;
+  }
+
+  override get serverSelectionTimeout(): Timeout | null {
+    if (this.options.serverSelectionTimeoutMS != null && this.options.serverSelectionTimeoutMS > 0)
+      return Timeout.expires(this.options.serverSelectionTimeoutMS);
+    return null;
+  }
+
+  override get connectionCheckoutTimeout(): Timeout | null {
+    if (this.options.waitQueueTimeoutMS != null && this.options.waitQueueTimeoutMS > 0)
+      return Timeout.expires(this.options.waitQueueTimeoutMS);
+    return null;
   }
 }

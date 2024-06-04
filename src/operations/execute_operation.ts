@@ -27,7 +27,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { Timeout } from '../timeout';
+import { TimeoutContext } from '../timeout';
 import { squashError, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
@@ -118,6 +118,14 @@ export async function executeOperation<
     );
   }
 
+  const timeoutContext = TimeoutContext.create({
+    serverSelectionTimeoutMS: client.options.serverSelectionTimeoutMS,
+    waitQueueTimeoutMS: client.options.waitQueueTimeoutMS,
+    timeoutMS: operation.options.timeoutMS
+  });
+
+  operation.timeoutContext = timeoutContext;
+
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
@@ -153,13 +161,10 @@ export async function executeOperation<
     selector = readPreference;
   }
 
-  const timeout = operation.timeoutMS != null ? Timeout.expires(operation.timeoutMS) : undefined;
-  operation.timeout = timeout;
-
   const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    timeout
+    timeoutContext: operation.timeoutContext
   });
 
   if (session == null) {
@@ -272,7 +277,8 @@ async function retryOperation<
     session,
     timeout: operation.timeout,
     operationName: operation.commandName,
-    previousServer
+    previousServer,
+    timeoutContext: operation.timeoutContext
   });
 
   if (isWriteOperation && !supportsRetryableWrites(server)) {

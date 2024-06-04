@@ -33,7 +33,7 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
     const res: TODO_NODE_3286 = await server.command(this.ns, this.command, {
       ...this.options,
       readPreference: this.readPreference,
-      timeout: this.timeout,
+      timeoutContext: this.timeoutContext,
       session
     });
     return res;
@@ -62,7 +62,7 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
       ...this.options,
       readPreference: this.readPreference,
       session,
-      timeout: this.timeout
+      timeoutContext: this.timeoutContext
     });
     return res;
   }
