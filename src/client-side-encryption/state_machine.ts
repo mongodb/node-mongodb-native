@@ -112,8 +112,25 @@ export type CSFLEKMSTlsOptions = {
   azure?: ClientEncryptionTlsOptions;
 };
 
-/** `{ v: [] }` */
-const EMPTY_V = Uint8Array.from([13, 0, 0, 0, 4, 118, 0, 5, 0, 0, 0, 0, 0]);
+/**
+ * This is kind of a hack.  For `rewrapManyDataKey`, we have tests that
+ * guarantee that when there are no matching keys, `rewrapManyDataKey` returns
+ * nothing.  We also have tests for auto encryption that guarantee for `encrypt`
+ * we return an error when there are no matching keys.  This error is generated in
+ * subsequent iterations of the state machine.
+ * Some apis (`encrypt`) throw if there are no filter matches and others (`rewrapManyDataKey`)
+ * do not.  We set the result manually here, and let the state machine continue.  `libmongocrypt`
+ * will inform us if we need to error by setting the state to `MONGOCRYPT_CTX_ERROR` but
+ * otherwise we'll return `{ v: [] }`.
+ */
+const EMPTY_V = Uint8Array.from([
+  ...[13, 0, 0, 0], // document size = 13 bytes
+  ...[
+    ...[4, 118, 0], // array type (4), "v\x00" basic latin "v"
+    ...[5, 0, 0, 0, 0] // empty document (5 byte size, null terminator)
+  ],
+  0 // null terminator
+]);
 
 /**
  * @internal
@@ -211,15 +228,7 @@ export class StateMachine {
           const keys = await this.fetchKeys(keyVaultClient, keyVaultNamespace, filter);
 
           if (keys.length === 0) {
-            // This is kind of a hack.  For `rewrapManyDataKey`, we have tests that
-            // guarantee that when there are no matching keys, `rewrapManyDataKey` returns
-            // nothing.  We also have tests for auto encryption that guarantee for `encrypt`
-            // we return an error when there are no matching keys.  This error is generated in
-            // subsequent iterations of the state machine.
-            // Some apis (`encrypt`) throw if there are no filter matches and others (`rewrapManyDataKey`)
-            // do not.  We set the result manually here, and let the state machine continue.  `libmongocrypt`
-            // will inform us if we need to error by setting the state to `MONGOCRYPT_CTX_ERROR` but
-            // otherwise we'll return `{ v: [] }`.
+            // See docs on EMPTY_V
             result = EMPTY_V;
           }
           for await (const key of keys) {

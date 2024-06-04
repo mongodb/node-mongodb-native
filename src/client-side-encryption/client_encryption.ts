@@ -719,8 +719,8 @@ export class ClientEncryption {
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
-    const result = deserialize(await stateMachine.execute(this, context));
-    return result.v;
+    const { v } = deserialize(await stateMachine.execute(this, context));
+    return v;
   }
 }
 

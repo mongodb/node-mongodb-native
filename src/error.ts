@@ -1177,17 +1177,16 @@ export class MongoWriteConcernError extends MongoServerError {
    *
    * @public
    **/
-  constructor(
-    result: {
-      writeConcernError: {
-        code: number;
-        errmsg: string;
-        codeName?: string;
-        errInfo?: Document;
-      };
-    } & Document
-  ) {
-    super(result.writeConcernError);
+  constructor(result: {
+    writeConcernError: {
+      code: number;
+      errmsg: string;
+      codeName?: string;
+      errInfo?: Document;
+    };
+    errorLabels?: string[];
+  }) {
+    super({ ...result, ...result.writeConcernError });
     this.errInfo = result.writeConcernError.errInfo;
     this.result = result;
   }

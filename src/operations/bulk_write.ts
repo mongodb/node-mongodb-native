@@ -7,7 +7,6 @@ import type {
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { throwIfWriteConcernError } from '../utils';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
@@ -51,9 +50,7 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
     }
 
     // Execute the bulk
-    const result = await bulk.execute({ ...options, session });
-    throwIfWriteConcernError(result);
-    return result;
+    return await bulk.execute({ ...options, session });
   }
 }
 

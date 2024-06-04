@@ -46,9 +46,9 @@ import {
   makeStateMachine,
   maxWireVersion,
   type MongoDBNamespace,
-  supportsRetryableWrites,
-  throwIfWriteConcernError
+  supportsRetryableWrites
 } from '../utils';
+import { throwIfWriteConcernError } from '../write_concern';
 import {
   type ClusterTime,
   STATE_CLOSED,
@@ -337,7 +337,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       ) {
         await this.pool.reauthenticate(conn);
         try {
-          return await conn.command(ns, cmd, finalOptions, responseType);
+          const res = await conn.command(ns, cmd, finalOptions, responseType);
+          throwIfWriteConcernError(res);
+          return res;
         } catch (commandError) {
           throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
         }

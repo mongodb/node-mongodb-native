@@ -294,8 +294,7 @@ export abstract class AbstractCursor<
 
     return bufferedDocs;
   }
-
-  private async *asyncIterator() {
+  async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
     if (this.closed) {
       return;
     }
@@ -341,10 +340,6 @@ export abstract class AbstractCursor<
         }
       }
     }
-  }
-
-  async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
-    yield* this.asyncIterator();
   }
 
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {

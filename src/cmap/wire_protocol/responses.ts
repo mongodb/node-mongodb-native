@@ -66,6 +66,14 @@ export type MongoDBResponseConstructor = {
 
 /** @internal */
 export class MongoDBResponse extends OnDemandDocument {
+  /**
+   * Devtools need to know which keys were encrypted before the driver automatically decrypted them.
+   * If decorating is enabled (`Symbol.for('@@mdb.decorateDecryptionResult')`), this field will be set,
+   * storing the original encrypted response from the server, so that we can build an object that has
+   * the list of BSON keys that were encrypted stored at a well known symbol: `Symbol.for('@@mdb.decryptedKeys')`.
+   */
+  encryptedResponse?: MongoDBResponse;
+
   static is(value: unknown): value is MongoDBResponse {
     return value instanceof MongoDBResponse;
   }
@@ -161,13 +169,11 @@ export class MongoDBResponse extends OnDemandDocument {
     }
     return { utf8: { writeErrors: false } };
   }
-
-  // TODO: Supports decorating result
-  encryptedResponse?: MongoDBResponse;
 }
 
 // Here's a little blast from the past.
 // OLD style method definition so that I can override get without redefining ALL the fancy TS :/
+// TODO there must be a better way...
 Object.defineProperty(MongoDBResponse.prototype, 'get', {
   value: function get(name: any, as: any, required: any) {
     try {

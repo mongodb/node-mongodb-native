@@ -4,7 +4,7 @@ import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } 
 import type { InferIdType, TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { hasAtomicOperators, type MongoDBNamespace, throwIfWriteConcernError } from '../utils';
+import { hasAtomicOperators, type MongoDBNamespace } from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
@@ -123,7 +123,6 @@ export class UpdateOperation extends CommandOperation<Document> {
     }
 
     const res = await super.executeCommand(server, session, command);
-    throwIfWriteConcernError(res);
     return res;
   }
 }
