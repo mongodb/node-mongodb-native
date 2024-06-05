@@ -11,7 +11,7 @@ import {
 import { MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
 import { decorateDecryptionResult, ns } from '../../utils';
-import { OnDemandDocument } from './on_demand/document';
+import { type JSTypeOf, OnDemandDocument } from './on_demand/document';
 
 // eslint-disable-next-line no-restricted-syntax
 const enum BSONElementOffset {
@@ -73,6 +73,29 @@ export class MongoDBResponse extends OnDemandDocument {
    * the list of BSON keys that were encrypted stored at a well known symbol: `Symbol.for('@@mdb.decryptedKeys')`.
    */
   encryptedResponse?: MongoDBResponse;
+
+  // Wrap error thrown from BSON
+  public override get<const T extends keyof JSTypeOf>(
+    name: string | number,
+    as: T,
+    required?: false | undefined
+  ): JSTypeOf[T] | null;
+  public override get<const T extends keyof JSTypeOf>(
+    name: string | number,
+    as: T,
+    required: true
+  ): JSTypeOf[T];
+  public override get<const T extends keyof JSTypeOf>(
+    name: string | number,
+    as: T,
+    required?: boolean | undefined
+  ): JSTypeOf[T] | null {
+    try {
+      return super.get(name, as, required);
+    } catch (cause) {
+      throw new MongoUnexpectedServerResponseError(cause.message, { cause });
+    }
+  }
 
   static is(value: unknown): value is MongoDBResponse {
     return value instanceof MongoDBResponse;
@@ -170,19 +193,6 @@ export class MongoDBResponse extends OnDemandDocument {
     return { utf8: { writeErrors: false } };
   }
 }
-
-// Here's a little blast from the past.
-// OLD style method definition so that I can override get without redefining ALL the fancy TS :/
-// TODO there must be a better way...
-Object.defineProperty(MongoDBResponse.prototype, 'get', {
-  value: function get(name: any, as: any, required: any) {
-    try {
-      return OnDemandDocument.prototype.get.call(this, name, as, required);
-    } catch (cause) {
-      throw new MongoUnexpectedServerResponseError(cause.message, { cause });
-    }
-  }
-});
 
 /** @internal */
 export class CursorResponse extends MongoDBResponse {
