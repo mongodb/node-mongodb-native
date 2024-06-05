@@ -30,8 +30,8 @@ describe('MaxTimeMS', function () {
     const col = client.db().collection('max_time_ms');
     await col.insertMany([{ agg_pipe: 1 }], { writeConcern: { w: 1 } });
     const cursor = col.find({ $where: 'sleep(100) || true' }).maxTimeMS(50);
-    const kBuiltOptions = getSymbolFrom(cursor, 'builtOptions');
-    expect(cursor[kBuiltOptions]).to.have.property('maxTimeMS', 50);
+    // @ts-expect-error: findOptions are private
+    expect(cursor.findOptions).to.have.property('maxTimeMS', 50);
 
     const error = await cursor.count().catch(error => error);
     expect(error).to.be.instanceOf(MongoServerError);
@@ -44,8 +44,8 @@ describe('MaxTimeMS', function () {
     const col = client.db().collection('max_time_ms');
     await col.insertMany([{ agg_pipe: 1 }], { writeConcern: { w: 1 } });
     const cursor = col.find({ $where: 'sleep(100) || true' }).maxTimeMS(50);
-    const kBuiltOptions = getSymbolFrom(cursor, 'builtOptions');
-    expect(cursor[kBuiltOptions]).to.have.property('maxTimeMS', 50);
+    // @ts-expect-error: findOptions are private
+    expect(cursor.findOptions).to.have.property('maxTimeMS', 50);
 
     const error = await cursor.toArray().catch(error => error);
     expect(error).to.be.instanceOf(MongoServerError);
