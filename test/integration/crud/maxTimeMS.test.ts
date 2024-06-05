@@ -9,7 +9,6 @@ import {
   MongoCursorExhaustedError,
   MongoServerError
 } from '../../mongodb';
-import { getSymbolFrom } from '../../tools/utils';
 
 describe('MaxTimeMS', function () {
   let client: MongoClient;
