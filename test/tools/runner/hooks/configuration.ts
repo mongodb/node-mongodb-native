@@ -204,7 +204,7 @@ const beforeAllPluginImports = () => {
  * @remarks TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set
  * the default dns resolution order for CI
  */
-function installNodeDNSWorkaroundHooks() {
+export function installNodeDNSWorkaroundHooks() {
   if (gte(coerce(process.version), coerce('18'))) {
     // We set before hooks because some tests connect in before hooks
     before(() => {
