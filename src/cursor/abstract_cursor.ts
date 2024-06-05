@@ -533,7 +533,7 @@ export abstract class AbstractCursor<
     const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-3283): Improve transform typing
     if (oldTransform) {
       this[kTransform] = doc => {
-        return transform(oldTransform(doc));
+        return this.makeSafeTransform(transform)(oldTransform(doc));
       };
     } else {
       this[kTransform] = this.makeSafeTransform(transform);
