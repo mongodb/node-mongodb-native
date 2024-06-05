@@ -803,7 +803,7 @@ export abstract class AbstractCursor<
   private emitClose() {
     try {
       if (!this.hasEmittedClose && (this[kDocuments].length === 0 || this[kClosed])) {
-        // @ts-expect-error: not sure..
+        // @ts-expect-error: CursorEvents is generic so Parameters<CursorEvents["close"]> may not be assignable to `[]`. Not sure how to require extenders do not add parameters.
         this.emit('close');
       }
     } finally {
