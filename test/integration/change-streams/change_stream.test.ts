@@ -2018,7 +2018,7 @@ describe('ChangeStream resumability', function () {
           } as FailPoint);
 
           expect(changeStream.cursor)
-            .to.have.property('options')
+            .to.have.property('changeStreamCursorOptions')
             .that.containSubset(changeStreamResumeOptions);
 
           await collection.insertOne({ name: 'bailey' });
@@ -2026,7 +2026,7 @@ describe('ChangeStream resumability', function () {
           await changeStream.next();
 
           expect(changeStream.cursor)
-            .to.have.property('options')
+            .to.have.property('changeStreamCursorOptions')
             .that.containSubset(changeStreamResumeOptions);
         }
       );
@@ -2182,7 +2182,7 @@ describe('ChangeStream resumability', function () {
           } as FailPoint);
 
           expect(changeStream.cursor)
-            .to.have.property('options')
+            .to.have.property('changeStreamCursorOptions')
             .that.containSubset(changeStreamResumeOptions);
 
           await collection.insertOne({ name: 'bailey' });
@@ -2190,7 +2190,7 @@ describe('ChangeStream resumability', function () {
           await changeStream.hasNext();
 
           expect(changeStream.cursor)
-            .to.have.property('options')
+            .to.have.property('changeStreamCursorOptions')
             .that.containSubset(changeStreamResumeOptions);
         }
       );
@@ -2360,7 +2360,7 @@ describe('ChangeStream resumability', function () {
           } as FailPoint);
 
           expect(changeStream.cursor)
-            .to.have.property('options')
+            .to.have.property('changeStreamCursorOptions')
             .that.containSubset(changeStreamResumeOptions);
 
           await collection.insertOne({ name: 'bailey' });
@@ -2368,7 +2368,7 @@ describe('ChangeStream resumability', function () {
           await changeStream.tryNext();
 
           expect(changeStream.cursor)
-            .to.have.property('options')
+            .to.have.property('changeStreamCursorOptions')
             .that.containSubset(changeStreamResumeOptions);
         }
       );
@@ -2504,14 +2504,14 @@ describe('ChangeStream resumability', function () {
           } as FailPoint);
 
           expect(changeStream.cursor)
-            .to.have.property('options')
+            .to.have.property('changeStreamCursorOptions')
             .that.containSubset(changeStreamResumeOptions);
 
           await collection.insertOne({ city: 'New York City' });
           await changeStreamIterator.next();
 
           expect(changeStream.cursor)
-            .to.have.property('options')
+            .to.have.property('changeStreamCursorOptions')
             .that.containSubset(changeStreamResumeOptions);
         }
       );
@@ -2643,7 +2643,7 @@ describe('ChangeStream resumability', function () {
         } as FailPoint);
 
         expect(changeStream.cursor)
-          .to.have.property('options')
+          .to.have.property('changeStreamCursorOptions')
           .that.containSubset(changeStreamResumeOptions);
 
         const changes = once(changeStream, 'change');
@@ -2654,7 +2654,7 @@ describe('ChangeStream resumability', function () {
         await changes;
 
         expect(changeStream.cursor)
-          .to.have.property('options')
+          .to.have.property('changeStreamCursorOptions')
           .that.containSubset(changeStreamResumeOptions);
       }
     );
