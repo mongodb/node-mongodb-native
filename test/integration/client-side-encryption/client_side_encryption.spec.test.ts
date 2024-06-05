@@ -63,7 +63,7 @@ const isServerless = !!process.env.SERVERLESS;
 
 const filter = new ClientSideEncryptionFilter();
 
-describe.only('Client Side Encryption (Legacy)', function () {
+describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
     path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),
