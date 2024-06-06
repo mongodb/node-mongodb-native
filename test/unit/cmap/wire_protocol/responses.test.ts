@@ -54,12 +54,12 @@ describe('class MongoDBResponse', () => {
   });
 });
 
-describe('class CursorResponse', () => {
+describe.only('class CursorResponse', () => {
   describe('get cursor()', () => {
     it('throws if input does not contain cursor embedded document', () => {
-      // @ts-expect-error: testing private getter
       expect(() => new CursorResponse(BSON.serialize({ ok: 1 })).cursor).to.throw(
-        MongoUnexpectedServerResponseError
+        MongoUnexpectedServerResponseError,
+        /"cursor" is missing/
       );
     });
   });
@@ -67,7 +67,8 @@ describe('class CursorResponse', () => {
   describe('get id()', () => {
     it('throws if input does not contain cursor.id int64', () => {
       expect(() => new CursorResponse(BSON.serialize({ ok: 1, cursor: {} })).id).to.throw(
-        MongoUnexpectedServerResponseError
+        MongoUnexpectedServerResponseError,
+        /"id" is missing/
       );
     });
   });
@@ -77,7 +78,7 @@ describe('class CursorResponse', () => {
       expect(
         // @ts-expect-error: testing private getter
         () => new CursorResponse(BSON.serialize({ ok: 1, cursor: { id: 0n, batch: [] } })).batch
-      ).to.throw(MongoUnexpectedServerResponseError);
+      ).to.throw(MongoUnexpectedServerResponseError, /did not contain a batch/);
     });
   });
 
