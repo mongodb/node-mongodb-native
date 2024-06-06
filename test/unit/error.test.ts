@@ -475,45 +475,64 @@ describe('MongoErrors', () => {
           error: new MongoNetworkError('socket bad, try again'),
           maxWireVersion: BELOW_4_4
         },
-        // {
-        //   description: 'a MongoWriteConcernError with no code nor label',
-        //   result: false,
-        //   error: new MongoWriteConcernError({ message: 'empty wc error' }),
-        //   maxWireVersion: BELOW_4_4
-        // },
-        // {
-        //   description: 'a MongoWriteConcernError with a random label',
-        //   result: false,
-        //   error: new MongoWriteConcernError(
-        //     { message: 'random label' },
-        //     { errorLabels: ['myLabel'] }
-        //   ),
-        //   maxWireVersion: BELOW_4_4
-        // },
-        // {
-        //   description: 'a MongoWriteConcernError with a retryable code above server 4.4',
-        //   result: false,
-        //   error: new MongoWriteConcernError({}, { code: 262 }),
-        //   maxWireVersion: ABOVE_4_4
-        // },
-        // {
-        //   description: 'a MongoWriteConcernError with a retryable code below server 4.4',
-        //   result: true,
-        //   error: new MongoWriteConcernError({}, { code: 262 }),
-        //   maxWireVersion: BELOW_4_4
-        // },
-        // {
-        //   description: 'a MongoWriteConcernError with a RetryableWriteError label below server 4.4',
-        //   result: false,
-        //   error: new MongoWriteConcernError({}, { errorLabels: ['RetryableWriteError'] }),
-        //   maxWireVersion: BELOW_4_4
-        // },
-        // {
-        //   description: 'a MongoWriteConcernError with a RetryableWriteError label above server 4.4',
-        //   result: false,
-        //   error: new MongoWriteConcernError({}, { errorLabels: ['RetryableWriteError'] }),
-        //   maxWireVersion: ABOVE_4_4
-        // },
+        {
+          description: 'a MongoWriteConcernError with a random label',
+          result: false,
+          error: new MongoWriteConcernError({
+            writeConcernError: {
+              errmsg: 'random label',
+              code: 1
+            },
+            errorLabels: ['myLabel']
+          }),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a retryable code above server 4.4',
+          result: false,
+          error: new MongoWriteConcernError({
+            writeConcernError: {
+              errmsg: 'code 262', // ExceededTimeLimit, is retryable
+              code: 262
+            }
+          }),
+          maxWireVersion: ABOVE_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a retryable code below server 4.4',
+          result: true,
+          error: new MongoWriteConcernError({
+            writeConcernError: {
+              errmsg: 'code 262',
+              code: 262
+            }
+          }),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a RetryableWriteError label below server 4.4',
+          result: false,
+          error: new MongoWriteConcernError({
+            writeConcernError: {
+              errmsg: 'code 1',
+              code: 1
+            },
+            errorLabels: ['RetryableWriteError']
+          }),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a RetryableWriteError label above server 4.4',
+          result: false,
+          error: new MongoWriteConcernError({
+            writeConcernError: {
+              errmsg: 'code 1',
+              code: 1
+            },
+            errorLabels: ['RetryableWriteError']
+          }),
+          maxWireVersion: ABOVE_4_4
+        },
         {
           description: 'any MongoError with a RetryableWriteError label',
           result: false,

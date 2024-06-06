@@ -54,7 +54,7 @@ describe('class MongoDBResponse', () => {
   });
 });
 
-describe.only('class CursorResponse', () => {
+describe('class CursorResponse', () => {
   describe('get cursor()', () => {
     it('throws if input does not contain cursor embedded document', () => {
       expect(() => new CursorResponse(BSON.serialize({ ok: 1 })).cursor).to.throw(
