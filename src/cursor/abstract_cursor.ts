@@ -786,7 +786,7 @@ export abstract class AbstractCursor<
     } catch (error) {
       squashError(error);
     } finally {
-      if (!session.hasEnded && session?.owner === this) {
+      if (session?.owner === this) {
         await session.endSession({ error });
       }
       if (!session?.inTransaction()) {
