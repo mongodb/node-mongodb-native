@@ -336,7 +336,10 @@ export type {
   CursorFlag,
   CursorStreamOptions
 } from './cursor/abstract_cursor';
-export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
+export type {
+  InitialCursorResponse,
+  InternalAbstractCursorOptions
+} from './cursor/abstract_cursor';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type { ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 export type {
@@ -464,7 +467,6 @@ export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
-export type { ExecutionResult } from './operations/execute_operation';
 export type { FindOptions } from './operations/find';
 export type {
   FindOneAndDeleteOptions,

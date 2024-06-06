@@ -1,4 +1,3 @@
-import { type CursorResponse } from '../cmap/wire_protocol/responses';
 import {
   isRetryableReadError,
   isRetryableWriteError,
@@ -17,7 +16,6 @@ import {
 } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ReadPreference } from '../read_preference';
-import type { Server } from '../sdam/server';
 import type { ServerDescription } from '../sdam/server_description';
 import {
   sameServerSelector,
@@ -36,16 +34,6 @@ const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
 type ResultTypeFromOperation<TOperation> = TOperation extends AbstractOperation<infer K>
   ? K
   : never;
-
-/** @internal */
-export interface ExecutionResult {
-  /** The server selected for the operation */
-  server: Server;
-  /** The session used for this operation, may be implicitly created */
-  session?: ClientSession;
-  /** The raw server response for the operation */
-  response: CursorResponse;
-}
 
 /**
  * Executes the given operation with provided arguments.

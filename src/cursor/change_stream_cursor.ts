@@ -11,10 +11,14 @@ import { INIT, RESPONSE } from '../constants';
 import type { MongoClient } from '../mongo_client';
 import { AggregateOperation } from '../operations/aggregate';
 import type { CollationOptions } from '../operations/command';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
-import { AbstractCursor, type AbstractCursorOptions } from './abstract_cursor';
+import {
+  AbstractCursor,
+  type AbstractCursorOptions,
+  type InitialCursorResponse
+} from './abstract_cursor';
 
 /** @internal */
 export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
@@ -125,7 +129,7 @@ export class ChangeStreamCursor<
     });
   }
 
-  async _initialize(session: ClientSession): Promise<ExecutionResult> {
+  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
       ...this.options,
@@ -151,7 +155,6 @@ export class ChangeStreamCursor<
     this.emit(INIT, response);
     this.emit(RESPONSE);
 
-    // TODO: NODE-2882
     return { server, session, response };
   }
 

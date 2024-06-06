@@ -14,7 +14,7 @@ import {
 } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, type ReadConcernLike } from '../read_concern';
@@ -47,6 +47,24 @@ const kClosed = Symbol('closed');
 const kKilled = Symbol('killed');
 /** @internal */
 const kInit = Symbol('kInit');
+
+/**
+ * @internal
+ * TODO(NODE-2882): A cursor's getMore commands must be run on the same server it was started on
+ * and the same session must be used for the lifetime of the cursor. This object serves to get the
+ * server and session (along with the response) out of executeOperation back to the AbstractCursor.
+ *
+ * There may be a better design for communicating these values back to the cursor, currently an operation
+ * MUST store the selected server on itself so it can be read after executeOperation has returned.
+ */
+export interface InitialCursorResponse {
+  /** The server selected for the operation */
+  server: Server;
+  /** The session used for this operation, may be implicitly created */
+  session?: ClientSession;
+  /** The raw server response for the operation */
+  response: CursorResponse;
+}
 
 /** @public */
 export const CURSOR_FLAGS = [
@@ -622,7 +640,9 @@ export abstract class AbstractCursor<
   abstract clone(): AbstractCursor<TSchema>;
 
   /** @internal */
-  protected abstract _initialize(session: ClientSession | undefined): Promise<ExecutionResult>;
+  protected abstract _initialize(
+    session: ClientSession | undefined
+  ): Promise<InitialCursorResponse>;
 
   /** @internal */
   async getMore(batchSize: number): Promise<CursorResponse> {

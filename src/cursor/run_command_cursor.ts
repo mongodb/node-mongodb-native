@@ -2,14 +2,14 @@ import type { BSONSerializeOptions, Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import { MongoAPIError } from '../error';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { RunCommandOperation } from '../operations/run_command';
 import type { ReadConcernLike } from '../read_concern';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { ns } from '../utils';
-import { AbstractCursor } from './abstract_cursor';
+import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
 
 /** @public */
 export type RunCursorCommandOptions = {
@@ -97,7 +97,7 @@ export class RunCommandCursor extends AbstractCursor {
   }
 
   /** @internal */
-  protected async _initialize(session: ClientSession): Promise<ExecutionResult> {
+  protected async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const operation = new RunCommandOperation<CursorResponse>(this.db, this.command, {
       ...this.cursorOptions,
       session: session,

@@ -5,13 +5,13 @@ import { type ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, type CountOptions } from '../operations/count';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { executeOperation } from '../operations/execute_operation';
 import { FindOperation, type FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
-import { AbstractCursor, assertUninitialized } from './abstract_cursor';
+import { AbstractCursor, assertUninitialized, type InitialCursorResponse } from './abstract_cursor';
 
 /** @internal */
 const kFilter = Symbol('filter');
@@ -69,7 +69,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  async _initialize(session: ClientSession): Promise<ExecutionResult> {
+  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const findOperation = new FindOperation(this.namespace, this[kFilter], {
       ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
@@ -81,7 +81,6 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     // the response is not a cursor when `explain` is enabled
     this[kNumReturned] = response.batchSize;
 
-    // TODO: NODE-2882
     return { server: findOperation.server, session, response };
   }
 
