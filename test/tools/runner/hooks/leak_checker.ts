@@ -55,26 +55,12 @@ class LeakChecker {
 
   setupClientLeakChecker() {
     const leakChecker = this;
-    MongoClient.prototype.connect = function (...args) {
+    MongoClient.prototype.connect = async function () {
       leakChecker.clients.add(this);
       this[LeakChecker.kConnectCount] ??= 0;
-
-      const lastArg = args[args.length - 1];
-      const lastArgIsCallback = typeof lastArg === 'function';
-      if (lastArgIsCallback) {
-        const argsWithoutCallback = args.slice(0, args.length - 1);
-        return LeakChecker.originalConnect.call(this, ...argsWithoutCallback, (error, client) => {
-          if (error == null) {
-            this[LeakChecker.kConnectCount] += 1; // only increment on successful connects
-          }
-          return lastArg(error, client);
-        });
-      } else {
-        return LeakChecker.originalConnect.call(this, ...args).then(client => {
-          this[LeakChecker.kConnectCount] += 1; // only increment on successful connects
-          return client;
-        });
-      }
+      await LeakChecker.originalConnect.call(this);
+      this[LeakChecker.kConnectCount] += 1; // only increment on successful connects
+      return this;
     };
 
     MongoClient.prototype.close = function (...args) {
@@ -178,4 +164,4 @@ const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheck
 const beforeAll = TRACE_SOCKETS ? [socketLeakCheckBeforeAll] : [];
 const beforeEach = [leakCheckerBeforeEach];
 const afterEach = [leakCheckerAfterEach, ...(TRACE_SOCKETS ? [socketLeakCheckAfterEach] : [])];
-module.exports = { mochaHooks: { beforeAll, beforeEach, afterEach } };
+export const mochaHooks = { beforeAll, beforeEach, afterEach };
