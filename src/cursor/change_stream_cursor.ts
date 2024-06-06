@@ -159,7 +159,6 @@ export class ChangeStreamCursor<
     const response = await super.getMore(batchSize);
 
     this.maxWireVersion = maxWireVersion(this.server);
-    // as ChangeStreamAggregateRawResult<TChange>
     this._processBatch(response);
 
     this.emit(ChangeStream.MORE, response);
