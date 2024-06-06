@@ -123,14 +123,7 @@ export type CSFLEKMSTlsOptions = {
  * will inform us if we need to error by setting the state to `MONGOCRYPT_CTX_ERROR` but
  * otherwise we'll return `{ v: [] }`.
  */
-const EMPTY_V = Uint8Array.from([
-  ...[13, 0, 0, 0], // document size = 13 bytes
-  ...[
-    ...[4, 118, 0], // array type (4), "v\x00" basic latin "v"
-    ...[5, 0, 0, 0, 0] // empty document (5 byte size, null terminator)
-  ],
-  0 // null terminator
-]);
+let EMPTY_V;
 
 /**
  * @internal
@@ -229,7 +222,7 @@ export class StateMachine {
 
           if (keys.length === 0) {
             // See docs on EMPTY_V
-            result = EMPTY_V;
+            result = EMPTY_V ??= serialize({ v: [] });
           }
           for await (const key of keys) {
             context.addMongoOperationResponse(serialize(key));
