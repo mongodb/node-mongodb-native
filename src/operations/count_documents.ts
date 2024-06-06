@@ -1,5 +1,6 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
+import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { AggregateOperation, type AggregateOptions } from './aggregate';
@@ -31,7 +32,10 @@ export class CountDocumentsOperation extends AggregateOperation {
     super(collection.s.namespace, pipeline, options);
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<any> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<TODO_NODE_3286> {
     const result = await super.execute(server, session);
     return result.shift()?.n ?? 0;
   }
