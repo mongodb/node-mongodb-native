@@ -766,6 +766,9 @@ export class CryptoConnection extends Connection {
       ns,
       encrypted,
       options,
+      // Eventually we want to require `responseType` which means we would satisfy `T` as the return type.
+      // In the meantime, we want encryptedResponse to always be _at least_ a MongoDBResponse if not a more specific subclass
+      // So that we can ensure we have access to the on-demand APIs for decorate response
       (responseType ?? MongoDBResponse) as any
     )) as unknown as MongoDBResponse;
 
