@@ -902,6 +902,13 @@ export interface KMIPEncryptionKeyOptions {
    * Host with optional port.
    */
   endpoint?: string;
+
+  /**
+   * If true, this key should be decrypted by the KMIP server.
+   *
+   * Requires `mongodb-client-encryption>=6.0.1`.
+   */
+  delegated?: boolean;
 }
 
 /**

@@ -1,6 +1,7 @@
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
+import { ClientSideEncryptionFilter } from '../../tools/runner/filters/client_encryption_filter';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import {
   gatherTestSuites,
@@ -60,6 +61,8 @@ const SKIPPED_TESTS = new Set([
 
 const isServerless = !!process.env.SERVERLESS;
 
+const filter = new ClientSideEncryptionFilter();
+
 describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
@@ -73,6 +76,10 @@ describe('Client Side Encryption (Legacy)', function () {
 
   before(function () {
     return testContext.setup(this.configuration);
+  });
+
+  before(async function () {
+    await filter.initializeFilter({} as any, {});
   });
 
   generateTopologyTests(testSuites, testContext, ({ description }) => {
@@ -89,13 +96,51 @@ describe('Client Side Encryption (Legacy)', function () {
       return !isSkippedTest;
     }
 
+    if (
+      description === 'Insert a document with auto encryption using KMIP delegated KMS provider'
+    ) {
+      if (
+        typeof filter.filter({
+          metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
+        }) === 'string'
+      ) {
+        return false;
+      }
+    }
+
     return true;
   });
 });
 
 describe('Client Side Encryption (Unified)', function () {
   installNodeDNSWorkaroundHooks();
-  runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')), () =>
-    isServerless ? 'Unified CSFLE tests to not run on serverless' : false
+
+  before(async function () {
+    await filter.initializeFilter({} as any, {});
+  });
+
+  runUnifiedSuite(
+    loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
+    ({ description }) => {
+      const delegatedKMIPTests = [
+        'rewrap with current KMS provider',
+        'rewrap with new local KMS provider',
+        'rewrap with new KMIP delegated KMS provider',
+        'rewrap with new KMIP KMS provider',
+        'rewrap with new GCP KMS provider',
+        'rewrap with new Azure KMS provider',
+        'rewrap with new AWS KMS provider',
+        'create datakey with KMIP delegated KMS provider',
+        'Insert a document with auto encryption using KMIP delegated KMS provider'
+      ];
+      if (delegatedKMIPTests.includes(description)) {
+        const shouldSkip = filter.filter({
+          metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
+        });
+        if (typeof shouldSkip === 'string') return shouldSkip;
+      }
+
+      return isServerless ? 'Unified CSFLE tests to not run on serverless' : false;
+    }
   );
 });
