@@ -341,7 +341,7 @@ export abstract class AbstractCursor<
 
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
     if (options?.transform) {
-      const transform = this.makeSafeTransform(options.transform);
+      const transform = options.transform;
       const readable = new ReadableCursorStream(this);
 
       const transformedStream = readable.pipe(
@@ -390,12 +390,11 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    const transform = this[kTransform];
-
     do {
       const doc = this[kDocuments].shift();
       if (doc != null) {
-        return transform != null ? transform(doc) : doc;
+        if (this[kTransform] != null) return await this.transformDocument(doc);
+        return doc;
       }
       await this.fetchBatch();
     } while (!this.isDead || this[kDocuments].length !== 0);
@@ -411,18 +410,18 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    const transform = this[kTransform];
-
     let doc = this[kDocuments].shift();
     if (doc != null) {
-      return transform != null ? transform(doc) : doc;
+      if (this[kTransform] != null) return await this.transformDocument(doc);
+      return doc;
     }
 
     await this.fetchBatch();
 
     doc = this[kDocuments].shift();
     if (doc != null) {
-      return transform != null ? transform(doc) : doc;
+      if (this[kTransform] != null) return await this.transformDocument(doc);
+      return doc;
     }
 
     return null;
@@ -533,10 +532,10 @@ export abstract class AbstractCursor<
     const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-3283): Improve transform typing
     if (oldTransform) {
       this[kTransform] = doc => {
-        return this.makeSafeTransform(transform)(oldTransform(doc));
+        return transform(oldTransform(doc));
       };
     } else {
-      this[kTransform] = this.makeSafeTransform(transform);
+      this[kTransform] = transform;
     }
 
     return this as unknown as AbstractCursor<T>;
@@ -812,24 +811,27 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
-  private makeSafeTransform<TSchema>(transform: (doc: TSchema) => any): (doc: TSchema) => any {
-    return doc => {
-      try {
-        const result = transform(doc);
-        // eslint-disable-next-line no-restricted-syntax
-        if (result === null) {
-          const message =
-            'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
-          throw new MongoAPIError(message);
-        }
+  private async transformDocument(document: NonNullable<TSchema>): Promise<TSchema> {
+    const transform = this[kTransform];
+    if (transform == null) return document;
 
-        return result;
-      } catch (error) {
-        // eslint-disable-next-line github/no-then
-        this.close().then(undefined, squashError);
-        throw error;
+    try {
+      const transformedDocument = transform(document);
+      // eslint-disable-next-line no-restricted-syntax
+      if (transformedDocument === null) {
+        const TRANSFORM_TO_NULL_ERROR =
+          'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
+        throw new MongoAPIError(TRANSFORM_TO_NULL_ERROR);
       }
-    };
+      return transformedDocument;
+    } catch (transformError) {
+      try {
+        await this.close();
+      } catch (closeError) {
+        squashError(closeError);
+      }
+      throw transformError;
+    }
   }
 
   /** @internal */
