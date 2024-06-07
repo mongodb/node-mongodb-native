@@ -404,7 +404,7 @@ export abstract class AbstractCursor<
     }
 
     do {
-      const doc = this[kDocuments]?.shift();
+      const doc = this[kDocuments]?.shift(this[kOptions]);
       if (doc != null) {
         if (this[kTransform] != null) return await this.transformDocument(doc);
         return doc;
@@ -423,7 +423,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    let doc = this[kDocuments]?.shift();
+    let doc = this[kDocuments]?.shift(this[kOptions]);
     if (doc != null) {
       if (this[kTransform] != null) return await this.transformDocument(doc);
       return doc;
@@ -431,7 +431,7 @@ export abstract class AbstractCursor<
 
     await this.fetchBatch();
 
-    doc = this[kDocuments]?.shift();
+    doc = this[kDocuments]?.shift(this[kOptions]);
     if (doc != null) {
       if (this[kTransform] != null) return await this.transformDocument(doc);
       return doc;
