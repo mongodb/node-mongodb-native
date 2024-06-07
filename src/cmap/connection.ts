@@ -555,6 +555,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions | undefined,
+    responseType: T
+  ): Promise<InstanceType<T>>;
+
+  public async command<T extends MongoDBResponseConstructor>(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions | undefined,
     responseType: T | undefined
   ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
 
@@ -762,15 +769,15 @@ export class CryptoConnection extends Connection {
       }
     }
 
-    const encryptedResponse: MongoDBResponse = (await super.command<T>(
+    const encryptedResponse = await super.command(
       ns,
       encrypted,
       options,
       // Eventually we want to require `responseType` which means we would satisfy `T` as the return type.
       // In the meantime, we want encryptedResponse to always be _at least_ a MongoDBResponse if not a more specific subclass
       // So that we can ensure we have access to the on-demand APIs for decorate response
-      (responseType ?? MongoDBResponse) as any
-    )) as unknown as MongoDBResponse;
+      responseType ?? MongoDBResponse
+    );
 
     const result = await autoEncrypter.decrypt(encryptedResponse.toBytes(), options);
 
