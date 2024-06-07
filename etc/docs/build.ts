@@ -10,11 +10,11 @@ import {
   confirm,
   customSemverCompare,
   getCommandLineArguments,
-  JsonVersionSchema,
+  type JsonVersionSchema,
   LATEST_TAG,
   log,
-  TomlVersionSchema,
-  VersionSchema
+  type TomlVersionSchema,
+  type VersionSchema
 } from './utils';
 
 const exec = promisify(execCb);
@@ -94,8 +94,7 @@ async function main() {
 
   if (!skipPrompts) {
     await confirm(`
-      Generating docs for the following configuration.
-  ${JSON.stringify(newVersion, null, 2)}
+      Generating docs for the following configuration.\n${JSON.stringify(newVersion, null, 2)}
       Does this look right? [y/n] `);
   }
 
