@@ -13,13 +13,6 @@ import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
 import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
 
-/** @internal */
-const kFilter = Symbol('filter');
-/** @internal */
-const kNumReturned = Symbol('numReturned');
-/** @internal */
-const kBuiltOptions = Symbol('builtOptions');
-
 /** @public Flags allowed for cursor */
 export const FLAGS = [
   'tailable',
@@ -33,11 +26,11 @@ export const FLAGS = [
 /** @public */
 export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   /** @internal */
-  [kFilter]: Document;
+  private cursorFilter: Document;
   /** @internal */
-  [kNumReturned] = 0;
+  private numReturned = 0;
   /** @internal */
-  [kBuiltOptions]: FindOptions;
+  private readonly findOptions: FindOptions;
 
   /** @internal */
   constructor(
@@ -48,18 +41,18 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   ) {
     super(client, namespace, options);
 
-    this[kFilter] = filter;
-    this[kBuiltOptions] = options;
+    this.cursorFilter = filter;
+    this.findOptions = options;
 
     if (options.sort != null) {
-      this[kBuiltOptions].sort = formatSort(options.sort);
+      this.findOptions.sort = formatSort(options.sort);
     }
   }
 
   clone(): FindCursor<TSchema> {
-    const clonedOptions = mergeOptions({}, this[kBuiltOptions]);
+    const clonedOptions = mergeOptions({}, this.findOptions);
     delete clonedOptions.session;
-    return new FindCursor(this.client, this.namespace, this[kFilter], {
+    return new FindCursor(this.client, this.namespace, this.cursorFilter, {
       ...clonedOptions
     });
   }
@@ -70,8 +63,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
-    const findOperation = new FindOperation(this.namespace, this[kFilter], {
-      ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
+    const findOperation = new FindOperation(this.namespace, this.cursorFilter, {
+      ...this.findOptions, // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
       session
     });
@@ -79,17 +72,17 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const response = await executeOperation(this.client, findOperation);
 
     // the response is not a cursor when `explain` is enabled
-    this[kNumReturned] = response.batchSize;
+    this.numReturned = response.batchSize;
 
     return { server: findOperation.server, session, response };
   }
 
   /** @internal */
   override async getMore(batchSize: number): Promise<CursorResponse> {
-    const numReturned = this[kNumReturned];
+    const numReturned = this.numReturned;
     if (numReturned) {
       // TODO(DRIVERS-1448): Remove logic to enforce `limit` in the driver
-      const limit = this[kBuiltOptions].limit;
+      const limit = this.findOptions.limit;
       batchSize =
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
 
@@ -113,7 +106,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
     const response = await super.getMore(batchSize);
     // TODO: wrap this in some logic to prevent it from happening if we don't need this support
-    this[kNumReturned] = this[kNumReturned] + response.batchSize;
+    this.numReturned = this.numReturned + response.batchSize;
 
     return response;
   }
@@ -131,8 +124,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     }
     return await executeOperation(
       this.client,
-      new CountOperation(this.namespace, this[kFilter], {
-        ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
+      new CountOperation(this.namespace, this.cursorFilter, {
+        ...this.findOptions, // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
         ...options
       })
@@ -144,19 +137,19 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     return (
       await executeOperation(
         this.client,
-        new FindOperation(this.namespace, this[kFilter], {
-          ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
+        new FindOperation(this.namespace, this.cursorFilter, {
+          ...this.findOptions, // NOTE: order matters here, we may need to refine this
           ...this.cursorOptions,
           explain: verbosity ?? true
         })
       )
-    ).shift(this[kBuiltOptions]);
+    ).shift(this.findOptions);
   }
 
   /** Set the cursor query */
   filter(filter: Document): this {
     this.throwIfInitialized();
-    this[kFilter] = filter;
+    this.cursorFilter = filter;
     return this;
   }
 
@@ -167,7 +160,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   hint(hint: Hint): this {
     this.throwIfInitialized();
-    this[kBuiltOptions].hint = hint;
+    this.findOptions.hint = hint;
     return this;
   }
 
@@ -178,7 +171,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   min(min: Document): this {
     this.throwIfInitialized();
-    this[kBuiltOptions].min = min;
+    this.findOptions.min = min;
     return this;
   }
 
@@ -189,7 +182,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   max(max: Document): this {
     this.throwIfInitialized();
-    this[kBuiltOptions].max = max;
+    this.findOptions.max = max;
     return this;
   }
 
@@ -202,7 +195,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   returnKey(value: boolean): this {
     this.throwIfInitialized();
-    this[kBuiltOptions].returnKey = value;
+    this.findOptions.returnKey = value;
     return this;
   }
 
@@ -213,7 +206,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   showRecordId(value: boolean): this {
     this.throwIfInitialized();
-    this[kBuiltOptions].showRecordId = value;
+    this.findOptions.showRecordId = value;
     return this;
   }
 
@@ -235,43 +228,43 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     // NOTE: consider some TS magic for this
     switch (field) {
       case 'comment':
-        this[kBuiltOptions].comment = value as string | Document;
+        this.findOptions.comment = value as string | Document;
         break;
 
       case 'explain':
-        this[kBuiltOptions].explain = value as boolean;
+        this.findOptions.explain = value as boolean;
         break;
 
       case 'hint':
-        this[kBuiltOptions].hint = value as string | Document;
+        this.findOptions.hint = value as string | Document;
         break;
 
       case 'max':
-        this[kBuiltOptions].max = value as Document;
+        this.findOptions.max = value as Document;
         break;
 
       case 'maxTimeMS':
-        this[kBuiltOptions].maxTimeMS = value as number;
+        this.findOptions.maxTimeMS = value as number;
         break;
 
       case 'min':
-        this[kBuiltOptions].min = value as Document;
+        this.findOptions.min = value as Document;
         break;
 
       case 'orderby':
-        this[kBuiltOptions].sort = formatSort(value as string | Document);
+        this.findOptions.sort = formatSort(value as string | Document);
         break;
 
       case 'query':
-        this[kFilter] = value as Document;
+        this.cursorFilter = value as Document;
         break;
 
       case 'returnKey':
-        this[kBuiltOptions].returnKey = value as boolean;
+        this.findOptions.returnKey = value as boolean;
         break;
 
       case 'showDiskLoc':
-        this[kBuiltOptions].showRecordId = value as boolean;
+        this.findOptions.showRecordId = value as boolean;
         break;
 
       default:
@@ -288,7 +281,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   comment(value: string): this {
     this.throwIfInitialized();
-    this[kBuiltOptions].comment = value;
+    this.findOptions.comment = value;
     return this;
   }
 
@@ -303,7 +296,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       throw new MongoInvalidArgumentError('Argument for maxAwaitTimeMS must be a number');
     }
 
-    this[kBuiltOptions].maxAwaitTimeMS = value;
+    this.findOptions.maxAwaitTimeMS = value;
     return this;
   }
 
@@ -318,7 +311,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
 
-    this[kBuiltOptions].maxTimeMS = value;
+    this.findOptions.maxTimeMS = value;
     return this;
   }
 
@@ -364,7 +357,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   project<T extends Document = Document>(value: Document): FindCursor<T> {
     this.throwIfInitialized();
-    this[kBuiltOptions].projection = value;
+    this.findOptions.projection = value;
     return this as unknown as FindCursor<T>;
   }
 
@@ -376,11 +369,11 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   sort(sort: Sort | string, direction?: SortDirection): this {
     this.throwIfInitialized();
-    if (this[kBuiltOptions].tailable) {
+    if (this.findOptions.tailable) {
       throw new MongoTailableCursorError('Tailable cursor does not support sorting');
     }
 
-    this[kBuiltOptions].sort = formatSort(sort, direction);
+    this.findOptions.sort = formatSort(sort, direction);
     return this;
   }
 
@@ -393,17 +386,17 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   allowDiskUse(allow = true): this {
     this.throwIfInitialized();
 
-    if (!this[kBuiltOptions].sort) {
+    if (!this.findOptions.sort) {
       throw new MongoInvalidArgumentError('Option "allowDiskUse" requires a sort specification');
     }
 
     // As of 6.0 the default is true. This allows users to get back to the old behavior.
     if (!allow) {
-      this[kBuiltOptions].allowDiskUse = false;
+      this.findOptions.allowDiskUse = false;
       return this;
     }
 
-    this[kBuiltOptions].allowDiskUse = true;
+    this.findOptions.allowDiskUse = true;
     return this;
   }
 
@@ -414,7 +407,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   collation(value: CollationOptions): this {
     this.throwIfInitialized();
-    this[kBuiltOptions].collation = value;
+    this.findOptions.collation = value;
     return this;
   }
 
@@ -425,7 +418,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   limit(value: number): this {
     this.throwIfInitialized();
-    if (this[kBuiltOptions].tailable) {
+    if (this.findOptions.tailable) {
       throw new MongoTailableCursorError('Tailable cursor does not support limit');
     }
 
@@ -433,7 +426,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       throw new MongoInvalidArgumentError('Operation "limit" requires an integer');
     }
 
-    this[kBuiltOptions].limit = value;
+    this.findOptions.limit = value;
     return this;
   }
 
@@ -444,7 +437,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    */
   skip(value: number): this {
     this.throwIfInitialized();
-    if (this[kBuiltOptions].tailable) {
+    if (this.findOptions.tailable) {
       throw new MongoTailableCursorError('Tailable cursor does not support skip');
     }
 
@@ -452,7 +445,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       throw new MongoInvalidArgumentError('Operation "skip" requires an integer');
     }
 
-    this[kBuiltOptions].skip = value;
+    this.findOptions.skip = value;
     return this;
   }
 }

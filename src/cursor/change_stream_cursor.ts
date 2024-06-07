@@ -35,15 +35,12 @@ export class ChangeStreamCursor<
   TSchema extends Document = Document,
   TChange extends Document = ChangeStreamDocument<TSchema>
 > extends AbstractCursor<TChange, ChangeStreamEvents> {
-  _resumeToken: ResumeToken;
-  startAtOperationTime: OperationTime | null = null;
-  hasReceived?: boolean;
-  resumeAfter: ResumeToken;
-  startAfter: ResumeToken;
-  options: ChangeStreamCursorOptions;
-
-  postBatchResumeToken?: ResumeToken;
-  pipeline: Document[];
+  private _resumeToken: ResumeToken;
+  private startAtOperationTime: OperationTime | null;
+  private hasReceived?: boolean;
+  private readonly changeStreamCursorOptions: ChangeStreamCursorOptions;
+  private postBatchResumeToken?: ResumeToken;
+  private readonly pipeline: Document[];
 
   /**
    * @internal
@@ -61,7 +58,7 @@ export class ChangeStreamCursor<
     super(client, namespace, options);
 
     this.pipeline = pipeline;
-    this.options = options;
+    this.changeStreamCursorOptions = options;
     this._resumeToken = null;
     this.startAtOperationTime = options.startAtOperationTime ?? null;
 
@@ -83,7 +80,7 @@ export class ChangeStreamCursor<
 
   get resumeOptions(): ChangeStreamCursorOptions {
     const options: ChangeStreamCursorOptions = {
-      ...this.options
+      ...this.changeStreamCursorOptions
     };
 
     for (const key of ['resumeAfter', 'startAfter', 'startAtOperationTime'] as const) {
@@ -91,7 +88,7 @@ export class ChangeStreamCursor<
     }
 
     if (this.resumeToken != null) {
-      if (this.options.startAfter && !this.hasReceived) {
+      if (this.changeStreamCursorOptions.startAfter && !this.hasReceived) {
         options.startAfter = this.resumeToken;
       } else {
         options.resumeAfter = this.resumeToken;
@@ -132,7 +129,7 @@ export class ChangeStreamCursor<
   async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
-      ...this.options,
+      ...this.changeStreamCursorOptions,
       session
     });
 
@@ -143,8 +140,8 @@ export class ChangeStreamCursor<
 
     if (
       this.startAtOperationTime == null &&
-      this.resumeAfter == null &&
-      this.startAfter == null &&
+      this.changeStreamCursorOptions.resumeAfter == null &&
+      this.changeStreamCursorOptions.startAfter == null &&
       this.maxWireVersion >= 7
     ) {
       this.startAtOperationTime = response.operationTime;

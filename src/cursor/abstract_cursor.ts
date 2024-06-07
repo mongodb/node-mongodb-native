@@ -21,29 +21,6 @@ import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type MongoDBNamespace, squashError } from '../utils';
 
-/** @internal */
-const kId = Symbol('id');
-/** @internal */
-const kDocuments = Symbol('documents');
-/** @internal */
-const kServer = Symbol('server');
-/** @internal */
-const kNamespace = Symbol('namespace');
-/** @internal */
-const kClient = Symbol('client');
-/** @internal */
-const kSession = Symbol('session');
-/** @internal */
-const kOptions = Symbol('options');
-/** @internal */
-const kTransform = Symbol('transform');
-/** @internal */
-const kInitialized = Symbol('initialized');
-/** @internal */
-const kClosed = Symbol('closed');
-/** @internal */
-const kKilled = Symbol('killed');
-
 /**
  * @internal
  * TODO(NODE-2882): A cursor's getMore commands must be run on the same server it was started on
@@ -151,27 +128,27 @@ export abstract class AbstractCursor<
   CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
 > extends TypedEventEmitter<CursorEvents> {
   /** @internal */
-  private [kId]: Long | null;
+  private cursorId: Long | null;
   /** @internal */
-  private [kSession]: ClientSession;
+  private cursorSession: ClientSession;
   /** @internal */
-  private [kServer]?: Server;
+  private selectedServer?: Server;
   /** @internal */
-  private [kNamespace]: MongoDBNamespace;
+  private cursorNamespace: MongoDBNamespace;
   /** @internal */
-  private [kDocuments]: CursorResponse | null = null;
+  private documents: CursorResponse | null = null;
   /** @internal */
-  private [kClient]: MongoClient;
+  private cursorClient: MongoClient;
   /** @internal */
-  private [kTransform]?: (doc: TSchema) => any;
+  private transform?: (doc: TSchema) => any;
   /** @internal */
-  private [kInitialized]: boolean;
+  private initialized: boolean;
   /** @internal */
-  private [kClosed]: boolean;
+  private isClosed: boolean;
   /** @internal */
-  private [kKilled]: boolean;
+  private isKilled: boolean;
   /** @internal */
-  private [kOptions]: InternalAbstractCursorOptions;
+  protected readonly cursorOptions: InternalAbstractCursorOptions;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -187,123 +164,118 @@ export abstract class AbstractCursor<
     if (!client.s.isMongoClient) {
       throw new MongoRuntimeError('Cursor must be constructed with MongoClient');
     }
-    this[kClient] = client;
-    this[kNamespace] = namespace;
-    this[kId] = null;
-    this[kInitialized] = false;
-    this[kClosed] = false;
-    this[kKilled] = false;
-    this[kOptions] = {
+    this.cursorClient = client;
+    this.cursorNamespace = namespace;
+    this.cursorId = null;
+    this.initialized = false;
+    this.isClosed = false;
+    this.isKilled = false;
+    this.cursorOptions = {
       readPreference:
         options.readPreference && options.readPreference instanceof ReadPreference
           ? options.readPreference
           : ReadPreference.primary,
       ...pluckBSONSerializeOptions(options)
     };
-    this[kOptions].timeoutMS = options.timeoutMS;
+    this.cursorOptions.timeoutMS = options.timeoutMS;
 
     const readConcern = ReadConcern.fromOptions(options);
     if (readConcern) {
-      this[kOptions].readConcern = readConcern;
+      this.cursorOptions.readConcern = readConcern;
     }
 
     if (typeof options.batchSize === 'number') {
-      this[kOptions].batchSize = options.batchSize;
+      this.cursorOptions.batchSize = options.batchSize;
     }
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
     if (options.comment !== undefined) {
-      this[kOptions].comment = options.comment;
+      this.cursorOptions.comment = options.comment;
     }
 
     if (typeof options.maxTimeMS === 'number') {
-      this[kOptions].maxTimeMS = options.maxTimeMS;
+      this.cursorOptions.maxTimeMS = options.maxTimeMS;
     }
 
     if (typeof options.maxAwaitTimeMS === 'number') {
-      this[kOptions].maxAwaitTimeMS = options.maxAwaitTimeMS;
+      this.cursorOptions.maxAwaitTimeMS = options.maxAwaitTimeMS;
     }
 
     if (options.session instanceof ClientSession) {
-      this[kSession] = options.session;
+      this.cursorSession = options.session;
     } else {
-      this[kSession] = this[kClient].startSession({ owner: this, explicit: false });
+      this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
     }
   }
 
   get id(): Long | undefined {
-    return this[kId] ?? undefined;
+    return this.cursorId ?? undefined;
   }
 
   /** @internal */
   get isDead() {
-    return (this[kId]?.isZero() ?? false) || this[kClosed] || this[kKilled];
+    return (this.cursorId?.isZero() ?? false) || this.isClosed || this.isKilled;
   }
 
   /** @internal */
   get client(): MongoClient {
-    return this[kClient];
+    return this.cursorClient;
   }
 
   /** @internal */
   get server(): Server | undefined {
-    return this[kServer];
+    return this.selectedServer;
   }
 
   get namespace(): MongoDBNamespace {
-    return this[kNamespace];
+    return this.cursorNamespace;
   }
 
   get readPreference(): ReadPreference {
-    return this[kOptions].readPreference;
+    return this.cursorOptions.readPreference;
   }
 
   get readConcern(): ReadConcern | undefined {
-    return this[kOptions].readConcern;
+    return this.cursorOptions.readConcern;
   }
 
   /** @internal */
   get session(): ClientSession {
-    return this[kSession];
+    return this.cursorSession;
   }
 
   set session(clientSession: ClientSession) {
-    this[kSession] = clientSession;
-  }
-
-  /** @internal */
-  get cursorOptions(): InternalAbstractCursorOptions {
-    return this[kOptions];
+    this.cursorSession = clientSession;
   }
 
   get closed(): boolean {
-    return this[kClosed];
+    return this.isClosed;
   }
 
   get killed(): boolean {
-    return this[kKilled];
+    return this.isKilled;
   }
 
   get loadBalanced(): boolean {
-    return !!this[kClient].topology?.loadBalanced;
+    return !!this.cursorClient.topology?.loadBalanced;
   }
 
   /** Returns current buffered documents length */
   bufferedCount(): number {
-    return this[kDocuments]?.length ?? 0;
+    return this.documents?.length ?? 0;
   }
 
   /** Returns current buffered documents */
   readBufferedDocuments(number?: number): TSchema[] {
     const bufferedDocs: TSchema[] = [];
     const documentsToRead = Math.min(
-      number ?? this[kDocuments]?.length ?? 0,
-      this[kDocuments]?.length ?? 0
+      number ?? this.documents?.length ?? 0,
+      this.documents?.length ?? 0
     );
 
     for (let count = 0; count < documentsToRead; count++) {
-      const document = this[kDocuments]?.shift(this[kOptions]);
+      const document = this.documents?.shift(this.cursorOptions);
       if (document != null) {
         bufferedDocs.push(document);
       }
@@ -312,21 +284,21 @@ export abstract class AbstractCursor<
     return bufferedDocs;
   }
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
-    if (this.closed) {
+    if (this.isClosed) {
       return;
     }
 
     try {
       while (true) {
-        if (this.killed) {
+        if (this.isKilled) {
           return;
         }
 
-        if (this.closed && (this[kDocuments]?.length ?? 0) === 0) {
+        if (this.closed && (this.documents?.length ?? 0) === 0) {
           return;
         }
 
-        if (this[kId] != null && this.isDead && (this[kDocuments]?.length ?? 0) === 0) {
+        if (this.cursorId != null && this.isDead && (this.documents?.length ?? 0) === 0) {
           return;
         }
 
@@ -342,7 +314,7 @@ export abstract class AbstractCursor<
     } finally {
       // Only close the cursor if it has not already been closed. This finally clause handles
       // the case when a user would break out of a for await of loop early.
-      if (!this.closed) {
+      if (!this.isClosed) {
         try {
           await this.close();
         } catch (error) {
@@ -383,34 +355,34 @@ export abstract class AbstractCursor<
   }
 
   async hasNext(): Promise<boolean> {
-    if (this[kId] === Long.ZERO) {
+    if (this.cursorId === Long.ZERO) {
       return false;
     }
 
     do {
-      if ((this[kDocuments]?.length ?? 0) !== 0) {
+      if ((this.documents?.length ?? 0) !== 0) {
         return true;
       }
       await this.fetchBatch();
-    } while (!this.isDead || (this[kDocuments]?.length ?? 0) !== 0);
+    } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
 
     return false;
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
   async next(): Promise<TSchema | null> {
-    if (this[kId] === Long.ZERO) {
+    if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
 
     do {
-      const doc = this[kDocuments]?.shift(this[kOptions]);
+      const doc = this.documents?.shift(this.cursorOptions);
       if (doc != null) {
-        if (this[kTransform] != null) return await this.transformDocument(doc);
+        if (this.transform != null) return await this.transformDocument(doc);
         return doc;
       }
       await this.fetchBatch();
-    } while (!this.isDead || (this[kDocuments]?.length ?? 0) !== 0);
+    } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
 
     return null;
   }
@@ -419,21 +391,21 @@ export abstract class AbstractCursor<
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
   async tryNext(): Promise<TSchema | null> {
-    if (this[kId] === Long.ZERO) {
+    if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
 
-    let doc = this[kDocuments]?.shift(this[kOptions]);
+    let doc = this.documents?.shift(this.cursorOptions);
     if (doc != null) {
-      if (this[kTransform] != null) return await this.transformDocument(doc);
+      if (this.transform != null) return await this.transformDocument(doc);
       return doc;
     }
 
     await this.fetchBatch();
 
-    doc = this[kDocuments]?.shift(this[kOptions]);
+    doc = this.documents?.shift(this.cursorOptions);
     if (doc != null) {
-      if (this[kTransform] != null) return await this.transformDocument(doc);
+      if (this.transform != null) return await this.transformDocument(doc);
       return doc;
     }
 
@@ -494,7 +466,7 @@ export abstract class AbstractCursor<
       throw new MongoInvalidArgumentError(`Flag ${flag} must be a boolean value`);
     }
 
-    this[kOptions][flag] = value;
+    this.cursorOptions[flag] = value;
     return this;
   }
 
@@ -542,13 +514,13 @@ export abstract class AbstractCursor<
    */
   map<T = any>(transform: (doc: TSchema) => T): AbstractCursor<T> {
     this.throwIfInitialized();
-    const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-3283): Improve transform typing
+    const oldTransform = this.transform;
     if (oldTransform) {
-      this[kTransform] = doc => {
+      this.transform = doc => {
         return transform(oldTransform(doc));
       };
     } else {
-      this[kTransform] = transform;
+      this.transform = transform;
     }
 
     return this as unknown as AbstractCursor<T>;
@@ -562,9 +534,9 @@ export abstract class AbstractCursor<
   withReadPreference(readPreference: ReadPreferenceLike): this {
     this.throwIfInitialized();
     if (readPreference instanceof ReadPreference) {
-      this[kOptions].readPreference = readPreference;
+      this.cursorOptions.readPreference = readPreference;
     } else if (typeof readPreference === 'string') {
-      this[kOptions].readPreference = ReadPreference.fromString(readPreference);
+      this.cursorOptions.readPreference = ReadPreference.fromString(readPreference);
     } else {
       throw new MongoInvalidArgumentError(`Invalid read preference: ${readPreference}`);
     }
@@ -581,7 +553,7 @@ export abstract class AbstractCursor<
     this.throwIfInitialized();
     const resolvedReadConcern = ReadConcern.fromOptions({ readConcern });
     if (resolvedReadConcern) {
-      this[kOptions].readConcern = resolvedReadConcern;
+      this.cursorOptions.readConcern = resolvedReadConcern;
     }
 
     return this;
@@ -598,7 +570,7 @@ export abstract class AbstractCursor<
       throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
 
-    this[kOptions].maxTimeMS = value;
+    this.cursorOptions.maxTimeMS = value;
     return this;
   }
 
@@ -609,7 +581,7 @@ export abstract class AbstractCursor<
    */
   batchSize(value: number): this {
     this.throwIfInitialized();
-    if (this[kOptions].tailable) {
+    if (this.cursorOptions.tailable) {
       throw new MongoTailableCursorError('Tailable cursor does not support batchSize');
     }
 
@@ -617,7 +589,7 @@ export abstract class AbstractCursor<
       throw new MongoInvalidArgumentError('Operation "batchSize" requires an integer');
     }
 
-    this[kOptions].batchSize = value;
+    this.cursorOptions.batchSize = value;
     return this;
   }
 
@@ -627,17 +599,17 @@ export abstract class AbstractCursor<
    * if the resultant data has already been retrieved by this cursor.
    */
   rewind(): void {
-    if (!this[kInitialized]) {
+    if (!this.initialized) {
       return;
     }
 
-    this[kId] = null;
-    this[kDocuments]?.clear();
-    this[kClosed] = false;
-    this[kKilled] = false;
-    this[kInitialized] = false;
+    this.cursorId = null;
+    this.documents?.clear();
+    this.isClosed = false;
+    this.isKilled = false;
+    this.initialized = false;
 
-    const session = this[kSession];
+    const session = this.cursorSession;
     if (session) {
       // We only want to end this session if we created it, and it hasn't ended yet
       if (session.explicit === false) {
@@ -645,7 +617,7 @@ export abstract class AbstractCursor<
           // eslint-disable-next-line github/no-then
           session.endSession().then(undefined, squashError);
         }
-        this[kSession] = this.client.startSession({ owner: this, explicit: false });
+        this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
       }
     }
   }
@@ -662,14 +634,28 @@ export abstract class AbstractCursor<
 
   /** @internal */
   async getMore(batchSize: number): Promise<CursorResponse> {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const getMoreOperation = new GetMoreOperation(this[kNamespace], this[kId]!, this[kServer]!, {
-      ...this[kOptions],
-      session: this[kSession],
-      batchSize
-    });
+    if (this.cursorId == null) {
+      throw new MongoRuntimeError(
+        'Unexpected null cursor id. A cursor creating command should have set this'
+      );
+    }
+    if (this.selectedServer == null) {
+      throw new MongoRuntimeError(
+        'Unexpected null selectedServer. A cursor creating command should have set this'
+      );
+    }
+    const getMoreOperation = new GetMoreOperation(
+      this.cursorNamespace,
+      this.cursorId,
+      this.selectedServer,
+      {
+        ...this.cursorOptions,
+        session: this.cursorSession,
+        batchSize
+      }
+    );
 
-    return await executeOperation(this[kClient], getMoreOperation);
+    return await executeOperation(this.cursorClient, getMoreOperation);
   }
 
   /**
@@ -681,16 +667,16 @@ export abstract class AbstractCursor<
    */
   private async cursorInit(): Promise<void> {
     try {
-      const state = await this._initialize(this[kSession]);
+      const state = await this._initialize(this.cursorSession);
       const response = state.response;
-      this[kServer] = state.server;
-      this[kId] = response.id;
-      this[kNamespace] = response.ns ?? this[kNamespace];
-      this[kDocuments] = response;
-      this[kInitialized] = true; // the cursor is now initialized, even if it is dead
+      this.selectedServer = state.server;
+      this.cursorId = response.id;
+      this.cursorNamespace = response.ns ?? this.namespace;
+      this.documents = response;
+      this.initialized = true; // the cursor is now initialized, even if it is dead
     } catch (error) {
       // the cursor is now initialized, even if an error occurred
-      this[kInitialized] = true;
+      this.initialized = true;
       await this.cleanup(error);
       throw error;
     }
@@ -704,7 +690,7 @@ export abstract class AbstractCursor<
 
   /** @internal Attempt to obtain more documents */
   private async fetchBatch(): Promise<void> {
-    if (this.closed) {
+    if (this.isClosed) {
       return;
     }
 
@@ -716,20 +702,20 @@ export abstract class AbstractCursor<
       return;
     }
 
-    if (this[kId] == null) {
+    if (this.cursorId == null) {
       await this.cursorInit();
       // If the cursor died or returned documents, return
-      if ((this[kDocuments]?.length ?? 0) !== 0 || this.isDead) return;
+      if ((this.documents?.length ?? 0) !== 0 || this.isDead) return;
       // Otherwise, run a getMore
     }
 
     // otherwise need to call getMore
-    const batchSize = this[kOptions].batchSize || 1000;
+    const batchSize = this.cursorOptions.batchSize || 1000;
 
     try {
       const response = await this.getMore(batchSize);
-      this[kId] = response.id;
-      this[kDocuments] = response;
+      this.cursorId = response.id;
+      this.documents = response;
     } catch (error) {
       try {
         await this.cleanup(error);
@@ -754,21 +740,23 @@ export abstract class AbstractCursor<
 
   /** @internal */
   private async cleanup(error?: Error) {
-    this[kClosed] = true;
-    const session = this[kSession];
+    this.isClosed = true;
+    const session = this.cursorSession;
     try {
       if (
-        !this[kKilled] &&
-        this[kId] &&
-        !this[kId].isZero() &&
-        this[kNamespace] &&
-        this[kServer] &&
+        !this.isKilled &&
+        this.cursorId &&
+        !this.cursorId.isZero() &&
+        this.cursorNamespace &&
+        this.selectedServer &&
         !session.hasEnded
       ) {
-        this[kKilled] = true;
+        this.isKilled = true;
         await executeOperation(
-          this[kClient],
-          new KillCursorsOperation(this[kId], this[kNamespace], this[kServer], { session })
+          this.cursorClient,
+          new KillCursorsOperation(this.cursorId, this.cursorNamespace, this.selectedServer, {
+            session
+          })
         );
       }
     } catch (error) {
@@ -790,7 +778,7 @@ export abstract class AbstractCursor<
   /** @internal */
   private emitClose() {
     try {
-      if (!this.hasEmittedClose && ((this[kDocuments]?.length ?? 0) === 0 || this[kClosed])) {
+      if (!this.hasEmittedClose && ((this.documents?.length ?? 0) === 0 || this.isClosed)) {
         // @ts-expect-error: CursorEvents is generic so Parameters<CursorEvents["close"]> may not be assignable to `[]`. Not sure how to require extenders do not add parameters.
         this.emit('close');
       }
@@ -801,11 +789,10 @@ export abstract class AbstractCursor<
 
   /** @internal */
   private async transformDocument(document: NonNullable<TSchema>): Promise<TSchema> {
-    const transform = this[kTransform];
-    if (transform == null) return document;
+    if (this.transform == null) return document;
 
     try {
-      const transformedDocument = transform(document);
+      const transformedDocument = this.transform(document);
       // eslint-disable-next-line no-restricted-syntax
       if (transformedDocument === null) {
         const TRANSFORM_TO_NULL_ERROR =
@@ -825,7 +812,7 @@ export abstract class AbstractCursor<
 
   /** @internal */
   protected throwIfInitialized() {
-    if (this[kInitialized]) throw new MongoCursorInUseError();
+    if (this.initialized) throw new MongoCursorInUseError();
   }
 }
 
@@ -859,7 +846,7 @@ class ReadableCursorStream extends Readable {
   }
 
   private _readNext() {
-    if (this._cursor[kId] === Long.ZERO) {
+    if (this._cursor.id === Long.ZERO) {
       this.push(null);
       return;
     }

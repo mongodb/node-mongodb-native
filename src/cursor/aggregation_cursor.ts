@@ -13,11 +13,6 @@ import { AbstractCursor } from './abstract_cursor';
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
 
-/** @internal */
-const kPipeline = Symbol('pipeline');
-/** @internal */
-const kOptions = Symbol('options');
-
 /**
  * The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query. It supports
@@ -26,10 +21,9 @@ const kOptions = Symbol('options');
  * @public
  */
 export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
+  public readonly pipeline: Document[];
   /** @internal */
-  [kPipeline]: Document[];
-  /** @internal */
-  [kOptions]: AggregateOptions;
+  private aggregateOptions: AggregateOptions;
 
   /** @internal */
   constructor(
@@ -40,18 +34,14 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   ) {
     super(client, namespace, options);
 
-    this[kPipeline] = pipeline;
-    this[kOptions] = options;
-  }
-
-  get pipeline(): Document[] {
-    return this[kPipeline];
+    this.pipeline = pipeline;
+    this.aggregateOptions = options;
   }
 
   clone(): AggregationCursor<TSchema> {
-    const clonedOptions = mergeOptions({}, this[kOptions]);
+    const clonedOptions = mergeOptions({}, this.aggregateOptions);
     delete clonedOptions.session;
-    return new AggregationCursor(this.client, this.namespace, this[kPipeline], {
+    return new AggregationCursor(this.client, this.namespace, this.pipeline, {
       ...clonedOptions
     });
   }
@@ -62,8 +52,8 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
-    const aggregateOperation = new AggregateOperation(this.namespace, this[kPipeline], {
-      ...this[kOptions],
+    const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
+      ...this.aggregateOptions,
       ...this.cursorOptions,
       session
     });
@@ -78,13 +68,13 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     return (
       await executeOperation(
         this.client,
-        new AggregateOperation(this.namespace, this[kPipeline], {
-          ...this[kOptions], // NOTE: order matters here, we may need to refine this
+        new AggregateOperation(this.namespace, this.pipeline, {
+          ...this.aggregateOptions, // NOTE: order matters here, we may need to refine this
           ...this.cursorOptions,
           explain: verbosity ?? true
         })
       )
-    ).shift(this[kOptions]);
+    ).shift(this.aggregateOptions);
   }
 
   /** Add a stage to the aggregation pipeline
@@ -103,7 +93,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   addStage<T = Document>(stage: Document): AggregationCursor<T>;
   addStage<T = Document>(stage: Document): AggregationCursor<T> {
     this.throwIfInitialized();
-    this[kPipeline].push(stage);
+    this.pipeline.push(stage);
     return this as unknown as AggregationCursor<T>;
   }
 
