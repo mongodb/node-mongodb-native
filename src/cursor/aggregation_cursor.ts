@@ -8,7 +8,7 @@ import type { Sort } from '../sort';
 import type { MongoDBNamespace } from '../utils';
 import { mergeOptions } from '../utils';
 import type { AbstractCursorOptions, InitialCursorResponse } from './abstract_cursor';
-import { AbstractCursor, assertUninitialized } from './abstract_cursor';
+import { AbstractCursor } from './abstract_cursor';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
@@ -102,7 +102,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   addStage(stage: Document): this;
   addStage<T = Document>(stage: Document): AggregationCursor<T>;
   addStage<T = Document>(stage: Document): AggregationCursor<T> {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kPipeline].push(stage);
     return this as unknown as AggregationCursor<T>;
   }

@@ -78,6 +78,17 @@
           "bsonType": "string",
           "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
         }
+      },
+      "encrypted_string_kmip_delegated": {
+        "encrypt": {
+          "keyId": [
+            {
+              "$uuid": "7411e9af-c688-4df7-8143-5e60ae96cba6"
+            }
+          ],
+          "bsonType": "string",
+          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+        }
       }
     },
     "bsonType": "object"

@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import { dirname, resolve } from 'path';
 import * as process from 'process';
+import { satisfies } from 'semver';
 
 import { type MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
@@ -59,15 +60,21 @@ export class ClientSideEncryptionFilter extends Filter {
       return true;
     }
 
-    if (clientSideEncryption !== true) {
-      throw new Error('ClientSideEncryptionFilter can only be set to true');
+    if (clientSideEncryption === false) {
+      throw new Error(
+        'ClientSideEncryptionFilter can only be set to true or a semver version range.'
+      );
     }
 
     // TODO(NODE-3401): unskip csfle tests on windows
     if (process.env.TEST_CSFLE && !this.enabled && process.platform !== 'win32') {
       throw new Error('Expected CSFLE to be enabled in the CI');
     }
+    const validRange = typeof clientSideEncryption === 'string' ? clientSideEncryption : '>=0.0.0';
 
-    return this.enabled;
+    if (!this.enabled) return 'Test requires CSFLE to be enabled.';
+    return satisfies(ClientSideEncryptionFilter.version, validRange)
+      ? true
+      : `requires mongodb-client-encryption ${validRange}`;
   }
 }

@@ -1870,7 +1870,7 @@ describe('Cursor', function () {
     const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
 
     await client.close();
-    expect(cursor).to.have.property('killed', true);
+    expect(cursor).to.have.property('closed', true);
 
     const error = await rejectedEarlyBecauseClientClosed;
     expect(error).to.be.instanceOf(MongoExpiredSessionError);

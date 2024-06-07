@@ -11,7 +11,7 @@ import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
-import { AbstractCursor, assertUninitialized, type InitialCursorResponse } from './abstract_cursor';
+import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
 
 /** @internal */
 const kFilter = Symbol('filter');
@@ -155,7 +155,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** Set the cursor query */
   filter(filter: Document): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kFilter] = filter;
     return this;
   }
@@ -166,7 +166,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param hint - If specified, then the query system will only consider plans using the hinted index.
    */
   hint(hint: Hint): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kBuiltOptions].hint = hint;
     return this;
   }
@@ -177,7 +177,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param min - Specify a $min value to specify the inclusive lower bound for a specific index in order to constrain the results of find(). The $min specifies the lower bound for all keys of a specific index in order.
    */
   min(min: Document): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kBuiltOptions].min = min;
     return this;
   }
@@ -188,7 +188,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param max - Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
    */
   max(max: Document): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kBuiltOptions].max = max;
     return this;
   }
@@ -201,7 +201,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - the returnKey value.
    */
   returnKey(value: boolean): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kBuiltOptions].returnKey = value;
     return this;
   }
@@ -212,7 +212,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - The $showDiskLoc option has now been deprecated and replaced with the showRecordId field. $showDiskLoc will still be accepted for OP_QUERY stye find.
    */
   showRecordId(value: boolean): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kBuiltOptions].showRecordId = value;
     return this;
   }
@@ -224,7 +224,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - The modifier value.
    */
   addQueryModifier(name: string, value: string | boolean | number | Document): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (name[0] !== '$') {
       throw new MongoInvalidArgumentError(`${name} is not a valid query modifier`);
     }
@@ -287,7 +287,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - The comment attached to this query.
    */
   comment(value: string): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kBuiltOptions].comment = value;
     return this;
   }
@@ -298,7 +298,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - Number of milliseconds to wait before aborting the tailed query.
    */
   maxAwaitTimeMS(value: number): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (typeof value !== 'number') {
       throw new MongoInvalidArgumentError('Argument for maxAwaitTimeMS must be a number');
     }
@@ -313,7 +313,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - Number of milliseconds to wait before aborting the query.
    */
   override maxTimeMS(value: number): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (typeof value !== 'number') {
       throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
     }
@@ -363,7 +363,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * ```
    */
   project<T extends Document = Document>(value: Document): FindCursor<T> {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kBuiltOptions].projection = value;
     return this as unknown as FindCursor<T>;
   }
@@ -375,7 +375,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param direction - The direction of the sorting (1 or -1).
    */
   sort(sort: Sort | string, direction?: SortDirection): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (this[kBuiltOptions].tailable) {
       throw new MongoTailableCursorError('Tailable cursor does not support sorting');
     }
@@ -391,7 +391,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * {@link https://www.mongodb.com/docs/manual/reference/command/find/#find-cmd-allowdiskuse | find command allowDiskUse documentation}
    */
   allowDiskUse(allow = true): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
 
     if (!this[kBuiltOptions].sort) {
       throw new MongoInvalidArgumentError('Option "allowDiskUse" requires a sort specification');
@@ -413,7 +413,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - The cursor collation options (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
    */
   collation(value: CollationOptions): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     this[kBuiltOptions].collation = value;
     return this;
   }
@@ -424,7 +424,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - The limit for the cursor query.
    */
   limit(value: number): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (this[kBuiltOptions].tailable) {
       throw new MongoTailableCursorError('Tailable cursor does not support limit');
     }
@@ -443,7 +443,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @param value - The skip for the cursor query.
    */
   skip(value: number): this {
-    assertUninitialized(this);
+    this.throwIfInitialized();
     if (this[kBuiltOptions].tailable) {
       throw new MongoTailableCursorError('Tailable cursor does not support skip');
     }

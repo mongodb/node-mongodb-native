@@ -773,6 +773,7 @@ export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
     | AWSEncryptionKeyOptions
     | AzureEncryptionKeyOptions
     | GCPEncryptionKeyOptions
+    | KMIPEncryptionKeyOptions
     | undefined;
 }
 
@@ -887,6 +888,31 @@ export interface AzureEncryptionKeyOptions {
 
 /**
  * @public
+ * Configuration options for making a KMIP encryption key
+ */
+export interface KMIPEncryptionKeyOptions {
+  /**
+   * keyId is the KMIP Unique Identifier to a 96 byte KMIP Secret Data managed object.
+   *
+   * If keyId is omitted, a random 96 byte KMIP Secret Data managed object will be created.
+   */
+  keyId?: string;
+
+  /**
+   * Host with optional port.
+   */
+  endpoint?: string;
+
+  /**
+   * If true, this key should be decrypted by the KMIP server.
+   *
+   * Requires `mongodb-client-encryption>=6.0.1`.
+   */
+  delegated?: boolean;
+}
+
+/**
+ * @public
  * Options to provide when creating a new data key.
  */
 export interface ClientEncryptionCreateDataKeyProviderOptions {
@@ -897,6 +923,7 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
     | AWSEncryptionKeyOptions
     | AzureEncryptionKeyOptions
     | GCPEncryptionKeyOptions
+    | KMIPEncryptionKeyOptions
     | undefined;
 
   /**
@@ -907,19 +934,6 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
 
   /** @experimental */
   keyMaterial?: Buffer | Binary;
-}
-
-/**
- * @public
- * @experimental
- */
-export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
-  provider: ClientEncryptionDataKeyProvider;
-  masterKey?:
-    | AWSEncryptionKeyOptions
-    | AzureEncryptionKeyOptions
-    | GCPEncryptionKeyOptions
-    | undefined;
 }
 
 /**

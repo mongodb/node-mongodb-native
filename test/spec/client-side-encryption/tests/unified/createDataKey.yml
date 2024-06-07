@@ -44,7 +44,7 @@ tests:
           kmsProvider: aws
           opts:
             masterKey: &new_aws_masterkey
-              key: arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0
+              key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
               region: us-east-1
         expectResult: { $$type: binData }
     expectEvents:
@@ -148,6 +148,35 @@ tests:
                     masterKey:
                       provider: kmip
                       keyId: { $$type: string }
+                writeConcern: { w: majority }
+
+  - description: create datakey with KMIP delegated KMS provider
+    operations:
+      - name: createDataKey
+        object: *clientEncryption0
+        arguments:
+          kmsProvider: kmip
+          opts:
+            masterKey: &new_kmip_masterkey
+              delegated: true
+        expectResult: { $$type: binData }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              databaseName: *database0Name
+              command:
+                insert: *collection0Name
+                documents:
+                  - _id: { $$type: binData }
+                    keyMaterial: { $$type: binData }
+                    creationDate: { $$type: date }
+                    updateDate: { $$type: date }
+                    status: { $$exists: true }
+                    masterKey:
+                      provider: kmip
+                      keyId: { $$type: string }
+                      delegated: true
                 writeConcern: { w: majority }
 
   - description: create datakey with local KMS provider
