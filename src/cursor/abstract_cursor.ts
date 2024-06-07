@@ -159,7 +159,7 @@ export abstract class AbstractCursor<
   /** @internal */
   private [kNamespace]: MongoDBNamespace;
   /** @internal */
-  [kDocuments]: CursorResponse = { length: 0 } as unknown as CursorResponse;
+  private [kDocuments]: CursorResponse | null = null;
   /** @internal */
   private [kClient]: MongoClient;
   /** @internal */
@@ -291,16 +291,19 @@ export abstract class AbstractCursor<
 
   /** Returns current buffered documents length */
   bufferedCount(): number {
-    return this[kDocuments].length;
+    return this[kDocuments]?.length ?? 0;
   }
 
   /** Returns current buffered documents */
   readBufferedDocuments(number?: number): TSchema[] {
     const bufferedDocs: TSchema[] = [];
-    const documentsToRead = Math.min(number ?? this[kDocuments].length, this[kDocuments].length);
+    const documentsToRead = Math.min(
+      number ?? this[kDocuments]?.length ?? 0,
+      this[kDocuments]?.length ?? 0
+    );
 
     for (let count = 0; count < documentsToRead; count++) {
-      const document = this[kDocuments].shift(this[kOptions]);
+      const document = this[kDocuments]?.shift(this[kOptions]);
       if (document != null) {
         bufferedDocs.push(document);
       }
@@ -319,11 +322,11 @@ export abstract class AbstractCursor<
           return;
         }
 
-        if (this.closed && this[kDocuments].length === 0) {
+        if (this.closed && (this[kDocuments]?.length ?? 0) === 0) {
           return;
         }
 
-        if (this[kId] != null && this.isDead && this[kDocuments].length === 0) {
+        if (this[kId] != null && this.isDead && (this[kDocuments]?.length ?? 0) === 0) {
           return;
         }
 
@@ -385,11 +388,11 @@ export abstract class AbstractCursor<
     }
 
     do {
-      if (this[kDocuments].length !== 0) {
+      if ((this[kDocuments]?.length ?? 0) !== 0) {
         return true;
       }
       await this.fetchBatch();
-    } while (!this.isDead || this[kDocuments].length !== 0);
+    } while (!this.isDead || (this[kDocuments]?.length ?? 0) !== 0);
 
     return false;
   }
@@ -401,13 +404,13 @@ export abstract class AbstractCursor<
     }
 
     do {
-      const doc = this[kDocuments].shift();
+      const doc = this[kDocuments]?.shift();
       if (doc != null) {
         if (this[kTransform] != null) return await this.transformDocument(doc);
         return doc;
       }
       await this.fetchBatch();
-    } while (!this.isDead || this[kDocuments].length !== 0);
+    } while (!this.isDead || (this[kDocuments]?.length ?? 0) !== 0);
 
     return null;
   }
@@ -420,7 +423,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    let doc = this[kDocuments].shift();
+    let doc = this[kDocuments]?.shift();
     if (doc != null) {
       if (this[kTransform] != null) return await this.transformDocument(doc);
       return doc;
@@ -428,7 +431,7 @@ export abstract class AbstractCursor<
 
     await this.fetchBatch();
 
-    doc = this[kDocuments].shift();
+    doc = this[kDocuments]?.shift();
     if (doc != null) {
       if (this[kTransform] != null) return await this.transformDocument(doc);
       return doc;
@@ -629,7 +632,7 @@ export abstract class AbstractCursor<
     }
 
     this[kId] = null;
-    this[kDocuments].clear();
+    this[kDocuments]?.clear();
     this[kClosed] = false;
     this[kKilled] = false;
     this[kInitialized] = false;
@@ -716,7 +719,7 @@ export abstract class AbstractCursor<
     if (this[kId] == null) {
       await this.cursorInit();
       // If the cursor died or returned documents, return
-      if (this[kDocuments].length !== 0 || this.isDead) return;
+      if ((this[kDocuments]?.length ?? 0) !== 0 || this.isDead) return;
       // Otherwise, run a getMore
     }
 
@@ -787,7 +790,7 @@ export abstract class AbstractCursor<
   /** @internal */
   private emitClose() {
     try {
-      if (!this.hasEmittedClose && (this[kDocuments].length === 0 || this[kClosed])) {
+      if (!this.hasEmittedClose && ((this[kDocuments]?.length ?? 0) === 0 || this[kClosed])) {
         // @ts-expect-error: CursorEvents is generic so Parameters<CursorEvents["close"]> may not be assignable to `[]`. Not sure how to require extenders do not add parameters.
         this.emit('close');
       }
@@ -824,15 +827,6 @@ export abstract class AbstractCursor<
   protected throwIfInitialized() {
     if (this[kInitialized]) throw new MongoCursorInUseError();
   }
-}
-
-/** A temporary helper to box up the many possible type issue of cursor ids */
-function getCursorId(response: Document) {
-  return typeof response.cursor.id === 'number'
-    ? Long.fromNumber(response.cursor.id)
-    : typeof response.cursor.id === 'bigint'
-    ? Long.fromBigInt(response.cursor.id)
-    : response.cursor.id;
 }
 
 class ReadableCursorStream extends Readable {
