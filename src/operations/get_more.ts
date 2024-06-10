@@ -96,6 +96,7 @@ export class GetMoreOperation extends AbstractOperation {
     const commandOptions = {
       returnFieldSelector: null,
       documentsReturnedIn: 'nextBatch',
+      timeoutContext: this.timeoutContext,
       ...this.options
     };
 
