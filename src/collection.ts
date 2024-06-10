@@ -25,6 +25,7 @@ import type {
 import type { AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
 import { CountOperation, type CountOptions } from './operations/count';
+import { CountDocumentsOperation, type CountDocumentsOptions } from './operations/count_documents';
 import {
   DeleteManyOperation,
   DeleteOneOperation,
@@ -92,14 +93,6 @@ import {
   resolveOptions
 } from './utils';
 import { WriteConcern, type WriteConcernOptions } from './write_concern';
-
-/** @public */
-export interface CountDocumentsOptions extends AggregateOptions {
-  /** The number of documents to skip. */
-  skip?: number;
-  /** The maximum amounts to count before aborting. */
-  limit?: number;
-}
 
 /** @public */
 export interface ModifyResult<TSchema = Document> {
@@ -771,23 +764,10 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema> = {},
     options: CountDocumentsOptions = {}
   ): Promise<number> {
-    const pipeline = [];
-    pipeline.push({ $match: filter });
-
-    if (typeof options.skip === 'number') {
-      pipeline.push({ $skip: options.skip });
-    }
-
-    if (typeof options.limit === 'number') {
-      pipeline.push({ $limit: options.limit });
-    }
-
-    pipeline.push({ $group: { _id: 1, n: { $sum: 1 } } });
-
-    const cursor = this.aggregate<{ n: number }>(pipeline, options);
-    const doc = await cursor.next();
-    await cursor.close();
-    return doc?.n ?? 0;
+    return await executeOperation(
+      this.client,
+      new CountDocumentsOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
+    );
   }
 
   /**

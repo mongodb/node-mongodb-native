@@ -54,6 +54,11 @@ describe('abstract operation', function () {
         correctCommandName: 'count'
       },
       {
+        subclassCreator: () => new mongodb.CountDocumentsOperation(collection, { a: 1 }, {}),
+        subclassType: mongodb.CountDocumentsOperation,
+        correctCommandName: 'aggregate'
+      },
+      {
         subclassCreator: () => new mongodb.CreateCollectionOperation(db, 'name'),
         subclassType: mongodb.CreateCollectionOperation,
         correctCommandName: 'create'
