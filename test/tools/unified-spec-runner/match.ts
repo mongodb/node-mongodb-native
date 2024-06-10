@@ -24,6 +24,7 @@ import {
   Long,
   MongoBulkWriteError,
   MongoError,
+  MongoOperationTimeoutError,
   MongoServerError,
   ObjectId,
   type OneOrMore,
@@ -97,6 +98,19 @@ export function isMatchAsRootOperator(value: unknown): value is MatchAsRootOpera
   return typeof value === 'object' && value != null && '$$matchAsRoot' in value;
 }
 
+export interface LteOperator {
+  $$lte: number;
+}
+
+export function isLteOperator(value: unknown): value is LteOperator {
+  return (
+    typeof value === 'object' &&
+    value != null &&
+    '$$lte' in value &&
+    typeof value['$$lte'] === 'number'
+  );
+}
+
 export const SpecialOperatorKeys = [
   '$$exists',
   '$$type',
@@ -105,7 +119,8 @@ export const SpecialOperatorKeys = [
   '$$matchAsRoot',
   '$$matchAsDocument',
   '$$unsetOrMatches',
-  '$$sessionLsid'
+  '$$sessionLsid',
+  '$$lte'
 ];
 
 export type SpecialOperator =
@@ -116,7 +131,8 @@ export type SpecialOperator =
   | UnsetOrMatchesOperator
   | SessionLsidOperator
   | MatchAsDocumentOperator
-  | MatchAsRootOperator;
+  | MatchAsRootOperator
+  | LteOperator;
 
 type KeysOfUnion<T> = T extends object ? keyof T : never;
 export type SpecialOperatorKey = KeysOfUnion<SpecialOperator>;
@@ -129,7 +145,8 @@ export function isSpecialOperator(value: unknown): value is SpecialOperator {
     isUnsetOrMatchesOperator(value) ||
     isSessionLsidOperator(value) ||
     isMatchAsRootOperator(value) ||
-    isMatchAsDocumentOperator(value)
+    isMatchAsDocumentOperator(value) ||
+    isLteOperator(value)
   );
 }
 
@@ -378,6 +395,9 @@ export function specialCheck(
     );
 
     resultCheck(actual, expected.$$matchAsRoot as any, entities, path, false);
+  } else if (isLteOperator(expected)) {
+    expect(typeof actual).to.equal('number');
+    expect(actual).to.be.lte(expected.$$lte);
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
   }
@@ -745,6 +765,12 @@ export function expectErrorCheck(
     } else {
       expect(error).not.to.be.instanceOf(MongoServerError);
     }
+  }
+
+  if (expected.isTimeoutError === false) {
+    expect(error).to.not.be.instanceof(MongoOperationTimeoutError);
+  } else if (expected.isTimeoutError === true) {
+    expect(error).to.be.instanceof(MongoOperationTimeoutError);
   }
 
   if (expected.errorContains != null) {

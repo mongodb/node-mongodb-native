@@ -6,7 +6,7 @@ runOnRequirements:
   - minServerVersion: "4.0"
     topologies: [ replicaset ]
   - minServerVersion: "4.1.8"
-    topologies: [ sharded-replicaset ]
+    topologies: [ sharded ]
 
 createEntities:
   - client:
@@ -51,7 +51,7 @@ tests:
   - description: "explicitly create collection using create command"
     runOnRequirements:
       - minServerVersion: "4.3.4"
-        topologies: [ replicaset, sharded-replicaset ]
+        topologies: [ replicaset, sharded ]
     operations:
       - name: dropCollection
         object: *database0
@@ -109,7 +109,7 @@ tests:
   - description: "create index on a non-existing collection"
     runOnRequirements:
       - minServerVersion: "4.3.4"
-        topologies: [ replicaset, sharded-replicaset ]
+        topologies: [ replicaset, sharded ]
     operations:
       - name: dropCollection
         object: *database0
