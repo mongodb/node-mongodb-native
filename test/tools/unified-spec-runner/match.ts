@@ -773,6 +773,12 @@ export function expectErrorCheck(
     expect(error).to.be.instanceof(MongoOperationTimeoutError);
   }
 
+  if (expected.isTimeoutError === false) {
+    expect(error).to.not.be.instanceof(MongoOperationTimeoutError);
+  } else if (expected.isTimeoutError === true) {
+    expect(error).to.be.instanceof(MongoOperationTimeoutError);
+  }
+
   if (expected.errorContains != null) {
     expect(error.message.toLowerCase(), expectMessage.toLowerCase()).to.include(
       expected.errorContains.toLowerCase()
