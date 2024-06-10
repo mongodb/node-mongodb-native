@@ -117,7 +117,7 @@ describe('CRUD API', function () {
           if (this.currentTest) {
             this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
           }
-          return this.skip();
+          this.skip();
         }
 
         const failPoint: FailPoint = {
@@ -148,6 +148,87 @@ describe('CRUD API', function () {
       it('the cursor for findOne is closed', async function () {
         const spy = sinon.spy(Collection.prototype, 'find');
         const error = await collection.findOne({}).catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
+        expect(spy.returnValues.at(0)).to.have.property('closed', true);
+        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+      });
+    });
+  });
+
+  describe('countDocuments()', () => {
+    let client: MongoClient;
+    let events;
+    let collection: Collection<{ _id: number }>;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      events = [];
+      client.on('commandSucceeded', commandSucceeded =>
+        commandSucceeded.commandName === 'aggregate' ? events.push(commandSucceeded) : null
+      );
+      client.on('commandFailed', commandFailed =>
+        commandFailed.commandName === 'aggregate' ? events.push(commandFailed) : null
+      );
+
+      collection = client.db('countDocuments').collection('countDocuments');
+      await collection.drop().catch(() => null);
+      await collection.insertMany([{ _id: 1 }, { _id: 2 }]);
+    });
+
+    afterEach(async () => {
+      await collection.drop().catch(() => null);
+      await client.close();
+    });
+
+    describe('when the aggregation operation succeeds', () => {
+      it('the cursor for countDocuments is closed', async function () {
+        const spy = sinon.spy(Collection.prototype, 'aggregate');
+        const result = await collection.countDocuments({});
+        expect(result).to.deep.equal(2);
+        expect(events[0]).to.be.instanceOf(CommandSucceededEvent);
+        expect(spy.returnValues[0]).to.have.property('closed', true);
+        expect(spy.returnValues[0]).to.have.nested.property('session.hasEnded', true);
+      });
+    });
+
+    describe('when the aggregation operation fails', () => {
+      beforeEach(async function () {
+        if (semver.lt(this.configuration.version, '4.2.0')) {
+          if (this.currentTest) {
+            this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
+          }
+          this.skip();
+        }
+
+        const failPoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: 'alwaysOn',
+          data: {
+            failCommands: ['aggregate'],
+            // 1 == InternalError, but this value not important to the test
+            errorCode: 1
+          }
+        };
+        await client.db().admin().command(failPoint);
+      });
+
+      afterEach(async function () {
+        if (semver.lt(this.configuration.version, '4.2.0')) {
+          return;
+        }
+
+        const failPoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: 'off',
+          data: { failCommands: ['aggregate'] }
+        };
+        await client.db().admin().command(failPoint);
+      });
+
+      it('the cursor for countDocuments is closed', async function () {
+        const spy = sinon.spy(Collection.prototype, 'aggregate');
+        const error = await collection.countDocuments({}).catch(error => error);
         expect(error).to.be.instanceOf(MongoServerError);
         expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
         expect(spy.returnValues.at(0)).to.have.property('closed', true);
