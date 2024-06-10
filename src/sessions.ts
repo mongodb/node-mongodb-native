@@ -174,7 +174,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this.sessionPool = sessionPool;
     this.hasEnded = false;
     this.clientOptions = clientOptions;
-    this.timeoutMS = options.defaultTimeoutMS ?? client.s.options?.timeoutMS;
+    this.timeoutMS = options.defaultTimeoutMS ?? client.options?.timeoutMS;
 
     this.explicit = !!options.explicit;
     this[kServerSession] = this.explicit ? this.sessionPool.acquire() : null;
