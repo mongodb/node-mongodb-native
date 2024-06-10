@@ -129,7 +129,7 @@ export abstract class TimeoutContext {
     this.clearConnectionCheckoutTimeout = true;
   }
 
-  static create(options: TimeoutContextOptions): CSOTTimeoutContext | LegacyTimeoutContext {
+  static create(options: TimeoutContextOptions): TimeoutContext {
     if (options.timeoutMS != null) return new CSOTTimeoutContext(options);
     else return new LegacyTimeoutContext(options);
   }
@@ -155,6 +155,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
   private _maxTimeMS?: number;
 
+  private overallTimeout: Timeout | null;
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
   private _socketWriteTimeout?: Timeout;
@@ -165,6 +166,10 @@ export class CSOTTimeoutContext extends TimeoutContext {
   constructor(options: TimeoutContextOptions) {
     super(options);
     this.timeoutMS = options.timeoutMS as number;
+
+    if (this.timeoutMS > 0) {
+      this.overallTimeout = Timeout.expires(this.timeoutMS);
+    } else this.overallTimeout = null;
 
     this.serverSelectionTimeoutMS =
       options.serverSelectionTimeoutMS ??
@@ -194,7 +199,8 @@ export class CSOTTimeoutContext extends TimeoutContext {
         this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
       } else {
         if (this.timeoutMS > 0) {
-          this._serverSelectionTimeout = Timeout.expires(this.timeoutMS);
+          this._serverSelectionTimeout = this.overallTimeout;
+          this.clearServerSelectionTimeout = false;
         } else {
           this._serverSelectionTimeout = null;
         }
