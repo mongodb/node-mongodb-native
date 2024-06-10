@@ -4,7 +4,7 @@ schemaVersion: "1.0"
 
 runOnRequirements:
   - minServerVersion: "4.1.8"
-    topologies: [ sharded-replicaset ]
+    topologies: [ sharded ]
 
 createEntities:
   - client:
