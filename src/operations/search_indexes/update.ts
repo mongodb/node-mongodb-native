@@ -27,7 +27,7 @@ export class UpdateSearchIndexOperation extends AbstractOperation<void> {
       definition: this.definition
     };
 
-    await server.command(namespace, command, { session });
+    await server.command(namespace, command, { session, timeoutContext: this.timeoutContext });
     return;
   }
 }

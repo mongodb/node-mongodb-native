@@ -95,7 +95,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   directConnection?: boolean;
 
   /** @internal */
-  timeoutContext?: TimeoutContext;
+  timeoutContext?: TimeoutContext; //TODO(NODE-6187): Make this required
 }
 
 /** @public */

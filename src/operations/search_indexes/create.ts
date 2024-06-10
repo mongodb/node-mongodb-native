@@ -39,7 +39,10 @@ export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
       indexes: this.descriptions
     };
 
-    const res = await server.command(namespace, command, { session });
+    const res = await server.command(namespace, command, {
+      session,
+      timeoutContext: this.timeoutContext
+    });
 
     const indexesCreated: Array<{ name: string }> = res?.indexesCreated ?? [];
     return indexesCreated.map(({ name }) => name);

@@ -570,7 +570,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       );
     }
     let timeout;
-    // TODO: make timeoutContext required
     if (options.timeoutContext) timeout = options.timeoutContext.serverSelectionTimeout;
     else {
       timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);

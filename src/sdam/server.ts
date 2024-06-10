@@ -273,7 +273,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options?: CommandOptions
+    options: CommandOptions
   ): Promise<Document>;
 
   public async command(

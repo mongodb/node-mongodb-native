@@ -46,7 +46,10 @@ export class KillCursorsOperation extends AbstractOperation {
       cursors: [this.cursorId]
     };
     try {
-      await server.command(this.ns, killCursorsCommand, { session });
+      await server.command(this.ns, killCursorsCommand, {
+        session,
+        timeoutContext: this.timeoutContext
+      });
     } catch (error) {
       // The driver should never emit errors from killCursors, this is spec-ed behavior
       squashError(error);
