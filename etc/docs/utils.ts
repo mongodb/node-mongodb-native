@@ -1,4 +1,5 @@
 import { createInterface } from 'readline';
+import * as util from 'util';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
@@ -26,6 +27,8 @@ export interface TomlVersionSchema {
 const capitalize = (s: string) =>
   s.length === 0 ? s : s[0].toUpperCase() + s.slice(1).toLowerCase();
 
+util.inspect.defaultOptions.breakLength = 1000;
+util.inspect.defaultOptions.depth = 1000;
 // eslint-disable-next-line no-console
 export const log = (...args: any[]) => console.error(args);
 
