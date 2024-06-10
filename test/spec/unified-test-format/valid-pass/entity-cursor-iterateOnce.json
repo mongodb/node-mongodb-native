@@ -1,0 +1,111 @@
+{
+  "description": "entity-cursor-iterateOnce",
+  "schemaVersion": "1.9",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "database0",
+      "collectionName": "coll0",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        },
+        {
+          "_id": 3
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "iterateOnce",
+      "operations": [
+        {
+          "name": "createFindCursor",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "batchSize": 2
+          },
+          "saveResultAsEntity": "cursor0"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "cursor0",
+          "expectResult": {
+            "_id": 1
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "cursor0",
+          "expectResult": {
+            "_id": 2
+          }
+        },
+        {
+          "name": "iterateOnce",
+          "object": "cursor0"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll0",
+                  "filter": {},
+                  "batchSize": 2
+                },
+                "commandName": "find",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll0"
+                },
+                "commandName": "getMore"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

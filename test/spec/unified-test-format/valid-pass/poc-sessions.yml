@@ -124,12 +124,11 @@ tests:
 
   - description: "Dirty explicit session is discarded"
     # Original test specified retryWrites=true, but that is now the default.
-    # Retryable writes will require a sharded-replicaset, though.
     runOnRequirements:
       - minServerVersion: "4.0"
         topologies: [ replicaset ]
       - minServerVersion: "4.1.8"
-        topologies: [ sharded-replicaset ]
+        topologies: [ sharded ]
     operations:
       - name: failPoint
         object: testRunner
