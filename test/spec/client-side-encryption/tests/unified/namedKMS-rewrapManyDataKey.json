@@ -1,0 +1,1385 @@
+{
+  "description": "namedKMS-rewrapManyDataKey",
+  "schemaVersion": "1.18",
+  "runOnRequirements": [
+    {
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws:name1": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            },
+            "azure:name1": {
+              "tenantId": {
+                "$$placeholder": 1
+              },
+              "clientId": {
+                "$$placeholder": 1
+              },
+              "clientSecret": {
+                "$$placeholder": 1
+              }
+            },
+            "gcp:name1": {
+              "email": {
+                "$$placeholder": 1
+              },
+              "privateKey": {
+                "$$placeholder": 1
+              }
+            },
+            "kmip:name1": {
+              "endpoint": {
+                "$$placeholder": 1
+              }
+            },
+            "local:name1": {
+              "key": {
+                "$$placeholder": 1
+              }
+            },
+            "local:name2": {
+              "key": "local+name2+YUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk"
+            },
+            "aws:name2": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "keyvault"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "datakeys"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "YXdzYXdzYXdzYXdzYXdzYQ==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "aws:name1_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gFXJqbF0Fy872MD7xl56D/2AAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDO7HPisPUlGzaio9vgIBEIB7/Qow46PMh/8JbEUbdXgTGhLfXPE+KIVW7T8s6YEMlGiRvMu7TV0QCIUJlSHPKZxzlJ2iwuz5yXeOag+EdY+eIQ0RKrsJ3b8UTisZYzGjfzZnxUKLzLoeXremtRCm3x47wCuHKd1dhh6FBbYt5TL2tDaj+vL2GBrKat2L",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "aws:name1",
+            "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+            "region": "us-east-1"
+          }
+        },
+        {
+          "_id": {
+            "$binary": {
+              "base64": "YXp1cmVhenVyZWF6dXJlYQ==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "azure:name1_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "pr01l7qDygUkFE/0peFwpnNlv3iIy8zrQK38Q9i12UCN2jwZHDmfyx8wokiIKMb9kAleeY+vnt3Cf1MKu9kcDmI+KxbNDd+V3ytAAGzOVLDJr77CiWjF9f8ntkXRHrAY9WwnVDANYkDwXlyU0Y2GQFTiW65jiQhUtYLYH63Tk48SsJuQvnWw1Q+PzY8ga+QeVec8wbcThwtm+r2IHsCFnc72Gv73qq7weISw+O4mN08z3wOp5FOS2ZM3MK7tBGmPdBcktW7F8ODGsOQ1FU53OrWUnyX2aTi2ftFFFMWVHqQo7EYuBZHru8RRODNKMyQk0BFfKovAeTAVRv9WH9QU7g==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "azure:name1",
+            "keyVaultEndpoint": "key-vault-csfle.vault.azure.net",
+            "keyName": "key-name-csfle"
+          }
+        },
+        {
+          "_id": {
+            "$binary": {
+              "base64": "Z2NwZ2NwZ2NwZ2NwZ2NwZw==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "gcp:name1_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "CiQAIgLj0USbQtof/pYRLQO96yg/JEtZbD1UxKueaC37yzT5tTkSiQEAhClWB5ZCSgzHgxv8raWjNB4r7e8ePGdsmSuYTYmLC5oHHS/BdQisConzNKFaobEQZHamTCjyhy5NotKF8MWoo+dyfQApwI29+vAGyrUIQCXzKwRnNdNQ+lb3vJtS5bqvLTvSxKHpVca2kqyC9nhonV+u4qru5Q2bAqUgVFc8fL4pBuvlowZFTQ==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "gcp:name1",
+            "projectId": "devprod-drivers",
+            "location": "global",
+            "keyRing": "key-ring-csfle",
+            "keyName": "key-name-csfle"
+          }
+        },
+        {
+          "_id": {
+            "$binary": {
+              "base64": "a21pcGttaXBrbWlwa21pcA==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "kmip:name1_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "CklVctHzke4mcytd0TxGqvepkdkQN8NUF4+jV7aZQITAKdz6WjdDpq3lMt9nSzWGG2vAEfvRb3mFEVjV57qqGqxjq2751gmiMRHXz0btStbIK3mQ5xbY9kdye4tsixlCryEwQONr96gwlwKKI9Nubl9/8+uRF6tgYjje7Q7OjauEf1SrJwKcoQ3WwnjZmEqAug0kImCpJ/irhdqPzivRiA==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "kmip:name1",
+            "keyId": "1"
+          }
+        },
+        {
+          "_id": {
+            "$binary": {
+              "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "local:name1_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "local:name1"
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "rewrap to aws:name1",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {
+              "keyAltNames": {
+                "$ne": "aws:name1_key"
+              }
+            },
+            "opts": {
+              "provider": "aws:name1",
+              "masterKey": {
+                "key": "arn:aws:kms:us-east-1:579766882180:key/061334ae-07a8-4ceb-a813-8135540e837d",
+                "region": "us-east-1"
+              }
+            }
+          },
+          "expectResult": {
+            "bulkWriteResult": {
+              "insertedCount": 0,
+              "matchedCount": 4,
+              "modifiedCount": 4,
+              "deletedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "keyAltNames": {
+                      "$ne": "aws:name1_key"
+                    }
+                  },
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "update": "datakeys",
+                  "ordered": true,
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "aws:name1",
+                            "key": "arn:aws:kms:us-east-1:579766882180:key/061334ae-07a8-4ceb-a813-8135540e837d",
+                            "region": "us-east-1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "aws:name1",
+                            "key": "arn:aws:kms:us-east-1:579766882180:key/061334ae-07a8-4ceb-a813-8135540e837d",
+                            "region": "us-east-1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "aws:name1",
+                            "key": "arn:aws:kms:us-east-1:579766882180:key/061334ae-07a8-4ceb-a813-8135540e837d",
+                            "region": "us-east-1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "aws:name1",
+                            "key": "arn:aws:kms:us-east-1:579766882180:key/061334ae-07a8-4ceb-a813-8135540e837d",
+                            "region": "us-east-1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rewrap to azure:name1",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {
+              "keyAltNames": {
+                "$ne": "azure:name1_key"
+              }
+            },
+            "opts": {
+              "provider": "azure:name1",
+              "masterKey": {
+                "keyVaultEndpoint": "key-vault-csfle.vault.azure.net",
+                "keyName": "key-name-csfle"
+              }
+            }
+          },
+          "expectResult": {
+            "bulkWriteResult": {
+              "insertedCount": 0,
+              "matchedCount": 4,
+              "modifiedCount": 4,
+              "deletedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "keyAltNames": {
+                      "$ne": "azure:name1_key"
+                    }
+                  },
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "update": "datakeys",
+                  "ordered": true,
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "azure:name1",
+                            "keyVaultEndpoint": "key-vault-csfle.vault.azure.net",
+                            "keyName": "key-name-csfle"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "azure:name1",
+                            "keyVaultEndpoint": "key-vault-csfle.vault.azure.net",
+                            "keyName": "key-name-csfle"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "azure:name1",
+                            "keyVaultEndpoint": "key-vault-csfle.vault.azure.net",
+                            "keyName": "key-name-csfle"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "azure:name1",
+                            "keyVaultEndpoint": "key-vault-csfle.vault.azure.net",
+                            "keyName": "key-name-csfle"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rewrap to gcp:name1",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {
+              "keyAltNames": {
+                "$ne": "gcp:name1_key"
+              }
+            },
+            "opts": {
+              "provider": "gcp:name1",
+              "masterKey": {
+                "projectId": "devprod-drivers",
+                "location": "global",
+                "keyRing": "key-ring-csfle",
+                "keyName": "key-name-csfle"
+              }
+            }
+          },
+          "expectResult": {
+            "bulkWriteResult": {
+              "insertedCount": 0,
+              "matchedCount": 4,
+              "modifiedCount": 4,
+              "deletedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "keyAltNames": {
+                      "$ne": "gcp:name1_key"
+                    }
+                  },
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "update": "datakeys",
+                  "ordered": true,
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "gcp:name1",
+                            "projectId": "devprod-drivers",
+                            "location": "global",
+                            "keyRing": "key-ring-csfle",
+                            "keyName": "key-name-csfle"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "gcp:name1",
+                            "projectId": "devprod-drivers",
+                            "location": "global",
+                            "keyRing": "key-ring-csfle",
+                            "keyName": "key-name-csfle"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "gcp:name1",
+                            "projectId": "devprod-drivers",
+                            "location": "global",
+                            "keyRing": "key-ring-csfle",
+                            "keyName": "key-name-csfle"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "gcp:name1",
+                            "projectId": "devprod-drivers",
+                            "location": "global",
+                            "keyRing": "key-ring-csfle",
+                            "keyName": "key-name-csfle"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rewrap to kmip:name1",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {
+              "keyAltNames": {
+                "$ne": "kmip:name1_key"
+              }
+            },
+            "opts": {
+              "provider": "kmip:name1"
+            }
+          },
+          "expectResult": {
+            "bulkWriteResult": {
+              "insertedCount": 0,
+              "matchedCount": 4,
+              "modifiedCount": 4,
+              "deletedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "keyAltNames": {
+                      "$ne": "kmip:name1_key"
+                    }
+                  },
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "update": "datakeys",
+                  "ordered": true,
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "kmip:name1",
+                            "keyId": {
+                              "$$type": "string"
+                            }
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "kmip:name1",
+                            "keyId": {
+                              "$$type": "string"
+                            }
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "kmip:name1",
+                            "keyId": {
+                              "$$type": "string"
+                            }
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "kmip:name1",
+                            "keyId": {
+                              "$$type": "string"
+                            }
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rewrap to local:name1",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {
+              "keyAltNames": {
+                "$ne": "local:name1_key"
+              }
+            },
+            "opts": {
+              "provider": "local:name1"
+            }
+          },
+          "expectResult": {
+            "bulkWriteResult": {
+              "insertedCount": 0,
+              "matchedCount": 4,
+              "modifiedCount": 4,
+              "deletedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "keyAltNames": {
+                      "$ne": "local:name1_key"
+                    }
+                  },
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "update": "datakeys",
+                  "ordered": true,
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "local:name1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "local:name1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "local:name1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    },
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "local:name1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rewrap from local:name1 to local:name2",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {
+              "keyAltNames": {
+                "$eq": "local:name1_key"
+              }
+            },
+            "opts": {
+              "provider": "local:name2"
+            }
+          },
+          "expectResult": {
+            "bulkWriteResult": {
+              "insertedCount": 0,
+              "matchedCount": 1,
+              "modifiedCount": 1,
+              "deletedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "keyAltNames": {
+                      "$eq": "local:name1_key"
+                    }
+                  },
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "update": "datakeys",
+                  "ordered": true,
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "local:name2"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rewrap from aws:name1 to aws:name2",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {
+              "keyAltNames": {
+                "$eq": "aws:name1_key"
+              }
+            },
+            "opts": {
+              "provider": "aws:name2",
+              "masterKey": {
+                "key": "arn:aws:kms:us-east-1:857654397073:key/0f8468f0-f135-4226-aa0b-bd05c4c30df5",
+                "region": "us-east-1"
+              }
+            }
+          },
+          "expectResult": {
+            "bulkWriteResult": {
+              "insertedCount": 0,
+              "matchedCount": 1,
+              "modifiedCount": 1,
+              "deletedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "keyAltNames": {
+                      "$eq": "aws:name1_key"
+                    }
+                  },
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "update": "datakeys",
+                  "ordered": true,
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$$type": "binData"
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "masterKey": {
+                            "provider": "aws:name2",
+                            "key": "arn:aws:kms:us-east-1:857654397073:key/0f8468f0-f135-4226-aa0b-bd05c4c30df5",
+                            "region": "us-east-1"
+                          },
+                          "keyMaterial": {
+                            "$$type": "binData"
+                          }
+                        },
+                        "$currentDate": {
+                          "updateDate": true
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

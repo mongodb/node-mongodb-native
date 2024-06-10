@@ -4,8 +4,112 @@ import { loadGCPCredentials } from './gcp';
 
 /**
  * @public
+ *
+ * A data key provider.  Allowed values:
+ *
+ * - aws, gcp, local, kmip or azure
+ * - (`mongodb-client-encryption>=6.0.1` only) a named key, in the form of:
+ *    `aws:<name>`, `gcp:<name>`, `local:<name>`, `kmip:<name>`, `azure:<name>`
+ *  where `name` is an alphanumeric string, underscores allowed.
  */
-export type ClientEncryptionDataKeyProvider = 'aws' | 'azure' | 'gcp' | 'local' | 'kmip';
+export type ClientEncryptionDataKeyProvider = string;
+
+/** @public */
+export interface AWSKMSProviderConfiguration {
+  /**
+   * The access key used for the AWS KMS provider
+   */
+  accessKeyId: string;
+
+  /**
+   * The secret access key used for the AWS KMS provider
+   */
+  secretAccessKey: string;
+
+  /**
+   * An optional AWS session token that will be used as the
+   * X-Amz-Security-Token header for AWS requests.
+   */
+  sessionToken?: string;
+}
+
+/** @public */
+export interface LocalKMSProviderConfiguration {
+  /**
+   * The master key used to encrypt/decrypt data keys.
+   * A 96-byte long Buffer or base64 encoded string.
+   */
+  key: Buffer | string;
+}
+
+/** @public */
+export interface KMIPKMSProviderConfiguration {
+  /**
+   * The output endpoint string.
+   * The endpoint consists of a hostname and port separated by a colon.
+   * E.g. "example.com:123". A port is always present.
+   */
+  endpoint?: string;
+}
+
+/** @public */
+export type AzureKMSProviderConfiguration =
+  | {
+      /**
+       * The tenant ID identifies the organization for the account
+       */
+      tenantId: string;
+
+      /**
+       * The client ID to authenticate a registered application
+       */
+      clientId: string;
+
+      /**
+       * The client secret to authenticate a registered application
+       */
+      clientSecret: string;
+
+      /**
+       * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+       * This is optional, and only needed if customer is using a non-commercial Azure instance
+       * (e.g. a government or China account, which use different URLs).
+       * Defaults to "login.microsoftonline.com"
+       */
+      identityPlatformEndpoint?: string | undefined;
+    }
+  | {
+      /**
+       * If present, an access token to authenticate with Azure.
+       */
+      accessToken: string;
+    };
+
+/** @public */
+export type GCPKMSProviderConfiguration =
+  | {
+      /**
+       * The service account email to authenticate
+       */
+      email: string;
+
+      /**
+       * A PKCS#8 encrypted key. This can either be a base64 string or a binary representation
+       */
+      privateKey: string | Buffer;
+
+      /**
+       * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+       * Defaults to "oauth2.googleapis.com"
+       */
+      endpoint?: string | undefined;
+    }
+  | {
+      /**
+       * If present, an access token to authenticate with GCP.
+       */
+      accessToken: string;
+    };
 
 /**
  * @public
@@ -15,113 +119,35 @@ export interface KMSProviders {
   /**
    * Configuration options for using 'aws' as your KMS provider
    */
-  aws?:
-    | {
-        /**
-         * The access key used for the AWS KMS provider
-         */
-        accessKeyId: string;
-
-        /**
-         * The secret access key used for the AWS KMS provider
-         */
-        secretAccessKey: string;
-
-        /**
-         * An optional AWS session token that will be used as the
-         * X-Amz-Security-Token header for AWS requests.
-         */
-        sessionToken?: string;
-      }
-    | Record<string, never>;
+  aws?: AWSKMSProviderConfiguration | Record<string, never>;
 
   /**
    * Configuration options for using 'local' as your KMS provider
    */
-  local?: {
-    /**
-     * The master key used to encrypt/decrypt data keys.
-     * A 96-byte long Buffer or base64 encoded string.
-     */
-    key: Buffer | string;
-  };
+  local?: LocalKMSProviderConfiguration;
 
   /**
    * Configuration options for using 'kmip' as your KMS provider
    */
-  kmip?: {
-    /**
-     * The output endpoint string.
-     * The endpoint consists of a hostname and port separated by a colon.
-     * E.g. "example.com:123". A port is always present.
-     */
-    endpoint?: string;
-  };
+  kmip?: KMIPKMSProviderConfiguration;
 
   /**
    * Configuration options for using 'azure' as your KMS provider
    */
-  azure?:
-    | {
-        /**
-         * The tenant ID identifies the organization for the account
-         */
-        tenantId: string;
-
-        /**
-         * The client ID to authenticate a registered application
-         */
-        clientId: string;
-
-        /**
-         * The client secret to authenticate a registered application
-         */
-        clientSecret: string;
-
-        /**
-         * If present, a host with optional port. E.g. "example.com" or "example.com:443".
-         * This is optional, and only needed if customer is using a non-commercial Azure instance
-         * (e.g. a government or China account, which use different URLs).
-         * Defaults to "login.microsoftonline.com"
-         */
-        identityPlatformEndpoint?: string | undefined;
-      }
-    | {
-        /**
-         * If present, an access token to authenticate with Azure.
-         */
-        accessToken: string;
-      }
-    | Record<string, never>;
+  azure?: AzureKMSProviderConfiguration | Record<string, never>;
 
   /**
    * Configuration options for using 'gcp' as your KMS provider
    */
-  gcp?:
-    | {
-        /**
-         * The service account email to authenticate
-         */
-        email: string;
+  gcp?: GCPKMSProviderConfiguration | Record<string, never>;
 
-        /**
-         * A PKCS#8 encrypted key. This can either be a base64 string or a binary representation
-         */
-        privateKey: string | Buffer;
-
-        /**
-         * If present, a host with optional port. E.g. "example.com" or "example.com:443".
-         * Defaults to "oauth2.googleapis.com"
-         */
-        endpoint?: string | undefined;
-      }
-    | {
-        /**
-         * If present, an access token to authenticate with GCP.
-         */
-        accessToken: string;
-      }
-    | Record<string, never>;
+  [key: string]:
+    | AWSKMSProviderConfiguration
+    | LocalKMSProviderConfiguration
+    | KMIPKMSProviderConfiguration
+    | AzureKMSProviderConfiguration
+    | GCPKMSProviderConfiguration
+    | undefined;
 }
 
 /**

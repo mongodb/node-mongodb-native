@@ -7,7 +7,7 @@ const path = require('path');
 const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
-const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
+const { LEGACY_HELLO_COMMAND, MongoCryptError } = require('../../mongodb');
 const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
@@ -18,6 +18,9 @@ const {
 } = require('../../spec/client-side-encryption/external/external-schema.json');
 /* eslint-disable no-restricted-modules */
 const { ClientEncryption } = require('../../../src/client-side-encryption/client_encryption');
+const {
+  ClientSideEncryptionFilter
+} = require('../../tools/runner/filters/client_encryption_filter');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -1366,6 +1369,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     let clientEncryptionWithTls;
     let clientEncryptionWithTlsExpired;
     let clientEncryptionWithInvalidHostname;
+    let clientEncryptionWithNames;
+    let keyvaultClient;
 
     beforeEach(async function () {
       const tlsCaOptions = {
@@ -1466,8 +1471,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           });
           await clientWithInvalidHostname.connect();
           break;
+        case 'Named AWS':
+        case 'Named Azure':
+        case 'Named GCP':
+        case 'Named KMIP':
+          break;
         default:
-          throw new Error('unexpected test case');
+          throw new Error('unexpected test case: ' + this.currentTest.title);
       }
     });
 
@@ -1476,7 +1486,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         clientNoTls,
         clientWithTls,
         clientWithTlsExpired,
-        clientWithInvalidHostname
+        clientWithInvalidHostname,
+        keyvaultClient
       ];
       for (const client of allClients) {
         if (client) {
@@ -1647,8 +1658,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
       it('should fail with no TLS', metadata, async function () {
         if (gte(coerce(process.version), coerce('19'))) {
-          this.skip('TODO(NODE-4942): fix failing csfle kmip test on Node19+');
-          return;
+          this.test.skipReason = 'TODO(NODE-4942): fix failing csfle kmip test on Node19+';
+          this.skip();
         }
         try {
           await clientEncryptionNoTls.createDataKey('kmip', { masterKey });
@@ -1682,6 +1693,213 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an invalid hostname.
           expect(e.cause.message).to.include('does not match certificate');
+        }
+      });
+    });
+
+    context('Case 5: not impemented', metadata, function () {}).skipReason = 'not implemented';
+
+    context('Case 6: named KMS providers apply TLS options', function () {
+      afterEach(() => keyvaultClient?.close());
+      beforeEach(async function () {
+        const filter = new ClientSideEncryptionFilter();
+        await filter.initializeFilter({}, {});
+        const shouldSkip = filter.filter({
+          metadata: {
+            requires: {
+              // 6.0.1 includes libmongocrypt 1.10.
+              clientSideEncryption: '>=6.0.1'
+            }
+          }
+        });
+        if (typeof shouldSkip === 'string') {
+          this.currentTest.skipReason = shouldSkip;
+          this.skip();
+        }
+        const providers = getKmsProviders();
+        keyvaultClient = this.configuration.newClient();
+
+        clientEncryptionWithNames = new ClientEncryption(keyvaultClient, {
+          kmsProviders: {
+            'aws:no_client_cert': {
+              accessKeyId: providers.aws.accessKeyId,
+              secretAccessKey: providers.aws.secretAccessKey
+            },
+            'azure:no_client_cert': {
+              tenantId: providers.azure.tenantId,
+              clientId: providers.azure.clientId,
+              clientSecret: providers.azure.clientId,
+              identityPlatformEndpoint: '127.0.0.1:8002'
+            },
+            'gcp:no_client_cert': {
+              email: providers.gcp.email,
+              privateKey: providers.gcp.privateKey,
+              endpoint: '127.0.0.1:8002'
+            },
+            'kmip:no_client_cert': {
+              endpoint: '127.0.0.1:5698'
+            },
+            'aws:with_tls': {
+              accessKeyId: providers.aws.accessKeyId,
+              secretAccessKey: providers.aws.secretAccessKey
+            },
+            'azure:with_tls': {
+              tenantId: providers.azure.tenantId,
+              clientId: providers.azure.clientId,
+              clientSecret: providers.azure.clientId,
+              identityPlatformEndpoint: '127.0.0.1:8002'
+            },
+            'gcp:with_tls': {
+              email: providers.gcp.email,
+              privateKey: providers.gcp.privateKey,
+              endpoint: '127.0.0.1:8002'
+            },
+            'kmip:with_tls': {
+              endpoint: '127.0.0.1:5698'
+            }
+          },
+          tlsOptions: {
+            'aws:no_client_cert': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+            },
+            'azure:no_client_cert': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+            },
+            'gcp:no_client_cert': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+            },
+            'kmip:no_client_cert': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+            },
+            'aws:with_tls': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            },
+            'azure:with_tls': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            },
+            'gcp:with_tls': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            },
+            'kmip:with_tls': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          },
+          keyVaultNamespace: 'db.keys'
+        });
+      });
+      it('Named AWS', async function () {
+        {
+          // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
+          const error = await clientEncryptionWithNames
+            .createDataKey('aws:no_client_cert', {
+              masterKey: {
+                region: 'us-east-1',
+                key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+                endpoint: '127.0.0.1:8002'
+              }
+            })
+            .catch(e => e);
+
+          // Expect an error indicating TLS handshake failed.
+          expect(error).to.be.instanceof(MongoCryptError);
+          expect(error.cause).to.match(/tlsv13 alert certificate required/);
+        }
+        {
+          // Call `client_encryption_with_names.createDataKey()` with "aws:with_tls" as the provider and the same masterKey.
+          const error = await clientEncryptionWithNames
+            .createDataKey('aws:with_tls', {
+              masterKey: {
+                region: 'us-east-1',
+                key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+                endpoint: '127.0.0.1:8002'
+              }
+            })
+            .catch(e => e);
+
+          // Expect an error from libmongocrypt with a message containing the string: "parse error". This implies TLS handshake succeeded.
+          expect(error).to.be.instanceof(MongoCryptError);
+          expect(error).to.match(/parse error/);
+        }
+      });
+
+      it('Named Azure', async function () {
+        {
+          // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
+          const error = await clientEncryptionWithNames
+            .createDataKey('azure:no_client_cert', {
+              masterKey: { keyVaultEndpoint: 'doesnotexist.local', keyName: 'foo' }
+            })
+            .catch(e => e);
+
+          // Expect an error indicating TLS handshake failed.
+          expect(error).to.be.instanceof(MongoCryptError);
+          expect(error.cause).to.match(/tlsv13 alert certificate required/);
+        }
+        {
+          // Call `client_encryption_with_names.createDataKey()` with "aws:with_tls" as the provider and the same masterKey.
+          const error = await clientEncryptionWithNames
+            .createDataKey('azure:with_tls', {
+              masterKey: { keyVaultEndpoint: 'doesnotexist.local', keyName: 'foo' }
+            })
+            .catch(e => e);
+
+          // Expect an error from libmongocrypt with a message containing the string: "parse error". This implies TLS handshake succeeded.
+          expect(error).to.be.instanceof(MongoCryptError);
+          expect(error).to.match(/HTTP status=404/);
+        }
+      });
+
+      it('Named GCP', async function () {
+        {
+          // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
+          const error = await clientEncryptionWithNames
+            .createDataKey('gcp:no_client_cert', {
+              masterKey: { projectId: 'foo', location: 'bar', keyRing: 'baz', keyName: 'foo' }
+            })
+            .catch(e => e);
+
+          // Expect an error indicating TLS handshake failed.
+          expect(error).to.be.instanceof(MongoCryptError);
+          expect(error.cause).to.match(/tlsv13 alert certificate required/);
+        }
+        {
+          // Call `client_encryption_with_names.createDataKey()` with "aws:with_tls" as the provider and the same masterKey.
+          const error = await clientEncryptionWithNames
+            .createDataKey('gcp:with_tls', {
+              masterKey: { projectId: 'foo', location: 'bar', keyRing: 'baz', keyName: 'foo' }
+            })
+            .catch(e => e);
+
+          // Expect an error from libmongocrypt with a message containing the string: "parse error". This implies TLS handshake succeeded.
+          expect(error).to.be.instanceof(MongoCryptError);
+          expect(error).to.match(/HTTP status=404/);
+        }
+      });
+
+      it('Named KMIP', async function () {
+        {
+          // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
+          const error = await clientEncryptionWithNames
+            .createDataKey('kmip:no_client_cert', {
+              masterKey: {}
+            })
+            .catch(e => e);
+
+          // Expect an error indicating TLS handshake failed.
+          expect(error).to.be.instanceof(MongoCryptError);
+          expect(error.cause).to.match(/handshake|before secure TLS connection was established/);
+        }
+        {
+          // Call `client_encryption_with_names.createDataKey()` with "aws:with_tls" as the provider and the same masterKey.
+          await clientEncryptionWithNames.createDataKey('kmip:with_tls', {
+            masterKey: {}
+          });
+
+          // Expect success.
         }
       });
     });

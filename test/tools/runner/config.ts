@@ -56,7 +56,12 @@ function convertToConnStringMap(obj: Record<string, any>) {
 
 export class TestConfiguration {
   version: string;
-  clientSideEncryption: Record<string, any>;
+  clientSideEncryption: {
+    enabled: boolean;
+    mongodbClientEncryption: any;
+    CSFLE_KMS_PROVIDERS: string | undefined;
+    version: string;
+  };
   parameters: Record<string, any>;
   singleMongosLoadBalancerUri: string;
   multiMongosLoadBalancerUri: string;

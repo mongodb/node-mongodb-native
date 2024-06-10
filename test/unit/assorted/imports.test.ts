@@ -15,7 +15,12 @@ function* walk(root) {
   }
 }
 
-describe('importing mongodb driver', () => {
+// these tests take a long time to run and never break, setting `SKIP_IMPORT`
+// will skip these tests locally.
+//
+// alternatively, we could consider getting rid of them, since they caught anything in 3 years.
+const test = process.env.SKIP_IMPORT ? describe.skip : describe;
+test('importing mongodb driver', () => {
   const sourceFiles = walk(path.resolve(__dirname, '../../../src'));
 
   for (const sourceFile of sourceFiles) {
