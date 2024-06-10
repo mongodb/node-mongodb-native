@@ -155,21 +155,14 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
   private _maxTimeMS?: number;
 
-  private overallTimeout: Timeout | null;
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
-  private _socketWriteTimeout?: Timeout;
-  private _socketReadTimeout?: Timeout;
 
   usingServerSelectionTimeoutMS: boolean;
 
   constructor(options: TimeoutContextOptions) {
     super(options);
     this.timeoutMS = options.timeoutMS as number;
-
-    if (this.timeoutMS > 0) {
-      this.overallTimeout = Timeout.expires(this.timeoutMS);
-    } else this.overallTimeout = null;
 
     this.serverSelectionTimeoutMS =
       options.serverSelectionTimeoutMS ??
@@ -199,13 +192,11 @@ export class CSOTTimeoutContext extends TimeoutContext {
         this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
       } else {
         if (this.timeoutMS > 0) {
-          this._serverSelectionTimeout = this.overallTimeout;
-          this.clearServerSelectionTimeout = false;
+          this._serverSelectionTimeout = Timeout.expires(this.timeoutMS);
         } else {
           this._serverSelectionTimeout = null;
         }
       }
-      this.clearServerSelectionTimeout = false;
     }
 
     return this._serverSelectionTimeout;
