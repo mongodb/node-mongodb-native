@@ -1,0 +1,78 @@
+{
+  "description": "matches-lte-operator",
+  "schemaVersion": "1.9",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0Name"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "database0Name",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "special lte matching operator",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "y": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll0",
+                  "documents": [
+                    {
+                      "_id": {
+                        "$$lte": 1
+                      },
+                      "y": {
+                        "$$lte": 2
+                      }
+                    }
+                  ]
+                },
+                "commandName": "insert",
+                "databaseName": "database0Name"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
