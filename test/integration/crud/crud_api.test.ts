@@ -105,9 +105,9 @@ describe('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'find');
         const result = await collection.findOne({});
         expect(result).to.deep.equal({ _id: 1 });
-        expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
-        expect(spy.returnValues.at(0)).to.have.property('closed', true);
-        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        expect(events[0]).to.be.instanceOf(CommandSucceededEvent);
+        expect(spy.returnValues[0]).to.have.property('closed', true);
+        expect(spy.returnValues[0]).to.have.nested.property('session.hasEnded', true);
       });
     });
 
@@ -149,9 +149,9 @@ describe('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'find');
         const error = await collection.findOne({}).catch(error => error);
         expect(error).to.be.instanceOf(MongoServerError);
-        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
-        expect(spy.returnValues.at(0)).to.have.property('closed', true);
-        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        expect(events[0]).to.be.instanceOf(CommandFailedEvent);
+        expect(spy.returnValues[0]).to.have.property('closed', true);
+        expect(spy.returnValues[0]).to.have.nested.property('session.hasEnded', true);
       });
     });
   });
@@ -230,9 +230,9 @@ describe('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'aggregate');
         const error = await collection.countDocuments({}).catch(error => error);
         expect(error).to.be.instanceOf(MongoServerError);
-        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
-        expect(spy.returnValues.at(0)).to.have.property('closed', true);
-        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        expect(events[0]).to.be.instanceOf(CommandFailedEvent);
+        expect(spy.returnValues[0]).to.have.property('closed', true);
+        expect(spy.returnValues[0]).to.have.nested.property('session.hasEnded', true);
       });
     });
   });
