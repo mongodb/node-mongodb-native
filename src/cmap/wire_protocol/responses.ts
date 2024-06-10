@@ -66,14 +66,6 @@ export type MongoDBResponseConstructor = {
 
 /** @internal */
 export class MongoDBResponse extends OnDemandDocument {
-  /**
-   * Devtools need to know which keys were encrypted before the driver automatically decrypted them.
-   * If decorating is enabled (`Symbol.for('@@mdb.decorateDecryptionResult')`), this field will be set,
-   * storing the original encrypted response from the server, so that we can build an object that has
-   * the list of BSON keys that were encrypted stored at a well known symbol: `Symbol.for('@@mdb.decryptedKeys')`.
-   */
-  encryptedResponse?: MongoDBResponse;
-
   // Wrap error thrown from BSON
   public override get<const T extends keyof JSTypeOf>(
     name: string | number,
@@ -196,6 +188,13 @@ export class MongoDBResponse extends OnDemandDocument {
 
 /** @internal */
 export class CursorResponse extends MongoDBResponse {
+  /**
+   * Devtools need to know which keys were encrypted before the driver automatically decrypted them.
+   * If decorating is enabled (`Symbol.for('@@mdb.decorateDecryptionResult')`), this field will be set,
+   * storing the original encrypted response from the server, so that we can build an object that has
+   * the list of BSON keys that were encrypted stored at a well known symbol: `Symbol.for('@@mdb.decryptedKeys')`.
+   */
+  encryptedResponse?: MongoDBResponse;
   /**
    * This supports a feature of the FindCursor.
    * It is an optimization to avoid an extra getMore when the limit has been reached

@@ -63,7 +63,11 @@ import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
-import { MongoDBResponse, type MongoDBResponseConstructor } from './wire_protocol/responses';
+import {
+  CursorResponse,
+  MongoDBResponse,
+  type MongoDBResponseConstructor
+} from './wire_protocol/responses';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
@@ -786,7 +790,7 @@ export class CryptoConnection extends Connection {
     if (autoEncrypter[kDecorateResult]) {
       if (responseType == null) {
         decorateDecryptionResult(decryptedResponse, encryptedResponse.toObject(), true);
-      } else {
+      } else if (decryptedResponse instanceof CursorResponse) {
         decryptedResponse.encryptedResponse = encryptedResponse;
       }
     }
