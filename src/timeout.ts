@@ -1,7 +1,6 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoInvalidArgumentError, MongoRuntimeError } from './error';
-import { type OperationOptions } from './operations/operation';
 import { csotMin, noop } from './utils';
 
 /** @internal */
@@ -111,7 +110,8 @@ export class Timeout extends Promise<never> {
 }
 
 /** @internal */
-export type TimeoutContextOptions = Pick<OperationOptions, 'timeoutMS' | 'session'> & {
+export type TimeoutContextOptions = {
+  timeoutMS?: number;
   serverSelectionTimeoutMS: number;
   waitQueueTimeoutMS: number;
   socketTimeoutMS?: number;
@@ -151,7 +151,7 @@ export abstract class TimeoutContext {
 export class CSOTTimeoutContext extends TimeoutContext {
   timeoutMS: number;
   serverSelectionTimeoutMS: number;
-  socketTimeoutMS: number;
+  socketTimeoutMS?: number;
 
   private _maxTimeMS?: number;
 
@@ -164,13 +164,9 @@ export class CSOTTimeoutContext extends TimeoutContext {
     super(options);
     this.timeoutMS = options.timeoutMS as number;
 
-    this.serverSelectionTimeoutMS =
-      options.serverSelectionTimeoutMS ??
-      options.session?.clientOptions?.serverSelectionTimeoutMS ??
-      0;
+    this.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
 
-    this.socketTimeoutMS =
-      options.socketTimeoutMS ?? options.session?.clientOptions?.socketTimeoutMS ?? 0;
+    this.socketTimeoutMS = options.socketTimeoutMS;
 
     this.usingServerSelectionTimeoutMS =
       this.serverSelectionTimeoutMS !== 0 &&
