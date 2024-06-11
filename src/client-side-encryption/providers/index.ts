@@ -114,6 +114,8 @@ export type GCPKMSProviderConfiguration =
 /**
  * @public
  * Configuration options that are used by specific KMS providers during key generation, encryption, and decryption.
+ *
+ * Named KMS providers _are not supported_ for automatic KMS credential fetching.
  */
 export interface KMSProviders {
   /**
