@@ -1697,7 +1697,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
-    context('Case 5: not impemented', metadata, function () {}).skipReason = 'not implemented';
+    context(
+      'Case 5: `tlsDisableOCSPEndpointCheck` is permitted',
+      metadata,
+      function () {}
+    ).skipReason = 'TODO(NODE-4840): Node does not support any OCSP options';
 
     context('Case 6: named KMS providers apply TLS options', function () {
       afterEach(() => keyvaultClient?.close());
