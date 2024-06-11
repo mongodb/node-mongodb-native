@@ -425,7 +425,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
   /** @see MongoOptions */
   get options(): Readonly<MongoOptions> {
-    return this[kOptions];
+    return Object.freeze({ ...this[kOptions] });
   }
 
   get serverApi(): Readonly<ServerApi | undefined> {
