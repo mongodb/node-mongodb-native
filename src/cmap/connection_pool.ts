@@ -27,7 +27,7 @@ import {
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { Timeout, type TimeoutContext, TimeoutError } from '../timeout';
+import { type TimeoutContext, TimeoutError } from '../timeout';
 import { type Callback, List, makeCounter, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
@@ -354,7 +354,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
    */
-  async checkOut(options: { timeoutContext?: TimeoutContext }): Promise<Connection> {
+  async checkOut(options: { timeoutContext: TimeoutContext }): Promise<Connection> {
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -362,9 +362,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
 
-    let timeout;
-    if (options?.timeoutContext) timeout = options.timeoutContext.connectionCheckoutTimeout;
-    else timeout = Timeout.expires(this.options.waitQueueTimeoutMS);
+    const timeout = options.timeoutContext.connectionCheckoutTimeout;
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
