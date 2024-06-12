@@ -309,44 +309,183 @@ export function getCSFLETestDataFromEnvironment(environment: Record<string, stri
  * Otherwise, drivers MUST configure the KMS provider with the explicit value of KMS credentials
  * field given in the test file. This is to permit testing conditions where invalid
  * KMS credentials are provided.
+ *
+ * Tests may also reference named KMS providers. KMS providers with the name
+ * `name1` are expected to be configured exactly as the unnamed KMS
+ * providers. The `aws:name2` KMS provider and `aws:name1` KMS providers
+ * deliberately use separate AWS accounts that do not have permission to the
+ * other's keys.
  */
 export function mergeKMSProviders(
   kmsProvidersFromTest: KMSProvidersEntity,
   kmsProvidersFromEnvironment: Document
 ): NonNullable<AutoEncryptionOptions['kmsProviders']> {
   const isPlaceholderValue = (value: StringOrPlaceholder) =>
-    typeof value !== 'string' && typeof value.$$placeholder !== 'undefined';
+    value && typeof value !== 'string' && typeof value.$$placeholder !== 'undefined';
 
-  const options = {};
+  const providers: Document = {};
 
-  const validKMSProviders: Array<keyof KMSProvidersEntity> = [
-    'kmip',
-    'local',
-    'aws',
-    'azure',
-    'gcp'
-  ];
+  function parseAWS(env, test) {
+    const awsProviders = {};
+    test['accessKeyId'] &&
+      (awsProviders['accessKeyId'] = isPlaceholderValue(test['accessKeyId'])
+        ? env['accessKeyId']
+        : test['accessKeyId']);
 
-  for (const provider of validKMSProviders) {
-    if (!(provider in kmsProvidersFromTest)) continue;
+    test['secretAccessKey'] &&
+      (awsProviders['secretAccessKey'] = isPlaceholderValue(test['secretAccessKey'])
+        ? env['secretAccessKey']
+        : test['secretAccessKey']);
 
-    const providerDataFromTest = kmsProvidersFromTest[provider];
-    const providerDataFromEnvironment = kmsProvidersFromEnvironment[provider];
+    test['sessionToken'] &&
+      (awsProviders['sessionToken'] = isPlaceholderValue(test['sessionToken'])
+        ? env['sessionToken']
+        : test['sessionToken']);
+    return awsProviders;
+  }
+  function parseAzure(env, test) {
+    const azureProviders: Document = {};
+    test['tenantId'] &&
+      (azureProviders['tenantId'] = isPlaceholderValue(test['tenantId'])
+        ? env['tenantId']
+        : test['tenantId']);
 
-    const providerOptions = {};
+    test['clientId'] &&
+      (azureProviders['clientId'] = isPlaceholderValue(test['clientId'])
+        ? env['clientId']
+        : test['clientId']);
 
-    for (const [key, value] of Object.entries(providerDataFromTest ?? {})) {
-      if (isPlaceholderValue(value)) {
-        providerOptions[key] = providerDataFromEnvironment[key];
-      } else {
-        providerOptions[key] = value;
-      }
-    }
+    test['clientSecret'] &&
+      (azureProviders['clientSecret'] = isPlaceholderValue(test['clientSecret'])
+        ? env['clientSecret']
+        : test['clientSecret']);
 
-    options[provider] = providerOptions;
+    test['identityPlatformEndpoint'] &&
+      (azureProviders['identityPlatformEndpoint'] = isPlaceholderValue(
+        test['identityPlatformEndpoint']
+      )
+        ? env['identityPlatformEndpoint']
+        : test['identityPlatformEndpoint']);
+
+    return azureProviders;
   }
 
-  return options;
+  function parseGCP(env, test) {
+    const gcpProviders = {};
+    test['email'] &&
+      (gcpProviders['email'] = isPlaceholderValue(test['email']) ? env['email'] : test['email']);
+
+    test['privateKey'] &&
+      (gcpProviders['privateKey'] = isPlaceholderValue(test['privateKey'])
+        ? env['privateKey']
+        : test['privateKey']);
+
+    test['endPoint'] &&
+      (gcpProviders['endPoint'] = isPlaceholderValue(test['endPoint'])
+        ? env['endPoint']
+        : test['endPoint']);
+    return gcpProviders;
+  }
+  function parseLocal(env, test) {
+    const localProviders = {};
+    test['key'] &&
+      (localProviders['key'] = isPlaceholderValue(test['key']) ? env['key'] : test['key']);
+    return localProviders;
+  }
+  function parseKMIP(env, test) {
+    const localProviders = {};
+    test['endpoint'] &&
+      (localProviders['endpoint'] = isPlaceholderValue(test['endpoint'])
+        ? env['endpoint']
+        : test['endpoint']);
+
+    return localProviders;
+  }
+  if ('aws' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['aws'];
+    const fromTest = kmsProvidersFromTest['aws'];
+
+    providers['aws'] = parseAWS(env, fromTest);
+  }
+
+  if ('aws:name1' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['aws'];
+    const fromTest = kmsProvidersFromTest['aws:name1'];
+
+    providers['aws:name1'] = parseAWS(env, fromTest);
+  }
+
+  if ('aws:name2' in kmsProvidersFromTest) {
+    providers['aws:name2'] = {
+      accessKeyId: process.env.FLE_AWS_KEY2,
+      secretAccessKey: process.env.FLE_AWS_SECRET2
+    };
+  }
+
+  if ('azure' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['azure'];
+    const fromTest = kmsProvidersFromTest['azure'];
+
+    providers['azure'] = parseAzure(env, fromTest);
+  }
+
+  if ('azure:name1' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['azure'];
+    const fromTest = kmsProvidersFromTest['azure:name1'];
+
+    providers['azure:name1'] = parseAzure(env, fromTest);
+  }
+
+  if ('gcp' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['gcp'];
+    const fromTest = kmsProvidersFromTest['gcp'];
+
+    providers['gcp'] = parseGCP(env, fromTest);
+  }
+
+  if ('gcp:name1' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['gcp'];
+    const fromTest = kmsProvidersFromTest['gcp:name1'];
+
+    providers['gcp:name1'] = parseGCP(env, fromTest);
+  }
+
+  if ('local' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['local'];
+    const fromTest = kmsProvidersFromTest['local'];
+
+    providers['local'] = parseLocal(env, fromTest);
+  }
+
+  if ('local:name1' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['local'];
+    const fromTest = kmsProvidersFromTest['local:name1'];
+
+    providers['local:name1'] = parseLocal(env, fromTest);
+  }
+
+  if ('local:name2' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['local'];
+    const fromTest = kmsProvidersFromTest['local:name2'];
+
+    providers['local:name2'] = parseLocal(env, fromTest);
+  }
+
+  if ('kmip' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['kmip'];
+    const fromTest = kmsProvidersFromTest['kmip'];
+
+    providers['kmip'] = parseKMIP(env, fromTest);
+  }
+
+  if ('kmip:name1' in kmsProvidersFromTest) {
+    const env = kmsProvidersFromEnvironment['kmip'];
+    const fromTest = kmsProvidersFromTest['kmip:name1'];
+
+    providers['kmip:name1'] = parseKMIP(env, fromTest);
+  }
+
+  return providers;
 }
 
 export function createClientEncryption(
@@ -373,13 +512,38 @@ export function createClientEncryption(
     process.env
   );
 
+  function parseTLSOptions() {
+    const handlers: Record<string, string> = {
+      aws: 'aws',
+      'aws:name1': 'aws',
+      'aws:name2': 'aws',
+      azure: 'azure',
+      'azure:name1': 'azure',
+      gcp: 'gcp',
+      'gcp:name1': 'gcp',
+      local: 'local',
+      'local:name1': 'local',
+      'local:name2': 'local',
+      kmip: 'kmip',
+      'kmip:name1': 'kmip'
+    };
+
+    return Object.keys(kmsProvidersFromTest).reduce((accum, provider) => {
+      const rootProvider = handlers[provider];
+      if (rootProvider && rootProvider in tlsOptions) {
+        accum[provider] = tlsOptions[rootProvider];
+      }
+      return accum;
+    }, {});
+  }
+
   const kmsProviders = mergeKMSProviders(kmsProvidersFromTest, kmsProvidersFromEnvironment);
 
   const autoEncryptionOptions: AutoEncryptionOptions = {
     keyVaultClient: clientEntity,
     kmsProviders,
     keyVaultNamespace,
-    tlsOptions
+    tlsOptions: parseTLSOptions()
   };
 
   if (process.env.CRYPT_SHARED_LIB_PATH) {

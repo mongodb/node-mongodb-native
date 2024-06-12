@@ -89,6 +89,16 @@ function translateClientOptions(options) {
           };
         }
 
+        if (options.autoEncryptOpts.kmsProviders['local:name2']) {
+          kmsProviders['local:name2'] = options.autoEncryptOpts.kmsProviders['local:name2'];
+          options.autoEncryption.tlsOptions = {
+            'local:name2': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          };
+        }
+
         if (process.env.CRYPT_SHARED_LIB_PATH) {
           options.autoEncryption.extraOptions = {
             cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH

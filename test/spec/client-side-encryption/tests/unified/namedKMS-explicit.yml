@@ -1,0 +1,72 @@
+description: namedKMS-explicit
+
+schemaVersion: "1.18"
+
+runOnRequirements:
+  - csfle: true
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  - clientEncryption:
+      id: &clientEncryption0 clientEncryption0
+      clientEncryptionOpts:
+        keyVaultClient: *client0
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          "local:name2" : { key: "local+name2+YUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk" }
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name keyvault
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name datakeys
+
+initialData:
+  - databaseName: *database0Name
+    collectionName: *collection0Name
+    documents:
+      - {
+            "_id": {
+                "$binary": {
+                    "base64": "local+name2+AAAAAAAAAA==",
+                    "subType": "04"
+                }
+            },
+            "keyAltNames": ["local:name2"],
+            "keyMaterial": {
+                "$binary": {
+                    "base64": "DX3iUuOlBsx6wBX9UZ3v/qXk1HNeBace2J+h/JwsDdF/vmSXLZ1l1VmZYIcpVFy6ODhdbzLjd4pNgg9wcm4etYig62KNkmtZ0/s1tAL5VsuW/s7/3PYnYGznZTFhLjIVcOH/RNoRj2eQb/sRTyivL85wePEpAU/JzuBj6qO9Y5txQgs1k0J3aNy10R9aQ8kC1NuSSpLAIXwE6DlNDDJXhw==",
+                    "subType": "00"
+                }
+            },
+            "creationDate": {"$date": {"$numberLong": "1552949630483"}},
+            "updateDate": {"$date": {"$numberLong": "1552949630483"}},
+            "status": {"$numberInt": "0"},
+            "masterKey": {"provider": "local:name2"}
+        }
+
+tests:
+  - description: can explicitly encrypt with a named KMS provider
+    operations:
+      - name: encrypt
+        object: *clientEncryption0
+        arguments:
+          value: "foobar"
+          opts:
+            keyAltName: "local:name2"
+            algorithm: "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+        expectResult: { "$binary" : { "base64" : "AZaHGpfp2pntvgAAAAAAAAAC4yX2LTAuN253GAkEO2ZXp4GpCyM7yoVNJMQQl+6uzxMs03IprLC7DL2vr18x9LwOimjTS9YbMJhrnFkEPuNhbg==", "subType" : "06" } }
+
+  - description: can explicitly decrypt with a named KMS provider
+    operations:
+      - name: decrypt
+        object: *clientEncryption0
+        arguments:
+          value: { "$binary" : { "base64" : "AZaHGpfp2pntvgAAAAAAAAAC4yX2LTAuN253GAkEO2ZXp4GpCyM7yoVNJMQQl+6uzxMs03IprLC7DL2vr18x9LwOimjTS9YbMJhrnFkEPuNhbg==", "subType" : "06" } }
+        expectResult: "foobar"
+  

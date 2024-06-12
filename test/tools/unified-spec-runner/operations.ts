@@ -867,6 +867,20 @@ operations.set('getKeyByAltName', async ({ entities, operation }) => {
   return clientEncryption.getKeyByAltName(keyAltName);
 });
 
+operations.set('encrypt', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { value, opts } = operation.arguments ?? {};
+
+  return clientEncryption.encrypt(value, opts);
+});
+
+operations.set('decrypt', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { value } = operation.arguments ?? {};
+
+  return clientEncryption.decrypt(value);
+});
+
 operations.set('listSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
   const { name, aggregationOptions } = operation.arguments ?? {};

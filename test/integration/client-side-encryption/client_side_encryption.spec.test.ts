@@ -97,7 +97,10 @@ describe('Client Side Encryption (Legacy)', function () {
     }
 
     if (
-      description === 'Insert a document with auto encryption using KMIP delegated KMS provider'
+      [
+        'Insert a document with auto encryption using KMIP delegated KMS provider',
+        'Automatically encrypt and decrypt with a named KMS provider'
+      ].includes(description)
     ) {
       if (
         typeof filter.filter({
@@ -131,7 +134,21 @@ describe('Client Side Encryption (Unified)', function () {
         'rewrap with new Azure KMS provider',
         'rewrap with new AWS KMS provider',
         'create datakey with KMIP delegated KMS provider',
-        'Insert a document with auto encryption using KMIP delegated KMS provider'
+        'Insert a document with auto encryption using KMIP delegated KMS provider',
+        'create data key with named AWS KMS provider',
+        'create datakey with named Azure KMS provider',
+        'create datakey with named GCP KMS provider',
+        'create datakey with named KMIP KMS provider',
+        'create datakey with named local KMS provider',
+        'can explicitly decrypt with a named KMS provider',
+        'rewrap to aws:name1',
+        'rewrap to azure:name1',
+        'rewrap to gcp:name1',
+        'rewrap to kmip:name1',
+        'rewrap to local:name1',
+        'rewrap from local:name1 to local:name2',
+        'rewrap from aws:name1 to aws:name2',
+        'can explicitly encrypt with a named KMS provider'
       ];
       if (delegatedKMIPTests.includes(description)) {
         const shouldSkip = filter.filter({

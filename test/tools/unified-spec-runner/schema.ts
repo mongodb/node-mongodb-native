@@ -182,35 +182,44 @@ export interface StreamEntity {
 
 export type StringOrPlaceholder = string | { $$placeholder: number };
 
+type UnnamedKMSProviders = {
+  aws?: {
+    accessKeyId: StringOrPlaceholder;
+    secretAccessKey: StringOrPlaceholder;
+    sessionToken: StringOrPlaceholder;
+  };
+  azure?: {
+    tenantId: StringOrPlaceholder;
+    clientId: StringOrPlaceholder;
+    clientSecret: StringOrPlaceholder;
+    identityPlatformEndpoint: StringOrPlaceholder;
+  };
+  gcp?: {
+    email: StringOrPlaceholder;
+    privateKey: StringOrPlaceholder;
+    endPoint: StringOrPlaceholder;
+  };
+  kmip?: {
+    endpoint: StringOrPlaceholder;
+  };
+  local?: {
+    key: StringOrPlaceholder;
+  };
+};
 export interface ClientEncryptionEntity {
   id: string;
   clientEncryptionOpts: {
     /** this is the id of the client entity to use as the keyvault client */
     keyVaultClient: string;
     keyVaultNamespace: string;
-    kmsProviders: {
-      aws?: {
-        accessKeyId: StringOrPlaceholder;
-        secretAccessKey: StringOrPlaceholder;
-        sessionToken: StringOrPlaceholder;
-      };
-      azure?: {
-        tenantId: StringOrPlaceholder;
-        clientId: StringOrPlaceholder;
-        clientSecret: StringOrPlaceholder;
-        identityPlatformEndpoint: StringOrPlaceholder;
-      };
-      gcp?: {
-        email: StringOrPlaceholder;
-        privateKey: StringOrPlaceholder;
-        endPoint: StringOrPlaceholder;
-      };
-      kmip?: {
-        endpoint: StringOrPlaceholder;
-      };
-      local?: {
-        key: StringOrPlaceholder;
-      };
+    kmsProviders: UnnamedKMSProviders & {
+      [key: string]:
+        | UnnamedKMSProviders['aws']
+        | UnnamedKMSProviders['gcp']
+        | UnnamedKMSProviders['azure']
+        | UnnamedKMSProviders['kmip']
+        | UnnamedKMSProviders['local']
+        | undefined;
     };
   };
 }
