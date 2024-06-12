@@ -21,7 +21,7 @@ allowing for insert/find/update/delete and other command operation on that Mongo
 <p><strong>COLLECTION Cannot directly be instantiated</strong></p>
 </div>
 <div class="tsd-comment tsd-typography">
-<h4>Example</h4><pre><code class="language-ts"><span class="hl-7">import</span><span class="hl-1"> { </span><span class="hl-6">MongoClient</span><span class="hl-1"> } </span><span class="hl-7">from</span><span class="hl-1"> </span><span class="hl-2">&#39;mongodb&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">interface</span><span class="hl-1"> </span><span class="hl-9">Pet</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-6">name</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1">;</span><br/><span class="hl-1">  </span><span class="hl-6">kind</span><span class="hl-1">: </span><span class="hl-2">&#39;dog&#39;</span><span class="hl-1"> | </span><span class="hl-2">&#39;cat&#39;</span><span class="hl-1"> | </span><span class="hl-2">&#39;fish&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">client</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-0">MongoClient</span><span class="hl-1">(</span><span class="hl-2">&#39;mongodb://localhost:27017&#39;</span><span class="hl-1">);</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">pets</span><span class="hl-1"> = </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">db</span><span class="hl-1">().</span><span class="hl-0">collection</span><span class="hl-1">&lt;</span><span class="hl-9">Pet</span><span class="hl-1">&gt;(</span><span class="hl-2">&#39;pets&#39;</span><span class="hl-1">);</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">petCursor</span><span class="hl-1"> = </span><span class="hl-6">pets</span><span class="hl-1">.</span><span class="hl-0">find</span><span class="hl-1">();</span><br/><br/><span class="hl-7">for</span><span class="hl-1"> </span><span class="hl-7">await</span><span class="hl-1"> (</span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">pet</span><span class="hl-1"> </span><span class="hl-4">of</span><span class="hl-1"> </span><span class="hl-6">petCursor</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-2">`</span><span class="hl-4">${</span><span class="hl-6">pet</span><span class="hl-11">.</span><span class="hl-6">name</span><span class="hl-4">}</span><span class="hl-2"> is a </span><span class="hl-4">${</span><span class="hl-6">pet</span><span class="hl-11">.</span><span class="hl-6">kind</span><span class="hl-4">}</span><span class="hl-2">!`</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
+<h4>Example</h4><pre><code class="language-ts"><span class="hl-7">import</span><span class="hl-1"> { </span><span class="hl-6">MongoClient</span><span class="hl-1"> } </span><span class="hl-7">from</span><span class="hl-1"> </span><span class="hl-2">&#39;mongodb&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-3">interface</span><span class="hl-1"> </span><span class="hl-9">Pet</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-6">name</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1">;</span><br/><span class="hl-1">  </span><span class="hl-6">kind</span><span class="hl-1">: </span><span class="hl-2">&#39;dog&#39;</span><span class="hl-1"> | </span><span class="hl-2">&#39;cat&#39;</span><span class="hl-1"> | </span><span class="hl-2">&#39;fish&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-5">client</span><span class="hl-1"> = </span><span class="hl-3">new</span><span class="hl-1"> </span><span class="hl-0">MongoClient</span><span class="hl-1">(</span><span class="hl-2">&#39;mongodb://localhost:27017&#39;</span><span class="hl-1">);</span><br/><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-5">pets</span><span class="hl-1"> = </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">db</span><span class="hl-1">().</span><span class="hl-0">collection</span><span class="hl-1">&lt;</span><span class="hl-9">Pet</span><span class="hl-1">&gt;(</span><span class="hl-2">&#39;pets&#39;</span><span class="hl-1">);</span><br/><br/><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-5">petCursor</span><span class="hl-1"> = </span><span class="hl-6">pets</span><span class="hl-1">.</span><span class="hl-0">find</span><span class="hl-1">();</span><br/><br/><span class="hl-7">for</span><span class="hl-1"> </span><span class="hl-7">await</span><span class="hl-1"> (</span><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-5">pet</span><span class="hl-1"> </span><span class="hl-3">of</span><span class="hl-1"> </span><span class="hl-6">petCursor</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-2">`</span><span class="hl-3">${</span><span class="hl-6">pet</span><span class="hl-12">.</span><span class="hl-6">name</span><span class="hl-3">}</span><span class="hl-2"> is a </span><span class="hl-3">${</span><span class="hl-6">pet</span><span class="hl-12">.</span><span class="hl-6">kind</span><span class="hl-3">}</span><span class="hl-2">!`</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
 </code><button>Copy</button></pre>
 </div></section> 
 <section class="tsd-panel">
@@ -34,7 +34,7 @@ allowing for insert/find/update/delete and other command operation on that Mongo
 <ul class="tsd-hierarchy">
 <li><span class="target">Collection</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L154">src/collection.ts:154</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L153">src/collection.ts:153</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -101,7 +101,7 @@ allowing for insert/find/update/delete and other command operation on that Mongo
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/BSONSerializeOptions.html" class="tsd-signature-type tsd-kind-interface">BSONSerializeOptions</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L234">src/collection.ts:234</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L233">src/collection.ts:233</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="collectionName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>collection<wbr/>Name</span><a href="#collectionName" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -112,7 +112,7 @@ allowing for insert/find/update/delete and other command operation on that Mongo
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L191">src/collection.ts:191</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L190">src/collection.ts:190</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="dbName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>db<wbr/>Name</span><a href="#dbName" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -123,7 +123,7 @@ allowing for insert/find/update/delete and other command operation on that Mongo
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L184">src/collection.ts:184</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L183">src/collection.ts:183</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="hint" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>hint</span><a href="#hint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -134,7 +134,7 @@ allowing for insert/find/update/delete and other command operation on that Mongo
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../types/Hint.html" class="tsd-signature-type tsd-kind-type-alias">Hint</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L250">src/collection.ts:250</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L249">src/collection.ts:249</a></li></ul></aside></li>
 <li class="tsd-signature" id="hint.hint-2"><span class="tsd-signature-symbol">set</span> hint<span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">v</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -144,7 +144,7 @@ allowing for insert/find/update/delete and other command operation on that Mongo
 <h5><span class="tsd-kind-parameter">v</span>: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../types/Hint.html" class="tsd-signature-type tsd-kind-type-alias">Hint</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L254">src/collection.ts:254</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L253">src/collection.ts:253</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="namespace" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>namespace</span><a href="#namespace" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -155,7 +155,7 @@ allowing for insert/find/update/delete and other command operation on that Mongo
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L198">src/collection.ts:198</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L197">src/collection.ts:197</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="readConcern" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>read<wbr/>Concern</span><a href="#readConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -167,7 +167,7 @@ this collection, will be inherited from the parent DB</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="ReadConcern.html" class="tsd-signature-type tsd-kind-class">ReadConcern</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L215">src/collection.ts:215</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L214">src/collection.ts:214</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="readPreference" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>read<wbr/>Preference</span><a href="#readPreference" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -179,7 +179,7 @@ this collection, will be inherited from the parent DB</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="ReadPreference.html" class="tsd-signature-type tsd-kind-class">ReadPreference</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L226">src/collection.ts:226</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L225">src/collection.ts:225</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="writeConcern" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>write<wbr/>Concern</span><a href="#writeConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -191,7 +191,7 @@ this collection, will be inherited from the parent DB</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L242">src/collection.ts:242</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L241">src/collection.ts:241</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member"><a id="aggregate" class="tsd-anchor"></a>
@@ -222,7 +222,7 @@ this collection, will be inherited from the parent DB</p>
 <h4 class="tsd-returns-title">Returns <a href="AggregationCursor.html" class="tsd-signature-type tsd-kind-class">AggregationCursor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L936">src/collection.ts:936</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L964">src/collection.ts:964</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="bulkWrite" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>bulk<wbr/>Write</span><a href="#bulkWrite" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -260,7 +260,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4>Throws</h4><p>MongoDriverError if operations is not an array</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L321">src/collection.ts:321</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L320">src/collection.ts:320</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="count" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>count</span><a href="#count" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -289,7 +289,7 @@ To obtain an estimated count of all documents in the collection, use Collection#
 <h4>Deprecated</h4><p>use Collection#countDocuments| countDocuments or Collection#estimatedDocumentCount| estimatedDocumentCount instead</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1041">src/collection.ts:1041</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1069">src/collection.ts:1069</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="countDocuments" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>count<wbr/>Documents</span><a href="#countDocuments" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -343,7 +343,7 @@ the following query operators must be replaced:</p>
 </ul>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L750">src/collection.ts:750</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L763">src/collection.ts:763</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="createIndex" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>create<wbr/>Index</span><a href="#createIndex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -366,11 +366,11 @@ the following query operators must be replaced:</p>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography">
-<h4>Example</h4><pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">collection</span><span class="hl-1"> = </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">db</span><span class="hl-1">(</span><span class="hl-2">&#39;foo&#39;</span><span class="hl-1">).</span><span class="hl-0">collection</span><span class="hl-1">(</span><span class="hl-2">&#39;bar&#39;</span><span class="hl-1">);</span><br/><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">({ </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1">, </span><span class="hl-6">b:</span><span class="hl-1"> -</span><span class="hl-8">1</span><span class="hl-1"> });</span><br/><br/><span class="hl-3">// Alternate syntax for { c: 1, d: -1 } that ensures order of indexes</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">([ [</span><span class="hl-6">c</span><span class="hl-1">, </span><span class="hl-8">1</span><span class="hl-1">], [</span><span class="hl-6">d</span><span class="hl-1">, -</span><span class="hl-8">1</span><span class="hl-1">] ]);</span><br/><br/><span class="hl-3">// Equivalent to { e: 1 }</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">(</span><span class="hl-2">&#39;e&#39;</span><span class="hl-1">);</span><br/><br/><span class="hl-3">// Equivalent to { f: 1, g: 1 }</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">([</span><span class="hl-2">&#39;f&#39;</span><span class="hl-1">, </span><span class="hl-2">&#39;g&#39;</span><span class="hl-1">])</span><br/><br/><span class="hl-3">// Equivalent to { h: 1, i: -1 }</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">([ { </span><span class="hl-6">h:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> }, { </span><span class="hl-6">i:</span><span class="hl-1"> -</span><span class="hl-8">1</span><span class="hl-1"> } ]);</span><br/><br/><span class="hl-3">// Equivalent to { j: 1, k: -1, l: 2d }</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">([</span><span class="hl-2">&#39;j&#39;</span><span class="hl-1">, [</span><span class="hl-2">&#39;k&#39;</span><span class="hl-1">, -</span><span class="hl-8">1</span><span class="hl-1">], { </span><span class="hl-6">l:</span><span class="hl-1"> </span><span class="hl-2">&#39;2d&#39;</span><span class="hl-1"> }])</span>
+<h4>Example</h4><pre><code class="language-ts"><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-5">collection</span><span class="hl-1"> = </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">db</span><span class="hl-1">(</span><span class="hl-2">&#39;foo&#39;</span><span class="hl-1">).</span><span class="hl-0">collection</span><span class="hl-1">(</span><span class="hl-2">&#39;bar&#39;</span><span class="hl-1">);</span><br/><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">({ </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1">, </span><span class="hl-6">b:</span><span class="hl-1"> -</span><span class="hl-8">1</span><span class="hl-1"> });</span><br/><br/><span class="hl-4">// Alternate syntax for { c: 1, d: -1 } that ensures order of indexes</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">([ [</span><span class="hl-6">c</span><span class="hl-1">, </span><span class="hl-8">1</span><span class="hl-1">], [</span><span class="hl-6">d</span><span class="hl-1">, -</span><span class="hl-8">1</span><span class="hl-1">] ]);</span><br/><br/><span class="hl-4">// Equivalent to { e: 1 }</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">(</span><span class="hl-2">&#39;e&#39;</span><span class="hl-1">);</span><br/><br/><span class="hl-4">// Equivalent to { f: 1, g: 1 }</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">([</span><span class="hl-2">&#39;f&#39;</span><span class="hl-1">, </span><span class="hl-2">&#39;g&#39;</span><span class="hl-1">])</span><br/><br/><span class="hl-4">// Equivalent to { h: 1, i: -1 }</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">([ { </span><span class="hl-6">h:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> }, { </span><span class="hl-6">i:</span><span class="hl-1"> -</span><span class="hl-8">1</span><span class="hl-1"> } ]);</span><br/><br/><span class="hl-4">// Equivalent to { j: 1, k: -1, l: 2d }</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">([</span><span class="hl-2">&#39;j&#39;</span><span class="hl-1">, [</span><span class="hl-2">&#39;k&#39;</span><span class="hl-1">, -</span><span class="hl-8">1</span><span class="hl-1">], { </span><span class="hl-6">l:</span><span class="hl-1"> </span><span class="hl-2">&#39;2d&#39;</span><span class="hl-1"> }])</span>
 </code><button>Copy</button></pre>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L574">src/collection.ts:574</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L573">src/collection.ts:573</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="createIndexes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>create<wbr/>Indexes</span><a href="#createIndexes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -397,11 +397,11 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography">
-<h4>Example</h4><pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">collection</span><span class="hl-1"> = </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">db</span><span class="hl-1">(</span><span class="hl-2">&#39;foo&#39;</span><span class="hl-1">).</span><span class="hl-0">collection</span><span class="hl-1">(</span><span class="hl-2">&#39;bar&#39;</span><span class="hl-1">);</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndexes</span><span class="hl-1">([</span><br/><span class="hl-1">  </span><span class="hl-3">// Simple index on field fizz</span><br/><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-6">key:</span><span class="hl-1"> { </span><span class="hl-6">fizz:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> },</span><br/><span class="hl-1">  }</span><br/><span class="hl-1">  </span><span class="hl-3">// wildcard index</span><br/><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-6">key:</span><span class="hl-1"> { </span><span class="hl-2">&#39;$**&#39;</span><span class="hl-6">:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> }</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">  </span><span class="hl-3">// named index on darmok and jalad</span><br/><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-6">key:</span><span class="hl-1"> { </span><span class="hl-6">darmok:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1">, </span><span class="hl-6">jalad:</span><span class="hl-1"> -</span><span class="hl-8">1</span><span class="hl-1"> }</span><br/><span class="hl-1">    </span><span class="hl-6">name</span><span class="hl-1">: </span><span class="hl-2">&#39;tanagra&#39;</span><br/><span class="hl-1">  }</span><br/><span class="hl-1">]);</span>
+<h4>Example</h4><pre><code class="language-ts"><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-5">collection</span><span class="hl-1"> = </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">db</span><span class="hl-1">(</span><span class="hl-2">&#39;foo&#39;</span><span class="hl-1">).</span><span class="hl-0">collection</span><span class="hl-1">(</span><span class="hl-2">&#39;bar&#39;</span><span class="hl-1">);</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndexes</span><span class="hl-1">([</span><br/><span class="hl-1">  </span><span class="hl-4">// Simple index on field fizz</span><br/><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-6">key:</span><span class="hl-1"> { </span><span class="hl-6">fizz:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> },</span><br/><span class="hl-1">  }</span><br/><span class="hl-1">  </span><span class="hl-4">// wildcard index</span><br/><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-6">key:</span><span class="hl-1"> { </span><span class="hl-2">&#39;$**&#39;</span><span class="hl-6">:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> }</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">  </span><span class="hl-4">// named index on darmok and jalad</span><br/><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-6">key:</span><span class="hl-1"> { </span><span class="hl-6">darmok:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1">, </span><span class="hl-6">jalad:</span><span class="hl-1"> -</span><span class="hl-8">1</span><span class="hl-1"> }</span><br/><span class="hl-1">    </span><span class="hl-6">name</span><span class="hl-1">: </span><span class="hl-2">&#39;tanagra&#39;</span><br/><span class="hl-1">  }</span><br/><span class="hl-1">]);</span>
 </code><button>Copy</button></pre>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L620">src/collection.ts:620</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L621">src/collection.ts:621</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="createSearchIndex" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>create<wbr/>Search<wbr/>Index</span><a href="#createSearchIndex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -423,7 +423,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4>Remarks</h4><p>Only available when used against a 7.0+ Atlas cluster.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1089">src/collection.ts:1089</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1118">src/collection.ts:1118</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="createSearchIndexes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>create<wbr/>Search<wbr/>Indexes</span><a href="#createSearchIndexes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -445,7 +445,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4>Remarks</h4><p>Only available when used against a 7.0+ Atlas cluster.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1103">src/collection.ts:1103</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1132">src/collection.ts:1132</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="deleteMany" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>delete<wbr/>Many</span><a href="#deleteMany" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -469,7 +469,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/DeleteResult.html" class="tsd-signature-type tsd-kind-interface">DeleteResult</a><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L438">src/collection.ts:438</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L437">src/collection.ts:437</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="deleteOne" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>delete<wbr/>One</span><a href="#deleteOne" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -493,7 +493,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/DeleteResult.html" class="tsd-signature-type tsd-kind-interface">DeleteResult</a><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L422">src/collection.ts:422</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L421">src/collection.ts:421</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="distinct" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>distinct</span><a href="#distinct" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -517,7 +517,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/Flatten.html" class="tsd-signature-type tsd-kind-type-alias">Flatten</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type tsd-kind-type-parameter">Key</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L767">src/collection.ts:767</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L780">src/collection.ts:780</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="distinct.distinct-2"><span class="tsd-kind-call-signature">distinct</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">Key</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span>, <span class="tsd-kind-parameter">filter</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/Flatten.html" class="tsd-signature-type tsd-kind-type-alias">Flatten</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type tsd-kind-type-parameter">Key</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#distinct.distinct-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <section class="tsd-panel">
@@ -534,7 +534,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h5><span class="tsd-kind-parameter">filter</span>: <a href="../types/Filter.html" class="tsd-signature-type tsd-kind-type-alias">Filter</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/Flatten.html" class="tsd-signature-type tsd-kind-type-alias">Flatten</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type tsd-kind-type-parameter">Key</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L770">src/collection.ts:770</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L783">src/collection.ts:783</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="distinct.distinct-3"><span class="tsd-kind-call-signature">distinct</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">Key</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span>, <span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/Flatten.html" class="tsd-signature-type tsd-kind-type-alias">Flatten</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type tsd-kind-type-parameter">Key</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#distinct.distinct-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <section class="tsd-panel">
@@ -553,7 +553,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/CommandOperationOptions.html" class="tsd-signature-type tsd-kind-interface">CommandOperationOptions</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/Flatten.html" class="tsd-signature-type tsd-kind-type-alias">Flatten</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type tsd-kind-type-parameter">Key</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L774">src/collection.ts:774</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L787">src/collection.ts:787</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="distinct.distinct-4"><span class="tsd-kind-call-signature">distinct</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#distinct.distinct-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -563,7 +563,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h5><span class="tsd-kind-parameter">key</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L781">src/collection.ts:781</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L794">src/collection.ts:794</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="distinct.distinct-5"><span class="tsd-kind-call-signature">distinct</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span>, <span class="tsd-kind-parameter">filter</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#distinct.distinct-5" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -575,7 +575,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h5><span class="tsd-kind-parameter">filter</span>: <a href="../types/Filter.html" class="tsd-signature-type tsd-kind-type-alias">Filter</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L782">src/collection.ts:782</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L795">src/collection.ts:795</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="distinct.distinct-6"><span class="tsd-kind-call-signature">distinct</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span>, <span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#distinct.distinct-6" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -589,7 +589,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/CommandOperationOptions.html" class="tsd-signature-type tsd-kind-interface">CommandOperationOptions</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L783">src/collection.ts:783</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L796">src/collection.ts:796</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="drop" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>drop</span><a href="#drop" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -608,7 +608,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L473">src/collection.ts:473</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L472">src/collection.ts:472</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="dropIndex" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>drop<wbr/>Index</span><a href="#dropIndex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -632,7 +632,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L641">src/collection.ts:641</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L642">src/collection.ts:642</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="dropIndexes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>drop<wbr/>Indexes</span><a href="#dropIndexes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -651,7 +651,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L656">src/collection.ts:656</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L657">src/collection.ts:657</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="dropSearchIndex" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>drop<wbr/>Search<wbr/>Index</span><a href="#dropSearchIndex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -672,7 +672,7 @@ Index specifications are defined <a href="https://www.mongodb.com/docs/manual/re
 <h4>Remarks</h4><p>Only available when used against a 7.0+ Atlas cluster.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1117">src/collection.ts:1117</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1146">src/collection.ts:1146</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="estimatedDocumentCount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>estimated<wbr/>Document<wbr/>Count</span><a href="#estimatedDocumentCount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -699,7 +699,7 @@ encountering errors.</p>
 <h4>See</h4><p><a href="https://www.mongodb.com/docs/manual/reference/command/count/#behavior|Count:">Behavior</a></p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L718">src/collection.ts:718</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L731">src/collection.ts:731</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="find" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>find</span><a href="#find" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -710,7 +710,7 @@ encountering errors.</p>
 <h4 class="tsd-returns-title">Returns <a href="FindCursor.html" class="tsd-signature-type tsd-kind-class">FindCursor</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L510">src/collection.ts:510</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L509">src/collection.ts:509</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="find.find-2"><span class="tsd-kind-call-signature">find</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="FindCursor.html" class="tsd-signature-type tsd-kind-class">FindCursor</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#find.find-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -722,7 +722,7 @@ encountering errors.</p>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOptions.html" class="tsd-signature-type tsd-kind-interface">FindOptions</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="FindCursor.html" class="tsd-signature-type tsd-kind-class">FindCursor</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L511">src/collection.ts:511</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L510">src/collection.ts:510</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="find.find-3"><span class="tsd-kind-call-signature">find</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="FindCursor.html" class="tsd-signature-type tsd-kind-class">FindCursor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><a href="#find.find-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <section class="tsd-panel">
@@ -739,7 +739,7 @@ encountering errors.</p>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOptions.html" class="tsd-signature-type tsd-kind-interface">FindOptions</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="FindCursor.html" class="tsd-signature-type tsd-kind-class">FindCursor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L512">src/collection.ts:512</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L511">src/collection.ts:511</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="findOne" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>find<wbr/>One</span><a href="#findOne" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -750,7 +750,7 @@ encountering errors.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L486">src/collection.ts:486</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L485">src/collection.ts:485</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOne.findOne-2"><span class="tsd-kind-call-signature">find<wbr/>One</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOne.findOne-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -760,7 +760,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">filter</span>: <a href="../types/Filter.html" class="tsd-signature-type tsd-kind-type-alias">Filter</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L487">src/collection.ts:487</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L486">src/collection.ts:486</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOne.findOne-3"><span class="tsd-kind-call-signature">find<wbr/>One</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOne.findOne-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -772,7 +772,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOptions.html" class="tsd-signature-type tsd-kind-interface">FindOptions</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L488">src/collection.ts:488</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L487">src/collection.ts:487</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOne.findOne-4"><span class="tsd-kind-call-signature">find<wbr/>One</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOne.findOne-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <section class="tsd-panel">
@@ -782,7 +782,7 @@ encountering errors.</p>
 <h4><span class="tsd-kind-type-parameter">T</span> = <span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span></h4></li></ul></section>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L491">src/collection.ts:491</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L490">src/collection.ts:490</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOne.findOne-5"><span class="tsd-kind-call-signature">find<wbr/>One</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOne.findOne-5" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <section class="tsd-panel">
@@ -797,7 +797,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">filter</span>: <a href="../types/Filter.html" class="tsd-signature-type tsd-kind-type-alias">Filter</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L492">src/collection.ts:492</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L491">src/collection.ts:491</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOne.findOne-6"><span class="tsd-kind-call-signature">find<wbr/>One</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOne.findOne-6" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <section class="tsd-panel">
@@ -814,7 +814,7 @@ encountering errors.</p>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOptions.html" class="tsd-signature-type tsd-kind-interface">FindOptions</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L493">src/collection.ts:493</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L492">src/collection.ts:492</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="findOneAndDelete" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>find<wbr/>One<wbr/>And<wbr/>Delete</span><a href="#findOneAndDelete" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -838,7 +838,7 @@ encountering errors.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ModifyResult.html" class="tsd-signature-type tsd-kind-interface">ModifyResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L819">src/collection.ts:819</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L847">src/collection.ts:847</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndDelete.findOneAndDelete-2"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Delete</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndDelete.findOneAndDelete-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -850,7 +850,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOneAndDeleteOptions.html" class="tsd-signature-type tsd-kind-interface">FindOneAndDeleteOptions</a><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">includeResultMetadata</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L823">src/collection.ts:823</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L851">src/collection.ts:851</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndDelete.findOneAndDelete-3"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Delete</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndDelete.findOneAndDelete-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -862,7 +862,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOneAndDeleteOptions.html" class="tsd-signature-type tsd-kind-interface">FindOneAndDeleteOptions</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L827">src/collection.ts:827</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L855">src/collection.ts:855</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndDelete.findOneAndDelete-4"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Delete</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndDelete.findOneAndDelete-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -872,7 +872,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">filter</span>: <a href="../types/Filter.html" class="tsd-signature-type tsd-kind-type-alias">Filter</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L831">src/collection.ts:831</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L859">src/collection.ts:859</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="findOneAndReplace" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>find<wbr/>One<wbr/>And<wbr/>Replace</span><a href="#findOneAndReplace" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -901,7 +901,7 @@ encountering errors.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ModifyResult.html" class="tsd-signature-type tsd-kind-interface">ModifyResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L853">src/collection.ts:853</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L881">src/collection.ts:881</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndReplace.findOneAndReplace-2"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Replace</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">replacement</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndReplace.findOneAndReplace-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -915,7 +915,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOneAndReplaceOptions.html" class="tsd-signature-type tsd-kind-interface">FindOneAndReplaceOptions</a><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">includeResultMetadata</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L858">src/collection.ts:858</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L886">src/collection.ts:886</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndReplace.findOneAndReplace-3"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Replace</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">replacement</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndReplace.findOneAndReplace-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -929,7 +929,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOneAndReplaceOptions.html" class="tsd-signature-type tsd-kind-interface">FindOneAndReplaceOptions</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L863">src/collection.ts:863</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L891">src/collection.ts:891</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndReplace.findOneAndReplace-4"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Replace</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">replacement</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndReplace.findOneAndReplace-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -941,7 +941,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">replacement</span>: <a href="../types/WithoutId.html" class="tsd-signature-type tsd-kind-type-alias">WithoutId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L868">src/collection.ts:868</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L896">src/collection.ts:896</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="findOneAndUpdate" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>find<wbr/>One<wbr/>And<wbr/>Update</span><a href="#findOneAndUpdate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -970,7 +970,7 @@ encountering errors.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ModifyResult.html" class="tsd-signature-type tsd-kind-interface">ModifyResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L895">src/collection.ts:895</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L923">src/collection.ts:923</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndUpdate.findOneAndUpdate-2"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Update</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">update</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndUpdate.findOneAndUpdate-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -984,7 +984,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOneAndUpdateOptions.html" class="tsd-signature-type tsd-kind-interface">FindOneAndUpdateOptions</a><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">includeResultMetadata</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L900">src/collection.ts:900</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L928">src/collection.ts:928</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndUpdate.findOneAndUpdate-3"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Update</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">update</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndUpdate.findOneAndUpdate-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -998,7 +998,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/FindOneAndUpdateOptions.html" class="tsd-signature-type tsd-kind-interface">FindOneAndUpdateOptions</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L905">src/collection.ts:905</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L933">src/collection.ts:933</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="findOneAndUpdate.findOneAndUpdate-4"><span class="tsd-kind-call-signature">find<wbr/>One<wbr/>And<wbr/>Update</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">filter</span>, <span class="tsd-kind-parameter">update</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#findOneAndUpdate.findOneAndUpdate-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -1010,7 +1010,7 @@ encountering errors.</p>
 <h5><span class="tsd-kind-parameter">update</span>: <a href="../types/UpdateFilter.html" class="tsd-signature-type tsd-kind-type-alias">UpdateFilter</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/WithId.html" class="tsd-signature-type tsd-kind-type-alias">WithId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L910">src/collection.ts:910</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L938">src/collection.ts:938</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="indexExists" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>index<wbr/>Exists</span><a href="#indexExists" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1027,18 +1027,18 @@ encountering errors.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li>
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a></h5>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/AbstractCursorOptions.html" class="tsd-signature-type tsd-kind-interface">AbstractCursorOptions</a></h5>
 <div class="tsd-comment tsd-typography"><p>Optional settings for the command</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L683">src/collection.ts:683</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L684">src/collection.ts:684</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="indexInformation" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>index<wbr/>Information</span><a href="#indexInformation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="indexInformation.indexInformation-1"><span class="tsd-kind-call-signature">index<wbr/>Information</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">&gt;</span><a href="#indexInformation.indexInformation-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="indexInformation.indexInformation-1"><span class="tsd-kind-call-signature">index<wbr/>Information</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#indexInformation.indexInformation-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Retrieves this collections index info.</p>
 </div>
@@ -1046,18 +1046,43 @@ encountering errors.</p>
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a></h5>
+<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">full</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5>
 <div class="tsd-comment tsd-typography"><p>Optional settings for the command</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">&gt;</span></h4>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L698">src/collection.ts:698</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L699">src/collection.ts:699</a></li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="indexInformation.indexInformation-2"><span class="tsd-kind-call-signature">index<wbr/>Information</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol">&gt;</span><a href="#indexInformation.indexInformation-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">full</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L702">src/collection.ts:702</a></li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="indexInformation.indexInformation-3"><span class="tsd-kind-call-signature">index<wbr/>Information</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol"> | </span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#indexInformation.indexInformation-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol"> | </span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L705">src/collection.ts:705</a></li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="indexInformation.indexInformation-4"><span class="tsd-kind-call-signature">index<wbr/>Information</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol">&gt;</span><a href="#indexInformation.indexInformation-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L708">src/collection.ts:708</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="indexes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>indexes</span><a href="#indexes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="indexes.indexes-1"><span class="tsd-kind-call-signature">indexes</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#indexes.indexes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="indexes.indexes-1"><span class="tsd-kind-call-signature">indexes</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#indexes.indexes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Retrieve all the indexes on the collection.</p>
 </div>
@@ -1065,14 +1090,44 @@ encountering errors.</p>
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a></h5>
+<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">full</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5>
 <div class="tsd-comment tsd-typography"><p>Optional settings for the command</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L806">src/collection.ts:806</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L819">src/collection.ts:819</a></li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="indexes.indexes-2"><span class="tsd-kind-call-signature">indexes</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol">&gt;</span><a href="#indexes.indexes-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">full</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L820">src/collection.ts:820</a></li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="indexes.indexes-3"><span class="tsd-kind-call-signature">indexes</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol"> | </span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#indexes.indexes-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/IndexInformationOptions.html" class="tsd-signature-type tsd-kind-interface">IndexInformationOptions</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionCompact.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionCompact</a><span class="tsd-signature-symbol"> | </span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L821">src/collection.ts:821</a></li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="indexes.indexes-4"><span class="tsd-kind-call-signature">indexes</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#indexes.indexes-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/AbstractCursorOptions.html" class="tsd-signature-type tsd-kind-interface">AbstractCursorOptions</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/IndexDescriptionInfo.html" class="tsd-signature-type tsd-kind-type-alias">IndexDescriptionInfo</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L824">src/collection.ts:824</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="initializeOrderedBulkOp" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>initialize<wbr/>Ordered<wbr/>Bulk<wbr/>Op</span><a href="#initializeOrderedBulkOp" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1093,7 +1148,7 @@ encountering errors.</p>
 However, <code>collection.bulkWrite()</code> provides an equivalent API that does not require prior connecting.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1025">src/collection.ts:1025</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1053">src/collection.ts:1053</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="initializeUnorderedBulkOp" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>initialize<wbr/>Unordered<wbr/>Bulk<wbr/>Op</span><a href="#initializeUnorderedBulkOp" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1114,7 +1169,7 @@ However, <code>collection.bulkWrite()</code> provides an equivalent API that doe
 However, <code>collection.bulkWrite()</code> provides an equivalent API that does not require prior connecting.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1013">src/collection.ts:1013</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1041">src/collection.ts:1041</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="insertMany" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>insert<wbr/>Many</span><a href="#insertMany" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1140,7 +1195,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/InsertManyResult.html" class="tsd-signature-type tsd-kind-interface">InsertManyResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L288">src/collection.ts:288</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L287">src/collection.ts:287</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="insertOne" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>insert<wbr/>One</span><a href="#insertOne" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1166,7 +1221,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/InsertOneResult.html" class="tsd-signature-type tsd-kind-interface">InsertOneResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L266">src/collection.ts:266</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L265">src/collection.ts:265</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="isCapped" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>is<wbr/>Capped</span><a href="#isCapped" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1185,7 +1240,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L539">src/collection.ts:539</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L538">src/collection.ts:538</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="listIndexes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>list<wbr/>Indexes</span><a href="#listIndexes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1197,14 +1252,14 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/ListIndexesOptions.html" class="tsd-signature-type tsd-kind-interface">ListIndexesOptions</a></h5>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/AbstractCursorOptions.html" class="tsd-signature-type tsd-kind-interface">AbstractCursorOptions</a></h5>
 <div class="tsd-comment tsd-typography"><p>Optional settings for the command</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="ListIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListIndexesCursor</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L673">src/collection.ts:673</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L674">src/collection.ts:674</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="listSearchIndexes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>list<wbr/>Search<wbr/>Indexes</span><a href="#listSearchIndexes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1216,7 +1271,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/AggregateOptions.html" class="tsd-signature-type tsd-kind-interface">AggregateOptions</a></h5>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../types/ListSearchIndexesOptions.html" class="tsd-signature-type tsd-kind-type-alias">ListSearchIndexesOptions</a></h5>
 <div class="tsd-comment tsd-typography"><p>The options for the list indexes operation.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
@@ -1225,7 +1280,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4>Remarks</h4><p>Only available when used against a 7.0+ Atlas cluster.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1055">src/collection.ts:1055</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1083">src/collection.ts:1083</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="listSearchIndexes.listSearchIndexes-2"><span class="tsd-kind-call-signature">list<wbr/>Search<wbr/>Indexes</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">name</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#listSearchIndexes.listSearchIndexes-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Returns all search indexes for the current collection.</p>
@@ -1239,7 +1294,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li>
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../interfaces/AggregateOptions.html" class="tsd-signature-type tsd-kind-interface">AggregateOptions</a></h5>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <a href="../types/ListSearchIndexesOptions.html" class="tsd-signature-type tsd-kind-type-alias">ListSearchIndexesOptions</a></h5>
 <div class="tsd-comment tsd-typography"><p>The options for the list indexes operation.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
@@ -1248,7 +1303,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4>Remarks</h4><p>Only available when used against a 7.0+ Atlas cluster.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1064">src/collection.ts:1064</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1092">src/collection.ts:1092</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="options" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>options</span><a href="#options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1267,7 +1322,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L527">src/collection.ts:527</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L526">src/collection.ts:526</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="rename" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>rename</span><a href="#rename" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1293,7 +1348,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4>Remarks</h4><p>This operation does not inherit options from the Db or MongoClient.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L457">src/collection.ts:457</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L456">src/collection.ts:456</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="replaceOne" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>replace<wbr/>One</span><a href="#replaceOne" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1322,7 +1377,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/UpdateResult.html" class="tsd-signature-type tsd-kind-interface">UpdateResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L373">src/collection.ts:373</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L372">src/collection.ts:372</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="updateMany" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update<wbr/>Many</span><a href="#updateMany" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1356,7 +1411,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/UpdateResult.html" class="tsd-signature-type tsd-kind-interface">UpdateResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L400">src/collection.ts:400</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L399">src/collection.ts:399</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="updateOne" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update<wbr/>One</span><a href="#updateOne" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1390,7 +1445,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/UpdateResult.html" class="tsd-signature-type tsd-kind-interface">UpdateResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">TSchema</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L350">src/collection.ts:350</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L349">src/collection.ts:349</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="updateSearchIndex" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update<wbr/>Search<wbr/>Index</span><a href="#updateSearchIndex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1416,7 +1471,7 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 <h4>Remarks</h4><p>Only available when used against a 7.0+ Atlas cluster.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1132">src/collection.ts:1132</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1161">src/collection.ts:1161</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="watch" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>watch</span><a href="#watch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -1459,18 +1514,18 @@ can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
 </ul>
 
 <h4>Example</h4><p>By just providing the first argument I can type the change to be <code>ChangeStreamDocument&lt;{ _id: number }&gt;</code></p>
-<pre><code class="language-ts"><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">watch</span><span class="hl-1">&lt;{ </span><span class="hl-6">_id</span><span class="hl-1">: </span><span class="hl-9">number</span><span class="hl-1"> }&gt;()</span><br/><span class="hl-1">  .</span><span class="hl-0">on</span><span class="hl-1">(</span><span class="hl-2">&#39;change&#39;</span><span class="hl-1">, </span><span class="hl-6">change</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-6">change</span><span class="hl-1">.</span><span class="hl-6">_id</span><span class="hl-1">.</span><span class="hl-0">toFixed</span><span class="hl-1">(</span><span class="hl-8">4</span><span class="hl-1">)));</span>
+<pre><code class="language-ts"><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">watch</span><span class="hl-1">&lt;{ </span><span class="hl-6">_id</span><span class="hl-1">: </span><span class="hl-9">number</span><span class="hl-1"> }&gt;()</span><br/><span class="hl-1">  .</span><span class="hl-0">on</span><span class="hl-1">(</span><span class="hl-2">&#39;change&#39;</span><span class="hl-1">, </span><span class="hl-6">change</span><span class="hl-1"> </span><span class="hl-3">=&gt;</span><span class="hl-1"> </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-6">change</span><span class="hl-1">.</span><span class="hl-6">_id</span><span class="hl-1">.</span><span class="hl-0">toFixed</span><span class="hl-1">(</span><span class="hl-8">4</span><span class="hl-1">)));</span>
 </code><button>Copy</button></pre>
 
 <h4>Example</h4><p>Passing a second argument provides a way to reflect the type changes caused by an advanced pipeline.
 Here, we are using a pipeline to have MongoDB filter for insert changes only and add a comment.
 No need start from scratch on the ChangeStreamInsertDocument type!
 By using an intersection we can save time and ensure defaults remain the same type!</p>
-<pre><code class="language-ts"><span class="hl-6">collection</span><br/><span class="hl-1">  .</span><span class="hl-0">watch</span><span class="hl-1">&lt;</span><span class="hl-9">Schema</span><span class="hl-1">, </span><span class="hl-9">ChangeStreamInsertDocument</span><span class="hl-1">&lt;</span><span class="hl-9">Schema</span><span class="hl-1">&gt; &amp; { </span><span class="hl-6">comment</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1"> }&gt;([</span><br/><span class="hl-1">    { </span><span class="hl-6">$addFields:</span><span class="hl-1"> { </span><span class="hl-6">comment:</span><span class="hl-1"> </span><span class="hl-2">&#39;big changes&#39;</span><span class="hl-1"> } },</span><br/><span class="hl-1">    { </span><span class="hl-6">$match:</span><span class="hl-1"> { </span><span class="hl-6">operationType:</span><span class="hl-1"> </span><span class="hl-2">&#39;insert&#39;</span><span class="hl-1"> } }</span><br/><span class="hl-1">  ])</span><br/><span class="hl-1">  .</span><span class="hl-0">on</span><span class="hl-1">(</span><span class="hl-2">&#39;change&#39;</span><span class="hl-1">, </span><span class="hl-6">change</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-6">change</span><span class="hl-1">.</span><span class="hl-6">comment</span><span class="hl-1">.</span><span class="hl-0">startsWith</span><span class="hl-1">(</span><span class="hl-2">&#39;big&#39;</span><span class="hl-1">);</span><br/><span class="hl-1">    </span><span class="hl-6">change</span><span class="hl-1">.</span><span class="hl-6">operationType</span><span class="hl-1"> === </span><span class="hl-2">&#39;insert&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-3">// No need to narrow in code because the generics did that for us!</span><br/><span class="hl-1">    </span><span class="hl-0">expectType</span><span class="hl-1">&lt;</span><span class="hl-9">Schema</span><span class="hl-1">&gt;(</span><span class="hl-6">change</span><span class="hl-1">.</span><span class="hl-6">fullDocument</span><span class="hl-1">);</span><br/><span class="hl-1">  });</span>
+<pre><code class="language-ts"><span class="hl-6">collection</span><br/><span class="hl-1">  .</span><span class="hl-0">watch</span><span class="hl-1">&lt;</span><span class="hl-9">Schema</span><span class="hl-1">, </span><span class="hl-9">ChangeStreamInsertDocument</span><span class="hl-1">&lt;</span><span class="hl-9">Schema</span><span class="hl-1">&gt; &amp; { </span><span class="hl-6">comment</span><span class="hl-1">: </span><span class="hl-9">string</span><span class="hl-1"> }&gt;([</span><br/><span class="hl-1">    { </span><span class="hl-6">$addFields:</span><span class="hl-1"> { </span><span class="hl-6">comment:</span><span class="hl-1"> </span><span class="hl-2">&#39;big changes&#39;</span><span class="hl-1"> } },</span><br/><span class="hl-1">    { </span><span class="hl-6">$match:</span><span class="hl-1"> { </span><span class="hl-6">operationType:</span><span class="hl-1"> </span><span class="hl-2">&#39;insert&#39;</span><span class="hl-1"> } }</span><br/><span class="hl-1">  ])</span><br/><span class="hl-1">  .</span><span class="hl-0">on</span><span class="hl-1">(</span><span class="hl-2">&#39;change&#39;</span><span class="hl-1">, </span><span class="hl-6">change</span><span class="hl-1"> </span><span class="hl-3">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-6">change</span><span class="hl-1">.</span><span class="hl-6">comment</span><span class="hl-1">.</span><span class="hl-0">startsWith</span><span class="hl-1">(</span><span class="hl-2">&#39;big&#39;</span><span class="hl-1">);</span><br/><span class="hl-1">    </span><span class="hl-6">change</span><span class="hl-1">.</span><span class="hl-6">operationType</span><span class="hl-1"> === </span><span class="hl-2">&#39;insert&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-4">// No need to narrow in code because the generics did that for us!</span><br/><span class="hl-1">    </span><span class="hl-0">expectType</span><span class="hl-1">&lt;</span><span class="hl-9">Schema</span><span class="hl-1">&gt;(</span><span class="hl-6">change</span><span class="hl-1">.</span><span class="hl-6">fullDocument</span><span class="hl-1">);</span><br/><span class="hl-1">  });</span>
 </code><button>Copy</button></pre>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L992">src/collection.ts:992</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L1020">src/collection.ts:1020</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -1483,7 +1538,9 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-private" name="private"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Private</span></label></li>
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
-<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></form></div>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-alpha" name="alpha"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Alpha</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-beta" name="beta"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Beta</span></label></li></ul></form></div>
 <div class="tsd-theme-toggle">
 <h4 class="uppercase">Theme</h4><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
 <details open class="tsd-index-accordion tsd-page-navigation"><summary class="tsd-accordion-summary">
@@ -1617,6 +1674,7 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="MongoDriverError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Driver<wbr/>Error</span></a></li>
 <li><a href="MongoError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Error</span></a></li>
 <li><a href="MongoExpiredSessionError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Expired<wbr/>Session<wbr/>Error</span></a></li>
+<li><a href="MongoGCPError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoGCPError</span></a></li>
 <li><a href="MongoGridFSChunkError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>GridFSChunk<wbr/>Error</span></a></li>
 <li><a href="MongoGridFSStreamError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>GridFSStream<wbr/>Error</span></a></li>
 <li><a href="MongoInvalidArgumentError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Invalid<wbr/>Argument<wbr/>Error</span></a></li>
@@ -1626,6 +1684,7 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="MongoNetworkError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Network<wbr/>Error</span></a></li>
 <li><a href="MongoNetworkTimeoutError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Network<wbr/>Timeout<wbr/>Error</span></a></li>
 <li><a href="MongoNotConnectedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Not<wbr/>Connected<wbr/>Error</span></a></li>
+<li><a href="MongoOIDCError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoOIDCError</span></a></li>
 <li><a href="MongoParseError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Parse<wbr/>Error</span></a></li>
 <li><a href="MongoRuntimeError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Runtime<wbr/>Error</span></a></li>
 <li><a href="MongoServerClosedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Server<wbr/>Closed<wbr/>Error</span></a></li>
@@ -1662,6 +1721,7 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="WriteConcernError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern<wbr/>Error</span></a></li>
 <li><a href="WriteError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Error</span></a></li>
 <li><a href="../interfaces/AWSEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>AWSEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AWSKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>AWSKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregate<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregationCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregation<wbr/>Cursor<wbr/>Options</span></a></li>
@@ -1702,7 +1762,7 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="../interfaces/ClientMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata</span></a></li>
 <li><a href="../interfaces/ClientMetadataOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClientSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Session<wbr/>Options</span></a></li>
-<li><a href="../interfaces/CloseOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
+<li><a href="../interfaces/CloseOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClusterTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cluster<wbr/>Time</span></a></li>
 <li><a href="../interfaces/ClusteredCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Clustered<wbr/>Collection<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CollationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collation<wbr/>Options</span></a></li>
@@ -1744,7 +1804,7 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="../interfaces/GridFSChunk.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSChunk</span></a></li>
 <li><a href="../interfaces/GridFSFile.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSFile</span></a></li>
 <li><a href="../interfaces/HedgeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Hedge<wbr/>Options</span></a></li>
-<li><a href="../interfaces/IdPServerInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPServer<wbr/>Info</span></a></li>
+<li><a href="../interfaces/IdPInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPInfo</span></a></li>
 <li><a href="../interfaces/IdPServerResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPServer<wbr/>Response</span></a></li>
 <li><a href="../interfaces/IndexDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Index<wbr/>Description</span></a></li>
 <li><a href="../interfaces/IndexInformationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Index<wbr/>Information<wbr/>Options</span></a></li>
@@ -1752,18 +1812,21 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="../interfaces/InsertOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="../interfaces/InsertOneOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Options</span></a></li>
 <li><a href="../interfaces/InsertOneResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Result</span></a></li>
+<li><a href="../interfaces/KMIPEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMIPEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="../interfaces/KMIPKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMIPKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../interfaces/KMSProviders.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMSProviders</span></a></li>
 <li><a href="../interfaces/ListCollectionsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Collections<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Result</span></a></li>
-<li><a href="../interfaces/ListIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Indexes<wbr/>Options</span></a></li>
+<li><a href="../interfaces/LocalKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>LocalKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../interfaces/ModifyResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Modify<wbr/>Result</span></a></li>
 <li><a href="../interfaces/MongoClientOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Client<wbr/>Options</span></a></li>
 <li><a href="../interfaces/MongoCredentialsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Credentials<wbr/>Options</span></a></li>
 <li><a href="../interfaces/MongoNetworkErrorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Network<wbr/>Error<wbr/>Options</span></a></li>
 <li><a href="../interfaces/MongoOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Options</span></a></li>
 <li><a href="../interfaces/MonitorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Monitor<wbr/>Options</span></a></li>
-<li><a href="../interfaces/OIDCCallbackContext.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCCallback<wbr/>Context</span></a></li>
+<li><a href="../interfaces/OIDCCallbackParams.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCCallback<wbr/>Params</span></a></li>
+<li><a href="../interfaces/OIDCResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCResponse</span></a></li>
 <li><a href="../interfaces/OperationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Operation<wbr/>Options</span></a></li>
 <li><a href="../interfaces/PkFactory.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Pk<wbr/>Factory</span></a></li>
 <li><a href="../interfaces/ProxyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Proxy<wbr/>Options</span></a></li>
@@ -1805,6 +1868,7 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="../types/AuthMechanism.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
 <li><a href="../types/AutoEncryptionExtraOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Extra<wbr/>Options</span></a></li>
 <li><a href="../types/AutoEncryptionLoggerLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
+<li><a href="../types/AzureKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>AzureKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../types/BSONTypeAlias.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>BSONType<wbr/>Alias</span></a></li>
 <li><a href="../types/BatchType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Batch<wbr/>Type</span></a></li>
 <li><a href="../types/BitwiseFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Bitwise<wbr/>Filter</span></a></li>
@@ -1833,10 +1897,13 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="../types/Filter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter</span></a></li>
 <li><a href="../types/FilterOperations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter<wbr/>Operations</span></a></li>
 <li><a href="../types/Flatten.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Flatten</span></a></li>
+<li><a href="../types/GCPKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GCPKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../types/GSSAPICanonicalizationValue.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GSSAPICanonicalization<wbr/>Value</span></a></li>
 <li><a href="../types/GenericListener.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Generic<wbr/>Listener</span></a></li>
 <li><a href="../types/GridFSBucketEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GridFSBucket<wbr/>Events</span></a></li>
 <li><a href="../types/Hint.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Hint</span></a></li>
+<li><a href="../types/IndexDescriptionCompact.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Description<wbr/>Compact</span></a></li>
+<li><a href="../types/IndexDescriptionInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Description<wbr/>Info</span></a></li>
 <li><a href="../types/IndexDirection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Direction</span></a></li>
 <li><a href="../types/IndexSpecification.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Specification</span></a></li>
 <li><a href="../types/InferIdType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Infer<wbr/>Id<wbr/>Type</span></a></li>
@@ -1845,6 +1912,7 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="../types/Join.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Join</span></a></li>
 <li><a href="../types/KeysOfAType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>OfAType</span></a></li>
 <li><a href="../types/KeysOfOtherType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>Of<wbr/>Other<wbr/>Type</span></a></li>
+<li><a href="../types/ListIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>List<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../types/ListSearchIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>List<wbr/>Search<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../types/MatchKeysAndValues.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Match<wbr/>Keys<wbr/>And<wbr/>Values</span></a></li>
 <li><a href="../types/MongoClientEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Mongo<wbr/>Client<wbr/>Events</span></a></li>
@@ -1855,8 +1923,7 @@ By using an intersection we can save time and ensure defaults remain the same ty
 <li><a href="../types/NonObjectIdLikeDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Non<wbr/>Object<wbr/>Id<wbr/>Like<wbr/>Document</span></a></li>
 <li><a href="../types/NotAcceptedFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Not<wbr/>Accepted<wbr/>Fields</span></a></li>
 <li><a href="../types/NumericType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Numeric<wbr/>Type</span></a></li>
-<li><a href="../types/OIDCRefreshFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRefresh<wbr/>Function</span></a></li>
-<li><a href="../types/OIDCRequestFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRequest<wbr/>Function</span></a></li>
+<li><a href="../types/OIDCCallbackFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCCallback<wbr/>Function</span></a></li>
 <li><a href="../types/OneOrMore.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>One<wbr/>Or<wbr/>More</span></a></li>
 <li><a href="../types/OnlyFieldsOfType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Only<wbr/>Fields<wbr/>Of<wbr/>Type</span></a></li>
 <li><a href="../types/OperationTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Operation<wbr/>Time</span></a></li>
