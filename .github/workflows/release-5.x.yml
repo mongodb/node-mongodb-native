@@ -20,7 +20,7 @@ jobs:
         uses: googleapis/release-please-action@v4
         with:
           target-branch: 5.x
-  
+
   compress_sign_and_upload:
     needs: [release_please]
     if: ${{ needs.release_please.outputs.release_created }}
@@ -40,3 +40,43 @@ jobs:
       - run: npm publish --provenance --tag=5x
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  generate_sarif_report:
+    environment: release
+    runs-on: ubuntu-latest
+    needs: [release_please]
+    permissions:
+      # required for all workflows
+      security-events: write
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up drivers-github-tools
+        uses: mongodb-labs/drivers-github-tools/setup@v2
+        with:
+          aws_region_name: us-east-1
+          aws_role_arn: ${{ secrets.aws_role_arn }}
+          aws_secret_id: ${{ secrets.aws_secret_id }}
+
+      - name: "Generate Sarif Report"
+        # TODO: Use v2 once it has been re-tagged to include this action
+        uses: mongodb-labs/drivers-github-tools/code-scanning-export@main
+        with:
+          ref: main
+          output-file: sarif-report.json
+
+      - name: Get release version and release package file name
+        id: get_version
+        shell: bash
+        run: |
+          package_version=$(jq --raw-output '.version' package.json)
+          echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
+      - name: actions/publish_asset_to_s3
+        uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@main
+        with:
+          version: ${{ steps.get_version.outputs.package_version }}
+          product_name: node-mongodb-native
+          file: sarif-report.json
+          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
