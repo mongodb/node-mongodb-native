@@ -178,7 +178,10 @@ export interface SelectServerOptions {
   session?: ClientSession;
   operationName: string;
   previousServer?: ServerDescription;
-  /** @internal */
+  /**
+   * @internal
+   * TODO(NODE-5685): Make this required
+   * */
   timeoutContext?: TimeoutContext;
 }
 
