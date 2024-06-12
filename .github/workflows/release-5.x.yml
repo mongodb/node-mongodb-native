@@ -64,7 +64,7 @@ jobs:
         # TODO: Use v2 once it has been re-tagged to include this action
         uses: mongodb-labs/drivers-github-tools/code-scanning-export@main
         with:
-          ref: main
+          ref: 5.x
           output-file: sarif-report.json
 
       - name: Get release version and release package file name

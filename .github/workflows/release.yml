@@ -42,7 +42,7 @@ jobs:
   generate_sarif_report:
     environment: release
     runs-on: ubuntu-latest
-    # needs: [release_please]
+    needs: [release_please]
     permissions:
       # required for all workflows
       security-events: write
@@ -77,5 +77,4 @@ jobs:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
           file: sarif-report.json
-          dry_run:  false
-          # dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
+          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
