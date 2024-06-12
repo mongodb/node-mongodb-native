@@ -110,41 +110,38 @@ export class Timeout extends Promise<never> {
 }
 
 /** @internal */
-export type TimeoutContextOptions = {
-  timeoutMS?: number;
+export type TimeoutContextOptions = LegacyTimeoutContextOptions | CSOTTimeoutContextOptions;
+
+/** @internal */
+export type LegacyTimeoutContextOptions = {
   serverSelectionTimeoutMS: number;
   waitQueueTimeoutMS: number;
   socketTimeoutMS?: number;
 };
 
 /** @internal */
+export type CSOTTimeoutContextOptions = {
+  timeoutMS: number;
+  serverSelectionTimeoutMS: number;
+  socketTimeoutMS?: number;
+};
+
+/** @internal */
 export abstract class TimeoutContext {
-  private _csotEnabled: boolean;
-  clearServerSelectionTimeout: boolean;
-  clearConnectionCheckoutTimeout: boolean;
-
-  constructor(options: TimeoutContextOptions) {
-    this._csotEnabled = options.timeoutMS != null;
-    this.clearServerSelectionTimeout = true;
-    this.clearConnectionCheckoutTimeout = true;
-  }
-
   static create(options: TimeoutContextOptions): TimeoutContext {
-    if (options.timeoutMS != null) return new CSOTTimeoutContext(options);
+    if ('timeoutMS' in options) return new CSOTTimeoutContext(options);
     else return new LegacyTimeoutContext(options);
   }
 
-  get serverSelectionTimeout(): Timeout | null {
-    return null;
-  }
+  abstract get serverSelectionTimeout(): Timeout | null;
 
-  get connectionCheckoutTimeout(): Timeout | null {
-    return null;
-  }
+  abstract get connectionCheckoutTimeout(): Timeout | null;
 
-  csotEnabled(): this is CSOTTimeoutContext {
-    return this._csotEnabled;
-  }
+  abstract get clearServerSelectionTimeout(): boolean;
+
+  abstract get clearConnectionCheckoutTimeout(): boolean;
+
+  abstract csotEnabled(): this is CSOTTimeoutContext;
 }
 
 /** @internal */
@@ -153,24 +150,24 @@ export class CSOTTimeoutContext extends TimeoutContext {
   serverSelectionTimeoutMS: number;
   socketTimeoutMS?: number;
 
+  clearConnectionCheckoutTimeout: boolean;
+  clearServerSelectionTimeout: boolean;
+
   private _maxTimeMS?: number;
 
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
 
-  usingServerSelectionTimeoutMS: boolean;
-
-  constructor(options: TimeoutContextOptions) {
-    super(options);
-    this.timeoutMS = options.timeoutMS as number;
+  constructor(options: CSOTTimeoutContextOptions) {
+    super();
+    this.timeoutMS = options.timeoutMS;
 
     this.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
 
     this.socketTimeoutMS = options.socketTimeoutMS;
 
-    this.usingServerSelectionTimeoutMS =
-      this.serverSelectionTimeoutMS !== 0 &&
-      csotMin(this.timeoutMS, this.serverSelectionTimeoutMS) === this.serverSelectionTimeoutMS;
+    this.clearServerSelectionTimeout = false;
+    this.clearConnectionCheckoutTimeout = true;
   }
 
   get maxTimeMS(): number {
@@ -181,10 +178,18 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this._maxTimeMS = v;
   }
 
+  csotEnabled(): this is CSOTTimeoutContext {
+    return true;
+  }
+
   override get serverSelectionTimeout(): Timeout | null {
+    // check for undefined
     if (typeof this._serverSelectionTimeout !== 'object') {
-      // check for undefined
-      if (this.usingServerSelectionTimeoutMS) {
+      const usingServerSelectionTimeoutMS =
+        this.serverSelectionTimeoutMS !== 0 &&
+        csotMin(this.timeoutMS, this.serverSelectionTimeoutMS) === this.serverSelectionTimeoutMS;
+
+      if (usingServerSelectionTimeoutMS) {
         this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
       } else {
         if (this.timeoutMS > 0) {
@@ -215,13 +220,19 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
 /** @internal */
 export class LegacyTimeoutContext extends TimeoutContext {
-  options: TimeoutContextOptions;
+  options: LegacyTimeoutContextOptions;
+  clearServerSelectionTimeout: boolean;
+  clearConnectionCheckoutTimeout: boolean;
 
-  constructor(options: TimeoutContextOptions) {
-    super(options);
+  constructor(options: LegacyTimeoutContextOptions) {
+    super();
     this.options = options;
     this.clearServerSelectionTimeout = true;
     this.clearConnectionCheckoutTimeout = true;
+  }
+
+  csotEnabled(): this is CSOTTimeoutContext {
+    return false;
   }
 
   override get serverSelectionTimeout(): Timeout | null {

@@ -69,10 +69,7 @@ describe('GetMoreOperation', function () {
         const call = stub.getCall(0);
         expect(call.args[0]).to.equal(namespace);
         expect(call.args[1]).to.deep.equal(expectedGetMoreCommand);
-        for (const k in opts) {
-          // NOTE: Done like this to omit checking the timeoutContext field
-          expect(call.args[2][k]).to.deep.equal(opts[k]);
-        }
+        expect(call.args[2]).to.containSubset(opts);
       });
     });
 

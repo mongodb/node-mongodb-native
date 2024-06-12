@@ -153,11 +153,6 @@ describe('TimeoutContext', function () {
   describe('CSOTTimeoutContext', function () {
     let ctx: CSOTTimeoutContext;
 
-    afterEach(() => {
-      // @ts-expect-error private property
-      ctx.overallTimeout?.clear();
-    });
-
     describe('get serverSelectionTimeout()', function () {
       let timeout: Timeout | null;
 

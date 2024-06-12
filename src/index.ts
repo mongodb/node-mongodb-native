@@ -559,7 +559,9 @@ export type {
 export type { Sort, SortDirection, SortDirectionForCmd, SortForCmd } from './sort';
 export type {
   CSOTTimeoutContext,
+  CSOTTimeoutContextOptions,
   LegacyTimeoutContext,
+  LegacyTimeoutContextOptions,
   Timeout,
   TimeoutContext,
   TimeoutContextOptions
