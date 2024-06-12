@@ -395,16 +395,22 @@ functions:
           source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
           rm -rf ./node_modules/@aws-sdk/credential-providers
   run atlas tests:
-    - command: shell.exec
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        args:
+          - '-c'
+          - ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/atlas_connect
+    - command: subprocess.exec
       type: test
       params:
         working_dir: src
-        add_expansions_to_env: true
-        script: |
-          export PROJECT_DIRECTORY="$(pwd)"
-          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
-
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+        binary: bash
+        env:
+          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
+        args:
+          - .evergreen/run-atlas-tests.sh
   run socks5 tests:
     - command: shell.exec
       type: test

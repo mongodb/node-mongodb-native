@@ -1,13 +1,13 @@
 #!/bin/bash
 
-if [ -z ${DRIVERS_TOOLS+omitted} ]; then echo "DRIVERS_TOOLS is unset" && exit 1; fi
-
 set -o errexit  # Exit the script with error if any of the commands fail
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+if test -f secrets-export.sh; then
+	source secrets-export.sh
+fi
 
-bash ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/atlas_connect
-source secrets-export.sh
+PROJECT_DIRECTORY=${PROJECT_DIRECTORY:-"."}
+source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
 node -v
 
