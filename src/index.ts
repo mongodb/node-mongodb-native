@@ -526,7 +526,13 @@ export type {
   RTTSampler,
   ServerMonitoringMode
 } from './sdam/monitor';
-export type { Server, ServerEvents, ServerOptions, ServerPrivate } from './sdam/server';
+export type {
+  Server,
+  ServerCommandOptions,
+  ServerEvents,
+  ServerOptions,
+  ServerPrivate
+} from './sdam/server';
 export type {
   ServerDescription,
   ServerDescriptionOptions,

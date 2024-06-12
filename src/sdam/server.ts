@@ -40,6 +40,7 @@ import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { isTransactionCommand } from '../transactions';
 import {
   type EventEmitterWithState,
@@ -102,6 +103,11 @@ export type ServerEvents = {
   ended(): void;
 } & ConnectionPoolEvents &
   EventEmitterWithState;
+
+/** @internal */
+export type ServerCommandOptions = Omit<CommandOptions, 'timeoutContext'> & {
+  timeoutContext: TimeoutContext;
+};
 
 /** @internal */
 export class Server extends TypedEventEmitter<ServerEvents> {
@@ -266,20 +272,20 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   public async command<T extends MongoDBResponseConstructor>(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions | undefined,
+    options: ServerCommandOptions | undefined,
     responseType: T | undefined
   ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
 
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions
+    options: ServerCommandOptions
   ): Promise<Document>;
 
   public async command(
     ns: MongoDBNamespace,
     cmd: Document,
-    options: CommandOptions,
+    options: ServerCommandOptions,
     responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     if (ns.db == null || typeof ns === 'string') {
