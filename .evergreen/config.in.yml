@@ -440,23 +440,12 @@ functions:
           rm -rf ./node_modules/@aws-sdk/credential-providers
 
   "run atlas tests":
-    # This creates secrets-export.sh, which is later sourced by run-tests.sh
-    - command: subprocess.exec
-      params:
-        working_dir: "src"
-        binary: bash
-        args:
-          - -c
-          - ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/atlas_connect
     - command: shell.exec
       type: test
       params:
         working_dir: "src"
+        add_expansions_to_env: true
         script: |
-          # Disable xtrace (just in case it was accidentally set).
-          set +x
-          source secrets-export.sh
-
           export PROJECT_DIRECTORY="$(pwd)"
           export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
