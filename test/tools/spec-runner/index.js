@@ -89,6 +89,16 @@ function translateClientOptions(options) {
           };
         }
 
+        if (options.autoEncryptOpts.kmsProviders['local:name2']) {
+          kmsProviders['local:name2'] = options.autoEncryptOpts.kmsProviders['local:name2'];
+          options.autoEncryption.tlsOptions = {
+            'local:name2': {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          };
+        }
+
         if (process.env.CRYPT_SHARED_LIB_PATH) {
           options.autoEncryption.extraOptions = {
             cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
@@ -187,9 +197,12 @@ function generateTopologyTests(testSuites, testContext, filter) {
         const csfleFilter = new ClientSideEncryptionFilter();
         await csfleFilter.initializeFilter(null, {});
         try {
-          if (!csfleFilter.filter({ metadata: { requires: { clientSideEncryption: true } } })) {
+          const filterResult = csfleFilter.filter({
+            metadata: { requires: { clientSideEncryption: true } }
+          });
+          if (typeof filterResult === 'string') {
             shouldRun = false;
-            this.currentTest.skipReason = `filtered by ClientSideEncryptionFilter`;
+            this.currentTest.skipReason = filterResult;
           }
         } catch (err) {
           csfleFilterError = err;

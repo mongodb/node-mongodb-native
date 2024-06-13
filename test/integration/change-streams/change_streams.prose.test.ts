@@ -4,7 +4,6 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
 import {
-  AbstractCursor,
   type ChangeStream,
   type CommandFailedEvent,
   type CommandStartedEvent,
@@ -18,7 +17,6 @@ import {
   Timestamp
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { getSymbolFrom } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 /**
@@ -72,9 +70,9 @@ function triggerResumableError(
 }
 
 const initIteratorMode = async (cs: ChangeStream) => {
-  const kInit = getSymbolFrom(AbstractCursor.prototype, 'kInit');
   const initEvent = once(cs.cursor, 'init');
-  await cs.cursor[kInit]();
+  //@ts-expect-error: private method
+  await cs.cursor.cursorInit();
   await initEvent;
   return;
 };

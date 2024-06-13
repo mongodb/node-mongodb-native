@@ -6,6 +6,7 @@ import { AssertionError, expect } from 'chai';
 
 import {
   AbstractCursor,
+  type ChangeStream,
   Collection,
   CommandStartedEvent,
   Db,
@@ -240,9 +241,9 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
   }
 
   const { pipeline, ...args } = operation.arguments!;
-  const changeStream = watchable.watch(pipeline, args);
-  const kInit = getSymbolFrom(AbstractCursor.prototype, 'kInit');
-  await changeStream.cursor[kInit]();
+  const changeStream: ChangeStream = watchable.watch(pipeline, args);
+  //@ts-expect-error: private method
+  await changeStream.cursor.cursorInit();
   return changeStream;
 });
 
@@ -864,6 +865,20 @@ operations.set('getKeyByAltName', async ({ entities, operation }) => {
   const { keyAltName } = operation.arguments ?? {};
 
   return clientEncryption.getKeyByAltName(keyAltName);
+});
+
+operations.set('encrypt', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { value, opts } = operation.arguments ?? {};
+
+  return clientEncryption.encrypt(value, opts);
+});
+
+operations.set('decrypt', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { value } = operation.arguments ?? {};
+
+  return clientEncryption.decrypt(value);
 });
 
 operations.set('listSearchIndexes', async ({ entities, operation }) => {

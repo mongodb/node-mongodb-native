@@ -1,0 +1,197 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.1.10"
+    }
+  ],
+  "database_name": "default",
+  "collection_name": "default",
+  "data": [],
+  "json_schema": {
+    "properties": {
+      "encrypted_string": {
+        "encrypt": {
+          "keyId": [
+            {
+              "$binary": {
+                "base64": "local+name2+AAAAAAAAAA==",
+                "subType": "04"
+              }
+            }
+          ],
+          "bsonType": "string",
+          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+        }
+      }
+    },
+    "bsonType": "object"
+  },
+  "key_vault_data": [
+    {
+      "_id": {
+        "$binary": {
+          "base64": "local+name2+AAAAAAAAAA==",
+          "subType": "04"
+        }
+      },
+      "keyMaterial": {
+        "$binary": {
+          "base64": "DX3iUuOlBsx6wBX9UZ3v/qXk1HNeBace2J+h/JwsDdF/vmSXLZ1l1VmZYIcpVFy6ODhdbzLjd4pNgg9wcm4etYig62KNkmtZ0/s1tAL5VsuW/s7/3PYnYGznZTFhLjIVcOH/RNoRj2eQb/sRTyivL85wePEpAU/JzuBj6qO9Y5txQgs1k0J3aNy10R9aQ8kC1NuSSpLAIXwE6DlNDDJXhw==",
+          "subType": "00"
+        }
+      },
+      "creationDate": {
+        "$date": {
+          "$numberLong": "1552949630483"
+        }
+      },
+      "updateDate": {
+        "$date": {
+          "$numberLong": "1552949630483"
+        }
+      },
+      "status": {
+        "$numberInt": "0"
+      },
+      "masterKey": {
+        "provider": "local:name2"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "Automatically encrypt and decrypt with a named KMS provider",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local:name2": {
+              "key": {
+                "$binary": {
+                  "base64": "local+name2+YUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string": "string0"
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 1,
+              "encrypted_string": "string0"
+            }
+          ]
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "listCollections": 1,
+              "filter": {
+                "name": "default"
+              }
+            },
+            "command_name": "listCollections"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "find": "datakeys",
+              "filter": {
+                "$or": [
+                  {
+                    "_id": {
+                      "$in": [
+                        {
+                          "$binary": {
+                            "base64": "local+name2+AAAAAAAAAA==",
+                            "subType": "04"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "keyAltNames": {
+                      "$in": []
+                    }
+                  }
+                ]
+              },
+              "$db": "keyvault",
+              "readConcern": {
+                "level": "majority"
+              }
+            },
+            "command_name": "find"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default",
+              "documents": [
+                {
+                  "_id": 1,
+                  "encrypted_string": {
+                    "$binary": {
+                      "base64": "AZaHGpfp2pntvgAAAAAAAAAC07sFvTQ0I4O2U49hpr4HezaK44Ivluzv5ntQBTYHDlAJMLyRMyB6Dl+UGHBgqhHe/Xw+pcT9XdiUoOJYAx9g+w==",
+                      "subType": "06"
+                    }
+                  }
+                }
+              ],
+              "ordered": true
+            },
+            "command_name": "insert"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "find": "default",
+              "filter": {
+                "_id": 1
+              }
+            },
+            "command_name": "find"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "encrypted_string": {
+                "$binary": {
+                  "base64": "AZaHGpfp2pntvgAAAAAAAAAC07sFvTQ0I4O2U49hpr4HezaK44Ivluzv5ntQBTYHDlAJMLyRMyB6Dl+UGHBgqhHe/Xw+pcT9XdiUoOJYAx9g+w==",
+                  "subType": "06"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

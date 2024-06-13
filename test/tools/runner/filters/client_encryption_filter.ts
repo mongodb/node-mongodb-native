@@ -72,6 +72,11 @@ export class ClientSideEncryptionFilter extends Filter {
     }
     const validRange = typeof clientSideEncryption === 'string' ? clientSideEncryption : '>=0.0.0';
 
-    return this.enabled && satisfies(ClientSideEncryptionFilter.version, validRange);
+    if (ClientSideEncryptionFilter.version && !this.enabled)
+      return 'Test requires FLE environment variables..';
+    if (!this.enabled) return 'Test requires CSFLE to be enabled.';
+    return satisfies(ClientSideEncryptionFilter.version, validRange)
+      ? true
+      : `requires mongodb-client-encryption ${validRange}, received ${ClientSideEncryptionFilter.version}`;
   }
 }

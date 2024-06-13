@@ -15,7 +15,7 @@ type RequiredCreateEncryptedCollectionSettings = Parameters<
 >[2];
 
 expectError<RequiredCreateEncryptedCollectionSettings>({});
-expectError<RequiredCreateEncryptedCollectionSettings>({
+expectAssignable<RequiredCreateEncryptedCollectionSettings>({
   provider: 'blah!',
   createCollectionOptions: { encryptedFields: {} }
 });

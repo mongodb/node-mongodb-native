@@ -153,6 +153,26 @@ describe('class AbstractCursor', function () {
       await client.close();
     });
 
+    it('wraps transform in result checking for each map call', async () => {
+      const control = { functionThatShouldReturnNull: 0 };
+      const makeCursor = () => {
+        const cursor = collection.find();
+        cursor
+          .map(doc => (control.functionThatShouldReturnNull === 0 ? null : doc))
+          .map(doc => (control.functionThatShouldReturnNull === 1 ? null : doc))
+          .map(doc => (control.functionThatShouldReturnNull === 2 ? null : doc));
+        return cursor;
+      };
+
+      for (const testFn of [0, 1, 2]) {
+        control.functionThatShouldReturnNull = testFn;
+        const error = await makeCursor()
+          .toArray()
+          .catch(error => error);
+        expect(error).to.be.instanceOf(MongoAPIError);
+      }
+    });
+
     context('toArray() with custom transforms', function () {
       for (const value of falseyValues) {
         it(`supports mapping to falsey value '${inspect(value)}'`, async function () {

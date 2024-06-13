@@ -22,7 +22,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">ConnectionPoolOptions</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L90">src/cmap/connection_pool.ts:90</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L84">src/cmap/connection_pool.ts:84</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -78,7 +78,7 @@
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="ALPNProtocols" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>ALPNProtocols</span><a href="#ALPNProtocols" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">ALPNProtocols</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Uint8Array</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Uint8Array</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-signature"><span class="tsd-kind-property">ALPNProtocols</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type ">Uint8Array</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Uint8Array</span><span class="tsd-signature-symbol">[]</span></div>
 <div class="tsd-comment tsd-typography"><p>An array of strings or a Buffer naming possible ALPN protocols.
 (Protocols should be ordered by their priority.)</p>
 </div>
@@ -104,7 +104,7 @@ replaced when CAs are explicitly specified using this option.</p>
 <div class="tsd-signature"><span class="tsd-kind-property">cancellation<wbr/>Token</span><span class="tsd-signature-symbol">?:</span> <a href="../classes/CancellationToken.html" class="tsd-signature-type tsd-kind-class">CancellationToken</a></div><aside class="tsd-sources">
 <p>Inherited from Omit.cancellationToken</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L119">src/cmap/connection.ts:119</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L127">src/cmap/connection.ts:127</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="cert" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>cert</span><a href="#cert" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">cert</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></div>
@@ -191,13 +191,13 @@ uppercased in order for OpenSSL to accept them.</p>
 <div class="tsd-signature"><span class="tsd-kind-property">connect<wbr/>TimeoutMS</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.connectTimeoutMS</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L115">src/cmap/connection.ts:115</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L123">src/cmap/connection.ts:123</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="credentials" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>credentials</span><a href="#credentials" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">credentials</span><span class="tsd-signature-symbol">?:</span> <a href="../classes/MongoCredentials.html" class="tsd-signature-type tsd-kind-class">MongoCredentials</a></div><aside class="tsd-sources">
 <p>Inherited from Omit.credentials</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L112">src/cmap/connection.ts:112</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L120">src/cmap/connection.ts:120</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="crl" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>crl</span><a href="#crl" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">crl</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></div>
@@ -241,7 +241,7 @@ tls.DEFAULT_ECDH_CURVE.</p>
 <div class="tsd-signature"><span class="tsd-kind-property">host<wbr/>Address</span><span class="tsd-signature-symbol">:</span> <a href="../classes/HostAddress.html" class="tsd-signature-type tsd-kind-class">HostAddress</a></div><aside class="tsd-sources">
 <p>Inherited from Omit.hostAddress</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L105">src/cmap/connection.ts:105</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L113">src/cmap/connection.ts:113</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="key" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>key</span><a href="#key" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">key</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">KeyObject</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></div>
@@ -267,7 +267,7 @@ object.passphrase if provided, or options.passphrase if it is not.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides Omit.loadBalanced</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L102">src/cmap/connection_pool.ts:102</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L96">src/cmap/connection_pool.ts:96</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="localAddress" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>local<wbr/>Address</span><a href="#localAddress" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">local<wbr/>Address</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
@@ -299,7 +299,7 @@ object.passphrase if provided, or options.passphrase if it is not.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L96">src/cmap/connection_pool.ts:96</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L90">src/cmap/connection_pool.ts:90</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="maxIdleTimeMS" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>max<wbr/>Idle<wbr/>TimeMS</span><a href="#maxIdleTimeMS" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Idle<wbr/>TimeMS</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -307,7 +307,7 @@ object.passphrase if provided, or options.passphrase if it is not.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L98">src/cmap/connection_pool.ts:98</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L92">src/cmap/connection_pool.ts:92</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="maxPoolSize" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>max<wbr/>Pool<wbr/>Size</span><a href="#maxPoolSize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">max<wbr/>Pool<wbr/>Size</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -315,13 +315,13 @@ object.passphrase if provided, or options.passphrase if it is not.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L92">src/cmap/connection_pool.ts:92</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L86">src/cmap/connection_pool.ts:86</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="metadata" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>metadata</span><a href="#metadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">metadata</span><span class="tsd-signature-symbol">:</span> <a href="ClientMetadata.html" class="tsd-signature-type tsd-kind-interface">ClientMetadata</a></div><aside class="tsd-sources">
 <p>Inherited from Omit.metadata</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L120">src/cmap/connection.ts:120</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L128">src/cmap/connection.ts:128</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="minDHSize" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>minDHSize</span><a href="#minDHSize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">minDHSize</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
@@ -335,19 +335,19 @@ object.passphrase if provided, or options.passphrase if it is not.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L94">src/cmap/connection_pool.ts:94</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L88">src/cmap/connection_pool.ts:88</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="monitorCommands" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>monitor<wbr/>Commands</span><a href="#monitorCommands" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">monitor<wbr/>Commands</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.monitorCommands</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L109">src/cmap/connection.ts:109</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L117">src/cmap/connection.ts:117</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="noDelay" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>no<wbr/>Delay</span><a href="#noDelay" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">no<wbr/>Delay</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.noDelay</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L117">src/cmap/connection.ts:117</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L125">src/cmap/connection.ts:125</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="passphrase" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>passphrase</span><a href="#passphrase" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">passphrase</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -380,25 +380,25 @@ object.passphrase if provided, or options.passphrase if it is not.</p>
 <div class="tsd-signature"><span class="tsd-kind-property">proxy<wbr/>Host</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.proxyHost</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L91">src/cmap/connection.ts:91</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L99">src/cmap/connection.ts:99</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="proxyPassword" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>proxy<wbr/>Password</span><a href="#proxyPassword" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">proxy<wbr/>Password</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.proxyPassword</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L94">src/cmap/connection.ts:94</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L102">src/cmap/connection.ts:102</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="proxyPort" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>proxy<wbr/>Port</span><a href="#proxyPort" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">proxy<wbr/>Port</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.proxyPort</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L92">src/cmap/connection.ts:92</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L100">src/cmap/connection.ts:100</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="proxyUsername" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>proxy<wbr/>Username</span><a href="#proxyUsername" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">proxy<wbr/>Username</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.proxyUsername</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L93">src/cmap/connection.ts:93</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L101">src/cmap/connection.ts:101</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="rejectUnauthorized" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>reject<wbr/>Unauthorized</span><a href="#rejectUnauthorized" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">reject<wbr/>Unauthorized</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -407,7 +407,7 @@ authorized with the list of supplied CAs. This option only has an
 effect if requestCert is true.</p>
 </div>
 <div class="tsd-comment tsd-typography">
-<h4>Default</h4><pre><code class="language-ts"><span class="hl-4">true</span>
+<h4>Default</h4><pre><code class="language-ts"><span class="hl-3">true</span>
 </code><button>Copy</button></pre>
 </div><aside class="tsd-sources">
 <p>Inherited from Omit.rejectUnauthorized</p>
@@ -447,7 +447,7 @@ interoperability. Default: none, see minVersion.</p>
 <div class="tsd-signature"><span class="tsd-kind-property">server<wbr/>Api</span><span class="tsd-signature-symbol">?:</span> <a href="ServerApi.html" class="tsd-signature-type tsd-kind-interface">ServerApi</a></div><aside class="tsd-sources">
 <p>Inherited from Omit.serverApi</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L108">src/cmap/connection.ts:108</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L116">src/cmap/connection.ts:116</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="servername" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>servername</span><a href="#servername" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">servername</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
@@ -469,13 +469,13 @@ interoperability. Default: none, see minVersion.</p>
 <div class="tsd-signature"><span class="tsd-kind-property">socket<wbr/>TimeoutMS</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.socketTimeoutMS</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L118">src/cmap/connection.ts:118</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L126">src/cmap/connection.ts:126</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="tls" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>tls</span><a href="#tls" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">tls</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <p>Inherited from Omit.tls</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L116">src/cmap/connection.ts:116</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection.ts#L124">src/cmap/connection.ts:124</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="waitQueueTimeoutMS" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>wait<wbr/>Queue<wbr/>TimeoutMS</span><a href="#waitQueueTimeoutMS" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">wait<wbr/>Queue<wbr/>TimeoutMS</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -483,7 +483,7 @@ interoperability. Default: none, see minVersion.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L100">src/cmap/connection_pool.ts:100</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/connection_pool.ts#L94">src/cmap/connection_pool.ts:94</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -496,7 +496,9 @@ interoperability. Default: none, see minVersion.</p>
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-private" name="private"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Private</span></label></li>
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
-<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></form></div>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-alpha" name="alpha"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Alpha</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-beta" name="beta"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Beta</span></label></li></ul></form></div>
 <div class="tsd-theme-toggle">
 <h4 class="uppercase">Theme</h4><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
 <details open class="tsd-index-accordion tsd-page-navigation"><summary class="tsd-accordion-summary">
@@ -627,6 +629,7 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="../classes/MongoDriverError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Driver<wbr/>Error</span></a></li>
 <li><a href="../classes/MongoError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Error</span></a></li>
 <li><a href="../classes/MongoExpiredSessionError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Expired<wbr/>Session<wbr/>Error</span></a></li>
+<li><a href="../classes/MongoGCPError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoGCPError</span></a></li>
 <li><a href="../classes/MongoGridFSChunkError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>GridFSChunk<wbr/>Error</span></a></li>
 <li><a href="../classes/MongoGridFSStreamError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>GridFSStream<wbr/>Error</span></a></li>
 <li><a href="../classes/MongoInvalidArgumentError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Invalid<wbr/>Argument<wbr/>Error</span></a></li>
@@ -636,6 +639,7 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="../classes/MongoNetworkError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Network<wbr/>Error</span></a></li>
 <li><a href="../classes/MongoNetworkTimeoutError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Network<wbr/>Timeout<wbr/>Error</span></a></li>
 <li><a href="../classes/MongoNotConnectedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Not<wbr/>Connected<wbr/>Error</span></a></li>
+<li><a href="../classes/MongoOIDCError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoOIDCError</span></a></li>
 <li><a href="../classes/MongoParseError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Parse<wbr/>Error</span></a></li>
 <li><a href="../classes/MongoRuntimeError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Runtime<wbr/>Error</span></a></li>
 <li><a href="../classes/MongoServerClosedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Server<wbr/>Closed<wbr/>Error</span></a></li>
@@ -672,6 +676,7 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="../classes/WriteConcernError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern<wbr/>Error</span></a></li>
 <li><a href="../classes/WriteError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Error</span></a></li>
 <li><a href="AWSEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>AWSEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="AWSKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>AWSKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="AggregateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregate<wbr/>Options</span></a></li>
 <li><a href="AggregationCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregation<wbr/>Cursor<wbr/>Options</span></a></li>
@@ -712,7 +717,7 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="ClientMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata</span></a></li>
 <li><a href="ClientMetadataOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata<wbr/>Options</span></a></li>
 <li><a href="ClientSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Session<wbr/>Options</span></a></li>
-<li><a href="CloseOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
+<li><a href="CloseOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
 <li><a href="ClusterTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cluster<wbr/>Time</span></a></li>
 <li><a href="ClusteredCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Clustered<wbr/>Collection<wbr/>Options</span></a></li>
 <li><a href="CollationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collation<wbr/>Options</span></a></li>
@@ -754,7 +759,7 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="GridFSChunk.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSChunk</span></a></li>
 <li><a href="GridFSFile.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSFile</span></a></li>
 <li><a href="HedgeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Hedge<wbr/>Options</span></a></li>
-<li><a href="IdPServerInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPServer<wbr/>Info</span></a></li>
+<li><a href="IdPInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPInfo</span></a></li>
 <li><a href="IdPServerResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPServer<wbr/>Response</span></a></li>
 <li><a href="IndexDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Index<wbr/>Description</span></a></li>
 <li><a href="IndexInformationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Index<wbr/>Information<wbr/>Options</span></a></li>
@@ -762,18 +767,21 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="InsertOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="InsertOneOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Options</span></a></li>
 <li><a href="InsertOneResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Result</span></a></li>
+<li><a href="KMIPEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMIPEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="KMIPKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMIPKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="KMSProviders.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMSProviders</span></a></li>
 <li><a href="ListCollectionsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Collections<wbr/>Options</span></a></li>
 <li><a href="ListDatabasesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Options</span></a></li>
 <li><a href="ListDatabasesResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Result</span></a></li>
-<li><a href="ListIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Indexes<wbr/>Options</span></a></li>
+<li><a href="LocalKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>LocalKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="ModifyResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Modify<wbr/>Result</span></a></li>
 <li><a href="MongoClientOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Client<wbr/>Options</span></a></li>
 <li><a href="MongoCredentialsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Credentials<wbr/>Options</span></a></li>
 <li><a href="MongoNetworkErrorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Network<wbr/>Error<wbr/>Options</span></a></li>
 <li><a href="MongoOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Options</span></a></li>
 <li><a href="MonitorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Monitor<wbr/>Options</span></a></li>
-<li><a href="OIDCCallbackContext.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCCallback<wbr/>Context</span></a></li>
+<li><a href="OIDCCallbackParams.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCCallback<wbr/>Params</span></a></li>
+<li><a href="OIDCResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCResponse</span></a></li>
 <li><a href="OperationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Operation<wbr/>Options</span></a></li>
 <li><a href="PkFactory.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Pk<wbr/>Factory</span></a></li>
 <li><a href="ProxyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Proxy<wbr/>Options</span></a></li>
@@ -815,6 +823,7 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="../types/AuthMechanism.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
 <li><a href="../types/AutoEncryptionExtraOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Extra<wbr/>Options</span></a></li>
 <li><a href="../types/AutoEncryptionLoggerLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
+<li><a href="../types/AzureKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>AzureKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../types/BSONTypeAlias.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>BSONType<wbr/>Alias</span></a></li>
 <li><a href="../types/BatchType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Batch<wbr/>Type</span></a></li>
 <li><a href="../types/BitwiseFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Bitwise<wbr/>Filter</span></a></li>
@@ -843,10 +852,13 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="../types/Filter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter</span></a></li>
 <li><a href="../types/FilterOperations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter<wbr/>Operations</span></a></li>
 <li><a href="../types/Flatten.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Flatten</span></a></li>
+<li><a href="../types/GCPKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GCPKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../types/GSSAPICanonicalizationValue.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GSSAPICanonicalization<wbr/>Value</span></a></li>
 <li><a href="../types/GenericListener.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Generic<wbr/>Listener</span></a></li>
 <li><a href="../types/GridFSBucketEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GridFSBucket<wbr/>Events</span></a></li>
 <li><a href="../types/Hint.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Hint</span></a></li>
+<li><a href="../types/IndexDescriptionCompact.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Description<wbr/>Compact</span></a></li>
+<li><a href="../types/IndexDescriptionInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Description<wbr/>Info</span></a></li>
 <li><a href="../types/IndexDirection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Direction</span></a></li>
 <li><a href="../types/IndexSpecification.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Specification</span></a></li>
 <li><a href="../types/InferIdType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Infer<wbr/>Id<wbr/>Type</span></a></li>
@@ -855,6 +867,7 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="../types/Join.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Join</span></a></li>
 <li><a href="../types/KeysOfAType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>OfAType</span></a></li>
 <li><a href="../types/KeysOfOtherType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>Of<wbr/>Other<wbr/>Type</span></a></li>
+<li><a href="../types/ListIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>List<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../types/ListSearchIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>List<wbr/>Search<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../types/MatchKeysAndValues.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Match<wbr/>Keys<wbr/>And<wbr/>Values</span></a></li>
 <li><a href="../types/MongoClientEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Mongo<wbr/>Client<wbr/>Events</span></a></li>
@@ -865,8 +878,7 @@ interoperability. Default: none, see minVersion.</p>
 <li><a href="../types/NonObjectIdLikeDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Non<wbr/>Object<wbr/>Id<wbr/>Like<wbr/>Document</span></a></li>
 <li><a href="../types/NotAcceptedFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Not<wbr/>Accepted<wbr/>Fields</span></a></li>
 <li><a href="../types/NumericType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Numeric<wbr/>Type</span></a></li>
-<li><a href="../types/OIDCRefreshFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRefresh<wbr/>Function</span></a></li>
-<li><a href="../types/OIDCRequestFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRequest<wbr/>Function</span></a></li>
+<li><a href="../types/OIDCCallbackFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCCallback<wbr/>Function</span></a></li>
 <li><a href="../types/OneOrMore.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>One<wbr/>Or<wbr/>More</span></a></li>
 <li><a href="../types/OnlyFieldsOfType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Only<wbr/>Fields<wbr/>Of<wbr/>Type</span></a></li>
 <li><a href="../types/OperationTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Operation<wbr/>Time</span></a></li>
