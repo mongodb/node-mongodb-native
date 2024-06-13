@@ -17,7 +17,7 @@ import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '..
 import { type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
-import { type ClientEncryptionDataKeyProvider, type KMSProviders } from './providers';
+import { type KMSProviders } from './providers';
 
 let socks: SocksLib | null = null;
 function loadSocks(): SocksLib {
@@ -110,6 +110,8 @@ export type CSFLEKMSTlsOptions = {
   kmip?: ClientEncryptionTlsOptions;
   local?: ClientEncryptionTlsOptions;
   azure?: ClientEncryptionTlsOptions;
+
+  [key: string]: ClientEncryptionTlsOptions | undefined;
 };
 
 /**
@@ -321,7 +323,7 @@ export class StateMachine {
 
     const tlsOptions = this.options.tlsOptions;
     if (tlsOptions) {
-      const kmsProvider = request.kmsProvider as ClientEncryptionDataKeyProvider;
+      const kmsProvider = request.kmsProvider;
       const providerTlsOptions = tlsOptions[kmsProvider];
       if (providerTlsOptions) {
         const error = this.validateTlsOptions(kmsProvider, providerTlsOptions);

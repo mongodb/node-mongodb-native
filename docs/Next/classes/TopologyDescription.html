@@ -54,6 +54,10 @@
 <div class="tsd-index-list"><a href="TopologyDescription.html#error" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-262144"><rect fill="var(--color-icon-background)" stroke="#FF4D4D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M8.85 16L11.13 7.24H12.582L14.85 16H13.758L13.182 13.672H10.53L9.954 16H8.85ZM10.746 12.76H12.954L12.282 10.06C12.154 9.548 12.054 9.12 11.982 8.776C11.91 8.432 11.866 8.208 11.85 8.104C11.834 8.208 11.79 8.432 11.718 8.776C11.646 9.12 11.546 9.544 11.418 10.048L10.746 12.76Z" fill="var(--color-text)"></path></g></svg><span>error</span></a>
 <a href="TopologyDescription.html#hasDataBearingServers" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>has<wbr/>Data<wbr/>Bearing<wbr/>Servers</span></a>
 <a href="TopologyDescription.html#hasKnownServers" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>has<wbr/>Known<wbr/>Servers</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading">Methods</h3>
+<div class="tsd-index-list"><a href="TopologyDescription.html#toJSON" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-2048"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)"></path></g></svg><span>toJSON</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
@@ -152,9 +156,9 @@
 <section class="tsd-panel tsd-member"><a id="error" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>error</span><a href="#error" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature" id="error.error-1"><span class="tsd-signature-symbol">get</span> error<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="MongoServerError.html" class="tsd-signature-type tsd-kind-class">MongoServerError</a></li>
+<li class="tsd-signature" id="error.error-1"><span class="tsd-signature-symbol">get</span> error<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="MongoError.html" class="tsd-signature-type tsd-kind-class">MongoError</a></li>
 <li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="MongoServerError.html" class="tsd-signature-type tsd-kind-class">MongoServerError</a></h4><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="MongoError.html" class="tsd-signature-type tsd-kind-class">MongoError</a></h4><aside class="tsd-sources">
 <ul>
 <li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/sdam/topology_description.ts#L310">src/sdam/topology_description.ts:310</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="hasDataBearingServers" class="tsd-anchor"></a>
@@ -178,7 +182,22 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/sdam/topology_description.ts#L325">src/sdam/topology_description.ts:325</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/sdam/topology_description.ts#L325">src/sdam/topology_description.ts:325</a></li></ul></aside></li></ul></section></section>
+<section class="tsd-panel-group tsd-member-group">
+<h2>Methods</h2>
+<section class="tsd-panel tsd-member"><a id="toJSON" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>toJSON</span><a href="#toJSON" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="toJSON.toJSON-1"><span class="tsd-kind-call-signature">toJSON</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><a href="#toJSON.toJSON-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns a JSON-serializable representation of the TopologyDescription.  This is primarily
+intended for use with JSON.stringify().</p>
+<p>This method will not throw.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/sdam/topology_description.ts#L352">src/sdam/topology_description.ts:352</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -191,7 +210,9 @@
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-private" name="private"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Private</span></label></li>
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
-<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></form></div>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-alpha" name="alpha"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Alpha</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-beta" name="beta"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Beta</span></label></li></ul></form></div>
 <div class="tsd-theme-toggle">
 <h4 class="uppercase">Theme</h4><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
 <details open class="tsd-index-accordion tsd-page-navigation"><summary class="tsd-accordion-summary">
@@ -213,7 +234,8 @@
 <li><a href="#type" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>type</span></a></li>
 <li><a href="#error" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>error</span></a></li>
 <li><a href="#hasDataBearingServers" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>has<wbr/>Data<wbr/>Bearing<wbr/>Servers</span></a></li>
-<li><a href="#hasKnownServers" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>has<wbr/>Known<wbr/>Servers</span></a></li></ul></div></details></div>
+<li><a href="#hasKnownServers" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>has<wbr/>Known<wbr/>Servers</span></a></li>
+<li><a href="#toJSON" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>toJSON</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>mongodb</span></a>
 <ul class="tsd-small-nested-navigation">
@@ -295,6 +317,7 @@
 <li><a href="MongoDriverError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Driver<wbr/>Error</span></a></li>
 <li><a href="MongoError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Error</span></a></li>
 <li><a href="MongoExpiredSessionError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Expired<wbr/>Session<wbr/>Error</span></a></li>
+<li><a href="MongoGCPError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoGCPError</span></a></li>
 <li><a href="MongoGridFSChunkError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>GridFSChunk<wbr/>Error</span></a></li>
 <li><a href="MongoGridFSStreamError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>GridFSStream<wbr/>Error</span></a></li>
 <li><a href="MongoInvalidArgumentError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Invalid<wbr/>Argument<wbr/>Error</span></a></li>
@@ -304,6 +327,7 @@
 <li><a href="MongoNetworkError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Network<wbr/>Error</span></a></li>
 <li><a href="MongoNetworkTimeoutError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Network<wbr/>Timeout<wbr/>Error</span></a></li>
 <li><a href="MongoNotConnectedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Not<wbr/>Connected<wbr/>Error</span></a></li>
+<li><a href="MongoOIDCError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoOIDCError</span></a></li>
 <li><a href="MongoParseError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Parse<wbr/>Error</span></a></li>
 <li><a href="MongoRuntimeError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Runtime<wbr/>Error</span></a></li>
 <li><a href="MongoServerClosedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Server<wbr/>Closed<wbr/>Error</span></a></li>
@@ -340,6 +364,7 @@
 <li><a href="WriteConcernError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern<wbr/>Error</span></a></li>
 <li><a href="WriteError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Error</span></a></li>
 <li><a href="../interfaces/AWSEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>AWSEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AWSKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>AWSKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregate<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregationCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregation<wbr/>Cursor<wbr/>Options</span></a></li>
@@ -380,7 +405,7 @@
 <li><a href="../interfaces/ClientMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata</span></a></li>
 <li><a href="../interfaces/ClientMetadataOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClientSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Session<wbr/>Options</span></a></li>
-<li><a href="../interfaces/CloseOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
+<li><a href="../interfaces/CloseOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClusterTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cluster<wbr/>Time</span></a></li>
 <li><a href="../interfaces/ClusteredCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Clustered<wbr/>Collection<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CollationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collation<wbr/>Options</span></a></li>
@@ -422,7 +447,7 @@
 <li><a href="../interfaces/GridFSChunk.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSChunk</span></a></li>
 <li><a href="../interfaces/GridFSFile.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSFile</span></a></li>
 <li><a href="../interfaces/HedgeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Hedge<wbr/>Options</span></a></li>
-<li><a href="../interfaces/IdPServerInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPServer<wbr/>Info</span></a></li>
+<li><a href="../interfaces/IdPInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPInfo</span></a></li>
 <li><a href="../interfaces/IdPServerResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>IdPServer<wbr/>Response</span></a></li>
 <li><a href="../interfaces/IndexDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Index<wbr/>Description</span></a></li>
 <li><a href="../interfaces/IndexInformationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Index<wbr/>Information<wbr/>Options</span></a></li>
@@ -430,18 +455,21 @@
 <li><a href="../interfaces/InsertOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="../interfaces/InsertOneOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Options</span></a></li>
 <li><a href="../interfaces/InsertOneResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Result</span></a></li>
+<li><a href="../interfaces/KMIPEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMIPEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="../interfaces/KMIPKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMIPKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../interfaces/KMSProviders.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMSProviders</span></a></li>
 <li><a href="../interfaces/ListCollectionsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Collections<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Result</span></a></li>
-<li><a href="../interfaces/ListIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Indexes<wbr/>Options</span></a></li>
+<li><a href="../interfaces/LocalKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>LocalKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../interfaces/ModifyResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Modify<wbr/>Result</span></a></li>
 <li><a href="../interfaces/MongoClientOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Client<wbr/>Options</span></a></li>
 <li><a href="../interfaces/MongoCredentialsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Credentials<wbr/>Options</span></a></li>
 <li><a href="../interfaces/MongoNetworkErrorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Network<wbr/>Error<wbr/>Options</span></a></li>
 <li><a href="../interfaces/MongoOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mongo<wbr/>Options</span></a></li>
 <li><a href="../interfaces/MonitorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Monitor<wbr/>Options</span></a></li>
-<li><a href="../interfaces/OIDCCallbackContext.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCCallback<wbr/>Context</span></a></li>
+<li><a href="../interfaces/OIDCCallbackParams.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCCallback<wbr/>Params</span></a></li>
+<li><a href="../interfaces/OIDCResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>OIDCResponse</span></a></li>
 <li><a href="../interfaces/OperationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Operation<wbr/>Options</span></a></li>
 <li><a href="../interfaces/PkFactory.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Pk<wbr/>Factory</span></a></li>
 <li><a href="../interfaces/ProxyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Proxy<wbr/>Options</span></a></li>
@@ -483,6 +511,7 @@
 <li><a href="../types/AuthMechanism.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
 <li><a href="../types/AutoEncryptionExtraOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Extra<wbr/>Options</span></a></li>
 <li><a href="../types/AutoEncryptionLoggerLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
+<li><a href="../types/AzureKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>AzureKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../types/BSONTypeAlias.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>BSONType<wbr/>Alias</span></a></li>
 <li><a href="../types/BatchType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Batch<wbr/>Type</span></a></li>
 <li><a href="../types/BitwiseFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Bitwise<wbr/>Filter</span></a></li>
@@ -511,10 +540,13 @@
 <li><a href="../types/Filter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter</span></a></li>
 <li><a href="../types/FilterOperations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter<wbr/>Operations</span></a></li>
 <li><a href="../types/Flatten.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Flatten</span></a></li>
+<li><a href="../types/GCPKMSProviderConfiguration.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GCPKMSProvider<wbr/>Configuration</span></a></li>
 <li><a href="../types/GSSAPICanonicalizationValue.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GSSAPICanonicalization<wbr/>Value</span></a></li>
 <li><a href="../types/GenericListener.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Generic<wbr/>Listener</span></a></li>
 <li><a href="../types/GridFSBucketEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GridFSBucket<wbr/>Events</span></a></li>
 <li><a href="../types/Hint.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Hint</span></a></li>
+<li><a href="../types/IndexDescriptionCompact.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Description<wbr/>Compact</span></a></li>
+<li><a href="../types/IndexDescriptionInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Description<wbr/>Info</span></a></li>
 <li><a href="../types/IndexDirection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Direction</span></a></li>
 <li><a href="../types/IndexSpecification.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Specification</span></a></li>
 <li><a href="../types/InferIdType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Infer<wbr/>Id<wbr/>Type</span></a></li>
@@ -523,6 +555,7 @@
 <li><a href="../types/Join.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Join</span></a></li>
 <li><a href="../types/KeysOfAType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>OfAType</span></a></li>
 <li><a href="../types/KeysOfOtherType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>Of<wbr/>Other<wbr/>Type</span></a></li>
+<li><a href="../types/ListIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>List<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../types/ListSearchIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>List<wbr/>Search<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../types/MatchKeysAndValues.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Match<wbr/>Keys<wbr/>And<wbr/>Values</span></a></li>
 <li><a href="../types/MongoClientEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Mongo<wbr/>Client<wbr/>Events</span></a></li>
@@ -533,8 +566,7 @@
 <li><a href="../types/NonObjectIdLikeDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Non<wbr/>Object<wbr/>Id<wbr/>Like<wbr/>Document</span></a></li>
 <li><a href="../types/NotAcceptedFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Not<wbr/>Accepted<wbr/>Fields</span></a></li>
 <li><a href="../types/NumericType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Numeric<wbr/>Type</span></a></li>
-<li><a href="../types/OIDCRefreshFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRefresh<wbr/>Function</span></a></li>
-<li><a href="../types/OIDCRequestFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRequest<wbr/>Function</span></a></li>
+<li><a href="../types/OIDCCallbackFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCCallback<wbr/>Function</span></a></li>
 <li><a href="../types/OneOrMore.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>One<wbr/>Or<wbr/>More</span></a></li>
 <li><a href="../types/OnlyFieldsOfType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Only<wbr/>Fields<wbr/>Of<wbr/>Type</span></a></li>
 <li><a href="../types/OperationTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Operation<wbr/>Time</span></a></li>

@@ -238,8 +238,13 @@ export {
 } from './client-side-encryption/errors';
 export type { MongocryptdManager } from './client-side-encryption/mongocryptd_manager';
 export type {
+  AWSKMSProviderConfiguration,
+  AzureKMSProviderConfiguration,
   ClientEncryptionDataKeyProvider,
-  KMSProviders
+  GCPKMSProviderConfiguration,
+  KMIPKMSProviderConfiguration,
+  KMSProviders,
+  LocalKMSProviderConfiguration
 } from './client-side-encryption/providers/index';
 export type {
   ClientEncryptionTlsOptions,

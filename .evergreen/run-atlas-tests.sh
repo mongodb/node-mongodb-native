@@ -2,9 +2,12 @@
 
 set -o errexit  # Exit the script with error if any of the commands fail
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+if test -f secrets-export.sh; then
+  source secrets-export.sh
+fi
 
-set -o xtrace
+PROJECT_DIRECTORY=${PROJECT_DIRECTORY:-"."}
+source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
 node -v
 

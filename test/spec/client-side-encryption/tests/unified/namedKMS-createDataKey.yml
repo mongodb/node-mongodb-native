@@ -1,0 +1,175 @@
+description: namedKMS-createDataKey
+
+schemaVersion: "1.18"
+
+runOnRequirements:
+  - csfle: true
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  - clientEncryption:
+      id: &clientEncryption0 clientEncryption0
+      clientEncryptionOpts:
+        keyVaultClient: *client0
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          "aws:name1": { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } }
+          "azure:name1": { tenantId: { $$placeholder: 1 }, clientId: { $$placeholder: 1 }, clientSecret: { $$placeholder: 1 } }
+          "gcp:name1": { email: { $$placeholder: 1 }, privateKey: { $$placeholder: 1 } }
+          "kmip:name1": { endpoint: { $$placeholder: 1 } }
+          "local:name1": { key: { $$placeholder: 1 } }
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name keyvault
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name datakeys
+
+initialData:
+  - databaseName: *database0Name
+    collectionName: *collection0Name
+    documents: []
+
+tests:
+  - description: create data key with named AWS KMS provider
+    operations:
+      - name: createDataKey
+        object: *clientEncryption0
+        arguments:
+          kmsProvider: "aws:name1"
+          opts:
+            masterKey: &new_aws_masterkey
+              key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
+              region: us-east-1
+        expectResult: { $$type: binData }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              databaseName: *database0Name
+              command:
+                insert: *collection0Name
+                documents:
+                  - _id: { $$type: binData }
+                    keyMaterial: { $$type: binData }
+                    creationDate: { $$type: date }
+                    updateDate: { $$type: date }
+                    status: { $$exists: true }
+                    masterKey:
+                      provider: "aws:name1"
+                      <<: *new_aws_masterkey
+                writeConcern: { w: majority }
+
+  - description: create datakey with named Azure KMS provider
+    operations:
+      - name: createDataKey
+        object: *clientEncryption0
+        arguments:
+          kmsProvider: "azure:name1"
+          opts:
+            masterKey: &new_azure_masterkey
+              keyVaultEndpoint: key-vault-csfle.vault.azure.net
+              keyName: key-name-csfle
+        expectResult: { $$type: binData }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              databaseName: *database0Name
+              command:
+                insert: *collection0Name
+                documents:
+                  - _id: { $$type: binData }
+                    keyMaterial: { $$type: binData }
+                    creationDate: { $$type: date }
+                    updateDate: { $$type: date }
+                    status: { $$exists: true }
+                    masterKey:
+                      provider: "azure:name1"
+                      <<: *new_azure_masterkey
+                writeConcern: { w: majority }
+
+  - description: create datakey with named GCP KMS provider
+    operations:
+      - name: createDataKey
+        object: *clientEncryption0
+        arguments:
+          kmsProvider: "gcp:name1"
+          opts:
+            masterKey: &new_gcp_masterkey
+              projectId: devprod-drivers
+              location: global
+              keyRing: key-ring-csfle
+              keyName: key-name-csfle
+        expectResult: { $$type: binData }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              databaseName: *database0Name
+              command:
+                insert: *collection0Name
+                documents:
+                  - _id: { $$type: binData }
+                    keyMaterial: { $$type: binData }
+                    creationDate: { $$type: date }
+                    updateDate: { $$type: date }
+                    status: { $$exists: true }
+                    masterKey:
+                      provider: "gcp:name1"
+                      <<: *new_gcp_masterkey
+                writeConcern: { w: majority }
+
+  - description: create datakey with named KMIP KMS provider
+    operations:
+      - name: createDataKey
+        object: *clientEncryption0
+        arguments:
+          kmsProvider: "kmip:name1"
+        expectResult: { $$type: binData }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              databaseName: *database0Name
+              command:
+                insert: *collection0Name
+                documents:
+                  - _id: { $$type: binData }
+                    keyMaterial: { $$type: binData }
+                    creationDate: { $$type: date }
+                    updateDate: { $$type: date }
+                    status: { $$exists: true }
+                    masterKey:
+                      provider: "kmip:name1"
+                      keyId: { $$type: string }
+                writeConcern: { w: majority }
+
+  - description: create datakey with named local KMS provider
+    operations:
+      - name: createDataKey
+        object: *clientEncryption0
+        arguments:
+          kmsProvider: "local:name1"
+        expectResult: { $$type: binData }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              databaseName: *database0Name
+              command:
+                insert: *collection0Name
+                documents:
+                  - _id: { $$type: binData }
+                    keyMaterial: { $$type: binData }
+                    creationDate: { $$type: date }
+                    updateDate: { $$type: date }
+                    status: { $$exists: true }
+                    masterKey:
+                      provider: "local:name1"
+                writeConcern: { w: majority }
