@@ -1,4 +1,4 @@
-import { expectAssignable, expectError, expectType } from 'tsd';
+import { expectAssignable, expectError, expectNotAssignable, expectType } from 'tsd';
 
 import type {
   AWSEncryptionKeyOptions,
@@ -9,6 +9,7 @@ import type {
   KMSProviders,
   RangeOptions
 } from '../..';
+import type { ClientEncryptionDataKeyProvider } from '../mongodb';
 
 type RequiredCreateEncryptedCollectionSettings = Parameters<
   ClientEncryption['createEncryptedCollection']
@@ -86,4 +87,19 @@ expectAssignable<RequiredCreateEncryptedCollectionSettings>({
   expectAssignable<KMSProviders['gcp']>({ accessToken: 'a' });
   // automatic
   expectAssignable<KMSProviders['gcp']>({});
+}
+
+{
+  expectAssignable<ClientEncryptionDataKeyProvider>('aws');
+  expectAssignable<ClientEncryptionDataKeyProvider>('gcp');
+  expectAssignable<ClientEncryptionDataKeyProvider>('azure');
+  expectAssignable<ClientEncryptionDataKeyProvider>('local');
+  expectAssignable<ClientEncryptionDataKeyProvider>('kmip');
+  expectAssignable<ClientEncryptionDataKeyProvider>('aws:named');
+  expectAssignable<ClientEncryptionDataKeyProvider>('gcp:named');
+  expectAssignable<ClientEncryptionDataKeyProvider>('azure:named');
+  expectAssignable<ClientEncryptionDataKeyProvider>('local:named');
+  expectAssignable<ClientEncryptionDataKeyProvider>('kmip:named');
+
+  expectNotAssignable<ClientEncryptionDataKeyProvider>('arbitrary string');
 }

@@ -3500,9 +3500,9 @@ tasks:
             - {key: TS_VERSION, value: current}
       - func: install dependencies
       - func: check types
-  - name: check-types-typescript-4.1.6
+  - name: check-types-typescript-4.4
     tags:
-      - check-types-typescript-4.1.6
+      - check-types-typescript-4.4
       - typescript-compilation
     commands:
       - command: expansions.update
@@ -3511,7 +3511,7 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: 4.1.6}
+            - {key: TS_VERSION, value: '4.4'}
       - func: install dependencies
       - func: check types
   - name: download-and-merge-coverage

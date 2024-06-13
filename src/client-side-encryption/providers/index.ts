@@ -122,7 +122,7 @@ export interface KMSProviders {
    * Configuration options for using 'aws' as your KMS provider
    */
   aws?: AWSKMSProviderConfiguration | Record<string, never>;
-  [key: `aws:${string}`]: AWSKMSProviderConfiguration | Record<string, never>;
+  [key: `aws:${string}`]: AWSKMSProviderConfiguration;
 
   /**
    * Configuration options for using 'local' as your KMS provider
@@ -140,13 +140,13 @@ export interface KMSProviders {
    * Configuration options for using 'azure' as your KMS provider
    */
   azure?: AzureKMSProviderConfiguration | Record<string, never>;
-  [key: `azure:${string}`]: AzureKMSProviderConfiguration | Record<string, never>;
+  [key: `azure:${string}`]: AzureKMSProviderConfiguration;
 
   /**
    * Configuration options for using 'gcp' as your KMS provider
    */
   gcp?: GCPKMSProviderConfiguration | Record<string, never>;
-  [key: `gcp:${string}`]: GCPKMSProviderConfiguration | Record<string, never>;
+  [key: `gcp:${string}`]: GCPKMSProviderConfiguration;
 }
 
 /**
