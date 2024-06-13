@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "MongoDB Lambda Function Example",
   "main": "app.mjs",
-  "license": "MIT",
+  "private": true,
+  "license": "Apache",
   "dependencies": {
     "mongodb": "mongodb/node-mongodb-native"
   }
