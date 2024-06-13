@@ -12,7 +12,7 @@ import { loadGCPCredentials } from './gcp';
  *    `aws:<name>`, `gcp:<name>`, `local:<name>`, `kmip:<name>`, `azure:<name>`
  *  where `name` is an alphanumeric string, underscores allowed.
  */
-export type ClientEncryptionDataKeyProvider = string;
+export type ClientEncryptionDataKeyProvider = keyof KMSProviders;
 
 /** @public */
 export interface AWSKMSProviderConfiguration {

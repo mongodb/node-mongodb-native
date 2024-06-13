@@ -15,7 +15,7 @@ type RequiredCreateEncryptedCollectionSettings = Parameters<
 >[2];
 
 expectError<RequiredCreateEncryptedCollectionSettings>({});
-expectAssignable<RequiredCreateEncryptedCollectionSettings>({
+expectError<RequiredCreateEncryptedCollectionSettings>({
   provider: 'blah!',
   createCollectionOptions: { encryptedFields: {} }
 });
@@ -30,6 +30,10 @@ expectError<RequiredCreateEncryptedCollectionSettings>({
 
 expectAssignable<RequiredCreateEncryptedCollectionSettings>({
   provider: 'aws',
+  createCollectionOptions: { encryptedFields: {} }
+});
+expectAssignable<RequiredCreateEncryptedCollectionSettings>({
+  provider: 'aws:namedprovider',
   createCollectionOptions: { encryptedFields: {} }
 });
 expectAssignable<RequiredCreateEncryptedCollectionSettings>({
