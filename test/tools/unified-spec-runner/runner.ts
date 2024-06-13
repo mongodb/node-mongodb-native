@@ -253,7 +253,12 @@ async function runUnifiedTest(
               entities
             )
           : testClient!.collectedLogs;
-        compareLogs(expectedLogsForClient.messages, filteredTestClientLogs, entities);
+        compareLogs(
+          expectedLogsForClient.messages,
+          filteredTestClientLogs,
+          entities,
+          expectedLogsForClient.ignoreExtraMessages
+        );
       }
     }
 

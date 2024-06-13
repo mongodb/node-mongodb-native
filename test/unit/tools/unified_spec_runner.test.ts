@@ -37,7 +37,7 @@ describe('Unified Spec Runner', function () {
           it('throws AssertionError when it finds extra keys', function () {
             actual =
               '{"data": {"$numberLong": "100"}, "a": {"$numberInt": "10"}, "b": {"$numberInt": "100"}}';
-            expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
+            expect(() => resultCheckSpy(actual, expected, entitiesMap, [], true)).to.throw(
               AssertionError,
               /object has more keys than expected/
             );

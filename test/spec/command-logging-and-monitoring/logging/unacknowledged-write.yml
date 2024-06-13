@@ -1,0 +1,76 @@
+description: "unacknowledged-write"
+
+schemaVersion: "1.16"
+
+createEntities:
+  - client:
+      id: &client client
+      useMultipleMongoses: false
+      observeLogMessages:
+        command: debug
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName logging-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName logging-tests-collection
+      collectionOptions:
+        writeConcern: { w: 0 }
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1 }
+
+tests:
+  - description: "An unacknowledged write generates a succeeded log message with ok: 1 reply"
+    operations:
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 2 }
+      # Force completion of the w: 0 write by executing a find on the same connection
+      - name: find
+        object: *collection
+        arguments:
+          filter: { }
+        expectResult: [
+          { _id: 1 },
+          { _id: 2 }
+        ]
+    expectLogMessages:
+      - client: *client
+        ignoreExtraMessages: true
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: insert
+              command:
+                $$matchAsDocument:
+                  $$matchAsRoot:
+                    insert: *collectionName
+                    $db: *databaseName
+              requestId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: insert
+              reply:
+                $$matchAsDocument:
+                  ok: 1
+              requestId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              durationMS: { $$type: [double, int, long] }
+        
+
