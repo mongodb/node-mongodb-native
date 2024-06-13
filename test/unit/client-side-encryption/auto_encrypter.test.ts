@@ -162,7 +162,7 @@ describe('AutoEncrypter', function () {
           local: { key: Buffer.alloc(96) }
         }
       });
-      const decrypted = await mc.decrypt(input);
+      const decrypted = BSON.deserialize(await mc.decrypt(input));
       expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
       expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
       expect(decrypted.filter).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
@@ -185,25 +185,26 @@ describe('AutoEncrypter', function () {
           local: { key: Buffer.alloc(96) }
         }
       });
-      mc[Symbol.for('@@mdb.decorateDecryptionResult')] = true;
-      let decrypted = await mc.decrypt(input);
+
+      let decrypted = BSON.deserialize(await mc.decrypt(input));
       expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
-      expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-      expect(decrypted.filter[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['ssn']);
 
       // The same, but with an object containing different data types as the input
-      decrypted = await mc.decrypt({
-        a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
-      });
+      decrypted = BSON.deserialize(
+        await mc.decrypt(
+          BSON.serialize({
+            a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
+          })
+        )
+      );
       expect(decrypted).to.eql({
         a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
       });
       expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
 
       // The same, but with nested data inside the decrypted input
-      decrypted = await mc.decrypt(nestedInput);
+      decrypted = BSON.deserialize(await mc.decrypt(nestedInput));
       expect(decrypted).to.eql({ nested: { x: { y: 1234 } } });
-      expect(decrypted[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['nested']);
       expect(decrypted.nested).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
       expect(decrypted.nested.x).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
       expect(decrypted.nested.x.y).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
@@ -243,7 +244,7 @@ describe('AutoEncrypter', function () {
             aws: {}
           }
         });
-        const decrypted = await mc.decrypt(input);
+        const decrypted = BSON.deserialize(await mc.decrypt(input));
         expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
       });
     });

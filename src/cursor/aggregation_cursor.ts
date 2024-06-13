@@ -2,12 +2,12 @@ import type { Document } from '../bson';
 import type { ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import { AggregateOperation, type AggregateOptions } from '../operations/aggregate';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
 import type { MongoDBNamespace } from '../utils';
 import { mergeOptions } from '../utils';
-import type { AbstractCursorOptions } from './abstract_cursor';
+import type { AbstractCursorOptions, InitialCursorResponse } from './abstract_cursor';
 import { AbstractCursor } from './abstract_cursor';
 
 /** @public */
@@ -51,7 +51,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  async _initialize(session: ClientSession): Promise<ExecutionResult> {
+  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.aggregateOptions,
       ...this.cursorOptions,
@@ -60,20 +60,21 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
     const response = await executeOperation(this.client, aggregateOperation);
 
-    // TODO: NODE-2882
     return { server: aggregateOperation.server, session, response };
   }
 
   /** Execute the explain for the cursor */
   async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
-    return await executeOperation(
-      this.client,
-      new AggregateOperation(this.namespace, this.pipeline, {
-        ...this.aggregateOptions, // NOTE: order matters here, we may need to refine this
-        ...this.cursorOptions,
-        explain: verbosity ?? true
-      })
-    );
+    return (
+      await executeOperation(
+        this.client,
+        new AggregateOperation(this.namespace, this.pipeline, {
+          ...this.aggregateOptions, // NOTE: order matters here, we may need to refine this
+          ...this.cursorOptions,
+          explain: verbosity ?? true
+        })
+      )
+    ).shift(this.aggregateOptions);
   }
 
   /** Add a stage to the aggregation pipeline

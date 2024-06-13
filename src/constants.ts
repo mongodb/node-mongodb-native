@@ -165,3 +165,12 @@ export const LEGACY_HELLO_COMMAND = 'ismaster';
  * The legacy hello command that was deprecated in MongoDB 5.0.
  */
 export const LEGACY_HELLO_COMMAND_CAMEL_CASE = 'isMaster';
+
+// Typescript errors if we index objects with `Symbol.for(...)`, so
+// to avoid TS errors we pull them out into variables.  Then we can type
+// the objects (and class) that we expect to see them on and prevent TS
+// errors.
+/** @internal */
+export const kDecorateResult = Symbol.for('@@mdb.decorateDecryptionResult');
+/** @internal */
+export const kDecoratedKeys = Symbol.for('@@mdb.decryptedKeys');

@@ -88,6 +88,9 @@ describe('CRUD API explain option', function () {
       context(`When explain is ${explainValue}, operation ${name}`, function () {
         it(`sets command verbosity to ${explainValue} and includes ${explainValueToExpectation(explainValue)} in the return response`, async function () {
           const response = await op.op(explainValue).catch(error => error);
+          if (response instanceof Error && !(response instanceof MongoServerError)) {
+            throw response;
+          }
           const commandStartedEvent = await commandStartedPromise;
           const explainJson = JSON.stringify(response);
           switch (explainValue) {

@@ -1,26 +1,21 @@
-import type { BSONSerializeOptions, Document, Long } from '../bson';
+import type { BSONSerializeOptions, Document } from '../bson';
+import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
-import { MongoAPIError, MongoUnexpectedServerResponseError } from '../error';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { MongoAPIError } from '../error';
+import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { RunCommandOperation } from '../operations/run_command';
 import type { ReadConcernLike } from '../read_concern';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { ns } from '../utils';
-import { AbstractCursor } from './abstract_cursor';
+import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
 
 /** @public */
 export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
 } & BSONSerializeOptions;
-
-/** @internal */
-type RunCursorCommandResponse = {
-  cursor: { id: bigint | Long | number; ns: string; firstBatch: Document[] };
-  ok: 1;
-};
 
 /** @public */
 export class RunCommandCursor extends AbstractCursor {
@@ -102,16 +97,16 @@ export class RunCommandCursor extends AbstractCursor {
   }
 
   /** @internal */
-  protected async _initialize(session: ClientSession): Promise<ExecutionResult> {
-    const operation = new RunCommandOperation<RunCursorCommandResponse>(this.db, this.command, {
+  protected async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
+    const operation = new RunCommandOperation<CursorResponse>(this.db, this.command, {
       ...this.cursorOptions,
       session: session,
-      readPreference: this.cursorOptions.readPreference
+      readPreference: this.cursorOptions.readPreference,
+      responseType: CursorResponse
     });
+
     const response = await executeOperation(this.client, operation);
-    if (response.cursor == null) {
-      throw new MongoUnexpectedServerResponseError('Expected server to respond with cursor');
-    }
+
     return {
       server: operation.server,
       session,
@@ -120,13 +115,12 @@ export class RunCommandCursor extends AbstractCursor {
   }
 
   /** @internal */
-  override async getMore(_batchSize: number): Promise<Document> {
+  override async getMore(_batchSize: number): Promise<CursorResponse> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const getMoreOperation = new GetMoreOperation(this.namespace, this.id!, this.server!, {
       ...this.cursorOptions,
       session: this.session,
-      ...this.getMoreOptions,
-      useCursorResponse: false
+      ...this.getMoreOptions
     });
 
     return await executeOperation(this.client, getMoreOperation);
