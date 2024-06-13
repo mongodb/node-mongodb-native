@@ -61,8 +61,7 @@ jobs:
           aws_secret_id: ${{ secrets.aws_secret_id }}
 
       - name: "Generate Sarif Report"
-        # TODO: Use v2 once it has been re-tagged to include this action
-        uses: mongodb-labs/drivers-github-tools/code-scanning-export@main
+        uses: mongodb-labs/drivers-github-tools/code-scanning-export@v2
         with:
           ref: 5.x
           output-file: sarif-report.json
