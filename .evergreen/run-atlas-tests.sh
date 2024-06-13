@@ -3,7 +3,7 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 if test -f secrets-export.sh; then
-	source secrets-export.sh
+  source secrets-export.sh
 fi
 
 PROJECT_DIRECTORY=${PROJECT_DIRECTORY:-"."}
