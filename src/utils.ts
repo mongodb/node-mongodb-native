@@ -8,11 +8,11 @@ import * as url from 'url';
 import { URL } from 'url';
 import { promisify } from 'util';
 
-import { type Document, ObjectId, resolveBSONOptions } from './bson';
+import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 import type { Collection } from './collection';
-import { LEGACY_HELLO_COMMAND } from './constants';
+import { kDecoratedKeys, LEGACY_HELLO_COMMAND } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import type { FindCursor } from './cursor/find_cursor';
 import type { Db } from './db';
@@ -1365,4 +1365,54 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
 
 export function noop() {
   return;
+}
+
+/**
+ * Recurse through the (identically-shaped) `decrypted` and `original`
+ * objects and attach a `decryptedKeys` property on each sub-object that
+ * contained encrypted fields. Because we only call this on BSON responses,
+ * we do not need to worry about circular references.
+ *
+ * @internal
+ */
+export function decorateDecryptionResult(
+  decrypted: Document & { [kDecoratedKeys]?: Array<string> },
+  original: Document,
+  isTopLevelDecorateCall = true
+): void {
+  if (isTopLevelDecorateCall) {
+    // The original value could have been either a JS object or a BSON buffer
+    if (Buffer.isBuffer(original)) {
+      original = deserialize(original);
+    }
+    if (Buffer.isBuffer(decrypted)) {
+      throw new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');
+    }
+  }
+
+  if (!decrypted || typeof decrypted !== 'object') return;
+  for (const k of Object.keys(decrypted)) {
+    const originalValue = original[k];
+
+    // An object was decrypted by libmongocrypt if and only if it was
+    // a BSON Binary object with subtype 6.
+    if (originalValue && originalValue._bsontype === 'Binary' && originalValue.sub_type === 6) {
+      if (!decrypted[kDecoratedKeys]) {
+        Object.defineProperty(decrypted, kDecoratedKeys, {
+          value: [],
+          configurable: true,
+          enumerable: false,
+          writable: false
+        });
+      }
+      // this is defined in the preceding if-statement
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      decrypted[kDecoratedKeys]!.push(k);
+      // Do not recurse into this decrypted value. It could be a sub-document/array,
+      // in which case there is no original value associated with its subfields.
+      continue;
+    }
+
+    decorateDecryptionResult(decrypted[k], originalValue, false);
+  }
 }

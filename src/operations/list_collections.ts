@@ -1,4 +1,5 @@
 import type { Binary, Document } from '../bson';
+import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -17,7 +18,7 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandOperation<Document> {
+export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -51,11 +52,15 @@ export class ListCollectionsOperation extends CommandOperation<Document> {
     return 'listCollections' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<CursorResponse> {
     return await super.executeCommand(
       server,
       session,
-      this.generateCommand(maxWireVersion(server))
+      this.generateCommand(maxWireVersion(server)),
+      CursorResponse
     );
   }
 

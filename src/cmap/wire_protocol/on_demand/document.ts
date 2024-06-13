@@ -66,9 +66,11 @@ export class OnDemandDocument {
     /** The start of the document */
     private readonly offset = 0,
     /** If this is an embedded document, indicates if this was a BSON array */
-    public readonly isArray = false
+    public readonly isArray = false,
+    /** If elements was already calculated */
+    elements?: BSONElement[]
   ) {
-    this.elements = parseToElementsToArray(this.bson, offset);
+    this.elements = elements ?? parseToElementsToArray(this.bson, offset);
   }
 
   /** Only supports basic latin strings */
@@ -78,8 +80,13 @@ export class OnDemandDocument {
 
     if (name.length !== nameLength) return false;
 
-    for (let i = 0; i < name.length; i++) {
-      if (this.bson[nameOffset + i] !== name.charCodeAt(i)) return false;
+    const nameEnd = nameOffset + nameLength;
+    for (
+      let byteIndex = nameOffset, charIndex = 0;
+      charIndex < name.length && byteIndex < nameEnd;
+      charIndex++, byteIndex++
+    ) {
+      if (this.bson[byteIndex] !== name.charCodeAt(charIndex)) return false;
     }
 
     return true;
@@ -125,7 +132,7 @@ export class OnDemandDocument {
       const element = this.elements[index];
 
       // skip this element if it has already been associated with a name
-      if (!this.indexFound[index] && this.isElementName(name, element)) {
+      if (!(index in this.indexFound) && this.isElementName(name, element)) {
         const cachedElement = { element, value: undefined };
         this.cache[name] = cachedElement;
         this.indexFound[index] = true;
@@ -247,7 +254,7 @@ export class OnDemandDocument {
   public get<const T extends keyof JSTypeOf>(
     name: string | number,
     as: T,
-    required?: false | undefined
+    required?: boolean | undefined
   ): JSTypeOf[T] | null;
 
   /** `required` will make `get` throw if name does not exist or is null/undefined */

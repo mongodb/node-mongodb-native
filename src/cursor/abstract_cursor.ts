@@ -1,7 +1,7 @@
 import { Readable, Transform } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
-import { CursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorResponse } from '../cmap/wire_protocol/responses';
 import {
   MongoAPIError,
   MongoCursorExhaustedError,
@@ -11,15 +11,33 @@ import {
   MongoTailableCursorError
 } from '../error';
 import type { MongoClient } from '../mongo_client';
-import { type TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { TypedEventEmitter } from '../mongo_types';
+import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { List, type MongoDBNamespace, ns, squashError } from '../utils';
+import { type MongoDBNamespace, squashError } from '../utils';
+
+/**
+ * @internal
+ * TODO(NODE-2882): A cursor's getMore commands must be run on the same server it was started on
+ * and the same session must be used for the lifetime of the cursor. This object serves to get the
+ * server and session (along with the response) out of executeOperation back to the AbstractCursor.
+ *
+ * There may be a better design for communicating these values back to the cursor, currently an operation
+ * MUST store the selected server on itself so it can be read after executeOperation has returned.
+ */
+export interface InitialCursorResponse {
+  /** The server selected for the operation */
+  server: Server;
+  /** The session used for this operation, may be implicitly created */
+  session?: ClientSession;
+  /** The raw server response for the operation */
+  response: CursorResponse;
+}
 
 /** @public */
 export const CURSOR_FLAGS = [
@@ -118,13 +136,7 @@ export abstract class AbstractCursor<
   /** @internal */
   private cursorNamespace: MongoDBNamespace;
   /** @internal */
-  private documents: {
-    length: number;
-    shift(bsonOptions?: any): TSchema | null;
-    clear(): void;
-    pushMany(many: Iterable<TSchema>): void;
-    push(item: TSchema): void;
-  };
+  private documents: CursorResponse | null = null;
   /** @internal */
   private cursorClient: MongoClient;
   /** @internal */
@@ -155,7 +167,6 @@ export abstract class AbstractCursor<
     this.cursorClient = client;
     this.cursorNamespace = namespace;
     this.cursorId = null;
-    this.documents = new List();
     this.initialized = false;
     this.isClosed = false;
     this.isKilled = false;
@@ -252,16 +263,19 @@ export abstract class AbstractCursor<
 
   /** Returns current buffered documents length */
   bufferedCount(): number {
-    return this.documents.length;
+    return this.documents?.length ?? 0;
   }
 
   /** Returns current buffered documents */
   readBufferedDocuments(number?: number): TSchema[] {
     const bufferedDocs: TSchema[] = [];
-    const documentsToRead = Math.min(number ?? this.documents.length, this.documents.length);
+    const documentsToRead = Math.min(
+      number ?? this.documents?.length ?? 0,
+      this.documents?.length ?? 0
+    );
 
     for (let count = 0; count < documentsToRead; count++) {
-      const document = this.documents.shift(this.cursorOptions);
+      const document = this.documents?.shift(this.cursorOptions);
       if (document != null) {
         bufferedDocs.push(document);
       }
@@ -269,7 +283,6 @@ export abstract class AbstractCursor<
 
     return bufferedDocs;
   }
-
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
     if (this.isClosed) {
       return;
@@ -281,11 +294,11 @@ export abstract class AbstractCursor<
           return;
         }
 
-        if (this.isClosed && this.documents.length === 0) {
+        if (this.closed && (this.documents?.length ?? 0) === 0) {
           return;
         }
 
-        if (this.cursorId != null && this.isDead && this.documents.length === 0) {
+        if (this.cursorId != null && this.isDead && (this.documents?.length ?? 0) === 0) {
           return;
         }
 
@@ -347,11 +360,11 @@ export abstract class AbstractCursor<
     }
 
     do {
-      if (this.documents.length !== 0) {
+      if ((this.documents?.length ?? 0) !== 0) {
         return true;
       }
       await this.fetchBatch();
-    } while (!this.isDead || this.documents.length !== 0);
+    } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
 
     return false;
   }
@@ -363,13 +376,13 @@ export abstract class AbstractCursor<
     }
 
     do {
-      const doc = this.documents.shift();
+      const doc = this.documents?.shift(this.cursorOptions);
       if (doc != null) {
         if (this.transform != null) return await this.transformDocument(doc);
         return doc;
       }
       await this.fetchBatch();
-    } while (!this.isDead || this.documents.length !== 0);
+    } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
 
     return null;
   }
@@ -382,7 +395,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    let doc = this.documents.shift();
+    let doc = this.documents?.shift(this.cursorOptions);
     if (doc != null) {
       if (this.transform != null) return await this.transformDocument(doc);
       return doc;
@@ -390,7 +403,7 @@ export abstract class AbstractCursor<
 
     await this.fetchBatch();
 
-    doc = this.documents.shift();
+    doc = this.documents?.shift(this.cursorOptions);
     if (doc != null) {
       if (this.transform != null) return await this.transformDocument(doc);
       return doc;
@@ -591,7 +604,7 @@ export abstract class AbstractCursor<
     }
 
     this.cursorId = null;
-    this.documents.clear();
+    this.documents?.clear();
     this.isClosed = false;
     this.isKilled = false;
     this.initialized = false;
@@ -615,10 +628,12 @@ export abstract class AbstractCursor<
   abstract clone(): AbstractCursor<TSchema>;
 
   /** @internal */
-  protected abstract _initialize(session: ClientSession | undefined): Promise<ExecutionResult>;
+  protected abstract _initialize(
+    session: ClientSession | undefined
+  ): Promise<InitialCursorResponse>;
 
   /** @internal */
-  async getMore(batchSize: number, useCursorResponse = false): Promise<Document | null> {
+  async getMore(batchSize: number): Promise<CursorResponse> {
     if (this.cursorId == null) {
       throw new MongoRuntimeError(
         'Unexpected null cursor id. A cursor creating command should have set this'
@@ -636,8 +651,7 @@ export abstract class AbstractCursor<
       {
         ...this.cursorOptions,
         session: this.cursorSession,
-        batchSize,
-        useCursorResponse
+        batchSize
       }
     );
 
@@ -656,27 +670,10 @@ export abstract class AbstractCursor<
       const state = await this._initialize(this.cursorSession);
       const response = state.response;
       this.selectedServer = state.server;
-      if (CursorResponse.is(response)) {
-        this.cursorId = response.id;
-        if (response.ns) this.cursorNamespace = response.ns;
-        this.documents = response;
-      } else if (response.cursor) {
-        // TODO(NODE-2674): Preserve int64 sent from MongoDB
-        this.cursorId = getCursorId(response);
-        if (response.cursor.ns) this.cursorNamespace = ns(response.cursor.ns);
-        this.documents.pushMany(response.cursor.firstBatch);
-      }
-
-      if (this.cursorId == null) {
-        // When server responses return without a cursor document, we close this cursor
-        // and return the raw server response. This is the case for explain commands
-        this.cursorId = Long.ZERO;
-        // TODO(NODE-3286): ExecutionResult needs to accept a generic parameter
-        this.documents.push(state.response as TODO_NODE_3286);
-      }
-
-      // the cursor is now initialized, even if it is dead
-      this.initialized = true;
+      this.cursorId = response.id;
+      this.cursorNamespace = response.ns ?? this.namespace;
+      this.documents = response;
+      this.initialized = true; // the cursor is now initialized, even if it is dead
     } catch (error) {
       // the cursor is now initialized, even if an error occurred
       this.initialized = true;
@@ -708,7 +705,7 @@ export abstract class AbstractCursor<
     if (this.cursorId == null) {
       await this.cursorInit();
       // If the cursor died or returned documents, return
-      if (this.documents.length !== 0 || this.isDead) return;
+      if ((this.documents?.length ?? 0) !== 0 || this.isDead) return;
       // Otherwise, run a getMore
     }
 
@@ -717,16 +714,8 @@ export abstract class AbstractCursor<
 
     try {
       const response = await this.getMore(batchSize);
-      // CursorResponse is disabled in this PR
-      // however the special `emptyGetMore` can be returned from find cursors
-      if (CursorResponse.is(response)) {
-        this.cursorId = response.id;
-        this.documents = response;
-      } else if (response?.cursor) {
-        const cursorId = getCursorId(response);
-        this.documents.pushMany(response.cursor.nextBatch);
-        this.cursorId = cursorId;
-      }
+      this.cursorId = response.id;
+      this.documents = response;
     } catch (error) {
       try {
         await this.cleanup(error);
@@ -789,7 +778,7 @@ export abstract class AbstractCursor<
   /** @internal */
   private emitClose() {
     try {
-      if (!this.hasEmittedClose && (this.documents.length === 0 || this.isClosed)) {
+      if (!this.hasEmittedClose && ((this.documents?.length ?? 0) === 0 || this.isClosed)) {
         // @ts-expect-error: CursorEvents is generic so Parameters<CursorEvents["close"]> may not be assignable to `[]`. Not sure how to require extenders do not add parameters.
         this.emit('close');
       }
@@ -825,15 +814,6 @@ export abstract class AbstractCursor<
   protected throwIfInitialized() {
     if (this.initialized) throw new MongoCursorInUseError();
   }
-}
-
-/** A temporary helper to box up the many possible type issue of cursor ids */
-function getCursorId(response: Document) {
-  return typeof response.cursor.id === 'number'
-    ? Long.fromNumber(response.cursor.id)
-    : typeof response.cursor.id === 'bigint'
-    ? Long.fromBigInt(response.cursor.id)
-    : response.cursor.id;
 }
 
 class ReadableCursorStream extends Readable {
