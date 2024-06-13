@@ -108,7 +108,7 @@ jobs:
           echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
 
       - name: actions/publish_asset_to_s3
-        uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@main
+        uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@v2
         with:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
