@@ -497,9 +497,10 @@ SINGLETON_TASKS.push(
 );
 
 function* makeTypescriptTasks() {
-  for (const TS_VERSION of ['next', 'current', '4.1.6']) {
-    // 4.1.6 can consume the public API but not compile the driver
-    if (TS_VERSION !== '4.1.6' && TS_VERSION !== 'next') {
+  for (const TS_VERSION of ['next', 'current', '4.4']) {
+    // We don't compile on next, because compilation errors are likely.  We do expect
+    // that the drivers types continue to work with next though.
+    if (TS_VERSION !== '4.4' && TS_VERSION !== 'next') {
       yield {
         name: `compile-driver-typescript-${TS_VERSION}`,
         tags: [`compile-driver-typescript-${TS_VERSION}`, 'typescript-compilation'],

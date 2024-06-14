@@ -12,7 +12,7 @@ import { loadGCPCredentials } from './gcp';
  *    `aws:<name>`, `gcp:<name>`, `local:<name>`, `kmip:<name>`, `azure:<name>`
  *  where `name` is an alphanumeric string, underscores allowed.
  */
-export type ClientEncryptionDataKeyProvider = string;
+export type ClientEncryptionDataKeyProvider = keyof KMSProviders;
 
 /** @public */
 export interface AWSKMSProviderConfiguration {
@@ -122,34 +122,31 @@ export interface KMSProviders {
    * Configuration options for using 'aws' as your KMS provider
    */
   aws?: AWSKMSProviderConfiguration | Record<string, never>;
+  [key: `aws:${string}`]: AWSKMSProviderConfiguration;
 
   /**
    * Configuration options for using 'local' as your KMS provider
    */
   local?: LocalKMSProviderConfiguration;
+  [key: `local:${string}`]: LocalKMSProviderConfiguration;
 
   /**
    * Configuration options for using 'kmip' as your KMS provider
    */
   kmip?: KMIPKMSProviderConfiguration;
+  [key: `kmip:${string}`]: KMIPKMSProviderConfiguration;
 
   /**
    * Configuration options for using 'azure' as your KMS provider
    */
   azure?: AzureKMSProviderConfiguration | Record<string, never>;
+  [key: `azure:${string}`]: AzureKMSProviderConfiguration;
 
   /**
    * Configuration options for using 'gcp' as your KMS provider
    */
   gcp?: GCPKMSProviderConfiguration | Record<string, never>;
-
-  [key: string]:
-    | AWSKMSProviderConfiguration
-    | LocalKMSProviderConfiguration
-    | KMIPKMSProviderConfiguration
-    | AzureKMSProviderConfiguration
-    | GCPKMSProviderConfiguration
-    | undefined;
+  [key: `gcp:${string}`]: GCPKMSProviderConfiguration;
 }
 
 /**
