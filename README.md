@@ -27,9 +27,9 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 The GitHub release contains a detached signature file for the NPM package (named
 `mongodb-X.Y.Z.tgz.sig`).
 
-The following command returns the link npm package. 
+The following command returns the link npm package.
 ```shell
-npm view mongodb@vX.Y.Z dist.tarball 
+npm view mongodb@vX.Y.Z dist.tarball
 ```
 
 Using the result of the above command, a `curl` command can return the official npm package for the release.
@@ -81,7 +81,7 @@ The following table describes add-on component version compatibility for the Nod
 
 #### Typescript Version
 
-We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against `typescript@4.1.6`.
+We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against `typescript@4.4.0`.
 This is the lowest typescript version guaranteed to work with our driver: older versions may or may not work - use at your own risk.
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
 If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).

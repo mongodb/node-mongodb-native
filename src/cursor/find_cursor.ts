@@ -5,13 +5,13 @@ import { type ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, type CountOptions } from '../operations/count';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { executeOperation } from '../operations/execute_operation';
 import { FindOperation, type FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
-import { AbstractCursor } from './abstract_cursor';
+import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -62,7 +62,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  async _initialize(session: ClientSession): Promise<ExecutionResult> {
+  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const findOperation = new FindOperation(this.namespace, this.cursorFilter, {
       ...this.findOptions, // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
@@ -72,19 +72,13 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const response = await executeOperation(this.client, findOperation);
 
     // the response is not a cursor when `explain` is enabled
-    if (CursorResponse.is(response)) {
-      this.numReturned = response.batchSize;
-    } else {
-      // Can be an explain response, hence the ?. on everything
-      this.numReturned = this.numReturned + (response?.cursor?.firstBatch?.length ?? 0);
-    }
+    this.numReturned = response.batchSize;
 
-    // TODO: NODE-2882
     return { server: findOperation.server, session, response };
   }
 
   /** @internal */
-  override async getMore(batchSize: number): Promise<Document | null> {
+  override async getMore(batchSize: number): Promise<CursorResponse> {
     const numReturned = this.numReturned;
     if (numReturned) {
       // TODO(DRIVERS-1448): Remove logic to enforce `limit` in the driver
@@ -110,13 +104,9 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       }
     }
 
-    const response = await super.getMore(batchSize, false);
+    const response = await super.getMore(batchSize);
     // TODO: wrap this in some logic to prevent it from happening if we don't need this support
-    if (CursorResponse.is(response)) {
-      this.numReturned = this.numReturned + response.batchSize;
-    } else {
-      this.numReturned = this.numReturned + (response?.cursor?.nextBatch?.length ?? 0);
-    }
+    this.numReturned = this.numReturned + response.batchSize;
 
     return response;
   }
@@ -144,14 +134,16 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** Execute the explain for the cursor */
   async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
-    return await executeOperation(
-      this.client,
-      new FindOperation(this.namespace, this.cursorFilter, {
-        ...this.findOptions, // NOTE: order matters here, we may need to refine this
-        ...this.cursorOptions,
-        explain: verbosity ?? true
-      })
-    );
+    return (
+      await executeOperation(
+        this.client,
+        new FindOperation(this.namespace, this.cursorFilter, {
+          ...this.findOptions, // NOTE: order matters here, we may need to refine this
+          ...this.cursorOptions,
+          explain: verbosity ?? true
+        })
+      )
+    ).shift(this.findOptions);
   }
 
   /** Set the cursor query */

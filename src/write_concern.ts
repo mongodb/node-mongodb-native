@@ -1,4 +1,6 @@
 import { type Document } from './bson';
+import { MongoDBResponse } from './cmap/wire_protocol/responses';
+import { MongoWriteConcernError } from './error';
 
 /** @public */
 export type W = number | 'majority';
@@ -157,5 +159,21 @@ export class WriteConcern {
       return new WriteConcern(w, wtimeout ?? wtimeoutMS, j ?? journal, fsync);
     }
     return undefined;
+  }
+}
+
+/** Called with either a plain object or MongoDBResponse */
+export function throwIfWriteConcernError(response: unknown): void {
+  if (typeof response === 'object' && response != null) {
+    const writeConcernError: object | null =
+      MongoDBResponse.is(response) && response.has('writeConcernError')
+        ? response.toObject()
+        : !MongoDBResponse.is(response) && 'writeConcernError' in response
+        ? response
+        : null;
+
+    if (writeConcernError != null) {
+      throw new MongoWriteConcernError(writeConcernError as any);
+    }
   }
 }

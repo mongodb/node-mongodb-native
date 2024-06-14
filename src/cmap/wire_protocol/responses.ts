@@ -1,15 +1,17 @@
 import {
+  type BSONElement,
   type BSONSerializeOptions,
   BSONType,
   type Document,
   Long,
   parseToElementsToArray,
+  pluckBSONSerializeOptions,
   type Timestamp
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
-import { type MongoDBNamespace, ns } from '../../utils';
-import { OnDemandDocument } from './on_demand/document';
+import { decorateDecryptionResult, ns } from '../../utils';
+import { type JSTypeOf, OnDemandDocument } from './on_demand/document';
 
 // eslint-disable-next-line no-restricted-syntax
 const enum BSONElementOffset {
@@ -30,8 +32,7 @@ const enum BSONElementOffset {
  *
  * @param bytes - BSON document returned from the server
  */
-export function isErrorResponse(bson: Uint8Array): boolean {
-  const elements = parseToElementsToArray(bson, 0);
+export function isErrorResponse(bson: Uint8Array, elements: BSONElement[]): boolean {
   for (let eIdx = 0; eIdx < elements.length; eIdx++) {
     const element = elements[eIdx];
 
@@ -60,25 +61,48 @@ export function isErrorResponse(bson: Uint8Array): boolean {
 /** @internal */
 export type MongoDBResponseConstructor = {
   new (bson: Uint8Array, offset?: number, isArray?: boolean): MongoDBResponse;
+  make(bson: Uint8Array): MongoDBResponse;
 };
 
 /** @internal */
 export class MongoDBResponse extends OnDemandDocument {
+  // Wrap error thrown from BSON
+  public override get<const T extends keyof JSTypeOf>(
+    name: string | number,
+    as: T,
+    required?: false | undefined
+  ): JSTypeOf[T] | null;
+  public override get<const T extends keyof JSTypeOf>(
+    name: string | number,
+    as: T,
+    required: true
+  ): JSTypeOf[T];
+  public override get<const T extends keyof JSTypeOf>(
+    name: string | number,
+    as: T,
+    required?: boolean | undefined
+  ): JSTypeOf[T] | null {
+    try {
+      return super.get(name, as, required);
+    } catch (cause) {
+      throw new MongoUnexpectedServerResponseError(cause.message, { cause });
+    }
+  }
+
   static is(value: unknown): value is MongoDBResponse {
     return value instanceof MongoDBResponse;
   }
 
+  static make(bson: Uint8Array) {
+    const elements = parseToElementsToArray(bson, 0);
+    const isError = isErrorResponse(bson, elements);
+    return isError
+      ? new MongoDBResponse(bson, 0, false, elements)
+      : new this(bson, 0, false, elements);
+  }
+
   // {ok:1}
   static empty = new MongoDBResponse(new Uint8Array([13, 0, 0, 0, 16, 111, 107, 0, 1, 0, 0, 0, 0]));
-
-  /** Indicates this document is a server error */
-  public get isError() {
-    let isError = this.ok === 0;
-    isError ||= this.has('errmsg');
-    isError ||= this.has('code');
-    isError ||= this.has('$err'); // The '$err' field is used in OP_REPLY responses
-    return isError;
-  }
 
   /**
    * Drivers can safely assume that the `recoveryToken` field is always a BSON document but drivers MUST NOT modify the
@@ -110,6 +134,7 @@ export class MongoDBResponse extends OnDemandDocument {
     return this.get('operationTime', BSONType.timestamp);
   }
 
+  /** Normalizes whatever BSON value is "ok" to a JS number 1 or 0. */
   public get ok(): 0 | 1 {
     return this.getNumber('ok') ? 1 : 0;
   }
@@ -144,13 +169,7 @@ export class MongoDBResponse extends OnDemandDocument {
 
   public override toObject(options?: BSONSerializeOptions): Record<string, any> {
     const exactBSONOptions = {
-      useBigInt64: options?.useBigInt64,
-      promoteLongs: options?.promoteLongs,
-      promoteValues: options?.promoteValues,
-      promoteBuffers: options?.promoteBuffers,
-      bsonRegExp: options?.bsonRegExp,
-      raw: options?.raw ?? false,
-      fieldsAsRaw: options?.fieldsAsRaw ?? {},
+      ...pluckBSONSerializeOptions(options ?? {}),
       validation: this.parseBsonSerializationOptions(options)
     };
     return super.toObject(exactBSONOptions);
@@ -170,68 +189,144 @@ export class MongoDBResponse extends OnDemandDocument {
 /** @internal */
 export class CursorResponse extends MongoDBResponse {
   /**
+   * Devtools need to know which keys were encrypted before the driver automatically decrypted them.
+   * If decorating is enabled (`Symbol.for('@@mdb.decorateDecryptionResult')`), this field will be set,
+   * storing the original encrypted response from the server, so that we can build an object that has
+   * the list of BSON keys that were encrypted stored at a well known symbol: `Symbol.for('@@mdb.decryptedKeys')`.
+   */
+  encryptedResponse?: MongoDBResponse;
+  /**
    * This supports a feature of the FindCursor.
    * It is an optimization to avoid an extra getMore when the limit has been reached
    */
-  static emptyGetMore = { id: new Long(0), length: 0, shift: () => null };
+  static emptyGetMore: CursorResponse = {
+    id: new Long(0),
+    length: 0,
+    shift: () => null
+  } as unknown as CursorResponse;
 
   static override is(value: unknown): value is CursorResponse {
     return value instanceof CursorResponse || value === CursorResponse.emptyGetMore;
   }
 
-  public id: Long;
-  public ns: MongoDBNamespace | null = null;
-  public batchSize = 0;
-
-  private batch: OnDemandDocument;
+  private _batch: OnDemandDocument | null = null;
   private iterated = 0;
 
-  constructor(bytes: Uint8Array, offset?: number, isArray?: boolean) {
-    super(bytes, offset, isArray);
-
-    const cursor = this.get('cursor', BSONType.object, true);
-
-    const id = cursor.get('id', BSONType.long, true);
-    this.id = new Long(Number(id & 0xffff_ffffn), Number((id >> 32n) & 0xffff_ffffn));
-
-    const namespace = cursor.get('ns', BSONType.string);
-    if (namespace != null) this.ns = ns(namespace);
-
-    if (cursor.has('firstBatch')) this.batch = cursor.get('firstBatch', BSONType.array, true);
-    else if (cursor.has('nextBatch')) this.batch = cursor.get('nextBatch', BSONType.array, true);
-    else throw new MongoUnexpectedServerResponseError('Cursor document did not contain a batch');
-
-    this.batchSize = this.batch.size();
+  get cursor() {
+    return this.get('cursor', BSONType.object, true);
   }
 
-  get length() {
+  public get id(): Long {
+    try {
+      return Long.fromBigInt(this.cursor.get('id', BSONType.long, true));
+    } catch (cause) {
+      throw new MongoUnexpectedServerResponseError(cause.message, { cause });
+    }
+  }
+
+  public get ns() {
+    const namespace = this.cursor.get('ns', BSONType.string);
+    if (namespace != null) return ns(namespace);
+    return null;
+  }
+
+  public get length() {
     return Math.max(this.batchSize - this.iterated, 0);
   }
 
-  shift(options?: BSONSerializeOptions): any {
+  private _encryptedBatch: OnDemandDocument | null = null;
+  get encryptedBatch() {
+    if (this.encryptedResponse == null) return null;
+    if (this._encryptedBatch != null) return this._encryptedBatch;
+
+    const cursor = this.encryptedResponse?.get('cursor', BSONType.object);
+    if (cursor?.has('firstBatch'))
+      this._encryptedBatch = cursor.get('firstBatch', BSONType.array, true);
+    else if (cursor?.has('nextBatch'))
+      this._encryptedBatch = cursor.get('nextBatch', BSONType.array, true);
+    else throw new MongoUnexpectedServerResponseError('Cursor document did not contain a batch');
+
+    return this._encryptedBatch;
+  }
+
+  private get batch() {
+    if (this._batch != null) return this._batch;
+    const cursor = this.cursor;
+    if (cursor.has('firstBatch')) this._batch = cursor.get('firstBatch', BSONType.array, true);
+    else if (cursor.has('nextBatch')) this._batch = cursor.get('nextBatch', BSONType.array, true);
+    else throw new MongoUnexpectedServerResponseError('Cursor document did not contain a batch');
+    return this._batch;
+  }
+
+  public get batchSize() {
+    return this.batch?.size();
+  }
+
+  public get postBatchResumeToken() {
+    return (
+      this.cursor.get('postBatchResumeToken', BSONType.object)?.toObject({
+        promoteValues: false,
+        promoteLongs: false,
+        promoteBuffers: false
+      }) ?? null
+    );
+  }
+
+  public shift(options?: BSONSerializeOptions): any {
     if (this.iterated >= this.batchSize) {
       return null;
     }
 
     const result = this.batch.get(this.iterated, BSONType.object, true) ?? null;
+    const encryptedResult = this.encryptedBatch?.get(this.iterated, BSONType.object, true) ?? null;
+
     this.iterated += 1;
 
     if (options?.raw) {
       return result.toBytes();
     } else {
-      return result.toObject(options);
+      const object = result.toObject(options);
+      if (encryptedResult) {
+        decorateDecryptionResult(object, encryptedResult.toObject(options), true);
+      }
+      return object;
     }
   }
 
-  clear() {
+  public clear() {
     this.iterated = this.batchSize;
   }
+}
 
-  pushMany() {
-    throw new Error('pushMany Unsupported method');
+/**
+ * Explain responses have nothing to do with cursor responses
+ * This class serves to temporarily avoid refactoring how cursors handle
+ * explain responses which is to detect that the response is not cursor-like and return the explain
+ * result as the "first and only" document in the "batch" and end the "cursor"
+ */
+export class ExplainedCursorResponse extends CursorResponse {
+  isExplain = true;
+
+  override get id(): Long {
+    return Long.fromBigInt(0n);
   }
 
-  push() {
-    throw new Error('push Unsupported method');
+  override get batchSize() {
+    return 0;
+  }
+
+  override get ns() {
+    return null;
+  }
+
+  _length = 1;
+  override get length(): number {
+    return this._length;
+  }
+
+  override shift(options?: BSONSerializeOptions | undefined) {
+    if (this._length === 0) return null;
+    this._length -= 1;
+    return this.toObject(options);
   }
 }

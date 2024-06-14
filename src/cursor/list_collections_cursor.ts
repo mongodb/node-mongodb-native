@@ -1,13 +1,13 @@
 import type { Document } from '../bson';
 import type { Db } from '../db';
-import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { executeOperation } from '../operations/execute_operation';
 import {
   type CollectionInfo,
   ListCollectionsOperation,
   type ListCollectionsOptions
 } from '../operations/list_collections';
 import type { ClientSession } from '../sessions';
-import { AbstractCursor } from './abstract_cursor';
+import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
 
 /** @public */
 export class ListCollectionsCursor<
@@ -34,7 +34,7 @@ export class ListCollectionsCursor<
   }
 
   /** @internal */
-  async _initialize(session: ClientSession | undefined): Promise<ExecutionResult> {
+  async _initialize(session: ClientSession | undefined): Promise<InitialCursorResponse> {
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,
       ...this.options,
@@ -43,7 +43,6 @@ export class ListCollectionsCursor<
 
     const response = await executeOperation(this.parent.client, operation);
 
-    // TODO: NODE-2882
     return { server: operation.server, session, response };
   }
 }
