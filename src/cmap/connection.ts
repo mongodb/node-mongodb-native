@@ -1,14 +1,15 @@
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
-import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
-import type { AutoEncrypter } from '../client-side-encryption/auto_encrypter';
+import { type BSONSerializeOptions, deserialize, type Document, type ObjectId } from '../bson';
+import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import {
   CLOSE,
   CLUSTER_TIME_RECEIVED,
   COMMAND_FAILED,
   COMMAND_STARTED,
   COMMAND_SUCCEEDED,
+  kDecorateResult,
   PINNED,
   UNPINNED
 } from '../constants';
@@ -19,8 +20,7 @@ import {
   MongoNetworkTimeoutError,
   MongoParseError,
   MongoServerError,
-  MongoUnexpectedServerResponseError,
-  MongoWriteConcernError
+  MongoUnexpectedServerResponseError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
@@ -33,6 +33,7 @@ import {
   BufferPool,
   calculateDurationInMs,
   type Callback,
+  decorateDecryptionResult,
   HostAddress,
   maxWireVersion,
   type MongoDBNamespace,
@@ -63,7 +64,7 @@ import { StreamDescription, type StreamDescriptionOptions } from './stream_descr
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
 import {
-  isErrorResponse,
+  CursorResponse,
   MongoDBResponse,
   type MongoDBResponseConstructor
 } from './wire_protocol/responses';
@@ -448,12 +449,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
-        const document =
-          responseType == null
-            ? new MongoDBResponse(bson)
-            : isErrorResponse(bson)
-            ? new MongoDBResponse(bson)
-            : new responseType(bson);
+        const document = (responseType ?? MongoDBResponse).make(bson);
 
         yield document;
         this.throwIfAborted();
@@ -517,12 +513,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
         }
 
-        if (document.has('writeConcernError')) {
-          object ??= document.toObject(bsonOptions);
-          throw new MongoWriteConcernError(object.writeConcernError, object);
-        }
-
-        if (document.isError) {
+        if (document.ok === 0) {
           throw new MongoServerError((object ??= document.toObject(bsonOptions)));
         }
 
@@ -552,39 +543,24 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
     } catch (error) {
       if (this.shouldEmitAndLogCommand) {
-        if (error.name === 'MongoWriteConcernError') {
-          this.emitAndLogCommand(
-            this.monitorCommands,
-            Connection.COMMAND_SUCCEEDED,
-            message.databaseName,
-            this.established,
-            new CommandSucceededEvent(
-              this,
-              message,
-              options.noResponse ? undefined : (object ??= document?.toObject(bsonOptions)),
-              started,
-              this.description.serverConnectionId
-            )
-          );
-        } else {
-          this.emitAndLogCommand(
-            this.monitorCommands,
-            Connection.COMMAND_FAILED,
-            message.databaseName,
-            this.established,
-            new CommandFailedEvent(
-              this,
-              message,
-              error,
-              started,
-              this.description.serverConnectionId
-            )
-          );
-        }
+        this.emitAndLogCommand(
+          this.monitorCommands,
+          Connection.COMMAND_FAILED,
+          message.databaseName,
+          this.established,
+          new CommandFailedEvent(this, message, error, started, this.description.serverConnectionId)
+        );
       }
       throw error;
     }
   }
+
+  public async command<T extends MongoDBResponseConstructor>(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions | undefined,
+    responseType: T
+  ): Promise<InstanceType<T>>;
 
   public async command<T extends MongoDBResponseConstructor>(
     ns: MongoDBNamespace,
@@ -749,7 +725,7 @@ export class CryptoConnection extends Connection {
     ns: MongoDBNamespace,
     cmd: Document,
     options?: CommandOptions,
-    _responseType?: T | undefined
+    responseType?: T | undefined
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {
@@ -763,7 +739,7 @@ export class CryptoConnection extends Connection {
     const serverWireVersion = maxWireVersion(this);
     if (serverWireVersion === 0) {
       // This means the initial handshake hasn't happened yet
-      return await super.command<T>(ns, cmd, options, undefined);
+      return await super.command<T>(ns, cmd, options, responseType);
     }
 
     if (serverWireVersion < 8) {
@@ -797,8 +773,28 @@ export class CryptoConnection extends Connection {
       }
     }
 
-    const response = await super.command<T>(ns, encrypted, options, undefined);
+    const encryptedResponse = await super.command(
+      ns,
+      encrypted,
+      options,
+      // Eventually we want to require `responseType` which means we would satisfy `T` as the return type.
+      // In the meantime, we want encryptedResponse to always be _at least_ a MongoDBResponse if not a more specific subclass
+      // So that we can ensure we have access to the on-demand APIs for decorate response
+      responseType ?? MongoDBResponse
+    );
 
-    return await autoEncrypter.decrypt(response, options);
+    const result = await autoEncrypter.decrypt(encryptedResponse.toBytes(), options);
+
+    const decryptedResponse = responseType?.make(result) ?? deserialize(result, options);
+
+    if (autoEncrypter[kDecorateResult]) {
+      if (responseType == null) {
+        decorateDecryptionResult(decryptedResponse, encryptedResponse.toObject(), true);
+      } else if (decryptedResponse instanceof CursorResponse) {
+        decryptedResponse.encryptedResponse = encryptedResponse;
+      }
+    }
+
+    return decryptedResponse;
   }
 }

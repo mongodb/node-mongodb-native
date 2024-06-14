@@ -1,6 +1,6 @@
 import type { Document } from '../bson';
+import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError } from '../error';
-import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
@@ -37,7 +37,7 @@ export interface AggregateOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class AggregateOperation<T = Document> extends CommandOperation<T> {
+export class AggregateOperation extends CommandOperation<CursorResponse> {
   override options: AggregateOptions;
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
@@ -94,7 +94,10 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     this.pipeline.push(stage);
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<CursorResponse> {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
@@ -134,8 +137,12 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
       command.cursor.batchSize = options.batchSize;
     }
 
-    const res: TODO_NODE_3286 = await super.executeCommand(server, session, command);
-    return res;
+    return await super.executeCommand(
+      server,
+      session,
+      command,
+      this.explain ? ExplainedCursorResponse : CursorResponse
+    );
   }
 }
 

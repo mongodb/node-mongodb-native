@@ -322,7 +322,11 @@ describe('abstract operation', function () {
           it(`operation.commandName equals key in command document`, async function () {
             const subclassInstance = subclassCreator();
             const yieldDoc =
-              subclassType.name === 'ProfilingLevelOperation' ? { ok: 1, was: 1 } : { ok: 1 };
+              subclassType.name === 'ProfilingLevelOperation'
+                ? { ok: 1, was: 1 }
+                : subclassType.name === 'CountDocumentsOperation'
+                ? { shift: () => ({ n: 1 }) }
+                : { ok: 1 };
             const cmdCallerStub = sinon.stub(Server.prototype, 'command').resolves(yieldDoc);
             if (sameServerOnlyOperationSubclasses.includes(subclassType.name.toString())) {
               await subclassInstance.execute(constructorServer, client.session);
