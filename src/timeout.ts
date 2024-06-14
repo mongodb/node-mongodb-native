@@ -126,11 +126,34 @@ export type CSOTTimeoutContextOptions = {
   socketTimeoutMS?: number;
 };
 
+function isLegacyTimeoutContextOptions(v: unknown): v is LegacyTimeoutContextOptions {
+  return (
+    v != null &&
+    typeof v === 'object' &&
+    'serverSelectionTimeoutMS' in v &&
+    typeof v.serverSelectionTimeoutMS === 'number' &&
+    'waitQueueTimeoutMS' in v &&
+    typeof v.waitQueueTimeoutMS === 'number'
+  );
+}
+
+function isCSOTTimeoutContextOptions(v: unknown): v is CSOTTimeoutContextOptions {
+  return (
+    v != null &&
+    typeof v === 'object' &&
+    'serverSelectionTimeoutMS' in v &&
+    typeof v.serverSelectionTimeoutMS === 'number' &&
+    'timeoutMS' in v &&
+    typeof v.timeoutMS === 'number'
+  );
+}
+
 /** @internal */
 export abstract class TimeoutContext {
   static create(options: TimeoutContextOptions): TimeoutContext {
-    if ('timeoutMS' in options) return new CSOTTimeoutContext(options);
-    else return new LegacyTimeoutContext(options);
+    if (isCSOTTimeoutContextOptions(options)) return new CSOTTimeoutContext(options);
+    else if (isLegacyTimeoutContextOptions(options)) return new LegacyTimeoutContext(options);
+    else throw new MongoRuntimeError('Unrecognized options');
   }
 
   abstract get serverSelectionTimeout(): Timeout | null;
