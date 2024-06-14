@@ -10,8 +10,10 @@ const { ns, isHello } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
 const { topologyWithPlaceholderClient } = require('../../tools/utils');
 const { MongoClientAuthProviders } = require('../../mongodb');
+const { TimeoutContext } = require('../../mongodb');
 
 describe('Connection Pool', function () {
+  let timeoutContext;
   let mockMongod;
   const stubServer = {
     topology: {
@@ -44,6 +46,10 @@ describe('Connection Pool', function () {
     })
   );
 
+  beforeEach(() => {
+    timeoutContext = TimeoutContext.create({ waitQueueTimeoutMS: 0, serverSelectionTimeoutMS: 0 });
+  });
+
   it('should destroy connections which have been closed', async function () {
     mockMongod.setMessageHandler(request => {
       const doc = request.document;
@@ -64,8 +70,10 @@ describe('Connection Pool', function () {
     const events = [];
     pool.on('connectionClosed', event => events.push(event));
 
-    const conn = await pool.checkOut();
-    const error = await conn.command(ns('admin.$cmd'), { ping: 1 }, {}).catch(error => error);
+    const conn = await pool.checkOut({ timeoutContext });
+    const error = await conn
+      .command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext })
+      .catch(error => error);
 
     expect(error).to.be.instanceOf(Error);
     pool.checkIn(conn);
@@ -93,7 +101,7 @@ describe('Connection Pool', function () {
 
     pool.ready();
 
-    const conn = await pool.checkOut();
+    const conn = await pool.checkOut({ timeoutContext });
     const maybeError = await conn.command(ns('admin.$cmd'), { ping: 1 }, undefined).catch(e => e);
     expect(maybeError).to.be.instanceOf(MongoError);
     expect(maybeError).to.match(/timed out/);
@@ -114,11 +122,15 @@ describe('Connection Pool', function () {
       waitQueueTimeoutMS: 200,
       hostAddress: mockMongod.hostAddress()
     });
+    const timeoutContext = TimeoutContext.create({
+      waitQueueTimeoutMS: 200,
+      serverSelectionTimeoutMS: 0
+    });
 
     pool.ready();
 
-    const conn = await pool.checkOut();
-    const err = await pool.checkOut().catch(e => e);
+    const conn = await pool.checkOut({ timeoutContext });
+    const err = await pool.checkOut({ timeoutContext }).catch(e => e);
     expect(err).to.exist.and.be.instanceOf(WaitQueueTimeoutError);
     sinon.stub(pool, 'availableConnectionCount').get(() => 0);
     pool.checkIn(conn);
