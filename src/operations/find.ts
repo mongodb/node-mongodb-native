@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError } from '../error';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
@@ -65,7 +66,7 @@ export interface FindOptions<TSchema extends Document = Document>
 }
 
 /** @internal */
-export class FindOperation extends CommandOperation<Document> {
+export class FindOperation extends CommandOperation<CursorResponse> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -95,7 +96,10 @@ export class FindOperation extends CommandOperation<Document> {
     return 'find' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<CursorResponse> {
     this.server = server;
 
     const options = this.options;
@@ -114,7 +118,7 @@ export class FindOperation extends CommandOperation<Document> {
         documentsReturnedIn: 'firstBatch',
         session
       },
-      undefined
+      this.explain ? ExplainedCursorResponse : CursorResponse
     );
   }
 }

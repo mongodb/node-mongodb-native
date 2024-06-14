@@ -34,13 +34,14 @@ describe('Non Server Retryable Writes', function () {
     async () => {
       const serverCommandStub = sinon.stub(Server.prototype, 'command');
       serverCommandStub.onCall(0).rejects(new PoolClearedError('error'));
-      serverCommandStub
-        .onCall(1)
-        .returns(
-          Promise.reject(
-            new MongoWriteConcernError({ errorLabels: ['NoWritesPerformed'], errorCode: 10107 }, {})
-          )
-        );
+      serverCommandStub.onCall(1).returns(
+        Promise.reject(
+          new MongoWriteConcernError({
+            errorLabels: ['NoWritesPerformed'],
+            writeConcernError: { errmsg: 'NotWritablePrimary error', errorCode: 10107 }
+          })
+        )
+      );
 
       const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
       sinon.restore();

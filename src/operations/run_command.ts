@@ -1,4 +1,5 @@
 import type { BSONSerializeOptions, Document } from '../bson';
+import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import { type Db } from '../db';
 import { type TODO_NODE_3286 } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
@@ -17,7 +18,11 @@ export type RunCommandOptions = {
 
 /** @internal */
 export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
-  constructor(parent: Db, public command: Document, public override options: RunCommandOptions) {
+  constructor(
+    parent: Db,
+    public command: Document,
+    public override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor }
+  ) {
     super(options);
     this.ns = parent.s.namespace.withCollection('$cmd');
   }
@@ -28,11 +33,16 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     this.server = server;
-    const res: TODO_NODE_3286 = await server.command(this.ns, this.command, {
-      ...this.options,
-      readPreference: this.readPreference,
-      session
-    });
+    const res: TODO_NODE_3286 = await server.command(
+      this.ns,
+      this.command,
+      {
+        ...this.options,
+        readPreference: this.readPreference,
+        session
+      },
+      this.options.responseType
+    );
     return res;
   }
 }
