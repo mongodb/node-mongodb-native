@@ -104,7 +104,7 @@ export interface ModifyResult<TSchema = Document> {
 export interface CountDocumentsOptions extends AggregateOptions {
   /** The number of documents to skip. */
   skip?: number;
-  /** The maximum amounts to count before aborting. */
+  /** The maximum amount of documents to consider. */
   limit?: number;
 }
 
