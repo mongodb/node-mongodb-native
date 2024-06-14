@@ -43,6 +43,12 @@ describe('Unified Spec Runner', function () {
             );
           });
 
+          it('does not throw when it finds extra keys but checking is disabled', function () {
+            actual =
+              '{"data": {"$numberLong": "100"}, "a": {"$numberInt": "10"}, "b": {"$numberInt": "100"}}';
+            resultCheckSpy(actual, expected, entitiesMap, [], false);
+          });
+
           it('passes when all keys match', function () {
             actual = '{"data": {"$numberLong": "100"}, "a": {"$numberInt": "10"}}';
             resultCheckSpy(actual, expected, entitiesMap, []);

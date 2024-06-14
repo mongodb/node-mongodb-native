@@ -650,7 +650,7 @@ export function matchesEvents(
   }
 }
 
-export function filterExtraLogs(
+export function filterIgnoredMessages(
   logsToIgnore: ExpectedLogMessage[],
   actual: ExpectedLogMessage[],
   entities: EntitiesMap
