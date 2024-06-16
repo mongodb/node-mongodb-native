@@ -24,9 +24,11 @@ export class MongocryptdManager {
 
     this.bypassSpawn = !!extraOptions.mongocryptdBypassSpawn;
 
-    this.spawnPath = extraOptions.mongocryptdSpawnPath || '';
+    if (Object.keys(extraOptions).includes('mongocryptdSpawnPath')) {
+      this.spawnPath = extraOptions.mongocryptdSpawnPath || '';
+    } else this.spawnPath = '';
     this.spawnArgs = [];
-    if (Array.isArray(extraOptions.mongocryptdSpawnArgs)) {
+    if (Object.keys(extraOptions).includes('mongocryptdSpawnArgs') && Array.isArray(extraOptions.mongocryptdSpawnArgs)) {
       this.spawnArgs = this.spawnArgs.concat(extraOptions.mongocryptdSpawnArgs);
     }
     if (
