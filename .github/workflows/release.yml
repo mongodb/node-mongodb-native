@@ -141,45 +141,6 @@ jobs:
           file: sbom.json
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
 
-  generate_authorized_publishing_report:
-    environment: release
-    runs-on: ubuntu-latest
-    needs: [release_please]
-    permissions:
-      # required for all workflows
-      security-events: write
-      id-token: write
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up drivers-github-tools
-        uses: mongodb-labs/drivers-github-tools/setup@v2
-        with:
-          aws_region_name: us-east-1
-          aws_role_arn: ${{ secrets.aws_role_arn }}
-          aws_secret_id: ${{ secrets.aws_secret_id }}
-
-      - name: Get release version and release package file name
-        id: get_version
-        shell: bash
-        run: |
-          package_version=$(jq --raw-output '.version' package.json)
-          echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
-
-      - name: Generate authorized pub report
-        uses: mongodb-labs/drivers-github-tools/authorized-pub@v2
-        with:
-          release_version: ${{ steps.get_version.outputs.package_version }}
-          product_name: node-mongodb-native
-          filenames: sbom.json
-          token:  ${{ github.token }}
-
-      - name: Test
-        shell: bash
-        run: |
-          cat $S3_ASSETS/authorized-publication.txt
-
   generate_compliance_report:
     environment: release
     runs-on: ubuntu-latest
@@ -215,5 +176,10 @@ jobs:
           release_version: ${{ steps.get_version.outputs.package_version }}
           token:  ${{ github.token }}
 
-      - name: 'Print Generated report'
-        run: cat $S3_ASSETS/ssdlc_compliance_report.txt
+      - name: actions/publish_asset_to_s3
+        uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@v2
+        with:
+          version: ${{ steps.get_version.outputs.package_version }}
+          product_name: node-mongodb-native
+          file: $S3_ASSETS/ssdlc_compliance_report.txt
+          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
