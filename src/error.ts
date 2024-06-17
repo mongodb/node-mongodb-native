@@ -60,7 +60,8 @@ export const MONGODB_ERROR_CODES = Object.freeze({
   MaxTimeMSExpired: 50,
   UnknownReplWriteConcern: 79,
   UnsatisfiableWriteConcern: 100,
-  Reauthenticate: 391
+  Reauthenticate: 391,
+  ReadConcernMajorityNotAvailableYet: 134
 } as const);
 
 // From spec@https://github.com/mongodb/specifications/blob/f93d78191f3db2898a59013a7ed5650352ef6da8/source/change-streams/change-streams.rst#resumable-error
@@ -1221,7 +1222,8 @@ const RETRYABLE_READ_ERROR_CODES = new Set<number>([
   MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
   MONGODB_ERROR_CODES.NotPrimaryNoSecondaryOk,
   MONGODB_ERROR_CODES.NotPrimaryOrSecondary,
-  MONGODB_ERROR_CODES.ExceededTimeLimit
+  MONGODB_ERROR_CODES.ExceededTimeLimit,
+  MONGODB_ERROR_CODES.ReadConcernMajorityNotAvailableYet
 ]);
 
 // see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms
