@@ -4,7 +4,7 @@ import { loadSpecTests } from '../../spec';
 import { generateTopologyTests, TestRunnerContext } from '../../tools/spec-runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
-describe.only('Retryable Reads (legacy)', function () {
+describe('Retryable Reads (legacy)', function () {
   const testContext = new TestRunnerContext();
   const testSuites = loadSpecTests(path.join('retryable-reads', 'legacy'));
 
