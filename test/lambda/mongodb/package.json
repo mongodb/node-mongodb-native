@@ -4,7 +4,7 @@
   "description": "MongoDB Lambda Function Example",
   "main": "app.mjs",
   "private": true,
-  "license": "Apache",
+  "license": "Apache-2.0",
   "dependencies": {
     "mongodb": "mongodb/node-mongodb-native"
   }
