@@ -61,7 +61,7 @@ jobs:
           file: ${{env.S3_ASSETS}}/authorized-publication.txt
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
 
-      - run: npm publish --provenance
+      - run: npm publish --provenance --tag=latest
         if: ${{ needs.release_please.outputs.release_created }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -104,7 +104,6 @@ jobs:
           product_name: node-mongodb-native
           file: sarif-report.json
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
-
 
   upload_sbom_lite:
     environment: release
