@@ -181,5 +181,5 @@ jobs:
         with:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
-          file: $S3_ASSETS/ssdlc_compliance_report.txt
+          file: ${{env.S3_ASSETS}}/ssdlc_compliance_report.txt
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
