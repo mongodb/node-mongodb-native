@@ -6,6 +6,7 @@ import {
 
 import { deserialize, type Document, serialize } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
+import { kDecorateResult } from '../constants';
 import { getMongoDBClientEncryption } from '../deps';
 import { MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
@@ -211,15 +212,6 @@ export const AutoEncryptionLoggerLevel = Object.freeze({
  */
 export type AutoEncryptionLoggerLevel =
   (typeof AutoEncryptionLoggerLevel)[keyof typeof AutoEncryptionLoggerLevel];
-
-// Typescript errors if we index objects with `Symbol.for(...)`, so
-// to avoid TS errors we pull them out into variables.  Then we can type
-// the objects (and class) that we expect to see them on and prevent TS
-// errors.
-/** @internal */
-const kDecorateResult = Symbol.for('@@mdb.decorateDecryptionResult');
-/** @internal */
-const kDecoratedKeys = Symbol.for('@@mdb.decryptedKeys');
 
 /**
  * @internal An internal class to be used by the driver for auto encryption
@@ -467,16 +459,18 @@ export class AutoEncrypter {
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
-    return await stateMachine.execute<Document>(this, context);
+
+    return deserialize(await stateMachine.execute(this, context), {
+      promoteValues: false,
+      promoteLongs: false
+    });
   }
 
   /**
    * Decrypt a command response
    */
-  async decrypt(response: Uint8Array | Document, options: CommandOptions = {}): Promise<Document> {
-    const buffer = Buffer.isBuffer(response) ? response : serialize(response, options);
-
-    const context = this._mongocrypt.makeDecryptionContext(buffer);
+  async decrypt(response: Uint8Array, options: CommandOptions = {}): Promise<Uint8Array> {
+    const context = this._mongocrypt.makeDecryptionContext(response);
 
     context.id = this._contextCounter++;
 
@@ -486,12 +480,7 @@ export class AutoEncrypter {
       tlsOptions: this._tlsOptions
     });
 
-    const decorateResult = this[kDecorateResult];
-    const result = await stateMachine.execute<Document>(this, context);
-    if (decorateResult) {
-      decorateDecryptionResult(result, response);
-    }
-    return result;
+    return await stateMachine.execute(this, context);
   }
 
   /**
@@ -516,55 +505,5 @@ export class AutoEncrypter {
 
   static get libmongocryptVersion(): string {
     return AutoEncrypter.getMongoCrypt().libmongocryptVersion;
-  }
-}
-
-/**
- * Recurse through the (identically-shaped) `decrypted` and `original`
- * objects and attach a `decryptedKeys` property on each sub-object that
- * contained encrypted fields. Because we only call this on BSON responses,
- * we do not need to worry about circular references.
- *
- * @internal
- */
-function decorateDecryptionResult(
-  decrypted: Document & { [kDecoratedKeys]?: Array<string> },
-  original: Document,
-  isTopLevelDecorateCall = true
-): void {
-  if (isTopLevelDecorateCall) {
-    // The original value could have been either a JS object or a BSON buffer
-    if (Buffer.isBuffer(original)) {
-      original = deserialize(original);
-    }
-    if (Buffer.isBuffer(decrypted)) {
-      throw new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');
-    }
-  }
-
-  if (!decrypted || typeof decrypted !== 'object') return;
-  for (const k of Object.keys(decrypted)) {
-    const originalValue = original[k];
-
-    // An object was decrypted by libmongocrypt if and only if it was
-    // a BSON Binary object with subtype 6.
-    if (originalValue && originalValue._bsontype === 'Binary' && originalValue.sub_type === 6) {
-      if (!decrypted[kDecoratedKeys]) {
-        Object.defineProperty(decrypted, kDecoratedKeys, {
-          value: [],
-          configurable: true,
-          enumerable: false,
-          writable: false
-        });
-      }
-      // this is defined in the preceding if-statement
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      decrypted[kDecoratedKeys]!.push(k);
-      // Do not recurse into this decrypted value. It could be a sub-document/array,
-      // in which case there is no original value associated with its subfields.
-      continue;
-    }
-
-    decorateDecryptionResult(decrypted[k], originalValue, false);
   }
 }

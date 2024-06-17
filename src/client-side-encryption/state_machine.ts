@@ -115,6 +115,19 @@ export type CSFLEKMSTlsOptions = {
 };
 
 /**
+ * This is kind of a hack.  For `rewrapManyDataKey`, we have tests that
+ * guarantee that when there are no matching keys, `rewrapManyDataKey` returns
+ * nothing.  We also have tests for auto encryption that guarantee for `encrypt`
+ * we return an error when there are no matching keys.  This error is generated in
+ * subsequent iterations of the state machine.
+ * Some apis (`encrypt`) throw if there are no filter matches and others (`rewrapManyDataKey`)
+ * do not.  We set the result manually here, and let the state machine continue.  `libmongocrypt`
+ * will inform us if we need to error by setting the state to `MONGOCRYPT_CTX_ERROR` but
+ * otherwise we'll return `{ v: [] }`.
+ */
+let EMPTY_V;
+
+/**
  * @internal
  *
  * An interface representing an object that can be passed to the `StateMachine.execute` method.
@@ -156,16 +169,13 @@ export class StateMachine {
   /**
    * Executes the state machine according to the specification
    */
-  async execute<T extends Document>(
-    executor: StateMachineExecutable,
-    context: MongoCryptContext
-  ): Promise<T> {
+  async execute(executor: StateMachineExecutable, context: MongoCryptContext): Promise<Uint8Array> {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
     const metaDataClient = executor._metaDataClient;
     const mongocryptdClient = executor._mongocryptdClient;
     const mongocryptdManager = executor._mongocryptdManager;
-    let result: T | null = null;
+    let result: Uint8Array | null = null;
 
     while (context.state !== MONGOCRYPT_CTX_DONE && context.state !== MONGOCRYPT_CTX_ERROR) {
       debug(`[context#${context.id}] ${stateToString.get(context.state) || context.state}`);
@@ -213,16 +223,8 @@ export class StateMachine {
           const keys = await this.fetchKeys(keyVaultClient, keyVaultNamespace, filter);
 
           if (keys.length === 0) {
-            // This is kind of a hack.  For `rewrapManyDataKey`, we have tests that
-            // guarantee that when there are no matching keys, `rewrapManyDataKey` returns
-            // nothing.  We also have tests for auto encryption that guarantee for `encrypt`
-            // we return an error when there are no matching keys.  This error is generated in
-            // subsequent iterations of the state machine.
-            // Some apis (`encrypt`) throw if there are no filter matches and others (`rewrapManyDataKey`)
-            // do not.  We set the result manually here, and let the state machine continue.  `libmongocrypt`
-            // will inform us if we need to error by setting the state to `MONGOCRYPT_CTX_ERROR` but
-            // otherwise we'll return `{ v: [] }`.
-            result = { v: [] } as any as T;
+            // See docs on EMPTY_V
+            result = EMPTY_V ??= serialize({ v: [] });
           }
           for await (const key of keys) {
             context.addMongoOperationResponse(serialize(key));
@@ -254,7 +256,7 @@ export class StateMachine {
             const message = context.status.message || 'Finalization error';
             throw new MongoCryptError(message);
           }
-          result = deserialize(finalizedContext, this.options) as T;
+          result = finalizedContext;
           break;
         }
 

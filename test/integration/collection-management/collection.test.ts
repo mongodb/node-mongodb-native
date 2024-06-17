@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, isHello, type MongoClient, MongoServerError } from '../../mongodb';
-import * as mock from '../../tools/mongodb-mock/index';
+import { Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('Collection', function () {
@@ -422,144 +422,117 @@ describe('Collection', function () {
     });
   });
 
-  describe('#countDocuments', function () {
-    let client;
-    let db;
-    let collection;
+  describe('countDocuments()', function () {
+    let client: MongoClient;
+    let collection: Collection<{ test: string }>;
+    let aggCommands;
 
     beforeEach(async function () {
-      client = configuration.newClient({ w: 1 });
-      await client.connect();
-      db = client.db(configuration.db);
-      collection = db.collection('test_coll');
-      await collection.insertOne({ a: 'c' });
+      client = this.configuration.newClient({ monitorCommands: true });
+      collection = client.db('test').collection('countDocuments');
+      await collection.insertMany(
+        Array.from({ length: 100 }, (_, i) => ({ test: i < 50 ? 'a' : 'b' }))
+      );
+      aggCommands = [];
+      client.on('commandStarted', ev => {
+        if (ev.commandName === 'aggregate') aggCommands.push(ev.command);
+      });
     });
 
     afterEach(async function () {
-      await collection.drop();
+      await collection.deleteMany({});
       await client.close();
     });
 
-    context('when passing a non-matching query', function () {
-      it('returns 0', async function () {
-        const result = await collection.countDocuments({ a: 'b' });
-        expect(result).to.equal(0);
+    it('returns the correct count as a js number', async () => {
+      const count = await collection.countDocuments({});
+      expect(count).to.be.a('number').that.equals(100);
+
+      const countDefault = await collection.countDocuments();
+      expect(countDefault).to.be.a('number').that.equals(100);
+
+      const countA = await collection.countDocuments({ test: 'a' });
+      expect(countA).to.be.a('number').that.equals(50);
+
+      const countC = await collection.countDocuments({ test: 'c' });
+      expect(countC).to.be.a('number').that.equals(0);
+    });
+
+    it('does not mutate options', async () => {
+      const options = Object.freeze(Object.create(null));
+      const count = await collection.countDocuments({}, options);
+      expect(count).to.be.a('number').that.equals(100);
+      expect(options).to.deep.equal({});
+    });
+
+    context('when a filter is applied', () => {
+      it('adds a $match pipeline', async () => {
+        await collection.countDocuments({ test: 'a' });
+        expect(aggCommands[0])
+          .to.have.property('pipeline')
+          .that.deep.equals([{ $match: { test: 'a' } }, { $group: { _id: 1, n: { $sum: 1 } } }]);
       });
     });
 
-    it('returns a promise', function () {
-      const docsPromise = collection.countDocuments();
-      expect(docsPromise).to.exist.and.to.be.an.instanceof(Promise);
-      return docsPromise.then(result => expect(result).to.equal(1));
-    });
-  });
+    describe('when aggregation fails', { requires: { mongodb: '>=4.4' } }, () => {
+      beforeEach(async function () {
+        await client
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: { failCommands: ['aggregate'], errorCode: 1 }
+          } as FailPoint);
+      });
 
-  describe('countDocuments with mock server', function () {
-    let server;
+      afterEach(async function () {
+        await client
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: 'off',
+            data: { failCommands: ['aggregate'] }
+          } as FailPoint);
+      });
 
-    beforeEach(() => {
-      return mock.createServer().then(s => {
-        server = s;
+      it('rejects the countDocuments API', async () => {
+        const error = await collection.countDocuments().catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
       });
     });
 
-    afterEach(() => mock.cleanup());
-
-    function testCountDocMock(testConfiguration, config, done) {
-      const client = testConfiguration.newClient(`mongodb://${server.uri()}/test`, {
-        serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
-      });
-      const close = e => client.close(() => done(e));
-
-      server.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.aggregate) {
-          try {
-            config.replyHandler(doc);
-            request.reply(config.reply);
-          } catch (e) {
-            close(e);
-          }
-        }
-
-        if (isHello(doc)) {
-          request.reply(Object.assign({}, mock.HELLO));
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
+    context('when provided with options', () => {
+      it('adds $skip stage to the pipeline', async () => {
+        await collection.countDocuments({}, { skip: 1 });
+        expect(aggCommands[0])
+          .to.have.property('pipeline')
+          .that.deep.equals([{ $match: {} }, { $skip: 1 }, { $group: { _id: 1, n: { $sum: 1 } } }]);
       });
 
-      const db = client.db('test');
-      const collection = db.collection('countDoc_mock');
+      it('adds $limit stage to the pipeline', async () => {
+        await collection.countDocuments({}, { limit: 1 });
+        expect(aggCommands[0])
+          .to.have.property('pipeline')
+          .that.deep.equals([
+            { $match: {} },
+            { $limit: 1 },
+            { $group: { _id: 1, n: { $sum: 1 } } }
+          ]);
+      });
 
-      config.executeCountDocuments(collection, close);
-    }
-
-    it('countDocuments should return appropriate error if aggregation fails with callback given', function (done) {
-      const replyHandler = () => null;
-      const executeCountDocuments = (collection, close) => {
-        collection.countDocuments(err => {
-          expect(err).to.exist;
-          expect(err.errmsg).to.equal('aggregation error - callback');
-          close();
-        });
-      };
-
-      testCountDocMock(
-        configuration,
-        {
-          replyHandler,
-          executeCountDocuments,
-          reply: { ok: 0, errmsg: 'aggregation error - callback' }
-        },
-        done
-      );
-    });
-
-    it('countDocuments should error if aggregation fails using Promises', function (done) {
-      const replyHandler = () => null;
-      const executeCountDocuments = (collection, close) => {
-        collection
-          .countDocuments()
-          .then(() => expect(false).to.equal(true)) // should never get here; error should be caught
-          .catch(e => {
-            expect(e.errmsg).to.equal('aggregation error - promise');
-            close();
-          });
-      };
-
-      testCountDocMock(
-        configuration,
-        {
-          replyHandler,
-          executeCountDocuments,
-          reply: { ok: 0, errmsg: 'aggregation error - promise' }
-        },
-        done
-      );
-    });
-
-    it('countDocuments pipeline should be correct with skip and limit applied', function (done) {
-      const replyHandler = doc => {
-        expect(doc.pipeline).to.deep.include({ $skip: 1 });
-        expect(doc.pipeline).to.deep.include({ $limit: 1 });
-      };
-      const executeCountDocuments = (collection, close) => {
-        collection.countDocuments({}, { limit: 1, skip: 1 }, err => {
-          expect(err).to.not.exist;
-          close();
-        });
-      };
-
-      testCountDocMock(
-        configuration,
-        {
-          replyHandler,
-          executeCountDocuments,
-          reply: { ok: 1 }
-        },
-        done
-      );
+      it('adds $skip and $limit stages to the pipeline', async () => {
+        await collection.countDocuments({}, { skip: 1, limit: 1 });
+        expect(aggCommands[0])
+          .to.have.property('pipeline')
+          .that.deep.equals([
+            { $match: {} },
+            { $skip: 1 },
+            { $limit: 1 },
+            { $group: { _id: 1, n: { $sum: 1 } } }
+          ]);
+      });
     });
   });
 

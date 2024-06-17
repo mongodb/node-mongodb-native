@@ -277,23 +277,22 @@ describe('Retryable Writes Spec Prose', () => {
       { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
       async () => {
         const serverCommandStub = sinon.stub(Server.prototype, 'command');
-        serverCommandStub
-          .onCall(0)
-          .returns(
-            Promise.reject(
-              new MongoWriteConcernError({ errorLabels: ['RetryableWriteError'], code: 91 }, {})
-            )
-          );
-        serverCommandStub
-          .onCall(1)
-          .returns(
-            Promise.reject(
-              new MongoWriteConcernError(
-                { errorLabels: ['RetryableWriteError', 'NoWritesPerformed'], errorCode: 10107 },
-                {}
-              )
-            )
-          );
+        serverCommandStub.onCall(0).returns(
+          Promise.reject(
+            new MongoWriteConcernError({
+              errorLabels: ['RetryableWriteError'],
+              writeConcernError: { errmsg: 'ShutdownInProgress error', code: 91 }
+            })
+          )
+        );
+        serverCommandStub.onCall(1).returns(
+          Promise.reject(
+            new MongoWriteConcernError({
+              errorLabels: ['RetryableWriteError', 'NoWritesPerformed'],
+              writeConcernError: { errmsg: 'NotWritablePrimary error', errorCode: 10107 }
+            })
+          )
+        );
 
         const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
         sinon.restore();

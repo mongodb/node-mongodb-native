@@ -751,8 +751,8 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
    *
    * @public
    **/
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -1158,27 +1158,14 @@ export class MongoServerSelectionError extends MongoSystemError {
   }
 }
 
-function makeWriteConcernResultObject(input: any) {
-  const output = Object.assign({}, input);
-
-  if (output.ok === 0) {
-    output.ok = 1;
-    delete output.errmsg;
-    delete output.code;
-    delete output.codeName;
-  }
-
-  return output;
-}
-
 /**
  * An error thrown when the server reports a writeConcernError
  * @public
  * @category Error
  */
 export class MongoWriteConcernError extends MongoServerError {
-  /** The result document (provided if ok: 1) */
-  result?: Document;
+  /** The result document */
+  result: Document;
 
   /**
    * **Do not use this constructor!**
@@ -1191,17 +1178,18 @@ export class MongoWriteConcernError extends MongoServerError {
    *
    * @public
    **/
-  constructor(message: ErrorDescription, result?: Document) {
-    if (result && Array.isArray(result.errorLabels)) {
-      message.errorLabels = result.errorLabels;
-    }
-
-    super(message);
-    this.errInfo = message.errInfo;
-
-    if (result != null) {
-      this.result = makeWriteConcernResultObject(result);
-    }
+  constructor(result: {
+    writeConcernError: {
+      code: number;
+      errmsg: string;
+      codeName?: string;
+      errInfo?: Document;
+    };
+    errorLabels?: string[];
+  }) {
+    super({ ...result, ...result.writeConcernError });
+    this.errInfo = result.writeConcernError.errInfo;
+    this.result = result;
   }
 
   override get name(): string {
