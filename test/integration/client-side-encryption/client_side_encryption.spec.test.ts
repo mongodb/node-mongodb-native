@@ -96,6 +96,11 @@ describe('Client Side Encryption (Legacy)', function () {
       return !isSkippedTest;
     }
 
+    // TODO(NODE-5686): add CSOT support to FLE
+    if (['timeoutMS applied to listCollections to get collection schema', 'remaining timeoutMS applied to find to get keyvault data'].includes(description)) {
+      return false;
+    }
+
     if (
       [
         'Insert a document with auto encryption using KMIP delegated KMS provider',
