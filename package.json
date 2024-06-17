@@ -133,7 +133,7 @@
     "check:test": "mocha --config test/mocha_mongodb.json test/integration",
     "check:unit": "mocha test/unit",
     "check:ts": "node ./node_modules/typescript/bin/tsc -v && node ./node_modules/typescript/bin/tsc --noEmit",
-    "check:atlas": "mocha --config test/manual/mocharc.json test/manual/atlas_connectivity.test.js",
+    "check:atlas": "mocha --config test/manual/mocharc.json test/manual/atlas_connectivity.test.ts",
     "check:adl": "mocha --config test/mocha_mongodb.json test/manual/atlas-data-lake-testing",
     "check:aws": "nyc mocha --config test/mocha_mongodb.json test/integration/auth/mongodb_aws.test.ts",
     "check:oidc": "mocha --config test/mocha_mongodb.json test/manual/mongodb_oidc.prose.test.ts",

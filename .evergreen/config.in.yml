@@ -434,29 +434,23 @@ functions:
           rm -rf ./node_modules/@aws-sdk/credential-providers
 
   "run atlas tests":
-    - command: shell.exec
-      type: test
-      params:
-        silent: true
-        working_dir: "src"
-        script: |
-          cat <<EOT > prepare_atlas_connectivity.sh
-          export ATLAS_CONNECTIVITY='${ATLAS_CONNECTIVITY}'
-          EOT
-    - command: shell.exec
-      type: test
+    # This creates secrets-export.sh, which is later sourced by run-tests.sh
+    - command: subprocess.exec
       params:
         working_dir: "src"
-        script: |
-          # Disable xtrace (just in case it was accidentally set).
-          set +x
-          . ./prepare_atlas_connectivity.sh
-          rm -f ./prepare_atlas_connectivity.sh
-
-          export PROJECT_DIRECTORY="$(pwd)"
-          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
-
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+        binary: bash
+        args:
+          - -c
+          - ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/atlas_connect
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        binary: bash
+        env:
+          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
+        args:
+          - .evergreen/run-atlas-tests.sh
 
   "run socks5 tests":
     - command: shell.exec
