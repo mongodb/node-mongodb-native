@@ -55,20 +55,21 @@ jobs:
           aws_secret_id: ${{ secrets.aws_secret_id }}
 
       - name: Generate authorized pub report
-        uses: mongodb-labs/drivers-github-tools/authorized-pub@v2
+        uses: baileympearson/drivers-github-tools/authorized-pub@add-output-file-to-authorized-publisher
         with:
           release_version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
           # <package> and <package>.sig
           filenames: ${{ steps.get_vars.outputs.package_file }}*
           token:  ${{ github.token }}
+          output_file: authorized-publication.txt
 
       - name: actions/publish_asset_to_s3
         uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@v2
         with:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
-          file: $S3_ASSETS/authorized-publication.txt
+          file: authorized-publication.txt
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
 
       - run: npm publish --provenance --tag=5x
