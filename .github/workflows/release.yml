@@ -45,21 +45,20 @@ jobs:
           dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
       - name: Generate authorized pub report
-        uses: baileympearson/drivers-github-tools/authorized-pub@add-output-file-to-authorized-publisher
+        uses: mongodb-js/drivers-github-tools/authorized-pub@v2
         with:
           release_version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
           # <package> and <package>.sig
           filenames: ${{ steps.get_vars.outputs.package_file }}*
           token:  ${{ github.token }}
-          output_file: authorized-publication.txt
 
       - name: actions/publish_asset_to_s3
         uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@v2
         with:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
-          file: authorized-publication.txt
+          file: ${{env.S3_ASSETS}}/authorized-publication.txt
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
 
       - run: npm publish --provenance
@@ -170,9 +169,9 @@ jobs:
       - name: Generate compliance report
         uses: mongodb-labs/drivers-github-tools/compliance-report@v2
         with:
-          sbom_name: 'sbom.json'
-          sarif_name: 'sarif.json'
-          security_report_location: 'tbd'
+          sbom_name: sbom.json
+          sarif_name: sarif-report.json
+          security_report_location: tbd
           release_version: ${{ steps.get_version.outputs.package_version }}
           token:  ${{ github.token }}
 
