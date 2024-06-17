@@ -21,13 +21,20 @@ jobs:
 
   compress_sign_and_upload:
     needs: [release_please]
-    if: ${{ needs.release_please.outputs.release_created }}
     environment: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: actions/setup
         uses: ./.github/actions/setup
+      - name: Get release version and release package file name
+        id: get_vars
+        shell: bash
+        run: |
+          package_version=$(jq --raw-output '.version' package.json)
+          echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
+          echo "package_file=mongodb-${package_version}.tgz" >> "$GITHUB_OUTPUT"
+
       - name: actions/compress_sign_and_upload
         uses: ./.github/actions/compress_sign_and_upload
         with:
@@ -35,7 +42,27 @@ jobs:
           aws_region_name: 'us-east-1'
           aws_secret_id: ${{ secrets.AWS_SECRET_ID }}
           npm_package_name: 'mongodb'
-      - run: npm publish --provenance
+          dry_run: ${{ needs.release_please.outputs.release_created == '' }}
+
+      - name: Generate authorized pub report
+        uses: mongodb-labs/drivers-github-tools/authorized-pub@v2
+        with:
+          release_version: ${{ steps.get_version.outputs.package_version }}
+          product_name: node-mongodb-native
+          # <package> and <package>.sig
+          filenames: ${{ steps.get_vars.outputs.package_file }}*
+          token:  ${{ github.token }}
+
+      - name: actions/publish_asset_to_s3
+        uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@v2
+        with:
+          version: ${{ steps.get_version.outputs.package_version }}
+          product_name: node-mongodb-native
+          file: ${{env.S3_ASSETS}}/authorized-publication.txt
+          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
+
+      - run: npm publish --provenance --tag=latest
+        if: ${{ needs.release_please.outputs.release_created }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -78,7 +105,6 @@ jobs:
           file: sarif-report.json
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
 
-
   upload_sbom_lite:
     environment: release
     runs-on: ubuntu-latest
@@ -111,4 +137,47 @@ jobs:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
           file: sbom.json
+          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
+
+  generate_compliance_report:
+    environment: release
+    runs-on: ubuntu-latest
+    needs: [release_please]
+    permissions:
+      # required for all workflows
+      security-events: write
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up drivers-github-tools
+        uses: mongodb-labs/drivers-github-tools/setup@v2
+        with:
+          aws_region_name: us-east-1
+          aws_role_arn: ${{ secrets.aws_role_arn }}
+          aws_secret_id: ${{ secrets.aws_secret_id }}
+
+      - name: Get release version and release package file name
+        id: get_version
+        shell: bash
+        run: |
+          package_version=$(jq --raw-output '.version' package.json)
+          echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate compliance report
+        uses: mongodb-labs/drivers-github-tools/compliance-report@v2
+        with:
+          sbom_name: sbom.json
+          sarif_name: sarif-report.json
+          security_report_location: tbd
+          release_version: ${{ steps.get_version.outputs.package_version }}
+          token:  ${{ github.token }}
+
+      - name: actions/publish_asset_to_s3
+        uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@v2
+        with:
+          version: ${{ steps.get_version.outputs.package_version }}
+          product_name: node-mongodb-native
+          file: ${{env.S3_ASSETS}}/ssdlc_compliance_report.txt
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
