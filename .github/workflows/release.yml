@@ -44,21 +44,46 @@ jobs:
           npm_package_name: 'mongodb'
           dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
-      - name: Generate authorized pub report
-        uses: mongodb-labs/drivers-github-tools/authorized-pub@v2
-        with:
-          release_version: ${{ steps.get_version.outputs.package_version }}
-          product_name: node-mongodb-native
-          # <package> and <package>.sig
-          filenames: ${{ steps.get_vars.outputs.package_file }}*
-          token:  ${{ github.token }}
+      - name: Prepare report
+        shell: bash
+        run: |
+            if [ -n "${{ inputs.token }}" ]; then
+              export GH_TOKEN=${{ github.token }}
+            fi
+            NAME=$(gh api users/${{ github.actor }} --jq '.name')
+            export REPORT=authorized-publication.txt
+            export FILENAMES=${{ inputs.filenames }}
+            cat << EOF > $REPORT
+            Product: node-mongodb-native
+            Version: ${{ steps.get_version.outputs.package_version }}
+            Releaser: $NAME
+            Build Source: GitHub Actions
+            Build Number: ${{ github.run_id }}
+            EOF
+            if [ -z "$FILENAMES" ]; then
+                echo "No published artifacts." >> $REPORT
+            else
+              for filename in ${{ steps.get_vars.outputs.package_file }}*; do
+                  SHA=$(shasum -a 256 $filename | awk '{print $1;}')
+                  echo "Filename: $filename"  >> $REPORT
+                  echo "Shasum: $SHA"  >> $REPORT
+              done
+            fi
+      # - name: Generate authorized pub report
+      #   uses: mongodb-labs/drivers-github-tools/authorized-pub@v2
+      #   with:
+      #     release_version: ${{ steps.get_version.outputs.package_version }}
+      #     product_name: node-mongodb-native
+      #     # <package> and <package>.sig
+      #     filenames: ${{ steps.get_vars.outputs.package_file }}*
+      #     token:  ${{ github.token }}
 
       - name: actions/publish_asset_to_s3
         uses: mongodb-labs/drivers-github-tools/node/publish_asset_to_s3@v2
         with:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
-          file: $S3_ASSETS/authorized-publication.txt
+          file: authorized-publication.txt
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
 
       - run: npm publish --provenance
