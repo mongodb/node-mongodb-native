@@ -3,6 +3,7 @@ import type { Document } from 'bson';
 import type { Collection } from '../../collection';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
+import { type TimeoutContext } from '../../timeout';
 import { AbstractOperation } from '../operation';
 
 /**
@@ -32,7 +33,11 @@ export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
     return 'createSearchIndexes' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<string[]> {
     const namespace = this.collection.fullNamespace;
     const command = {
       createSearchIndexes: namespace.collection,
@@ -41,7 +46,7 @@ export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
 
     const res = await server.command(namespace, command, {
       session,
-      timeoutContext: this.timeoutContext
+      timeoutContext
     });
 
     const indexesCreated: Array<{ name: string }> = res?.indexesCreated ?? [];

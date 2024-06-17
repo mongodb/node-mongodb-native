@@ -3,6 +3,7 @@ import { MongoInvalidArgumentError } from '../error';
 import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
@@ -94,7 +95,11 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     this.pipeline.push(stage);
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<T> {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
@@ -134,7 +139,12 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
       command.cursor.batchSize = options.batchSize;
     }
 
-    const res: TODO_NODE_3286 = await super.executeCommand(server, session, command);
+    const res: TODO_NODE_3286 = await super.executeCommand(
+      server,
+      session,
+      command,
+      timeoutContext
+    );
     return res;
   }
 }

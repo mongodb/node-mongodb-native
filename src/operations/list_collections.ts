@@ -2,6 +2,7 @@ import type { Binary, Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -51,11 +52,16 @@ export class ListCollectionsOperation extends CommandOperation<Document> {
     return 'listCollections' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Document> {
     return await super.executeCommand(
       server,
       session,
-      this.generateCommand(maxWireVersion(server))
+      this.generateCommand(maxWireVersion(server)),
+      timeoutContext
     );
   }
 

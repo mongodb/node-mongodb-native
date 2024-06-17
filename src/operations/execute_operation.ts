@@ -73,7 +73,7 @@ export interface ExecutionResult {
 export async function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T): Promise<TResult> {
+>(client: MongoClient, operation: T, timeoutContext?: TimeoutContext): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
@@ -118,13 +118,11 @@ export async function executeOperation<
     );
   }
 
-  const timeoutContext = TimeoutContext.create({
+  timeoutContext ??= TimeoutContext.create({
     serverSelectionTimeoutMS: client.options.serverSelectionTimeoutMS,
     waitQueueTimeoutMS: client.options.waitQueueTimeoutMS,
     timeoutMS: operation.options.timeoutMS
   });
-
-  operation.timeoutContext = timeoutContext;
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
@@ -164,18 +162,18 @@ export async function executeOperation<
   const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    timeoutContext: operation.timeoutContext
+    timeoutContext
   });
 
   if (session == null) {
     // No session also means it is not retryable, early exit
-    return await operation.execute(server, undefined);
+    return await operation.execute(server, undefined, timeoutContext);
   }
 
   if (!operation.hasAspect(Aspect.RETRYABLE)) {
     // non-retryable operation, early exit
     try {
-      return await operation.execute(server, session);
+      return await operation.execute(server, session, timeoutContext);
     } finally {
       if (session?.owner != null && session.owner === owner) {
         try {
@@ -203,14 +201,15 @@ export async function executeOperation<
   }
 
   try {
-    return await operation.execute(server, session);
+    return await operation.execute(server, session, timeoutContext);
   } catch (operationError) {
     if (willRetry && operationError instanceof MongoError) {
       return await retryOperation(operation, operationError, {
         session,
         topology,
         selector,
-        previousServer: server.description
+        previousServer: server.description,
+        timeoutContext
       });
     }
     throw operationError;
@@ -231,6 +230,7 @@ type RetryOptions = {
   topology: Topology;
   selector: ReadPreference | ServerSelector;
   previousServer: ServerDescription;
+  timeoutContext: TimeoutContext;
 };
 
 async function retryOperation<
@@ -239,7 +239,7 @@ async function retryOperation<
 >(
   operation: T,
   originalError: MongoError,
-  { session, topology, selector, previousServer }: RetryOptions
+  { session, topology, selector, previousServer, timeoutContext }: RetryOptions
 ): Promise<TResult> {
   const isWriteOperation = operation.hasAspect(Aspect.WRITE_OPERATION);
   const isReadOperation = operation.hasAspect(Aspect.READ_OPERATION);
@@ -277,7 +277,7 @@ async function retryOperation<
     session,
     operationName: operation.commandName,
     previousServer,
-    timeoutContext: operation.timeoutContext
+    timeoutContext
   });
 
   if (isWriteOperation && !supportsRetryableWrites(server)) {
@@ -287,7 +287,7 @@ async function retryOperation<
   }
 
   try {
-    return await operation.execute(server, session);
+    return await operation.execute(server, session, timeoutContext);
   } catch (retryError) {
     if (
       retryError instanceof MongoError &&

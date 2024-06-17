@@ -2,6 +2,7 @@ import type { Long } from '../bson';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { type MongoDBNamespace, squashError } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
@@ -29,7 +30,11 @@ export class KillCursorsOperation extends AbstractOperation {
     return 'killCursors' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<void> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<void> {
     if (server !== this.server) {
       throw new MongoRuntimeError('Killcursor must run on the same server operation began on');
     }
@@ -48,7 +53,7 @@ export class KillCursorsOperation extends AbstractOperation {
     try {
       await server.command(this.ns, killCursorsCommand, {
         session,
-        timeoutContext: this.timeoutContext
+        timeoutContext
       });
     } catch (error) {
       // The driver should never emit errors from killCursors, this is spec-ed behavior

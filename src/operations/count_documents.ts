@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { AggregateOperation, type AggregateOptions } from './aggregate';
 
 /** @public */
@@ -31,8 +32,12 @@ export class CountDocumentsOperation extends AggregateOperation<number> {
     super(collection.s.namespace, pipeline, options);
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
-    const result = await super.execute(server, session);
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<number> {
+    const result = await super.execute(server, session, timeoutContext);
 
     // NOTE: We're avoiding creating a cursor here to reduce the callstack.
     const response = result as unknown as Document;

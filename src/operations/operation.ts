@@ -67,9 +67,6 @@ export abstract class AbstractOperation<TResult = any> {
   /** @internal */
   timeoutMS?: number;
 
-  /** @internal */
-  timeoutContext!: TimeoutContext;
-
   [kSession]: ClientSession | undefined;
 
   constructor(options: OperationOptions = {}) {
@@ -91,7 +88,11 @@ export abstract class AbstractOperation<TResult = any> {
   Command name should be stateless (should not use 'this' keyword) */
   abstract get commandName(): string;
 
-  abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;
+  abstract execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<TResult>;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;

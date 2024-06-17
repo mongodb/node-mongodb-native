@@ -5,6 +5,7 @@ import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
@@ -295,7 +296,11 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     return 'createIndexes';
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<string[]> {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -315,7 +320,7 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
 
-    await super.executeCommand(server, session, cmd);
+    await super.executeCommand(server, session, cmd, timeoutContext);
 
     const indexNames = indexes.map(index => index.name || '');
     return indexNames;
@@ -343,9 +348,13 @@ export class DropIndexOperation extends CommandOperation<Document> {
     return 'dropIndexes' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Document> {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
-    return await super.executeCommand(server, session, cmd);
+    return await super.executeCommand(server, session, cmd, timeoutContext);
   }
 }
 
@@ -376,7 +385,11 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     return 'listIndexes' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Document> {
     const serverWireVersion = maxWireVersion(server);
 
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
@@ -389,7 +402,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
       command.comment = this.options.comment;
     }
 
-    return await super.executeCommand(server, session, command);
+    return await super.executeCommand(server, session, command, timeoutContext);
   }
 }
 

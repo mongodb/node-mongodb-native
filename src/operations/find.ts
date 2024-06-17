@@ -4,6 +4,7 @@ import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort } from '../sort';
+import { type TimeoutContext } from '../timeout';
 import { decorateWithExplain, type MongoDBNamespace, normalizeHintField } from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -95,7 +96,11 @@ export class FindOperation extends CommandOperation<Document> {
     return 'find' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Document> {
     this.server = server;
 
     const options = this.options;
@@ -113,7 +118,7 @@ export class FindOperation extends CommandOperation<Document> {
         ...this.bsonOptions,
         documentsReturnedIn: 'firstBatch',
         session,
-        timeoutContext: this.timeoutContext
+        timeoutContext
       },
       undefined
     );

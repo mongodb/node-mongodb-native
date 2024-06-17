@@ -2,6 +2,7 @@ import type { Db } from '../db';
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { enumToString } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 
@@ -53,7 +54,8 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<ProfilingLevel> {
     const level = this.level;
 
@@ -64,7 +66,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     }
 
     // TODO(NODE-3483): Determine error to put here
-    await super.executeCommand(server, session, { profile: this.profile });
+    await super.executeCommand(server, session, { profile: this.profile }, timeoutContext);
     return level;
   }
 }
