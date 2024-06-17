@@ -333,7 +333,7 @@ describe('Sessions - unit', function () {
 
       before(() => {
         serverSessionSymbol = getSymbolFrom(
-          new ClientSession({}, serverSessionPool, {}),
+          new ClientSession(client, serverSessionPool, {}),
           'serverSession'
         );
       });
