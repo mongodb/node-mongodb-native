@@ -55,7 +55,7 @@ jobs:
           aws_secret_id: ${{ secrets.aws_secret_id }}
 
       - name: Generate authorized pub report
-        uses: mongodb-js/drivers-github-tools/authorized-pub@v2
+        uses: mongodb-labs/drivers-github-tools/authorized-pub@v2
         with:
           release_version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
