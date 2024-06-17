@@ -7,7 +7,7 @@ import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mon
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';
-import { compareLogs, filterExtraLogs, matchesEvents } from './match';
+import { compareLogs, filterIgnoredMessages, matchesEvents } from './match';
 import { executeOperationAndCheck } from './operations';
 import * as uni from './schema';
 import { isAnyRequirementSatisfied, patchVersion, zip } from './unified-utils';
@@ -247,13 +247,18 @@ async function runUnifiedTest(
 
         expect(testClient, `No client entity found with id ${clientId}`).to.exist;
         const filteredTestClientLogs = expectedLogsForClient.ignoreMessages
-          ? filterExtraLogs(
+          ? filterIgnoredMessages(
               expectedLogsForClient.ignoreMessages,
               testClient!.collectedLogs,
               entities
             )
           : testClient!.collectedLogs;
-        compareLogs(expectedLogsForClient.messages, filteredTestClientLogs, entities);
+        compareLogs(
+          expectedLogsForClient.messages,
+          filteredTestClientLogs,
+          entities,
+          expectedLogsForClient.ignoreExtraMessages
+        );
       }
     }
 
