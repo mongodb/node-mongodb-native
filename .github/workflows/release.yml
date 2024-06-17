@@ -58,9 +58,8 @@ jobs:
         with:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
-          file: ${{ $S3_ASSETS/authorized-publication.txt }}
+          file: $S3_ASSETS/authorized-publication.txt
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
-
 
       - run: npm publish --provenance
         if: ${{ needs.release_please.outputs.release_created }}

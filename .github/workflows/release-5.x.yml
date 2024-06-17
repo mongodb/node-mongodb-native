@@ -47,6 +47,13 @@ jobs:
           npm_package_name: 'mongodb'
           dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
+      - name: Set up drivers-github-tools
+        uses: mongodb-labs/drivers-github-tools/setup@v2
+        with:
+          aws_region_name: us-east-1
+          aws_role_arn: ${{ secrets.aws_role_arn }}
+          aws_secret_id: ${{ secrets.aws_secret_id }}
+
       - name: Generate authorized pub report
         uses: mongodb-labs/drivers-github-tools/authorized-pub@v2
         with:
@@ -61,7 +68,7 @@ jobs:
         with:
           version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
-          file: ${{ $S3_ASSETS/authorized-publication.txt }}
+          file: $S3_ASSETS/authorized-publication.txt
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
 
       - run: npm publish --provenance --tag=5x
