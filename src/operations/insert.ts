@@ -130,7 +130,8 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<InsertManyResult> {
     const coll = this.collection;
     const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
@@ -144,7 +145,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     );
 
     try {
-      const res = await bulkWriteOperation.execute(server, session);
+      const res = await bulkWriteOperation.execute(server, session, timeoutContext);
       return {
         acknowledged: writeConcern?.w !== 0,
         insertedCount: res.insertedCount,
