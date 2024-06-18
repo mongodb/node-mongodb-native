@@ -31,6 +31,7 @@ import {
   MIN_SUPPORTED_SERVER_VERSION,
   MIN_SUPPORTED_WIRE_VERSION
 } from './wire_protocol/constants';
+import { isSharded } from './wire_protocol/shared';
 
 /** @public */
 export type Stream = Socket | TLSSocket;
@@ -164,7 +165,7 @@ export async function performInitialHandshake(
     } catch (error) {
       if (error instanceof MongoError) {
         error.addErrorLabel(MongoErrorLabel.HandshakeError);
-        if (needsRetryableWriteLabel(error, response.maxWireVersion)) {
+        if (needsRetryableWriteLabel(error, response.maxWireVersion, isSharded(conn))) {
           error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
         }
       }

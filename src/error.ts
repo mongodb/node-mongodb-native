@@ -1215,11 +1215,15 @@ const RETRYABLE_READ_ERROR_CODES = new Set<number>([
 // see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms
 const RETRYABLE_WRITE_ERROR_CODES = RETRYABLE_READ_ERROR_CODES;
 
-export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): boolean {
+export function needsRetryableWriteLabel(
+  error: Error,
+  maxWireVersion: number,
+  isSharded: boolean
+): boolean {
   // pre-4.4 server, then the driver adds an error label for every valid case
   // execute operation will only inspect the label, code/message logic is handled here
   if (error instanceof MongoNetworkError) {
-    return true;
+    return !isSharded;
   }
 
   if (error instanceof MongoError) {
@@ -1235,7 +1239,9 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
   }
 
   if (error instanceof MongoWriteConcernError) {
-    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
+    return isSharded && maxWireVersion < 9
+      ? false
+      : RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
   }
 
   if (error instanceof MongoError && typeof error.code === 'number') {

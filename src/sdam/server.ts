@@ -8,6 +8,7 @@ import {
 } from '../cmap/connection_pool';
 import { PoolClearedError } from '../cmap/errors';
 import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
+import { isSharded } from '../cmap/wire_protocol/shared';
 import {
   APM_EVENTS,
   CLOSED,
@@ -453,7 +454,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     } else {
       if (
         (isRetryableWritesEnabled(this.topology) || isTransactionCommand(cmd)) &&
-        needsRetryableWriteLabel(error, maxWireVersion(this)) &&
+        needsRetryableWriteLabel(error, maxWireVersion(this), isSharded(this)) &&
         !inActiveTransaction(session, cmd)
       ) {
         error.addErrorLabel(MongoErrorLabel.RetryableWriteError);

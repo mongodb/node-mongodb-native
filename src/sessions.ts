@@ -391,7 +391,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     const topologyMaxWireVersion = maxWireVersion(this.client.topology);
     if (
-      isSharded(this.client.topology) &&
+      is(this.client.topology) &&
       topologyMaxWireVersion != null &&
       topologyMaxWireVersion < minWireVersionForShardedTransactions
     ) {
