@@ -1223,7 +1223,7 @@ export function needsRetryableWriteLabel(
   // pre-4.4 server, then the driver adds an error label for every valid case
   // execute operation will only inspect the label, code/message logic is handled here
   if (error instanceof MongoNetworkError) {
-    return !isSharded;
+    return true;
   }
 
   if (error instanceof MongoError) {

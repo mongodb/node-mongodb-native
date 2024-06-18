@@ -203,6 +203,6 @@ async function turnOffFailPoint(client, name) {
   });
 }
 
-describe('Retryable Writes (unified)', function () {
+describe.only('Retryable Writes (unified)', function () {
   runUnifiedSuite(loadSpecTests(path.join('retryable-writes', 'unified')));
 });
