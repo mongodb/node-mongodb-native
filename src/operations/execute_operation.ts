@@ -119,8 +119,8 @@ export async function executeOperation<
   }
 
   timeoutContext ??= TimeoutContext.create({
-    serverSelectionTimeoutMS: client.options.serverSelectionTimeoutMS,
-    waitQueueTimeoutMS: client.options.waitQueueTimeoutMS,
+    serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
+    waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
     timeoutMS: operation.options.timeoutMS
   });
 
