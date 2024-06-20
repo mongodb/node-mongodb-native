@@ -12,7 +12,9 @@ export interface CountOptions extends CommandOperationOptions {
   skip?: number;
   /** The maximum amounts to count before aborting. */
   limit?: number;
-  /** Number of milliseconds to wait before aborting the query. */
+  /** Number of milliseconds to wait before aborting the query.
+   * @deprecated Will be removed in a future release - use timeoutMS instead.
+   */
   maxTimeMS?: number;
   /** An index name hint for the query. */
   hint?: string | Document;

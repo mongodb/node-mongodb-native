@@ -79,6 +79,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   /**
    * When applicable `maxTimeMS` controls the amount of time the initial command
    * that constructs a cursor should take. (ex. find, aggregate, listCollections)
+   * @deprecated Will be removed in a future release - use timeoutMS instead.
    */
   maxTimeMS?: number;
   /**

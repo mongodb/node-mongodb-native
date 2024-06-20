@@ -16,7 +16,10 @@ export interface GetMoreOptions extends OperationOptions {
    * getMore only supports 'comment' in server versions 4.4 and above.
    */
   comment?: unknown;
-  /** Number of milliseconds to wait before aborting the query. */
+  /**
+   * Number of milliseconds to wait before aborting the query.
+   * @deprecated Will be removed in a future release - use timeoutMS instead.
+   */
   maxTimeMS?: number;
   /** TODO(NODE-4413): Address bug with maxAwaitTimeMS not being passed in from the cursor correctly */
   maxAwaitTimeMS?: number;
