@@ -91,6 +91,7 @@ interface FindAndModifyCmdBase {
   fields?: Document;
   bypassDocumentValidation?: boolean;
   arrayFilters?: Document[];
+  /** @deprecated Will be removed in a future release - use timeoutMS instead. */
   maxTimeMS?: number;
   let?: Document;
   writeConcern?: WriteConcern | WriteConcernSettings;

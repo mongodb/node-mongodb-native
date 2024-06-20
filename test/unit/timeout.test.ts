@@ -10,7 +10,7 @@ import {
   TimeoutError
 } from '../mongodb';
 
-describe('Timeout', function () {
+describe.only('Timeout', function () {
   let timeout: Timeout;
 
   beforeEach(() => {
@@ -124,9 +124,9 @@ describe('Timeout', function () {
   });
 });
 
-describe('TimeoutContext', function () {
+describe.only('TimeoutContext', function () {
   describe('TimeoutContext.create', function () {
-    describe('when timeoutMS is a number', function () {
+    context('when timeoutMS is a number', function () {
       it('returns a CSOTTimeoutContext instance', function () {
         const ctx = TimeoutContext.create({
           timeoutMS: 0,
@@ -138,7 +138,7 @@ describe('TimeoutContext', function () {
       });
     });
 
-    describe('when timeoutMS is undefined', function () {
+    context('when timeoutMS is undefined', function () {
       it('returns a LegacyTimeoutContext instance', function () {
         const ctx = TimeoutContext.create({
           serverSelectionTimeoutMS: 0,
@@ -160,7 +160,7 @@ describe('TimeoutContext', function () {
         timeout?.clear();
       });
 
-      describe('when timeoutMS is 0 and serverSelectionTimeoutMS is 0', function () {
+      context('when timeoutMS is 0 and serverSelectionTimeoutMS is 0', function () {
         it('returns null', function () {
           ctx = new CSOTTimeoutContext({
             timeoutMS: 0,
@@ -172,7 +172,7 @@ describe('TimeoutContext', function () {
         });
       });
 
-      describe('when timeoutMS is 0 and serverSelectionTimeoutMS is >0', function () {
+      context('when timeoutMS is 0 and serverSelectionTimeoutMS is >0', function () {
         it('returns a Timeout instance with duration set to serverSelectionTimeoutMS', function () {
           ctx = new CSOTTimeoutContext({
             timeoutMS: 0,
@@ -187,39 +187,43 @@ describe('TimeoutContext', function () {
         });
       });
 
-      describe('when timeoutMS is >0 serverSelectionTimeoutMS is >0 and timeoutMS > serverSelectionTimeoutMS', function () {
-        it('returns a Timeout instance with duration set to serverSelectionTimeoutMS', function () {
-          ctx = new CSOTTimeoutContext({
-            timeoutMS: 15,
-            serverSelectionTimeoutMS: 10,
-            waitQueueTimeoutMS: 0
-          });
+      context(
+        'when timeoutMS is >0 serverSelectionTimeoutMS is >0 and timeoutMS > serverSelectionTimeoutMS',
+        function () {
+          it('returns a Timeout instance with duration set to serverSelectionTimeoutMS', function () {
+            ctx = new CSOTTimeoutContext({
+              timeoutMS: 15,
+              serverSelectionTimeoutMS: 10,
+              waitQueueTimeoutMS: 0
+            });
 
-          timeout = ctx.serverSelectionTimeout;
-          expect(timeout).to.exist;
-          expect(timeout).to.be.instanceOf(Timeout);
-          expect(timeout.duration).to.equal(ctx.serverSelectionTimeoutMS);
-        });
+            timeout = ctx.serverSelectionTimeout;
+            expect(timeout).to.exist;
+            expect(timeout).to.be.instanceOf(Timeout);
+            expect(timeout.duration).to.equal(ctx.serverSelectionTimeoutMS);
+          });
       });
 
-      describe('when timeoutMS is >0, serverSelectionTimeoutMS is >0 and timeoutMS < serverSelectionTimeoutMS', function () {
-        it('returns a Timeout instance with duration set to timeoutMS', function () {
-          ctx = new CSOTTimeoutContext({
-            timeoutMS: 10,
-            serverSelectionTimeoutMS: 15,
-            waitQueueTimeoutMS: 0
-          });
+      context(
+        'when timeoutMS is >0, serverSelectionTimeoutMS is >0 and timeoutMS < serverSelectionTimeoutMS',
+        function () {
+          it('returns a Timeout instance with duration set to timeoutMS', function () {
+            ctx = new CSOTTimeoutContext({
+              timeoutMS: 10,
+              serverSelectionTimeoutMS: 15,
+              waitQueueTimeoutMS: 0
+            });
 
-          timeout = ctx.serverSelectionTimeout;
-          expect(timeout).to.exist;
-          expect(timeout).to.be.instanceOf(Timeout);
-          expect(timeout.duration).to.equal(ctx.timeoutMS);
-        });
+            timeout = ctx.serverSelectionTimeout;
+            expect(timeout).to.exist;
+            expect(timeout).to.be.instanceOf(Timeout);
+            expect(timeout.duration).to.equal(ctx.timeoutMS);
+          });
       });
     });
 
     describe('get connectionCheckoutTimeout()', function () {
-      describe('when called before get serverSelectionTimeout()', function () {
+      context('when called before get serverSelectionTimeout()', function () {
         it('throws a MongoRuntimeError', function () {
           ctx = new CSOTTimeoutContext({
             timeoutMS: 100,
@@ -231,7 +235,7 @@ describe('TimeoutContext', function () {
         });
       });
 
-      describe('when called after get serverSelectionTimeout()', function () {
+      context('when called after get serverSelectionTimeout()', function () {
         let serverSelectionTimeout: Timeout;
         let connectionCheckoutTimeout: Timeout;
 
@@ -254,6 +258,52 @@ describe('TimeoutContext', function () {
         });
       });
     });
+
+    describe('#elapseTime', function () {
+      beforeEach(function () {
+        ctx = new CSOTTimeoutContext({
+          timeoutMS: 100,
+          serverSelectionTimeoutMS: 100
+        });
+        ctx.elapseTime(50);
+      });
+
+      it('reduces the remainingTimeMS', function () {
+        expect(ctx.remainingTimeoutMS).to.equal(50);
+      });
+    });
+
+    describe('get maxTimeMS', function () {
+      context('when remainingTimeoutMS - minRoundTripTime <= 0', function () {
+        beforeEach(function () {
+          ctx = new CSOTTimeoutContext({
+            timeoutMS: 100,
+            serverSelectionTimeoutMS: 100
+          });
+          ctx.remainingTimeoutMS = 50;
+          ctx.minRoundTripTime = 50;
+        });
+
+        it('raises a timeout error', function () {
+          expect(() => ctx.maxTimeMS).to.throw();
+        });
+      });
+
+      context('wnen remainingTimeoutMS - minRoundTripTime > 0', function () {
+        beforeEach(function () {
+          ctx = new CSOTTimeoutContext({
+            timeoutMS: 100,
+            serverSelectionTimeoutMS: 100
+          });
+          ctx.remainingTimeoutMS = 50;
+          ctx.minRoundTripTime = 40;
+        });
+
+        it('returns remainingTimeoutMS - minRoundTripTime', function () {
+          expect(ctx.maxTimeMS).to.equal(10);
+        });
+      });
+    });
   });
 
   describe('LegacyTimeoutContext', function () {
@@ -264,7 +314,7 @@ describe('TimeoutContext', function () {
     });
 
     describe('get serverSelectionTimeout()', function () {
-      describe('when serverSelectionTimeoutMS > 0', function () {
+      context('when serverSelectionTimeoutMS > 0', function () {
         it('returns a Timeout instance with duration set to serverSelectionTimeoutMS', function () {
           const ctx = new LegacyTimeoutContext({
             serverSelectionTimeoutMS: 100,
@@ -277,7 +327,7 @@ describe('TimeoutContext', function () {
         });
       });
 
-      describe('when serverSelectionTimeoutMS = 0', function () {
+      context('when serverSelectionTimeoutMS = 0', function () {
         it('returns null', function () {
           const ctx = new LegacyTimeoutContext({
             serverSelectionTimeoutMS: 0,
@@ -291,7 +341,7 @@ describe('TimeoutContext', function () {
     });
 
     describe('get connectionCheckoutTimeout()', function () {
-      describe('when waitQueueTimeoutMS > 0', function () {
+      context('when waitQueueTimeoutMS > 0', function () {
         it('returns a Timeout instance with duration set to waitQueueTimeoutMS', function () {
           const ctx = new LegacyTimeoutContext({
             serverSelectionTimeoutMS: 10,
@@ -304,7 +354,7 @@ describe('TimeoutContext', function () {
         });
       });
 
-      describe('when waitQueueTimeoutMS = 0', function () {
+      context('when waitQueueTimeoutMS = 0', function () {
         it('returns null', function () {
           const ctx = new LegacyTimeoutContext({
             serverSelectionTimeoutMS: 10,
@@ -312,6 +362,31 @@ describe('TimeoutContext', function () {
           });
 
           expect(ctx.connectionCheckoutTimeout).to.be.null;
+        });
+      });
+    });
+
+    describe('get maxTimeMS', function () {
+      context('when maxTimeMS was provided', function () {
+        const ctx = new LegacyTimeoutContext({
+          serverSelectionTimeoutMS: 10,
+          waitQueueTimeoutMS: 0,
+          maxTimeMS: 50
+        });
+
+        it('returns the maxTimeMS', function () {
+          expect(ctx.maxTimeMS).to.equal(50);
+        });
+      });
+
+      context('when maxTimeMS was not provided', function () {
+        const ctx = new LegacyTimeoutContext({
+          serverSelectionTimeoutMS: 10,
+          waitQueueTimeoutMS: 0
+        });
+
+        it('returns undefined', function () {
+          expect(ctx.maxTimeMS).to.equal(undefined);
         });
       });
     });

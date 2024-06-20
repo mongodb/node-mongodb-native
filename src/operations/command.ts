@@ -38,6 +38,7 @@ export interface CommandOperationOptions
   readConcern?: ReadConcernLike;
   /** Collation */
   collation?: CollationOptions;
+  /** @deprecated Will be removed in a future release - use timeoutMS instead. */
   maxTimeMS?: number;
   /**
    * Comment to apply to the operation.
