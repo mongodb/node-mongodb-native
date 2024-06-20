@@ -86,15 +86,6 @@ describe('Client Side Encryption (Legacy)', function () {
     if (SKIPPED_TESTS.has(description)) {
       return false;
     }
-    if (isServerless) {
-      // TODO(NODE-4730): Fix failing csfle tests against serverless
-      const isSkippedTest = [
-        'BypassQueryAnalysis decrypts',
-        'encryptedFieldsMap is preferred over remote encryptedFields'
-      ].includes(description);
-
-      return !isSkippedTest;
-    }
 
     // TODO(NODE-5686): add CSOT support to FLE
     if (
@@ -104,6 +95,16 @@ describe('Client Side Encryption (Legacy)', function () {
       ].includes(description)
     ) {
       return false;
+    }
+
+    if (isServerless) {
+      // TODO(NODE-4730): Fix failing csfle tests against serverless
+      const isSkippedTest = [
+        'BypassQueryAnalysis decrypts',
+        'encryptedFieldsMap is preferred over remote encryptedFields'
+      ].includes(description);
+
+      return !isSkippedTest;
     }
 
     if (
