@@ -86,6 +86,17 @@ describe('Client Side Encryption (Legacy)', function () {
     if (SKIPPED_TESTS.has(description)) {
       return false;
     }
+
+    // TODO(NODE-5686): add CSOT support to FLE
+    if (
+      [
+        'timeoutMS applied to listCollections to get collection schema',
+        'remaining timeoutMS applied to find to get keyvault data'
+      ].includes(description)
+    ) {
+      return false;
+    }
+
     if (isServerless) {
       // TODO(NODE-4730): Fix failing csfle tests against serverless
       const isSkippedTest = [
