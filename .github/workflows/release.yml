@@ -19,7 +19,7 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@v4
 
-  compress_sign_and_upload:
+  ssdlc:
     needs: [release_please]
     permissions:
       # required for all workflows
@@ -49,6 +49,10 @@ jobs:
           npm_package_name: 'mongodb'
           dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
+      - name: Copy sbom file to release assets
+        shell: bash
+        run: cp sbom.json ${{ env.RELEASE_ASSETS }}/sbom.json
+
       - name: Generate authorized pub report
         uses: baileympearson/drivers-github-tools/full-report@adjust-shared-actions-for-node
         with:
@@ -64,6 +68,20 @@ jobs:
           version: ${{ inputs.version }}
           product_name: ${{ inputs.product_name }}
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
+
+      - run: npm publish --provenance --tag=latest
+        if: ${{ needs.release_please.outputs.release_created }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish:
+    needs: [release_please, ssdlc]
+    environment: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: actions/setup
+        uses: ./.github/actions/setup
 
       - run: npm publish --provenance --tag=latest
         if: ${{ needs.release_please.outputs.release_created }}
