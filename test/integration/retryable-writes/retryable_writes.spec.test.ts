@@ -19,6 +19,22 @@ describe('Legacy Retryable Writes Specs', function () {
 
   const retryableWrites = loadSpecTests('retryable-writes', 'legacy');
 
+  const LEGACY_SKIP_TESTS_4_4_SHARDED = [
+    'BulkWrite succeeds after WriteConcernError ShutdownInProgress',
+    'DeleteOne succeeds after WriteConcernError ShutdownInProgress',
+    'FindOneAndDelete succeeds after WriteConcernError ShutdownInProgress',
+    'FindOneAndReplace succeeds after WriteConcernError ShutdownInProgress',
+    'FindOneAndUpdate succeeds after WriteConcernError ShutdownInProgress',
+    'InsertMany succeeds after WriteConcernError ShutdownInProgress',
+    'InsertOne succeeds after WriteConcernError InterruptedAtShutdown',
+    'InsertOne succeeds after WriteConcernError InterruptedDueToReplStateChange',
+    'InsertOne succeeds after WriteConcernError PrimarySteppedDown',
+    'InsertOne succeeds after WriteConcernError ShutdownInProgress',
+    'InsertOne fails after multiple retryable writeConcernErrors',
+    'ReplaceOne succeeds after WriteConcernError ShutdownInProgress',
+    'UpdateOne succeeds after WriteConcernError ShutdownInProgress'
+  ];
+
   for (const suite of retryableWrites) {
     describe(suite.name, function () {
       beforeEach(async function () {
@@ -65,14 +81,24 @@ describe('Legacy Retryable Writes Specs', function () {
       });
 
       for (const spec of suite.tests) {
-        // Step 2: Run the test
-        const mochaTest = it(spec.description, async () => await executeScenarioTest(spec, ctx));
+        if (
+          LEGACY_SKIP_TESTS_4_4_SHARDED.includes(spec.description) &&
+          this.ctx.topologyType === 'Sharded' &&
+          Number(this.ctx.version) <= 4.4
+        ) {
+          this.ctx.skipReason =
+            'drivers should not consider the code within the writeConcernError field from a pre-4.4 mongos response';
+          this.ctx.skip();
+        } else {
+          // Step 2: Run the test
+          const mochaTest = it(spec.description, async () => await executeScenarioTest(spec, ctx));
 
-        // A pattern we don't need to repeat for unified tests
-        // In order to give the beforeEach hook access to the
-        // spec test so it can be responsible for skipping it
-        // and executeScenarioSetup
-        mochaTest.spec = spec;
+          // A pattern we don't need to repeat for unified tests
+          // In order to give the beforeEach hook access to the
+          // spec test so it can be responsible for skipping it
+          // and executeScenarioSetup
+          mochaTest.spec = spec;
+        }
       }
     });
   }
