@@ -51,7 +51,7 @@ jobs:
 
       - name: Copy sbom file to release assets
         shell: bash
-        run: cp sbom.json ${{ env.RELEASE_ASSETS }}/sbom.json
+        run: cp sbom.json ${{ env.S3_ASSETS }}/sbom.json
 
       - name: Generate authorized pub report
         uses: baileympearson/drivers-github-tools/full-report@adjust-shared-actions-for-node
@@ -63,7 +63,7 @@ jobs:
           dist_filenames: ${{ steps.get_vars.outputs.package_file }}*
           token:  ${{ github.token }}
 
-      - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v2
+      - uses: baileympearson/drivers-github-tools/upload-s3-assets@adjust-shared-actions-for-node
         with:
           version: ${{ inputs.version }}
           product_name: ${{ inputs.product_name }}
