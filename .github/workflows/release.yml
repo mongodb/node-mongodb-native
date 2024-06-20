@@ -62,6 +62,8 @@ jobs:
           # <package> and <package>.sig
           dist_filenames: ${{ steps.get_vars.outputs.package_file }}*
           token:  ${{ github.token }}
+          sbom_file_name: sbom.json
+
 
       - uses: baileympearson/drivers-github-tools/upload-s3-assets@adjust-shared-actions-for-node
         with:
