@@ -272,7 +272,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   public async command<T extends MongoDBResponseConstructor>(
     ns: MongoDBNamespace,
     command: Document,
-    options: ServerCommandOptions | undefined,
+    options: ServerCommandOptions,
     responseType: T | undefined
   ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
 

@@ -390,7 +390,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             : 'Timed out while checking out a connection from connection pool',
           this.address
         );
-        if (options?.timeoutContext?.csotEnabled()) {
+        if (options.timeoutContext.csotEnabled()) {
           throw new MongoOperationTimeoutError('Timed out during connection checkout', {
             cause: timeoutError
           });
@@ -399,7 +399,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       throw error;
     } finally {
-      if (options?.timeoutContext?.clearConnectionCheckoutTimeout) timeout?.clear();
+      if (options.timeoutContext.clearConnectionCheckoutTimeout) timeout?.clear();
     }
   }
 
