@@ -205,7 +205,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
     return true;
   }
 
-  override get serverSelectionTimeout(): Timeout | null {
+  get serverSelectionTimeout(): Timeout | null {
     // check for undefined
     if (typeof this._serverSelectionTimeout !== 'object') {
       const usingServerSelectionTimeoutMS =
@@ -226,7 +226,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
     return this._serverSelectionTimeout;
   }
 
-  override get connectionCheckoutTimeout(): Timeout | null {
+  get connectionCheckoutTimeout(): Timeout | null {
     if (typeof this._connectionCheckoutTimeout !== 'object') {
       if (typeof this._serverSelectionTimeout === 'object') {
         // null or Timeout
@@ -258,13 +258,13 @@ export class LegacyTimeoutContext extends TimeoutContext {
     return false;
   }
 
-  override get serverSelectionTimeout(): Timeout | null {
+  get serverSelectionTimeout(): Timeout | null {
     if (this.options.serverSelectionTimeoutMS != null && this.options.serverSelectionTimeoutMS > 0)
       return Timeout.expires(this.options.serverSelectionTimeoutMS);
     return null;
   }
 
-  override get connectionCheckoutTimeout(): Timeout | null {
+  get connectionCheckoutTimeout(): Timeout | null {
     if (this.options.waitQueueTimeoutMS != null && this.options.waitQueueTimeoutMS > 0)
       return Timeout.expires(this.options.waitQueueTimeoutMS);
     return null;
