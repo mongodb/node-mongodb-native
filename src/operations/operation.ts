@@ -2,7 +2,7 @@ import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '..
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Timeout } from '../timeout';
+import { type Timeout, type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
 
 export const Aspect = {
@@ -82,15 +82,17 @@ export abstract class AbstractOperation<TResult = any> {
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
     this.trySecondaryWrite = false;
-
-    this.timeoutMS = options.timeoutMS;
   }
 
   /** Must match the first key of the command object sent to the server.
   Command name should be stateless (should not use 'this' keyword) */
   abstract get commandName(): string;
 
-  abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;
+  abstract execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<TResult>;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;

@@ -1,7 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
-import { MongoInvalidArgumentError } from './error';
-import { noop } from './utils';
+import { MongoInvalidArgumentError, MongoRuntimeError } from './error';
+import { csotMin, noop } from './utils';
 
 /** @internal */
 export class TimeoutError extends Error {
@@ -106,5 +106,167 @@ export class Timeout extends Promise<never> {
       // eslint-disable-next-line github/no-then
       typeof timeout.then === 'function'
     );
+  }
+}
+
+/** @internal */
+export type TimeoutContextOptions = LegacyTimeoutContextOptions | CSOTTimeoutContextOptions;
+
+/** @internal */
+export type LegacyTimeoutContextOptions = {
+  serverSelectionTimeoutMS: number;
+  waitQueueTimeoutMS: number;
+  socketTimeoutMS?: number;
+};
+
+/** @internal */
+export type CSOTTimeoutContextOptions = {
+  timeoutMS: number;
+  serverSelectionTimeoutMS: number;
+  socketTimeoutMS?: number;
+};
+
+function isLegacyTimeoutContextOptions(v: unknown): v is LegacyTimeoutContextOptions {
+  return (
+    v != null &&
+    typeof v === 'object' &&
+    'serverSelectionTimeoutMS' in v &&
+    typeof v.serverSelectionTimeoutMS === 'number' &&
+    'waitQueueTimeoutMS' in v &&
+    typeof v.waitQueueTimeoutMS === 'number'
+  );
+}
+
+function isCSOTTimeoutContextOptions(v: unknown): v is CSOTTimeoutContextOptions {
+  return (
+    v != null &&
+    typeof v === 'object' &&
+    'serverSelectionTimeoutMS' in v &&
+    typeof v.serverSelectionTimeoutMS === 'number' &&
+    'timeoutMS' in v &&
+    typeof v.timeoutMS === 'number'
+  );
+}
+
+/** @internal */
+export abstract class TimeoutContext {
+  static create(options: TimeoutContextOptions): TimeoutContext {
+    if (isCSOTTimeoutContextOptions(options)) return new CSOTTimeoutContext(options);
+    else if (isLegacyTimeoutContextOptions(options)) return new LegacyTimeoutContext(options);
+    else throw new MongoRuntimeError('Unrecognized options');
+  }
+
+  abstract get serverSelectionTimeout(): Timeout | null;
+
+  abstract get connectionCheckoutTimeout(): Timeout | null;
+
+  abstract get clearServerSelectionTimeout(): boolean;
+
+  abstract get clearConnectionCheckoutTimeout(): boolean;
+
+  abstract csotEnabled(): this is CSOTTimeoutContext;
+}
+
+/** @internal */
+export class CSOTTimeoutContext extends TimeoutContext {
+  timeoutMS: number;
+  serverSelectionTimeoutMS: number;
+  socketTimeoutMS?: number;
+
+  clearConnectionCheckoutTimeout: boolean;
+  clearServerSelectionTimeout: boolean;
+
+  private _maxTimeMS?: number;
+
+  private _serverSelectionTimeout?: Timeout | null;
+  private _connectionCheckoutTimeout?: Timeout | null;
+
+  constructor(options: CSOTTimeoutContextOptions) {
+    super();
+    this.timeoutMS = options.timeoutMS;
+
+    this.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
+
+    this.socketTimeoutMS = options.socketTimeoutMS;
+
+    this.clearServerSelectionTimeout = false;
+    this.clearConnectionCheckoutTimeout = true;
+  }
+
+  get maxTimeMS(): number {
+    return this._maxTimeMS ?? -1;
+  }
+
+  set maxTimeMS(v: number) {
+    this._maxTimeMS = v;
+  }
+
+  csotEnabled(): this is CSOTTimeoutContext {
+    return true;
+  }
+
+  get serverSelectionTimeout(): Timeout | null {
+    // check for undefined
+    if (typeof this._serverSelectionTimeout !== 'object') {
+      const usingServerSelectionTimeoutMS =
+        this.serverSelectionTimeoutMS !== 0 &&
+        csotMin(this.timeoutMS, this.serverSelectionTimeoutMS) === this.serverSelectionTimeoutMS;
+
+      if (usingServerSelectionTimeoutMS) {
+        this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
+      } else {
+        if (this.timeoutMS > 0) {
+          this._serverSelectionTimeout = Timeout.expires(this.timeoutMS);
+        } else {
+          this._serverSelectionTimeout = null;
+        }
+      }
+    }
+
+    return this._serverSelectionTimeout;
+  }
+
+  get connectionCheckoutTimeout(): Timeout | null {
+    if (typeof this._connectionCheckoutTimeout !== 'object') {
+      if (typeof this._serverSelectionTimeout === 'object') {
+        // null or Timeout
+        this._connectionCheckoutTimeout = this._serverSelectionTimeout;
+      } else {
+        throw new MongoRuntimeError(
+          'Unreachable. If you are seeing this error, please file a ticket on the NODE driver project on Jira'
+        );
+      }
+    }
+    return this._connectionCheckoutTimeout;
+  }
+}
+
+/** @internal */
+export class LegacyTimeoutContext extends TimeoutContext {
+  options: LegacyTimeoutContextOptions;
+  clearServerSelectionTimeout: boolean;
+  clearConnectionCheckoutTimeout: boolean;
+
+  constructor(options: LegacyTimeoutContextOptions) {
+    super();
+    this.options = options;
+    this.clearServerSelectionTimeout = true;
+    this.clearConnectionCheckoutTimeout = true;
+  }
+
+  csotEnabled(): this is CSOTTimeoutContext {
+    return false;
+  }
+
+  get serverSelectionTimeout(): Timeout | null {
+    if (this.options.serverSelectionTimeoutMS != null && this.options.serverSelectionTimeoutMS > 0)
+      return Timeout.expires(this.options.serverSelectionTimeoutMS);
+    return null;
+  }
+
+  get connectionCheckoutTimeout(): Timeout | null {
+    if (this.options.waitQueueTimeoutMS != null && this.options.waitQueueTimeoutMS > 0)
+      return Timeout.expires(this.options.waitQueueTimeoutMS);
+    return null;
   }
 }

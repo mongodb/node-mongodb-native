@@ -3,6 +3,7 @@ import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -54,12 +55,14 @@ export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<CursorResponse> {
     return await super.executeCommand(
       server,
       session,
       this.generateCommand(maxWireVersion(server)),
+      timeoutContext,
       CursorResponse
     );
   }
