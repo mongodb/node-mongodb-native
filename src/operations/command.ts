@@ -7,6 +7,7 @@ import type { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { MIN_SECONDARY_WRITE_WIRE_VERSION } from '../sdam/server_selection';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import {
   commandSupportsReadConcern,
   decorateWithExplain,
@@ -112,19 +113,22 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     server: Server,
     session: ClientSession | undefined,
     cmd: Document,
+    timeoutContext: TimeoutContext,
     responseType: T | undefined
   ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
 
   public async executeCommand(
     server: Server,
     session: ClientSession | undefined,
-    cmd: Document
+    cmd: Document,
+    timeoutContext: TimeoutContext
   ): Promise<Document>;
 
   async executeCommand(
     server: Server,
     session: ClientSession | undefined,
     cmd: Document,
+    timeoutContext: TimeoutContext,
     responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     this.server = server;
@@ -132,7 +136,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     const options = {
       ...this.options,
       ...this.bsonOptions,
-      timeout: this.timeout,
+      timeoutContext,
       readPreference: this.readPreference,
       session
     };
