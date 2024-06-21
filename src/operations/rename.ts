@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -29,7 +30,11 @@ export class RenameOperation extends CommandOperation<Document> {
     return 'renameCollection' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Collection> {
     // Build the command
     const renameCollection = this.collection.namespace;
     const toCollection = this.collection.s.namespace.withCollection(this.newName).toString();
@@ -42,7 +47,7 @@ export class RenameOperation extends CommandOperation<Document> {
       dropTarget: dropTarget
     };
 
-    await super.executeCommand(server, session, command);
+    await super.executeCommand(server, session, command, timeoutContext);
     return new Collection(this.collection.s.db, this.newName, this.collection.s.options);
   }
 }
