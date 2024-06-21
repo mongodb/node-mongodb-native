@@ -3,6 +3,7 @@ import type { Db } from '../db';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -29,7 +30,11 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     return 'drop' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<boolean> {
     const db = this.db;
     const options = this.options;
     const name = this.name;
@@ -57,7 +62,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
         // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
         const dropOp = new DropCollectionOperation(db, collectionName);
         try {
-          await dropOp.executeWithoutEncryptedFieldsCheck(server, session);
+          await dropOp.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
         } catch (err) {
           if (
             !(err instanceof MongoServerError) ||
@@ -69,14 +74,15 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
       }
     }
 
-    return await this.executeWithoutEncryptedFieldsCheck(server, session);
+    return await this.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
   }
 
   private async executeWithoutEncryptedFieldsCheck(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<boolean> {
-    await super.executeCommand(server, session, { drop: this.name });
+    await super.executeCommand(server, session, { drop: this.name }, timeoutContext);
     return true;
   }
 }
@@ -96,8 +102,12 @@ export class DropDatabaseOperation extends CommandOperation<boolean> {
     return 'dropDatabase' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
-    await super.executeCommand(server, session, { dropDatabase: 1 });
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<boolean> {
+    await super.executeCommand(server, session, { dropDatabase: 1 }, timeoutContext);
     return true;
   }
 }

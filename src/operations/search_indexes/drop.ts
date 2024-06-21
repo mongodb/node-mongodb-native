@@ -3,6 +3,7 @@ import type { Collection } from '../../collection';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
+import { type TimeoutContext } from '../../timeout';
 import { AbstractOperation } from '../operation';
 
 /** @internal */
@@ -18,7 +19,11 @@ export class DropSearchIndexOperation extends AbstractOperation<void> {
     return 'dropSearchIndex' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<void> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<void> {
     const namespace = this.collection.fullNamespace;
 
     const command: Document = {
@@ -30,7 +35,7 @@ export class DropSearchIndexOperation extends AbstractOperation<void> {
     }
 
     try {
-      await server.command(namespace, command, { session });
+      await server.command(namespace, command, { session, timeoutContext });
     } catch (error) {
       const isNamespaceNotFoundError =
         error instanceof MongoServerError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound;

@@ -24,7 +24,8 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { supportsRetryableWrites } from '../utils';
+import { TimeoutContext } from '../timeout';
+import { squashError, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -57,7 +58,7 @@ type ResultTypeFromOperation<TOperation> =
 export async function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T): Promise<TResult> {
+>(client: MongoClient, operation: T, timeoutContext?: TimeoutContext): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
@@ -86,6 +87,12 @@ export async function executeOperation<
     );
   }
 
+  timeoutContext ??= TimeoutContext.create({
+    serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
+    waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
+    timeoutMS: operation.options.timeoutMS
+  });
+
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
@@ -109,7 +116,8 @@ export async function executeOperation<
     return await tryOperation(operation, {
       topology,
       session,
-      readPreference
+      readPreference,
+      timeoutContext
     });
   } finally {
     if (session?.owner != null && session.owner === owner) {
@@ -268,7 +276,7 @@ async function tryOperation<
       if (tries > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
         operation.resetBatch();
       }
-      return await operation.execute(server, session);
+      return await operation.execute(server, session, timeoutContext);
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;
 
