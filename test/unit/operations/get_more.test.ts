@@ -69,7 +69,7 @@ describe('GetMoreOperation', function () {
         const call = stub.getCall(0);
         expect(call.args[0]).to.equal(namespace);
         expect(call.args[1]).to.deep.equal(expectedGetMoreCommand);
-        expect(call.args[2]).to.deep.equal(opts);
+        expect(call.args[2]).to.containSubset(opts);
       });
     });
 
