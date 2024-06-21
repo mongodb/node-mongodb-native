@@ -5,6 +5,7 @@ import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
+import { type TimeoutContext } from '../timeout';
 import { decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
 import { type WriteConcern, type WriteConcernSettings } from '../write_concern';
 import { CommandOperation, type CommandOperationOptions } from './command';
@@ -180,7 +181,11 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     return 'findAndModify' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Document> {
     const coll = this.collection;
     const query = this.query;
     const options = { ...this.options, ...this.bsonOptions };
@@ -208,7 +213,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     }
 
     // Execute the command
-    const result = await super.executeCommand(server, session, cmd);
+    const result = await super.executeCommand(server, session, cmd, timeoutContext);
     return options.includeResultMetadata ? result : result.value ?? null;
   }
 }

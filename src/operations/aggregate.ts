@@ -3,6 +3,7 @@ import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/r
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
@@ -96,7 +97,8 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<CursorResponse> {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
@@ -141,6 +143,7 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
       server,
       session,
       command,
+      timeoutContext,
       this.explain ? ExplainedCursorResponse : CursorResponse
     );
   }
