@@ -59,6 +59,7 @@ jobs:
           release_version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
           sarif_report_target_ref: main
+          third_party_dependency_tool: n/a
           # <package> and <package>.sig
           dist_filenames: ${{ steps.get_vars.outputs.package_file }}*
           token:  ${{ github.token }}
