@@ -28,6 +28,7 @@ import {
   ns,
   PoolClosedError as MongoPoolClosedError,
   setDifference,
+  TimeoutContext,
   type TopologyDescription,
   type TopologyOptions,
   WaitQueueTimeoutError as MongoWaitQueueTimeoutError
@@ -376,11 +377,17 @@ describe('MongoErrors', () => {
         { replicaSet: 'rs' } as TopologyOptions
       );
 
+      const timeoutContext = TimeoutContext.create({
+        serverSelectionTimeoutMS: 0,
+        waitQueueTimeoutMS: 0
+      });
       return replSet
         .connect()
-        .then(topology => topology.selectServer('primary', {}))
+        .then(topology => topology.selectServer('primary', { timeoutContext }))
         .then(server =>
-          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
+          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {
+            timeoutContext
+          })
         )
         .then(
           () => expect.fail('expected command to fail'),
@@ -419,10 +426,14 @@ describe('MongoErrors', () => {
         if (err) {
           return cleanup(err);
         }
+        const timeoutContext = TimeoutContext.create({
+          serverSelectionTimeoutMS: 0,
+          waitQueueTimeoutMS: 0
+        });
 
-        topology.selectServer('primary', {}).then(server => {
+        topology.selectServer('primary', { timeoutContext }).then(server => {
           server
-            .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
+            .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), { timeoutContext })
             .then(expect.fail, err => {
               let _err;
               try {

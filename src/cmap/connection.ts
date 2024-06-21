@@ -30,7 +30,7 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
-import { type Timeout } from '../timeout';
+import { type TimeoutContext } from '../timeout';
 import {
   BufferPool,
   calculateDurationInMs,
@@ -97,7 +97,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   directConnection?: boolean;
 
   /** @internal */
-  timeout?: Timeout;
+  timeoutContext?: TimeoutContext;
 }
 
 /** @public */

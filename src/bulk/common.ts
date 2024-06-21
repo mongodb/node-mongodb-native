@@ -20,6 +20,7 @@ import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../o
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import {
   applyRetryableWrites,
   type Callback,
@@ -873,6 +874,9 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   forceServerObjectId?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+
+  /** @internal */
+  timeoutContext?: TimeoutContext;
 }
 
 const executeCommandsAsync = promisify(executeCommands);
