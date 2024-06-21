@@ -5,6 +5,7 @@ import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maybeAddIdToDocuments, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
@@ -27,7 +28,11 @@ export class InsertOperation extends CommandOperation<Document> {
     return 'insert' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Document> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -46,7 +51,7 @@ export class InsertOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
-    return await super.executeCommand(server, session, command);
+    return await super.executeCommand(server, session, command, timeoutContext);
   }
 }
 
@@ -73,9 +78,10 @@ export class InsertOneOperation extends InsertOperation {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<InsertOneResult> {
-    const res = await super.execute(server, session);
+    const res = await super.execute(server, session, timeoutContext);
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) {
       // This should be a WriteError but we can't change it now because of error hierarchy
@@ -123,7 +129,8 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<InsertManyResult> {
     const coll = this.collection;
     const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
@@ -137,7 +144,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     );
 
     try {
-      const res = await bulkWriteOperation.execute(server, session);
+      const res = await bulkWriteOperation.execute(server, session, timeoutContext);
       return {
         acknowledged: writeConcern?.w !== 0,
         insertedCount: res.insertedCount,
