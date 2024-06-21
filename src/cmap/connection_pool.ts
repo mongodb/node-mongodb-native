@@ -362,35 +362,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCheckOutStartedEvent(this)
     );
 
-    const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
-    const serverSelectionTimeoutMS = this[kServer].topology.s.serverSelectionTimeoutMS;
-
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
 
-    let timeout: Timeout | null = null;
-    if (options?.timeout) {
-      // CSOT enabled
-      // Determine if we're using the timeout passed in or a new timeout
-      if (options.timeout.duration > 0 || serverSelectionTimeoutMS > 0) {
-        // This check determines whether or not Topology.selectServer used the configured
-        // `timeoutMS` or `serverSelectionTimeoutMS` value for its timeout
-        if (
-          options.timeout.duration === serverSelectionTimeoutMS ||
-          csotMin(options.timeout.duration, serverSelectionTimeoutMS) < serverSelectionTimeoutMS
-        ) {
-          // server selection used `timeoutMS`, so we should use the existing timeout as the timeout
-          // here
-          timeout = options.timeout;
-        } else {
-          // server selection used `serverSelectionTimeoutMS`, so we construct a new timeout with
-          // the time remaining to ensure that Topology.selectServer and ConnectionPool.checkOut
-          // cumulatively don't spend more than `serverSelectionTimeoutMS` blocking
-          timeout = Timeout.expires(serverSelectionTimeoutMS - options.timeout.timeElapsed);
-        }
-      }
-    } else {
-      timeout = Timeout.expires(waitQueueTimeoutMS);
-    }
+    const timeout = options.timeoutContext.connectionCheckoutTimeout;
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
@@ -419,7 +393,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             : 'Timed out while checking out a connection from connection pool',
           this.address
         );
-        if (options?.timeout) {
+        if (options.timeoutContext.csotEnabled()) {
           throw new MongoOperationTimeoutError('Timed out during connection checkout', {
             cause: timeoutError
           });
@@ -428,7 +402,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       throw error;
     } finally {
-      if (timeout !== options?.timeout) timeout?.clear();
+      if (options.timeoutContext.clearConnectionCheckoutTimeout) timeout?.clear();
     }
   }
 

@@ -47,7 +47,7 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
         ...this.options,
         readPreference: this.readPreference,
         session,
-        timeout: this.timeout
+        timeoutContext
       },
       this.options.responseType
     );
@@ -82,7 +82,7 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
       ...this.options,
       readPreference: this.readPreference,
       session,
-      timeout: this.timeout
+      timeoutContext
     });
     return res;
   }

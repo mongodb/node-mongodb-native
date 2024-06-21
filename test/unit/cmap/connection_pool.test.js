@@ -129,8 +129,8 @@ describe('Connection Pool', function () {
 
     pool.ready();
 
-    const conn = await pool.checkOut();
-    const err = await pool.checkOut().catch(e => e);
+    const conn = await pool.checkOut({ timeoutContext });
+    const err = await pool.checkOut({ timeoutContext }).catch(e => e);
     expect(err).to.exist.and.be.instanceOf(WaitQueueTimeoutError);
     sinon.stub(pool, 'availableConnectionCount').get(() => 0);
     pool.checkIn(conn);

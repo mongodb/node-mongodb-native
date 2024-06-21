@@ -38,7 +38,6 @@ import { Timeout, TimeoutContext, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
-  csotMin,
   type EventEmitterWithState,
   HostAddress,
   List,
@@ -461,13 +460,20 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
-    const timeoutMS = this.client.options.timeoutMS;
-    const timeout = timeoutMS != null ? Timeout.expires(timeoutMS) : undefined;
+    const timeoutMS = this.client.s.options.timeoutMS;
+    const serverSelectionTimeoutMS = this.client.s.options.serverSelectionTimeoutMS;
     const readPreference = options.readPreference ?? ReadPreference.primary;
+
+    const timeoutContext = TimeoutContext.create({
+      timeoutMS,
+      serverSelectionTimeoutMS,
+      waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
+    });
+
     const selectServerOptions = {
       operationName: 'ping',
-      timeout,
-      ...options
+      ...options,
+      timeoutContext
     };
     try {
       const server = await this.selectServer(
@@ -477,7 +483,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
       if (!skipPingOnConnect && server && this.s.credentials) {
-        await server.command(ns('admin.$cmd'), { ping: 1 }, { timeout });
+        await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
         this.emit(Topology.CONNECT, this);
@@ -566,24 +572,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         new ServerSelectionStartedEvent(selector, this.description, options.operationName)
       );
     }
-    const serverSelectionTimeoutMS = options.serverSelectionTimeoutMS ?? 0;
-    let timeout: Timeout | null;
-    if (options.timeout) {
-      // CSOT Enabled
-      if (options.timeout.duration > 0 || serverSelectionTimeoutMS > 0) {
-        if (
-          options.timeout.duration === serverSelectionTimeoutMS ||
-          csotMin(options.timeout.duration, serverSelectionTimeoutMS) < serverSelectionTimeoutMS
-        ) {
-          timeout = options.timeout;
-        } else {
-          timeout = Timeout.expires(serverSelectionTimeoutMS);
-        }
-      } else {
-        timeout = null;
-      }
-    } else {
-      timeout = Timeout.expires(serverSelectionTimeoutMS);
+    let timeout;
+    if (options.timeoutContext) timeout = options.timeoutContext.serverSelectionTimeout;
+    else {
+      timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
     }
 
     const isSharded = this.description.type === TopologyType.Sharded;
@@ -607,7 +599,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      if (timeout !== options.timeout) timeout?.clear();
+      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
       return transaction.server;
     }
 
@@ -657,7 +649,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           );
         }
 
-        if (options.timeout) {
+        if (options.timeoutContext?.csotEnabled()) {
           throw new MongoOperationTimeoutError('Timed out during server selection', {
             cause: timeoutError
           });
@@ -667,7 +659,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       // Other server selection error
       throw error;
     } finally {
-      if (timeout !== options.timeout) timeout?.clear();
+      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
     }
   }
   /**
