@@ -12,7 +12,8 @@ import {
   makeClientMetadata,
   type MongoClient,
   type Server,
-  shuffle
+  shuffle,
+  TimeoutContext
 } from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { type FailPoint, sleep } from './utils';
@@ -191,7 +192,14 @@ const compareInputToSpec = (input, expected, message) => {
 
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   checkOut: async function (op) {
-    const connection: Connection = await ConnectionPool.prototype.checkOut.call(threadContext.pool);
+    const timeoutContext = TimeoutContext.create({
+      serverSelectionTimeoutMS: 0,
+      waitQueueTimeoutMS: threadContext.pool.options.waitQueueTimeoutMS
+    });
+    const connection: Connection = await ConnectionPool.prototype.checkOut.call(
+      threadContext.pool,
+      { timeoutContext }
+    );
     if (op.label != null) {
       threadContext.connections.set(op.label, connection);
     } else {

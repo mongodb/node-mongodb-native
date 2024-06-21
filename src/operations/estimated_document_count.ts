@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -30,7 +31,11 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     return 'count' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<number> {
     const cmd: Document = { count: this.collectionName };
 
     if (typeof this.options.maxTimeMS === 'number') {
@@ -43,7 +48,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
       cmd.comment = this.options.comment;
     }
 
-    const response = await super.executeCommand(server, session, cmd);
+    const response = await super.executeCommand(server, session, cmd, timeoutContext);
 
     return response?.n || 0;
   }

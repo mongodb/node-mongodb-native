@@ -3,6 +3,7 @@ import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
@@ -58,7 +59,8 @@ export class GetMoreOperation extends AbstractOperation {
    */
   override async execute(
     server: Server,
-    _session: ClientSession | undefined
+    _session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<CursorResponse> {
     if (server !== this.server) {
       throw new MongoRuntimeError('Getmore must run on the same server operation began on');
@@ -97,6 +99,7 @@ export class GetMoreOperation extends AbstractOperation {
     const commandOptions = {
       returnFieldSelector: null,
       documentsReturnedIn: 'nextBatch',
+      timeoutContext,
       ...this.options
     };
 
