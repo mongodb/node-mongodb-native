@@ -9,6 +9,7 @@ import { MongoCompatibilityError } from '../error';
 import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { CreateIndexesOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
@@ -124,7 +125,11 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     return 'create' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Collection> {
     const db = this.db;
     const name = this.name;
     const options = this.options;
@@ -155,7 +160,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
             unique: true
           }
         });
-        await createOp.executeWithoutEncryptedFieldsCheck(server, session);
+        await createOp.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
       }
 
       if (!options.encryptedFields) {
@@ -163,7 +168,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
       }
     }
 
-    const coll = await this.executeWithoutEncryptedFieldsCheck(server, session);
+    const coll = await this.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
 
     if (encryptedFields) {
       // Create the required index for queryable encryption support.
@@ -173,7 +178,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
         { __safeContent__: 1 },
         {}
       );
-      await createIndexOp.execute(server, session);
+      await createIndexOp.execute(server, session, timeoutContext);
     }
 
     return coll;
@@ -181,7 +186,8 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
 
   private async executeWithoutEncryptedFieldsCheck(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<Collection> {
     const db = this.db;
     const name = this.name;
@@ -198,7 +204,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
       }
     }
     // otherwise just execute the command
-    await super.executeCommand(server, session, cmd);
+    await super.executeCommand(server, session, cmd, timeoutContext);
     return new Collection(db, name, options);
   }
 }

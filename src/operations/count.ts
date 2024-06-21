@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -36,7 +37,11 @@ export class CountOperation extends CommandOperation<number> {
     return 'count' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<number> {
     const options = this.options;
     const cmd: Document = {
       count: this.collectionName,
@@ -59,7 +64,7 @@ export class CountOperation extends CommandOperation<number> {
       cmd.maxTimeMS = options.maxTimeMS;
     }
 
-    const result = await super.executeCommand(server, session, cmd);
+    const result = await super.executeCommand(server, session, cmd, timeoutContext);
     return result ? result.n : 0;
   }
 }

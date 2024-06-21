@@ -17,6 +17,7 @@ import {
   Server,
   SrvPoller,
   SrvPollingEvent,
+  TimeoutContext,
   Topology,
   TopologyDescription,
   TopologyDescriptionChangedEvent,
@@ -108,17 +109,28 @@ describe('Topology (unit)', function () {
 
       const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
       topology.connect().then(() => {
-        topology.selectServer('primary', {}).then(server => {
-          server.command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250 }).then(
-            () => expect.fail('expected command to fail'),
-            err => {
-              expect(err).to.exist;
-              expect(err).to.match(/timed out/);
-              topology.close();
-              done();
-            }
-          );
-        }, expect.fail);
+        const ctx = TimeoutContext.create({
+          waitQueueTimeoutMS: 0,
+          serverSelectionTimeoutMS: 0,
+          socketTimeoutMS: 250
+        });
+        topology
+          .selectServer('primary', {
+            timeoutContext: ctx
+          })
+          .then(server => {
+            server
+              .command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250, timeoutContext: ctx })
+              .then(
+                () => expect.fail('expected command to fail'),
+                err => {
+                  expect(err).to.exist;
+                  expect(err).to.match(/timed out/);
+                  topology.close();
+                  done();
+                }
+              );
+          }, expect.fail);
       }, expect.fail);
     });
   });
@@ -217,10 +229,16 @@ describe('Topology (unit)', function () {
       let poolCleared = false;
       topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-      const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
-        () => null,
-        e => e
-      );
+      const timeoutContext = TimeoutContext.create({
+        serverSelectionTimeoutMS: 0,
+        waitQueueTimeoutMS: 0
+      });
+      const err = await server
+        .command(ns('test.test'), { insert: { a: 42 } }, { timeoutContext })
+        .then(
+          () => null,
+          e => e
+        );
       expect(err).to.eql(serverDescription.error);
       expect(poolCleared).to.be.true;
     });
@@ -245,11 +263,17 @@ describe('Topology (unit)', function () {
 
       let poolCleared = false;
       topology.on('connectionPoolCleared', () => (poolCleared = true));
+      const timeoutContext = TimeoutContext.create({
+        serverSelectionTimeoutMS: 0,
+        waitQueueTimeoutMS: 0
+      });
 
-      const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
-        () => null,
-        e => e
-      );
+      const err = await server
+        .command(ns('test.test'), { insert: { a: 42 } }, { timeoutContext })
+        .then(
+          () => null,
+          e => e
+        );
       expect(err).to.eql(serverDescription.error);
       expect(poolCleared).to.be.false;
       topology.close();
@@ -269,14 +293,20 @@ describe('Topology (unit)', function () {
 
       topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
       await topology.connect();
+      const timeoutContext = TimeoutContext.create({
+        waitQueueTimeoutMS: 0,
+        serverSelectionTimeoutMS: 0
+      });
       const server = await topology.selectServer('primary', {});
       let serverDescription;
       server.on('descriptionReceived', sd => (serverDescription = sd));
 
-      const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
-        () => null,
-        e => e
-      );
+      const err = await server
+        .command(ns('test.test'), { insert: { a: 42 } }, { timeoutContext })
+        .then(
+          () => null,
+          e => e
+        );
       expect(err).to.eql(serverDescription.error);
       expect(server.description.type).to.equal('Unknown');
     });
