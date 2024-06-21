@@ -16,6 +16,7 @@ import {
 } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ReadPreference } from '../read_preference';
+import { type Server } from '../sdam/server';
 import type { ServerDescription } from '../sdam/server_description';
 import {
   sameServerSelector,
@@ -283,5 +284,214 @@ async function retryOperation<
       throw originalError;
     }
     throw retryError;
+  }
+}
+
+/**
+ * Executes a read command in the context of a MongoClient where a retryable
+ * read have been enabled. The session parameter may be an implicit or
+ * explicit client session (depending on how the CRUD method was invoked).
+ */
+async function executeRetryableRead<
+  T extends AbstractOperation<TResult>,
+  TResult = ResultTypeFromOperation<T>
+>(
+  operation: T,
+  options: {
+    topology: Topology;
+    timeoutContext: TimeoutContext;
+    session: ClientSession;
+    selector: ReadPreference | ServerSelector;
+  }
+): Promise<TResult> {
+  let previousError: MongoError | undefined;
+  let retrying = false;
+  let previousServer: Server | undefined;
+  let server: Server;
+
+  const { topology, timeoutContext, selector, session } = options;
+  for (;;) {
+    if (previousError != null) {
+      retrying = true;
+    }
+    try {
+      if (previousServer == null) {
+        server = await topology.selectServer(selector, {
+          timeoutContext,
+          session,
+          operationName: operation.commandName
+        });
+      } else {
+        // If a previous attempt was made, deprioritize the previous server
+        // where the command failed.
+        server = await topology.selectServer(selector, {
+          previousServer: previousServer.description,
+          session,
+          timeoutContext,
+          operationName: operation.commandName
+        });
+      }
+    } catch (exception) {
+      if (previousError == null) {
+        // If this is the first attempt, propagate the exception.
+        throw exception;
+      }
+      // For retries, propagate the previous error.
+      throw previousError;
+    }
+
+    if (topology.s.options.retryReads || session.inTransaction()) {
+      /* If this is the first loop iteration and we determine that retryable
+       * reads are not supported, execute the command once and allow any
+       * errors to propagate */
+
+      if (!previousError) {
+        return await operation.execute(server, session, timeoutContext);
+      }
+
+      /* If the server selected for retrying is too old, throw the previous error.
+       * The caller can then infer that an attempt was made and failed. This case
+       * is very rare, and likely means that the cluster is in the midst of a
+       * downgrade. */
+      throw previousError;
+    }
+
+    /* NetworkException and NotWritablePrimaryException are both retryable errors. If
+     * caught, remember the exception, update SDAM accordingly, and proceed with
+     * retrying the operation.
+     *
+     * Exceptions that originate from the driver (e.g. no socket available
+     * from the connection pool) are treated as fatal. Any such exception
+     * that occurs on the previous attempt is propagated as-is. On retries,
+     * the error from the previous attempt is raised as it will be more
+     * relevant for the user. */
+    try {
+      return await operation.execute(server, session, timeoutContext);
+    } catch (error) {
+      if (error instanceof MongoError) {
+        if (isRetryableReadError(error)) {
+          previousError = error;
+          previousServer = server;
+        } else {
+          throw previousError ?? error;
+        }
+      } else {
+        throw previousError ?? error;
+      }
+
+      /* If CSOT is not enabled, allow any retryable error from the second
+       * attempt to propagate to our caller, as it will be just as relevant
+       * (if not more relevant) than the original error. */
+      if (retrying) {
+        throw previousError;
+      }
+      // TODO(NODE-6231): Implement CSOT logic
+    }
+  }
+}
+
+async function executeRetryableWrite<
+  T extends AbstractOperation<TResult>,
+  TResult = ResultTypeFromOperation<T>
+>(
+  operation: T,
+  options: {
+    topology: Topology;
+    timeoutContext: TimeoutContext;
+    session: ClientSession;
+    selector: ReadPreference | ServerSelector;
+  }
+): Promise<TResult> {
+  const { topology, timeoutContext, selector, session } = options;
+  /* Allow ServerSelectionException to propagate to our caller, which can then
+   * assume that no attempts were made. */
+  let server = await topology.selectServer(selector, {
+    timeoutContext,
+    session,
+    operationName: operation.commandName
+  });
+
+  /* If the server does not support retryable writes, execute the write as if
+   * retryable writes are not enabled. */
+  if (!supportsRetryableWrites(server)) {
+    return await operation.execute(server, session, timeoutContext);
+  }
+
+  let previousError: MongoError | undefined;
+  let retrying = false;
+  for (;;) {
+    try {
+      return await operation.execute(server, session, timeoutContext);
+    } catch (currentError) {
+      handleError(currentError);
+
+      /* If the error has a RetryableWriteError label, remember the exception
+       * and proceed with retrying the operation.
+       *
+       * IllegalOperation (code 20) with errmsg starting with "Transaction
+       * numbers" MUST be re-raised with an actionable error message.
+       */
+
+      if (!isRetryableWriteError(currentError)) {
+        throw currentError;
+      }
+
+      /*
+       * If the "previousError" is "null", then the "currentError" is the
+       * first error encountered during the retry attempt cycle. We must
+       * persist the first error in the case where all succeeding errors are
+       * labeled "NoWritesPerformed", which would otherwise raise "null" as
+       * the error.
+       */
+      if (previousError == null) {
+        previousError = currentError;
+      }
+
+      /*
+       * For exceptions that originate from the driver (e.g. no socket available
+       * from the connection pool), we should raise the previous error if there
+       * was one.
+       */
+      if (
+        !(currentError instanceof MongoError) &&
+        !previousError?.hasErrorLabel('NoWritesPerformed')
+      ) {
+        previousError = currentError;
+      }
+    }
+
+    /*
+     * We try to select server that is not the one that failed by passing the
+     * failed server as a deprioritized server.
+     * If we cannot select a writable server, do not proceed with retrying and
+     * throw the previous error. The caller can then infer that an attempt was
+     * made and failed. */
+    try {
+      server = await topology.selectServer(selector, {
+        timeoutContext,
+        session,
+        operationName: operation.commandName,
+        previousServer: server.description
+      });
+    } catch {
+      throw previousError;
+    }
+
+    /* If the server selected for retrying is too old, throw the previous error.
+     * The caller can then infer that an attempt was made and failed. This case
+     * is very rare, and likely means that the cluster is in the midst of a
+     * downgrade. */
+    if (!supportsRetryableWrites(server)) {
+      throw previousError;
+    }
+
+    /* If CSOT is not enabled, allow any retryable error from the second
+     * attempt to propagate to our caller, as it will be just as relevant
+     * (if not more relevant) than the original error. */
+    if (retrying) {
+      throw previousError;
+    }
+    //TODO(NODE-6231): Implement CSOT behaviour
+    retrying = true;
   }
 }
