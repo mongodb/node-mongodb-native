@@ -18,6 +18,8 @@ jobs:
     steps:
       - id: release
         uses: googleapis/release-please-action@v4
+        with:
+          target-branch: 5.x
 
   ssdlc:
     needs: [release_please]
