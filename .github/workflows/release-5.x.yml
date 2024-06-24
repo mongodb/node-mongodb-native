@@ -54,7 +54,7 @@ jobs:
         run: cp sbom.json ${{ env.S3_ASSETS }}/sbom.json
 
       - name: Generate authorized pub report
-        uses: baileympearson/drivers-github-tools/full-report@adjust-shared-actions-for-node
+        uses: mongodb-labs/drivers-github-tools/full-report@v2
         with:
           release_version: ${{ steps.get_version.outputs.package_version }}
           product_name: node-mongodb-native
@@ -65,7 +65,7 @@ jobs:
           token:  ${{ github.token }}
           sbom_file_name: sbom.json
 
-      - uses: baileympearson/drivers-github-tools/upload-s3-assets@adjust-shared-actions-for-node
+      - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v2
         with:
           version: ${{ inputs.version }}
           product_name: ${{ inputs.product_name }}
