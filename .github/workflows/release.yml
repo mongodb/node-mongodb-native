@@ -63,6 +63,8 @@ jobs:
           dist_filenames: ${{ env.package_file }}*
           token:  ${{ github.token }}
           sbom_file_name: sbom.json
+          evergreen_project: mongo-node-driver-next
+          evergreen_commit: ${{ env.commit }}
 
       - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v2
         with:
