@@ -173,7 +173,7 @@ export async function executeOperation<
     }
   }
 
-  const willRetryRead = topology.s.options.retryReads && !inTransaction && operation.canRetryRead;
+  //const willRetryRead = topology.s.options.retryReads && !inTransaction && operation.canRetryRead;
 
   const willRetryWrite =
     topology.s.options.retryWrites &&
@@ -181,7 +181,7 @@ export async function executeOperation<
     supportsRetryableWrites(server) &&
     operation.canRetryWrite;
 
-  const willRetry = (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
+  //const willRetry = (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
 
   if (hasWriteAspect && willRetryWrite) {
     operation.options.willRetryWrite = true;
@@ -189,18 +189,16 @@ export async function executeOperation<
   }
 
   try {
-    return await operation.execute(server, session, timeoutContext);
-  } catch (operationError) {
-    if (willRetry && operationError instanceof MongoError) {
-      return await retryOperation(operation, operationError, {
-        session,
+    if (hasReadAspect) {
+      return await executeRetryableRead(operation, { topology, session, timeoutContext, selector });
+    } else {
+      return await executeRetryableWrite(operation, {
         topology,
-        selector,
-        previousServer: server.description,
-        timeoutContext
+        session,
+        timeoutContext,
+        selector
       });
     }
-    throw operationError;
   } finally {
     if (session?.owner != null && session.owner === owner) {
       try {
@@ -221,7 +219,8 @@ type RetryOptions = {
   timeoutContext: TimeoutContext;
 };
 
-async function retryOperation<
+/*
+async function _retryOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(
@@ -286,6 +285,7 @@ async function retryOperation<
     throw retryError;
   }
 }
+*/
 
 /**
  * Executes a read command in the context of a MongoClient where a retryable
@@ -423,7 +423,8 @@ async function executeRetryableWrite<
     try {
       return await operation.execute(server, session, timeoutContext);
     } catch (currentError) {
-      handleError(currentError);
+      if (!(currentError instanceof MongoError)) throw currentError;
+      handleError(operation, session, currentError);
 
       /* If the error has a RetryableWriteError label, remember the exception
        * and proceed with retrying the operation.
@@ -433,6 +434,13 @@ async function executeRetryableWrite<
        */
 
       if (!isRetryableWriteError(currentError)) {
+        if (currentError.code === 20) {
+          throw new MongoServerError({
+            message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+            errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+            originalError: currentError
+          });
+        }
         throw currentError;
       }
 
@@ -493,5 +501,30 @@ async function executeRetryableWrite<
     }
     //TODO(NODE-6231): Implement CSOT behaviour
     retrying = true;
+  }
+}
+
+function handleError<T extends AbstractOperation>(
+  operation: T,
+  session: ClientSession,
+  error: MongoError
+) {
+  const isWriteOperation = operation.hasAspect(Aspect.WRITE_OPERATION);
+  const isReadOperation = operation.hasAspect(Aspect.READ_OPERATION);
+
+  if (
+    (isWriteOperation && !isRetryableWriteError(error)) ||
+    (isReadOperation && !isRetryableReadError(error))
+  ) {
+    throw error;
+  }
+
+  if (
+    error instanceof MongoNetworkError &&
+    session.isPinned &&
+    !session.inTransaction() &&
+    operation.hasAspect(Aspect.CURSOR_CREATING)
+  ) {
+    session.unpin({ force: true, forceClear: true });
   }
 }
