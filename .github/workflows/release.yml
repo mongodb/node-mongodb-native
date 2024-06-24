@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
   id-token: write
 
-name: release
+name: release-latest
 
 jobs:
   release_please:
@@ -18,6 +18,8 @@ jobs:
     steps:
       - id: release
         uses: googleapis/release-please-action@v4
+        with:
+          target-branch: main
 
   ssdlc:
     needs: [release_please]
