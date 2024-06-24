@@ -57,7 +57,7 @@ jobs:
         uses: mongodb-labs/drivers-github-tools/full-report@v2
         with:
           release_version: ${{ steps.get_version.outputs.package_version }}
-          product_name: node-mongodb-native
+          product_name: mongodb
           sarif_report_target_ref: main
           third_party_dependency_tool: n/a
           # <package> and <package>.sig
@@ -65,17 +65,11 @@ jobs:
           token:  ${{ github.token }}
           sbom_file_name: sbom.json
 
-
       - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v2
         with:
           version: ${{ inputs.version }}
           product_name: ${{ inputs.product_name }}
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
-
-      - run: npm publish --provenance --tag=latest
-        if: ${{ needs.release_please.outputs.release_created }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish:
     needs: [release_please, ssdlc]
