@@ -53,7 +53,7 @@ jobs:
         run: cp sbom.json ${{ env.S3_ASSETS }}/sbom.json
 
       - name: Generate authorized pub report
-        uses: blink1073/drivers-github-tools/full-report@add-evergreen-link
+        uses: mongodb-labs/drivers-github-tools/full-report@v2
         with:
           release_version: ${{ env.package_version }}
           product_name: mongodb
@@ -70,7 +70,7 @@ jobs:
         with:
           version: ${{ env.package_version }}
           product_name: mongodb
-          dry_run: false
+          dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
   publish:
     needs: [release_please, ssdlc]
