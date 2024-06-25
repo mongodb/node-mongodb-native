@@ -19,8 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: actions/setup
-        uses: ./.github/actions/setup
+      - name: Install Node and dependencies
+        uses: baileympearson/drivers-github-tools/node/setup@add-signing-env-action-for-node
       - run: sudo apt-get install hugo
       - name: Build Docs
         run: npm run build:docs -- --yes
