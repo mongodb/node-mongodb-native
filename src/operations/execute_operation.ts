@@ -207,28 +207,31 @@ async function executeOperationWithRetry<
   }
 
   const tries = willRetry ? 2 : 1;
-  let previousError: MongoError | undefined;
+  let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 
   for (let attemptNumber = 0; attemptNumber < tries; attemptNumber++) {
-    if (previousError) {
-      if (hasWriteAspect && previousError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
+    if (previousOperationError) {
+      if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
         throw new MongoServerError({
           message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
           errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-          originalError: previousError
+          originalError: previousOperationError
         });
       }
 
-      if (hasWriteAspect && !isRetryableWriteError(previousError)) throw previousError;
+      if (hasWriteAspect && !isRetryableWriteError(previousOperationError))
+        throw previousOperationError;
 
-      if (hasReadAspect && !isRetryableReadError(previousError)) throw previousError;
+      if (hasReadAspect && !isRetryableReadError(previousOperationError))
+        throw previousOperationError;
 
       if (
-        previousError instanceof MongoNetworkError &&
-        session?.isPinned &&
-        !session?.inTransaction() &&
-        operation.hasAspect(Aspect.CURSOR_CREATING)
+        previousOperationError instanceof MongoNetworkError &&
+        operation.hasAspect(Aspect.CURSOR_CREATING) &&
+        session != null &&
+        session.isPinned &&
+        !session.inTransaction()
       ) {
         session.unpin({ force: true, forceClear: true });
       }
@@ -247,20 +250,24 @@ async function executeOperationWithRetry<
     }
 
     try {
-      const rv = await operation.execute(server, session, timeoutContext);
-
-      return rv;
-    } catch (error) {
-      previousServer = server.description;
-      if (error instanceof MongoError) {
-        previousError = error;
+      return await operation.execute(server, session, timeoutContext);
+    } catch (operationError) {
+      if (operationError instanceof MongoError) {
+        if (
+          previousOperationError != null &&
+          operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
+        ) {
+          throw previousOperationError;
+        }
+        previousServer = server.description;
+        previousOperationError = operationError;
       } else {
-        throw error;
+        throw operationError;
       }
     }
   }
 
-  throw previousError;
+  throw previousOperationError;
 }
 /**
  * Executes a read command in the context of a MongoClient where a retryable
