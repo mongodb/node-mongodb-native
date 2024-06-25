@@ -40,7 +40,7 @@ export interface LocalKMSProviderConfiguration {
    * The master key used to encrypt/decrypt data keys.
    * A 96-byte long Buffer or base64 encoded string.
    */
-  key: Binary | Buffer | string;
+  key: Binary | Uint8Array | string;
 }
 
 /** @public */
