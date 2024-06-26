@@ -253,18 +253,16 @@ async function executeOperationWithRetry<
     try {
       return await operation.execute(server, session, timeoutContext);
     } catch (operationError) {
-      if (operationError instanceof MongoError) {
-        if (
-          previousOperationError != null &&
-          operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
-        ) {
-          throw previousOperationError;
-        }
-        previousServer = server.description;
-        previousOperationError = operationError;
-      } else {
-        throw operationError;
+      if (!(operationError instanceof MongoError)) throw operationError;
+
+      if (
+        previousOperationError != null &&
+        operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
+      ) {
+        throw previousOperationError;
       }
+      previousServer = server.description;
+      previousOperationError = operationError;
     }
   }
 
