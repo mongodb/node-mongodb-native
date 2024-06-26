@@ -65,13 +65,7 @@ export async function executeOperation<
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
-  await autoConnect(client);
-
-  if (client.topology == null) {
-    throw new MongoRuntimeError('client.connect did not create a topology but also did not throw');
-  }
-
-  const { topology } = client;
+  const topology = await autoConnect(client);
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
@@ -133,19 +127,11 @@ export async function executeOperation<
   }
 }
 
-/** @internal */
-type RetryOptions = {
-  session: ClientSession | undefined;
-  readPreference: ReadPreference;
-  topology: Topology;
-  timeoutContext: TimeoutContext;
-};
-
 /**
  * Connects a client if it has not yet been connected
  * @internal
  */
-async function autoConnect(client: MongoClient): Promise<void> {
+async function autoConnect(client: MongoClient): Promise<Topology> {
   if (client.topology == null) {
     if (client.s.hasBeenClosed) {
       throw new MongoNotConnectedError('Client must be connected before running operations');
@@ -153,11 +139,26 @@ async function autoConnect(client: MongoClient): Promise<void> {
     client.s.options[Symbol.for('@@mdb.skipPingOnConnect')] = true;
     try {
       await client.connect();
+      if (client.topology == null) {
+        throw new MongoRuntimeError(
+          'client.connect did not create a topology but also did not throw'
+        );
+      }
+      return client.topology;
     } finally {
       delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
     }
   }
+  return client.topology;
 }
+
+/** @internal */
+type RetryOptions = {
+  session: ClientSession | undefined;
+  readPreference: ReadPreference;
+  topology: Topology;
+  timeoutContext: TimeoutContext;
+};
 
 /**
  * Executes an operation and retries as appropriate
