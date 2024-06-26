@@ -16,7 +16,6 @@ import {
 } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ReadPreference } from '../read_preference';
-import { type Server } from '../sdam/server';
 import type { ServerDescription } from '../sdam/server_description';
 import {
   sameServerSelector,
@@ -131,6 +130,35 @@ export async function executeOperation<
     session.unpin();
   }
 
+  try {
+    return await tryOperation(operation, {
+      topology,
+      timeoutContext,
+      session,
+      readPreference
+    });
+  } finally {
+    if (session?.owner != null && session.owner === owner) {
+      await session.endSession();
+    }
+  }
+}
+
+/** @internal */
+type RetryOptions = {
+  session: ClientSession | undefined;
+  readPreference: ReadPreference;
+  topology: Topology;
+  timeoutContext: TimeoutContext;
+};
+
+async function tryOperation<
+  T extends AbstractOperation<TResult>,
+  TResult = ResultTypeFromOperation<T>
+>(
+  operation: T,
+  { topology, timeoutContext, session, readPreference }: RetryOptions
+): Promise<TResult> {
   let selector: ReadPreference | ServerSelector;
 
   if (operation.hasAspect(Aspect.MUST_SELECT_SAME_SERVER)) {
@@ -146,43 +174,12 @@ export async function executeOperation<
     selector = readPreference;
   }
 
-  const server = await topology.selectServer(selector, {
+  let server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
     timeoutContext
   });
 
-  try {
-    return await tryOperation(operation, {
-      server,
-      topology,
-      timeoutContext,
-      session,
-      selector
-    });
-  } finally {
-    if (session?.owner != null && session.owner === owner) {
-      await session.endSession();
-    }
-  }
-}
-
-/** @internal */
-type RetryOptions = {
-  server: Server;
-  session: ClientSession | undefined;
-  topology: Topology;
-  selector: ReadPreference | ServerSelector;
-  timeoutContext: TimeoutContext;
-};
-
-async function tryOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(
-  operation: T,
-  { server, topology, timeoutContext, session, selector }: RetryOptions
-): Promise<TResult> {
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
   const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
   const inTransaction = session?.inTransaction() ?? false;
@@ -206,12 +203,12 @@ async function tryOperation<
   }
 
   // TODO(NODE-6231): implement infinite retry within CSOT timeout here
-  const tries = willRetry ? 2 : 1;
+  const maxTries = willRetry ? 2 : 1;
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 
   // TODO(NODE-6231): implement infinite retry within CSOT timeout here
-  for (let attemptNumber = 0; attemptNumber < tries; attemptNumber++) {
+  for (let tries = 0; tries < maxTries; tries++) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
         throw new MongoServerError({
