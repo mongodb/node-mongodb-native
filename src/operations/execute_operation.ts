@@ -152,7 +152,6 @@ export async function executeOperation<
     timeoutContext
   });
 
-  // TODO: Look into which operations do and don't have this aspect
   try {
     return await executeOperationWithRetry(operation, {
       server,
@@ -206,10 +205,12 @@ async function executeOperationWithRetry<
     session.incrementTransactionNumber();
   }
 
+  // TODO(NODE-6231): implement infinite retry within CSOT timeout here
   const tries = willRetry ? 2 : 1;
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 
+  // TODO(NODE-6231): implement infinite retry within CSOT timeout here
   for (let attemptNumber = 0; attemptNumber < tries; attemptNumber++) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
