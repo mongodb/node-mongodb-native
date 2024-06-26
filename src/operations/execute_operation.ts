@@ -201,9 +201,9 @@ async function executeOperationWithRetry<
     session != null &&
     ((hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite));
 
-  if (hasWriteAspect && willRetryWrite) {
+  if (hasWriteAspect && willRetryWrite && session != null) {
     operation.options.willRetryWrite = true;
-    session?.incrementTransactionNumber();
+    session.incrementTransactionNumber();
   }
 
   const tries = willRetry ? 2 : 1;
