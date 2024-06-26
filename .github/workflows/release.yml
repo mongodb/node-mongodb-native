@@ -59,15 +59,15 @@ jobs:
 
       - name: Copy sbom file to release assets
         shell: bash
-        if: ${{ !'' }}
+        if: ${{ '' == '' }}
         run: cp sbom.json ${{ env.S3_ASSETS }}/sbom.json
 
       # only used for mongodb-client-encryption
       - name: Augment SBOM and copy to release assets
-        if: ${{ ''}}
+        if: ${{ '' != '' }}
         uses: mongodb-labs/drivers-github-tools/sbom@v2
         with:
-          silk_asset_group: ${{ '' }}
+          silk_asset_group: ''
           sbom_file_name: sbom.json
 
       - name: Generate authorized pub report
@@ -78,7 +78,7 @@ jobs:
           sarif_report_target_ref: main
           third_party_dependency_tool: n/a
           dist_filenames: artifacts/*
-          token:  ${{ github.token }}
+          token: ${{ github.token }}
           sbom_file_name: sbom.json
           evergreen_project: mongo-node-driver-next
           evergreen_commit: ${{ env.commit }}
