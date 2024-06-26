@@ -46,10 +46,9 @@ type ResultTypeFromOperation<TOperation> = TOperation extends AbstractOperation<
  * not provided.
  *
  * The expectation is that this function:
- * - Connects the MongoClient if it has not already been connected
+ * - Connects the MongoClient if it has not already been connected, see {@link autoconnect}
  * - Creates a session if none is provided and cleans up the session it creates
- * - Selects a server based on readPreference or various factors
- * - Retries an operation if it fails for certain errors, see {@link retryOperation}
+ * - Tries an operation and retries under certain conditions, see {@link tryOperation}
  *
  * @typeParam T - The operation's type
  * @typeParam TResult - The type of the operation's result, calculated from T
@@ -66,23 +65,13 @@ export async function executeOperation<
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
+  await autoconnect(client);
+
   if (client.topology == null) {
-    // Auto connect on operation
-    if (client.s.hasBeenClosed) {
-      throw new MongoNotConnectedError('Client must be connected before running operations');
-    }
-    client.s.options[Symbol.for('@@mdb.skipPingOnConnect')] = true;
-    try {
-      await client.connect();
-    } finally {
-      delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
-    }
+    throw new MongoRuntimeError('client.connect did not create a topology but also did not throw');
   }
 
   const { topology } = client;
-  if (topology == null) {
-    throw new MongoRuntimeError('client.connect did not create a topology but also did not throw');
-  }
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
@@ -105,12 +94,6 @@ export async function executeOperation<
     );
   }
 
-  timeoutContext ??= TimeoutContext.create({
-    serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
-    waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
-    timeoutMS: operation.options.timeoutMS
-  });
-
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
@@ -129,6 +112,12 @@ export async function executeOperation<
   if (session?.isPinned && session.transaction.isCommitted && !operation.bypassPinningCheck) {
     session.unpin();
   }
+
+  timeoutContext ??= TimeoutContext.create({
+    serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
+    waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
+    timeoutMS: operation.options.timeoutMS
+  });
 
   try {
     return await tryOperation(operation, {
@@ -152,6 +141,42 @@ type RetryOptions = {
   timeoutContext: TimeoutContext;
 };
 
+/**
+ * Connects a client if it has not yet been connected
+ * @internal
+ */
+async function autoconnect(client: MongoClient): Promise<void> {
+  if (client.topology == null) {
+    if (client.s.hasBeenClosed) {
+      throw new MongoNotConnectedError('Client must be connected before running operations');
+    }
+    client.s.options[Symbol.for('@@mdb.skipPingOnConnect')] = true;
+    try {
+      await client.connect();
+    } finally {
+      delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
+    }
+  }
+}
+
+/**
+ * Executes an operation and retries as appropriate
+ * @internal
+ *
+ * @remarks
+ * Implements behaviour described in [Retryable Reads](https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.md) and [Retryable
+ * Writes](https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.md) specification
+ *
+ * This function:
+ * - performs initial server selection
+ * - attempts to execute an operation
+ * - retries the operation if it meets the criteria for a retryable read or a retryable write
+ *
+ * @typeParam T - The operation's type
+ * @typeParam TResult - The type of the operation's result, calculated from T
+ *
+ * @param operation - The operation to execute
+ * */
 async function tryOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
