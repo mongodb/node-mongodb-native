@@ -46,7 +46,7 @@ type ResultTypeFromOperation<TOperation> = TOperation extends AbstractOperation<
  * not provided.
  *
  * The expectation is that this function:
- * - Connects the MongoClient if it has not already been connected, see {@link autoconnect}
+ * - Connects the MongoClient if it has not already been connected, see {@link autoConnect}
  * - Creates a session if none is provided and cleans up the session it creates
  * - Tries an operation and retries under certain conditions, see {@link tryOperation}
  *
@@ -65,7 +65,7 @@ export async function executeOperation<
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
-  await autoconnect(client);
+  await autoConnect(client);
 
   if (client.topology == null) {
     throw new MongoRuntimeError('client.connect did not create a topology but also did not throw');
@@ -145,7 +145,7 @@ type RetryOptions = {
  * Connects a client if it has not yet been connected
  * @internal
  */
-async function autoconnect(client: MongoClient): Promise<void> {
+async function autoConnect(client: MongoClient): Promise<void> {
   if (client.topology == null) {
     if (client.s.hasBeenClosed) {
       throw new MongoNotConnectedError('Client must be connected before running operations');
