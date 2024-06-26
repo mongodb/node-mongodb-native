@@ -153,7 +153,7 @@ export async function executeOperation<
   });
 
   try {
-    return await executeOperationWithRetry(operation, {
+    return await tryOperation(operation, {
       server,
       topology,
       timeoutContext,
@@ -176,7 +176,7 @@ type RetryOptions = {
   timeoutContext: TimeoutContext;
 };
 
-async function executeOperationWithRetry<
+async function tryOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(
