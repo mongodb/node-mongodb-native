@@ -38,9 +38,11 @@ jobs:
 
       - name: Load version and package info
         uses: baileympearson/drivers-github-tools/node/get_version_info@add-signing-env-action-for-node
+        with:
+          npm_package_name: mongodb
 
       - name: actions/compress_sign_and_upload
-        uses: baileympearson/drivers-github-tools/node/sign_js_only_package@add-signing-env-action-for-node
+        uses: baileympearson/drivers-github-tools/node/sign_node_package@add-signing-env-action-for-node
         with:
           aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
           aws_region_name: us-east-1
@@ -60,7 +62,7 @@ jobs:
           sarif_report_target_ref: main
           third_party_dependency_tool: n/a
           # <package> and <package>.sig
-          dist_filenames: ${{ env.package_file }}*
+          dist_filenames: artifacts/*
           token:  ${{ github.token }}
           sbom_file_name: sbom.json
           evergreen_project: mongo-node-driver-next
