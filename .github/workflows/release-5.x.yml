@@ -21,8 +21,13 @@ jobs:
         with:
           target-branch: 5.x
 
-  ssdlc:
+  build:
     needs: [release_please]
+    name: "Perform any build or bundling steps, as necessary."
+    uses: ./.github/workflows/build.yml
+
+  ssdlc:
+    needs: [release_please, build]
     permissions:
       # required for all workflows
       security-events: write
@@ -35,6 +40,8 @@ jobs:
 
       - name: Install Node and dependencies
         uses: baileympearson/drivers-github-tools/node/setup@add-signing-env-action-for-node
+        with:
+          ignore_install_scripts: false
 
       - name: Load version and package info
         uses: baileympearson/drivers-github-tools/node/get_version_info@add-signing-env-action-for-node
@@ -52,7 +59,16 @@ jobs:
 
       - name: Copy sbom file to release assets
         shell: bash
+        if: ${{ !'' }}
         run: cp sbom.json ${{ env.S3_ASSETS }}/sbom.json
+
+      # only used for mongodb-client-encryption
+      - name: Augment SBOM and copy to release assets
+        if: ${{ ''}}
+        uses: mongodb-labs/drivers-github-tools/sbom@v2
+        with:
+          silk_asset_group: ${{ '' }}
+          sbom_file_name: sbom.json
 
       - name: Generate authorized pub report
         uses: mongodb-labs/drivers-github-tools/full-report@v2
@@ -74,7 +90,7 @@ jobs:
           dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
   publish:
-    needs: [release_please, ssdlc]
+    needs: [release_please, ssdlc, build]
     environment: release
     runs-on: ubuntu-latest
     steps:
