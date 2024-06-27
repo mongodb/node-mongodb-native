@@ -46,7 +46,7 @@ jobs:
 
       # Setup Node.js and npm install
       - name: Install Node and dependencies
-        uses: baileympearson/drivers-github-tools/node/setup@add-signing-env-action-for-node
+        uses: mongodb-labs/drivers-github-tools/node/setup@v2
 
       # See: https://github.com/googleapis/release-please/issues/1274
 

@@ -27,7 +27,7 @@ jobs:
           fi
       - uses: actions/checkout@v4
       - name: Install Node and dependencies
-        uses: baileympearson/drivers-github-tools/node/setup@add-signing-env-action-for-node
+        uses: mongodb-labs/drivers-github-tools/node/setup@v2
       - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
       - run: npm publish --provenance --tag=alpha
         env:

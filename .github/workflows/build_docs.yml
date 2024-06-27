@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Node and dependencies
-        uses: baileympearson/drivers-github-tools/node/setup@add-signing-env-action-for-node
+        uses: mongodb-labs/drivers-github-tools/node/setup@v2
       - run: sudo apt-get install hugo
       - name: Build Docs
         run: npm run build:docs -- --yes

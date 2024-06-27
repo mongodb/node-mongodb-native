@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Node and dependencies
-        uses: baileympearson/drivers-github-tools/node/setup@add-signing-env-action-for-node
+        uses: mongodb-labs/drivers-github-tools/node/setup@v2
       - id: build_nightly
         run: npm run build:nightly
       - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
