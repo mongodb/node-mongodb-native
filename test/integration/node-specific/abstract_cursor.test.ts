@@ -7,7 +7,6 @@ import { inspect } from 'util';
 import {
   type Collection,
   type FindCursor,
-  Long,
   MongoAPIError,
   type MongoClient,
   MongoServerError
@@ -194,7 +193,9 @@ describe('class AbstractCursor', function () {
         const error = await cursor.toArray().catch(e => e);
 
         expect(error).be.instanceOf(MongoAPIError);
-        expect(cursor.closed).to.be.true;
+        expect(cursor.id.isZero()).to.be.true;
+        // The first batch exhausted the cursor, the only thing to clean up is the session
+        expect(cursor.session.hasEnded).to.be.true;
       });
     });
 
@@ -226,7 +227,9 @@ describe('class AbstractCursor', function () {
           }
         } catch (error) {
           expect(error).to.be.instanceOf(MongoAPIError);
-          expect(cursor.closed).to.be.true;
+          expect(cursor.id.isZero()).to.be.true;
+          // The first batch exhausted the cursor, the only thing to clean up is the session
+          expect(cursor.session.hasEnded).to.be.true;
         }
       });
     });
@@ -260,7 +263,9 @@ describe('class AbstractCursor', function () {
 
         const error = await cursor.forEach(iterator).catch(e => e);
         expect(error).to.be.instanceOf(MongoAPIError);
-        expect(cursor.closed).to.be.true;
+        expect(cursor.id.isZero()).to.be.true;
+        // The first batch exhausted the cursor, the only thing to clean up is the session
+        expect(cursor.session.hasEnded).to.be.true;
       });
     });
   });
