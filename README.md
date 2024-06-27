@@ -46,7 +46,7 @@ gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
 ```
 
 >[!Note]
-No verification is done when using npm to install the package. To ensure release integrity when using npm, download the tarball manually from the GitHub release, verify the signature, then install the package from the downloaded tarball using `npm install mongodb-X.Y.Z.tgz`.
+No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
 
 ### Bugs / Feature Requests
 
