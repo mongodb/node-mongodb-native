@@ -1,10 +1,11 @@
-const { expect } = require('chai');
-const {
-  MIN_SUPPORTED_SERVER_VERSION,
+import { expect } from 'chai';
+
+import {
   MAX_SUPPORTED_SERVER_VERSION,
-  MIN_SUPPORTED_WIRE_VERSION,
-  MAX_SUPPORTED_WIRE_VERSION
-} = require('../../../mongodb');
+  MAX_SUPPORTED_WIRE_VERSION,
+  MIN_SUPPORTED_SERVER_VERSION,
+  MIN_SUPPORTED_WIRE_VERSION
+} from '../../../mongodb';
 
 describe('Wire Protocol Constants', function () {
   describe('MIN_SUPPORTED_SERVER_VERSION', function () {
@@ -14,8 +15,8 @@ describe('Wire Protocol Constants', function () {
   });
 
   describe('MAX_SUPPORTED_SERVER_VERSION', function () {
-    it('returns 7.0', function () {
-      expect(MAX_SUPPORTED_SERVER_VERSION).to.equal('7.0');
+    it('returns 8.0', function () {
+      expect(MAX_SUPPORTED_SERVER_VERSION).to.equal('8.0');
     });
   });
 
@@ -26,8 +27,8 @@ describe('Wire Protocol Constants', function () {
   });
 
   describe('MAX_SUPPORTED_WIRE_VERSION', function () {
-    it('returns 21', function () {
-      expect(MAX_SUPPORTED_WIRE_VERSION).to.equal(21);
+    it('returns 25', function () {
+      expect(MAX_SUPPORTED_WIRE_VERSION).to.equal(25);
     });
   });
 });
