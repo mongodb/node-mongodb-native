@@ -44,7 +44,6 @@ describe('Wire Protocol Version', () => {
     it('should raise a compatibility error', async function () {
       setWireProtocolMessageHandler(Number.MAX_SAFE_INTEGER - 1, Number.MAX_SAFE_INTEGER);
 
-      /** @type {MongoClient} */
       client = new MongoClient(
         `mongodb://${server.uri()}/wireVersionTest?serverSelectionTimeoutMS=200`
       );
@@ -62,7 +61,6 @@ describe('Wire Protocol Version', () => {
     it('should raise a compatibility error', async function () {
       setWireProtocolMessageHandler(1, 1);
 
-      /** @type {MongoClient} */
       client = new MongoClient(
         `mongodb://${server.uri()}/wireVersionTest?serverSelectionTimeoutMS=200`
       );
