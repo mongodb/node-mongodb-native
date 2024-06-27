@@ -12,8 +12,8 @@ export class MongocryptdManager {
 
   uri: string;
   bypassSpawn: boolean;
-  spawnPath: string;
-  spawnArgs: Array<string>;
+  spawnPath = '';
+  spawnArgs: Array<string> = [];
   _child?: ChildProcess;
 
   constructor(extraOptions: AutoEncryptionExtraOptions = {}) {
@@ -24,11 +24,14 @@ export class MongocryptdManager {
 
     this.bypassSpawn = !!extraOptions.mongocryptdBypassSpawn;
 
-    if (Object.keys(extraOptions).includes('mongocryptdSpawnPath')) {
+    if (Object.hasOwn(extraOptions, 'mongocryptdSpawnPath')) {
       this.spawnPath = extraOptions.mongocryptdSpawnPath || '';
-    } else this.spawnPath = '';
+    }
     this.spawnArgs = [];
-    if (Object.keys(extraOptions).includes('mongocryptdSpawnArgs') && Array.isArray(extraOptions.mongocryptdSpawnArgs)) {
+    if (
+      Object.hasOwn(extraOptions, 'mongocryptdSpawnArgs') &&
+      Array.isArray(extraOptions.mongocryptdSpawnArgs)
+    ) {
       this.spawnArgs = this.spawnArgs.concat(extraOptions.mongocryptdSpawnArgs);
     }
     if (
