@@ -215,10 +215,6 @@ export abstract class AbstractCursor<
    * It is non-zero for as long as the database has an open cursor.
    *
    * The initiating command may receive a zero id if the entire result is in the `firstBatch`.
-   *
-   * The id value may still be non-zero after calling `cursor.close()`
-   * since the value is only updated when the server returns a new id value,
-   * and a cursor may be closed before iteration is complete.
    */
   get id(): Long | undefined {
     return this.cursorId ?? undefined;
@@ -770,9 +766,11 @@ export abstract class AbstractCursor<
         !session.hasEnded
       ) {
         this.isKilled = true;
+        const cursorId = this.cursorId;
+        this.cursorId = Long.ZERO;
         await executeOperation(
           this.cursorClient,
-          new KillCursorsOperation(this.cursorId, this.cursorNamespace, this.selectedServer, {
+          new KillCursorsOperation(cursorId, this.cursorNamespace, this.selectedServer, {
             session
           })
         );

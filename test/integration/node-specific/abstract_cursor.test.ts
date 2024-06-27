@@ -9,6 +9,7 @@ import {
   type FindCursor,
   MongoAPIError,
   type MongoClient,
+  MongoCursorExhaustedError,
   MongoServerError
 } from '../../mongodb';
 
@@ -348,22 +349,15 @@ describe('class AbstractCursor', function () {
     });
 
     describe('when some documents have been iterated and the cursor is closed', () => {
-      it('has a nonzero id and is closed and is killed', async function () {
+      it('has a zero id and is not closed and is killed', async function () {
         cursor = client.db().collection('test').find({}, { batchSize: 2 });
         await cursor.next();
         await cursor.close();
         expect(cursor).to.have.property('closed', false);
         expect(cursor).to.have.property('killed', true);
-        expect(cursor.id.isZero()).to.be.false;
-
-        // After closing, next still returns just fine.
-        // I do not think this is part of our expected/intended use
-        // but I leave these assertions here so when/if a change is made
-        // it is done intentionally
-        expect(await cursor.next()).to.have.property('a', 2);
-        expect(await cursor.next()).to.be.null;
-        // now closed is true since we finished all the local documents
-        expect(cursor).to.have.property('closed', true);
+        expect(cursor.id.isZero()).to.be.true;
+        const error = await cursor.next().catch(error => error);
+        expect(error).to.be.instanceOf(MongoCursorExhaustedError);
       });
     });
   });
