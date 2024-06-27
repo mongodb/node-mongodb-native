@@ -112,11 +112,11 @@ export abstract class AbstractOperation<TResult = any> {
   }
 
   get canRetryRead(): boolean {
-    return true;
+    return this.hasAspect(Aspect.RETRYABLE) && this.hasAspect(Aspect.READ_OPERATION);
   }
 
   get canRetryWrite(): boolean {
-    return true;
+    return this.hasAspect(Aspect.RETRYABLE) && this.hasAspect(Aspect.WRITE_OPERATION);
   }
 }
 
