@@ -21,8 +21,13 @@ jobs:
         with:
           target-branch: 5.x
 
-  ssdlc:
+  build:
     needs: [release_please]
+    name: "Perform any build or bundling steps, as necessary."
+    uses: ./.github/workflows/build.yml
+
+  ssdlc:
+    needs: [release_please, build]
     permissions:
       # required for all workflows
       security-events: write
@@ -32,51 +37,69 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: actions/setup
-        uses: ./.github/actions/setup
-      - name: Get release version and release package file name
-        id: get_vars
-        shell: bash
-        run: |
-          package_version=$(jq --raw-output '.version' package.json)
-          echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
-          echo "package_file=mongodb-${package_version}.tgz" >> "$GITHUB_OUTPUT"
+
+      - name: Install Node and dependencies
+        uses: mongodb-labs/drivers-github-tools/node/setup@v2
+        with:
+          ignore_install_scripts: false
+
+      - name: Load version and package info
+        uses: mongodb-labs/drivers-github-tools/node/get_version_info@v2
+        with:
+          npm_package_name: mongodb
 
       - name: actions/compress_sign_and_upload
-        uses: ./.github/actions/compress_sign_and_upload
+        uses: mongodb-labs/drivers-github-tools/node/sign_node_package@v2
         with:
           aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
-          aws_region_name: 'us-east-1'
+          aws_region_name: us-east-1
           aws_secret_id: ${{ secrets.AWS_SECRET_ID }}
-          npm_package_name: 'mongodb'
+          npm_package_name: mongodb
           dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
       - name: Copy sbom file to release assets
         shell: bash
+        if: ${{ '' == '' }}
         run: cp sbom.json ${{ env.S3_ASSETS }}/sbom.json
+
+      # only used for mongodb-client-encryption
+      - name: Augment SBOM and copy to release assets
+        if: ${{ '' != '' }}
+        uses: mongodb-labs/drivers-github-tools/sbom@v2
+        with:
+          silk_asset_group: ''
+          sbom_file_name: sbom.json
 
       - name: Generate authorized pub report
         uses: mongodb-labs/drivers-github-tools/full-report@v2
         with:
-          release_version: ${{ steps.get_version.outputs.package_version }}
+          release_version: ${{ env.package_version }}
           product_name: mongodb
           sarif_report_target_ref: 5.x
           third_party_dependency_tool: n/a
-          # <package> and <package>.sig
-          dist_filenames: ${{ steps.get_vars.outputs.package_file }}*
-          token:  ${{ github.token }}
+          dist_filenames: artifacts/*
+          token: ${{ github.token }}
           sbom_file_name: sbom.json
+          evergreen_project: mongo-node-driver-next
+          evergreen_commit: ${{ env.commit }}
+
+      - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v2
+        with:
+          version: ${{ env.package_version }}
+          product_name: mongodb
+          dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
   publish:
-    needs: [release_please, ssdlc]
+    needs: [release_please, ssdlc, build]
     environment: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: actions/setup
-        uses: ./.github/actions/setup
 
-      - run: npm publish --provenance --tag=5.x
+      - name: Install Node and dependencies
+        uses: mongodb-labs/drivers-github-tools/node/setup@v2
+
+      - run: npm publish --provenance --tag=5x
         if: ${{ needs.release_please.outputs.release_created }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
