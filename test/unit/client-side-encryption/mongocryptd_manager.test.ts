@@ -28,7 +28,7 @@ describe('MongocryptdManager', function () {
   });
 
   it('does not allow prototype pollution on spawn args', function () {
-    const mcdm = new MongocryptdManager({ __proto__: { mongocryptdSpawnArgs: 'test' } });
+    const mcdm = new MongocryptdManager({ __proto__: { mongocryptdSpawnArgs: ['test'] } });
     expect(mcdm.spawnArgs).to.deep.equal(['--idleShutdownTimeoutSecs', '60']);
   });
 
