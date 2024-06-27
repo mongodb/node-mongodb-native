@@ -7,6 +7,7 @@ import { inspect } from 'util';
 import {
   type Collection,
   type FindCursor,
+  Long,
   MongoAPIError,
   type MongoClient,
   MongoServerError
@@ -297,6 +298,68 @@ describe('class AbstractCursor', function () {
         stream.on('end', () => resolve(null));
       });
       expect(error).to.be.instanceof(MongoServerError);
+    });
+  });
+
+  describe('cursor end state', function () {
+    let client: MongoClient;
+    let cursor: FindCursor;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      const test = client.db().collection('test');
+      await test.deleteMany({});
+      await test.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }]);
+    });
+
+    afterEach(async function () {
+      await cursor.close();
+      await client.close();
+    });
+
+    describe('when the last batch has been received', () => {
+      it('has a zero id and is not closed and is never killed', async function () {
+        cursor = client.db().collection('test').find({});
+        expect(cursor).to.have.property('closed', false);
+        await cursor.tryNext();
+        expect(cursor.id.isZero()).to.be.true;
+        expect(cursor).to.have.property('closed', false);
+        expect(cursor).to.have.property('killed', false);
+      });
+    });
+
+    describe('when the last document has been iterated', () => {
+      it('has a zero id and is closed and is never killed', async function () {
+        cursor = client.db().collection('test').find({});
+        await cursor.next();
+        await cursor.next();
+        await cursor.next();
+        await cursor.next();
+        expect(await cursor.next()).to.be.null;
+        expect(cursor.id.isZero()).to.be.true;
+        expect(cursor).to.have.property('closed', true);
+        expect(cursor).to.have.property('killed', false);
+      });
+    });
+
+    describe('when some documents have been iterated and the cursor is closed', () => {
+      it('has a nonzero id and is closed and is killed', async function () {
+        cursor = client.db().collection('test').find({}, { batchSize: 2 });
+        await cursor.next();
+        await cursor.close();
+        expect(cursor).to.have.property('closed', false);
+        expect(cursor).to.have.property('killed', true);
+        expect(cursor.id.isZero()).to.be.false;
+
+        // After closing, next still returns just fine.
+        // I do not think this is part of our expected/intended use
+        // but I leave these assertions here so when/if a change is made
+        // it is done intentionally
+        expect(await cursor.next()).to.have.property('a', 2);
+        expect(await cursor.next()).to.be.null;
+        // now closed is true since we finished all the local documents
+        expect(cursor).to.have.property('closed', true);
+      });
     });
   });
 });
