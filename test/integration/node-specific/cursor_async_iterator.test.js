@@ -95,7 +95,7 @@ describe('Cursor Async Iterator Tests', function () {
       }
 
       expect(count).to.equal(1);
-      expect(cursor.closed).to.be.true;
+      expect(cursor.killed).to.be.true;
     });
 
     it('cleans up cursor when breaking out of for await of loops', async function () {
@@ -106,7 +106,8 @@ describe('Cursor Async Iterator Tests', function () {
         break;
       }
 
-      expect(cursor.closed).to.be.true;
+      // The expectation is that we have "cleaned" up the cursor on the server side
+      expect(cursor.killed).to.be.true;
     });
 
     it('returns when attempting to reuse the cursor after a break', async function () {
@@ -118,7 +119,7 @@ describe('Cursor Async Iterator Tests', function () {
         break;
       }
 
-      expect(cursor.closed).to.be.true;
+      expect(cursor.killed).to.be.true;
 
       for await (const doc of cursor) {
         expect.fail('Async generator returns immediately if cursor is closed', doc);

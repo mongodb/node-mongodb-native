@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.8.0](https://github.com/mongodb/node-mongodb-native/compare/v6.7.0...v6.8.0) (2024-06-27)
+
+
+### Features
+
+* **NODE-5718:** add ReadConcernMajorityNotAvailableYet to retryable errors ([#4154](https://github.com/mongodb/node-mongodb-native/issues/4154)) ([4f32dec](https://github.com/mongodb/node-mongodb-native/commit/4f32decc354b222a6fe824a668d0b7b9db930f5f))
+* **NODE-5801:** allow multiple providers providers per type ([#4137](https://github.com/mongodb/node-mongodb-native/issues/4137)) ([4d209ce](https://github.com/mongodb/node-mongodb-native/commit/4d209ce7aa92ac543f6b106d94a65508858ccf51))
+* **NODE-5853:** support delegated KMIP data key option ([#4129](https://github.com/mongodb/node-mongodb-native/issues/4129)) ([aa429f8](https://github.com/mongodb/node-mongodb-native/commit/aa429f8c471b6ac23d9ffc33c9d40e1dc116c75b))
+* **NODE-6136:** parse cursor responses on demand ([#4112](https://github.com/mongodb/node-mongodb-native/issues/4112)) ([3ed6a2a](https://github.com/mongodb/node-mongodb-native/commit/3ed6a2adf552159bc8526b096ace59f0d5800c96))
+* **NODE-6157:** add signature to github releases ([#4119](https://github.com/mongodb/node-mongodb-native/issues/4119)) ([f38c5fe](https://github.com/mongodb/node-mongodb-native/commit/f38c5fe3990f279194523c906dc646bbcc29cbe9))
+
+
+### Bug Fixes
+
+* **NODE-5801:** use more specific key typing for multiple KMS provider support ([#4146](https://github.com/mongodb/node-mongodb-native/issues/4146)) ([465ffd9](https://github.com/mongodb/node-mongodb-native/commit/465ffd97974b40e2bf2608907455c00c58c59cff))
+* **NODE-6085:** add TS support for KMIP data key options ([#4128](https://github.com/mongodb/node-mongodb-native/issues/4128)) ([f790cc1](https://github.com/mongodb/node-mongodb-native/commit/f790cc181d87049e0018e1e5e859f90ee8156c0d))
+* **NODE-6241:** allow `Binary` as local KMS provider key ([#4160](https://github.com/mongodb/node-mongodb-native/issues/4160)) ([fb724eb](https://github.com/mongodb/node-mongodb-native/commit/fb724eb6441408ad7f93c50d146a12c9b64d8333))
+* **NODE-6242:** close becomes true after calling close when documents still remain ([#4161](https://github.com/mongodb/node-mongodb-native/issues/4161)) ([e3d70c3](https://github.com/mongodb/node-mongodb-native/commit/e3d70c3d224e1cd0888d79516c1b509921ac560d))
+
 ## [6.7.0](https://github.com/mongodb/node-mongodb-native/compare/v6.6.2...v6.7.0) (2024-05-29)
 
 

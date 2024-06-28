@@ -1060,7 +1060,8 @@ describe('Change Streams', function () {
             await changeStreamIterator.next();
             await changeStreamIterator.return();
             expect(changeStream.closed).to.be.true;
-            expect(changeStream.cursor).property('closed', true);
+            expect(changeStream.cursor).property('isClosed', true);
+            expect(changeStream.cursor).nested.property('session.hasEnded', true);
           }
         );
 

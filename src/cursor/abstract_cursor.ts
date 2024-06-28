@@ -209,6 +209,13 @@ export abstract class AbstractCursor<
     }
   }
 
+  /**
+   * The cursor has no id until it receives a response from the initial cursor creating command.
+   *
+   * It is non-zero for as long as the database has an open cursor.
+   *
+   * The initiating command may receive a zero id if the entire result is in the `firstBatch`.
+   */
   get id(): Long | undefined {
     return this.cursorId ?? undefined;
   }
@@ -249,10 +256,17 @@ export abstract class AbstractCursor<
     this.cursorSession = clientSession;
   }
 
+  /**
+   * The cursor is closed and all remaining locally buffered documents have been iterated.
+   */
   get closed(): boolean {
-    return this.isClosed;
+    return this.isClosed && (this.documents?.length ?? 0) === 0;
   }
 
+  /**
+   * A `killCursors` command was attempted on this cursor.
+   * This is performed if the cursor id is non zero.
+   */
   get killed(): boolean {
     return this.isKilled;
   }
@@ -294,7 +308,7 @@ export abstract class AbstractCursor<
           return;
         }
 
-        if (this.closed && (this.documents?.length ?? 0) === 0) {
+        if (this.closed) {
           return;
         }
 
@@ -752,9 +766,11 @@ export abstract class AbstractCursor<
         !session.hasEnded
       ) {
         this.isKilled = true;
+        const cursorId = this.cursorId;
+        this.cursorId = Long.ZERO;
         await executeOperation(
           this.cursorClient,
-          new KillCursorsOperation(this.cursorId, this.cursorNamespace, this.selectedServer, {
+          new KillCursorsOperation(cursorId, this.cursorNamespace, this.selectedServer, {
             session
           })
         );

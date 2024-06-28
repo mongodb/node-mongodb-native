@@ -1,0 +1,68 @@
+description: "ReadConcernMajorityNotAvailableYet is a retryable read"
+
+schemaVersion: "1.3"
+
+runOnRequirements:
+  - minServerVersion: "4.0"
+    topologies: [single, replicaset]
+  - minServerVersion: "4.1.7"
+    topologies: [sharded, load-balanced]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      # Ensure the `configureFailpoint` and `find` commands are run on the same mongos
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name "retryable-reads-tests"
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name "readconcernmajoritynotavailableyet_test"
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  - description: "Find succeeds on second attempt after ReadConcernMajorityNotAvailableYet"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ "find" ]
+              errorCode: 134 # ReadConcernMajorityNotAvailableYet
+      - name: find
+        arguments:
+          filter: { _id: { $gt: 1 } }
+        object: *collection0
+        expectResult:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: { $gt: 1 } }
+              commandName: find
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: { $gt: 1 } }
+              commandName: find
+              databaseName: *database0Name
