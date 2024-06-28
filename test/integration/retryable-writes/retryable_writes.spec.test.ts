@@ -14,7 +14,7 @@ interface RetryableWriteTestContext {
   failPointName?: any;
 }
 
-describe.only('Legacy Retryable Writes Specs', function () {
+describe('Legacy Retryable Writes Specs', function () {
   let ctx: RetryableWriteTestContext = {};
 
   const retryableWrites = loadSpecTests('retryable-writes', 'legacy');
