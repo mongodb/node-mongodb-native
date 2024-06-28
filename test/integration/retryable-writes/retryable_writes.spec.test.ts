@@ -14,7 +14,7 @@ interface RetryableWriteTestContext {
   failPointName?: any;
 }
 
-describe('Legacy Retryable Writes Specs', function () {
+describe.only('Legacy Retryable Writes Specs', function () {
   let ctx: RetryableWriteTestContext = {};
 
   const retryableWrites = loadSpecTests('retryable-writes', 'legacy');
@@ -79,17 +79,8 @@ describe('Legacy Retryable Writes Specs', function () {
         await ctx.client.close();
         ctx = {}; // reset context
       });
-
       for (const spec of suite.tests) {
-        if (
-          LEGACY_SKIP_TESTS_4_4_SHARDED.includes(spec.description) &&
-          this.ctx.topologyType === 'Sharded' &&
-          Number(this.ctx.version) <= 4.4
-        ) {
-          this.ctx.skipReason =
-            'drivers should not consider the code within the writeConcernError field from a pre-4.4 mongos response';
-          this.ctx.skip();
-        } else {
+        if (!LEGACY_SKIP_TESTS_4_4_SHARDED.includes(spec.description)) {
           // Step 2: Run the test
           const mochaTest = it(spec.description, async () => await executeScenarioTest(spec, ctx));
 
