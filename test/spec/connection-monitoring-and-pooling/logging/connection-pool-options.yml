@@ -71,6 +71,7 @@ tests:
               driverConnectionId: { $$type: [int, long] }
               serverHost: { $$type: string }
               serverPort: { $$type: [int, long] }
+              durationMS: { $$type: [double, int, long] }
 
   # Drivers who have not done DRIVERS-1943 will need to skip this test.
   - description: "maxConnecting should be included in connection pool created message when specified"

@@ -604,6 +604,7 @@ export function defaultLogTransform(
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection ready';
       log.driverConnectionId = logObject.connectionId;
+      log.durationMS = logObject.durationMS;
       return log;
     case CONNECTION_CLOSED:
       log = attachConnectionFields(log, logObject);
@@ -649,6 +650,7 @@ export function defaultLogTransform(
           if (logObject.error) {
             log.error = logObject.error;
           }
+          log.durationMS = logObject.durationMS;
           break;
         default:
           log.reason = `Unknown close reason: ${logObject.reason}`;
@@ -658,6 +660,7 @@ export function defaultLogTransform(
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection checked out';
       log.driverConnectionId = logObject.connectionId;
+      log.durationMS = logObject.durationMS;
       return log;
     case CONNECTION_CHECKED_IN:
       log = attachConnectionFields(log, logObject);
