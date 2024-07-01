@@ -24,10 +24,9 @@ export class MongocryptdManager {
 
     this.bypassSpawn = !!extraOptions.mongocryptdBypassSpawn;
 
-    if (Object.hasOwn(extraOptions, 'mongocryptdSpawnPath')) {
-      this.spawnPath = extraOptions.mongocryptdSpawnPath || '';
+    if (Object.hasOwn(extraOptions, 'mongocryptdSpawnPath') && extraOptions.mongocryptdSpawnPath) {
+      this.spawnPath = extraOptions.mongocryptdSpawnPath;
     }
-    this.spawnArgs = [];
     if (
       Object.hasOwn(extraOptions, 'mongocryptdSpawnArgs') &&
       Array.isArray(extraOptions.mongocryptdSpawnArgs)
