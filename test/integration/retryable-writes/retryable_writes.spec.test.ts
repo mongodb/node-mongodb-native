@@ -63,6 +63,7 @@ describe('Legacy Retryable Writes Specs', function () {
         await ctx.client.close();
         ctx = {}; // reset context
       });
+
       for (const spec of suite.tests) {
         // Step 2: Run the test
         const mochaTest = it(spec.description, async () => await executeScenarioTest(spec, ctx));
