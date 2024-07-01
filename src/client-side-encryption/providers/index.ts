@@ -1,3 +1,4 @@
+import type { Binary } from '../../bson';
 import { loadAWSCredentials } from './aws';
 import { loadAzureCredentials } from './azure';
 import { loadGCPCredentials } from './gcp';
@@ -39,7 +40,7 @@ export interface LocalKMSProviderConfiguration {
    * The master key used to encrypt/decrypt data keys.
    * A 96-byte long Buffer or base64 encoded string.
    */
-  key: Buffer | string;
+  key: Binary | Uint8Array | string;
 }
 
 /** @public */

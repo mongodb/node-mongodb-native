@@ -1,0 +1,16 @@
+on:
+  workflow_call: {}
+
+name: Build
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "nothing to do."
+        shell: bash

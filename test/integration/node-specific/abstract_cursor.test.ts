@@ -9,6 +9,7 @@ import {
   type FindCursor,
   MongoAPIError,
   type MongoClient,
+  MongoCursorExhaustedError,
   MongoServerError
 } from '../../mongodb';
 
@@ -193,7 +194,9 @@ describe('class AbstractCursor', function () {
         const error = await cursor.toArray().catch(e => e);
 
         expect(error).be.instanceOf(MongoAPIError);
-        expect(cursor.closed).to.be.true;
+        expect(cursor.id.isZero()).to.be.true;
+        // The first batch exhausted the cursor, the only thing to clean up is the session
+        expect(cursor.session.hasEnded).to.be.true;
       });
     });
 
@@ -225,7 +228,9 @@ describe('class AbstractCursor', function () {
           }
         } catch (error) {
           expect(error).to.be.instanceOf(MongoAPIError);
-          expect(cursor.closed).to.be.true;
+          expect(cursor.id.isZero()).to.be.true;
+          // The first batch exhausted the cursor, the only thing to clean up is the session
+          expect(cursor.session.hasEnded).to.be.true;
         }
       });
     });
@@ -259,7 +264,9 @@ describe('class AbstractCursor', function () {
 
         const error = await cursor.forEach(iterator).catch(e => e);
         expect(error).to.be.instanceOf(MongoAPIError);
-        expect(cursor.closed).to.be.true;
+        expect(cursor.id.isZero()).to.be.true;
+        // The first batch exhausted the cursor, the only thing to clean up is the session
+        expect(cursor.session.hasEnded).to.be.true;
       });
     });
   });
@@ -297,6 +304,61 @@ describe('class AbstractCursor', function () {
         stream.on('end', () => resolve(null));
       });
       expect(error).to.be.instanceof(MongoServerError);
+    });
+  });
+
+  describe('cursor end state', function () {
+    let client: MongoClient;
+    let cursor: FindCursor;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      const test = client.db().collection('test');
+      await test.deleteMany({});
+      await test.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }]);
+    });
+
+    afterEach(async function () {
+      await cursor.close();
+      await client.close();
+    });
+
+    describe('when the last batch has been received', () => {
+      it('has a zero id and is not closed and is never killed', async function () {
+        cursor = client.db().collection('test').find({});
+        expect(cursor).to.have.property('closed', false);
+        await cursor.tryNext();
+        expect(cursor.id.isZero()).to.be.true;
+        expect(cursor).to.have.property('closed', false);
+        expect(cursor).to.have.property('killed', false);
+      });
+    });
+
+    describe('when the last document has been iterated', () => {
+      it('has a zero id and is closed and is never killed', async function () {
+        cursor = client.db().collection('test').find({});
+        await cursor.next();
+        await cursor.next();
+        await cursor.next();
+        await cursor.next();
+        expect(await cursor.next()).to.be.null;
+        expect(cursor.id.isZero()).to.be.true;
+        expect(cursor).to.have.property('closed', true);
+        expect(cursor).to.have.property('killed', false);
+      });
+    });
+
+    describe('when some documents have been iterated and the cursor is closed', () => {
+      it('has a zero id and is not closed and is killed', async function () {
+        cursor = client.db().collection('test').find({}, { batchSize: 2 });
+        await cursor.next();
+        await cursor.close();
+        expect(cursor).to.have.property('closed', false);
+        expect(cursor).to.have.property('killed', true);
+        expect(cursor.id.isZero()).to.be.true;
+        const error = await cursor.next().catch(error => error);
+        expect(error).to.be.instanceOf(MongoCursorExhaustedError);
+      });
     });
   });
 });

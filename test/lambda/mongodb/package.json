@@ -1,9 +1,10 @@
 {
-  "name": "mongodb",
+  "name": "mongodb-test-lambda",
   "version": "1.0.0",
   "description": "MongoDB Lambda Function Example",
   "main": "app.mjs",
-  "license": "MIT",
+  "private": true,
+  "license": "Apache-2.0",
   "dependencies": {
     "mongodb": "mongodb/node-mongodb-native"
   }

@@ -9,7 +9,7 @@ import type {
   KMSProviders,
   RangeOptions
 } from '../..';
-import type { ClientEncryptionDataKeyProvider } from '../mongodb';
+import { Binary, type ClientEncryptionDataKeyProvider } from '../mongodb';
 
 type RequiredCreateEncryptedCollectionSettings = Parameters<
   ClientEncryption['createEncryptedCollection']
@@ -51,6 +51,10 @@ expectAssignable<RequiredCreateEncryptedCollectionSettings>({
 
 {
   // KMSProviders
+  // local
+  expectAssignable<KMSProviders['local']>({ key: '' });
+  expectAssignable<KMSProviders['local']>({ key: Buffer.alloc(0) });
+  expectAssignable<KMSProviders['local']>({ key: Binary.createFromBase64('') });
   // aws
   expectAssignable<KMSProviders['aws']>({ accessKeyId: '', secretAccessKey: '' });
   expectAssignable<KMSProviders['aws']>({
