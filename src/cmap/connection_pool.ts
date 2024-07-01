@@ -162,6 +162,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   [kWaitQueue]: List<WaitQueueMember>;
   [kMetrics]: ConnectionPoolMetrics;
   [kProcessingWaitQueue]: boolean;
+  checkOutTime: undefined | number;
 
   /**
    * Emitted when the connection pool is created.
@@ -355,6 +356,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * explicitly destroyed by the new owner.
    */
   async checkOut(): Promise<Connection> {
+    this.checkOutTime = Date.now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)

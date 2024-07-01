@@ -229,7 +229,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
     error?: MongoError
   ) {
     super(pool);
-    this.durationMS = this.durationMS = Date.now() - (connection.connectionCreatedEventTime ?? Date.now());
+    this.durationMS = Date.now() - (pool.checkOutTime ?? 0);
     this.reason = reason;
     this.error = error;
   }
@@ -263,7 +263,7 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   /** @internal */
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
-    this.durationMS = 0;
+    this.durationMS = Date.now() - (pool.checkOutTime ?? 0);
     this.connectionId = connection.id;
   }
 }
