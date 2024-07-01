@@ -191,6 +191,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   private lastUseTime: number;
   private clusterTime: Document | null = null;
+
   private error: Error | null = null;
   private dataEvents: AsyncGenerator<Buffer, void, void> | null = null;
 
@@ -229,6 +230,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.description = new StreamDescription(this.address, options);
     this.generation = options.generation;
     this.lastUseTime = now();
+    this.connectionCreatedEventTime = null;
 
     this.messageStream = this.socket
       .on('error', this.onError.bind(this))

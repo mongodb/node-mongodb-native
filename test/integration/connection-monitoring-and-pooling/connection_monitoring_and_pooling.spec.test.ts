@@ -39,7 +39,7 @@ const INTERRUPT_IN_USE_SKIPPED_TESTS: SkipDescription[] = [
   }
 ];
 
-describe('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-format', function () {
+describe.only('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-format', function () {
   const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling', 'cmap-format');
 
   runCmapTestSuite(tests, {
@@ -57,7 +57,7 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-form
   });
 });
 
-describe('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function () {
+describe.only('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function () {
   const tests = loadSpecTests('connection-monitoring-and-pooling', 'logging');
 
   runUnifiedSuite(tests, test => {

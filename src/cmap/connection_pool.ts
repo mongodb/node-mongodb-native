@@ -629,6 +629,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kPending]++;
     // This is our version of a "virtual" no-I/O connection as the spec requires
+    const connectionCreatedTime = Date.now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CREATED,
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
@@ -670,7 +671,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         connection.markAvailable();
         this.emitAndLog(
           ConnectionPool.CONNECTION_READY,
-          new ConnectionReadyEvent(this, connection)
+          new ConnectionReadyEvent(this, connection, connectionCreatedTime)
         );
 
         this[kPending]--;
