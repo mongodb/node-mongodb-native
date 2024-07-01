@@ -55,12 +55,26 @@ class LeakChecker {
 
   setupClientLeakChecker() {
     const leakChecker = this;
-    MongoClient.prototype.connect = async function () {
+    MongoClient.prototype.connect = function (...args) {
       leakChecker.clients.add(this);
       this[LeakChecker.kConnectCount] ??= 0;
-      await LeakChecker.originalConnect.call(this);
-      this[LeakChecker.kConnectCount] += 1; // only increment on successful connects
-      return this;
+
+      const lastArg = args[args.length - 1];
+      const lastArgIsCallback = typeof lastArg === 'function';
+      if (lastArgIsCallback) {
+        const argsWithoutCallback = args.slice(0, args.length - 1);
+        return LeakChecker.originalConnect.call(this, ...argsWithoutCallback, (error, client) => {
+          if (error == null) {
+            this[LeakChecker.kConnectCount] += 1; // only increment on successful connects
+          }
+          return lastArg(error, client);
+        });
+      } else {
+        return LeakChecker.originalConnect.call(this, ...args).then(client => {
+          this[LeakChecker.kConnectCount] += 1; // only increment on successful connects
+          return client;
+        });
+      }
     };
 
     MongoClient.prototype.close = function (...args) {
