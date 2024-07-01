@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as path from 'path';
+import { lt } from 'semver';
 
 import type { Collection, Db, MongoClient } from '../../mongodb';
 import { loadSpecTests } from '../../spec';
@@ -37,6 +38,8 @@ describe('Legacy Retryable Writes Specs', function () {
 
   for (const suite of retryableWrites) {
     describe(suite.name, function () {
+      let isShardedAndBefore4_4 = false;
+
       beforeEach(async function () {
         let utilClient: MongoClient;
         if (this.configuration.isLoadBalanced) {
@@ -53,6 +56,9 @@ describe('Legacy Retryable Writes Specs', function () {
         const someRequirementMet =
           !allRequirements.length ||
           (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
+
+        isShardedAndBefore4_4 =
+          this.configuration.topologyType === 'Sharded' && lt(this.configuration.version, '4.4.0');
 
         await utilClient.close();
 
@@ -80,7 +86,7 @@ describe('Legacy Retryable Writes Specs', function () {
         ctx = {}; // reset context
       });
       for (const spec of suite.tests) {
-        if (!LEGACY_SKIP_TESTS_4_4_SHARDED.includes(spec.description)) {
+        if (!LEGACY_SKIP_TESTS_4_4_SHARDED.includes(spec.description) && !isShardedAndBefore4_4) {
           // Step 2: Run the test
           const mochaTest = it(spec.description, async () => await executeScenarioTest(spec, ctx));
 
