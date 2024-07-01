@@ -22,48 +22,6 @@ echo "adding temporary AWS credentials to environment"
 # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
 . "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 
-ABS_PATH_TO_PATCH=$(pwd)
-
-# Environment Variables:
-# CSFLE_GIT_REF - set the git reference to checkout for a custom CSFLE version
-# CDRIVER_GIT_REF - set the git reference to checkout for a custom CDRIVER version (this is for libbson)
-CSFLE_GIT_REF=${CSFLE_GIT_REF:-master}
-CDRIVER_GIT_REF=${CDRIVER_GIT_REF:-1.17.6}
-
-rm -rf ../csfle-deps-tmp
-mkdir -p ../csfle-deps-tmp
-pushd ../csfle-deps-tmp
-
-rm -rf libmongocrypt mongo-c-driver
-
-git clone https://github.com/mongodb/libmongocrypt.git
-pushd libmongocrypt
-git fetch --tags
-git checkout "$CSFLE_GIT_REF" -b csfle-custom
-echo "checked out libmongocrypt at $(git rev-parse HEAD)"
-popd # libmongocrypt
-
-git clone https://github.com/mongodb/mongo-c-driver.git
-pushd mongo-c-driver
-git fetch --tags
-git checkout "$CDRIVER_GIT_REF" -b cdriver-custom
-echo "checked out C driver at $(git rev-parse HEAD)"
-popd # mongo-c-driver
-
-pushd libmongocrypt/bindings/node
-
-npm install --production --ignore-scripts
-bash ./etc/build-static.sh
-
-npm run rebuild # just in case this is necessary?
-
-BINDINGS_DIR=$(pwd)
-popd # libmongocrypt/bindings/node
-popd # ../csfle-deps-tmp
-
-# copy mongodb-client-encryption into driver's node_modules
-npm link $BINDINGS_DIR
-
 export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
 export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"

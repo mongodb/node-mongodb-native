@@ -15,7 +15,7 @@ describe('Retryable Reads (legacy)', function () {
   });
 
   generateTopologyTests(testSuites, testContext, spec => {
-    return (
+    const shouldRun =
       spec.description.match(/distinct/i) ||
       spec.description.match(/aggregate/i) ||
       spec.description.match(/countDocuments/i) ||
@@ -26,8 +26,13 @@ describe('Retryable Reads (legacy)', function () {
       spec.description.match(/listCollectionNames/i) ||
       spec.description.match(/estimatedDocumentCount/i) ||
       spec.description.match(/count/i) ||
-      spec.description.match(/find/i)
-    );
+      spec.description.match(/find/i);
+
+    if (!shouldRun) {
+      return 'Test skipped by generic filter.';
+    }
+
+    return true;
   });
 });
 

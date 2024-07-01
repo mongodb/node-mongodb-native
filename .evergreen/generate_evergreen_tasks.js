@@ -579,33 +579,54 @@ BUILD_VARIANTS.push({
   tasks: ['test-atlas-data-lake']
 });
 
-const oneOffFuncAsTasks = [];
+const NIGHTLY_TASKS = [
+  {
+    name: `run-custom-csfle-tests-with-libmongocrypt-latest`,
+    tags: ['run-custom-dependency-tests', 'nightly'],
+    commands: [
+      updateExpansions({
+        NODE_LTS_VERSION: LOWEST_LTS,
+        NPM_VERSION: 9,
+        VERSION: '8.0',
+        TOPOLOGY: 'replica_set',
+      }),
+      { func: 'install dependencies' },
+      { func: 'bootstrap mongo-orchestration' },
+      { func: 'bootstrap kms servers' },
+      {
+        func: 'install mongodb-client-encryption',
+        vars: {
+          'LIBMONGOCRYPT_VERSION': 'latest'
+        }
+      },
+      { func: 'run custom csfle tests' }
+    ]
+  }
+];
 
-const FLE_PINNED_COMMIT = '974a4614f8c1c3786e5e39fa63568d83f4f69ebd';
+const customDependencyTests = [];
 
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of [FLE_PINNED_COMMIT, 'master']) {
-    oneOffFuncAsTasks.push({
-      name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
-      tags: ['run-custom-dependency-tests'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9,
-          VERSION: version,
-          TOPOLOGY: 'replica_set',
-          CSFLE_GIT_REF: ref
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'bootstrap kms servers' },
-        { func: 'run custom csfle tests' }
-      ]
-    });
-  }
+  customDependencyTests.push({
+    name: `run-custom-csfle-tests-${version}`,
+    tags: ['run-custom-dependency-tests'],
+    commands: [
+      updateExpansions({
+        NODE_LTS_VERSION: LOWEST_LTS,
+        NPM_VERSION: 9,
+        VERSION: version,
+        TOPOLOGY: 'replica_set',
+      }),
+      { func: 'install dependencies' },
+      { func: 'bootstrap mongo-orchestration' },
+      { func: 'bootstrap kms servers' },
+      { func: 'install mongodb-client-encryption' },
+      { func: 'run custom csfle tests' }
+    ]
+  });
 }
 
-oneOffFuncAsTasks.push({
+customDependencyTests.push({
   name: `test-latest-driver-mongodb-client-encryption-6.0.0`,
   tags: ['run-custom-dependency-tests'],
   commands: [
@@ -641,13 +662,13 @@ const coverageTask = {
 };
 
 SINGLETON_TASKS.push(coverageTask);
-SINGLETON_TASKS.push(...oneOffFuncAsTasks);
+SINGLETON_TASKS.push(...customDependencyTests);
 
 BUILD_VARIANTS.push({
   name: 'rhel8-custom-dependency-tests',
   display_name: 'Custom Dependency Version Test',
   run_on: DEFAULT_OS,
-  tasks: oneOffFuncAsTasks.map(({ name }) => name)
+  tasks: customDependencyTests.map(({ name }) => name)
 });
 
 // special case for serverless testing
@@ -735,6 +756,13 @@ BUILD_VARIANTS.push({
   tasks: ['test_atlas_task_group_search_indexes']
 });
 
+BUILD_VARIANTS.push({
+  name: 'nightly',
+  display_name: 'Nightly Build',
+  run_on: DEFAULT_OS,
+  tasks: ['.nightly']
+})
+
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && [16, 18, 20].includes(variant.expansions.NODE_LTS_VERSION)
@@ -758,7 +786,8 @@ fileData.tasks = (fileData.tasks || [])
   .concat(SINGLETON_TASKS)
   .concat(AUTH_DISABLED_TASKS)
   .concat(AWS_LAMBDA_HANDLER_TASKS)
-  .concat(MONGOCRYPTD_CSFLE_TASKS);
+  .concat(MONGOCRYPTD_CSFLE_TASKS)
+  .concat(NIGHTLY_TASKS);
 
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
