@@ -22,6 +22,16 @@ describe('MongocryptdManager', function () {
     expect(mcdm.spawnArgs).to.deep.equal(['--idleShutdownTimeoutSecs', '12']);
   });
 
+  it('does not allow prototype pollution on spawn path', function () {
+    const mcdm = new MongocryptdManager({ __proto__: { mongocryptdSpawnPath: 'test' } });
+    expect(mcdm.spawnPath).to.equal('');
+  });
+
+  it('does not allow prototype pollution on spawn args', function () {
+    const mcdm = new MongocryptdManager({ __proto__: { mongocryptdSpawnArgs: ['test'] } });
+    expect(mcdm.spawnArgs).to.deep.equal(['--idleShutdownTimeoutSecs', '60']);
+  });
+
   it('should not override `idleShutdownTimeoutSecs` if the user sets it using `key=value` form', function () {
     const mcdm = new MongocryptdManager({
       mongocryptdSpawnArgs: ['--idleShutdownTimeoutSecs=12']
