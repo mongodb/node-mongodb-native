@@ -5,13 +5,15 @@ const { WaitQueueTimeoutError } = require('../../mongodb');
 const mock = require('../../tools/mongodb-mock/index');
 const sinon = require('sinon');
 const { expect } = require('chai');
-const { setImmediate } = require('timers');
+const { setImmediate } = require('timers/promises');
 const { ns, isHello } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
 const { topologyWithPlaceholderClient } = require('../../tools/utils');
 const { MongoClientAuthProviders } = require('../../mongodb');
+const { TimeoutContext } = require('../../mongodb');
 
 describe('Connection Pool', function () {
+  let timeoutContext;
   let mockMongod;
   const stubServer = {
     topology: {
@@ -26,6 +28,9 @@ describe('Connection Pool', function () {
         options: {
           extendedMetadata: {}
         }
+      },
+      s: {
+        serverSelectionTimeoutMS: 0
       }
     }
   };
@@ -40,6 +45,10 @@ describe('Connection Pool', function () {
       };
     })
   );
+
+  beforeEach(() => {
+    timeoutContext = TimeoutContext.create({ waitQueueTimeoutMS: 0, serverSelectionTimeoutMS: 0 });
+  });
 
   it('should destroy connections which have been closed', async function () {
     mockMongod.setMessageHandler(request => {
@@ -61,8 +70,10 @@ describe('Connection Pool', function () {
     const events = [];
     pool.on('connectionClosed', event => events.push(event));
 
-    const conn = await pool.checkOut();
-    const error = await conn.command(ns('admin.$cmd'), { ping: 1 }, {}).catch(error => error);
+    const conn = await pool.checkOut({ timeoutContext });
+    const error = await conn
+      .command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext })
+      .catch(error => error);
 
     expect(error).to.be.instanceOf(Error);
     pool.checkIn(conn);
@@ -90,7 +101,7 @@ describe('Connection Pool', function () {
 
     pool.ready();
 
-    const conn = await pool.checkOut();
+    const conn = await pool.checkOut({ timeoutContext });
     const maybeError = await conn.command(ns('admin.$cmd'), { ping: 1 }, undefined).catch(e => e);
     expect(maybeError).to.be.instanceOf(MongoError);
     expect(maybeError).to.match(/timed out/);
@@ -98,7 +109,7 @@ describe('Connection Pool', function () {
     pool.checkIn(conn);
   });
 
-  it('should clear timed out wait queue members if no connections are available', function (done) {
+  it('should clear timed out wait queue members if no connections are available', async function () {
     mockMongod.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -111,26 +122,22 @@ describe('Connection Pool', function () {
       waitQueueTimeoutMS: 200,
       hostAddress: mockMongod.hostAddress()
     });
+    const timeoutContext = TimeoutContext.create({
+      waitQueueTimeoutMS: 200,
+      serverSelectionTimeoutMS: 0
+    });
 
     pool.ready();
 
-    pool.checkOut().then(conn => {
-      expect(conn).to.exist;
-      pool.checkOut().then(expect.fail, err => {
-        expect(err).to.exist.and.be.instanceOf(WaitQueueTimeoutError);
+    const conn = await pool.checkOut({ timeoutContext });
+    const err = await pool.checkOut({ timeoutContext }).catch(e => e);
+    expect(err).to.exist.and.be.instanceOf(WaitQueueTimeoutError);
+    sinon.stub(pool, 'availableConnectionCount').get(() => 0);
+    pool.checkIn(conn);
 
-        // We can only process the wait queue with `checkIn` and `checkOut`, so we
-        // force the pool here to think there are no available connections, even though
-        // we are checking the connection back in. This simulates a slow leak where
-        // incoming requests outpace the ability of the queue to fully process cancelled
-        // wait queue members
-        sinon.stub(pool, 'availableConnectionCount').get(() => 0);
-        pool.checkIn(conn);
+    await setImmediate();
 
-        setImmediate(() => expect(pool).property('waitQueueSize').to.equal(0));
-        done();
-      });
-    }, expect.fail);
+    expect(pool).property('waitQueueSize').to.equal(0);
   });
 
   describe('minPoolSize population', function () {

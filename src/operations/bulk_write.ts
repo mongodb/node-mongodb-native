@@ -7,6 +7,7 @@ import type {
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
@@ -32,11 +33,17 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<BulkWriteResult> {
     const coll = this.collection;
     const operations = this.operations;
-    const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
+    const options = {
+      ...this.options,
+      ...this.bsonOptions,
+      readPreference: this.readPreference,
+      timeoutContext
+    };
 
     // Create the bulk operation
     const bulk: BulkOperationBase =

@@ -2,6 +2,7 @@ import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '..
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type Timeout, type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
 
 export const Aspect = {
@@ -61,6 +62,11 @@ export abstract class AbstractOperation<TResult = any> {
 
   options: OperationOptions;
 
+  /** @internal */
+  timeout?: Timeout;
+  /** @internal */
+  timeoutMS?: number;
+
   [kSession]: ClientSession | undefined;
 
   constructor(options: OperationOptions = {}) {
@@ -82,7 +88,11 @@ export abstract class AbstractOperation<TResult = any> {
   Command name should be stateless (should not use 'this' keyword) */
   abstract get commandName(): string;
 
-  abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;
+  abstract execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<TResult>;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;
@@ -102,11 +112,11 @@ export abstract class AbstractOperation<TResult = any> {
   }
 
   get canRetryRead(): boolean {
-    return true;
+    return this.hasAspect(Aspect.RETRYABLE) && this.hasAspect(Aspect.READ_OPERATION);
   }
 
   get canRetryWrite(): boolean {
-    return true;
+    return this.hasAspect(Aspect.RETRYABLE) && this.hasAspect(Aspect.WRITE_OPERATION);
   }
 }
 
