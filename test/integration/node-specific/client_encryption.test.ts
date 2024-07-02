@@ -4,14 +4,14 @@ import * as sinon from 'sinon';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import {
-  type DataKey,
-  ClientEncryption
+  ClientEncryption,
+  type DataKey
 } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptInvalidArgumentError } from '../../../src/client-side-encryption/errors';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { type Collection, type MongoClient, Binary, Int32, Long, UUID } from '../../mongodb';
+import { Binary, type Collection, Int32, Long, type MongoClient, UUID } from '../../mongodb';
 
 function readHttpResponse(path) {
   let data = readFileSync(path, 'utf8').toString();

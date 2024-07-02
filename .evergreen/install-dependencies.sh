@@ -106,6 +106,10 @@ fi
 echo "npm location: $(which npm)"
 echo "npm version: $(npm -v)"
 
+echo "installing FLE"
+npm i mongodb-client-encryption@alpha
+
+echo "installed FLE"
 npm install "${NPM_OPTIONS}"
 
 npm ls

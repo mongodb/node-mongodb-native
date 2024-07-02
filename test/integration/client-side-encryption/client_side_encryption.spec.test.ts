@@ -1,10 +1,7 @@
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
-import {
-  ClientSideEncryptionFilter,
-  LibmongocryptVersionFilter
-} from '../../tools/runner/filters/client_encryption_filter';
+import { ClientSideEncryptionFilter } from '../../tools/runner/filters/client_encryption_filter';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import {
   gatherTestSuites,
@@ -126,7 +123,7 @@ describe('Client Side Encryption (Legacy)', function () {
   });
 });
 
-describe.only('Client Side Encryption (Unified)', function () {
+describe('Client Side Encryption (Unified)', function () {
   installNodeDNSWorkaroundHooks();
 
   before(async function () {
