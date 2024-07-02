@@ -282,26 +282,6 @@ functions:
         timeout_secs: 300
         script: |
           ${PREPARE_SHELL}
-          # Disable xtrace (just in case it was accidentally set).
-          set +x
-
-          cat <<EOT > prepare_client_encryption.sh
-            export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
-            export RUN_WITH_MONGOCRYPTD=${RUN_WITH_MONGOCRYPTD}
-            export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
-            export FLE_AWS_KEY2='${FLE_AWS_KEY2}'
-            export FLE_AWS_SECRET2='${FLE_AWS_SECRET2}'
-            export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
-            export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
-            export AWS_REGION='${AWS_REGION}'
-            export AWS_CMK_ID='${AWS_CMK_ID}'
-            export AWS_DEFAULT_REGION='us-east-1'
-            export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
-            export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
-          EOT
-
-          source prepare_client_encryption.sh
-          rm prepare_client_encryption.sh
 
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} \
