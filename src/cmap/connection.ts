@@ -449,7 +449,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
-        const document = (responseType ?? MongoDBResponse).make(bson);
+        const document = (responseType || MongoDBResponse).make(bson);
 
         yield document;
         this.throwIfAborted();
