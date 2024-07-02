@@ -106,9 +106,6 @@ async function main() {
 
   log('Generating new static site...');
 
-  await exec(`git checkout main ${RELEASES_TOML_FILE}`);
-  await exec(`git checkout main ${RELEASES_JSON_FILE}`);
-
   const tomlVersions = parse(
     await readFile(RELEASES_TOML_FILE, { encoding: 'utf8' })
   ) as unknown as TomlVersionSchema;
