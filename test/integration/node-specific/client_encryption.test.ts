@@ -24,7 +24,7 @@ const metadata: MongoDBMetadataUI = {
     clientSideEncryption: true
   }
 };
-describe('ClientEncryption integration tests', function () {
+describe.only('ClientEncryption integration tests', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
@@ -321,7 +321,7 @@ describe('ClientEncryption integration tests', function () {
       });
 
       completeOptions = {
-        algorithm: 'RangePreview',
+        algorithm: 'Range',
         contentionFactor: 0,
         rangeOptions: {
           min: new Long(0),
@@ -335,7 +335,11 @@ describe('ClientEncryption integration tests', function () {
     context('when expressionMode is incorrectly provided as an argument', function () {
       it(
         'overrides the provided option with the correct value for expression mode',
-        metadata,
+        {
+          requires: {
+            clientSideEncryption: '>=6.1.0-alpha'
+          }
+        },
         async function () {
           const optionsWithExpressionMode = { ...completeOptions, expressionMode: true };
           const result = await clientEncryption.encrypt(new Long(0), optionsWithExpressionMode);
@@ -353,6 +357,11 @@ describe('ClientEncryption integration tests', function () {
     const expression = {
       $and: [{ someField: { $gt: 1 } }]
     };
+    const metadata: MongoDBMetadataUI = {
+      requires: {
+        clientSideEncryption: '>=6.1.0-alpha'
+      }
+    };
 
     beforeEach(async function () {
       clientEncryption = new ClientEncryption(client, {
@@ -366,12 +375,13 @@ describe('ClientEncryption integration tests', function () {
       });
 
       completeOptions = {
-        algorithm: 'RangePreview',
-        queryType: 'rangePreview',
+        algorithm: 'Range',
+        queryType: 'range',
         contentionFactor: 0,
         rangeOptions: {
           min: new Int32(0),
           max: new Int32(10),
+          trimFactor: new Int32(1),
           sparsity: new Long(1)
         },
         keyId: dataKey
@@ -396,7 +406,7 @@ describe('ClientEncryption integration tests', function () {
       expect(errorOrResult).to.be.instanceof(TypeError);
     });
 
-    it(`throws if algorithm does not equal 'rangePreview'`, metadata, async function () {
+    it(`throws if algorithm does not equal 'range'`, metadata, async function () {
       completeOptions['algorithm'] = 'equality';
       const errorOrResult = await clientEncryption
         .encryptExpression(expression, completeOptions)
@@ -406,10 +416,10 @@ describe('ClientEncryption integration tests', function () {
     });
 
     it(
-      `does not throw if algorithm has different casing than 'rangePreview'`,
+      `does not throw if algorithm has different casing than 'range'`,
       metadata,
       async function () {
-        completeOptions['algorithm'] = 'rAnGePrEvIeW';
+        completeOptions['algorithm'] = 'rAnGe';
         const errorOrResult = await clientEncryption
           .encryptExpression(expression, completeOptions)
           .catch(e => e);

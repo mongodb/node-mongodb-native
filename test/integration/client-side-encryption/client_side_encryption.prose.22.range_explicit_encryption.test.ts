@@ -20,13 +20,13 @@ const getKmsProviders = () => {
 
 const metaData: MongoDBMetadataUI = {
   requires: {
-    clientSideEncryption: true,
+    clientSideEncryption: '>=6.1.0-alpha',
 
     // The Range Explicit Encryption tests require MongoDB server 7.0+ for QE v2.
     // The tests must not run against a standalone.
     //
-    // `rangePreview` is not supported on 8.0+ servers.
-    mongodb: '>=7.0.0 <8.0.0',
+    // `range` is not supported on 8.0+ servers.
+    mongodb: '>=8.0.0',
     topology: '!single'
   }
 };
@@ -60,7 +60,8 @@ const dataTypes: ReadonlyArray<{
   {
     type: 'DecimalNoPrecision',
     rangeOptions: prepareOptions({
-      sparsity: { $numberLong: '1' }
+      sparsity: { $numberLong: '1' },
+      trimFactor: { $numberInt: '1' }
     }),
     factory: value => new Decimal128(value.toString())
   },
@@ -69,6 +70,7 @@ const dataTypes: ReadonlyArray<{
     rangeOptions: prepareOptions({
       min: { $numberDecimal: '0' },
       max: { $numberDecimal: '200' },
+      trimFactor: { $numberInt: '1' },
       sparsity: { $numberLong: '1' },
       precision: 2
     }),
@@ -76,7 +78,10 @@ const dataTypes: ReadonlyArray<{
   },
   {
     type: 'DoubleNoPrecision',
-    rangeOptions: prepareOptions({ sparsity: { $numberLong: '1' } }),
+    rangeOptions: prepareOptions({
+      trimFactor: { $numberInt: '1' },
+      sparsity: { $numberLong: '1' }
+    }),
     factory: value => new Double(value)
   },
   {
@@ -84,6 +89,7 @@ const dataTypes: ReadonlyArray<{
     rangeOptions: prepareOptions({
       min: { $numberDouble: '0' },
       max: { $numberDouble: '200' },
+      trimFactor: { $numberInt: '1' },
       sparsity: { $numberLong: '1' },
       precision: 2
     }),
@@ -94,6 +100,7 @@ const dataTypes: ReadonlyArray<{
     rangeOptions: prepareOptions({
       min: { $date: { $numberLong: '0' } },
       max: { $date: { $numberLong: '200' } },
+      trimFactor: { $numberInt: '1' },
       sparsity: { $numberLong: '1' }
     }),
     factory: value => new Date(value)
@@ -103,6 +110,7 @@ const dataTypes: ReadonlyArray<{
     rangeOptions: prepareOptions({
       min: { $numberInt: '0' },
       max: { $numberInt: '200' },
+      trimFactor: { $numberInt: '1' },
       sparsity: { $numberLong: '1' }
     }),
     factory: value => value
@@ -112,6 +120,7 @@ const dataTypes: ReadonlyArray<{
     rangeOptions: prepareOptions({
       min: { $numberLong: '0' },
       max: { $numberLong: '200' },
+      trimFactor: { $numberInt: '1' },
       sparsity: { $numberLong: '1' }
     }),
     factory: value => Long.fromNumber(value)
@@ -202,6 +211,11 @@ describe('Range Explicit Encryption', function () {
           keyVaultNamespace: 'keyvault.datakeys',
           kmsProviders: getKmsProviders()
         };
+        console.error({
+          csfleKMSPRoviders:
+            typeof process.env.CSFLE_KMS_PROVIDERS === 'string' &&
+            process.env.CSFLE_KMS_PROVIDERS.length > 0
+        });
         clientEncryption = new ClientEncryption(keyVaultClient, clientEncryptionOpts);
 
         const autoEncryptionOptions = {
@@ -217,9 +231,9 @@ describe('Range Explicit Encryption', function () {
 
         const opts = {
           keyId,
-          algorithm: 'RangePreview',
+          algorithm: 'Range',
           contentionFactor: 0,
-          rangeOptions // TODO: is this the correct place to encrypt with rangeOpts?
+          rangeOptions
         };
 
         encryptedZero = await clientEncryption.encrypt(factory(0), opts);
@@ -257,14 +271,14 @@ describe('Range Explicit Encryption', function () {
       });
 
       afterEach(async function () {
-        await keyVaultClient.close();
-        await encryptedClient.close();
+        await keyVaultClient?.close();
+        await encryptedClient?.close();
       });
 
       it('Case 1: can decrypt a payload', metaData, async function () {
         const insertedPayload = await clientEncryption.encrypt(factory(6), {
           keyId,
-          algorithm: 'RangePreview',
+          algorithm: 'Range',
           contentionFactor: 0,
           rangeOptions
         });
@@ -283,8 +297,8 @@ describe('Range Explicit Encryption', function () {
 
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
-          algorithm: 'RangePreview',
-          queryType: 'rangePreview',
+          algorithm: 'Range',
+          queryType: 'range',
           contentionFactor: 0,
           rangeOptions
         });
@@ -335,8 +349,8 @@ describe('Range Explicit Encryption', function () {
 
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
-          algorithm: 'RangePreview',
-          queryType: 'rangePreview',
+          algorithm: 'Range',
+          queryType: 'range',
           contentionFactor: 0,
           rangeOptions
         });
@@ -380,8 +394,8 @@ describe('Range Explicit Encryption', function () {
 
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
-          algorithm: 'RangePreview',
-          queryType: 'rangePreview',
+          algorithm: 'Range',
+          queryType: 'range',
           contentionFactor: 0,
           rangeOptions
         });
@@ -408,8 +422,8 @@ describe('Range Explicit Encryption', function () {
 
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
-          algorithm: 'RangePreview',
-          queryType: 'rangePreview',
+          algorithm: 'Range',
+          queryType: 'range',
           contentionFactor: 0,
           rangeOptions
         });
@@ -458,7 +472,7 @@ describe('Range Explicit Encryption', function () {
           const resultOrError = await clientEncryption
             .encrypt(factory(201), {
               keyId,
-              algorithm: 'RangePreview',
+              algorithm: 'Range',
               contentionFactor: 0,
               rangeOptions
             })
@@ -485,7 +499,7 @@ describe('Range Explicit Encryption', function () {
         const resultOrError = await clientEncryption
           .encrypt(payload, {
             keyId,
-            algorithm: 'RangePreview',
+            algorithm: 'Range',
             contentionFactor: 0,
             rangeOptions
           })
@@ -528,7 +542,7 @@ describe('Range Explicit Encryption', function () {
           const resultOrError = await clientEncryption
             .encrypt(factory(6), {
               keyId,
-              algorithm: 'RangePreview',
+              algorithm: 'Range',
               contentionFactor: 0,
               rangeOptions: options
             })
