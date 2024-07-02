@@ -41,4 +41,4 @@ function afterEachUnhandled() {
   unhandled.unknown = [];
 }
 
-module.exports = { mochaHooks: { beforeEach: beforeEachUnhandled, afterEach: afterEachUnhandled } };
+export const mochaHooks = { beforeEach: beforeEachUnhandled, afterEach: afterEachUnhandled };
