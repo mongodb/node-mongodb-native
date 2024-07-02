@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.9.0](https://github.com/mongodb/node-mongodb-native/compare/v6.8.0...v6.9.0) (2024-07-02)
+
+
+### Features
+
+* **NODE-6225:** add property ownership check before referencing `mongocryptdSpawnPath` and `mongocryptdSpawnArgs` ([#4151](https://github.com/mongodb/node-mongodb-native/issues/4151)) ([f48f8d3](https://github.com/mongodb/node-mongodb-native/commit/f48f8d36cf96c25ebf656e359e97b61dbfe7c4ed))
+* **NODE-6244:** Bump max supported wire version and server version ([#4163](https://github.com/mongodb/node-mongodb-native/issues/4163)) ([45bc098](https://github.com/mongodb/node-mongodb-native/commit/45bc0982f0f00e1811baf2a613989a808783b8b1))
+
+
+### Bug Fixes
+
+* **NODE-6241:** allow Binary as local kms provider key for auto encryption ([#4165](https://github.com/mongodb/node-mongodb-native/issues/4165)) ([d85f827](https://github.com/mongodb/node-mongodb-native/commit/d85f827aca56603b5d7b64f853c190473be81b6f))
+
 ## [6.8.0](https://github.com/mongodb/node-mongodb-native/compare/v6.7.0...v6.8.0) (2024-06-27)
 
 
