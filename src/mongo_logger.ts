@@ -650,11 +650,11 @@ export function defaultLogTransform(
           if (logObject.error) {
             log.error = logObject.error;
           }
-          log.durationMS = logObject.durationMS;
           break;
         default:
           log.reason = `Unknown close reason: ${logObject.reason}`;
       }
+      log.durationMS = logObject.durationMS;
       return log;
     case CONNECTION_CHECKED_OUT:
       log = attachConnectionFields(log, logObject);

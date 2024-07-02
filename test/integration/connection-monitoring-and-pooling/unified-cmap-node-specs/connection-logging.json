@@ -110,13 +110,6 @@
                     "int",
                     "long"
                   ]
-                },
-                "durationMS": {
-                  "$$type": [
-                    "double",
-                    "int",
-                    "long"
-                  ]
                 }
               }
             },
@@ -194,6 +187,13 @@
                 },
                 "serverPort": {
                   "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "durationMS": {
+                  "$$type": [
+                    "double",
                     "int",
                     "long"
                   ]
