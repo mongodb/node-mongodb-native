@@ -1,0 +1,218 @@
+
+# Requires libmongocrypt 1.8.0.
+runOn:
+  - minServerVersion: "8.0.0"
+    # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topology: [ "replicaset", "sharded", "load-balanced" ]
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+data: []
+encrypted_fields: &encrypted_fields {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedDoublePrecision', 'bsonType': 'double', 'queries': {'queryType': 'range', 'contention': {'$numberLong': '0'}, 'trimFactor': {'$numberInt': '1'}, 'sparsity': {'$numberLong': '1'}, 'min': {'$numberDouble': '0.0'}, 'max': {'$numberDouble': '200.0'}, 'precision': {'$numberInt': '2'}}}]}
+key_vault_data: [ {'_id': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'keyMaterial': {'$binary': {'base64': 'sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1648914851981'}}, 'updateDate': {'$date': {'$numberLong': '1648914851981'}}, 'status': {'$numberInt': '0'}, 'masterKey': {'provider': 'local'}} ]
+tests:
+  - description: "FLE2 Range DoublePrecision. Delete."
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 { _id: 0, encryptedDoublePrecision: { $numberDouble: "0" } }
+      - name: insertOne
+        arguments:
+          document: &doc1 { _id: 1, encryptedDoublePrecision: { $numberDouble: "1" } }
+      - name: deleteOne
+        arguments:
+            filter: { "encryptedDoublePrecision": { $gt: {$numberDouble: "0" }} }
+        result:
+          deletedCount: 1
+    expectations:
+      - command_started_event:
+          command:
+            listCollections: 1
+            filter:
+              name: *collection_name
+          command_name: listCollections
+      - command_started_event:
+          command:
+            find: datakeys
+            filter: {
+                  "$or": [
+                      {
+                          "_id": {
+                              "$in": [
+                                {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}
+                              ]
+                          }
+                      },
+                      {
+                          "keyAltNames": {
+                              "$in": []
+                          }
+                      }
+                  ]
+              }
+            $db: keyvault
+            readConcern: { level: "majority" }
+          command_name: find
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - &doc0_encrypted { "_id": 0, "encryptedDoublePrecision": { $$type: "binData" } }
+            ordered: true
+            encryptionInformation:
+              type: 1
+              schema:
+                default.default:
+                  # libmongocrypt applies escCollection and ecocCollection to outgoing command.
+                  escCollection: "enxcol_.default.esc"
+                  ecocCollection: "enxcol_.default.ecoc"
+                  <<: *encrypted_fields
+          command_name: insert
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - &doc1_encrypted { "_id": 1, "encryptedDoublePrecision": { $$type: "binData" } }
+            ordered: true
+            encryptionInformation:
+              type: 1
+              schema:
+                default.default:
+                  # libmongocrypt applies escCollection and ecocCollection to outgoing command.
+                  escCollection: "enxcol_.default.esc"
+                  ecocCollection: "enxcol_.default.ecoc"
+                  <<: *encrypted_fields
+          command_name: insert
+      - command_started_event:
+          command:
+            delete: *collection_name
+            deletes: [
+                  {
+                      "q": {
+                          "encryptedDoublePrecision": {
+                              "$gt": {
+                                  "$binary": {
+                                      "base64": "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",
+                                      "subType": "06"
+                                  }
+                              }
+                          }
+                      },
+                      "limit": 1
+                  }
+              ]
+            ordered: true
+            encryptionInformation:
+              type: 1
+              schema:
+                default.default:
+                  # libmongocrypt applies escCollection and ecocCollection to outgoing command.
+                  escCollection: "enxcol_.default.esc"
+                  ecocCollection: "enxcol_.default.ecoc"
+                  <<: *encrypted_fields
+          command_name: delete
+    outcome:
+      collection:
+        # Outcome is checked using a separate MongoClient without auto encryption.
+        data:
+        -
+          {
+              "_id": 0,
+              "encryptedDoublePrecision": { $$type: "binData" },
+              "__safeContent__": [
+                  {
+                      "$binary": {
+                          "base64": "Dri0CXmL78L2DOgk9w0DwxHOMGMzih7m6l59vgy+WWo=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "x7GR49EN0t3WXQDihkrbonK7qNIBYC87tpL/XEUyIYc=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "JfYUqWF+OoGjiYkRI4L5iPlF+T1Eleul7Fki22jp4Qc=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "q1RyGfIgsaQHoZFRw+DD28V26rN5hweApPLwExncvT8=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "L2PFeKGvLS6C+DLudR6fGlBq3ERPvjWvRyNRIA2HVb0=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "CWxaNqL3iP1yCixDkcmf9bmW3E5VeN8TJkg1jJe528s=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "+vC6araOEo+fpW7PSIP40/EnzBCj1d2N10Jr3rrXJJM=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "6SV63Mf51Z6A6p2X3rCnJKCu6ku3Oeb45mBYbz+IoAo=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "RjBYT2h3ZAoHxhf8DU6/dFbDkEBZp0IxREcsRTu2MXs=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "b7d8mRzD1kI1tdc7uNL+YAUonJ6pODLsRLkArfEKSkM=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "Xg8C1/A0KJaXOw4i+26Rv03/CydaaunOzXh0CIT+gn8=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "UoKUDw2wJYToUCcFaIs03YQSTksYR0MIOTJllwODqKc=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "c/5cwAT0C5jber2xlJnWD3a5tVDy0nRtr5HG02hoFOY=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "wSUrRXavAGaajNeqC5mEUH1K67oYl5Wy9RNIzKjwLAM=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "6vrp4wWDtHEgHWR99I70WVDzevg1Fk/Pw5U8gUDa0OU=",
+                          "subType": "00"
+                      }
+                  }
+              ]
+          }
