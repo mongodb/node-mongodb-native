@@ -75,3 +75,123 @@ tests:
           - { _id: 1, x: 11 }
           - { _id: 2, x: 22 }
           - { _id: 3, x: 33 }  # The write was still applied
+
+  - description: "RetryableWriteError label is added based on top-level code in pre-4.4 server response"
+    runOnRequirements:
+      - minServerVersion: "4.2"
+        maxServerVersion: "4.2.99"
+        topologies: [ replicaset, sharded ]
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            # Trigger the fail point twice to allow asserting the error label in
+            # the retry attempt's response.
+            mode: { times: 2 }
+            data:
+              failCommands: [ "insert" ]
+              errorCode: 189 # PrimarySteppedDown
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          errorLabelsContain: [ "RetryableWriteError" ]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &insertCommandStartedEvent
+              command:
+                insert: *collectionName
+                documents: [{ _id: 3, x: 33 }]
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent: *insertCommandStartedEvent
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+
+  - description: "RetryableWriteError label is added based on writeConcernError in pre-4.4 mongod response"
+    runOnRequirements:
+      - minServerVersion: "4.2"
+        maxServerVersion: "4.2.99"
+        topologies: [ replicaset ]
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            # Trigger the fail point twice to allow asserting the error label in
+            # the retry attempt's response.
+            mode: { times: 2 }
+            data:
+              failCommands: [ "insert" ]
+              writeConcernError:
+                code: 91 # ShutdownInProgress
+                errmsg: "Replication is being shut down"
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          errorLabelsContain: [ "RetryableWriteError" ]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: *insertCommandStartedEvent
+          - commandStartedEvent: *insertCommandStartedEvent
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          # writeConcernError doesn't prevent the server from applying the write
+          - { _id: 3, x: 33 }
+
+  - description: "RetryableWriteError label is not added based on writeConcernError in pre-4.4 mongos response"
+    runOnRequirements:
+      - minServerVersion: "4.2"
+        maxServerVersion: "4.2.99"
+        topologies: [ sharded ]
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            # Trigger the fail point only once since a RetryableWriteError label
+            # will not be added and the write will not be retried.
+            mode: { times: 1 }
+            data:
+              failCommands: [ "insert" ]
+              writeConcernError:
+                code: 91 # ShutdownInProgress
+                errmsg: "Replication is being shut down"
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          errorLabelsOmit: [ "RetryableWriteError" ]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: *insertCommandStartedEvent
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          # writeConcernError doesn't prevent the server from applying the write
+          - { _id: 3, x: 33 }
