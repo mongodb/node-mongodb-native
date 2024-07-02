@@ -24,7 +24,7 @@ const metadata: MongoDBMetadataUI = {
     clientSideEncryption: true
   }
 };
-describe.only('ClientEncryption integration tests', function () {
+describe('ClientEncryption integration tests', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
