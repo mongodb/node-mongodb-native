@@ -47,7 +47,7 @@
 maps the full ambiguous update path to an array containing the actual resolved components of the path.  For example,
 given a document shaped like <code>{ a: { &#39;0&#39;: 0 } }</code>, and an update of <code>{ $inc: &#39;a.0&#39; }</code>, disambiguated paths would look like
 the following:</p>
-<pre><code><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-2">&#39;a.0&#39;</span><span class="hl-1">: [</span><span class="hl-2">&#39;a&#39;</span><span class="hl-1">, </span><span class="hl-2">&#39;0&#39;</span><span class="hl-1">]</span><br/><span class="hl-1">  }</span>
+<pre><code><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-3">&#39;a.0&#39;</span><span class="hl-1">: [</span><span class="hl-3">&#39;a&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;0&#39;</span><span class="hl-1">]</span><br/><span class="hl-1">  }</span>
 </code><button>Copy</button></pre>
 <p>This field is only present when there are ambiguous paths that are updated as a part of the update event and <code>showExpandedEvents</code>
 is enabled for the change stream.</p>

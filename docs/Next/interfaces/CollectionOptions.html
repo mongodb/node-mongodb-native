@@ -23,7 +23,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">CollectionOptions</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L105">src/collection.ts:105</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L112">src/collection.ts:112</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -78,7 +78,7 @@
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="BSONSerializeOptions.html">BSONSerializeOptions</a>.<a href="BSONSerializeOptions.html#enableUtf8Validation">enableUtf8Validation</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bson.ts#L80">src/bson.ts:80</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bson.ts#L81">src/bson.ts:81</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="fieldsAsRaw" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>fields<wbr/>As<wbr/>Raw</span><a href="#fieldsAsRaw" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">fields<wbr/>As<wbr/>Raw</span><span class="tsd-signature-symbol">?:</span> <a href="BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a></div>
@@ -146,7 +146,7 @@ If you need to maintain your own editable clone of the bytes returned for an ext
 your own buffer and clone the contents:</p>
 </div>
 <div class="tsd-comment tsd-typography">
-<h4>Example</h4><pre><code class="language-ts"><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-5">raw</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">findOne</span><span class="hl-1">({}, { </span><span class="hl-6">raw:</span><span class="hl-1"> </span><span class="hl-3">true</span><span class="hl-1"> });</span><br/><span class="hl-3">const</span><span class="hl-1"> </span><span class="hl-5">myBuffer</span><span class="hl-1"> = </span><span class="hl-6">Buffer</span><span class="hl-1">.</span><span class="hl-0">alloc</span><span class="hl-1">(</span><span class="hl-6">raw</span><span class="hl-1">.</span><span class="hl-6">byteLength</span><span class="hl-1">);</span><br/><span class="hl-6">myBuffer</span><span class="hl-1">.</span><span class="hl-0">set</span><span class="hl-1">(</span><span class="hl-6">raw</span><span class="hl-1">, </span><span class="hl-8">0</span><span class="hl-1">);</span><br/><span class="hl-4">// Only save and use `myBuffer` beyond this point</span>
+<h4>Example</h4><pre><code class="language-ts"><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-5">raw</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">findOne</span><span class="hl-1">({}, { </span><span class="hl-6">raw:</span><span class="hl-1"> </span><span class="hl-2">true</span><span class="hl-1"> });</span><br/><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-5">myBuffer</span><span class="hl-1"> = </span><span class="hl-6">Buffer</span><span class="hl-1">.</span><span class="hl-0">alloc</span><span class="hl-1">(</span><span class="hl-6">raw</span><span class="hl-1">.</span><span class="hl-6">byteLength</span><span class="hl-1">);</span><br/><span class="hl-6">myBuffer</span><span class="hl-1">.</span><span class="hl-0">set</span><span class="hl-1">(</span><span class="hl-6">raw</span><span class="hl-1">, </span><span class="hl-8">0</span><span class="hl-1">);</span><br/><span class="hl-4">// Only save and use `myBuffer` beyond this point</span>
 </code><button>Copy</button></pre>
 
 <h4>Remarks</h4><p>Please note there is a known limitation where this option cannot be used at the MongoClient level (see <a href="https://jira.mongodb.org/browse/NODE-3946">NODE-3946</a>).
@@ -154,7 +154,7 @@ It does correctly work at <code>Db</code>, <code>Collection</code>, and per oper
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="BSONSerializeOptions.html">BSONSerializeOptions</a>.<a href="BSONSerializeOptions.html#raw">raw</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bson.ts#L77">src/bson.ts:77</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bson.ts#L78">src/bson.ts:78</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="readConcern" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>read<wbr/>Concern</span><a href="#readConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">read<wbr/>Concern</span><span class="tsd-signature-symbol">?:</span> <a href="../types/ReadConcernLike.html" class="tsd-signature-type tsd-kind-type-alias">ReadConcernLike</a></div>
@@ -162,7 +162,7 @@ It does correctly work at <code>Db</code>, <code>Collection</code>, and per oper
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L107">src/collection.ts:107</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L114">src/collection.ts:114</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="readPreference" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>read<wbr/>Preference</span><a href="#readPreference" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">read<wbr/>Preference</span><span class="tsd-signature-symbol">?:</span> <a href="../types/ReadPreferenceLike.html" class="tsd-signature-type tsd-kind-type-alias">ReadPreferenceLike</a></div>
@@ -170,7 +170,7 @@ It does correctly work at <code>Db</code>, <code>Collection</code>, and per oper
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L109">src/collection.ts:109</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/collection.ts#L116">src/collection.ts:116</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="serializeFunctions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>serialize<wbr/>Functions</span><a href="#serializeFunctions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">serialize<wbr/>Functions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -201,7 +201,7 @@ It does correctly work at <code>Db</code>, <code>Collection</code>, and per oper
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="WriteConcernOptions.html">WriteConcernOptions</a>.<a href="WriteConcernOptions.html#writeConcern">writeConcern</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L9">src/write_concern.ts:9</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L11">src/write_concern.ts:11</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
