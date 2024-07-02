@@ -107,7 +107,7 @@ const testSkipBeforeEachHook = async function () {
  * @param skippedTests - define list of tests to skip
  * @returns
  */
-const skipBrokenAuthTestBeforeEachHook = function (
+export const skipBrokenAuthTestBeforeEachHook = function (
   { skippedTests }: { skippedTests: string[] } = { skippedTests: [] }
 ) {
   return function () {
@@ -222,12 +222,8 @@ export function installNodeDNSWorkaroundHooks() {
   }
 }
 
-module.exports = {
-  mochaHooks: {
-    beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
-    beforeEach: [testSkipBeforeEachHook],
-    afterAll: [cleanUpMocksAfterHook]
-  },
-  skipBrokenAuthTestBeforeEachHook,
-  installNodeDNSWorkaroundHooks
+export const mochaHooks = {
+  beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
+  beforeEach: [testSkipBeforeEachHook],
+  afterAll: [cleanUpMocksAfterHook]
 };
