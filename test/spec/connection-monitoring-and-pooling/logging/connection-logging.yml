@@ -66,6 +66,7 @@ tests:
               driverConnectionId: { $$type: [int, long] }
               serverHost: { $$type: string }
               serverPort: { $$type: [int, long] }
+              durationMS: { $$type: [double, int, long] }
 
           - level: debug
             component: connection
@@ -74,6 +75,7 @@ tests:
               driverConnectionId: { $$type: [int, long] }
               serverHost: { $$type: string }
               serverPort: { $$type: [int, long] }
+              durationMS: { $$type: [double, int, long] }
 
           - level: debug
             component: connection
@@ -98,6 +100,7 @@ tests:
               driverConnectionId: { $$type: [int, long] }
               serverHost: { $$type: string }
               serverPort: { $$type: [int, long] }
+              durationMS: { $$type: [double, int, long] }
 
           - level: debug
             component: connection
@@ -218,3 +221,4 @@ tests:
               serverPort: { $$type: [int, long] }
               reason: "An error occurred while trying to establish a new connection"
               error: { $$exists: true }
+              durationMS: { $$type: [double, int, long] }
