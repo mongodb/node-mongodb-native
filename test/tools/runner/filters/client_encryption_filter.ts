@@ -23,8 +23,10 @@ export class ClientSideEncryptionFilter extends Filter {
   enabled: boolean;
   static version = null;
 
+  csfleKMSProviders = null;
+
   override async initializeFilter(client: MongoClient, context: Record<string, any>) {
-    const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
+    this.csfleKMSProviders = process.env.CSFLE_KMS_PROVIDERS;
     let mongodbClientEncryption;
     try {
       mongodbClientEncryption = require('mongodb-client-encryption');
@@ -41,13 +43,13 @@ export class ClientSideEncryptionFilter extends Filter {
       )
     ).version;
 
-    this.enabled = !!(CSFLE_KMS_PROVIDERS && mongodbClientEncryption);
+    this.enabled = !!(this.csfleKMSProviders && mongodbClientEncryption);
 
     // Adds these fields onto the context so that they can be reused by tests
     context.clientSideEncryption = {
       enabled: this.enabled,
       mongodbClientEncryption,
-      CSFLE_KMS_PROVIDERS,
+      CSFLE_KMS_PROVIDERS: this.csfleKMSProviders,
       version: ClientSideEncryptionFilter.version
     };
   }
@@ -67,16 +69,52 @@ export class ClientSideEncryptionFilter extends Filter {
     }
 
     // TODO(NODE-3401): unskip csfle tests on windows
-    if (process.env.TEST_CSFLE && !this.enabled && process.platform !== 'win32') {
-      throw new Error('Expected CSFLE to be enabled in the CI');
+    if (process.env.TEST_CSFLE && process.platform !== 'win32') {
+      if (!this.csfleKMSProviders) {
+        throw new Error('FLE tests must run, but no KMS providers were set in the environment.');
+      }
+      if (ClientSideEncryptionFilter.version == null) {
+        throw new Error('FLE tests must run, but mongodb client encryption was not installed.');
+      }
     }
-    const validRange = typeof clientSideEncryption === 'string' ? clientSideEncryption : '>=0.0.0';
 
-    if (ClientSideEncryptionFilter.version && !this.enabled)
-      return 'Test requires FLE environment variables..';
-    if (!this.enabled) return 'Test requires CSFLE to be enabled.';
-    return satisfies(ClientSideEncryptionFilter.version, validRange)
+    if (this.csfleKMSProviders == null) return 'Test requires FLE environment variables.';
+    if (ClientSideEncryptionFilter.version == null)
+      return 'Test requires mongodb-client-encryption to be installed.';
+
+    const validRange = typeof clientSideEncryption === 'string' ? clientSideEncryption : '>=0.0.0';
+    return satisfies(ClientSideEncryptionFilter.version, validRange, { includePrerelease: true })
       ? true
       : `requires mongodb-client-encryption ${validRange}, received ${ClientSideEncryptionFilter.version}`;
+  }
+}
+
+export class LibmongocryptVersionFilter extends Filter {
+  clientSideEncryptionFilter = new ClientSideEncryptionFilter();
+  override async initializeFilter(client: MongoClient, context: Record<string, any>) {
+    await this.clientSideEncryptionFilter.initializeFilter(client, context);
+  }
+
+  filter(test: { metadata?: MongoDBMetadataUI }) {
+    const clientSideEncryption =
+      test.metadata && test.metadata.requires && test.metadata.requires.libmongocrypt;
+
+    if (clientSideEncryption == null) {
+      return true;
+    }
+
+    if (
+      !this.clientSideEncryptionFilter.filter({
+        metadata: { requires: { clientSideEncryption: true } }
+      })
+    ) {
+      return `no mongodb-client-encryption installed, but test requires a libmongocrypt version.`;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const version = require('mongodb-client-encryption').MongoCrypt.libmongocryptVersion;
+
+    return satisfies(version, clientSideEncryption, {
+      includePrerelease: true
+    });
   }
 }

@@ -16,7 +16,10 @@ import { coerce, gte } from 'semver';
 
 import { ApiVersionFilter } from '../filters/api_version_filter';
 import { AuthFilter } from '../filters/auth_filter';
-import { ClientSideEncryptionFilter } from '../filters/client_encryption_filter';
+import {
+  ClientSideEncryptionFilter,
+  LibmongocryptVersionFilter
+} from '../filters/client_encryption_filter';
 import { GenericPredicateFilter } from '../filters/generic_predicate_filter';
 import { IDMSMockServerFilter } from '../filters/idms_mock_server_filter';
 import { MongoDBTopologyFilter } from '../filters/mongodb_topology_filter';
@@ -60,6 +63,7 @@ async function initializeFilters(client): Promise<Record<string, any>> {
     new ApiVersionFilter(),
     new AuthFilter(),
     new ClientSideEncryptionFilter(),
+    new LibmongocryptVersionFilter(),
     new GenericPredicateFilter(),
     new IDMSMockServerFilter(),
     new MongoDBTopologyFilter(),

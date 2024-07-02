@@ -16,8 +16,7 @@ describe('Read Write Concern spec tests', function () {
 
     generateTopologyTests(testSuites, testContext, ({ description }) => {
       if (description === 'MapReduce omits default write concern') {
-        // The node driver does not have a mapReduce collection helper
-        return false;
+        return 'The node driver does not have a mapReduce collection helper';
       }
       return true;
     });
