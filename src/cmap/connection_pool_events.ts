@@ -213,12 +213,6 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
    * emitting a `ConnectionCheckOutStartedEvent`
    * and emitting this event as part of the same checking out.
    *
-   * Naturally, if a new connection was not created (`ConnectionCreatedEvent`)
-   * and established (`ConnectionReadyEvent`) as part of checking out,
-   * this duration is usually
-   * not greater than `ConnectionPoolOptions.waitQueueTimeoutMS`,
-   * but MAY occasionally be greater than that,
-   * because a driver does not provide hard real-time guarantees.
    */
   durationMS: number;
 
@@ -251,12 +245,6 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
    * emitting a `ConnectionCheckOutStartedEvent`
    * and emitting this event as part of the same checking out.
    *
-   * Naturally, if a new connection was not created (`ConnectionCreatedEvent`)
-   * and established (`ConnectionReadyEvent`) as part of checking out,
-   * this duration is usually
-   * not greater than `ConnectionPoolOptions.waitQueueTimeoutMS`,
-   * but MAY occasionally be greater than that,
-   * because a driver does not provide hard real-time guarantees.
    */
   durationMS: number;
 
