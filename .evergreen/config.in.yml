@@ -13,11 +13,6 @@ command_type: system
 # That roughly accounts for variable system performance for various buildvariants
 exec_timeout_secs: 2100
 
-patch_aliases:
-  - alias: "nightly"
-    variant_tags: ["nightly"]
-    task_tags: [".*"]
-
 # What to do when evergreen hits the timeout (`post:` tasks are run automatically)
 timeout:
   - command: subprocess.exec

@@ -1,12 +1,6 @@
 stepback: true
 command_type: system
 exec_timeout_secs: 2100
-patch_aliases:
-  - alias: nightly
-    variant_tags:
-      - nightly
-    task_tags:
-      - .*
 timeout:
   - command: subprocess.exec
     params:
@@ -5197,8 +5191,3 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - test_atlas_task_group_search_indexes
-  - name: nightly
-    display_name: Nightly Build
-    run_on: rhel80-large
-    tasks:
-      - .nightly

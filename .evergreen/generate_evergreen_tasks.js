@@ -579,31 +579,6 @@ BUILD_VARIANTS.push({
   tasks: ['test-atlas-data-lake']
 });
 
-const NIGHTLY_TASKS = [
-  {
-    name: `run-custom-csfle-tests-with-libmongocrypt-latest`,
-    tags: ['run-custom-dependency-tests', 'nightly'],
-    commands: [
-      updateExpansions({
-        NODE_LTS_VERSION: LOWEST_LTS,
-        NPM_VERSION: 9,
-        VERSION: '8.0',
-        TOPOLOGY: 'replica_set',
-      }),
-      { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'bootstrap kms servers' },
-      {
-        func: 'install mongodb-client-encryption',
-        vars: {
-          'LIBMONGOCRYPT_VERSION': 'latest'
-        }
-      },
-      { func: 'run custom csfle tests' }
-    ]
-  }
-];
-
 const customDependencyTests = [];
 
 for (const version of ['5.0', 'rapid', 'latest']) {
@@ -755,13 +730,6 @@ BUILD_VARIANTS.push({
   run_on: DEFAULT_OS,
   tasks: ['test_atlas_task_group_search_indexes']
 });
-
-BUILD_VARIANTS.push({
-  name: 'nightly',
-  display_name: 'Nightly Build',
-  run_on: DEFAULT_OS,
-  tasks: ['.nightly']
-})
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
