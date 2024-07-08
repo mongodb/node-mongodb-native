@@ -4305,26 +4305,6 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run tests
-  - name: run-custom-csfle-tests-with-libmongocrypt-latest
-    tags:
-      - run-custom-dependency-tests
-      - nightly
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '8.0'}
-            - {key: TOPOLOGY, value: replica_set}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: install mongodb-client-encryption
-        vars:
-          LIBMONGOCRYPT_VERSION: latest
-      - func: run custom csfle tests
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true

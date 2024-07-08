@@ -415,18 +415,12 @@ describe('ClientEncryption integration tests', function () {
       expect(errorOrResult).to.be.instanceof(TypeError);
     });
 
-    it(
-      `does not throw if algorithm has different casing than 'range'`,
-      metadata,
-      async function () {
-        completeOptions['algorithm'] = 'rAnGe';
-        const errorOrResult = await clientEncryption
-          .encryptExpression(expression, completeOptions)
-          .catch(e => e);
+    it(`works with any casing of 'range'`, metadata, async function () {
+      completeOptions['algorithm'] = 'rAnGe';
+      const result = await clientEncryption.encryptExpression(expression, completeOptions);
 
-        expect(errorOrResult).not.to.be.instanceof(Error);
-      }
-    );
+      expect(result.$and).to.exist;
+    });
 
     context('when expressionMode is incorrectly provided as an argument', function () {
       it(

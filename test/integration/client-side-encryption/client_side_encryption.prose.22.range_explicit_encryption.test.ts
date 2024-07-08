@@ -211,11 +211,6 @@ describe('Range Explicit Encryption', function () {
           keyVaultNamespace: 'keyvault.datakeys',
           kmsProviders: getKmsProviders()
         };
-        console.error({
-          csfleKMSPRoviders:
-            typeof process.env.CSFLE_KMS_PROVIDERS === 'string' &&
-            process.env.CSFLE_KMS_PROVIDERS.length > 0
-        });
         clientEncryption = new ClientEncryption(keyVaultClient, clientEncryptionOpts);
 
         const autoEncryptionOptions = {
