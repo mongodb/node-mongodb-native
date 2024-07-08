@@ -27,7 +27,7 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Timeout, TimeoutError } from '../timeout';
-import { type Callback, List, makeCounter, promiseWithResolvers } from '../utils';
+import { type Callback, List, makeCounter, now, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -356,7 +356,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * explicitly destroyed by the new owner.
    */
   async checkOut(): Promise<Connection> {
-    const checkoutTime = Date.now();
+    const checkoutTime = now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -632,7 +632,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kPending]++;
     // This is our version of a "virtual" no-I/O connection as the spec requires
-    const connectionCreatedTime = Date.now();
+    const connectionCreatedTime = now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CREATED,
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
