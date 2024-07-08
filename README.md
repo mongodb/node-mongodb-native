@@ -70,7 +70,9 @@ Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mo
 
 ### Compatibility
 
-For server and runtime version compatibility matrices, please refer to the following links:
+The latest version of the MongoDB Node driver officially supports MongoDB servers 3.6 and later.  
+
+For exhaustive server and runtime version compatibility matrices, please refer to the following links:
 
 - [MongoDB](https://www.mongodb.com/docs/drivers/node/current/compatibility/#mongodb-compatibility)
 - [NodeJS](https://www.mongodb.com/docs/drivers/node/current/compatibility/#language-compatibility)
