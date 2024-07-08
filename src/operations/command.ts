@@ -104,7 +104,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       return this.explain == null;
     }
-    return true;
+    return super.canRetryWrite;
   }
 
   public async executeCommand<T extends MongoDBResponseConstructor>(
