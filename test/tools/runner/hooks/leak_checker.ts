@@ -178,4 +178,4 @@ const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheck
 const beforeAll = TRACE_SOCKETS ? [socketLeakCheckBeforeAll] : [];
 const beforeEach = [leakCheckerBeforeEach];
 const afterEach = [leakCheckerAfterEach, ...(TRACE_SOCKETS ? [socketLeakCheckAfterEach] : [])];
-module.exports = { mochaHooks: { beforeAll, beforeEach, afterEach } };
+export const mochaHooks = { beforeAll, beforeEach, afterEach };
