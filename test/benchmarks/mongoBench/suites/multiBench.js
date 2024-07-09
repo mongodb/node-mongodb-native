@@ -140,7 +140,7 @@ function makeMultiBench(suite) {
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
-    .benchmark('findManyAndEmptyCursorToArray', benchmark =>
+    .benchmark('findManyAndToArray', benchmark =>
       benchmark
         .taskSize(16.22)
         .setup(makeLoadJSON('tweet.json'))
