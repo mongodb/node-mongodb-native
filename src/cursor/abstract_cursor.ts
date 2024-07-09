@@ -297,6 +297,7 @@ export abstract class AbstractCursor<
 
     return bufferedDocs;
   }
+
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
     if (this.isClosed) {
       return;
@@ -457,9 +458,24 @@ export abstract class AbstractCursor<
    * cursor.rewind() can be used to reset the cursor.
    */
   async toArray(): Promise<TSchema[]> {
-    const array = [];
+    const array: TSchema[] = [];
+
+    // when each loop iteration ends,documents will be empty and a 'await (const document of this)' will run a getMore operation
     for await (const document of this) {
       array.push(document);
+      let docs = this.readBufferedDocuments();
+      if (this.transform != null) {
+        docs = await Promise.all(
+          docs.map(async doc => {
+            if (doc != null) {
+              return await this.transformDocument(doc);
+            } else {
+              throw Error;
+            }
+          })
+        );
+      }
+      array.push(...docs);
     }
     return array;
   }
