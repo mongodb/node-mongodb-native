@@ -212,8 +212,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
    * The time it took to check out the connection.
    * More specifically, the time elapsed between
    * emitting a `ConnectionCheckOutStartedEvent`
-   * and emitting this event as part of the same checking out.
-   *
+   * and emitting this event as part of the same check out.
    */
   durationMS: number;
 
