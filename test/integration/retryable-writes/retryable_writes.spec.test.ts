@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as path from 'path';
+import { lt } from 'semver';
 
 import type { Collection, Db, MongoClient } from '../../mongodb';
 import { loadSpecTests } from '../../spec';
@@ -14,7 +15,7 @@ interface RetryableWriteTestContext {
   failPointName?: any;
 }
 
-describe('Legacy Retryable Writes Specs', function () {
+describe.only('Legacy Retryable Writes Specs', function () {
   let ctx: RetryableWriteTestContext = {};
 
   const retryableWrites = loadSpecTests('retryable-writes', 'legacy');
@@ -55,6 +56,14 @@ describe('Legacy Retryable Writes Specs', function () {
           (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
 
         await utilClient.close();
+
+        if (
+          this.configuration.topologyType === 'Sharded' &&
+          lt(this.configuration.version, '4.4.0')
+        ) {
+          // 'TODO(NODE-5925): will be resolved when driver migrates to unified tests
+          this.skip();
+        }
 
         if (!someRequirementMet) this.skip();
       });
@@ -220,6 +229,6 @@ async function turnOffFailPoint(client, name) {
   });
 }
 
-describe('Retryable Writes (unified)', function () {
+describe.only('Retryable Writes (unified)', function () {
   runUnifiedSuite(loadSpecTests(path.join('retryable-writes', 'unified')));
 });
