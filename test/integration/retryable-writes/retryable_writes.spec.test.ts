@@ -15,7 +15,7 @@ interface RetryableWriteTestContext {
   failPointName?: any;
 }
 
-describe.only('Legacy Retryable Writes Specs', function () {
+describe('Legacy Retryable Writes Specs', function () {
   let ctx: RetryableWriteTestContext = {};
 
   const retryableWrites = loadSpecTests('retryable-writes', 'legacy');
@@ -229,6 +229,6 @@ async function turnOffFailPoint(client, name) {
   });
 }
 
-describe.only('Retryable Writes (unified)', function () {
+describe('Retryable Writes (unified)', function () {
   runUnifiedSuite(loadSpecTests(path.join('retryable-writes', 'unified')));
 });
