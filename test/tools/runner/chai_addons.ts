@@ -1,7 +1,7 @@
-'use strict';
+/* eslint-disable @typescript-eslint/no-var-requires */
 
-// configure chai
-const chai = require('chai');
+import chai = require('chai');
+
 chai.use(require('sinon-chai'));
 chai.use(require('chai-subset'));
 chai.use(require('../spec-runner/matcher').default);

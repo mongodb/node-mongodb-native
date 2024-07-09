@@ -3,7 +3,7 @@
   "require": [
     "source-map-support/register",
     "ts-node/register",
-    "test/tools/runner/chai-addons.js",
+    "test/tools/runner/chai_addons.ts",
     "test/tools/runner/hooks/unhandled_checker.ts"
   ],
   "extension": [
