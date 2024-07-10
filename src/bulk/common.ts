@@ -911,6 +911,8 @@ export class BulkWriteShimOperation extends AbstractOperation {
 /** @public */
 export abstract class BulkOperationBase {
   isOrdered: boolean;
+  // Declare dynamically assigned property
+  declare length: number;
   /** @internal */
   s: BulkOperationPrivate;
   operationId?: number;
