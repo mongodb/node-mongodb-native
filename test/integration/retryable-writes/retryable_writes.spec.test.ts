@@ -57,14 +57,6 @@ describe('Legacy Retryable Writes Specs', function () {
 
         await utilClient.close();
 
-        if (
-          this.configuration.topologyType === 'Sharded' &&
-          lt(this.configuration.version, '4.4.0')
-        ) {
-          // 'TODO(NODE-5925): will be resolved when driver migrates to unified tests
-          this.skip();
-        }
-
         if (!someRequirementMet) this.skip();
       });
 
@@ -73,6 +65,15 @@ describe('Legacy Retryable Writes Specs', function () {
         // like creating a client, dropping and refilling data collections,
         // and enabling failpoints
         const { spec } = this.currentTest;
+        if (
+          this.configuration.topologyType === 'Sharded' &&
+          lt(this.configuration.version, '4.4.0') &&
+          LEGACY_SKIP_TESTS_4_4_SHARDED.includes(spec.description)
+        ) {
+          this.currentTest.skipReason =
+            'TODO(NODE-5925): will be resolved when driver migrates to unified tests';
+          this.skip();
+        }
         await executeScenarioSetup(suite, spec, this.configuration, ctx);
       });
 
@@ -89,16 +90,14 @@ describe('Legacy Retryable Writes Specs', function () {
         ctx = {}; // reset context
       });
       for (const spec of suite.tests) {
-        if (!LEGACY_SKIP_TESTS_4_4_SHARDED.includes(spec.description)) {
-          // Step 2: Run the test
-          const mochaTest = it(spec.description, async () => await executeScenarioTest(spec, ctx));
+        // Step 2: Run the test
+        const mochaTest = it(spec.description, async () => await executeScenarioTest(spec, ctx));
 
-          // A pattern we don't need to repeat for unified tests
-          // In order to give the beforeEach hook access to the
-          // spec test so it can be responsible for skipping it
-          // and executeScenarioSetup
-          mochaTest.spec = spec;
-        }
+        // A pattern we don't need to repeat for unified tests
+        // In order to give the beforeEach hook access to the
+        // spec test so it can be responsible for skipping it
+        // and executeScenarioSetup
+        mochaTest.spec = spec;
       }
     });
   }
