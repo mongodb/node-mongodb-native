@@ -139,6 +139,22 @@ function makeMultiBench(suite) {
         })
         .teardown(dropDb)
         .teardown(disconnectClient)
+    )
+    .benchmark('findManyAndToArray', benchmark =>
+      benchmark
+        .taskSize(16.22)
+        .setup(makeLoadJSON('tweet.json'))
+        .setup(makeClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .setup(initCollection)
+        .setup(makeLoadTweets(false))
+        .task(async function () {
+          await this.collection.find({}).toArray();
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
     );
 }
 
