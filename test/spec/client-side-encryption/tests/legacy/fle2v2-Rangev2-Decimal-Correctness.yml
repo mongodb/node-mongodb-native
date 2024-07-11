@@ -1,0 +1,293 @@
+# Test correctness results.
+# Does not include command monitoring expectations or outcome assertions to make tests more readable.
+
+# Requires libmongocrypt 1.8.0.
+runOn:
+  - minServerVersion: "8.0.0"
+    # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
+    # FLE 2 Encrypted collections are not supported on standalone.
+    # Tests for Decimal (without precision) must only run against a replica set. Decimal (without precision) queries are expected to take a long time and may exceed the default mongos timeout.
+    topology: [ "replicaset" ]
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+data: []
+encrypted_fields: &encrypted_fields {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedDecimalNoPrecision', 'bsonType': 'decimal', 'queries': {'queryType': 'range', 'contention': {'$numberLong': '0'}, 'trimFactor': {'$numberInt': '1'}, 'sparsity': {'$numberLong': '1'}}}]}
+key_vault_data: [ {'_id': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'keyMaterial': {'$binary': {'base64': 'sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1648914851981'}}, 'updateDate': {'$date': {'$numberLong': '1648914851981'}}, 'status': {'$numberInt': '0'}, 'masterKey': {'provider': 'local'}} ]
+tests:
+  - description: "Find with $gt"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 { _id: 0, encryptedDecimalNoPrecision: { $numberDecimal: "0.0" } }
+      - name: insertOne
+        arguments:
+          document: &doc1 { _id: 1, encryptedDecimalNoPrecision: { $numberDecimal: "1.0" } }
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $gt: { $numberDecimal: "0.0" } }}
+        result: [*doc1]
+
+  - description: "Find with $gte"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $gte: { $numberDecimal: "0.0" } }}
+          # sort so results from range queries are ordered.
+          sort: { _id: 1 }
+        result: [*doc0, *doc1]
+
+  - description: "Find with $gt with no results"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $gt: { $numberDecimal: "1.0" } }}
+        result: []
+
+  - description: "Find with $lt"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $lt: { $numberDecimal: "1.0" } }}
+        result: [*doc0]
+
+  - description: "Find with $lte"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $lte: { $numberDecimal: "1.0" } }}
+          # sort so results from range queries are ordered.
+          sort: { _id: 1 }
+        result: [*doc0, *doc1]
+
+  - description: "Find with $gt and $lt"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $gt: { $numberDecimal: "0.0" }, $lt: { $numberDecimal: "2.0"} }}
+        result: [*doc1]
+
+  - description: "Find with equality"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $numberDecimal: "0.0" } }
+        result: [*doc0]
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $numberDecimal: "1.0" } }
+        result: [*doc1]
+
+  - description: "Find with $in"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $in: [ {$numberDecimal: "0.0"} ] } }
+        result: [*doc0]
+
+  - description: "Aggregate with $gte"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: aggregate
+        arguments:
+          pipeline:
+          - { $match: { encryptedDecimalNoPrecision: { $gte: { $numberDecimal: "0.0" } }} }
+          # sort so results from range queries are ordered.
+          - { $sort: { _id: 1 }}
+        result: [*doc0, *doc1]
+
+  - description: "Aggregate with $gt with no results"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: aggregate
+        arguments:
+          pipeline:
+          - { $match: { encryptedDecimalNoPrecision: { $gt: { $numberDecimal: "1.0" } }} }
+        result: []
+
+  - description: "Aggregate with $lt"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: aggregate
+        arguments:
+          pipeline:
+          - { $match: { encryptedDecimalNoPrecision: { $lt: { $numberDecimal: "1.0" } }} }
+        result: [*doc0]
+
+  - description: "Aggregate with $lte"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: aggregate
+        arguments:
+          pipeline:
+          - { $match: { encryptedDecimalNoPrecision: { $lte: { $numberDecimal: "1.0" } }} }
+          # sort so results from range queries are ordered.
+          - { $sort: { _id: 1 }}
+        result: [*doc0, *doc1]
+
+  - description: "Aggregate with $gt and $lt"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: aggregate
+        arguments:
+          pipeline:
+          - { $match: { encryptedDecimalNoPrecision: { $gt: { $numberDecimal: "0.0" }, $lt: { $numberDecimal: "2.0"} }} }
+        result: [*doc1]
+
+  - description: "Aggregate with equality"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: aggregate
+        arguments:
+          pipeline:
+          - { $match: { encryptedDecimalNoPrecision: { $numberDecimal: "0.0" } } }
+        result: [*doc0]
+      - name: aggregate
+        arguments:
+          pipeline:
+          - { $match: { encryptedDecimalNoPrecision: { $numberDecimal: "1.0" } } }
+        result: [*doc1]
+
+  - description: "Aggregate with $in"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: *doc0 }
+      - name: insertOne
+        arguments: { document: *doc1 }
+      - name: aggregate
+        arguments:
+          pipeline:
+          - { $match: { encryptedDecimalNoPrecision: { $in: [ {$numberDecimal: "0.0"} ] } } }
+        result: [*doc0]
+
+  - description: "Wrong type: Insert Int"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments: { document: { _id: 0, encryptedDecimalNoPrecision: { $numberInt: "0" }} }
+        result:
+          # Expect an error from mongocryptd.
+          errorContains: "cannot encrypt element"
+
+  - description: "Wrong type: Find Int"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: find
+        arguments:
+          filter: { encryptedDecimalNoPrecision: { $gte: { $numberInt: "0" } }}
+          # sort so results from range queries are ordered.
+          sort: { _id: 1 }
+        result:
+          # expect an error from libmongocrypt.
+          errorContains: "field type is not supported"

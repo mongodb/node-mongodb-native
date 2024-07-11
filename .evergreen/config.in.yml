@@ -272,6 +272,7 @@ functions:
     - command: shell.exec
       type: test
       params:
+        shell: bash
         working_dir: src
         timeout_secs: 300
         script: |
@@ -475,8 +476,6 @@ functions:
           export AWS_CMK_ID='${AWS_CMK_ID}'
           export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
           export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
-          export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
-          export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
           EOT
     - command: shell.exec
       type: test
@@ -914,8 +913,6 @@ functions:
           export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
           export AWS_REGION='${AWS_REGION}'
           export AWS_CMK_ID='${AWS_CMK_ID}'
-          export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
-          export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
           EOT
     - command: shell.exec
       type: test
@@ -1073,6 +1070,18 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
+
+  install mongodb-client-encryption:
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: "src"
+        env:
+          INSTALL_DIR: mongodb-client-encryption
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
 
 tasks:
   - name: 'test-atlas-data-lake'

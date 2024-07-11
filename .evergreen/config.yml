@@ -241,6 +241,7 @@ functions:
     - command: shell.exec
       type: test
       params:
+        shell: bash
         working_dir: src
         timeout_secs: 300
         script: |
@@ -428,8 +429,6 @@ functions:
           export AWS_CMK_ID='${AWS_CMK_ID}'
           export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
           export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
-          export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
-          export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
           EOT
     - command: shell.exec
       type: test
@@ -886,8 +885,6 @@ functions:
           export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
           export AWS_REGION='${AWS_REGION}'
           export AWS_CMK_ID='${AWS_CMK_ID}'
-          export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
-          export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
           EOT
     - command: shell.exec
       type: test
@@ -1035,6 +1032,17 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
+  install mongodb-client-encryption:
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: src
+        env:
+          INSTALL_DIR: mongodb-client-encryption
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
 tasks:
   - name: test-atlas-data-lake
     tags:
@@ -3516,7 +3524,7 @@ tasks:
         variant: '*'
         status: '*'
         patch_optional: true
-  - name: run-custom-csfle-tests-5.0-pinned-commit
+  - name: run-custom-csfle-tests-5.0
     tags:
       - run-custom-dependency-tests
     commands:
@@ -3528,29 +3536,12 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
+      - func: install mongodb-client-encryption
       - func: run custom csfle tests
-  - name: run-custom-csfle-tests-5.0-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '5.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
-  - name: run-custom-csfle-tests-rapid-pinned-commit
+  - name: run-custom-csfle-tests-rapid
     tags:
       - run-custom-dependency-tests
     commands:
@@ -3562,29 +3553,12 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
+      - func: install mongodb-client-encryption
       - func: run custom csfle tests
-  - name: run-custom-csfle-tests-rapid-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
-  - name: run-custom-csfle-tests-latest-pinned-commit
+  - name: run-custom-csfle-tests-latest
     tags:
       - run-custom-dependency-tests
     commands:
@@ -3596,27 +3570,10 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
-      - func: run custom csfle tests
-  - name: run-custom-csfle-tests-latest-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
+      - func: install mongodb-client-encryption
       - func: run custom csfle tests
   - name: test-latest-driver-mongodb-client-encryption-6.0.0
     tags:
@@ -5118,12 +5075,9 @@ buildvariants:
     display_name: Custom Dependency Version Test
     run_on: rhel80-large
     tasks:
-      - run-custom-csfle-tests-5.0-pinned-commit
-      - run-custom-csfle-tests-5.0-master
-      - run-custom-csfle-tests-rapid-pinned-commit
-      - run-custom-csfle-tests-rapid-master
-      - run-custom-csfle-tests-latest-pinned-commit
-      - run-custom-csfle-tests-latest-master
+      - run-custom-csfle-tests-5.0
+      - run-custom-csfle-tests-rapid
+      - run-custom-csfle-tests-latest
       - test-latest-driver-mongodb-client-encryption-6.0.0
   - name: rhel8-test-serverless
     display_name: Serverless Test
