@@ -27,7 +27,7 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Timeout, TimeoutError } from '../timeout';
-import { type Callback, List, makeCounter, promiseWithResolvers } from '../utils';
+import { type Callback, List, makeCounter, now, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -104,6 +104,7 @@ export interface WaitQueueMember {
   reject: (err: AnyError) => void;
   timeout: Timeout;
   [kCancelled]?: boolean;
+  checkoutTime: number;
 }
 
 /** @internal */
@@ -355,6 +356,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * explicitly destroyed by the new owner.
    */
   async checkOut(): Promise<Connection> {
+    const checkoutTime = now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -369,7 +371,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     const waitQueueMember: WaitQueueMember = {
       resolve,
       reject,
-      timeout
+      timeout,
+      checkoutTime
     };
 
     this[kWaitQueue].push(waitQueueMember);
@@ -385,7 +388,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
         this.emitAndLog(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-          new ConnectionCheckOutFailedEvent(this, 'timeout')
+          new ConnectionCheckOutFailedEvent(this, 'timeout', waitQueueMember.checkoutTime)
         );
         const timeoutError = new WaitQueueTimeoutError(
           this.loadBalanced
@@ -629,6 +632,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kPending]++;
     // This is our version of a "virtual" no-I/O connection as the spec requires
+    const connectionCreatedTime = now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CREATED,
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
@@ -670,7 +674,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         connection.markAvailable();
         this.emitAndLog(
           ConnectionPool.CONNECTION_READY,
-          new ConnectionReadyEvent(this, connection)
+          new ConnectionReadyEvent(this, connection, connectionCreatedTime)
         );
 
         this[kPending]--;
@@ -759,7 +763,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
         this.emitAndLog(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-          new ConnectionCheckOutFailedEvent(this, reason, error)
+          new ConnectionCheckOutFailedEvent(this, reason, waitQueueMember.checkoutTime, error)
         );
         waitQueueMember.timeout.clear();
         this[kWaitQueue].shift();
@@ -780,7 +784,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         this[kCheckedOut].add(connection);
         this.emitAndLog(
           ConnectionPool.CONNECTION_CHECKED_OUT,
-          new ConnectionCheckedOutEvent(this, connection)
+          new ConnectionCheckedOutEvent(this, connection, waitQueueMember.checkoutTime)
         );
         waitQueueMember.timeout.clear();
 
@@ -809,14 +813,19 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             this.emitAndLog(
               ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
               // TODO(NODE-5192): Remove this cast
-              new ConnectionCheckOutFailedEvent(this, 'connectionError', err as MongoError)
+              new ConnectionCheckOutFailedEvent(
+                this,
+                'connectionError',
+                waitQueueMember.checkoutTime,
+                err as MongoError
+              )
             );
             waitQueueMember.reject(err);
           } else if (connection) {
             this[kCheckedOut].add(connection);
             this.emitAndLog(
               ConnectionPool.CONNECTION_CHECKED_OUT,
-              new ConnectionCheckedOutEvent(this, connection)
+              new ConnectionCheckedOutEvent(this, connection, waitQueueMember.checkoutTime)
             );
             waitQueueMember.resolve(connection);
           }
