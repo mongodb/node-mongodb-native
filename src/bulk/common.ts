@@ -911,8 +911,6 @@ export class BulkWriteShimOperation extends AbstractOperation {
 /** @public */
 export abstract class BulkOperationBase {
   isOrdered: boolean;
-  // Declare dynamically assigned property
-  declare length: number;
   /** @internal */
   s: BulkOperationPrivate;
   operationId?: number;
@@ -1180,6 +1178,10 @@ export abstract class BulkOperationBase {
     );
   }
 
+  get length(): number {
+    return this.s.currentIndex;
+  }
+
   get bsonOptions(): BSONSerializeOptions {
     return this.s.bsonOptions;
   }
@@ -1275,13 +1277,6 @@ export abstract class BulkOperationBase {
     );
   }
 }
-
-Object.defineProperty(BulkOperationBase.prototype, 'length', {
-  enumerable: true,
-  get() {
-    return this.s.currentIndex;
-  }
-});
 
 function isInsertBatch(batch: Batch): boolean {
   return batch.batchType === BatchType.INSERT;
