@@ -525,6 +525,9 @@ export interface UpdateDescription<TSchema extends Document = Document> {
   disambiguatedPaths?: Document;
 }
 
+// @ts-expect-error Assigning to a readonly property.
+Symbol.asyncDispose ??= Symbol('asyncDispose');
+
 /** @public */
 export type ChangeStreamEvents<
   TSchema extends Document = Document,
@@ -544,9 +547,17 @@ export type ChangeStreamEvents<
  * @public
  */
 export class ChangeStream<
-  TSchema extends Document = Document,
-  TChange extends Document = ChangeStreamDocument<TSchema>
-> extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>> {
+    TSchema extends Document = Document,
+    TChange extends Document = ChangeStreamDocument<TSchema>
+  >
+  extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>>
+  implements AsyncDisposable
+{
+  async [Symbol.asyncDispose]() {
+    console.error('ChangeStream[Symbol.asyncDispose]() called.');
+    await this.close();
+  }
+
   pipeline: Document[];
   /**
    * @remarks WriteConcern can still be present on the options because

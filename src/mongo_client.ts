@@ -325,6 +325,9 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
 
 const kOptions = Symbol('options');
 
+// @ts-expect-error Assigning to a readonly property.
+Symbol.asyncDispose ??= Symbol('asyncDispose');
+
 /**
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
  * @public
@@ -344,7 +347,7 @@ const kOptions = Symbol('options');
  * await client.insertOne({ name: 'spot', kind: 'dog' });
  * ```
  */
-export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
+export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements AsyncDisposable {
   /** @internal */
   s: MongoClientPrivate;
   /** @internal */
@@ -402,6 +405,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       }
     };
     this.checkForNonGenuineHosts();
+  }
+
+  async [Symbol.asyncDispose]() {
+    console.error('MongoClient[Symbol.asyncDispose]() called.');
+    await this.close();
   }
 
   /** @internal */

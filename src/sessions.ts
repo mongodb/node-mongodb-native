@@ -99,6 +99,9 @@ export interface EndSessionOptions {
   forceClear?: boolean;
 }
 
+// @ts-expect-error Assigning to a readonly property.
+Symbol.asyncDispose ??= Symbol('asyncDispose');
+
 /**
  * A class representing a client session on the server
  *
@@ -285,6 +288,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     } finally {
       maybeClearPinnedConnection(this, { force: true, ...options });
     }
+  }
+
+  async [Symbol.asyncDispose]() {
+    console.error('ClientSession[Symbol.asyncDispose]() called.');
+    await this.endSession({ force: true });
   }
 
   /**

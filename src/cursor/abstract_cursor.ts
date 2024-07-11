@@ -1,3 +1,4 @@
+import { once } from 'events';
 import { Readable, Transform } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
@@ -121,6 +122,9 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
 export type AbstractCursorEvents = {
   [AbstractCursor.CLOSE](): void;
 };
+
+// @ts-expect-error Assigning to a readonly property.
+Symbol.asyncDispose ??= Symbol('asyncDispose');
 
 /** @public */
 export abstract class AbstractCursor<
@@ -273,6 +277,12 @@ export abstract class AbstractCursor<
 
   get loadBalanced(): boolean {
     return !!this.cursorClient.topology?.loadBalanced;
+  }
+
+  async [Symbol.asyncDispose]() {
+    const name = this.constructor.name;
+    console.error(name + '[Symbol.asyncDispose]() called.');
+    await this.close();
   }
 
   /** Returns current buffered documents length */
