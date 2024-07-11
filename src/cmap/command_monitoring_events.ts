@@ -46,7 +46,6 @@ export class CommandStartedEvent {
     command: WriteProtocolMessageType,
     serverConnectionId: bigint | null
   ) {
-    Error.captureStackTrace(this);
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
