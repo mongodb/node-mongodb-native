@@ -51,7 +51,7 @@ export class Timeout extends Promise<never> {
   }
 
   /** Create a new timeout that expires in `duration` ms */
-  private constructor(executor: Executor = () => null, duration: number, unref = false) {
+  private constructor(executor: Executor = () => null, duration: number, unref = true) {
     let reject!: Reject;
 
     if (duration < 0) {
@@ -150,6 +150,11 @@ function isCSOTTimeoutContextOptions(v: unknown): v is CSOTTimeoutContextOptions
 
 /** @internal */
 export abstract class TimeoutContext {
+  start: number;
+  constructor() {
+    this.start = Math.trunc(performance.now());
+  }
+
   static create(options: TimeoutContextOptions): TimeoutContext {
     if (isCSOTTimeoutContextOptions(options)) return new CSOTTimeoutContext(options);
     else if (isLegacyTimeoutContextOptions(options)) return new LegacyTimeoutContext(options);
@@ -180,6 +185,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
+  public minRoundTripTime = 0;
 
   constructor(options: CSOTTimeoutContextOptions) {
     super();
@@ -194,11 +200,12 @@ export class CSOTTimeoutContext extends TimeoutContext {
   }
 
   get maxTimeMS(): number {
-    return this._maxTimeMS ?? -1;
+    return this.remainingTimeMS - this.minRoundTripTime;
   }
 
-  set maxTimeMS(v: number) {
-    this._maxTimeMS = v;
+  get remainingTimeMS() {
+    const timePassed = Math.trunc(performance.now()) - this.start;
+    return this.timeoutMS <= 0 ? Infinity : this.timeoutMS - timePassed;
   }
 
   csotEnabled(): this is CSOTTimeoutContext {

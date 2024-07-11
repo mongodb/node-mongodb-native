@@ -590,7 +590,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         try {
           await client.connect();
         } catch (error) {
-          console.error(ejson`failed to connect entity ${entity}`);
+          console.error('failed to connect entity', entity);
           throw error;
         }
         map.set(entity.client.id, client);

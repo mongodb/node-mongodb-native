@@ -1,5 +1,6 @@
 import { type EventEmitter } from 'events';
 
+import { Timeout } from '../../timeout';
 import { List, promiseWithResolvers } from '../../utils';
 
 /**
@@ -18,7 +19,7 @@ type PendingPromises = Omit<
  * Returns an AsyncIterator that iterates each 'data' event emitted from emitter.
  * It will reject upon an error event.
  */
-export function onData(emitter: EventEmitter) {
+export function onData(emitter: EventEmitter, { timeoutMS }: { timeoutMS: number }) {
   // Setup pending events and pending promise lists
   /**
    * When the caller has not yet called .next(), we store the
@@ -86,6 +87,10 @@ export function onData(emitter: EventEmitter) {
   // Adding event handlers
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
+
+  if (timeoutMS > 0 && Number.isFinite(timeoutMS))
+    // eslint-disable-next-line github/no-then
+    Timeout.expires(timeoutMS).then(undefined, errorHandler);
 
   return iterator;
 

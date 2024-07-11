@@ -46,6 +46,7 @@ export class CommandStartedEvent {
     command: WriteProtocolMessageType,
     serverConnectionId: bigint | null
   ) {
+    Error.captureStackTrace(this);
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
@@ -110,6 +111,7 @@ export class CommandSucceededEvent {
     started: number,
     serverConnectionId: bigint | null
   ) {
+    Error.captureStackTrace(this);
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
@@ -129,6 +131,8 @@ export class CommandSucceededEvent {
     return !!this.serviceId;
   }
 }
+
+Error.stackTraceLimit = 1000;
 
 /**
  * An event indicating the failure of a given command
@@ -168,6 +172,7 @@ export class CommandFailedEvent {
     started: number,
     serverConnectionId: bigint | null
   ) {
+    Error.captureStackTrace(this);
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);

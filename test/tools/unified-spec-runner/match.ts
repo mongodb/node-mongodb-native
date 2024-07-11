@@ -173,7 +173,8 @@ TYPE_MAP.set('minKey', actual => actual._bsontype === 'MinKey');
 TYPE_MAP.set('maxKey', actual => actual._bsontype === 'MaxKey');
 TYPE_MAP.set(
   'int',
-  actual => (typeof actual === 'number' && Number.isInteger(actual)) || actual._bsontype === 'Int32'
+  actual =>
+    (typeof actual === 'number' && Number.isInteger(actual)) || actual?._bsontype === 'Int32'
 );
 TYPE_MAP.set(
   'long',
@@ -218,6 +219,10 @@ export function resultCheck(
       resultCheck(objFromActual, value, entities, path, checkExtraKeys);
     } else if (key === 'createIndexes') {
       for (const [i, userIndex] of actual.indexes.entries()) {
+        if (expected?.indexes?.[i]?.key == null) {
+          // The expectation does not include an assertion for the index key
+          continue;
+        }
         expect(expected).to.have.nested.property(`.indexes[${i}].key`).to.be.a('object');
         // @ts-expect-error: Not worth narrowing to a document
         expect(Object.keys(expected.indexes[i].key)).to.have.lengthOf(1);
@@ -360,7 +365,7 @@ export function specialCheck(
     for (const type of types) {
       ok ||= TYPE_MAP.get(type)(actual);
     }
-    expect(ok, `Expected [${actual}] to be one of [${types}]`).to.be.true;
+    expect(ok, `Expected ${path.join('.')} [${actual}] to be one of [${types}]`).to.be.true;
   } else if (isExistsOperator(expected)) {
     // $$exists
     const actualExists = actual !== undefined && actual !== null;
