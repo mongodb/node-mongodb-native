@@ -21,19 +21,19 @@ describe('Legacy Retryable Writes Specs', function () {
   const retryableWrites = loadSpecTests('retryable-writes', 'legacy');
 
   const LEGACY_SKIP_TESTS_4_4_SHARDED = [
-    'BulkWrite succeeds after WriteConcernError ShutdownInProgress',
-    'DeleteOne succeeds after WriteConcernError ShutdownInProgress',
-    'FindOneAndDelete succeeds after WriteConcernError ShutdownInProgress',
-    'FindOneAndReplace succeeds after WriteConcernError ShutdownInProgress',
-    'FindOneAndUpdate succeeds after WriteConcernError ShutdownInProgress',
-    'InsertMany succeeds after WriteConcernError ShutdownInProgress',
-    'InsertOne succeeds after WriteConcernError InterruptedAtShutdown',
-    'InsertOne succeeds after WriteConcernError InterruptedDueToReplStateChange',
-    'InsertOne succeeds after WriteConcernError PrimarySteppedDown',
-    'InsertOne succeeds after WriteConcernError ShutdownInProgress',
-    'InsertOne fails after multiple retryable writeConcernErrors',
-    'ReplaceOne succeeds after WriteConcernError ShutdownInProgress',
-    'UpdateOne succeeds after WriteConcernError ShutdownInProgress'
+    // 'BulkWrite succeeds after WriteConcernError ShutdownInProgress',
+    // 'DeleteOne succeeds after WriteConcernError ShutdownInProgress',
+    // 'FindOneAndDelete succeeds after WriteConcernError ShutdownInProgress',
+    // 'FindOneAndReplace succeeds after WriteConcernError ShutdownInProgress',
+    // 'FindOneAndUpdate succeeds after WriteConcernError ShutdownInProgress',
+    // 'InsertMany succeeds after WriteConcernError ShutdownInProgress',
+    // 'InsertOne succeeds after WriteConcernError InterruptedAtShutdown',
+    // 'InsertOne succeeds after WriteConcernError InterruptedDueToReplStateChange',
+    // 'InsertOne succeeds after WriteConcernError PrimarySteppedDown',
+    // 'InsertOne succeeds after WriteConcernError ShutdownInProgress',
+    // 'InsertOne fails after multiple retryable writeConcernErrors',
+    // 'ReplaceOne succeeds after WriteConcernError ShutdownInProgress',
+    // 'UpdateOne succeeds after WriteConcernError ShutdownInProgress'
   ];
 
   for (const suite of retryableWrites) {

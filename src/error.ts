@@ -1241,10 +1241,10 @@ export function needsRetryableWriteLabel(
     }
   }
 
-  if (error instanceof MongoWriteConcernError) {
-    return serverType === 'Mongos' && maxWireVersion < 9
-      ? false
-      : RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? Number(error.code) ?? 0);
+  if (error instanceof MongoWriteConcernError && !(serverType === 'Mongos' && maxWireVersion < 9)) {
+    return RETRYABLE_WRITE_ERROR_CODES.has(
+      error.result.writeConcernError.code ?? Number(error.code) ?? 0
+    );
   }
 
   if (error instanceof MongoError && typeof error.code === 'number') {
