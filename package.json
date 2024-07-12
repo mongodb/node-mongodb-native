@@ -2,15 +2,30 @@
   "name": "mongodb",
   "version": "6.8.0",
   "description": "The official MongoDB driver for Node.js",
-  "main": "lib/index.js",
   "files": [
     "lib",
     "src",
     "etc/prepare.js",
     "mongodb.d.ts",
+    "mongodb-next.d.ts",
     "tsconfig.json"
   ],
-  "types": "mongodb.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./mongodb.d.ts",
+      "require": "./lib/index.js",
+      "node": "./lib/index.js",
+      "default": "./lib/index.js"
+    },
+    "./next": {
+      "import": "./lib/index.js",
+      "types": "./mongodb-next.d.ts",
+      "require": "./lib/index.js",
+      "node": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:mongodb/node-mongodb-native.git"
