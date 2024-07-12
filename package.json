@@ -126,7 +126,7 @@
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
-    "build:dts": "npm run build:ts && api-extractor run && node etc/clean_definition_files.cjs && eslint mongodb.d.ts --fix",
+    "build:dts": "npm run build:ts && api-extractor run && node etc/clean_definition_files.cjs && ts-node polyfill.ts",
     "build:docs": "./etc/docs/build.ts",
     "build:typedoc": "typedoc",
     "build:nightly": "node ./.github/scripts/nightly.mjs",
