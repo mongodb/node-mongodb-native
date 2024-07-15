@@ -18,6 +18,7 @@ import {
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoOperationTimeoutError,
   MongoParseError,
   MongoServerError,
   MongoUnexpectedServerResponseError
@@ -462,7 +463,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         options.timeoutContext.minRoundTripTime != null &&
         options.timeoutContext.remainingTimeMS < options.timeoutContext.minRoundTripTime
       ) {
-        throw new TimeoutError('Server roundtrip time is greater than the time remaining');
+        throw new MongoOperationTimeoutError(
+          'Server roundtrip time is greater than the time remaining'
+        );
       }
 
       for await (const response of this.readMany({ timeoutContext: options.timeoutContext })) {
@@ -659,7 +662,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         options.timeoutContext.minRoundTripTime != null &&
         options.timeoutContext.remainingTimeMS < options.timeoutContext.minRoundTripTime
       ) {
-        throw new TimeoutError('Server roundtrip time is greater than the time remaining');
+        throw new MongoOperationTimeoutError(
+          'Server roundtrip time is greater than the time remaining'
+        );
       }
     }
 
@@ -668,7 +673,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const drainEvent = once<void>(this.socket, 'drain');
     if (options.timeoutContext?.csotEnabled()) {
       const timeout = Timeout.expires(options.timeoutContext.remainingTimeMS);
-      return await Promise.race([drainEvent, timeout]);
+      try {
+        return await Promise.race([drainEvent, timeout]);
+      } catch (error) {
+        if (TimeoutError.is(error)) {
+          throw new MongoOperationTimeoutError('Timed out at socket write');
+        }
+        throw error;
+      }
     }
     return await drainEvent;
   }
