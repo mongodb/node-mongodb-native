@@ -181,8 +181,6 @@ export class CSOTTimeoutContext extends TimeoutContext {
   clearConnectionCheckoutTimeout: boolean;
   clearServerSelectionTimeout: boolean;
 
-  private _maxTimeMS?: number;
-
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
   public minRoundTripTime = 0;
