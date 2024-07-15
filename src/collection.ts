@@ -292,7 +292,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async insertMany(
-    docs: OptionalUnlessRequiredId<TSchema>[],
+    docs: ReadonlyArray<OptionalUnlessRequiredId<TSchema>>,
     options?: BulkWriteOptions
   ): Promise<InsertManyResult<TSchema>> {
     return await executeOperation(
@@ -325,7 +325,7 @@ export class Collection<TSchema extends Document = Document> {
    * @throws MongoDriverError if operations is not an array
    */
   async bulkWrite(
-    operations: AnyBulkWriteOperation<TSchema>[],
+    operations: ReadonlyArray<AnyBulkWriteOperation<TSchema>>,
     options?: BulkWriteOptions
   ): Promise<BulkWriteResult> {
     if (!Array.isArray(operations)) {
@@ -336,7 +336,7 @@ export class Collection<TSchema extends Document = Document> {
       this.client,
       new BulkWriteOperation(
         this as TODO_NODE_3286,
-        operations as TODO_NODE_3286,
+        operations,
         resolveOptions(this, options ?? { ordered: true })
       )
     );
