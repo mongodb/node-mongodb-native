@@ -1,6 +1,7 @@
 import { type EventEmitter } from 'events';
 
-import { Timeout } from '../../timeout';
+import { MongoOperationTimeoutError } from '../../error';
+import { Timeout, TimeoutError } from '../../timeout';
 import { List, promiseWithResolvers } from '../../utils';
 
 /**
@@ -102,8 +103,12 @@ export function onData(emitter: EventEmitter, { timeoutMS }: { timeoutMS: number
 
   function errorHandler(err: Error) {
     const promise = unconsumedPromises.shift();
-    if (promise != null) promise.reject(err);
-    else error = err;
+    const timeoutError = TimeoutError.is(err)
+      ? new MongoOperationTimeoutError('Timed out during socket read')
+      : undefined;
+
+    if (promise != null) promise.reject(timeoutError ?? err);
+    else error = timeoutError ?? err;
     void closeHandler();
   }
 
