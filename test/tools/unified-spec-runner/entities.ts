@@ -44,7 +44,7 @@ import {
   type TopologyOpeningEvent,
   WriteConcern
 } from '../../mongodb';
-import { ejson, getEnvironmentalOptions } from '../../tools/utils';
+import { getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';
 import { trace } from './runner';
