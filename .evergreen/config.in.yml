@@ -348,6 +348,7 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: ${TS_VERSION}
           TS_CHECK: CHECK_TYPES
+          TYPES_VERSION: ${TYPES_VERSION}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
@@ -362,6 +363,7 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: ${TS_VERSION}
           TS_CHECK: COMPILE_DRIVER
+          TYPES_VERSION: ${TYPES_VERSION}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
