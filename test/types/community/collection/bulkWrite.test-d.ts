@@ -1,6 +1,12 @@
 import { expectError } from 'tsd';
 
-import { type Collection, type Document, MongoClient, ObjectId } from '../../../mongodb';
+import {
+  type AnyBulkWriteOperation,
+  type Collection,
+  type Document,
+  MongoClient,
+  ObjectId
+} from '../../../mongodb';
 
 // TODO(NODE-3347): Improve these tests to use more expect assertions
 
@@ -44,6 +50,9 @@ const testDocument: TestSchema = {
   subInterfaceArray: []
 };
 const { ...testDocumentWithoutId } = testDocument;
+
+const rd_array: ReadonlyArray<AnyBulkWriteOperation<TestSchema>> = [];
+collectionType.bulkWrite(rd_array);
 
 // insertOne
 

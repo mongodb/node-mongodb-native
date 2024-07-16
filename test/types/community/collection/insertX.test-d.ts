@@ -46,6 +46,9 @@ const collection = db.collection<TestModel>('testCollection');
 const testDoc: OptionalId<TestModelWithId> = { stringField: 'a', fruitTags: [] };
 expectType<Parameters<(typeof collection)['insertOne']>[0]>(testDoc);
 
+const rd_array: ReadonlyArray<TestModel> = [];
+await collection.insertMany(rd_array);
+
 const resultOne = await collection.insertOne({
   stringField: 'hola',
   fruitTags: ['Strawberry']
