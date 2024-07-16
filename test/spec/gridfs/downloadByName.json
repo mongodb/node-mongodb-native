@@ -1,0 +1,330 @@
+{
+  "description": "gridfs-downloadByName",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "gridfs-tests"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket0",
+        "database": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_files_collection",
+        "database": "database0",
+        "collectionName": "fs.files"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_chunks_collection",
+        "database": "database0",
+        "collectionName": "fs.chunks"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "gridfs-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "length": 1,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "md5": "47ed733b8d10be225eceba344d533586",
+          "filename": "abc",
+          "contentType": "application/octet-stream",
+          "aliases": [],
+          "metadata": {}
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000002"
+          },
+          "length": 1,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-02T00:00:00.000Z"
+          },
+          "md5": "b15835f133ff2e27c7cb28117bfae8f4",
+          "filename": "abc",
+          "contentType": "application/octet-stream",
+          "aliases": [],
+          "metadata": {}
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000003"
+          },
+          "length": 1,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-03T00:00:00.000Z"
+          },
+          "md5": "eccbc87e4b5ce2fe28308fd9f2a7baf3",
+          "filename": "abc",
+          "contentType": "application/octet-stream",
+          "aliases": [],
+          "metadata": {}
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000004"
+          },
+          "length": 1,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-04T00:00:00.000Z"
+          },
+          "md5": "f623e75af30e62bbd73d6df5b50bb7b5",
+          "filename": "abc",
+          "contentType": "application/octet-stream",
+          "aliases": [],
+          "metadata": {}
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "length": 1,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-05T00:00:00.000Z"
+          },
+          "md5": "4c614360da93c0a041b22e537de151eb",
+          "filename": "abc",
+          "contentType": "application/octet-stream",
+          "aliases": [],
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "gridfs-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "EQ==",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000002"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000002"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "Ig==",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000003"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000003"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "Mw==",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000004"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000004"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "RA==",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "VQ==",
+              "subType": "00"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "downloadByName defaults to latest revision (-1)",
+      "operations": [
+        {
+          "name": "downloadByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "55"
+          }
+        }
+      ]
+    },
+    {
+      "description": "downloadByName when revision is 0",
+      "operations": [
+        {
+          "name": "downloadByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "abc",
+            "revision": 0
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ]
+    },
+    {
+      "description": "downloadByName when revision is 1",
+      "operations": [
+        {
+          "name": "downloadByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "abc",
+            "revision": 1
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "22"
+          }
+        }
+      ]
+    },
+    {
+      "description": "downloadByName when revision is 2",
+      "operations": [
+        {
+          "name": "downloadByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "abc",
+            "revision": 2
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "33"
+          }
+        }
+      ]
+    },
+    {
+      "description": "downloadByName when revision is -2",
+      "operations": [
+        {
+          "name": "downloadByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "abc",
+            "revision": -2
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "44"
+          }
+        }
+      ]
+    },
+    {
+      "description": "downloadByName when revision is -1",
+      "operations": [
+        {
+          "name": "downloadByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "abc",
+            "revision": -1
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "55"
+          }
+        }
+      ]
+    },
+    {
+      "description": "downloadByName when files entry does not exist",
+      "operations": [
+        {
+          "name": "downloadByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "xyz"
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "downloadByName when revision does not exist",
+      "operations": [
+        {
+          "name": "downloadByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "abc",
+            "revision": 999
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ]
+    }
+  ]
+}

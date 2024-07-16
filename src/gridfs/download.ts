@@ -56,15 +56,41 @@ export interface GridFSFile {
 
 /** @internal */
 export interface GridFSBucketReadStreamPrivate {
+  /**
+   * The running total number of bytes read from the chunks collection.
+   */
   bytesRead: number;
+  /**
+   * The number of bytes to remove from the last chunk read in the file.  This is non-zero
+   * if `end` is not equal to the length of the document and `end` is not a multiple
+   * of the chunkSize.
+   */
   bytesToTrim: number;
+
+  /**
+   * The number of bytes to remove from the first chunk read in the file.  This is non-zero
+   * if `start` is not equal to the 0  and `start` is not a multiple
+   * of the chunkSize.
+   */
   bytesToSkip: number;
+
+  files: Collection<GridFSFile>;
   chunks: Collection<GridFSChunk>;
   cursor?: FindCursor<GridFSChunk>;
+
+  /** The running total number of chunks read from the chunks collection. */
   expected: number;
-  files: Collection<GridFSFile>;
+
+  /**
+   * The filter used to search in the _files_ collection (i.e., `{ _id: <> }`)
+   * This is not the same filter used when reading chunks from the chunks collection.
+   */
   filter: Document;
+
+  /** Indicates whether or not download has started. */
   init: boolean;
+
+  /** The expected number of chunks to read, calculated from start, end, chunkSize and file length. */
   expectedEnd: number;
   file?: GridFSFile;
   options: {

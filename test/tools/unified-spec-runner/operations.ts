@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { once, Writable } from 'node:stream';
+
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { AssertionError, expect } from 'chai';
 
@@ -519,27 +521,28 @@ operations.set('delete', async ({ entities, operation }) => {
 operations.set('download', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
 
-  const stream = bucket.openDownloadStream(operation.arguments!.id);
-  return new Promise((resolve, reject) => {
-    const chunks: any[] = [];
-    stream.on('data', chunk => chunks.push(...chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(chunks));
-  });
+  const { id, ...options } = operation.arguments ?? {};
+  const stream = bucket.openDownloadStream(id, options);
+  return Buffer.concat(await stream.toArray());
+});
+
+operations.set('downloadByName', async ({ entities, operation }) => {
+  const bucket = entities.getEntity('bucket', operation.object);
+
+  const { filename, ...options } = operation.arguments ?? {};
+  const stream: Readable = bucket.openDownloadStreamByName(filename, options);
+
+  return Buffer.concat(await stream.toArray());
 });
 
 operations.set('upload', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
+  const { filename, source, ...options } = operation.arguments ?? {};
 
-  const stream = bucket.openUploadStream(operation.arguments!.filename, {
-    chunkSizeBytes: operation.arguments?.chunkSizeBytes
-  });
+  const stream = bucket.openUploadStream(operation.arguments!.filename, options);
+  const filestream = Readable.from(Buffer.from(operation.arguments!.source.$$hexBytes, 'hex'));
 
-  const data = Buffer.from(operation.arguments!.source.$$hexBytes, 'hex');
-  const willFinish = once(stream, 'finish');
-  stream.end(data);
-  await willFinish;
-
+  await pipeline(filestream, stream);
   return stream.gridFSFile?._id;
 });
 

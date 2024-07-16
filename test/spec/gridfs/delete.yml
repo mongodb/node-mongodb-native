@@ -1,0 +1,198 @@
+description: "gridfs-delete"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name gridfs-tests
+  - bucket:
+      id: &bucket0 bucket0
+      database: *database0
+  - collection:
+      id: &bucket0_files_collection bucket0_files_collection
+      database: *database0
+      collectionName: &bucket0_files_collectionName fs.files
+  - collection:
+      id: &bucket0_chunks_collection bucket0_chunks_collection
+      database: *database0
+      collectionName: &bucket0_chunks_collectionName fs.chunks
+
+initialData:
+  - collectionName: *bucket0_files_collectionName
+    databaseName: *database0Name
+    documents:
+      - &file1
+        _id: { "$oid": "000000000000000000000001" }
+        length: 0
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "d41d8cd98f00b204e9800998ecf8427e"
+        filename: "length-0"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+      - &file2
+        _id: { "$oid": "000000000000000000000002" }
+        length: 0
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "d41d8cd98f00b204e9800998ecf8427e"
+        filename: "length-0-with-empty-chunk"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+      - &file3
+        _id: { "$oid": "000000000000000000000003" }
+        length: 2
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "c700ed4fdb1d27055aa3faa2c2432283"
+        filename: "length-2"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+      - &file4
+        _id: { "$oid": "000000000000000000000004" }
+        length: 8
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "dd254cdc958e53abaa67da9f797125f5"
+        filename: "length-8"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+  - collectionName: *bucket0_chunks_collectionName
+    databaseName: *database0Name
+    documents:
+      - &file2_chunk0
+        _id: { "$oid": "000000000000000000000001" }
+        files_id: { "$oid": "000000000000000000000002" }
+        n: 0
+        data: { "$binary": { "base64": "", "subType": "00" } }
+      - &file3_chunk0
+        _id: { "$oid": "000000000000000000000002" }
+        files_id: { "$oid": "000000000000000000000003" }
+        n: 0
+        data: { "$binary": { "base64": "ESI=", "subType": "00" } } # hex: 1122
+      - &file4_chunk0
+        _id: { "$oid": "000000000000000000000003" }
+        files_id: { "$oid": "000000000000000000000004" }
+        n: 0
+        data: { "$binary": { "base64": "ESIzRA==", "subType": "00" } }  # hex: 11223344
+      - &file4_chunk1
+        _id: { "$oid": "000000000000000000000004" }
+        files_id: { "$oid": "000000000000000000000004" }
+        n: 1
+        data: { "$binary": { "base64": "VWZ3iA==", "subType": "00" } } # hex: 55667788
+
+tests:
+  - description: "delete when length is 0"
+    operations:
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000001" }
+    outcome:
+      - collectionName: *bucket0_files_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file2
+          - *file3
+          - *file4
+      - collectionName: *bucket0_chunks_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file2_chunk0
+          - *file3_chunk0
+          - *file4_chunk0
+          - *file4_chunk1
+  - description: "delete when length is 0 and there is one extra empty chunk"
+    operations:
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000002" }
+    outcome:
+      - collectionName: *bucket0_files_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file1
+          - *file3
+          - *file4
+      - collectionName: *bucket0_chunks_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file3_chunk0
+          - *file4_chunk0
+          - *file4_chunk1
+  - description: "delete when length is 8"
+    operations:
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000004" }
+    outcome:
+      - collectionName: *bucket0_files_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file1
+          - *file2
+          - *file3
+      - collectionName: *bucket0_chunks_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file2_chunk0
+          - *file3_chunk0
+  - description: "delete when files entry does not exist"
+    operations:
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000000" }
+        expectError: { isError: true } # FileNotFound
+    outcome:
+      - collectionName: *bucket0_files_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file1
+          - *file2
+          - *file3
+          - *file4
+      - collectionName: *bucket0_chunks_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file2_chunk0
+          - *file3_chunk0
+          - *file4_chunk0
+          - *file4_chunk1
+  - description: "delete when files entry does not exist and there are orphaned chunks"
+    operations:
+      - name: deleteOne
+        object: *bucket0_files_collection
+        arguments:
+          filter:
+            _id: { $oid: "000000000000000000000004" }
+        expectResult:
+          deletedCount: 1
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000004" }
+        expectError: { isError: true } # FileNotFound
+    outcome:
+      - collectionName: *bucket0_files_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file1
+          - *file2
+          - *file3
+      # Orphaned chunks are still deleted even if fs.files
+      - collectionName: *bucket0_chunks_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file2_chunk0
+          - *file3_chunk0
