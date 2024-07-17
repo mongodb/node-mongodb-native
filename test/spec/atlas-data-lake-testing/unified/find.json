@@ -1,12 +1,36 @@
 {
-  "collection_name": "driverdata",
-  "database_name": "test",
+  "description": "find",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "driverdata"
+      }
+    }
+  ],
   "tests": [
     {
       "description": "Find with projection and sort",
       "operations": [
         {
-          "object": "collection",
+          "object": "collection0",
           "name": "find",
           "arguments": {
             "filter": {
@@ -22,7 +46,7 @@
             },
             "limit": 5
           },
-          "result": [
+          "expectResult": [
             {
               "a": 5,
               "b": 6,
@@ -51,13 +75,20 @@
           ]
         }
       ],
-      "expectations": [
+      "expectEvents": [
         {
-          "command_started_event": {
-            "command": {
-              "find": "driverdata"
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "driverdata"
+                },
+                "commandName": "find",
+                "databaseName": "test"
+              }
             }
-          }
+          ]
         }
       ]
     }

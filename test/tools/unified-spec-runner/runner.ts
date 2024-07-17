@@ -18,9 +18,15 @@ export function trace(message: string): void {
   }
 }
 
+async function isAtlasDataLake(client: MongoClient): Promise<boolean> {
+  const buildInfo = await client.db('admin').admin().buildInfo();
+  return 'dataLake' in buildInfo;
+}
+
 async function terminateOpenTransactions(client: MongoClient) {
   // Note: killAllSession is not supported on serverless, see CLOUDP-84298
-  if (process.env.SERVERLESS) {
+  // killAllSession is not allowed in ADL either.
+  if (process.env.SERVERLESS || (await isAtlasDataLake(client))) {
     return;
   }
   // TODO(NODE-3491): on sharded clusters this has to be run on each mongos
@@ -101,7 +107,9 @@ async function runUnifiedTest(
     await terminateOpenTransactions(utilClient);
 
     // Must fetch parameters before checking runOnRequirements
-    ctx.configuration.parameters = await utilClient.db().admin().command({ getParameter: '*' });
+    ctx.configuration.parameters = (await isAtlasDataLake(utilClient))
+      ? {}
+      : await utilClient.db().admin().command({ getParameter: '*' });
 
     // If test.runOnRequirements is specified, the test runner MUST skip the test unless one or more
     // runOnRequirement objects are satisfied.
