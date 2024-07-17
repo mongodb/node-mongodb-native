@@ -1,0 +1,350 @@
+{
+  "description": "client bulkWrite retryable writes with client errors",
+  "schemaVersion": "1.21",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "8.0",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "retryable-writes-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "retryable-writes-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "_yamlAnchors": {
+    "namespace": "retryable-writes-tests.coll0"
+  },
+  "tests": [
+    {
+      "description": "client bulkWrite with one network error succeeds after retry",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "bulkWrite"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "retryable-writes-tests.coll0",
+                  "document": {
+                    "_id": 4,
+                    "x": 44
+                  }
+                }
+              }
+            ],
+            "verboseResults": true
+          },
+          "expectResult": {
+            "insertedCount": 1,
+            "upsertedCount": 0,
+            "matchedCount": 0,
+            "modifiedCount": 0,
+            "deletedCount": 0,
+            "insertResults": {
+              "0": {
+                "insertedId": 4
+              }
+            },
+            "updateResults": {},
+            "deleteResults": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "errorsOnly": false,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "insert": 0,
+                      "document": {
+                        "_id": 4,
+                        "x": 44
+                      }
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "retryable-writes-tests.coll0"
+                    }
+                  ],
+                  "lsid": {
+                    "$$exists": true
+                  },
+                  "txnNumber": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "errorsOnly": false,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "insert": 0,
+                      "document": {
+                        "_id": 4,
+                        "x": 44
+                      }
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "retryable-writes-tests.coll0"
+                    }
+                  ],
+                  "lsid": {
+                    "$$exists": true
+                  },
+                  "txnNumber": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "client bulkWrite with two network errors fails after retry",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "bulkWrite"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "retryable-writes-tests.coll0",
+                  "document": {
+                    "_id": 4,
+                    "x": 44
+                  }
+                }
+              }
+            ],
+            "verboseResults": true
+          },
+          "expectError": {
+            "isClientError": true,
+            "errorLabelsContain": [
+              "RetryableWriteError"
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "errorsOnly": false,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "insert": 0,
+                      "document": {
+                        "_id": 4,
+                        "x": 44
+                      }
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "retryable-writes-tests.coll0"
+                    }
+                  ],
+                  "lsid": {
+                    "$$exists": true
+                  },
+                  "txnNumber": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "errorsOnly": false,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "insert": 0,
+                      "document": {
+                        "_id": 4,
+                        "x": 44
+                      }
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "retryable-writes-tests.coll0"
+                    }
+                  ],
+                  "lsid": {
+                    "$$exists": true
+                  },
+                  "txnNumber": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
