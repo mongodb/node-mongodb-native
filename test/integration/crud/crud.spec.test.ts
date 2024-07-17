@@ -60,9 +60,9 @@ describe('CRUD unified', function () {
     loadSpecTests(path.join('crud', 'unified')),
     ({ description }, { isLoadBalanced }) => {
       return description.match(clientBulkWriteTests)
-        ? 'TODO(node-xxxx): implement client level bulk write'
+        ? 'TODO(NODE-6257): implement client level bulk write'
         : unacknowledgedHintTests.includes(description)
-        ? `TODO(....)`
+        ? `TODO(NODE-3541)`
         : isLoadBalanced && loadBalancedCollationTests.includes(description)
         ? `TODO(NODE-6280): fix collation for find and modify commands on load balanced mode`
         : false;
