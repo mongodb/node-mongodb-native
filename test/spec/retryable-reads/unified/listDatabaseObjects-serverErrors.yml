@@ -1,0 +1,355 @@
+# listDatabaseObjects returns an array of MongoDatabase objects.
+# Not all drivers support this functionality. For more details, see:
+# https://github.com/mongodb/specifications/blob/v1/source/enumerate-databases.rst#enumerating-mongodatabase-objects
+
+description: listDatabaseObjects-serverErrors
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - single
+      - replicaset
+  -
+    minServerVersion: 4.1.7
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+
+initialData:
+  -
+    collectionName: &collection_name coll
+    databaseName: &database_name retryable-reads-tests
+    documents: []
+
+tests:
+  -
+    description: 'ListDatabaseObjects succeeds after InterruptedAtShutdown'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint: &failCommand_failPoint
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 11600
+      - &retryable_operation
+        object: *client0
+        name: listDatabaseObjects
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - &retryable_command_started_event
+            commandStartedEvent:
+              command:
+                listDatabases: 1
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after InterruptedDueToReplStateChange'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 11602
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after NotWritablePrimary'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 10107
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after NotPrimaryNoSecondaryOk'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 13435
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after NotPrimaryOrSecondary'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 13436
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after PrimarySteppedDown'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 189
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after ShutdownInProgress'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 91
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after HostNotFound'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 7
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after HostUnreachable'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 6
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after NetworkTimeout'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 89
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects succeeds after SocketException'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 9001
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects fails after two NotWritablePrimary errors'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 2
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 10107
+      - &retryable_operation_fails
+        object: *client0
+        name: listDatabaseObjects
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'ListDatabaseObjects fails after NotWritablePrimary when retryReads is false'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  retryReads: false
+                observeEvents:
+                  - commandStartedEvent
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client1
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - listDatabases
+              errorCode: 10107
+      - <<: *retryable_operation_fails
+        object: *client1
+    expectEvents:
+      -
+        client: *client1
+        events:
+          - *retryable_command_started_event

@@ -1,0 +1,145 @@
+description: changeStreams-db.watch
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.7
+    serverless: forbid
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+      ignoreCommandMonitoringEvents:
+        - killCursors
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name retryable-reads-tests
+
+initialData:
+  -
+    collectionName: &collection_name coll
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'db.watch succeeds on first attempt'
+    operations:
+      - &retryable_operation
+        object: *database0
+        name: createChangeStream
+        arguments:
+          pipeline: []
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - &retryable_command_started_event
+            commandStartedEvent:
+              command:
+                aggregate: 1
+                cursor: {  }
+                pipeline:
+                  -
+                    $changeStream: {  }
+              databaseName: *database_name
+  -
+    description: 'db.watch succeeds on second attempt'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint: &failCommand_failPoint
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - aggregate
+              closeConnection: true
+      - *retryable_operation
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'db.watch fails on first attempt'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  retryReads: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client1
+          failPoint: *failCommand_failPoint
+      - &retryable_operation_fails
+        object: *database1
+        name: createChangeStream
+        arguments:
+          pipeline: []
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client1
+        events:
+          - *retryable_command_started_event
+  -
+    description: 'db.watch fails on second attempt'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 2
+            data:
+              failCommands:
+                - aggregate
+              closeConnection: true
+      - <<: *retryable_operation_fails
+        object: *database0
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
