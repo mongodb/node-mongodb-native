@@ -57,19 +57,7 @@ Operation
 
 These tests check that the default write concern is omitted in operations.
 
-The spec test format is an extension of `transactions spec tests <https://github.com/mongodb/specifications/blob/master/source/transactions/tests/README.rst>`_ with the following additions:
-
-- ``writeConcern`` in the ``databaseOptions`` or ``collectionOptions`` may be an empty document to indicate a `server default write concern <https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#servers-default-writeconcern>`_. For example, in libmongoc:
-
-    .. code:: c
-
-       /* Create a default write concern, and set on a collection object. */
-       mongoc_write_concern_t *wc = mongoc_write_concern_new ();
-       mongoc_collection_set_write_concern (collection, wc);
-
-    If the driver has no way to explicitly set a default write concern on a database or collection, ignore the empty ``writeConcern`` document and continue with the test.
-- The operations ``createIndex``, ``dropIndex`` are introduced.
-
+The tests utilize the `Unified Test Format <../../unified-test-format/unified-test-format.md>`__.
 
 Use as unit tests
 =================

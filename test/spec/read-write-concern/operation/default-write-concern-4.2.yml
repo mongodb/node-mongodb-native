@@ -1,36 +1,66 @@
-# Test that setting a default write concern does not add a write concern
-# to the command sent over the wire.
+# Test that setting a default write concern does not add a write concern to the command sent over the wire.
 # Test operations that require 4.2+ server.
 
-data:
-  - {_id: 1, x: 11}
-  - {_id: 2, x: 22}
-collection_name: &collection_name default_write_concern_coll
-database_name: &database_name default_write_concern_db
+description: default-write-concern-4.2
 
-runOn:
-    - minServerVersion: "4.2"
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "4.2"
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name default-write-concern-tests
+      databaseOptions:
+        writeConcern: {}
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+      collectionOptions:
+        writeConcern: {}
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
 
 tests:
-  - description: Aggregate with $merge omits default write concern
+  -
+    description: Aggregate with $merge omits default write concern
     operations:
-      - object: collection
-        databaseOptions: {writeConcern: {}}
-        collectionOptions: {writeConcern: {}}
+      -
+        object: *collection0
         name: aggregate
         arguments:
           pipeline: &merge_pipeline
-            - $match: {_id: {$gt: 1}}
-            - $merge: {into: &other_collection_name "other_collection_name" }
-    expectations:
-      - command_started_event:
-          command:
-            aggregate: *collection_name
-            pipeline: *merge_pipeline
-            # "null" fields will be checked for non-existence
-            writeConcern: null
+            - $match: { _id: { $gt: 1 } }
+            - $merge: { into: &other_collection_name "other_collection_name" }
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *merge_pipeline
+                writeConcern: { $$exists: false }
     outcome:
-      collection:
-        name: *other_collection_name
-        data:
-          - {_id: 2, x: 22}
+      -
+        collectionName: *other_collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 2, x: 22 }

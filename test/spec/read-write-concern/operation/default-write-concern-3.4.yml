@@ -1,95 +1,144 @@
-# Test that setting a default write concern does not add a write concern
-# to the command sent over the wire.
-# Test operations that require 3.4+ server, where all commands started
-# to accept a write concern.
+# Test that setting a default write concern does not add a write concern to the command sent over the wire.
+# Test operations that require 3.4+ server, where all commands started to accept a write concern.
 
-data:
-  - {_id: 1, x: 11}
-  - {_id: 2, x: 22}
-collection_name: &collection_name default_write_concern_coll
-database_name: &database_name default_write_concern_db
+description: default-write-concern-3.4
 
-runOn:
-    - minServerVersion: "3.4"
+schemaVersion: "1.4"
+
+runOnRequirements:
+  - minServerVersion: "3.4"
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name default-write-concern-tests
+      databaseOptions:
+        writeConcern: {}
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+      collectionOptions:
+        writeConcern: {}
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
 
 tests:
-  - description: Aggregate with $out omits default write concern
+  -
+    description: Aggregate with $out omits default write concern
+    # Serverless does not support $out stage
+    runOnRequirements:
+      - serverless: forbid
     operations:
-      - object: collection
-        collectionOptions: {writeConcern: {}}
+      -
+        object: *collection0
         name: aggregate
         arguments:
           pipeline: &out_pipeline
-            - $match: {_id: {$gt: 1}}
+            - $match: { _id: { $gt: 1 } }
             - $out: &other_collection_name "other_collection_name"
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *out_pipeline
+                writeConcern: { $$exists: false }
     outcome:
-      collection:
-        name: *other_collection_name
-        data:
-          - {_id: 2, x: 22}
-    expectations:
-      - command_started_event:
-          command:
-            aggregate: *collection_name
-            pipeline: *out_pipeline
-            writeConcern: null
-  - description: RunCommand with a write command omits default write concern (runCommand should never inherit write concern)
+      -
+        collectionName: *other_collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 2, x: 22 }
+  -
+    description: RunCommand with a write command omits default write concern (runCommand should never inherit write concern)
     operations:
-      - object: database
-        databaseOptions: {writeConcern: {}}
+      -
+        object: *database0
         name: runCommand
-        command_name: delete
         arguments:
           command:
             delete: *collection_name
-            deletes:
-              - {q: {}, limit: 1}
-    expectations:
-      - command_started_event:
-          command:
-            delete: *collection_name
-            deletes:
-              - {q: {}, limit: 1}
-            writeConcern: null
-  - description: CreateIndex and dropIndex omits default write concern 
+            deletes: [ { q: {}, limit: 1 } ]
+          commandName: delete
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes: [ { q: {}, limit: 1 } ]
+                writeConcern: { $$exists: false }
+  -
+    description: CreateIndex and dropIndex omits default write concern 
     operations:
-      - object: collection
-        collectionOptions: {writeConcern: {}}
+      -
+        object: *collection0
         name: createIndex
         arguments:
-          keys: {x: 1}
-      - object: collection
-        collectionOptions: {writeConcern: {}}
+          keys: { x: 1 }
+      -
+        object: *collection0
         name: dropIndex
         arguments:
           name: x_1
-    expectations:
-      - command_started_event:
-          command:
-            createIndexes: *collection_name
-            indexes:
-              - name: x_1
-                key: {x: 1}
-            writeConcern: null
-      - command_started_event:
-          command:
-            dropIndexes: *collection_name
-            index: x_1
-            writeConcern: null
-  - description: MapReduce omits default write concern
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                createIndexes: *collection_name
+                indexes: [ { name: "x_1", key: { x: 1 } } ]
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                dropIndexes: *collection_name
+                index: x_1
+                writeConcern: { $$exists: false }
+  -
+    description: MapReduce omits default write concern
+    # Serverless does not support mapReduce operation
+    runOnRequirements:
+      - serverless: forbid
     operations:
-      - name: mapReduce
-        object: collection
-        collectionOptions: {writeConcern: {}}
+      -
+        name: mapReduce
+        object: *collection0
         arguments:
-          map: { $code: 'function inc() { return emit(0, this.x + 1) }' }
-          reduce: { $code: 'function sum(key, values) { return values.reduce((acc, x) => acc + x); }' }
+          map: { $code: "function inc() { return emit(0, this.x + 1) }" }
+          reduce: { $code: "function sum(key, values) { return values.reduce((acc, x) => acc + x); }" }
           out: { inline: 1 }
-    expectations:
-      - command_started_event:
-          command:
-            mapReduce: *collection_name
-            map: { $code: 'function inc() { return emit(0, this.x + 1) }' }
-            reduce: { $code: 'function sum(key, values) { return values.reduce((acc, x) => acc + x); }' }
-            out: { inline: 1 }
-            writeConcern: null
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                mapReduce: *collection_name
+                map: { $code: "function inc() { return emit(0, this.x + 1) }" }
+                reduce: { $code: "function sum(key, values) { return values.reduce((acc, x) => acc + x); }" }
+                out: { inline: 1 }
+                writeConcern: { $$exists: false }
