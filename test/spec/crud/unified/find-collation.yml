@@ -1,0 +1,46 @@
+description: find-collation
+
+schemaVersion: '1.4'
+
+runOnRequirements:
+  -
+    minServerVersion: '3.4'
+    serverless: forbid
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v1
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: ping }
+
+tests:
+  -
+    description: 'Find with a collation'
+    operations:
+      -
+        object: *collection0
+        name: find
+        arguments:
+          filter: { x: PING }
+          # https://www.mongodb.com/docs/manual/reference/collation/#collation-document
+          collation:
+            locale: en_US
+            strength: 2
+        expectResult:
+          - { _id: 1, x: ping }

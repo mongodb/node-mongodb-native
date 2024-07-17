@@ -1,0 +1,829 @@
+{
+  "description": "bulkWrite",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "2.6"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "BulkWrite with deleteOne operations",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 3
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 2
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 1,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 0,
+            "modifiedCount": 0,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with deleteMany operations",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteMany": {
+                  "filter": {
+                    "x": {
+                      "$lt": 11
+                    }
+                  }
+                }
+              },
+              {
+                "deleteMany": {
+                  "filter": {
+                    "x": {
+                      "$lte": 22
+                    }
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 2,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 0,
+            "modifiedCount": 0,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": []
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with insertOne operations",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 3,
+                    "x": 33
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 4,
+                    "x": 44
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 2,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 3,
+                "1": 4
+              }
+            },
+            "matchedCount": 0,
+            "modifiedCount": 0,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with replaceOne operations",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "replacement": {
+                    "x": 33
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "x": 12
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "replacement": {
+                    "x": 33
+                  },
+                  "upsert": true
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 1,
+            "upsertedIds": {
+              "2": 3
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with updateOne operations",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 0
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 0
+                    }
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 11
+                    }
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 33
+                    }
+                  },
+                  "upsert": true
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 2,
+            "modifiedCount": 1,
+            "upsertedCount": 1,
+            "upsertedIds": {
+              "3": 3
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 23
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with updateMany operations",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateMany": {
+                  "filter": {
+                    "x": {
+                      "$lt": 11
+                    }
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 0
+                    }
+                  }
+                }
+              },
+              {
+                "updateMany": {
+                  "filter": {
+                    "x": {
+                      "$lte": 22
+                    }
+                  },
+                  "update": {
+                    "$unset": {
+                      "y": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateMany": {
+                  "filter": {
+                    "x": {
+                      "$lte": 22
+                    }
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateMany": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 33
+                    }
+                  },
+                  "upsert": true
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 4,
+            "modifiedCount": 2,
+            "upsertedCount": 1,
+            "upsertedIds": {
+              "3": 3
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 23
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with mixed ordered operations",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 3,
+                    "x": 33
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateMany": {
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 4,
+                    "x": 44
+                  }
+                }
+              },
+              {
+                "deleteMany": {
+                  "filter": {
+                    "x": {
+                      "$nin": [
+                        24,
+                        34
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 4
+                  },
+                  "replacement": {
+                    "_id": 4,
+                    "x": 44
+                  },
+                  "upsert": true
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 2,
+            "insertedCount": 2,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 3,
+                "3": 4
+              }
+            },
+            "matchedCount": 3,
+            "modifiedCount": 3,
+            "upsertedCount": 1,
+            "upsertedIds": {
+              "5": 4
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 24
+            },
+            {
+              "_id": 3,
+              "x": 34
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with mixed unordered operations",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "replacement": {
+                    "_id": 3,
+                    "x": 33
+                  },
+                  "upsert": true
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              }
+            ],
+            "ordered": false
+          },
+          "expectResult": {
+            "deletedCount": 1,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 1,
+            "upsertedIds": {
+              "0": 3
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 23
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite continue-on-error behavior with unordered (preexisting duplicate key)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 3,
+                    "x": 33
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 4,
+                    "x": 44
+                  }
+                }
+              }
+            ],
+            "ordered": false
+          },
+          "expectError": {
+            "isError": true,
+            "expectResult": {
+              "deletedCount": 0,
+              "insertedCount": 2,
+              "matchedCount": 0,
+              "modifiedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {}
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite continue-on-error behavior with unordered (duplicate key in requests)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 3,
+                    "x": 33
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 3,
+                    "x": 33
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 4,
+                    "x": 44
+                  }
+                }
+              }
+            ],
+            "ordered": false
+          },
+          "expectError": {
+            "isError": true,
+            "expectResult": {
+              "deletedCount": 0,
+              "insertedCount": 2,
+              "matchedCount": 0,
+              "modifiedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {}
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,350 @@
+description: "client bulkWrite top-level options"
+schemaVersion: "1.1"
+runOnRequirements:
+  - minServerVersion: "8.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - client:
+      id: &writeConcernClient writeConcernClient
+      uriOptions:
+        &clientWriteConcern { w: 1 }
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+  comment: &comment { bulk: "write" }
+  let: &let { id1: 1, id2: 2 }
+  writeConcern: &majorityWriteConcern { w: "majority" }
+
+tests:
+  - description: "client bulkWrite comment"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 3, x: 33 }
+          comment: *comment
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 3
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                comment: *comment
+                ops:
+                  - insert: 0
+                    document: { _id: 3, x: 33 }
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+  - description: "client bulkWrite bypassDocumentValidation"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 3, x: 33 }
+          bypassDocumentValidation: true
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 3
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                bypassDocumentValidation: true
+                ops:
+                  - insert: 0
+                    document: { _id: 3, x: 33 }
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+  - description: "client bulkWrite let"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateOne:
+                namespace: *namespace
+                filter:
+                  $expr:
+                    $eq: [ "$_id", "$$id1" ]
+                update:
+                  $inc: { x: 1 }
+            - deleteOne:
+                namespace: *namespace
+                filter:
+                  $expr:
+                    $eq: [ "$_id", "$$id2" ]
+          let: *let
+          verboseResults: true
+        expectResult:
+          insertedCount: 0
+          upsertedCount: 0
+          matchedCount: 1
+          modifiedCount: 1
+          deletedCount: 1
+          insertResults: {}
+          updateResults:
+            0:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+          deleteResults:
+            1:
+              deletedCount: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                let: *let
+                ops:
+                  - update: 0
+                    filter:
+                      $expr:
+                        $eq: [ "$_id", "$$id1" ]
+                    updateMods: { $inc: { x: 1 } }
+                    multi: false
+                  - delete: 0
+                    filter:
+                      $expr:
+                        $eq: [ "$_id", "$$id2" ]
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - databaseName: *database0Name
+        collectionName: *collection0Name
+        documents:
+          - { _id: 1, x: 12 }
+  - description: "client bulkWrite bypassDocumentValidation: false is sent"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 3, x: 33 }
+          bypassDocumentValidation: false
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 3
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                bypassDocumentValidation: false
+                ops:
+                  - insert: 0
+                    document: { _id: 3, x: 33 }
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+  - description: "client bulkWrite writeConcern"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 3, x: 33 }
+          writeConcern: *majorityWriteConcern
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 3
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                writeConcern: *majorityWriteConcern
+                ops:
+                  - insert: 0
+                    document: { _id: 3, x: 33 }
+                nsInfo:
+                  - ns: *namespace
+  - description: "client bulkWrite inherits writeConcern from client"
+    operations:
+      - object: *writeConcernClient
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 3, x: 33 }
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 3
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *writeConcernClient
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                writeConcern: { w: 1 }
+                ops:
+                  - insert: 0
+                    document: { _id: 3, x: 33 }
+                nsInfo:
+                  - ns: *namespace
+  - description: "client bulkWrite writeConcern option overrides client writeConcern"
+    operations:
+      - object: *writeConcernClient
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 3, x: 33 }
+          writeConcern: *majorityWriteConcern
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 3
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *writeConcernClient
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                writeConcern: *majorityWriteConcern
+                ops:
+                  - insert: 0
+                    document: { _id: 3, x: 33 }
+                nsInfo:
+                  - ns: *namespace

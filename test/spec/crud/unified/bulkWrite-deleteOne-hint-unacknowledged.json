@@ -1,0 +1,265 @@
+{
+  "description": "bulkWrite-deleteOne-hint-unacknowledged",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "db0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0",
+        "collectionOptions": {
+          "writeConcern": {
+            "w": 0
+          }
+        }
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "db0",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Unacknowledged deleteOne with hint string fails with client-side error on pre-4.4 server",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "Unacknowledged deleteOne with hint document fails with client-side error on pre-4.4 server",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "Unacknowledged deleteOne with hint string on 4.4+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "hint": "_id_"
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "acknowledged": {
+                "$$unsetOrMatches": false
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll0",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "hint": {
+                        "$$type": [
+                          "string",
+                          "object"
+                        ]
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Unacknowledged deleteOne with hint document on 4.4+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "acknowledged": {
+                "$$unsetOrMatches": false
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll0",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "hint": {
+                        "$$type": [
+                          "string",
+                          "object"
+                        ]
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

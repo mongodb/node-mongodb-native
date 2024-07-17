@@ -1,0 +1,216 @@
+{
+  "description": "client-bulkWrite-update-validation",
+  "schemaVersion": "1.1",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "_yamlAnchors": {
+    "namespace": "crud-tests.coll0"
+  },
+  "tests": [
+    {
+      "description": "client bulkWrite replaceOne prohibits atomic modifiers",
+      "operations": [
+        {
+          "name": "clientBulkWrite",
+          "object": "client0",
+          "arguments": {
+            "models": [
+              {
+                "replaceOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "$set": {
+                      "x": 22
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "client bulkWrite updateOne requires atomic modifiers",
+      "operations": [
+        {
+          "name": "clientBulkWrite",
+          "object": "client0",
+          "arguments": {
+            "models": [
+              {
+                "updateOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "x": 22
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "client bulkWrite updateMany requires atomic modifiers",
+      "operations": [
+        {
+          "name": "clientBulkWrite",
+          "object": "client0",
+          "arguments": {
+            "models": [
+              {
+                "updateMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "update": {
+                    "x": 44
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

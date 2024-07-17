@@ -274,6 +274,91 @@
           ]
         }
       ]
+    },
+    {
+      "description": "BulkWrite with arrayFilters",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateOne": {
+                  "filter": {},
+                  "update": {
+                    "$set": {
+                      "y.$[i].b": 2
+                    }
+                  },
+                  "arrayFilters": [
+                    {
+                      "i.b": 3
+                    }
+                  ]
+                }
+              },
+              {
+                "updateMany": {
+                  "filter": {},
+                  "update": {
+                    "$set": {
+                      "y.$[i].b": 2
+                    }
+                  },
+                  "arrayFilters": [
+                    {
+                      "i.b": 1
+                    }
+                  ]
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 0,
+            "insertedIds": {
+              "$$unsetOrMatches": {}
+            },
+            "matchedCount": 3,
+            "modifiedCount": 3,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "y": [
+                {
+                  "b": 2
+                },
+                {
+                  "b": 2
+                }
+              ]
+            },
+            {
+              "_id": 2,
+              "y": [
+                {
+                  "b": 0
+                },
+                {
+                  "b": 2
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

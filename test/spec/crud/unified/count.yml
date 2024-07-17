@@ -1,0 +1,95 @@
+description: count
+
+schemaVersion: '1.0'
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v1
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  -
+    description: 'Estimated document count'
+    operations:
+      -
+        object: *collection0
+        name: estimatedDocumentCount
+        arguments: {  }
+        expectResult: 3
+  -
+    description: 'Count documents without a filter'
+    operations:
+      -
+        object: *collection0
+        name: countDocuments
+        arguments:
+          filter: {  }
+        expectResult: 3
+  -
+    description: 'Count documents with a filter'
+    operations:
+      -
+        object: *collection0
+        name: countDocuments
+        arguments:
+          filter: { _id: { $gt: 1 } }
+        expectResult: 2
+  -
+    description: 'Count documents with skip and limit'
+    operations:
+      -
+        object: *collection0
+        name: countDocuments
+        arguments:
+          filter: {  }
+          skip: 1
+          limit: 3
+        expectResult: 2
+  -
+    description: 'Deprecated count without a filter'
+    operations:
+      -
+        object: *collection0
+        name: count
+        arguments:
+          filter: {  }
+        expectResult: 3
+  -
+    description: 'Deprecated count with a filter'
+    operations:
+      -
+        object: *collection0
+        name: count
+        arguments:
+          filter: { _id: { $gt: 1 } }
+        expectResult: 2
+  -
+    description: 'Deprecated count with skip and limit'
+    operations:
+      -
+        object: *collection0
+        name: count
+        arguments:
+          filter: {  }
+          skip: 1
+          limit: 3
+        expectResult: 2

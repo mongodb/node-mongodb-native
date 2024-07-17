@@ -1,0 +1,216 @@
+{
+  "description": "updateOne",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "2.6"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "UpdateOne when many documents match",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          },
+          "expectResult": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ]
+    },
+    {
+      "description": "UpdateOne when one document matches",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          },
+          "expectResult": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "UpdateOne when no documents match",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "_id": 4
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          },
+          "expectResult": {
+            "matchedCount": 0,
+            "modifiedCount": 0,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "UpdateOne with upsert when no documents match",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "_id": 4
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "upsert": true
+          },
+          "expectResult": {
+            "matchedCount": 0,
+            "modifiedCount": 0,
+            "upsertedCount": 1,
+            "upsertedId": 4
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

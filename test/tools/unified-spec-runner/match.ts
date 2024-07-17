@@ -22,6 +22,7 @@ import {
   ConnectionReadyEvent,
   type Document,
   Long,
+  MongoBulkWriteError,
   MongoError,
   MongoServerError,
   ObjectId,
@@ -738,7 +739,11 @@ export function expectErrorCheck(
   if (expected.isClientError === false) {
     expect(error).to.be.instanceOf(MongoServerError);
   } else if (expected.isClientError === true) {
-    expect(error).not.to.be.instanceOf(MongoServerError);
+    if (error instanceof MongoBulkWriteError) {
+      expect(error.errorResponse).not.to.be.instanceOf(MongoServerError);
+    } else {
+      expect(error).not.to.be.instanceOf(MongoServerError);
+    }
   }
 
   if (expected.errorContains != null) {
