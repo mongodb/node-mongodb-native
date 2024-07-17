@@ -386,7 +386,7 @@ operations.set('iterateOnce', async ({ entities, operation }) => {
 
 operations.set('listCollections', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
-  const { filter, ...opts } = operation.arguments!;
+  const { filter, ...opts } = operation.arguments ?? { filter: {} };
   return db.listCollections(filter, opts).toArray();
 });
 
