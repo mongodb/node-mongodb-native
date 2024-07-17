@@ -740,6 +740,7 @@ export function expectErrorCheck(
     expect(error).to.be.instanceOf(MongoServerError);
   } else if (expected.isClientError === true) {
     if (error instanceof MongoBulkWriteError) {
+      // TODO(NODE-6281): do not throw MongoServerErrors from bulk write if the error is a client-side error
       expect(error.errorResponse).not.to.be.instanceOf(MongoServerError);
     } else {
       expect(error).not.to.be.instanceOf(MongoServerError);
