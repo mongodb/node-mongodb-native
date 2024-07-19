@@ -1,0 +1,86 @@
+{
+  "description": "distinct",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Distinct without a filter",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {}
+          },
+          "expectResult": [
+            11,
+            22,
+            33
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Distinct with a filter",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            }
+          },
+          "expectResult": [
+            22,
+            33
+          ]
+        }
+      ]
+    }
+  ]
+}

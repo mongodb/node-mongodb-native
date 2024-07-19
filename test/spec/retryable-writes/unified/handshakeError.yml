@@ -50,6 +50,96 @@ tests:
   #   - Triggers failpoint (second time).
   #   - Tests whether operation successfully retries the handshake and succeeds.
 
+  - description: "client.clientBulkWrite succeeds after retryable handshake network error"
+    runOnRequirements:
+      - minServerVersion: "8.0" # `bulkWrite` added to server 8.0
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: clientBulkWrite
+        object: *client
+        arguments:
+          models:
+          - insertOne:
+              namespace: retryable-writes-handshake-tests.coll
+              document: { _id: 8, x: 88 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: bulkWrite
+          - commandSucceededEvent:
+              commandName: bulkWrite
+
+  - description: "client.clientBulkWrite succeeds after retryable handshake server error (ShutdownInProgress)"
+    runOnRequirements:
+      - minServerVersion: "8.0" # `bulkWrite` added to server 8.0
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: clientBulkWrite
+        object: *client
+        arguments:
+          models:
+          - insertOne:
+              namespace: retryable-writes-handshake-tests.coll
+              document: { _id: 8, x: 88 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: bulkWrite
+          - commandSucceededEvent:
+              commandName: bulkWrite
+
   - description: "collection.insertOne succeeds after retryable handshake network error"
     operations:
       - name: failPoint

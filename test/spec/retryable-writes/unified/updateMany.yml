@@ -1,0 +1,54 @@
+description: updateMany
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: '3.6'
+    topologies: [ replicaset, sharded, load-balanced ]
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: true
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name retryable-writes-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests:
+  -
+    description: 'UpdateMany ignores retryWrites'
+    operations:
+      -
+        object: *collection0
+        name: updateMany
+        arguments:
+          filter: {  }
+          update: { $inc: { x: 1 } }
+        expectResult:
+          matchedCount: 2
+          modifiedCount: 2
+          upsertedCount: 0
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 12 }
+          - { _id: 2, x: 23 }

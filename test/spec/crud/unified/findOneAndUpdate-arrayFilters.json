@@ -1,0 +1,251 @@
+{
+  "description": "findOneAndUpdate-arrayFilters",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.5.6"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "y": [
+            {
+              "b": 3
+            },
+            {
+              "b": 1
+            }
+          ]
+        },
+        {
+          "_id": 2,
+          "y": [
+            {
+              "b": 0
+            },
+            {
+              "b": 1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "FindOneAndUpdate when no document matches arrayFilters",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {},
+            "update": {
+              "$set": {
+                "y.$[i].b": 2
+              }
+            },
+            "arrayFilters": [
+              {
+                "i.b": 4
+              }
+            ]
+          },
+          "expectResult": {
+            "_id": 1,
+            "y": [
+              {
+                "b": 3
+              },
+              {
+                "b": 1
+              }
+            ]
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "y": [
+                {
+                  "b": 3
+                },
+                {
+                  "b": 1
+                }
+              ]
+            },
+            {
+              "_id": 2,
+              "y": [
+                {
+                  "b": 0
+                },
+                {
+                  "b": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when one document matches arrayFilters",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {},
+            "update": {
+              "$set": {
+                "y.$[i].b": 2
+              }
+            },
+            "arrayFilters": [
+              {
+                "i.b": 3
+              }
+            ]
+          },
+          "expectResult": {
+            "_id": 1,
+            "y": [
+              {
+                "b": 3
+              },
+              {
+                "b": 1
+              }
+            ]
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "y": [
+                {
+                  "b": 2
+                },
+                {
+                  "b": 1
+                }
+              ]
+            },
+            {
+              "_id": 2,
+              "y": [
+                {
+                  "b": 0
+                },
+                {
+                  "b": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when multiple documents match arrayFilters",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {},
+            "update": {
+              "$set": {
+                "y.$[i].b": 2
+              }
+            },
+            "arrayFilters": [
+              {
+                "i.b": 1
+              }
+            ]
+          },
+          "expectResult": {
+            "_id": 1,
+            "y": [
+              {
+                "b": 3
+              },
+              {
+                "b": 1
+              }
+            ]
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "y": [
+                {
+                  "b": 3
+                },
+                {
+                  "b": 2
+                }
+              ]
+            },
+            {
+              "_id": 2,
+              "y": [
+                {
+                  "b": 0
+                },
+                {
+                  "b": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

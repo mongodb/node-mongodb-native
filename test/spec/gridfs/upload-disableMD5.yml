@@ -1,0 +1,92 @@
+description: "gridfs-upload-disableMD5"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name gridfs-tests
+  - bucket:
+      id: &bucket0 bucket0
+      database: *database0
+  - collection:
+      id: &bucket0_files_collection bucket0_files_collection
+      database: *database0
+      collectionName: &bucket0_files_collectionName fs.files
+  - collection:
+      id: &bucket0_chunks_collection bucket0_chunks_collection
+      database: *database0
+      collectionName: &bucket0_chunks_collectionName fs.chunks
+
+initialData:
+  - collectionName: *bucket0_files_collectionName
+    databaseName: *database0Name
+    documents: []
+  - collectionName: *bucket0_chunks_collectionName
+    databaseName: *database0Name
+    documents: []
+
+# Note: these tests utilize the transitional "disableMD5" option. Drivers that
+# do not support the option should skip this file.
+tests:
+  - description: "upload when length is 0 sans MD5"
+    operations:
+      - name: upload
+        object: *bucket0
+        arguments:
+          filename: "filename"
+          source: { $$hexBytes: "" }
+          chunkSizeBytes: 4
+          disableMD5: true
+        expectResult: { $$type: objectId }
+        saveResultAsEntity: &uploadedObjectId uploadedObjectId
+      - name: find
+        object: *bucket0_files_collection
+        arguments:
+          filter: {}
+        expectResult:
+          - _id: { $$matchesEntity: *uploadedObjectId }
+            length: 0
+            chunkSize: 4
+            uploadDate: { $$type: date }
+            md5: { $$exists: false }
+            filename: filename
+      - name: find
+        object: *bucket0_chunks_collection
+        arguments:
+          filter: {}
+        expectResult: []
+  - description: "upload when length is 1 sans MD5"
+    operations:
+      - name: upload
+        object: *bucket0
+        arguments:
+          filename: "filename"
+          source: { $$hexBytes: "11" }
+          chunkSizeBytes: 4
+          disableMD5: true
+        expectResult: { $$type: objectId }
+        saveResultAsEntity: *uploadedObjectId
+      - name: find
+        object: *bucket0_files_collection
+        arguments:
+          filter: {}
+        expectResult:
+          - _id: { $$matchesEntity: *uploadedObjectId }
+            length: 1
+            chunkSize: 4
+            uploadDate: { $$type: date }
+            md5: { $$exists: false }
+            filename: filename
+      - name: find
+        object: *bucket0_chunks_collection
+        arguments:
+          filter: {}
+        expectResult:
+          - _id: { $$type: objectId }
+            files_id: { $$matchesEntity: *uploadedObjectId }
+            n: 0
+            data: { $binary: { base64: "EQ==", subType: "00" } } # hex 11

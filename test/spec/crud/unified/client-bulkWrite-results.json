@@ -1,0 +1,832 @@
+{
+  "description": "client bulkWrite results",
+  "schemaVersion": "1.1",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "8.0"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        },
+        {
+          "_id": 5,
+          "x": 55
+        },
+        {
+          "_id": 6,
+          "x": 66
+        },
+        {
+          "_id": 7,
+          "x": 77
+        }
+      ]
+    }
+  ],
+  "_yamlAnchors": {
+    "namespace": "crud-tests.coll0"
+  },
+  "tests": [
+    {
+      "description": "client bulkWrite with verboseResults: true returns detailed results",
+      "operations": [
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "crud-tests.coll0",
+                  "document": {
+                    "_id": 8,
+                    "x": 88
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "$and": [
+                      {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      {
+                        "_id": {
+                          "$lte": 3
+                        }
+                      }
+                    ]
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 2
+                    }
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 4
+                  },
+                  "replacement": {
+                    "x": 44
+                  },
+                  "upsert": true
+                }
+              },
+              {
+                "deleteOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 5
+                  }
+                }
+              },
+              {
+                "deleteMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "$and": [
+                      {
+                        "_id": {
+                          "$gt": 5
+                        }
+                      },
+                      {
+                        "_id": {
+                          "$lte": 7
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "verboseResults": true
+          },
+          "expectResult": {
+            "insertedCount": 1,
+            "upsertedCount": 1,
+            "matchedCount": 3,
+            "modifiedCount": 3,
+            "deletedCount": 3,
+            "insertResults": {
+              "0": {
+                "insertedId": 8
+              }
+            },
+            "updateResults": {
+              "1": {
+                "matchedCount": 1,
+                "modifiedCount": 1,
+                "upsertedId": {
+                  "$$exists": false
+                }
+              },
+              "2": {
+                "matchedCount": 2,
+                "modifiedCount": 2,
+                "upsertedId": {
+                  "$$exists": false
+                }
+              },
+              "3": {
+                "matchedCount": 1,
+                "modifiedCount": 0,
+                "upsertedId": 4
+              }
+            },
+            "deleteResults": {
+              "4": {
+                "deletedCount": 1
+              },
+              "5": {
+                "deletedCount": 2
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "errorsOnly": false,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "insert": 0,
+                      "document": {
+                        "_id": 8,
+                        "x": 88
+                      }
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "_id": 1
+                      },
+                      "updateMods": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "multi": false
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "$and": [
+                          {
+                            "_id": {
+                              "$gt": 1
+                            }
+                          },
+                          {
+                            "_id": {
+                              "$lte": 3
+                            }
+                          }
+                        ]
+                      },
+                      "updateMods": {
+                        "$inc": {
+                          "x": 2
+                        }
+                      },
+                      "multi": true
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "_id": 4
+                      },
+                      "updateMods": {
+                        "x": 44
+                      },
+                      "upsert": true,
+                      "multi": false
+                    },
+                    {
+                      "delete": 0,
+                      "filter": {
+                        "_id": 5
+                      },
+                      "multi": false
+                    },
+                    {
+                      "delete": 0,
+                      "filter": {
+                        "$and": [
+                          {
+                            "_id": {
+                              "$gt": 5
+                            }
+                          },
+                          {
+                            "_id": {
+                              "$lte": 7
+                            }
+                          }
+                        ]
+                      },
+                      "multi": true
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "crud-tests.coll0"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 24
+            },
+            {
+              "_id": 3,
+              "x": 35
+            },
+            {
+              "_id": 4,
+              "x": 44
+            },
+            {
+              "_id": 8,
+              "x": 88
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "client bulkWrite with verboseResults: false omits detailed results",
+      "operations": [
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "crud-tests.coll0",
+                  "document": {
+                    "_id": 8,
+                    "x": 88
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "$and": [
+                      {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      {
+                        "_id": {
+                          "$lte": 3
+                        }
+                      }
+                    ]
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 2
+                    }
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 4
+                  },
+                  "replacement": {
+                    "x": 44
+                  },
+                  "upsert": true
+                }
+              },
+              {
+                "deleteOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 5
+                  }
+                }
+              },
+              {
+                "deleteMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "$and": [
+                      {
+                        "_id": {
+                          "$gt": 5
+                        }
+                      },
+                      {
+                        "_id": {
+                          "$lte": 7
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "verboseResults": false
+          },
+          "expectResult": {
+            "insertedCount": 1,
+            "upsertedCount": 1,
+            "matchedCount": 3,
+            "modifiedCount": 3,
+            "deletedCount": 3,
+            "insertResults": {
+              "$$unsetOrMatches": {}
+            },
+            "updateResults": {
+              "$$unsetOrMatches": {}
+            },
+            "deleteResults": {
+              "$$unsetOrMatches": {}
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "errorsOnly": true,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "insert": 0,
+                      "document": {
+                        "_id": 8,
+                        "x": 88
+                      }
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "_id": 1
+                      },
+                      "updateMods": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "multi": false
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "$and": [
+                          {
+                            "_id": {
+                              "$gt": 1
+                            }
+                          },
+                          {
+                            "_id": {
+                              "$lte": 3
+                            }
+                          }
+                        ]
+                      },
+                      "updateMods": {
+                        "$inc": {
+                          "x": 2
+                        }
+                      },
+                      "multi": true
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "_id": 4
+                      },
+                      "updateMods": {
+                        "x": 44
+                      },
+                      "upsert": true,
+                      "multi": false
+                    },
+                    {
+                      "delete": 0,
+                      "filter": {
+                        "_id": 5
+                      },
+                      "multi": false
+                    },
+                    {
+                      "delete": 0,
+                      "filter": {
+                        "$and": [
+                          {
+                            "_id": {
+                              "$gt": 5
+                            }
+                          },
+                          {
+                            "_id": {
+                              "$lte": 7
+                            }
+                          }
+                        ]
+                      },
+                      "multi": true
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "crud-tests.coll0"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 24
+            },
+            {
+              "_id": 3,
+              "x": 35
+            },
+            {
+              "_id": 4,
+              "x": 44
+            },
+            {
+              "_id": 8,
+              "x": 88
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "client bulkWrite defaults to verboseResults: false",
+      "operations": [
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "crud-tests.coll0",
+                  "document": {
+                    "_id": 8,
+                    "x": 88
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "$and": [
+                      {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      {
+                        "_id": {
+                          "$lte": 3
+                        }
+                      }
+                    ]
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 2
+                    }
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 4
+                  },
+                  "replacement": {
+                    "x": 44
+                  },
+                  "upsert": true
+                }
+              },
+              {
+                "deleteOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": 5
+                  }
+                }
+              },
+              {
+                "deleteMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "$and": [
+                      {
+                        "_id": {
+                          "$gt": 5
+                        }
+                      },
+                      {
+                        "_id": {
+                          "$lte": 7
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "insertedCount": 1,
+            "upsertedCount": 1,
+            "matchedCount": 3,
+            "modifiedCount": 3,
+            "deletedCount": 3,
+            "insertResults": {
+              "$$unsetOrMatches": {}
+            },
+            "updateResults": {
+              "$$unsetOrMatches": {}
+            },
+            "deleteResults": {
+              "$$unsetOrMatches": {}
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "errorsOnly": true,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "insert": 0,
+                      "document": {
+                        "_id": 8,
+                        "x": 88
+                      }
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "_id": 1
+                      },
+                      "updateMods": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "multi": false
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "$and": [
+                          {
+                            "_id": {
+                              "$gt": 1
+                            }
+                          },
+                          {
+                            "_id": {
+                              "$lte": 3
+                            }
+                          }
+                        ]
+                      },
+                      "updateMods": {
+                        "$inc": {
+                          "x": 2
+                        }
+                      },
+                      "multi": true
+                    },
+                    {
+                      "update": 0,
+                      "filter": {
+                        "_id": 4
+                      },
+                      "updateMods": {
+                        "x": 44
+                      },
+                      "upsert": true,
+                      "multi": false
+                    },
+                    {
+                      "delete": 0,
+                      "filter": {
+                        "_id": 5
+                      },
+                      "multi": false
+                    },
+                    {
+                      "delete": 0,
+                      "filter": {
+                        "$and": [
+                          {
+                            "_id": {
+                              "$gt": 5
+                            }
+                          },
+                          {
+                            "_id": {
+                              "$lte": 7
+                            }
+                          }
+                        ]
+                      },
+                      "multi": true
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "crud-tests.coll0"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 24
+            },
+            {
+              "_id": 3,
+              "x": 35
+            },
+            {
+              "_id": 4,
+              "x": 44
+            },
+            {
+              "_id": 8,
+              "x": 88
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+description: deleteMany
+
+schemaVersion: '1.0'
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v1
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  -
+    description: 'DeleteMany when many documents match'
+    operations:
+      -
+        object: *collection0
+        name: deleteMany
+        arguments:
+          filter: { _id: { $gt: 1 } }
+        expectResult:
+          deletedCount: 2
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'DeleteMany when no document matches'
+    operations:
+      -
+        object: *collection0
+        name: deleteMany
+        arguments:
+          filter: { _id: 4 }
+        expectResult:
+          deletedCount: 0
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }

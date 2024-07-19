@@ -1,0 +1,93 @@
+{
+  "description": "updateOne-collation",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.4",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": "ping"
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "UpdateOne when one document matches with collation",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "x": "PING"
+            },
+            "update": {
+              "$set": {
+                "x": "pong"
+              }
+            },
+            "collation": {
+              "locale": "en_US",
+              "strength": 2
+            }
+          },
+          "expectResult": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": "pong"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

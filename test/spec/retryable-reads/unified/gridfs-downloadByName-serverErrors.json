@@ -1,0 +1,1016 @@
+{
+  "description": "gridfs-downloadByName-serverErrors",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "single",
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.7",
+      "topologies": [
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "retryable-reads-tests"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket0",
+        "database": "database0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "retryable-reads-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "length": 1,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "filename": "abc",
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "retryable-reads-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000002"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "EQ==",
+              "subType": "00"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "DownloadByName succeeds after InterruptedAtShutdown",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 11600
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after InterruptedDueToReplStateChange",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 11602
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after NotWritablePrimary",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 10107
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after NotPrimaryNoSecondaryOk",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 13435
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after NotPrimaryOrSecondary",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 13436
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after PrimarySteppedDown",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 189
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after ShutdownInProgress",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after HostNotFound",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 7
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after HostUnreachable",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 6
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after NetworkTimeout",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 89
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName succeeds after SocketException",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 9001
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "11"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks"
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName fails after two NotWritablePrimary errors",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 10107
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket0",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DownloadByName fails after NotWritablePrimary when retryReads is false",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "createEntities",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client1",
+                  "useMultipleMongoses": false,
+                  "uriOptions": {
+                    "retryReads": false
+                  },
+                  "observeEvents": [
+                    "commandStartedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "database1",
+                  "client": "client1",
+                  "databaseName": "retryable-reads-tests"
+                }
+              },
+              {
+                "bucket": {
+                  "id": "bucket1",
+                  "database": "database1"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client1",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 10107
+              }
+            }
+          }
+        },
+        {
+          "object": "bucket1",
+          "name": "downloadByName",
+          "arguments": {
+            "filename": "abc"
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client1",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "filename": "abc"
+                  }
+                },
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

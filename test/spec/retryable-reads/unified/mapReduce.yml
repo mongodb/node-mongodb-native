@@ -1,0 +1,153 @@
+description: mapReduce
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - single
+      - replicaset
+  -
+    minServerVersion: 4.1.7
+    # serverless proxy does not support mapReduce operation
+    serverless: forbid
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name retryable-reads-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 0
+      -
+        _id: 2
+        x: 1
+      -
+        _id: 3
+        x: 2
+
+tests:
+  -
+    description: 'MapReduce succeeds with retry on'
+    operations:
+      - &operation_succeeds
+        object: *collection0
+        name: mapReduce
+        arguments:
+          map:
+            $code: 'function inc() { return emit(0, this.x + 1) }'
+          reduce:
+            $code: 'function sum(key, values) { return values.reduce((acc, x) => acc + x); }'
+          out:
+            inline: 1
+        expectResult:
+          -
+            _id: 0
+            value: 6
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - &command_started_event
+            commandStartedEvent:
+              command:
+                mapReduce: *collection_name
+                map:
+                  $code: 'function inc() { return emit(0, this.x + 1) }'
+                reduce:
+                  $code: 'function sum(key, values) { return values.reduce((acc, x) => acc + x); }'
+                out:
+                  inline: 1
+              databaseName: *database_name
+  -
+    description: 'MapReduce fails with retry on'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint: &failCommand_failPoint
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - mapReduce
+              closeConnection: true
+      - &operation_fails
+        object: *collection0
+        name: mapReduce
+        arguments:
+          map:
+            $code: 'function inc() { return emit(0, this.x + 1) }'
+          reduce:
+            $code: 'function sum(key, values) { return values.reduce((acc, x) => acc + x); }'
+          out:
+            inline: 1
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *command_started_event
+  -
+    description: 'MapReduce fails with retry off'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  retryReads: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client1
+          failPoint: *failCommand_failPoint
+      - <<: *operation_fails
+        object: *collection1
+    expectEvents:
+      -
+        client: *client1
+        events:
+          - *command_started_event

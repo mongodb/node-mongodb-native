@@ -1,19 +1,55 @@
 {
-  "data": [
-    {
-      "_id": 1,
-      "x": 11
-    },
-    {
-      "_id": 2,
-      "x": 22
-    }
-  ],
-  "collection_name": "default_write_concern_coll",
-  "database_name": "default_write_concern_db",
-  "runOn": [
+  "description": "default-write-concern-2.6",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
     {
       "minServerVersion": "2.6"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "default-write-concern-tests",
+        "databaseOptions": {
+          "writeConcern": {}
+        }
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll",
+        "collectionOptions": {
+          "writeConcern": {}
+        }
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "default-write-concern-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
     }
   ],
   "tests": [
@@ -22,32 +58,36 @@
       "operations": [
         {
           "name": "deleteOne",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "filter": {}
           },
-          "result": {
+          "expectResult": {
             "deletedCount": 1
           }
         }
       ],
-      "expectations": [
+      "expectEvents": [
         {
-          "command_started_event": {
-            "command": {
-              "delete": "default_write_concern_coll",
-              "deletes": [
-                {
-                  "q": {},
-                  "limit": 1
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll",
+                  "deletes": [
+                    {
+                      "q": {},
+                      "limit": 1
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
                 }
-              ],
-              "writeConcern": null
+              }
             }
-          }
+          ]
         }
       ]
     },
@@ -56,32 +96,36 @@
       "operations": [
         {
           "name": "deleteMany",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "filter": {}
           },
-          "result": {
+          "expectResult": {
             "deletedCount": 2
           }
         }
       ],
-      "expectations": [
+      "expectEvents": [
         {
-          "command_started_event": {
-            "command": {
-              "delete": "default_write_concern_coll",
-              "deletes": [
-                {
-                  "q": {},
-                  "limit": 0
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll",
+                  "deletes": [
+                    {
+                      "q": {},
+                      "limit": 0
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
                 }
-              ],
-              "writeConcern": null
+              }
             }
-          }
+          ]
         }
       ]
     },
@@ -90,30 +134,24 @@
       "operations": [
         {
           "name": "bulkWrite",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "ordered": true,
             "requests": [
               {
-                "name": "deleteMany",
-                "arguments": {
+                "deleteMany": {
                   "filter": {}
                 }
               },
               {
-                "name": "insertOne",
-                "arguments": {
+                "insertOne": {
                   "document": {
                     "_id": 1
                   }
                 }
               },
               {
-                "name": "updateOne",
-                "arguments": {
+                "updateOne": {
                   "filter": {
                     "_id": 1
                   },
@@ -125,16 +163,14 @@
                 }
               },
               {
-                "name": "insertOne",
-                "arguments": {
+                "insertOne": {
                   "document": {
                     "_id": 2
                   }
                 }
               },
               {
-                "name": "replaceOne",
-                "arguments": {
+                "replaceOne": {
                   "filter": {
                     "_id": 1
                   },
@@ -144,16 +180,14 @@
                 }
               },
               {
-                "name": "insertOne",
-                "arguments": {
+                "insertOne": {
                   "document": {
                     "_id": 3
                   }
                 }
               },
               {
-                "name": "updateMany",
-                "arguments": {
+                "updateMany": {
                   "filter": {
                     "_id": 1
                   },
@@ -165,8 +199,7 @@
                 }
               },
               {
-                "name": "deleteOne",
-                "arguments": {
+                "deleteOne": {
                   "filter": {
                     "_id": 3
                   }
@@ -176,10 +209,177 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "name": "default_write_concern_coll",
-          "data": [
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll",
+                  "deletes": [
+                    {
+                      "q": {},
+                      "limit": 0
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll",
+                  "documents": [
+                    {
+                      "_id": 1
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "$set": {
+                          "x": 1
+                        }
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "x": 2
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll",
+                  "documents": [
+                    {
+                      "_id": 3
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "$set": {
+                          "x": 3
+                        }
+                      },
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": 3
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "default-write-concern-tests",
+          "documents": [
             {
               "_id": 1,
               "x": 3
@@ -189,136 +389,6 @@
             }
           ]
         }
-      },
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "delete": "default_write_concern_coll",
-              "deletes": [
-                {
-                  "q": {},
-                  "limit": 0
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "default_write_concern_coll",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "update": "default_write_concern_coll",
-              "updates": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "u": {
-                    "$set": {
-                      "x": 1
-                    }
-                  }
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "default_write_concern_coll",
-              "documents": [
-                {
-                  "_id": 2
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "update": "default_write_concern_coll",
-              "updates": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "u": {
-                    "x": 2
-                  }
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "default_write_concern_coll",
-              "documents": [
-                {
-                  "_id": 3
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "update": "default_write_concern_coll",
-              "updates": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "u": {
-                    "$set": {
-                      "x": 3
-                    }
-                  },
-                  "multi": true
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "delete": "default_write_concern_coll",
-              "deletes": [
-                {
-                  "q": {
-                    "_id": 3
-                  },
-                  "limit": 1
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        }
       ]
     },
     {
@@ -326,10 +396,7 @@
       "operations": [
         {
           "name": "insertOne",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "document": {
               "_id": 3
@@ -338,10 +405,7 @@
         },
         {
           "name": "insertMany",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "documents": [
               {
@@ -354,10 +418,51 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "name": "default_write_concern_coll",
-          "data": [
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll",
+                  "documents": [
+                    {
+                      "_id": 3
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll",
+                  "documents": [
+                    {
+                      "_id": 4
+                    },
+                    {
+                      "_id": 5
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "default-write-concern-tests",
+          "documents": [
             {
               "_id": 1,
               "x": 11
@@ -377,37 +482,6 @@
             }
           ]
         }
-      },
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "default_write_concern_coll",
-              "documents": [
-                {
-                  "_id": 3
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "default_write_concern_coll",
-              "documents": [
-                {
-                  "_id": 4
-                },
-                {
-                  "_id": 5
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        }
       ]
     },
     {
@@ -415,10 +489,7 @@
       "operations": [
         {
           "name": "updateOne",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "filter": {
               "_id": 1
@@ -432,10 +503,7 @@
         },
         {
           "name": "updateMany",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "filter": {
               "_id": 2
@@ -449,10 +517,7 @@
         },
         {
           "name": "replaceOne",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "filter": {
               "_id": 2
@@ -463,10 +528,98 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "name": "default_write_concern_coll",
-          "data": [
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "$set": {
+                          "x": 1
+                        }
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 2
+                      },
+                      "u": {
+                        "$set": {
+                          "x": 2
+                        }
+                      },
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 2
+                      },
+                      "u": {
+                        "x": 3
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "default-write-concern-tests",
+          "documents": [
             {
               "_id": 1,
               "x": 1
@@ -476,67 +629,6 @@
               "x": 3
             }
           ]
-        }
-      },
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "update": "default_write_concern_coll",
-              "updates": [
-                {
-                  "q": {
-                    "_id": 1
-                  },
-                  "u": {
-                    "$set": {
-                      "x": 1
-                    }
-                  }
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "update": "default_write_concern_coll",
-              "updates": [
-                {
-                  "q": {
-                    "_id": 2
-                  },
-                  "u": {
-                    "$set": {
-                      "x": 2
-                    }
-                  },
-                  "multi": true
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "update": "default_write_concern_coll",
-              "updates": [
-                {
-                  "q": {
-                    "_id": 2
-                  },
-                  "u": {
-                    "x": 3
-                  }
-                }
-              ],
-              "writeConcern": null
-            }
-          }
         }
       ]
     }

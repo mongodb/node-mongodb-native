@@ -1,0 +1,37 @@
+description: "client bulkWrite errorResponse"
+schemaVersion: "1.12"
+runOnRequirements:
+  - minServerVersion: "8.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false # Avoid setting fail points with multiple mongoses
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+
+tests:
+  - description: "client bulkWrite operations support errorResponse assertions"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ bulkWrite ]
+              errorCode: &errorCode 8 # UnknownError
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 1 }
+        expectError:
+          errorCode: *errorCode
+          errorResponse:
+            code: *errorCode

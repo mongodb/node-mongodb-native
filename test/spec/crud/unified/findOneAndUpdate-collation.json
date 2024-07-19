@@ -1,0 +1,106 @@
+{
+  "description": "findOneAndUpdate-collation",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.4",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": "ping"
+        },
+        {
+          "_id": 3,
+          "x": "pINg"
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "FindOneAndUpdate when many documents match with collation returning the document before modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "x": "PING"
+            },
+            "update": {
+              "$set": {
+                "x": "pong"
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "sort": {
+              "_id": 1
+            },
+            "collation": {
+              "locale": "en_US",
+              "strength": 2
+            }
+          },
+          "expectResult": {
+            "x": "ping"
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": "pong"
+            },
+            {
+              "_id": 3,
+              "x": "pINg"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -213,3 +213,20 @@ tests:
                 comment: { $$exists: false }
               commandName: getMore
               databaseName: *database0Name
+  -
+    description: 'Aggregate with multiple stages'
+    operations:
+      -
+        object: *collection0
+        name: aggregate
+        arguments:
+          pipeline:
+            - { $sort: { x: 1 } }
+            - { $match: { _id: { $gt: 1 } } }
+          batchSize: 2
+        expectResult:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+          - { _id: 4, x: 44 }
+          - { _id: 5, x: 55 }
+          - { _id: 6, x: 66 }

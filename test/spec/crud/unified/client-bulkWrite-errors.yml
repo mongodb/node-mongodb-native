@@ -1,0 +1,240 @@
+description: "client bulkWrite errors"
+schemaVersion: "1.21"
+runOnRequirements:
+  - minServerVersion: "8.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+      uriOptions:
+        retryWrites: false
+      useMultipleMongoses: false # Target a single mongos with failpoint
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+  writeConcernErrorCode: &writeConcernErrorCode 91
+  writeConcernErrorMessage: &writeConcernErrorMessage "Replication is being shut down"
+  undefinedVarCode: &undefinedVarCode 17276 # Use of an undefined variable
+
+tests:
+  - description: "an individual operation fails during an ordered bulkWrite"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+            - deleteOne:
+                namespace: *namespace
+                filter:
+                  $expr:
+                    $eq: [ "$_id", "$$id2" ] # Attempt to access a nonexistent let var
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 3 }
+          verboseResults: true
+        expectError:
+          expectResult:
+            insertedCount: 0
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 1
+            insertResults: {}
+            updateResults: {}
+            deleteResults:
+              0:
+                deletedCount: 1
+          writeErrors:
+            1:
+              code: *undefinedVarCode
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+  - description: "an individual operation fails during an unordered bulkWrite"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+            - deleteOne:
+                namespace: *namespace
+                filter:
+                  $expr:
+                    $eq: [ "$_id", "$$id2" ] # Attempt to access a nonexistent let var
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 3 }
+          verboseResults: true
+          ordered: false
+        expectError:
+          expectResult:
+            insertedCount: 0
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 2
+            insertResults: {}
+            updateResults: {}
+            deleteResults:
+              0:
+                deletedCount: 1
+              2:
+                deletedCount: 1
+          writeErrors:
+            1:
+              code: *undefinedVarCode
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 2, x: 22 }
+  - description: "detailed results are omitted from error when verboseResults is false"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+            - deleteOne:
+                namespace: *namespace
+                filter:
+                  $expr:
+                    $eq: [ "$_id", "$$id2" ] # Attempt to access a nonexistent let var
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 3 }
+          verboseResults: false
+        expectError:
+          expectResult:
+            insertedCount: 0
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 1
+            insertResults:
+              $$unsetOrMatches: {}
+            updateResults:
+              $$unsetOrMatches: {}
+            deleteResults:
+              $$unsetOrMatches: {}
+          writeErrors:
+            1:
+              code: *undefinedVarCode
+  - description: "a top-level failure occurs during a bulkWrite"
+    operations:
+      - object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - bulkWrite
+              errorCode: 8 # UnknownError
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { x: 1 }
+          verboseResults: true
+        expectError:
+          errorCode: 8
+  - description: "a bulk write with only errors does not report a partial result"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - deleteOne:
+                namespace: *namespace
+                filter:
+                  $expr:
+                    $eq: [ "$_id", "$$id2" ] # Attempt to access a nonexistent let var
+          verboseResults: true
+        expectError:
+          expectResult:
+            $$unsetOrMatches: {} # Empty or nonexistent result when no successful writes occurred
+          writeErrors:
+            0:
+              code: *undefinedVarCode
+  - description: "a write concern error occurs during a bulkWrite"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - bulkWrite
+              writeConcernError:
+                code: *writeConcernErrorCode
+                errmsg: *writeConcernErrorMessage
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 10 }
+          verboseResults: true
+        expectError:
+          expectResult:
+            insertedCount: 1
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 0
+            insertResults:
+              0:
+                insertedId: 10
+            updateResults: {}
+            deleteResults: {}
+          writeConcernErrors:
+            - code: *writeConcernErrorCode
+              message: *writeConcernErrorMessage
+  - description: "an empty list of write models is a client-side error"
+    operations:
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          models: []
+          verboseResults: true
+        expectError:
+          isClientError: true

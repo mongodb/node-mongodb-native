@@ -1,0 +1,44 @@
+description: insertOne
+
+schemaVersion: '1.0'
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v1
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  -
+    description: 'InsertOne with a non-existing document'
+    operations:
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 2, x: 22 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
