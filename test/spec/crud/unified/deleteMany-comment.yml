@@ -74,7 +74,8 @@ tests:
 
   - description: "deleteMany with comment - pre 4.4"
     runOnRequirements:
-      - maxServerVersion: "4.2.99"
+      - minServerVersion: "3.4.0"
+        maxServerVersion: "4.2.99"
     operations:
       - name: deleteMany
         object: *collection0

@@ -1,0 +1,101 @@
+{
+  "description": "updateMany-collation",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.4",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": "ping"
+        },
+        {
+          "_id": 3,
+          "x": "pINg"
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "UpdateMany when many documents match with collation",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "updateMany",
+          "arguments": {
+            "filter": {
+              "x": "ping"
+            },
+            "update": {
+              "$set": {
+                "x": "pong"
+              }
+            },
+            "collation": {
+              "locale": "en_US",
+              "strength": 2
+            }
+          },
+          "expectResult": {
+            "matchedCount": 2,
+            "modifiedCount": 2,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": "pong"
+            },
+            {
+              "_id": 3,
+              "x": "pong"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,696 @@
+{
+  "description": "listDatabases-serverErrors",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "single",
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.7",
+      "topologies": [
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "retryable-reads-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "ListDatabases succeeds after InterruptedAtShutdown",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 11600
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after InterruptedDueToReplStateChange",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 11602
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after NotWritablePrimary",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 10107
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after NotPrimaryNoSecondaryOk",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 13435
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after NotPrimaryOrSecondary",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 13436
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after PrimarySteppedDown",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 189
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after ShutdownInProgress",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after HostNotFound",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 7
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after HostUnreachable",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 6
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after NetworkTimeout",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 89
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases succeeds after SocketException",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 9001
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases fails after two NotWritablePrimary errors",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 10107
+              }
+            }
+          }
+        },
+        {
+          "object": "client0",
+          "name": "listDatabases",
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "ListDatabases fails after NotWritablePrimary when retryReads is false",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "createEntities",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client1",
+                  "useMultipleMongoses": false,
+                  "uriOptions": {
+                    "retryReads": false
+                  },
+                  "observeEvents": [
+                    "commandStartedEvent"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client1",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "errorCode": 10107
+              }
+            }
+          }
+        },
+        {
+          "object": "client1",
+          "name": "listDatabases",
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client1",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listDatabases": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

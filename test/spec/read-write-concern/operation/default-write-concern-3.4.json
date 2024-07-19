@@ -1,30 +1,68 @@
 {
-  "data": [
-    {
-      "_id": 1,
-      "x": 11
-    },
-    {
-      "_id": 2,
-      "x": 22
-    }
-  ],
-  "collection_name": "default_write_concern_coll",
-  "database_name": "default_write_concern_db",
-  "runOn": [
+  "description": "default-write-concern-3.4",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
     {
       "minServerVersion": "3.4"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "default-write-concern-tests",
+        "databaseOptions": {
+          "writeConcern": {}
+        }
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll",
+        "collectionOptions": {
+          "writeConcern": {}
+        }
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "default-write-concern-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
     }
   ],
   "tests": [
     {
       "description": "Aggregate with $out omits default write concern",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "name": "aggregate",
           "arguments": {
             "pipeline": [
@@ -42,37 +80,45 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "name": "other_collection_name",
-          "data": [
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      }
+                    },
+                    {
+                      "$out": "other_collection_name"
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "other_collection_name",
+          "databaseName": "default-write-concern-tests",
+          "documents": [
             {
               "_id": 2,
               "x": 22
             }
           ]
-        }
-      },
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "aggregate": "default_write_concern_coll",
-              "pipeline": [
-                {
-                  "$match": {
-                    "_id": {
-                      "$gt": 1
-                    }
-                  }
-                },
-                {
-                  "$out": "other_collection_name"
-                }
-              ],
-              "writeConcern": null
-            }
-          }
         }
       ]
     },
@@ -80,39 +126,43 @@
       "description": "RunCommand with a write command omits default write concern (runCommand should never inherit write concern)",
       "operations": [
         {
-          "object": "database",
-          "databaseOptions": {
-            "writeConcern": {}
-          },
+          "object": "database0",
           "name": "runCommand",
-          "command_name": "delete",
           "arguments": {
             "command": {
-              "delete": "default_write_concern_coll",
+              "delete": "coll",
               "deletes": [
                 {
                   "q": {},
                   "limit": 1
                 }
               ]
-            }
+            },
+            "commandName": "delete"
           }
         }
       ],
-      "expectations": [
+      "expectEvents": [
         {
-          "command_started_event": {
-            "command": {
-              "delete": "default_write_concern_coll",
-              "deletes": [
-                {
-                  "q": {},
-                  "limit": 1
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll",
+                  "deletes": [
+                    {
+                      "q": {},
+                      "limit": 1
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  }
                 }
-              ],
-              "writeConcern": null
+              }
             }
-          }
+          ]
         }
       ]
     },
@@ -120,10 +170,7 @@
       "description": "CreateIndex and dropIndex omits default write concern",
       "operations": [
         {
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "name": "createIndex",
           "arguments": {
             "keys": {
@@ -132,53 +179,61 @@
           }
         },
         {
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "name": "dropIndex",
           "arguments": {
             "name": "x_1"
           }
         }
       ],
-      "expectations": [
+      "expectEvents": [
         {
-          "command_started_event": {
-            "command": {
-              "createIndexes": "default_write_concern_coll",
-              "indexes": [
-                {
-                  "name": "x_1",
-                  "key": {
-                    "x": 1
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "createIndexes": "coll",
+                  "indexes": [
+                    {
+                      "name": "x_1",
+                      "key": {
+                        "x": 1
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
                   }
                 }
-              ],
-              "writeConcern": null
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "dropIndexes": "coll",
+                  "index": "x_1",
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
             }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "dropIndexes": "default_write_concern_coll",
-              "index": "x_1",
-              "writeConcern": null
-            }
-          }
+          ]
         }
       ]
     },
     {
       "description": "MapReduce omits default write concern",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "mapReduce",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "map": {
               "$code": "function inc() { return emit(0, this.x + 1) }"
@@ -192,23 +247,30 @@
           }
         }
       ],
-      "expectations": [
+      "expectEvents": [
         {
-          "command_started_event": {
-            "command": {
-              "mapReduce": "default_write_concern_coll",
-              "map": {
-                "$code": "function inc() { return emit(0, this.x + 1) }"
-              },
-              "reduce": {
-                "$code": "function sum(key, values) { return values.reduce((acc, x) => acc + x); }"
-              },
-              "out": {
-                "inline": 1
-              },
-              "writeConcern": null
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "mapReduce": "coll",
+                  "map": {
+                    "$code": "function inc() { return emit(0, this.x + 1) }"
+                  },
+                  "reduce": {
+                    "$code": "function sum(key, values) { return values.reduce((acc, x) => acc + x); }"
+                  },
+                  "out": {
+                    "inline": 1
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
             }
-          }
+          ]
         }
       ]
     }

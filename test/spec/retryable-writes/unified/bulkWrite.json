@@ -1,0 +1,931 @@
+{
+  "description": "bulkWrite",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.6",
+      "topologies": [
+        "replicaset"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "retryable-writes-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "retryable-writes-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "First command is retried",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 1,
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 2
+              }
+            },
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "All commands are retried",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 7
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 3,
+                    "x": 33
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 4,
+                    "x": 44
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "upsert": true
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 5,
+                    "x": 55
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "replacement": {
+                    "_id": 3,
+                    "x": 333
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 1,
+            "insertedCount": 3,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 2,
+                "2": 3,
+                "4": 5
+              }
+            },
+            "matchedCount": 2,
+            "modifiedCount": 2,
+            "upsertedCount": 1,
+            "upsertedIds": {
+              "3": 4
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 23
+            },
+            {
+              "_id": 3,
+              "x": 333
+            },
+            {
+              "_id": 4,
+              "x": 45
+            },
+            {
+              "_id": 5,
+              "x": 55
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Both commands are retried after their first statement fails",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 2
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 2
+              }
+            },
+            "matchedCount": 2,
+            "modifiedCount": 2,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Second command is retried after its second statement fails",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "skip": 2
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 2
+              }
+            },
+            "matchedCount": 2,
+            "modifiedCount": 2,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with unordered execution",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 3,
+                    "x": 33
+                  }
+                }
+              }
+            ],
+            "ordered": false
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 2,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "0": 2,
+                "1": 3
+              }
+            },
+            "matchedCount": 0,
+            "modifiedCount": 0,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "First insertOne is never committed",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectError": {
+            "isError": true,
+            "expectResult": {
+              "deletedCount": 0,
+              "insertedCount": 0,
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              },
+              "matchedCount": 0,
+              "modifiedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {}
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Second updateOne is never committed",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "skip": 1
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectError": {
+            "isError": true,
+            "expectResult": {
+              "deletedCount": 0,
+              "insertedCount": 1,
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 2
+                }
+              },
+              "matchedCount": 0,
+              "modifiedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {}
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Third updateOne is never committed",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "skip": 2
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectError": {
+            "isError": true,
+            "expectResult": {
+              "deletedCount": 0,
+              "insertedCount": 1,
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "1": 2
+                }
+              },
+              "matchedCount": 1,
+              "modifiedCount": 1,
+              "upsertedCount": 0,
+              "upsertedIds": {}
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Single-document write following deleteMany is retried",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteMany": {
+                  "filter": {
+                    "x": 11
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 1,
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "1": 2
+              }
+            },
+            "matchedCount": 0,
+            "modifiedCount": 0,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Single-document write following updateMany is retried",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateMany": {
+                  "filter": {
+                    "x": 11
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              },
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 2,
+                    "x": 22
+                  }
+                }
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "deletedCount": 0,
+            "insertedCount": 1,
+            "insertedIds": {
+              "$$unsetOrMatches": {
+                "1": 2
+              }
+            },
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 12
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

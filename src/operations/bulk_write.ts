@@ -13,11 +13,11 @@ import { AbstractOperation, Aspect, defineAspects } from './operation';
 export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
   override options: BulkWriteOptions;
   collection: Collection;
-  operations: AnyBulkWriteOperation[];
+  operations: ReadonlyArray<AnyBulkWriteOperation>;
 
   constructor(
     collection: Collection,
-    operations: AnyBulkWriteOperation[],
+    operations: ReadonlyArray<AnyBulkWriteOperation>,
     options: BulkWriteOptions
   ) {
     super(options);

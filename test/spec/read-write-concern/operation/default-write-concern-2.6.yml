@@ -1,215 +1,296 @@
-# Test that setting a default write concern does not add a write concern
-# to the command sent over the wire.
+# Test that setting a default write concern does not add a write concern to the command sent over the wire.
 # Test operations that require 2.6+ server.
 
-data:
-  - {_id: 1, x: 11}
-  - {_id: 2, x: 22}
-collection_name: &collection_name default_write_concern_coll
-database_name: &database_name default_write_concern_db
+description: default-write-concern-2.6
 
-runOn:
-    - minServerVersion: "2.6"
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "2.6"
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name default-write-concern-tests
+      databaseOptions:
+        writeConcern: {}
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+      collectionOptions:
+        writeConcern: {}
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
 
 tests:
-  - description: DeleteOne omits default write concern
+  -
+    description: DeleteOne omits default write concern
     operations:
-      - name: deleteOne
-        object: collection
-        collectionOptions: {writeConcern: {}}
+      -
+        name: deleteOne
+        object: *collection0
         arguments:
           filter: {}
-        result:
+        expectResult:
           deletedCount: 1
-    expectations:
-      - command_started_event:
-          command:
-            delete: *collection_name
-            deletes:
-              - {q: {}, limit: 1}
-            writeConcern: null
-  - description: DeleteMany omits default write concern
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes: [ { q: {}, limit: 1 } ]
+                writeConcern: { $$exists: false }
+  -
+    description: DeleteMany omits default write concern
     operations:
-      - name: deleteMany
-        object: collection
-        collectionOptions: {writeConcern: {}}
+      -
+        name: deleteMany
+        object: *collection0
         arguments:
           filter: {}
-        result:
+        expectResult:
           deletedCount: 2
-    expectations:
-      - command_started_event:
-          command:
-            delete: *collection_name
-            deletes: [{q: {}, limit: 0}]
-            writeConcern: null
-  - description: BulkWrite with all models omits default write concern
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes: [ { q: {}, limit: 0 } ]
+                writeConcern: { $$exists: false }
+  -
+    description: BulkWrite with all models omits default write concern
     operations:
-      - name: bulkWrite
-        object: collection
-        collectionOptions: {writeConcern: {}}
+      -
+        name: bulkWrite
+        object: *collection0
         arguments:
           ordered: true
           requests:
-            - name: deleteMany
-              arguments:
+            -
+              deleteMany:
                 filter: {}
-            - name: insertOne
-              arguments:
-                document: {_id: 1}
-            - name: updateOne
-              arguments:
-                filter: {_id: 1}
-                update: {$set: {x: 1}}
-            - name: insertOne
-              arguments:
-                document: {_id: 2}
-            - name: replaceOne
-              arguments:
-                filter: {_id: 1}
-                replacement: {x: 2}
-            - name: insertOne
-              arguments:
-                document: {_id: 3}
-            - name: updateMany
-              arguments:
-                filter: {_id: 1}
-                update: {$set: {x: 3}}
-            - name: deleteOne
-              arguments:
-                filter: {_id: 3}
+            -
+              insertOne:
+                document: { _id: 1 }
+            -
+              updateOne:
+                filter: { _id: 1 }
+                update: { $set: { x: 1 } }
+            -
+              insertOne:
+                document: { _id: 2 }
+            -
+              replaceOne:
+                filter: { _id: 1 }
+                replacement: { x: 2 }
+            -
+              insertOne:
+                document: { _id: 3 }
+            -
+              updateMany:
+                filter: { _id: 1 }
+                update: { $set: { x: 3 } }
+            -
+              deleteOne:
+                filter: { _id: 3 }
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes: [ { q: {}, limit: 0 } ]
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents: [ { _id: 1 } ]
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: { _id: 1 }
+                    u: { $set: { x: 1 } }
+                    upsert: { $$unsetOrMatches: false }
+                    multi: { $$unsetOrMatches: false }
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents: [ { _id: 2 } ]
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: { _id: 1 }
+                    u: { x: 2 }
+                    upsert: { $$unsetOrMatches: false }
+                    multi: { $$unsetOrMatches: false }
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents: [ { _id: 3 } ]
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: { _id: 1 }
+                    u: { $set: { x: 3 } }
+                    multi: true
+                    upsert: { $$unsetOrMatches: false }
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes: [ { q: { _id: 3 }, limit: 1 } ]
+                writeConcern: { $$exists: false }
     outcome:
-      collection:
-        name: *collection_name
-        data:
-          - {_id: 1, x: 3}
-          - {_id: 2}
-    expectations:
-      - command_started_event:
-          command:
-            delete: *collection_name
-            deletes: [{q: {}, limit: 0}]
-            writeConcern: null
-      - command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - {_id: 1}
-            writeConcern: null
-      - command_started_event:
-          command:
-            update: *collection_name
-            updates:
-              - {q: {_id: 1}, u: {$set: {x: 1}}}
-            writeConcern: null
-      - command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - {_id: 2}
-            writeConcern: null
-      - command_started_event:
-          command:
-            update: *collection_name
-            updates:
-              - {q: {_id: 1}, u: {x: 2}}
-            writeConcern: null
-      - command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - {_id: 3}
-            writeConcern: null
-      - command_started_event:
-          command:
-            update: *collection_name
-            updates: 
-              - {q: {_id: 1}, u: {$set: {x: 3}}, multi: true}
-            writeConcern: null
-      - command_started_event:
-          command:
-            delete: *collection_name
-            deletes: [{q: {_id: 3}, limit: 1}]
-            writeConcern: null
-  - description: 'InsertOne and InsertMany omit default write concern'
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 3 }
+          - { _id: 2 }
+  -
+    description: InsertOne and InsertMany omit default write concern
     operations:
-      - name: insertOne
-        object: collection
-        collectionOptions: {writeConcern: {}}
+      -
+        name: insertOne
+        object: *collection0
         arguments:
-          document: {_id: 3}
-      - name: insertMany
-        object: collection
-        collectionOptions: {writeConcern: {}}
+          document: { _id: 3 }
+      -
+        name: insertMany
+        object: *collection0
         arguments:
           documents:
-            - {_id: 4}
-            - {_id: 5}
+            - { _id: 4 }
+            - { _id: 5 }
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents: [ { _id: 3 } ]
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents: [ { _id: 4 }, { _id: 5 } ]
+                writeConcern: { $$exists: false }
     outcome:
-      collection:
-        name: *collection_name
-        data:
-          - {_id: 1, x: 11}
-          - {_id: 2, x: 22}
-          - {_id: 3}
-          - {_id: 4}
-          - {_id: 5}
-    expectations:
-      - command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - {_id: 3}
-            writeConcern: null
-      - command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - {_id: 4}
-              - {_id: 5}
-            writeConcern: null
-  - description: 'UpdateOne, UpdateMany, and ReplaceOne omit default write concern'
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3 }
+          - { _id: 4 }
+          - { _id: 5 }
+  -
+    description: UpdateOne, UpdateMany, and ReplaceOne omit default write concern
     operations:
-      - name: updateOne
-        object: collection
-        collectionOptions: {writeConcern: {}}
+      -
+        name: updateOne
+        object: *collection0
         arguments:
-          filter: {_id: 1}
-          update: {$set: {x: 1}}
-      - name: updateMany
-        object: collection
-        collectionOptions: {writeConcern: {}}
+          filter: { _id: 1 }
+          update: { $set: { x: 1 } }
+      -
+        name: updateMany
+        object: *collection0
         arguments:
-          filter: {_id: 2}
-          update: {$set: {x: 2}}
-      - name: replaceOne
-        object: collection
-        collectionOptions: {writeConcern: {}}
+          filter: { _id: 2 }
+          update: { $set: { x: 2 } }
+      -
+        name: replaceOne
+        object: *collection0
         arguments:
-          filter: {_id: 2}
-          replacement: {x: 3}
+          filter: { _id: 2 }
+          replacement: { x: 3 }
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: { _id: 1 }
+                    u: { $set: { x: 1 } }
+                    upsert: { $$unsetOrMatches: false }
+                    multi: { $$unsetOrMatches: false }
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: { _id: 2 }
+                    u: { $set: { x: 2 } }
+                    multi: true
+                    upsert: { $$unsetOrMatches: false }
+                writeConcern: { $$exists: false }
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: { _id: 2 }
+                    u: { x: 3 }
+                    upsert: { $$unsetOrMatches: false }
+                    multi: { $$unsetOrMatches: false }
+                writeConcern: { $$exists: false }
     outcome:
-      collection:
-        name: *collection_name
-        data:
-          - {_id: 1, x: 1}
-          - {_id: 2, x: 3}
-    expectations:
-      - command_started_event:
-          command:
-            update: *collection_name
-            updates:
-              - {q: {_id: 1}, u: {$set: {x: 1}}}
-            writeConcern: null
-      - command_started_event:
-          command:
-            update: *collection_name
-            updates:
-              - {q: {_id: 2}, u: {$set: {x: 2}}, multi: true}
-            writeConcern: null
-      - command_started_event:
-          command:
-            update: *collection_name
-            updates:
-              - {q: {_id: 2}, u: {x: 3}}
-            writeConcern: null
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 1 }
+          - { _id: 2, x: 3 }

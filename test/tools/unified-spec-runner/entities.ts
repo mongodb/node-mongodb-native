@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
 
@@ -362,7 +361,15 @@ export class FailPointMap extends Map<string, Document> {
     let address: string;
     if (addressOrClient instanceof MongoClient) {
       client = addressOrClient;
-      address = client.topology!.s.seedlist.join(',');
+      address = client.topology?.s.seedlist.join(',');
+      if (client.topology?.s.credentials) {
+        if (
+          client.topology.s.credentials.mechanism === 'DEFAULT' ||
+          client.topology.s.credentials.mechanism.startsWith('SCRAM')
+        ) {
+          address = `${client.topology.s.credentials.username}:${client.topology.s.credentials.password}@${address}`;
+        }
+      }
     } else {
       // create a new client
       address = addressOrClient.toString();
@@ -516,7 +523,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     const entity = this.get(key);
     if (!entity) {
       if (assertExists) throw new Error(`Entity '${key}' does not exist`);
-      return;
+      return undefined;
     }
     if (NO_INSTANCE_CHECK.includes(type)) {
       // Skip constructor checks for interfaces.

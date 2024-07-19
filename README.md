@@ -70,7 +70,11 @@ Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mo
 
 ### Compatibility
 
-For server and runtime version compatibility matrices, please refer to the following links:
+The driver currently supports 3.6+ servers.
+
+** 3.6 support is deprecated and support will be removed in a future version **
+
+For exhaustive server and runtime version compatibility matrices, please refer to the following links:
 
 - [MongoDB](https://www.mongodb.com/docs/drivers/node/current/compatibility/#mongodb-compatibility)
 - [NodeJS](https://www.mongodb.com/docs/drivers/node/current/compatibility/#language-compatibility)

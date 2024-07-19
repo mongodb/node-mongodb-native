@@ -1,0 +1,132 @@
+description: "client bulkWrite update pipeline"
+schemaVersion: "1.1"
+runOnRequirements:
+  - minServerVersion: "8.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - {_id: 1, x: 1}
+      - {_id: 2, x: 2}
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+
+tests:
+  - description: "client bulkWrite updateOne with pipeline"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update:
+                  - $addFields:
+                      foo: 1
+          verboseResults: true
+        expectResult:
+          insertedCount: 0
+          upsertedCount: 0
+          matchedCount: 1
+          modifiedCount: 1
+          deletedCount: 0
+          insertResults: {}
+          updateResults:
+            0:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { "$$exists": false }
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods:
+                      - $addFields:
+                          foo: 1
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - databaseName: *database0Name
+        collectionName: *collection0Name
+        documents:
+          - {_id: 1, x: 1, foo: 1}
+          - {_id: 2, x: 2 }
+
+  - description: "client bulkWrite updateMany with pipeline"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateMany:
+                namespace: *namespace
+                filter: {}
+                update:
+                  - $addFields:
+                      foo: 1
+          verboseResults: true
+        expectResult:
+          insertedCount: 0
+          upsertedCount: 0
+          matchedCount: 2
+          modifiedCount: 2
+          deletedCount: 0
+          insertResults: {}
+          updateResults:
+            0:
+              matchedCount: 2
+              modifiedCount: 2
+              upsertedId: { "$$exists": false }
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: { }
+                    updateMods:
+                      - $addFields:
+                          foo: 1
+                    multi: true
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - databaseName: *database0Name
+        collectionName: *collection0Name
+        documents:
+          - {_id: 1, x: 1, foo: 1}
+          - {_id: 2, x: 2, foo: 1}

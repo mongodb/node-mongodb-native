@@ -1,0 +1,412 @@
+description: find-serverErrors
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - single
+      - replicaset
+  -
+    minServerVersion: 4.1.7
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name retryable-reads-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+      -
+        _id: 3
+        x: 33
+      -
+        _id: 4
+        x: 44
+      -
+        _id: 5
+        x: 55
+
+tests:
+  -
+    description: 'Find succeeds after InterruptedAtShutdown'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint: &failCommand_failPoint
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 11600
+      - &retryable_operation_succeeds
+        object: *collection0
+        name: find
+        arguments:
+          filter: {  }
+          sort:
+            _id: 1
+          limit: 4
+        expectResult:
+          -
+            _id: 1
+            x: 11
+          -
+            _id: 2
+            x: 22
+          -
+            _id: 3
+            x: 33
+          -
+            _id: 4
+            x: 44
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - &retryable_command_started_event
+            commandStartedEvent:
+              command:
+                find: *collection_name
+                filter: {  }
+                sort:
+                  _id: 1
+                limit: 4
+              databaseName: *database_name
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after InterruptedDueToReplStateChange'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 11602
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after NotWritablePrimary'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 10107
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after NotPrimaryNoSecondaryOk'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 13435
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after NotPrimaryOrSecondary'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 13436
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after PrimarySteppedDown'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 189
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after ShutdownInProgress'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 91
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after HostNotFound'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 7
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after HostUnreachable'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 6
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after NetworkTimeout'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 89
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find succeeds after SocketException'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 9001
+      - *retryable_operation_succeeds
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find fails after two NotWritablePrimary errors'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 2
+            data:
+              failCommands:
+                - find
+              errorCode: 10107
+      - &retryable_operation_fails
+        object: *collection0
+        name: find
+        arguments:
+          filter: {  }
+          sort:
+            _id: 1
+          limit: 4
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *retryable_command_started_event
+          - *retryable_command_started_event
+  -
+    description: 'Find fails after NotWritablePrimary when retryReads is false'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  retryReads: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client1
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              errorCode: 10107
+      - <<: *retryable_operation_fails
+        object: *collection1
+    expectEvents:
+      -
+        client: *client1
+        events:
+          - *retryable_command_started_event

@@ -61,6 +61,7 @@ export class TestConfiguration {
     mongodbClientEncryption: any;
     CSFLE_KMS_PROVIDERS: string | undefined;
     version: string;
+    libmongocrypt: string | null;
   };
   parameters: Record<string, any>;
   singleMongosLoadBalancerUri: string;

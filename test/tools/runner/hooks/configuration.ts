@@ -81,6 +81,12 @@ const testSkipBeforeEachHook = async function () {
   if (metadata && metadata.requires && Object.keys(metadata.requires).length > 0) {
     const failedFilter = filters.find(filter => filter.filter(this.currentTest) !== true);
     if (failedFilter) {
+      const maybeSkipReason = failedFilter.filter(this.currentTest);
+      if (typeof maybeSkipReason === 'string') {
+        this.currentTest.skipReason = maybeSkipReason;
+        this.skip();
+        return;
+      }
       const filterName = failedFilter.constructor.name;
       if (filterName === 'GenericPredicateFilter') {
         this.currentTest.skipReason = `filtered by ${filterName}: ${failedFilter.filter(
@@ -169,7 +175,8 @@ const testConfigBeforeHook = async function () {
     tls: process.env.SSL === 'ssl',
     csfle: {
       enabled: this.configuration.clientSideEncryption.enabled,
-      version: this.configuration.clientSideEncryption.version
+      version: this.configuration.clientSideEncryption.version,
+      libmongocrypt: this.configuration.clientSideEncryption.libmongocrypt
     },
     serverApi: MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,

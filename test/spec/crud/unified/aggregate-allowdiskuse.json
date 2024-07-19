@@ -1,155 +1,155 @@
 {
-    "description": "aggregate-allowdiskuse",
-    "schemaVersion": "1.0",
-    "createEntities": [
-      {
-        "client": {
-          "id": "client0",
-          "observeEvents": [
-            "commandStartedEvent"
+  "description": "aggregate-allowdiskuse",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Aggregate does not send allowDiskUse when value is not specified",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {}
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {}
+                    }
+                  ],
+                  "allowDiskUse": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "aggregate",
+                "databaseName": "crud-tests"
+              }
+            }
           ]
         }
-      },
-      {
-        "database": {
-          "id": "database0",
+      ]
+    },
+    {
+      "description": "Aggregate sends allowDiskUse false when false is specified",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {}
+              }
+            ],
+            "allowDiskUse": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
           "client": "client0",
-          "databaseName": "crud-tests"
-        }
-      },
-      {
-        "collection": {
-          "id": "collection0",
-          "database": "database0",
-          "collectionName": "coll0"
-        }
-      }
-    ],
-    "initialData": [
-      {
-        "collectionName": "coll0",
-        "databaseName": "crud-tests",
-        "documents": []
-      }
-    ],
-    "tests": [
-      {
-        "description": "Aggregate does not send allowDiskUse when value is not specified",
-        "operations": [
-          {
-            "object": "collection0",
-            "name": "aggregate",
-            "arguments": {
-              "pipeline": [
-                {
-                  "$match": {}
-                }
-              ]
-            }
-          }
-        ],
-        "expectEvents": [
-          {
-            "client": "client0",
-            "events": [
-              {
-                "commandStartedEvent": {
-                  "command": {
-                    "aggregate": "coll0",
-                    "pipeline": [
-                      {
-                        "$match": {}
-                      }
-                    ],
-                    "allowDiskUse": {
-                      "$$exists": false
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {}
                     }
-                  },
-                  "commandName": "aggregate",
-                  "databaseName": "crud-tests"
-                }
+                  ],
+                  "allowDiskUse": false
+                },
+                "commandName": "aggregate",
+                "databaseName": "crud-tests"
               }
-            ]
-          }
-        ]
-      },
-      {
-        "description": "Aggregate sends allowDiskUse false when false is specified",
-        "operations": [
-          {
-            "object": "collection0",
-            "name": "aggregate",
-            "arguments": {
-              "pipeline": [
-                {
-                  "$match": {}
-                }
-              ],
-              "allowDiskUse": false
             }
-          }
-        ],
-        "expectEvents": [
-          {
-            "client": "client0",
-            "events": [
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate sends allowDiskUse true when true is specified",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
               {
-                "commandStartedEvent": {
-                  "command": {
-                    "aggregate": "coll0",
-                    "pipeline": [
-                      {
-                        "$match": {}
-                      }
-                    ],
-                    "allowDiskUse": false
-                  },
-                  "commandName": "aggregate",
-                  "databaseName": "crud-tests"
-                }
+                "$match": {}
               }
-            ]
+            ],
+            "allowDiskUse": true
           }
-        ]
-      },
-      {
-        "description": "Aggregate sends allowDiskUse true when true is specified",
-        "operations": [
-          {
-            "object": "collection0",
-            "name": "aggregate",
-            "arguments": {
-              "pipeline": [
-                {
-                  "$match": {}
-                }
-              ],
-              "allowDiskUse": true
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {}
+                    }
+                  ],
+                  "allowDiskUse": true
+                },
+                "commandName": "aggregate",
+                "databaseName": "crud-tests"
+              }
             }
-          }
-        ],
-        "expectEvents": [
-          {
-            "client": "client0",
-            "events": [
-              {
-                "commandStartedEvent": {
-                  "command": {
-                    "aggregate": "coll0",
-                    "pipeline": [
-                      {
-                        "$match": {}
-                      }
-                    ],
-                    "allowDiskUse": true
-                  },
-                  "commandName": "aggregate",
-                  "databaseName": "crud-tests"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
+          ]
+        }
+      ]
+    }
+  ]
+}

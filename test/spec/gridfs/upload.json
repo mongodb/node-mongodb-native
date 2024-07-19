@@ -1,0 +1,616 @@
+{
+  "description": "gridfs-upload",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "gridfs-tests"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket0",
+        "database": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_files_collection",
+        "database": "database0",
+        "collectionName": "fs.files"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_chunks_collection",
+        "database": "database0",
+        "collectionName": "fs.chunks"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "gridfs-tests",
+      "documents": []
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "gridfs-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "upload when length is 0",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": ""
+            },
+            "chunkSizeBytes": 4
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "uploadedObjectId"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "length": 0,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "d41d8cd98f00b204e9800998ecf8427e"
+              },
+              "filename": "filename"
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": []
+        }
+      ]
+    },
+    {
+      "description": "upload when length is 1",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "11"
+            },
+            "chunkSizeBytes": 4
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "uploadedObjectId"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "length": 1,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "47ed733b8d10be225eceba344d533586"
+              },
+              "filename": "filename"
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "EQ==",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "upload when length is 3",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "112233"
+            },
+            "chunkSizeBytes": 4
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "uploadedObjectId"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "length": 3,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "bafae3a174ab91fc70db7a6aa50f4f52"
+              },
+              "filename": "filename"
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "ESIz",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "upload when length is 4",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "11223344"
+            },
+            "chunkSizeBytes": 4
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "uploadedObjectId"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "length": 4,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "7e7c77cff5705d1f7574a25ef6662117"
+              },
+              "filename": "filename"
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "ESIzRA==",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "upload when length is 5",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            },
+            "chunkSizeBytes": 4
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "uploadedObjectId"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "length": 5,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "283d4fea5dded59cf837d3047328f5af"
+              },
+              "filename": "filename"
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {},
+            "sort": {
+              "n": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "ESIzRA==",
+                  "subType": "00"
+                }
+              }
+            },
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 1,
+              "data": {
+                "$binary": {
+                  "base64": "VQ==",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "upload when length is 8",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455667788"
+            },
+            "chunkSizeBytes": 4
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "uploadedObjectId"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "length": 8,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "dd254cdc958e53abaa67da9f797125f5"
+              },
+              "filename": "filename"
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {},
+            "sort": {
+              "n": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "ESIzRA==",
+                  "subType": "00"
+                }
+              }
+            },
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 1,
+              "data": {
+                "$binary": {
+                  "base64": "VWZ3iA==",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "upload when contentType is provided",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "11"
+            },
+            "chunkSizeBytes": 4,
+            "contentType": "image/jpeg"
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "uploadedObjectId"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "length": 1,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "47ed733b8d10be225eceba344d533586"
+              },
+              "filename": "filename",
+              "contentType": "image/jpeg"
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "EQ==",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "upload when metadata is provided",
+      "operations": [
+        {
+          "name": "upload",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "11"
+            },
+            "chunkSizeBytes": 4,
+            "metadata": {
+              "x": 1
+            }
+          },
+          "expectResult": {
+            "$$type": "objectId"
+          },
+          "saveResultAsEntity": "uploadedObjectId"
+        },
+        {
+          "name": "find",
+          "object": "bucket0_files_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "length": 1,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$$type": "date"
+              },
+              "md5": {
+                "$$unsetOrMatches": "47ed733b8d10be225eceba344d533586"
+              },
+              "filename": "filename",
+              "metadata": {
+                "x": 1
+              }
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "bucket0_chunks_collection",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "objectId"
+              },
+              "files_id": {
+                "$$matchesEntity": "uploadedObjectId"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "EQ==",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

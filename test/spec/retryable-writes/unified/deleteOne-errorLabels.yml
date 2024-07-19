@@ -1,0 +1,157 @@
+description: deleteOne-errorLabels
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: 4.3.1 # failCommand errorLabels option
+    topologies: [ replicaset, sharded, load-balanced ]
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name retryable-writes-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests:
+  -
+    description: 'DeleteOne succeeds with RetryableWriteError from server'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              errorCode: 112 # WriteConflict, not a retryable error code
+              # Override server behavior: send RetryableWriteError label with non-retryable error code
+              errorLabels:
+                - RetryableWriteError
+      -
+        object: *collection0
+        name: deleteOne
+        arguments:
+          filter: { _id: 1 }
+        # Driver retries operation and it succeeds
+        expectResult:
+          deletedCount: 1
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 2, x: 22 }
+  -
+    description: 'DeleteOne fails if server does not return RetryableWriteError'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              errorCode: 11600 # InterruptedAtShutdown, normally a retryable error code
+              errorLabels: []  # Override server behavior: do not send RetryableWriteError label with retryable code
+      -
+        object: *collection0
+        name: deleteOne
+        arguments:
+          filter: { _id: 1 }
+        # Driver does not retry operation because there was no RetryableWriteError label on response
+        expectError:
+          isError: true
+          errorLabelsOmit:
+            - RetryableWriteError
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+  -
+    description: 'DeleteOne succeeds after PrimarySteppedDown'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              errorCode: 189
+              errorLabels:
+                - RetryableWriteError
+      -
+        object: *collection0
+        name: deleteOne
+        arguments:
+          filter: { _id: 1 }
+        expectResult:
+          deletedCount: 1
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 2, x: 22 }
+  -
+    description: 'DeleteOne succeeds after WriteConcernError ShutdownInProgress'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              errorLabels:
+                - RetryableWriteError
+              writeConcernError:
+                code: 91
+                errmsg: 'Replication is being shut down'
+      -
+        object: *collection0
+        name: deleteOne
+        arguments:
+          filter: { _id: 1 }
+        expectResult:
+          deletedCount: 1
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 2, x: 22 }

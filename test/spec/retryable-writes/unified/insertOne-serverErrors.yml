@@ -1,12 +1,12 @@
 description: "retryable-writes insertOne serverErrors"
 
-schemaVersion: "1.0"
+schemaVersion: "1.9"
 
 runOnRequirements:
   - minServerVersion: "4.0"
     topologies: [ replicaset ]
   - minServerVersion: "4.1.7"
-    topologies: [ sharded ]
+    topologies: [ sharded, load-balanced ]
 
 createEntities:
   - client:
@@ -195,3 +195,212 @@ tests:
           - { _id: 2, x: 22 }
           # writeConcernError doesn't prevent the server from applying the write
           - { _id: 3, x: 33 }
+  -
+    description: 'InsertOne succeeds after connection failure'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              closeConnection: true
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 3 } }
+    outcome:
+      -
+        collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+  -
+    description: 'InsertOne fails after connection failure when retryWrites option is false'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  retryWrites: false
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *databaseName
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collectionName
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client1
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              closeConnection: true
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          isError: true
+          # If retryWrites is false, the driver should not add the
+          # RetryableWriteError label to the error.
+          errorLabelsOmit:
+            - RetryableWriteError
+    outcome:
+      -
+        collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+  -
+    description: 'InsertOne fails after Interrupted'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 11601
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          isError: true
+          errorLabelsOmit:
+            - RetryableWriteError
+    outcome:
+      -
+        collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+  -
+    description: 'InsertOne fails after WriteConcernError Interrupted'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              writeConcernError:
+                code: 11601
+                errmsg: 'operation was interrupted'
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          isError: true
+          errorLabelsOmit:
+            - RetryableWriteError
+    outcome:
+      -
+        collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 } # The write was still applied.
+  -
+    description: 'InsertOne fails after WriteConcernError WriteConcernFailed'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              writeConcernError:
+                code: 64
+                codeName: WriteConcernFailed
+                errmsg: 'waiting for replication timed out'
+                errInfo:
+                  wtimeout: true
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          isError: true
+          errorLabelsOmit:
+            - RetryableWriteError
+    outcome:
+      -
+        collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 } # The write was still applied.
+  -
+    description: 'InsertOne fails with a RetryableWriteError label after two connection failures'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ insert ]
+              closeConnection: true
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          isError: true
+          errorLabelsContain:
+            - RetryableWriteError
+    outcome:
+      -
+        collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }

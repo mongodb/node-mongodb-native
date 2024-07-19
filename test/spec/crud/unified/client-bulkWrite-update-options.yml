@@ -1,0 +1,337 @@
+description: "client bulkWrite update options"
+schemaVersion: "1.1"
+runOnRequirements:
+  - minServerVersion: "8.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, array: [ 1, 2, 3 ] }
+      - { _id: 2, array: [ 1, 2, 3 ] }
+      - { _id: 3, array: [ 1, 2, 3 ] }
+      - { _id: 4, array: [ 1, 2, 3 ] }
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+  collation: &collation { "locale": "simple" }
+  hint: &hint _id_
+
+tests:
+  - description: "client bulkWrite update with arrayFilters"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update:
+                  $set:
+                    array.$[i]: 4
+                arrayFilters: [ i: { $gte: 2 } ]
+            - updateMany:
+                namespace: *namespace
+                filter:
+                  $and: [ { _id: { $gt: 1 } }, { _id: { $lte: 3 } } ]
+                update:
+                  $set:
+                    array.$[i]: 5
+                arrayFilters: [ i: { $gte: 2 } ]
+          verboseResults: true
+        expectResult:
+          insertedCount: 0
+          upsertedCount: 0
+          matchedCount: 3
+          modifiedCount: 3
+          deletedCount: 0
+          insertResults: {}
+          updateResults:
+            0:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+            1:
+              matchedCount: 2
+              modifiedCount: 2
+              upsertedId: { $$exists: false }
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods:
+                      $set:
+                        array.$[i]: 4
+                    arrayFilters: [ i: { $gte: 2 } ]
+                    multi: false
+                  - update: 0
+                    filter:
+                      $and: [ { _id: { $gt: 1 } }, { _id: { $lte: 3 } } ]
+                    updateMods:
+                      $set:
+                        array.$[i]: 5
+                    arrayFilters: [ i: { $gte: 2 } ]
+                    multi: true
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - databaseName: *database0Name
+        collectionName: *collection0Name
+        documents:
+          - { _id: 1, array: [ 1, 4, 4 ] }
+          - { _id: 2, array: [ 1, 5, 5 ] }
+          - { _id: 3, array: [ 1, 5, 5 ] }
+          - { _id: 4, array: [ 1, 2, 3 ] }
+  - description: "client bulkWrite update with collation"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update: { $set: { array: [ 1, 2, 4 ] } }
+                collation: *collation
+            - updateMany:
+                namespace: *namespace
+                filter:
+                  $and: [ { _id: { $gt: 1 } }, { _id: { $lte: 3 } } ]
+                update: { $set: { array: [ 1, 2, 5 ] } }
+                collation: *collation
+            - replaceOne:
+                namespace: *namespace
+                filter: { _id: 4 }
+                replacement: { array: [ 1, 2, 6 ] }
+                collation: *collation
+          verboseResults: true
+        expectResult:
+          insertedCount: 0
+          upsertedCount: 0
+          matchedCount: 4
+          modifiedCount: 4
+          deletedCount: 0
+          insertResults: {}
+          updateResults:
+            0:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+            1:
+              matchedCount: 2
+              modifiedCount: 2
+              upsertedId: { $$exists: false }
+            2:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods: { $set: { array: [ 1, 2, 4 ] } }
+                    collation: *collation
+                    multi: false
+                  - update: 0
+                    filter:
+                      $and: [ { _id: { $gt: 1 } }, { _id: { $lte: 3 } } ]
+                    updateMods: { $set: { array: [ 1, 2, 5 ] } }
+                    collation: *collation
+                    multi: true
+                  - update: 0
+                    filter: { _id: 4 }
+                    updateMods: { array: [ 1, 2, 6 ] }
+                    collation: *collation
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - databaseName: *database0Name
+        collectionName: *collection0Name
+        documents:
+          - { _id: 1, array: [ 1, 2, 4 ] }
+          - { _id: 2, array: [ 1, 2, 5 ] }
+          - { _id: 3, array: [ 1, 2, 5 ] }
+          - { _id: 4, array: [ 1, 2, 6 ] }
+  - description: "client bulkWrite update with hint"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update: { $set: { array: [ 1, 2, 4 ] } }
+                hint: *hint
+            - updateMany:
+                namespace: *namespace
+                filter:
+                  $and: [ { _id: { $gt: 1 } }, { _id: { $lte: 3 } } ]
+                update: { $set: { array: [ 1, 2, 5 ] } }
+                hint: *hint
+            - replaceOne:
+                namespace: *namespace
+                filter: { _id: 4 }
+                replacement: { array: [ 1, 2, 6 ] }
+                hint: *hint
+          verboseResults: true
+        expectResult:
+          insertedCount: 0
+          upsertedCount: 0
+          matchedCount: 4
+          modifiedCount: 4
+          deletedCount: 0
+          insertResults: {}
+          updateResults:
+            0:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+            1:
+              matchedCount: 2
+              modifiedCount: 2
+              upsertedId: { $$exists: false }
+            2:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods: { $set: { array: [ 1, 2, 4 ] } }
+                    hint: *hint
+                    multi: false
+                  - update: 0
+                    filter:
+                      $and: [ { _id: { $gt: 1 } }, { _id: { $lte: 3 } } ]
+                    updateMods: { $set: { array: [ 1, 2, 5 ] } }
+                    hint: *hint
+                    multi: true
+                  - update: 0
+                    filter: { _id: 4 }
+                    updateMods: { array: [ 1, 2, 6 ] }
+                    hint: *hint
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - databaseName: *database0Name
+        collectionName: *collection0Name
+        documents:
+          - { _id: 1, array: [ 1, 2, 4 ] }
+          - { _id: 2, array: [ 1, 2, 5 ] }
+          - { _id: 3, array: [ 1, 2, 5 ] }
+          - { _id: 4, array: [ 1, 2, 6 ] }
+  - description: "client bulkWrite update with upsert"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 5 }
+                update: { $set: { array: [ 1, 2, 4 ] } }
+                upsert: true
+            - replaceOne:
+                namespace: *namespace
+                filter: { _id: 6 }
+                replacement: { array: [ 1, 2, 6 ] }
+                upsert: true
+          verboseResults: true
+        expectResult:
+          insertedCount: 0
+          upsertedCount: 2
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults: {}
+          updateResults:
+            0:
+              matchedCount: 1
+              modifiedCount: 0
+              upsertedId: 5
+            1:
+              matchedCount: 1
+              modifiedCount: 0
+              upsertedId: 6
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: { _id: 5 }
+                    updateMods: { $set: { array: [ 1, 2, 4 ] } }
+                    upsert: true
+                    multi: false
+                  - update: 0
+                    filter: { _id: 6 }
+                    updateMods: { array: [ 1, 2, 6 ] }
+                    upsert: true
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - databaseName: *database0Name
+        collectionName: *collection0Name
+        documents:
+          - { _id: 1, array: [ 1, 2, 3 ] }
+          - { _id: 2, array: [ 1, 2, 3 ] }
+          - { _id: 3, array: [ 1, 2, 3 ] }
+          - { _id: 4, array: [ 1, 2, 3 ] }
+          - { _id: 5, array: [ 1, 2, 4 ] }
+          - { _id: 6, array: [ 1, 2, 6 ] }

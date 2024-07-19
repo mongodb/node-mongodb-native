@@ -1,0 +1,86 @@
+description: aggregate-merge
+
+schemaVersion: '1.0'
+
+runOnRequirements:
+  -
+    minServerVersion: 4.1.11
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name retryable-reads-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      -
+        _id: 1
+        x: 11
+      -
+        _id: 2
+        x: 22
+      -
+        _id: 3
+        x: 33
+
+tests:
+  -
+    description: 'Aggregate with $merge does not retry'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - aggregate
+              closeConnection: true
+      -
+        object: *collection0
+        name: aggregate
+        arguments:
+          pipeline: &pipeline
+            -
+              $match:
+                _id:
+                  $gt: 1
+            -
+              $sort:
+                x: 1
+            -
+              $merge:
+                into: output-collection
+        expectError:
+          isError: true
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline: *pipeline
+              commandName: aggregate
+              databaseName: *database_name
