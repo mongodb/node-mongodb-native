@@ -1,5 +1,4 @@
 import * as path from 'path';
-import { lt } from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
