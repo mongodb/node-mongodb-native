@@ -28,7 +28,7 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { type TimeoutContext, TimeoutError } from '../timeout';
-import { type Callback, List, makeCounter, promiseWithResolvers } from '../utils';
+import { type Callback, List, makeCounter, now, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -356,6 +356,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * explicitly destroyed by the new owner.
    */
   async checkOut(options: { timeoutContext: TimeoutContext }): Promise<Connection> {
+    const checkoutTime = now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -367,7 +368,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
-      reject
+      reject,
+      checkoutTime
     };
 
     this[kWaitQueue].push(waitQueueMember);
