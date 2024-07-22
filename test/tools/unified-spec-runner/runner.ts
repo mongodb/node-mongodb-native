@@ -306,13 +306,21 @@ async function runUnifiedTest(
  */
 export function runUnifiedSuite(
   specTests: uni.UnifiedSuite[],
-  skipFilter: uni.TestFilter = () => false
+  skipFilter: uni.TestFilter = () => false,
+  expectRuntimeError = false
 ): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const [index, test] of unifiedSuite.tests.entries()) {
         it(String(test.description === '' ? `Test ${index}` : test.description), async function () {
-          await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+          if (expectRuntimeError) {
+            const error = await runUnifiedTest(this, unifiedSuite, test, skipFilter).catch(
+              error => error
+            );
+            expect(error).to.exist;
+          } else {
+            await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+          }
         });
       }
     });

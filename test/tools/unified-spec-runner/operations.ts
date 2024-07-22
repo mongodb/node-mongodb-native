@@ -44,6 +44,8 @@ type RunOperationFn = (
 ) => Promise<Document | boolean | number | null | void | string>;
 export const operations = new Map<string, RunOperationFn>();
 
+export class MalformedOperationError extends Error {}
+
 operations.set('createEntities', async ({ entities, operation, testConfig }) => {
   if (!operation.arguments?.entities) {
     throw new Error('encountered createEntities operation without entities argument');
@@ -356,6 +358,9 @@ operations.set('failPoint', async ({ entities, operation }) => {
 operations.set('insertOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { document, ...opts } = operation.arguments!;
+  if (!document) {
+    throw new MalformedOperationError('No document defined in the arguments for insertOne');
+  }
   // Looping exposes the fact that we can generate _ids for inserted
   // documents and we don't want the original operation to get modified
   // and use the same _id for each insert.
@@ -949,7 +954,7 @@ export async function executeOperationAndCheck(
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);
       return;
-    } else if (!operation.ignoreResultAndError) {
+    } else if (!operation.ignoreResultAndError || error instanceof MalformedOperationError) {
       throw error;
     }
   }

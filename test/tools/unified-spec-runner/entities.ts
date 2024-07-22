@@ -586,11 +586,17 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           uri = makeConnectionString(config.url({ useMultipleMongoses }), entity.client.uriOptions);
         }
         const client = new UnifiedMongoClient(uri, entity.client);
-        new EntityEventRegistry(client, entity.client, map).register();
         try {
+          new EntityEventRegistry(client, entity.client, map).register();
           await client.connect();
         } catch (error) {
           console.error(ejson`failed to connect entity ${entity}`);
+          // In the case where multiple clients are defined in the test and any one of them failed
+          // to connect, but others did succeed, we need to ensure all open clients are closed.
+          const clients = map.mapOf('client');
+          for (const clientEntry of clients.values()) {
+            await clientEntry.close();
+          }
           throw error;
         }
         map.set(entity.client.id, client);
@@ -668,7 +674,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
       } else if ('stream' in entity) {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
       } else if ('clientEncryption' in entity) {
-        const clientEncryption = createClientEncryption(map, entity.clientEncryption);
+        const clientEncryption = await createClientEncryption(map, entity.clientEncryption);
 
         map.set(entity.clientEncryption.id, clientEncryption);
       } else {

@@ -12,11 +12,13 @@ import {
   type DbOptions,
   type Document,
   getMongoDBClientEncryption,
-  type MongoClient
+  type MongoClient,
+  ReturnDocument
 } from '../../mongodb';
 import { shouldRunServerlessTest } from '../../tools/utils';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
+import { MalformedOperationError } from './operations';
 import type {
   ClientEncryptionEntity,
   CollectionOrDatabaseOptions,
@@ -199,7 +201,13 @@ export function patchCollectionOptions(
 export function translateOptions(options: Document): Document {
   const translatedOptions = { ...options };
   if (options.returnDocument) {
-    translatedOptions.returnDocument = options.returnDocument.toLowerCase();
+    const returnDocument = options.returnDocument.toLowerCase();
+    if (![ReturnDocument.BEFORE, ReturnDocument.AFTER].includes(returnDocument)) {
+      throw new MalformedOperationError(
+        'Return document must be specified as either "before" or "after"'
+      );
+    }
+    translatedOptions.returnDocument = returnDocument;
   }
   return translatedOptions as Document;
 }
@@ -341,6 +349,11 @@ export function mergeKMSProviders(
       (awsProviders['sessionToken'] = isPlaceholderValue(test['sessionToken'])
         ? env['sessionToken']
         : test['sessionToken']);
+
+    if (!awsProviders['accessKeyId'] || !awsProviders['secretAccessKey']) {
+      throw new Error('AWS KMS providers must constain "accessKeyId" and "secretAccessKey"');
+    }
+
     return awsProviders;
   }
   function parseAzure(env, test) {
@@ -367,6 +380,16 @@ export function mergeKMSProviders(
         ? env['identityPlatformEndpoint']
         : test['identityPlatformEndpoint']);
 
+    if (
+      !azureProviders['tenantId'] ||
+      !azureProviders['clientId'] ||
+      !azureProviders['clientSecret']
+    ) {
+      throw new Error(
+        'Azure KMS providers must contain "tenantId", "clientId", and "clientSecret"'
+      );
+    }
+
     return azureProviders;
   }
 
@@ -384,6 +407,11 @@ export function mergeKMSProviders(
       (gcpProviders['endPoint'] = isPlaceholderValue(test['endPoint'])
         ? env['endPoint']
         : test['endPoint']);
+
+    if (!gcpProviders['email'] || !gcpProviders['privateKey']) {
+      throw new Error('GCP KMS providers must contain "email" and "privateKey"');
+    }
+
     return gcpProviders;
   }
   function parseLocal(env, test) {
@@ -485,13 +513,17 @@ export function mergeKMSProviders(
     providers['kmip:name1'] = parseKMIP(env, fromTest);
   }
 
+  if (Object.keys(providers).length === 0) {
+    throw new Error('Found empty KMS providers in test');
+  }
+
   return providers;
 }
 
-export function createClientEncryption(
+export async function createClientEncryption(
   map: EntitiesMap,
   entity: ClientEncryptionEntity
-): ClientEncryption {
+): Promise<ClientEncryption> {
   getMongoDBClientEncryption();
 
   const { clientEncryptionOpts } = entity;
@@ -537,7 +569,13 @@ export function createClientEncryption(
     }, {});
   }
 
-  const kmsProviders = mergeKMSProviders(kmsProvidersFromTest, kmsProvidersFromEnvironment);
+  let kmsProviders;
+  try {
+    kmsProviders = mergeKMSProviders(kmsProvidersFromTest, kmsProvidersFromEnvironment);
+  } catch (error) {
+    await clientEntity.close();
+    throw error;
+  }
 
   const autoEncryptionOptions: AutoEncryptionOptions = {
     keyVaultClient: clientEntity,
