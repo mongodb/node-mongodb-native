@@ -100,12 +100,12 @@ describe('Unified Spec Runner', function () {
 
             expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
-              /Expected \[string\] to be one of \[int\]/
+              /\[string\] to be one of \[int\]/
             );
           });
         });
 
-        context('when the expected value is not a document', function () {
+        context('when the expeced value is not a document', function () {
           beforeEach(function () {
             expected = { $$matchAsRoot: '{"data": { "data": 10, "a": 11 }}' };
           });
