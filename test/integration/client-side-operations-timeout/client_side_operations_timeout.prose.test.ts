@@ -417,7 +417,7 @@ describe('CSOT spec prose tests', function () {
         await clock.tickAsync(11);
         expect(await maybeError).to.be.instanceof(MongoServerSelectionError);
       }).skipReason =
-        'TODO(NODE-XXXX): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
+        'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
     });
 
     it.skip("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async function () {
@@ -442,7 +442,7 @@ describe('CSOT spec prose tests', function () {
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     }).skipReason =
-      'TODO(NODE-XXXX): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
 
     it.skip("serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS", async function () {
       /**
@@ -465,7 +465,7 @@ describe('CSOT spec prose tests', function () {
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     }).skipReason =
-      'TODO(NODE-XXXX): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
 
     it.skip('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', async function () {
       /**
@@ -488,7 +488,7 @@ describe('CSOT spec prose tests', function () {
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     }).skipReason =
-      'TODO(NODE-XXXX): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
 
     it.skip("timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS", async function () {
       /**
