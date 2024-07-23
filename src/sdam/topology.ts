@@ -465,7 +465,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const serverSelectionTimeoutMS = this.client.s.options.serverSelectionTimeoutMS;
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const timeoutContext = TimeoutContext.create({
-      timeoutMS: 0,
+      timeoutMS: undefined,
       serverSelectionTimeoutMS,
       waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
     });
