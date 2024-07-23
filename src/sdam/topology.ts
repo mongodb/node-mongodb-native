@@ -460,26 +460,28 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
+    // TODO(NODE-XXXX): auto connect cannot use timeoutMS
+    // const timeoutMS = this.client.s.options.timeoutMS;
+    const serverSelectionTimeoutMS = this.client.s.options.serverSelectionTimeoutMS;
+    const readPreference = options.readPreference ?? ReadPreference.primary;
+    const timeoutContext = TimeoutContext.create({
+      timeoutMS: 0,
+      serverSelectionTimeoutMS,
+      waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
+    });
+    const selectServerOptions = {
+      operationName: 'ping',
+      ...options,
+      timeoutContext
+    };
+    const server = await this.selectServer(
+      readPreferenceServerSelector(readPreference),
+      selectServerOptions
+    );
+
     try {
       const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
       if (!skipPingOnConnect && this.s.credentials) {
-        const timeoutMS = this.client.s.options.timeoutMS;
-        const serverSelectionTimeoutMS = this.client.s.options.serverSelectionTimeoutMS;
-        const readPreference = options.readPreference ?? ReadPreference.primary;
-        const timeoutContext = TimeoutContext.create({
-          timeoutMS,
-          serverSelectionTimeoutMS,
-          waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
-        });
-        const selectServerOptions = {
-          operationName: 'ping',
-          ...options,
-          timeoutContext
-        };
-        const server = await this.selectServer(
-          readPreferenceServerSelector(readPreference),
-          selectServerOptions
-        );
         await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
