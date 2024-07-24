@@ -1,5 +1,5 @@
 {
-  "description": "ignoreResultAndError",
+  "description": "ignoreResultAndError-malformed",
   "schemaVersion": "1.3",
   "createEntities": [
     {
@@ -32,26 +32,15 @@
   ],
   "tests": [
     {
-      "description": "operation errors are not ignored if ignoreResultAndError is false",
+      "description": "malformed operation fails if ignoreResultAndError is true",
       "operations": [
         {
           "name": "insertOne",
           "object": "collection0",
           "arguments": {
-            "document": {
-              "_id": 1
-            }
-          }
-        },
-        {
-          "name": "insertOne",
-          "object": "collection0",
-          "arguments": {
-            "document": {
-              "_id": 1
-            }
+            "foo": "bar"
           },
-          "ignoreResultAndError": false
+          "ignoreResultAndError": true
         }
       ]
     }

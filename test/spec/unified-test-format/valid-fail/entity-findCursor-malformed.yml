@@ -1,0 +1,31 @@
+# This test is split out into a separate file to accommodate drivers that validate operation structure while decoding
+# from JSON/YML. Such drivers fail to decode any files containing invalid operations. Combining this test in a file
+# with other entity-findCursor valid-fail tests, which test failures that occur during test execution, would prevent
+# such drivers from decoding the file and running any of the tests.
+description: entity-findCursor-malformed
+
+schemaVersion: '1.3'
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0Name
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - databaseName: *database0Name
+    collectionName: *collection0Name
+    documents: []
+
+tests:
+  - description: createFindCursor fails if filter is not specified
+    operations:
+      - name: createFindCursor
+        object: *collection0
+        saveResultAsEntity: &cursor0 cursor0

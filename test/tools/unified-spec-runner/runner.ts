@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect } from 'chai';
+import { AssertionError, expect } from 'chai';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
 import type { MongoClient } from '../../mongodb';
-import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mongodb';
+import {
+  MONGODB_ERROR_CODES,
+  MongoParseError,
+  MongoServerError,
+  ns,
+  ReadPreference,
+  TopologyType
+} from '../../mongodb';
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';
@@ -306,13 +313,28 @@ async function runUnifiedTest(
  */
 export function runUnifiedSuite(
   specTests: uni.UnifiedSuite[],
-  skipFilter: uni.TestFilter = () => false
+  skipFilter: uni.TestFilter = () => false,
+  expectRuntimeError = false
 ): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const [index, test] of unifiedSuite.tests.entries()) {
         it(String(test.description === '' ? `Test ${index}` : test.description), async function () {
-          await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+          if (expectRuntimeError) {
+            const error = await runUnifiedTest(this, unifiedSuite, test, skipFilter).catch(
+              error => error
+            );
+            expect(error).to.satisfy(value => {
+              return (
+                value instanceof AssertionError ||
+                value instanceof MongoServerError ||
+                value instanceof TypeError ||
+                value instanceof MongoParseError
+              );
+            });
+          } else {
+            await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+          }
         });
       }
     });

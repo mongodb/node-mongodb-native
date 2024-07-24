@@ -1,3 +1,5 @@
+import { AssertionError } from 'chai';
+
 import {
   COMMAND_FAILED,
   COMMAND_STARTED,
@@ -60,11 +62,15 @@ export class EntityEventRegistry {
   register(): void {
     if (this.clientEntity.storeEventsAsEntities) {
       for (const { id, events } of this.clientEntity.storeEventsAsEntities) {
+        if (this.entitiesMap.has(id) || this.clientEntity.id === id) {
+          throw new AssertionError(`Duplicate id ${id} found while storing events as entities`);
+        }
         this.entitiesMap.set(id, []);
         for (const eventName of events) {
           // Need to map the event names to the Node event names.
           this.client.on(MAPPINGS[eventName], () => {
-            this.entitiesMap.getEntity('events', id).push({
+            const events = this.entitiesMap.getEntity('events', id);
+            events.push({
               name: eventName,
               observedAt: Date.now()
             });

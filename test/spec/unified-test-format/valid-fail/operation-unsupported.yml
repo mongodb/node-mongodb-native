@@ -1,0 +1,13 @@
+description: "operation-unsupported"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+
+tests:
+  - description: "Unsupported operation"
+    operations:
+      - name: unsupportedOperation
+        object: *client0
