@@ -105,7 +105,7 @@ describe('Unified Spec Runner', function () {
           });
         });
 
-        context('when the expeced value is not a document', function () {
+        context('when the expected value is not a document', function () {
           beforeEach(function () {
             expected = { $$matchAsRoot: '{"data": { "data": 10, "a": 11 }}' };
           });

@@ -474,12 +474,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       ...options,
       timeoutContext
     };
-    const server = await this.selectServer(
-      readPreferenceServerSelector(readPreference),
-      selectServerOptions
-    );
 
     try {
+      const server = await this.selectServer(
+        readPreferenceServerSelector(readPreference),
+        selectServerOptions
+      );
       const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
       if (!skipPingOnConnect && this.s.credentials) {
         await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
