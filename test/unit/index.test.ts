@@ -16,6 +16,7 @@ const EXPECTED_EXPORTS = [
   'AbstractCursor',
   'Admin',
   'AggregationCursor',
+  'AsyncDisposable',
   'AuthMechanism',
   'AutoEncryptionLoggerLevel',
   'BatchType',

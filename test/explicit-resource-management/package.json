@@ -1,0 +1,24 @@
+{
+  "name": "explicit-resource-management",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "run": "npm run build && node out/main.js",
+    "build": "tsc",
+    "test": "npm run build && mocha --config .mocharc.json main.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/chai": "^4.3.16",
+    "chai": "^4.4.1",
+    "mongodb": "../../mongodb-6.8.0.tgz",
+    "tslib": "^2.6.3"
+  },
+  "devDependencies": {
+    "mocha": "^10.7.0",
+    "typescript": "5.5"
+  }
+}

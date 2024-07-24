@@ -492,56 +492,94 @@ SINGLETON_TASKS.push(
         { func: 'run lint checks' }
       ]
     },
+    {
+      name: 'run-resource-management-no-async-dispose',
+      tags: ['resource-management'],
+      commands: [
+        updateExpansions({
+          NODE_LTS_VERSION: "v16.20.2",
+          NPM_VERSION: 9
+        }),
+        { func: 'install dependencies' },
+        { func: 'check resource management' }
+      ]
+    },
+    {
+      name: 'run-resource-management-async-dispose',
+      tags: ['resource-management'],
+      commands: [
+        updateExpansions({
+          NODE_LTS_VERSION: 'latest',
+          NPM_VERSION: 9
+        }),
+        { func: 'install dependencies' },
+        { func: 'check resource management' }
+      ]
+    },
+    {
+      name: 'test-explicit-resource-management-smoke-tests',
+      tags: ['resource-management'],
+      commands: [
+        updateExpansions({
+          VERSION: 'latest',
+          TOPOLOGY: 'replica_set',
+          NODE_LTS_VERSION: 'latest'
+        }),
+        { func: 'install dependencies' },
+        { func: 'bootstrap mongo-orchestration' },
+        { func: 'check resource management smoke tests' }
+      ]
+    },
     ...Array.from(makeTypescriptTasks())
   ]
 );
 
 function* makeTypescriptTasks() {
-  for (const TS_VERSION of ['next', 'current', '4.4']) {
-    // We don't compile on next, because compilation errors are likely.  We do expect
-    // that the drivers types continue to work with next though.
-    if (TS_VERSION !== '4.4' && TS_VERSION !== 'next') {
-      yield {
-        name: `compile-driver-typescript-${TS_VERSION}`,
-        tags: [`compile-driver-typescript-${TS_VERSION}`, 'typescript-compilation'],
-        commands: [
-          updateExpansions({
-            NODE_LTS_VERSION: LOWEST_LTS,
-            NPM_VERSION: 9,
-            TS_VERSION
-          }),
-          { func: 'install dependencies' },
-          { func: 'compile driver' }
-        ]
-      };
+  function makeCompileTask(TS_VERSION, TYPES_VERSION) {
+    return {
+      name: `compile-driver-typescript-${TS_VERSION}-node-types-${TYPES_VERSION}`,
+      tags: [`compile-driver-typescript-${TS_VERSION}`, 'typescript-compilation'],
+      commands: [
+        updateExpansions({
+          NODE_LTS_VERSION: LOWEST_LTS,
+          NPM_VERSION: 9,
+          TS_VERSION,
+          TYPES_VERSION
+        }),
+        { func: 'install dependencies' },
+        { func: 'compile driver' }
+      ]
     }
-
-    yield {
-      name: `check-types-typescript-${TS_VERSION}`,
+  }
+  function makeCheckTypesTask(TS_VERSION, TYPES_VERSION) {
+    return {
+      name: `check-types-typescript-${TS_VERSION}-node-types-${TYPES_VERSION}`,
       tags: [`check-types-typescript-${TS_VERSION}`, 'typescript-compilation'],
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
           NPM_VERSION: 9,
-          TS_VERSION
+          TS_VERSION,
+          TYPES_VERSION
         }),
         { func: 'install dependencies' },
         { func: 'check types' }
       ]
-    };
+    }
   }
-  return {
-    name: 'run-typescript-next',
-    tags: ['run-typescript-next', 'typescript-compilation'],
-    commands: [
-      updateExpansions({
-        NODE_LTS_VERSION: LOWEST_LTS,
-        NPM_VERSION: 9
-      }),
-      { func: 'install dependencies' },
-      { func: 'run typescript next' }
-    ]
-  };
+
+  const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1)
+  yield makeCheckTypesTask('next', typesVersion);
+  yield makeCheckTypesTask('current', typesVersion);
+
+  yield makeCheckTypesTask('next', '16.x');
+  yield makeCheckTypesTask('current', '16.x');
+
+  // typescript 4.4 only compiles our types with this particular version
+  yield makeCheckTypesTask('4.4', '18.11.9');
+
+  yield makeCompileTask('current', typesVersion);
+  yield makeCompileTask('current', '16.x');
 }
 
 BUILD_VARIANTS.push({
@@ -731,6 +769,13 @@ BUILD_VARIANTS.push({
   tasks: ['test_atlas_task_group_search_indexes']
 });
 
+BUILD_VARIANTS.push({
+  name: 'resource management tests',
+  display_name: 'resource management tests',
+  run_on: DEFAULT_OS,
+  tasks: ['.resource-management']
+});
+
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && [16, 18, 20].includes(variant.expansions.NODE_LTS_VERSION)
@@ -755,6 +800,7 @@ fileData.tasks = (fileData.tasks || [])
   .concat(AUTH_DISABLED_TASKS)
   .concat(AWS_LAMBDA_HANDLER_TASKS)
   .concat(MONGOCRYPTD_CSFLE_TASKS);
+
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(

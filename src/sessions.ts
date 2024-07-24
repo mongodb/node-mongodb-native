@@ -27,6 +27,7 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
+import { type AsyncDisposable } from './resource_management';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
 import {
   isTransactionCommand,
@@ -105,7 +106,10 @@ export interface EndSessionOptions {
  * NOTE: not meant to be instantiated directly.
  * @public
  */
-export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
+export class ClientSession
+  extends TypedEventEmitter<ClientSessionEvents>
+  implements AsyncDisposable
+{
   /** @internal */
   client: MongoClient;
   /** @internal */
@@ -286,6 +290,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       maybeClearPinnedConnection(this, { force: true, ...options });
     }
   }
+  /** @beta */
+  declare [Symbol.asyncDispose]: () => Promise<void>;
 
   /**
    * Advances the operationTime for a ClientSession.
@@ -483,6 +489,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     return await attemptTransaction(this, startTime, fn, options);
   }
 }
+
+Symbol.asyncDispose &&
+  (ClientSession.prototype[Symbol.asyncDispose] = async function () {
+    await this.endSession({ force: true });
+  });
 
 const MAX_WITH_TRANSACTION_TIMEOUT = 120000;
 const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([

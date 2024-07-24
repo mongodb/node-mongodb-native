@@ -34,6 +34,7 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
+import { type AsyncDisposable } from './resource_management';
 import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import { readPreferenceServerSelector } from './sdam/server_selection';
@@ -344,7 +345,7 @@ const kOptions = Symbol('options');
  * await client.insertOne({ name: 'spot', kind: 'dog' });
  * ```
  */
-export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
+export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements AsyncDisposable {
   /** @internal */
   s: MongoClientPrivate;
   /** @internal */
@@ -403,6 +404,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     };
     this.checkForNonGenuineHosts();
   }
+
+  /** @beta */
+  declare [Symbol.asyncDispose]: () => Promise<void>;
 
   /** @internal */
   private checkForNonGenuineHosts() {
@@ -757,6 +761,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
 }
+
+Symbol.asyncDispose &&
+  (MongoClient.prototype[Symbol.asyncDispose] = async function () {
+    await this.close();
+  });
 
 /**
  * Parsed Mongo Client Options.

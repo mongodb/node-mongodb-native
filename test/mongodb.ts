@@ -187,6 +187,7 @@ export * from '../src/operations/update';
 export * from '../src/operations/validate_collection';
 export * from '../src/read_concern';
 export * from '../src/read_preference';
+export * from '../src/resource_management';
 export * from '../src/sdam/common';
 export * from '../src/sdam/events';
 export * from '../src/sdam/monitor';

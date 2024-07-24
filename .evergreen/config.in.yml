@@ -348,9 +348,35 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: ${TS_VERSION}
           TS_CHECK: CHECK_TYPES
+          TYPES_VERSION: ${TYPES_VERSION}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
+
+  "check resource management":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-resource-management.sh"
+
+  "check resource management smoke tests":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          MONGODB_URI: ${MONGODB_URI}
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-resource-management-smoke-tests.sh"
 
   "compile driver":
     - command: subprocess.exec
@@ -362,6 +388,7 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: ${TS_VERSION}
           TS_CHECK: COMPILE_DRIVER
+          TYPES_VERSION: ${TYPES_VERSION}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"

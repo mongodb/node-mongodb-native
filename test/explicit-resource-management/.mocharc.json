@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json",
+  "extension": [
+    "js"
+  ],
+  "reporter": "../tools/reporter/mongodb_reporter.js",
+  "recursive": true,
+  "timeout": 60000,
+  "failZero": true,
+  "sort": true,
+  "color": true
+}
