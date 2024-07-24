@@ -1,7 +1,7 @@
 import { type EventEmitter } from 'events';
 
 import { MongoOperationTimeoutError } from '../../error';
-import { Timeout, TimeoutError } from '../../timeout';
+import { type TimeoutContext, TimeoutError } from '../../timeout';
 import { List, promiseWithResolvers } from '../../utils';
 
 /**
@@ -20,7 +20,10 @@ type PendingPromises = Omit<
  * Returns an AsyncIterator that iterates each 'data' event emitted from emitter.
  * It will reject upon an error event.
  */
-export function onData(emitter: EventEmitter, { timeoutMS }: { timeoutMS: number }) {
+export function onData(
+  emitter: EventEmitter,
+  { timeoutContext }: { timeoutContext?: TimeoutContext }
+) {
   // Setup pending events and pending promise lists
   /**
    * When the caller has not yet called .next(), we store the
@@ -88,10 +91,8 @@ export function onData(emitter: EventEmitter, { timeoutMS }: { timeoutMS: number
   // Adding event handlers
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
-
-  if (timeoutMS > 0 && Number.isFinite(timeoutMS))
-    // eslint-disable-next-line github/no-then
-    Timeout.expires(timeoutMS).then(undefined, errorHandler);
+  // eslint-disable-next-line github/no-then
+  timeoutContext?.timeoutForSocketRead?.then(undefined, errorHandler);
 
   return iterator;
 

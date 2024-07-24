@@ -1,6 +1,6 @@
 import { clearTimeout, setTimeout } from 'timers';
 
-import { MongoInvalidArgumentError, MongoRuntimeError } from './error';
+import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
 import { csotMin, noop } from './utils';
 
 /** @internal */
@@ -169,6 +169,10 @@ export abstract class TimeoutContext {
 
   abstract get clearConnectionCheckoutTimeout(): boolean;
 
+  abstract get timeoutForSocketWrite(): Timeout | null;
+
+  abstract get timeoutForSocketRead(): Timeout | null;
+
   abstract csotEnabled(): this is CSOTTimeoutContext;
 }
 
@@ -244,6 +248,20 @@ export class CSOTTimeoutContext extends TimeoutContext {
     }
     return this._connectionCheckoutTimeout;
   }
+
+  get timeoutForSocketWrite(): Timeout | null {
+    const { remainingTimeMS } = this;
+    if (!Number.isFinite(remainingTimeMS)) return null;
+    if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
+    throw new MongoOperationTimeoutError('Timed out before socket write');
+  }
+
+  get timeoutForSocketRead(): Timeout | null {
+    const { remainingTimeMS } = this;
+    if (!Number.isFinite(remainingTimeMS)) return null;
+    if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
+    throw new MongoOperationTimeoutError('Timed out before socket read');
+  }
 }
 
 /** @internal */
@@ -272,6 +290,14 @@ export class LegacyTimeoutContext extends TimeoutContext {
   get connectionCheckoutTimeout(): Timeout | null {
     if (this.options.waitQueueTimeoutMS != null && this.options.waitQueueTimeoutMS > 0)
       return Timeout.expires(this.options.waitQueueTimeoutMS);
+    return null;
+  }
+
+  get timeoutForSocketWrite(): Timeout | null {
+    return null;
+  }
+
+  get timeoutForSocketRead(): Timeout | null {
     return null;
   }
 }

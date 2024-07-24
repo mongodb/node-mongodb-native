@@ -30,7 +30,7 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
-import { Timeout, type TimeoutContext, TimeoutError } from '../timeout';
+import { type TimeoutContext, TimeoutError } from '../timeout';
 import {
   BufferPool,
   calculateDurationInMs,
@@ -671,8 +671,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (this.socket.write(buffer)) return;
 
     const drainEvent = once<void>(this.socket, 'drain');
-    if (options.timeoutContext?.csotEnabled()) {
-      const timeout = Timeout.expires(options.timeoutContext.remainingTimeMS);
+    const timeout = options?.timeoutContext?.timeoutForSocketWrite;
+    if (timeout) {
       try {
         return await Promise.race([drainEvent, timeout]);
       } catch (error) {
@@ -698,11 +698,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     timeoutContext?: TimeoutContext;
   }): AsyncGenerator<OpMsgResponse | OpReply> {
     try {
-      const timeoutMS = options.timeoutContext?.csotEnabled()
-        ? options.timeoutContext.remainingTimeMS
-        : 0;
-
-      this.dataEvents = onData(this.messageStream, { timeoutMS });
+      this.dataEvents = onData(this.messageStream, options);
 
       for await (const message of this.dataEvents) {
         const response = await decompressResponse(message);
