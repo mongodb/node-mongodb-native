@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { AssertionError, expect } from 'chai';
 import { EventEmitter } from 'events';
 
 import {
@@ -303,7 +303,7 @@ export class UnifiedMongoClient extends MongoClient {
       case 'all':
         return [...this.commandEvents, ...this.cmapEvents, ...this.sdamEvents];
       default:
-        throw new Error(`Unknown eventType: ${eventType}`);
+        throw new AssertionError(`Unknown eventType: ${eventType}`);
     }
   }
 
@@ -490,7 +490,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   mapOf(type: EntityTypeId): EntitiesMap<Entity> {
     const ctor = ENTITY_CTORS.get(type);
     if (!ctor) {
-      throw new Error(`Unknown type ${type}`);
+      throw new AssertionError(`Unknown type ${type}`);
     }
     return new EntitiesMap(Array.from(this.entries()).filter(([, e]) => e instanceof ctor));
   }
@@ -522,7 +522,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: EntityTypeId, key: string, assertExists = true): Entity | undefined {
     const entity = this.get(key);
     if (!entity) {
-      if (assertExists) throw new Error(`Entity '${key}' does not exist`);
+      if (assertExists) throw new AssertionError(`Entity '${key}' does not exist`);
       return undefined;
     }
     if (NO_INSTANCE_CHECK.includes(type)) {
@@ -531,10 +531,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     }
     const ctor = ENTITY_CTORS.get(type);
     if (!ctor) {
-      throw new Error(`Unknown type ${type}`);
+      throw new AssertionError(`Unknown type ${type}`);
     }
     if (!(entity instanceof ctor)) {
-      throw new Error(`${key} is not an instance of ${type}`);
+      throw new AssertionError(`${key} is not an instance of ${type}`);
     }
     return entity;
   }
@@ -672,13 +672,13 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
       } else if ('thread' in entity) {
         map.set(entity.thread.id, new UnifiedThread(entity.thread.id));
       } else if ('stream' in entity) {
-        throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
+        throw new AssertionError(`Unsupported Entity ${JSON.stringify(entity)}`);
       } else if ('clientEncryption' in entity) {
         const clientEncryption = await createClientEncryption(map, entity.clientEncryption);
 
         map.set(entity.clientEncryption.id, clientEncryption);
       } else {
-        throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
+        throw new AssertionError(`Unsupported Entity ${JSON.stringify(entity)}`);
       }
     }
     return map;

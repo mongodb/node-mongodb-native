@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect } from 'chai';
+import { AssertionError, expect } from 'chai';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
 import type { MongoClient } from '../../mongodb';
-import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mongodb';
+import {
+  MONGODB_ERROR_CODES,
+  MongoParseError,
+  MongoServerError,
+  ns,
+  ReadPreference,
+  TopologyType
+} from '../../mongodb';
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';
@@ -317,7 +324,14 @@ export function runUnifiedSuite(
             const error = await runUnifiedTest(this, unifiedSuite, test, skipFilter).catch(
               error => error
             );
-            expect(error).to.exist;
+            expect(error).to.satisfy(value => {
+              return (
+                value instanceof AssertionError ||
+                value instanceof MongoServerError ||
+                value instanceof TypeError ||
+                value instanceof MongoParseError
+              );
+            });
           } else {
             await runUnifiedTest(this, unifiedSuite, test, skipFilter);
           }
