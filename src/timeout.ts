@@ -185,7 +185,6 @@ export class CSOTTimeoutContext extends TimeoutContext {
   public minRoundTripTime = 0;
   private start: number;
 
-
   constructor(options: CSOTTimeoutContextOptions) {
     super();
     this.start = Math.trunc(performance.now());
