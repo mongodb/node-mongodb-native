@@ -491,8 +491,13 @@ export class ClientSession
 }
 
 Symbol.asyncDispose &&
-  (ClientSession.prototype[Symbol.asyncDispose] = async function () {
-    await this.endSession({ force: true });
+  Object.defineProperty(ClientSession.prototype, Symbol.asyncDispose, {
+    value: async function asyncDispose(this: { endSession(): Promise<void> }) {
+      await this.endSession();
+    },
+    enumerable: false,
+    configurable: true,
+    writable: true
   });
 
 const MAX_WITH_TRANSACTION_TIMEOUT = 120000;

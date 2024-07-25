@@ -1,4 +1,5 @@
-import { AbstractCursor, ChangeStream } from './beta';
+import { ChangeStream } from './change_stream';
+import { AbstractCursor } from './cursor/abstract_cursor';
 import { MongoClient } from './mongo_client';
 import { ClientSession } from './sessions';
 
@@ -12,7 +13,6 @@ export interface AsyncDisposable {
 }
 
 /**
- * @public
  * @beta
  *
  * Attaches `Symbol.asyncDispose` methods to the MongoClient, Cursors, sessions and change streams
@@ -26,7 +26,7 @@ export interface AsyncDisposable {
  * Example:
  *
  * ```typescript
- * import { load, MongoClient } from 'mongodb/beta';
+ * import { configureExplicitResourceManagement, MongoClient } from 'mongodb/lib/beta';
  *
  * Symbol.asyncDispose ??= Symbol('dispose');
  * load();
@@ -36,22 +36,42 @@ export interface AsyncDisposable {
  */
 export function configureExplicitResourceManagement() {
   Symbol.asyncDispose &&
-    (MongoClient.prototype[Symbol.asyncDispose] = async function () {
-      await this.close();
+    Object.defineProperty(MongoClient.prototype, Symbol.asyncDispose, {
+      value: async function asyncDispose(this: { close(): Promise<void> }) {
+        await this.close();
+      },
+      enumerable: false,
+      configurable: true,
+      writable: true
     });
 
   Symbol.asyncDispose &&
-    (ClientSession.prototype[Symbol.asyncDispose] = async function () {
-      await this.endSession({ force: true });
+    Object.defineProperty(AbstractCursor.prototype, Symbol.asyncDispose, {
+      value: async function asyncDispose(this: { close(): Promise<void> }) {
+        await this.close();
+      },
+      enumerable: false,
+      configurable: true,
+      writable: true
     });
 
   Symbol.asyncDispose &&
-    (AbstractCursor.prototype[Symbol.asyncDispose] = async function () {
-      await this.close();
+    Object.defineProperty(ChangeStream.prototype, Symbol.asyncDispose, {
+      value: async function asyncDispose(this: { close(): Promise<void> }) {
+        await this.close();
+      },
+      enumerable: false,
+      configurable: true,
+      writable: true
     });
 
   Symbol.asyncDispose &&
-    (ChangeStream.prototype[Symbol.asyncDispose] = async function () {
-      await this.close();
+    Object.defineProperty(ClientSession.prototype, Symbol.asyncDispose, {
+      value: async function asyncDispose(this: { endSession(): Promise<void> }) {
+        await this.endSession();
+      },
+      enumerable: false,
+      configurable: true,
+      writable: true
     });
 }

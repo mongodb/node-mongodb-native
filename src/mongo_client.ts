@@ -763,8 +763,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 }
 
 Symbol.asyncDispose &&
-  (MongoClient.prototype[Symbol.asyncDispose] = async function () {
-    await this.close();
+  Object.defineProperty(MongoClient.prototype, Symbol.asyncDispose, {
+    value: async function asyncDispose(this: { close(): Promise<void> }) {
+      await this.close();
+    },
+    enumerable: false,
+    configurable: true,
+    writable: true
   });
 
 /**

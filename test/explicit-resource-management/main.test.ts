@@ -7,9 +7,6 @@ import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
 
-// @ts-expect-error Assigning readonly property.
-Symbol.asyncDispose ??= Symbol('dispose');
-
 async function setUpCollection(client: MongoClient) {
 	const collection = client.db('foo').collection<{ name: string }>('bar');
 	const documents: Array<{ name: string }> = Array.from({ length: 5 }).map(i => ({

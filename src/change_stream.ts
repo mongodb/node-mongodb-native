@@ -995,6 +995,11 @@ export class ChangeStream<
 }
 
 Symbol.asyncDispose &&
-  (ChangeStream.prototype[Symbol.asyncDispose] = async function () {
-    await this.close();
+  Object.defineProperty(ChangeStream.prototype, Symbol.asyncDispose, {
+    value: async function asyncDispose(this: { close(): Promise<void> }) {
+      await this.close();
+    },
+    enumerable: false,
+    configurable: true,
+    writable: true
   });

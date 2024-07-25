@@ -925,6 +925,11 @@ class ReadableCursorStream extends Readable {
 }
 
 Symbol.asyncDispose &&
-  (AbstractCursor.prototype[Symbol.asyncDispose] = async function () {
-    await this.close();
+  Object.defineProperty(AbstractCursor.prototype, Symbol.asyncDispose, {
+    value: async function asyncDispose(this: { close(): Promise<void> }) {
+      await this.close();
+    },
+    enumerable: false,
+    configurable: true,
+    writable: true
   });
