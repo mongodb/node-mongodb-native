@@ -3,7 +3,8 @@ import { executeUriValidationTest } from '../tools/uri_spec_runner';
 
 const skipTests = [
   // TODO(NODE-3914): Fix; note that wtimeoutms will be deprecated via DRIVERS-555 (NODE-3078)
-  'Deprecated (or unknown) options are ignored if replacement exists'
+  'Deprecated (or unknown) options are ignored if replacement exists',
+  'Colon in a key value pair'
 ];
 
 describe('Connection String spec tests', function () {

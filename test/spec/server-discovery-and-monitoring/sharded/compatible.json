@@ -23,7 +23,7 @@
             "isWritablePrimary": true,
             "msg": "isdbgrid",
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
