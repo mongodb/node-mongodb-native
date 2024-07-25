@@ -1159,13 +1159,29 @@ export class MongoServerSelectionError extends MongoSystemError {
 }
 
 /**
+ * The type of the result property of MongoWriteConcernError
+ * @public
+ */
+export interface WriteConcernErrorResult {
+  writeConcernError: {
+    code: number;
+    errmsg: string;
+    codeName?: string;
+    errInfo?: Document;
+  };
+  ok: 0 | 1;
+  code?: number;
+  [x: string | number]: unknown;
+}
+
+/**
  * An error thrown when the server reports a writeConcernError
  * @public
  * @category Error
  */
 export class MongoWriteConcernError extends MongoServerError {
   /** The result document */
-  result: Document;
+  result: WriteConcernErrorResult;
 
   /**
    * **Do not use this constructor!**
@@ -1178,18 +1194,11 @@ export class MongoWriteConcernError extends MongoServerError {
    *
    * @public
    **/
-  constructor(result: {
-    writeConcernError: {
-      code: number;
-      errmsg: string;
-      codeName?: string;
-      errInfo?: Document;
-    };
-    errorLabels?: string[];
-  }) {
-    super({ ...result, ...result.writeConcernError });
-    this.errInfo = result.writeConcernError.errInfo;
+  constructor(result: WriteConcernErrorResult) {
+    super(result);
+    this.errInfo = result.writeConcernError?.errInfo;
     this.result = result;
+    this.code = result.code ? result.code : undefined;
   }
 
   override get name(): string {
@@ -1237,7 +1246,9 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
   }
 
   if (error instanceof MongoWriteConcernError) {
-    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
+    return RETRYABLE_WRITE_ERROR_CODES.has(
+      error.result.writeConcernError?.code ?? error?.code ?? 0
+    );
   }
 
   if (error instanceof MongoError && typeof error.code === 'number') {
