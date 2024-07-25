@@ -3612,21 +3612,6 @@ tasks:
             - {key: TYPES_VERSION, value: 20.14.10}
       - func: install dependencies
       - func: compile driver
-  - name: compile-driver-typescript-current-node-types-16.x
-    tags:
-      - compile-driver-typescript-current
-      - typescript-compilation
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: current}
-            - {key: TYPES_VERSION, value: 16.x}
-      - func: install dependencies
-      - func: compile driver
   - name: download-and-merge-coverage
     tags: []
     commands:

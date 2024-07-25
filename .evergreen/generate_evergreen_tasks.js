@@ -579,7 +579,6 @@ function* makeTypescriptTasks() {
   yield makeCheckTypesTask('4.4', '18.11.9');
 
   yield makeCompileTask('current', typesVersion);
-  yield makeCompileTask('current', '16.x');
 }
 
 BUILD_VARIANTS.push({
