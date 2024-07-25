@@ -16,7 +16,7 @@
             ],
             "setName": "wrong",
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
@@ -45,7 +45,7 @@
             ],
             "setName": "rs",
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],

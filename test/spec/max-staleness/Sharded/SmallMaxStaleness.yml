@@ -9,14 +9,14 @@ topology_description:
     type: Mongos
     avg_rtt_ms: 5
     lastUpdateTime: 0
-    maxWireVersion: 6
+    maxWireVersion: 21
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
   - &2
     address: b:27017
     type: Mongos
     avg_rtt_ms: 50  # Too far.
     lastUpdateTime: 0
-    maxWireVersion: 6
+    maxWireVersion: 21
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
 read_preference:
   mode: Nearest

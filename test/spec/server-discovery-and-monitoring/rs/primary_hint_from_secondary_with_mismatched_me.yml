@@ -17,7 +17,7 @@ phases: [
                 setName: "rs",
                 primary: "b:27017",
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 21
             }]
         ],
 
@@ -45,7 +45,7 @@ phases: [
                 hosts: ["b:27017"],
                 setName: "rs",
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 21
             }]
         ],
 

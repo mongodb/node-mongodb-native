@@ -51,7 +51,7 @@ function serverDescriptionFromDefinition(definition, hosts) {
   fakeHello.lastWrite = definition.lastWrite;
 
   // default max wire version is `6`
-  fakeHello.maxWireVersion = fakeHello.maxWireVersion || 6;
+  fakeHello.maxWireVersion = fakeHello.maxWireVersion || 21;
 
   const serverDescription = new ServerDescription(definition.address, fakeHello, {
     roundTripTime: definition.avg_rtt_ms

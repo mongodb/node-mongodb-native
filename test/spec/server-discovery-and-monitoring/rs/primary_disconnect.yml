@@ -15,7 +15,7 @@ phases: [
                     hosts: ["a:27017"],
                     setName: "rs",
                     minWireVersion: 0,
-                    maxWireVersion: 6
+                    maxWireVersion: 21
                 }]
         ],
 

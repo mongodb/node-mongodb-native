@@ -25,4 +25,4 @@ phases:
           ok: 1
           setName: rs
           minWireVersion: 0
-          maxWireVersion: 6
+          maxWireVersion: 21

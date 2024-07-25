@@ -15,7 +15,7 @@ topology_description:
   - &3
     address: c:27017
     type: RSSecondary
-    maxWireVersion: 6
+    maxWireVersion: 21
     avg_rtt_ms: 5
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
 read_preference:
