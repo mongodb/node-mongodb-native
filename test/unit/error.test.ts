@@ -30,8 +30,7 @@ import {
   setDifference,
   type TopologyDescription,
   type TopologyOptions,
-  WaitQueueTimeoutError as MongoWaitQueueTimeoutError,
-  WriteConcernErrorResult
+  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
 } from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
@@ -743,22 +742,22 @@ describe('MongoErrors', () => {
   });
 
   describe('MongoWriteConcernError constructor', function () {
-    context('when no top-level code is provided and writeConcernError.code exists', function () {
-      it('error.code remains undefined', function () {
-        const res: WriteConcernErrorResult = {
+    context('when no top-level code is provided', function () {
+      it('error.code is set to writeConcernError.code', function () {
+        const res = {
           writeConcernError: {
             code: 81, // nested code
             errmsg: 'fake msg'
           },
           ok: 1
         };
-        expect(new MongoWriteConcernError(res).code).to.equal(undefined);
+        expect(new MongoWriteConcernError(res).code).to.equal(81);
       });
     });
     context('when top-level code is provided and  writeConcernError.code exists', function () {
       it('error.code equals the top-level code', function () {
         const topLevelCode = 10;
-        const res: WriteConcernErrorResult = {
+        const res = {
           writeConcernError: {
             code: 81, // nested code
             errmsg: 'fake msg'

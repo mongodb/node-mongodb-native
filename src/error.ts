@@ -1169,8 +1169,9 @@ export interface WriteConcernErrorResult {
     codeName?: string;
     errInfo?: Document;
   };
-  ok: 0 | 1;
+  ok: number;
   code?: number;
+  errorLabels?: string[];
   [x: string | number]: unknown;
 }
 
@@ -1181,7 +1182,7 @@ export interface WriteConcernErrorResult {
  */
 export class MongoWriteConcernError extends MongoServerError {
   /** The result document */
-  result: WriteConcernErrorResult;
+  result: Document;
 
   /**
    * **Do not use this constructor!**
@@ -1195,10 +1196,10 @@ export class MongoWriteConcernError extends MongoServerError {
    * @public
    **/
   constructor(result: WriteConcernErrorResult) {
-    super(result);
-    this.errInfo = result.writeConcernError?.errInfo;
+    super({ ...result, ...result.writeConcernError });
+    this.errInfo = result.writeConcernError.errInfo;
     this.result = result;
-    this.code = result.code ? result.code : undefined;
+    this.code = result.code ?? result.writeConcernError.code ?? undefined;
   }
 
   override get name(): string {
@@ -1246,9 +1247,7 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
   }
 
   if (error instanceof MongoWriteConcernError) {
-    return RETRYABLE_WRITE_ERROR_CODES.has(
-      error.result.writeConcernError?.code ?? error?.code ?? 0
-    );
+    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
   }
 
   if (error instanceof MongoError && typeof error.code === 'number') {

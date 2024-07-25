@@ -737,7 +737,7 @@ describe('MongoClient', function () {
     expect(error).to.have.property('code', 'EBADNAME');
   });
 
-  it.only('srvServiceName should not error if it is greater than 15 characters as long as the DNS query limit is not surpassed', async () => {
+  it('srvServiceName should not error if it is greater than 15 characters as long as the DNS query limit is not surpassed', async () => {
     const options = parseOptions('mongodb+srv://localhost.a.com', {
       srvServiceName: 'a'.repeat(16)
     });
