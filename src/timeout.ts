@@ -150,11 +150,6 @@ function isCSOTTimeoutContextOptions(v: unknown): v is CSOTTimeoutContextOptions
 
 /** @internal */
 export abstract class TimeoutContext {
-  start: number;
-  constructor() {
-    this.start = Math.trunc(performance.now());
-  }
-
   static create(options: TimeoutContextOptions): TimeoutContext {
     if (isCSOTTimeoutContextOptions(options)) return new CSOTTimeoutContext(options);
     else if (isLegacyTimeoutContextOptions(options)) return new LegacyTimeoutContext(options);
@@ -188,9 +183,13 @@ export class CSOTTimeoutContext extends TimeoutContext {
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
   public minRoundTripTime = 0;
+  private start: number;
+
 
   constructor(options: CSOTTimeoutContextOptions) {
     super();
+    this.start = Math.trunc(performance.now());
+
     this.timeoutMS = options.timeoutMS;
 
     this.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
