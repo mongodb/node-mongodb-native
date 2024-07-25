@@ -34,7 +34,7 @@ export interface AsyncDisposable {
  * await using client = new MongoClient(...);
  * ```
  */
-export function load() {
+export function configureExplicitResourceManagement() {
   Symbol.asyncDispose &&
     (MongoClient.prototype[Symbol.asyncDispose] = async function () {
       await this.close();
