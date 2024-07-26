@@ -90,6 +90,8 @@ export function onData(
   // Adding event handlers
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
+  // eslint-disable-next-line github/no-then
+  timeoutContext?.timeoutForSocketRead?.then(undefined, errorHandler);
 
   const timeoutForSocketRead = timeoutContext?.timeoutForSocketRead;
   timeoutForSocketRead?.throwIfExpired();
