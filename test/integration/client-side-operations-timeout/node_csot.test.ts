@@ -48,7 +48,6 @@ describe('CSOT driver tests', () => {
         afterEach(async () => {
           await cursor?.close();
           await session?.endSession();
-          await session.endSession();
         });
 
         it('throws an error', async () => {
