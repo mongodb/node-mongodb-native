@@ -44,7 +44,7 @@ import {
   type TopologyOpeningEvent,
   WriteConcern
 } from '../../mongodb';
-import { ejson, getEnvironmentalOptions } from '../../tools/utils';
+import { getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';
 import { trace } from './runner';
@@ -590,7 +590,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         try {
           await client.connect();
         } catch (error) {
-          console.error(ejson`failed to connect entity ${entity}`);
+          console.error('failed to connect entity', entity);
           throw error;
         }
         map.set(entity.client.id, client);

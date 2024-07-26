@@ -18,6 +18,7 @@ import {
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoOperationTimeoutError,
   MongoParseError,
   MongoServerError,
   MongoUnexpectedServerResponseError
@@ -29,7 +30,7 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
-import { type TimeoutContext } from '../timeout';
+import { type TimeoutContext, TimeoutError } from '../timeout';
 import {
   BufferPool,
   calculateDurationInMs,
@@ -416,6 +417,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       ...options
     };
 
+    if (options.timeoutContext?.csotEnabled()) {
+      const { maxTimeMS } = options.timeoutContext;
+      if (maxTimeMS > 0 && Number.isFinite(maxTimeMS)) cmd.maxTimeMS = maxTimeMS;
+    }
+
     const message = this.supportsOpMsg
       ? new OpMsgRequest(db, cmd, commandOptions)
       : new OpQueryRequest(db, cmd, commandOptions);
@@ -430,7 +436,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
 
-    if (typeof options.socketTimeoutMS === 'number') {
+    if (options.timeoutContext?.csotEnabled()) {
+      this.socket.setTimeout(0);
+    } else if (typeof options.socketTimeoutMS === 'number') {
       this.socket.setTimeout(options.socketTimeoutMS);
     } else if (this.socketTimeoutMS !== 0) {
       this.socket.setTimeout(this.socketTimeoutMS);
@@ -439,7 +447,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     try {
       await this.writeCommand(message, {
         agreedCompressor: this.description.compressor ?? 'none',
-        zlibCompressionLevel: this.description.zlibCompressionLevel
+        zlibCompressionLevel: this.description.zlibCompressionLevel,
+        timeoutContext: options.timeoutContext
       });
 
       if (options.noResponse) {
@@ -449,7 +458,17 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       this.throwIfAborted();
 
-      for await (const response of this.readMany()) {
+      if (
+        options.timeoutContext?.csotEnabled() &&
+        options.timeoutContext.minRoundTripTime != null &&
+        options.timeoutContext.remainingTimeMS < options.timeoutContext.minRoundTripTime
+      ) {
+        throw new MongoOperationTimeoutError(
+          'Server roundtrip time is greater than the time remaining'
+        );
+      }
+
+      for await (const response of this.readMany({ timeoutContext: options.timeoutContext })) {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
@@ -622,7 +641,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    */
   private async writeCommand(
     command: WriteProtocolMessageType,
-    options: { agreedCompressor?: CompressorName; zlibCompressionLevel?: number }
+    options: {
+      agreedCompressor?: CompressorName;
+      zlibCompressionLevel?: number;
+      timeoutContext?: TimeoutContext;
+    }
   ): Promise<void> {
     const finalCommand =
       options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
@@ -634,8 +657,32 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const buffer = Buffer.concat(await finalCommand.toBin());
 
+    if (options.timeoutContext?.csotEnabled()) {
+      if (
+        options.timeoutContext.minRoundTripTime != null &&
+        options.timeoutContext.remainingTimeMS < options.timeoutContext.minRoundTripTime
+      ) {
+        throw new MongoOperationTimeoutError(
+          'Server roundtrip time is greater than the time remaining'
+        );
+      }
+    }
+
     if (this.socket.write(buffer)) return;
-    return await once(this.socket, 'drain');
+
+    const drainEvent = once<void>(this.socket, 'drain');
+    const timeout = options?.timeoutContext?.timeoutForSocketWrite;
+    if (timeout) {
+      try {
+        return await Promise.race([drainEvent, timeout]);
+      } catch (error) {
+        if (TimeoutError.is(error)) {
+          throw new MongoOperationTimeoutError('Timed out at socket write');
+        }
+        throw error;
+      }
+    }
+    return await drainEvent;
   }
 
   /**
@@ -647,9 +694,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    *
    * Note that `for-await` loops call `return` automatically when the loop is exited.
    */
-  private async *readMany(): AsyncGenerator<OpMsgResponse | OpReply> {
+  private async *readMany(options: {
+    timeoutContext?: TimeoutContext;
+  }): AsyncGenerator<OpMsgResponse | OpReply> {
     try {
-      this.dataEvents = onData(this.messageStream);
+      this.dataEvents = onData(this.messageStream, options);
+
       for await (const message of this.dataEvents) {
         const response = await decompressResponse(message);
         yield response;

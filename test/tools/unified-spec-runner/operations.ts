@@ -295,6 +295,7 @@ operations.set('dropCollection', async ({ entities, operation }) => {
     if (!/ns not found/.test(err.message)) {
       throw err;
     }
+    return false;
   }
 });
 
@@ -305,7 +306,7 @@ operations.set('drop', async ({ entities, operation }) => {
 
 operations.set('dropIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.dropIndexes();
+  return collection.dropIndexes(operation.arguments);
 });
 
 operations.set('endSession', async ({ entities, operation }) => {
@@ -753,11 +754,10 @@ operations.set('runCommand', async ({ entities, operation }: OperationFunctionPa
   if (operation.arguments?.command == null) throw new Error('runCommand requires a command');
   const { command } = operation.arguments;
 
-  if (operation.arguments.timeoutMS != null) throw new Error('timeoutMS not supported');
-
   const options = {
     readPreference: operation.arguments.readPreference,
-    session: operation.arguments.session
+    session: operation.arguments.session,
+    timeoutMS: operation.arguments.timeoutMS
   };
 
   return db.command(command, options);
