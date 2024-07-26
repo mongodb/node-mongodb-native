@@ -1,5 +1,5 @@
 import { EJSON } from 'bson';
-import { expect } from 'chai';
+import { AssertionError, expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
@@ -12,11 +12,13 @@ import {
   type DbOptions,
   type Document,
   getMongoDBClientEncryption,
-  type MongoClient
+  type MongoClient,
+  ReturnDocument
 } from '../../mongodb';
 import { shouldRunServerlessTest } from '../../tools/utils';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
+import { MalformedOperationError } from './operations';
 import type {
   ClientEncryptionEntity,
   CollectionOrDatabaseOptions,
@@ -51,7 +53,7 @@ export async function topologySatisfies(
     }[config.topologyType];
 
     if (!Array.isArray(r.topologies)) {
-      throw new Error('Topology specification must be an array');
+      throw new AssertionError('Topology specification must be an array');
     }
 
     if (r.topologies.includes('sharded-replicaset') && topologyType === 'sharded') {
@@ -61,7 +63,7 @@ export async function topologySatisfies(
         skipReason = `requires sharded-replicaset but shards.length=${shards.length}`;
       }
     } else {
-      if (!topologyType) throw new Error(`Topology undiscovered: ${config.topologyType}`);
+      if (!topologyType) throw new AssertionError(`Topology undiscovered: ${config.topologyType}`);
       ok &&= r.topologies.includes(topologyType);
       if (!ok && skipReason == null) {
         skipReason = `requires ${r.topologies} but discovered a ${topologyType} topology`;
@@ -83,7 +85,8 @@ export async function topologySatisfies(
   }
 
   if (r.serverParameters) {
-    if (!config.parameters) throw new Error('Configuration does not have server parameters');
+    if (!config.parameters)
+      throw new AssertionError('Configuration does not have server parameters');
     for (const [name, value] of Object.entries(r.serverParameters)) {
       if (name in config.parameters) {
         ok &&= isDeepStrictEqual(config.parameters[name], value);
@@ -199,7 +202,13 @@ export function patchCollectionOptions(
 export function translateOptions(options: Document): Document {
   const translatedOptions = { ...options };
   if (options.returnDocument) {
-    translatedOptions.returnDocument = options.returnDocument.toLowerCase();
+    const returnDocument = options.returnDocument.toLowerCase();
+    if (![ReturnDocument.BEFORE, ReturnDocument.AFTER].includes(returnDocument)) {
+      throw new MalformedOperationError(
+        'Return document must be specified as either "before" or "after"'
+      );
+    }
+    translatedOptions.returnDocument = returnDocument;
   }
   return translatedOptions as Document;
 }
@@ -250,7 +259,7 @@ export function getCSFLETestDataFromEnvironment(environment: Record<string, stri
   tlsOptions: AutoEncryptionOptions['tlsOptions'];
 } {
   if (environment.CSFLE_KMS_PROVIDERS == null) {
-    throw new Error(
+    throw new AssertionError(
       'CSFLE_KMS_PROVIDERS is required to run the csfle tests.  Please make sure it is set in the environment.'
     );
   }
@@ -260,17 +269,17 @@ export function getCSFLETestDataFromEnvironment(environment: Record<string, stri
       relaxed: false
     });
   } catch {
-    throw new Error('Malformed CSFLE_KMS_PROVIDERS provided to unified tests.');
+    throw new AssertionError('Malformed CSFLE_KMS_PROVIDERS provided to unified tests.');
   }
 
   if (environment.KMIP_TLS_CA_FILE == null) {
-    throw new Error(
+    throw new AssertionError(
       'KMIP_TLS_CA_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
     );
   }
 
   if (environment.KMIP_TLS_CERT_FILE == null) {
-    throw new Error(
+    throw new AssertionError(
       'KMIP_TLS_CERT_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
     );
   }
@@ -341,6 +350,13 @@ export function mergeKMSProviders(
       (awsProviders['sessionToken'] = isPlaceholderValue(test['sessionToken'])
         ? env['sessionToken']
         : test['sessionToken']);
+
+    if (!awsProviders['accessKeyId'] || !awsProviders['secretAccessKey']) {
+      throw new AssertionError(
+        'AWS KMS providers must constain "accessKeyId" and "secretAccessKey"'
+      );
+    }
+
     return awsProviders;
   }
   function parseAzure(env, test) {
@@ -367,6 +383,16 @@ export function mergeKMSProviders(
         ? env['identityPlatformEndpoint']
         : test['identityPlatformEndpoint']);
 
+    if (
+      !azureProviders['tenantId'] ||
+      !azureProviders['clientId'] ||
+      !azureProviders['clientSecret']
+    ) {
+      throw new AssertionError(
+        'Azure KMS providers must contain "tenantId", "clientId", and "clientSecret"'
+      );
+    }
+
     return azureProviders;
   }
 
@@ -384,6 +410,11 @@ export function mergeKMSProviders(
       (gcpProviders['endPoint'] = isPlaceholderValue(test['endPoint'])
         ? env['endPoint']
         : test['endPoint']);
+
+    if (!gcpProviders['email'] || !gcpProviders['privateKey']) {
+      throw new AssertionError('GCP KMS providers must contain "email" and "privateKey"');
+    }
+
     return gcpProviders;
   }
   function parseLocal(env, test) {
@@ -485,13 +516,17 @@ export function mergeKMSProviders(
     providers['kmip:name1'] = parseKMIP(env, fromTest);
   }
 
+  if (Object.keys(providers).length === 0) {
+    throw new AssertionError('Found empty KMS providers in test');
+  }
+
   return providers;
 }
 
-export function createClientEncryption(
+export async function createClientEncryption(
   map: EntitiesMap,
   entity: ClientEncryptionEntity
-): ClientEncryption {
+): Promise<ClientEncryption> {
   getMongoDBClientEncryption();
 
   const { clientEncryptionOpts } = entity;
@@ -503,7 +538,7 @@ export function createClientEncryption(
 
   const clientEntity = map.getEntity('client', keyVaultClient, false);
   if (!clientEntity) {
-    throw new Error(
+    throw new AssertionError(
       'unable to get client entity required by client encryption entity in unified test'
     );
   }
@@ -537,7 +572,13 @@ export function createClientEncryption(
     }, {});
   }
 
-  const kmsProviders = mergeKMSProviders(kmsProvidersFromTest, kmsProvidersFromEnvironment);
+  let kmsProviders;
+  try {
+    kmsProviders = mergeKMSProviders(kmsProvidersFromTest, kmsProvidersFromEnvironment);
+  } catch (error) {
+    await clientEntity.close();
+    throw error;
+  }
 
   const autoEncryptionOptions: AutoEncryptionOptions = {
     keyVaultClient: clientEntity,

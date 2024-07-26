@@ -44,9 +44,11 @@ type RunOperationFn = (
 ) => Promise<Document | boolean | number | null | void | string>;
 export const operations = new Map<string, RunOperationFn>();
 
+export class MalformedOperationError extends AssertionError {}
+
 operations.set('createEntities', async ({ entities, operation, testConfig }) => {
   if (!operation.arguments?.entities) {
-    throw new Error('encountered createEntities operation without entities argument');
+    throw new AssertionError('encountered createEntities operation without entities argument');
   }
   await EntitiesMap.createEntities(testConfig, null, operation.arguments.entities!, entities);
 });
@@ -59,7 +61,7 @@ operations.set('abortTransaction', async ({ entities, operation }) => {
 operations.set('aggregate', async ({ entities, operation }) => {
   const dbOrCollection = entities.get(operation.object) as Db | Collection;
   if (!(dbOrCollection instanceof Db || dbOrCollection instanceof Collection)) {
-    throw new Error(`Operation object '${operation.object}' must be a db or collection`);
+    throw new AssertionError(`Operation object '${operation.object}' must be a db or collection`);
   }
   const { pipeline, ...opts } = operation.arguments!;
   const cursor = dbOrCollection.aggregate(pipeline, opts);
@@ -228,7 +230,7 @@ operations.set('close', async ({ entities, operation }) => {
   } catch {}
   /* eslint-enable no-empty */
 
-  throw new Error(`No closable entity with key ${operation.object}`);
+  throw new AssertionError(`No closable entity with key ${operation.object}`);
 });
 
 operations.set('commitTransaction', async ({ entities, operation }) => {
@@ -239,7 +241,7 @@ operations.set('commitTransaction', async ({ entities, operation }) => {
 operations.set('createChangeStream', async ({ entities, operation }) => {
   const watchable = entities.get(operation.object);
   if (watchable == null || !('watch' in watchable)) {
-    throw new Error(`Entity ${operation.object} must be watchable`);
+    throw new AssertionError(`Entity ${operation.object} must be watchable`);
   }
 
   const { pipeline, ...args } = operation.arguments!;
@@ -356,6 +358,9 @@ operations.set('failPoint', async ({ entities, operation }) => {
 operations.set('insertOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { document, ...opts } = operation.arguments!;
+  if (!document) {
+    throw new MalformedOperationError('No document defined in the arguments for insertOne');
+  }
   // Looping exposes the fact that we can generate _ids for inserted
   // documents and we don't want the original operation to get modified
   // and use the same _id for each insert.
@@ -582,7 +587,7 @@ operations.set('waitForEvent', async ({ entities, operation }) => {
     eventPromise,
     sleep(10000).then(() =>
       Promise.reject(
-        new Error(
+        new AssertionError(
           `Timed out waiting for ${eventName}; captured [${mongoClient
             .getCapturedEvents('all')
             .map(e => e.constructor.name)
@@ -677,7 +682,7 @@ operations.set('waitForPrimaryChange', async ({ entities, operation }) => {
   await Promise.race([
     newPrimaryPromise,
     sleep(timeoutMS ?? 10000).then(() =>
-      Promise.reject(new Error(`Timed out waiting for primary change on ${client}`))
+      Promise.reject(new AssertionError(`Timed out waiting for primary change on ${client}`))
     )
   ]);
 });
@@ -697,7 +702,9 @@ operations.set('waitForThread', async ({ entities, operation }) => {
   const thread = entities.getEntity('thread', threadId, true);
   await Promise.race([
     thread.finish(),
-    sleep(10000).then(() => Promise.reject(new Error(`Timed out waiting for thread: ${threadId}`)))
+    sleep(10000).then(() =>
+      Promise.reject(new AssertionError(`Timed out waiting for thread: ${threadId}`))
+    )
   ]);
 });
 
@@ -750,10 +757,11 @@ operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
 operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {
   const db = entities.getEntity('db', operation.object);
 
-  if (operation.arguments?.command == null) throw new Error('runCommand requires a command');
+  if (operation.arguments?.command == null)
+    throw new AssertionError('runCommand requires a command');
   const { command } = operation.arguments;
 
-  if (operation.arguments.timeoutMS != null) throw new Error('timeoutMS not supported');
+  if (operation.arguments.timeoutMS != null) throw new AssertionError('timeoutMS not supported');
 
   const options = {
     readPreference: operation.arguments.readPreference,
@@ -949,7 +957,7 @@ export async function executeOperationAndCheck(
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);
       return;
-    } else if (!operation.ignoreResultAndError) {
+    } else if (!operation.ignoreResultAndError || error instanceof MalformedOperationError) {
       throw error;
     }
   }
