@@ -45,22 +45,12 @@ describe('Db', function () {
     });
   });
 
-  it('shouldCorrectlyHandleFailedConnection', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var fs_client = configuration.newClient('mongodb://127.0.0.1:25117/test', {
-        serverSelectionTimeoutMS: 10
-      });
-
-      fs_client.connect(function (err) {
-        test.ok(err != null);
-        done();
-      });
-    }
+  it('should correctly handle failed connection', async function () {
+    const client = this.configuration.newClient('mongodb://iLoveJS', {
+      serverSelectionTimeoutMS: 10
+    });
+    const error = await client.connect().catch(error => error);
+    expect(error).to.be.instanceOf(Error);
   });
 
   it('shouldCorrectlyGetErrorDroppingNonExistingDb', {
