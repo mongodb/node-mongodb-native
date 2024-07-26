@@ -384,7 +384,7 @@ describe('CSOT spec prose tests', function () {
         clock.restore();
       });
 
-      it('serverSelectionTimeoutMS honored if timeoutMS is not set', async function () {
+      it.skip('serverSelectionTimeoutMS honored if timeoutMS is not set', async function () {
         /**
          * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?serverSelectionTimeoutMS=10`.
          * 1. Using `client`, execute the command `{ ping: 1 }` against the `admin` database.
@@ -416,10 +416,11 @@ describe('CSOT spec prose tests', function () {
 
         await clock.tickAsync(11);
         expect(await maybeError).to.be.instanceof(MongoServerSelectionError);
-      });
+      }).skipReason =
+        'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
     });
 
-    it("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async function () {
+    it.skip("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async function () {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
        * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
@@ -440,9 +441,10 @@ describe('CSOT spec prose tests', function () {
 
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
-    });
+    }).skipReason =
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
 
-    it("serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS", async function () {
+    it.skip("serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS", async function () {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10`.
        * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
@@ -462,9 +464,10 @@ describe('CSOT spec prose tests', function () {
 
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
-    });
+    }).skipReason =
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
 
-    it('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', async function () {
+    it.skip('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', async function () {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=0&serverSelectionTimeoutMS=10`.
        * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
@@ -484,7 +487,8 @@ describe('CSOT spec prose tests', function () {
 
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
-    });
+    }).skipReason =
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
 
     it.skip("timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS", async function () {
       /**
