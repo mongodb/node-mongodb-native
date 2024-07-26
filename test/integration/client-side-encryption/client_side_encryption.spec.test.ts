@@ -82,19 +82,18 @@ describe('Client Side Encryption (Legacy)', function () {
     await filter.initializeFilter({} as any, {});
   });
 
-  generateTopologyTests(testSuites, testContext, ({ description }) => {
+  generateTopologyTests(testSuites, testContext, test => {
+    const { description } = test;
     if (SKIPPED_TESTS.has(description)) {
-      return false;
+      return 'Skipped by generic test name skip filter.';
     }
-
-    // TODO(NODE-5686): add CSOT support to FLE
     if (
       [
         'timeoutMS applied to listCollections to get collection schema',
         'remaining timeoutMS applied to find to get keyvault data'
       ].includes(description)
     ) {
-      return false;
+      return 'TODO(NODE-5686): add CSOT support to FLE';
     }
 
     if (isServerless) {
@@ -104,7 +103,7 @@ describe('Client Side Encryption (Legacy)', function () {
         'encryptedFieldsMap is preferred over remote encryptedFields'
       ].includes(description);
 
-      return !isSkippedTest;
+      return isSkippedTest ? 'TODO(NODE-4730): Fix failing csfle tests against serverless' : true;
     }
 
     if (
@@ -113,13 +112,11 @@ describe('Client Side Encryption (Legacy)', function () {
         'Automatically encrypt and decrypt with a named KMS provider'
       ].includes(description)
     ) {
-      if (
-        typeof filter.filter({
-          metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
-        }) === 'string'
-      ) {
-        return false;
-      }
+      const result = filter.filter({
+        metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
+      });
+
+      if (typeof result === 'string') return result;
     }
 
     return true;

@@ -1,0 +1,143 @@
+{
+  "description": "aggregate-out",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "2.6",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Aggregate with $out",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$sort": {
+                  "x": 1
+                }
+              },
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              },
+              {
+                "$out": "other_test_collection"
+              }
+            ],
+            "batchSize": 2
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "other_test_collection",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $out and batch size of 0",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$sort": {
+                  "x": 1
+                }
+              },
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              },
+              {
+                "$out": "other_test_collection"
+              }
+            ],
+            "batchSize": 0
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "other_test_collection",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

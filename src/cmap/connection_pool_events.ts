@@ -13,6 +13,7 @@ import {
   CONNECTION_READY
 } from '../constants';
 import type { MongoError } from '../error';
+import { now } from '../utils';
 import type { Connection } from './connection';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 
@@ -126,12 +127,25 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
 export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number | '<monitor>';
+  /**
+   * The time it took to establish the connection.
+   * In accordance with the definition of establishment of a connection
+   * specified by `ConnectionPoolOptions.maxConnecting`,
+   * it is the time elapsed between emitting a `ConnectionCreatedEvent`
+   * and emitting this event as part of the same checking out.
+   *
+   * Naturally, when establishing a connection is part of checking out,
+   * this duration is not greater than
+   * `ConnectionCheckedOutEvent.duration`.
+   */
+  durationMS: number;
   /** @internal */
   name = CONNECTION_READY;
 
   /** @internal */
-  constructor(pool: ConnectionPool, connection: Connection) {
+  constructor(pool: ConnectionPool, connection: Connection, connectionCreatedEventTime: number) {
     super(pool);
+    this.durationMS = now() - connectionCreatedEventTime;
     this.connectionId = connection.id;
   }
 }
@@ -194,14 +208,23 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
   error?: MongoError;
   /** @internal */
   name = CONNECTION_CHECK_OUT_FAILED;
+  /**
+   * The time it took to check out the connection.
+   * More specifically, the time elapsed between
+   * emitting a `ConnectionCheckOutStartedEvent`
+   * and emitting this event as part of the same check out.
+   */
+  durationMS: number;
 
   /** @internal */
   constructor(
     pool: ConnectionPool,
     reason: 'poolClosed' | 'timeout' | 'connectionError',
+    checkoutTime: number,
     error?: MongoError
   ) {
     super(pool);
+    this.durationMS = now() - checkoutTime;
     this.reason = reason;
     this.error = error;
   }
@@ -217,10 +240,19 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   connectionId: number | '<monitor>';
   /** @internal */
   name = CONNECTION_CHECKED_OUT;
+  /**
+   * The time it took to check out the connection.
+   * More specifically, the time elapsed between
+   * emitting a `ConnectionCheckOutStartedEvent`
+   * and emitting this event as part of the same checking out.
+   *
+   */
+  durationMS: number;
 
   /** @internal */
-  constructor(pool: ConnectionPool, connection: Connection) {
+  constructor(pool: ConnectionPool, connection: Connection, checkoutTime: number) {
     super(pool);
+    this.durationMS = now() - checkoutTime;
     this.connectionId = connection.id;
   }
 }

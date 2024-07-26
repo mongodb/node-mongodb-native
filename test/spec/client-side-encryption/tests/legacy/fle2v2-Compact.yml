@@ -1,6 +1,7 @@
 # Requires libmongocrypt 1.8.0.
 runOn:
-  - minServerVersion: "7.0.0"
+  # TODO(NODE-6128): lower server version to 7.0.0
+  - minServerVersion: "8.0.0"
     # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
     # FLE 2 Encrypted collections are not supported on standalone.
     topology: [ "replicaset", "sharded", "load-balanced" ]

@@ -1,19 +1,55 @@
 {
-  "data": [
-    {
-      "_id": 1,
-      "x": 11
-    },
-    {
-      "_id": 2,
-      "x": 22
-    }
-  ],
-  "collection_name": "default_write_concern_coll",
-  "database_name": "default_write_concern_db",
-  "runOn": [
+  "description": "default-write-concern-3.2",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
     {
       "minServerVersion": "3.2"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "default-write-concern-tests",
+        "databaseOptions": {
+          "writeConcern": {}
+        }
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll",
+        "collectionOptions": {
+          "writeConcern": {}
+        }
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "default-write-concern-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
     }
   ],
   "tests": [
@@ -22,10 +58,7 @@
       "operations": [
         {
           "name": "findOneAndUpdate",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "filter": {
               "_id": 1
@@ -39,10 +72,7 @@
         },
         {
           "name": "findOneAndReplace",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "filter": {
               "_id": 2
@@ -54,10 +84,7 @@
         },
         {
           "name": "findOneAndDelete",
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
+          "object": "collection0",
           "arguments": {
             "filter": {
               "_id": 2
@@ -65,59 +92,71 @@
           }
         }
       ],
-      "outcome": {
-        "collection": {
-          "name": "default_write_concern_coll",
-          "data": [
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 1
+                    }
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll",
+                  "query": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "x": 2
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll",
+                  "query": {
+                    "_id": 2
+                  },
+                  "remove": true,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "default-write-concern-tests",
+          "documents": [
             {
               "_id": 1,
               "x": 1
             }
           ]
-        }
-      },
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "findAndModify": "default_write_concern_coll",
-              "query": {
-                "_id": 1
-              },
-              "update": {
-                "$set": {
-                  "x": 1
-                }
-              },
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "findAndModify": "default_write_concern_coll",
-              "query": {
-                "_id": 2
-              },
-              "update": {
-                "x": 2
-              },
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "findAndModify": "default_write_concern_coll",
-              "query": {
-                "_id": 2
-              },
-              "remove": true,
-              "writeConcern": null
-            }
-          }
         }
       ]
     }

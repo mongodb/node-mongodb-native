@@ -1,0 +1,31 @@
+description: entity-findCursor
+
+schemaVersion: '1.3'
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0Name
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - databaseName: *database0Name
+    collectionName: *collection0Name
+    documents: []
+
+tests:
+  - description: iterateUntilDocumentOrError fails if it references a nonexistent entity
+    operations:
+      - name: iterateUntilDocumentOrError
+        object: cursor0
+
+  - description: close fails if it references a nonexistent entity
+    operations:
+      - name: close
+        object: cursor0

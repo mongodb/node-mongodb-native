@@ -1,0 +1,213 @@
+description: updateOne
+
+schemaVersion: '1.0'
+
+runOnRequirements:
+  -
+    minServerVersion: '3.6'
+    topologies: [ replicaset ]
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name retryable-writes-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests:
+  -
+    description: 'UpdateOne is committed on first attempt'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
+            mode: { times: 1 }
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: { _id: 1 }
+          update: { $inc: { x: 1 } }
+        expectResult:
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 12 }
+          - { _id: 2, x: 22 }
+  -
+    description: 'UpdateOne is not committed on first attempt'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
+            mode: { times: 1 }
+            data:
+              failBeforeCommitExceptionCode: 1
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: { _id: 1 }
+          update: { $inc: { x: 1 } }
+        expectResult:
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 12 }
+          - { _id: 2, x: 22 }
+  -
+    description: 'UpdateOne is never committed'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
+            mode: { times: 2 }
+            data:
+              failBeforeCommitExceptionCode: 1
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: { _id: 1 }
+          update: { $inc: { x: 1 } }
+        expectError:
+          isError: true
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+  -
+    description: 'UpdateOne with upsert is committed on first attempt'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
+            mode: { times: 1 }
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: { _id: 3, x: 33 }
+          update: { $inc: { x: 1 } }
+          upsert: true
+        expectResult:
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 1
+          upsertedId: 3
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 34 }
+  -
+    description: 'UpdateOne with upsert is not committed on first attempt'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
+            mode: { times: 1 }
+            data:
+              failBeforeCommitExceptionCode: 1
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: { _id: 3, x: 33 }
+          update: { $inc: { x: 1 } }
+          upsert: true
+        expectResult:
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 1
+          upsertedId: 3
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 34 }
+  -
+    description: 'UpdateOne with upsert is never committed'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
+            mode: { times: 2 }
+            data:
+              failBeforeCommitExceptionCode: 1
+      -
+        object: *collection0
+        name: updateOne
+        arguments:
+          filter: { _id: 3, x: 33 }
+          update: { $inc: { x: 1 } }
+          upsert: true
+        expectError:
+          isError: true
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }

@@ -29,11 +29,9 @@ tests:
           client: *client0
           failPoint:
             configureFailPoint: failCommand
-            mode:
-              times: 2
+            mode: { times: 2 }
             data:
-              failCommands:
-                - insert
+              failCommands: [ insert ]
               errorCode: 64
               errorLabels:
                 - NoWritesPerformed
@@ -41,8 +39,7 @@ tests:
       - name: insertOne
         object: *collection0
         arguments:
-          document:
-            x: 1
+          document: { x: 1 }
         expectError:
           errorCode: 64
           errorLabelsContain:

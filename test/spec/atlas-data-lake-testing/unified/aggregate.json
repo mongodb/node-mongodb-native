@@ -1,0 +1,84 @@
+{
+  "description": "aggregate",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "driverdata"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "Aggregate with pipeline (project, sort, limit)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 0
+                }
+              },
+              {
+                "$sort": {
+                  "a": 1
+                }
+              },
+              {
+                "$limit": 2
+              }
+            ]
+          },
+          "expectResult": [
+            {
+              "a": 1,
+              "b": 2,
+              "c": 3
+            },
+            {
+              "a": 2,
+              "b": 3,
+              "c": 4
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "driverdata"
+                },
+                "commandName": "aggregate",
+                "databaseName": "test"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

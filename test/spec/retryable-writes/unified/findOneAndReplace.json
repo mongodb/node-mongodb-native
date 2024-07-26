@@ -1,0 +1,213 @@
+{
+  "description": "findOneAndReplace",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.6",
+      "topologies": [
+        "replicaset"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "retryable-writes-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "retryable-writes-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "FindOneAndReplace is committed on first attempt",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "_id": 1,
+              "x": 111
+            },
+            "returnDocument": "Before"
+          },
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 111
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndReplace is not committed on first attempt",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "_id": 1,
+              "x": 111
+            },
+            "returnDocument": "Before"
+          },
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 111
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndReplace is never committed",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "onPrimaryTransactionalWrite",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failBeforeCommitExceptionCode": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "_id": 1,
+              "x": 111
+            },
+            "returnDocument": "Before"
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-writes-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

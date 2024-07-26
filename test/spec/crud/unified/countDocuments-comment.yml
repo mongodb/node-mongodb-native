@@ -1,0 +1,92 @@
+description: "countDocuments-comment"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name countDocuments-comments-test
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  - description: "countDocuments with document comment"
+    runOnRequirements:
+      - minServerVersion: 4.4.0
+    operations:
+      - name: countDocuments
+        object: *collection0
+        arguments:
+          filter: {}
+          comment: &documentComment { key: "value" }
+        expectResult: 3
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: &pipeline
+                  - $match: {}
+                  - $group: { _id: 1, n: { $sum: 1 } }
+                comment: *documentComment
+              commandName: aggregate
+              databaseName: *database0Name
+
+  - description: "countDocuments with string comment"
+    runOnRequirements:
+      - minServerVersion: 3.6.0
+    operations:
+      - name: countDocuments
+        object: *collection0
+        arguments:
+          filter: {}
+          comment: &stringComment "comment"
+        expectResult: 3
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline
+                comment: *stringComment
+              commandName: aggregate
+              databaseName: *database0Name
+
+  - description: "countDocuments with document comment on less than 4.4.0 - server error"
+    runOnRequirements:
+      - minServerVersion: 3.6.0
+        maxServerVersion: 4.3.99
+    operations:
+      - name: countDocuments
+        object: *collection0
+        arguments:
+          filter: {}
+          comment: *documentComment
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline
+                comment: *documentComment
+              commandName: aggregate
+              databaseName: *database0Name

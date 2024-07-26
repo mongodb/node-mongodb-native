@@ -104,9 +104,9 @@ export interface InsertManyResult<TSchema = Document> {
 export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
   override options: BulkWriteOptions;
   collection: Collection;
-  docs: Document[];
+  docs: ReadonlyArray<Document>;
 
-  constructor(collection: Collection, docs: Document[], options: BulkWriteOptions) {
+  constructor(collection: Collection, docs: ReadonlyArray<Document>, options: BulkWriteOptions) {
     super(options);
 
     if (!Array.isArray(docs)) {
