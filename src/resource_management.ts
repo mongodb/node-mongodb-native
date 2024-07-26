@@ -10,7 +10,7 @@ export interface AsyncDisposable {
    *
    * A method that wraps disposal semantics for a given resource in the class.
    */
-  dispose(): Promise<void>;
+  asyncDispose(): Promise<void>;
 }
 
 /** @internal */
@@ -18,7 +18,7 @@ export function configureResourceManagement(target: AsyncDisposable) {
   Symbol.asyncDispose &&
     Object.defineProperty(target, Symbol.asyncDispose, {
       value: async function asyncDispose(this: AsyncDisposable) {
-        await this.dispose();
+        await this.asyncDispose();
       },
       enumerable: false,
       configurable: true,

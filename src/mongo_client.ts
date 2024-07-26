@@ -408,7 +408,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /** @beta */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
-  async dispose() {
+  async asyncDispose() {
     await this.close();
   }
 

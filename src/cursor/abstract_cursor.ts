@@ -282,7 +282,7 @@ export abstract class AbstractCursor<
   /** @beta */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
-  async dispose() {
+  async asyncDispose() {
     await this.close();
   }
 
