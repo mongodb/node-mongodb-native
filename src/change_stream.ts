@@ -18,7 +18,7 @@ import { type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
-import { type AsyncDisposable } from './resource_management';
+import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerSessionId } from './sessions';
 import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
@@ -553,6 +553,10 @@ export class ChangeStream<
 {
   /** @beta */
   declare [Symbol.asyncDispose]: () => Promise<void>;
+  /** @internal */
+  async dispose() {
+    await this.close();
+  }
 
   pipeline: Document[];
   /**
@@ -994,12 +998,4 @@ export class ChangeStream<
   }
 }
 
-Symbol.asyncDispose &&
-  Object.defineProperty(ChangeStream.prototype, Symbol.asyncDispose, {
-    value: async function asyncDispose(this: { close(): Promise<void> }) {
-      await this.close();
-    },
-    enumerable: false,
-    configurable: true,
-    writable: true
-  });
+configureResourceManagement(ChangeStream.prototype);

@@ -31,6 +31,7 @@ import type { CommandOperationOptions, OperationParent } from './operations/comm
 import type { Hint, OperationOptions } from './operations/operation';
 import { ReadConcern } from './read_concern';
 import { ReadPreference } from './read_preference';
+import type { AsyncDisposable } from './resource_management';
 import { ServerType } from './sdam/common';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';

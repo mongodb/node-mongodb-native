@@ -9,7 +9,6 @@ echo "Building driver...finished."
 echo "Node version: $(node -v)"
 cd test/explicit-resource-management
 
-pwd
 npm i
 npm t
 mv xunit.xml ../..

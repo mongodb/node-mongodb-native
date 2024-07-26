@@ -1,15 +1,29 @@
-import { ChangeStream } from './change_stream';
-import { AbstractCursor } from './cursor/abstract_cursor';
-import { MongoClient } from './mongo_client';
-import { ClientSession } from './sessions';
-
 /**
  * @public
- * @experimental
  */
 export interface AsyncDisposable {
   /** @beta */
-  [Symbol.asyncDispose]: () => Promise<void>;
+  [Symbol.asyncDispose](): Promise<void>;
+
+  /**
+   * @internal
+   *
+   * A method that wraps disposal semantics for a given resource in the class.
+   */
+  dispose(): Promise<void>;
+}
+
+/** @internal */
+export function configureResourceManagement(target: AsyncDisposable) {
+  Symbol.asyncDispose &&
+    Object.defineProperty(target, Symbol.asyncDispose, {
+      value: async function asyncDispose(this: AsyncDisposable) {
+        await this.dispose();
+      },
+      enumerable: false,
+      configurable: true,
+      writable: true
+    });
 }
 
 /**
@@ -35,43 +49,22 @@ export interface AsyncDisposable {
  * ```
  */
 export function configureExplicitResourceManagement() {
-  Symbol.asyncDispose &&
-    Object.defineProperty(MongoClient.prototype, Symbol.asyncDispose, {
-      value: async function asyncDispose(this: { close(): Promise<void> }) {
-        await this.close();
-      },
-      enumerable: false,
-      configurable: true,
-      writable: true
-    });
+  // We must import lazily here, because there's a circular dependency between the resource management
+  // file and each resources' file.  We could move `configureResourceManagement` to a separate
+  // function, but keeping all resource-management related code together seemed preferable and I chose
+  // lazy requiring of resources instead.
 
-  Symbol.asyncDispose &&
-    Object.defineProperty(AbstractCursor.prototype, Symbol.asyncDispose, {
-      value: async function asyncDispose(this: { close(): Promise<void> }) {
-        await this.close();
-      },
-      enumerable: false,
-      configurable: true,
-      writable: true
-    });
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { MongoClient } = require('./mongo_client');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { ClientSession } = require('./sessions');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { AbstractCursor } = require('./cursor/abstract_cursor');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { ChangeStream } = require('./change_stream');
 
-  Symbol.asyncDispose &&
-    Object.defineProperty(ChangeStream.prototype, Symbol.asyncDispose, {
-      value: async function asyncDispose(this: { close(): Promise<void> }) {
-        await this.close();
-      },
-      enumerable: false,
-      configurable: true,
-      writable: true
-    });
-
-  Symbol.asyncDispose &&
-    Object.defineProperty(ClientSession.prototype, Symbol.asyncDispose, {
-      value: async function asyncDispose(this: { endSession(): Promise<void> }) {
-        await this.endSession();
-      },
-      enumerable: false,
-      configurable: true,
-      writable: true
-    });
+  configureResourceManagement(MongoClient.prototype);
+  configureResourceManagement(ClientSession.prototype);
+  configureResourceManagement(AbstractCursor.prototype);
+  configureResourceManagement(ChangeStream.prototype);
 }

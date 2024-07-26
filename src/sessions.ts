@@ -27,7 +27,7 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
-import { type AsyncDisposable } from './resource_management';
+import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
 import {
   isTransactionCommand,
@@ -292,6 +292,10 @@ export class ClientSession
   }
   /** @beta */
   declare [Symbol.asyncDispose]: () => Promise<void>;
+  /** @internal */
+  async dispose() {
+    await this.endSession({ force: true });
+  }
 
   /**
    * Advances the operationTime for a ClientSession.
@@ -490,15 +494,7 @@ export class ClientSession
   }
 }
 
-Symbol.asyncDispose &&
-  Object.defineProperty(ClientSession.prototype, Symbol.asyncDispose, {
-    value: async function asyncDispose(this: { endSession(): Promise<void> }) {
-      await this.endSession();
-    },
-    enumerable: false,
-    configurable: true,
-    writable: true
-  });
+configureResourceManagement(ClientSession.prototype);
 
 const MAX_WITH_TRANSACTION_TIMEOUT = 120000;
 const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([

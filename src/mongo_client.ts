@@ -34,7 +34,7 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
-import { type AsyncDisposable } from './resource_management';
+import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import { readPreferenceServerSelector } from './sdam/server_selection';
@@ -407,6 +407,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /** @beta */
   declare [Symbol.asyncDispose]: () => Promise<void>;
+  /** @internal */
+  async dispose() {
+    await this.close();
+  }
 
   /** @internal */
   private checkForNonGenuineHosts() {
@@ -762,15 +766,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 }
 
-Symbol.asyncDispose &&
-  Object.defineProperty(MongoClient.prototype, Symbol.asyncDispose, {
-    value: async function asyncDispose(this: { close(): Promise<void> }) {
-      await this.close();
-    },
-    enumerable: false,
-    configurable: true,
-    writable: true
-  });
+configureResourceManagement(MongoClient.prototype);
 
 /**
  * Parsed Mongo Client Options.

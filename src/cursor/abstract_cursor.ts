@@ -17,7 +17,7 @@ import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
-import { type AsyncDisposable } from '../resource_management';
+import { type AsyncDisposable, configureResourceManagement } from '../resource_management';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type MongoDBNamespace, squashError } from '../utils';
@@ -281,6 +281,10 @@ export abstract class AbstractCursor<
 
   /** @beta */
   declare [Symbol.asyncDispose]: () => Promise<void>;
+  /** @internal */
+  async dispose() {
+    await this.close();
+  }
 
   /** Returns current buffered documents length */
   bufferedCount(): number {
@@ -924,12 +928,4 @@ class ReadableCursorStream extends Readable {
   }
 }
 
-Symbol.asyncDispose &&
-  Object.defineProperty(AbstractCursor.prototype, Symbol.asyncDispose, {
-    value: async function asyncDispose(this: { close(): Promise<void> }) {
-      await this.close();
-    },
-    enumerable: false,
-    configurable: true,
-    writable: true
-  });
+configureResourceManagement(AbstractCursor.prototype);

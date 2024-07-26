@@ -75,6 +75,7 @@ export {
   MongoUnexpectedServerResponseError,
   MongoWriteConcernError
 } from './error';
+export { configureExplicitResourceManagement } from './resource_management';
 export {
   AbstractCursor,
   // Actual driver classes exported
@@ -111,7 +112,6 @@ export { ReturnDocument } from './operations/find_and_modify';
 export { ProfilingLevel } from './operations/set_profiling_level';
 export { ReadConcernLevel } from './read_concern';
 export { ReadPreferenceMode } from './read_preference';
-export { AsyncDisposable } from './resource_management';
 export { ServerType, TopologyType } from './sdam/common';
 
 // Helper classes
@@ -521,6 +521,7 @@ export type {
   ReadPreferenceLikeOptions,
   ReadPreferenceOptions
 } from './read_preference';
+export type { AsyncDisposable } from './resource_management';
 export type { ClusterTime, TimerQueue } from './sdam/common';
 export type {
   Monitor,
