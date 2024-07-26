@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
 import { clearTimeout, setTimeout } from 'timers';
+import { inspect } from 'util';
 
 import {
   addContainerMetadata,
@@ -433,7 +434,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     }
     compareInputToSpec(actualError, errorPropsToCheck, `failed while checking ${errorType}`);
   } else {
-    expect(actualError).to.not.exist;
+    expect(actualError, inspect(actualError)).to.not.exist;
   }
 
   const actualEvents = threadContext.poolEvents.filter(

@@ -155,7 +155,10 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async listDatabases(options?: ListDatabasesOptions): Promise<ListDatabasesResult> {
-    return await executeOperation(this.s.db.client, new ListDatabasesOperation(this.s.db, options));
+    return await executeOperation(
+      this.s.db.client,
+      new ListDatabasesOperation(this.s.db, { timeoutMS: this.s.db.timeoutMS, ...options })
+    );
   }
 
   /**
