@@ -740,4 +740,33 @@ describe('MongoErrors', () => {
       });
     });
   });
+
+  describe('MongoWriteConcernError constructor', function () {
+    context('when no top-level code is provided', function () {
+      it('error.code is set to writeConcernError.code', function () {
+        const res = {
+          writeConcernError: {
+            code: 81, // nested code
+            errmsg: 'fake msg'
+          },
+          ok: 1
+        };
+        expect(new MongoWriteConcernError(res).code).to.equal(81);
+      });
+    });
+    context('when top-level code is provided and  writeConcernError.code exists', function () {
+      it('error.code equals the top-level code', function () {
+        const topLevelCode = 10;
+        const res = {
+          writeConcernError: {
+            code: 81, // nested code
+            errmsg: 'fake msg'
+          },
+          ok: 1,
+          code: topLevelCode
+        };
+        expect(new MongoWriteConcernError(res).code).to.equal(topLevelCode);
+      });
+    });
+  });
 });
