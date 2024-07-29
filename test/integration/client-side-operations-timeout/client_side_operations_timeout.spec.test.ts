@@ -20,6 +20,11 @@ const cursorOperations = [
   'listCollectionNames'
 ];
 
+const bulkWriteOperations = [
+  'timeoutMS applies to whole operation, not individual attempts - bulkWrite on collection',
+  'timeoutMS applies to whole operation, not individual attempts - insertMany on collection'
+];
+
 describe('CSOT spec tests', function () {
   const specs = loadSpecTests(join('client-side-operations-timeout'));
   for (const spec of specs) {
@@ -32,6 +37,10 @@ describe('CSOT spec tests', function () {
       // Cursor operation
       if (test.operations.find(operation => cursorOperations.includes(operation.name)))
         test.skipReason = 'TODO(NODE-5684): Not working yet';
+
+      if (bulkWriteOperations.includes(test.description))
+        test.skipReason =
+          'TODO(NODE-6274): update test runner to check errorResponse field of MongoBulkWriteError in isTimeoutError assertion';
     }
   }
   runUnifiedSuite(specs);
