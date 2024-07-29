@@ -1250,13 +1250,18 @@ export function needsRetryableWriteLabel(
     }
   }
 
-  if (error instanceof MongoWriteConcernError && !(serverType === 'Mongos' && maxWireVersion < 9)) {
-    return RETRYABLE_WRITE_ERROR_CODES.has(
-      error.result.writeConcernError.code ?? Number(error.code) ?? 0
-    );
+  if (error instanceof MongoWriteConcernError) {
+    if (!(serverType === 'Mongos' && maxWireVersion < 9)) {
+      return RETRYABLE_WRITE_ERROR_CODES.has(
+        error.result.writeConcernError.code ?? Number(error.code) ?? 0
+      );
+    }
+    if (error.result.writeConcernError.code !== Number(error.code)) {
+      return RETRYABLE_WRITE_ERROR_CODES.has(Number(error.code) ?? 0);
+    }
   }
 
-  if (error instanceof MongoError && typeof error.code === 'number') {
+  if (error instanceof MongoError && !(error instanceof MongoWriteConcernError)) {
     return RETRYABLE_WRITE_ERROR_CODES.has(Number(error.code));
   }
 

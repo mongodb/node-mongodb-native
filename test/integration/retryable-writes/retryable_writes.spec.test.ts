@@ -19,9 +19,6 @@ describe('Retryable Writes (unified)', function () {
   runUnifiedSuite(loadSpecTests(path.join('retryable-writes', 'unified')), ({ description }) => {
     return clientBulkWriteTests.includes(description)
       ? `TODO(NODE-6257): implement client-level bulk write.`
-      : description ===
-        'RetryableWriteError label is not added based on writeConcernError in pre-4.4 mongos response'
-      ? 'TODO(NODE-5720)'
       : false;
   });
 });
