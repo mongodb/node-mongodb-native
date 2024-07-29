@@ -1160,6 +1160,23 @@ export class MongoServerSelectionError extends MongoSystemError {
 }
 
 /**
+ * The type of the result property of MongoWriteConcernError
+ * @public
+ */
+export interface WriteConcernErrorResult {
+  writeConcernError: {
+    code: number;
+    errmsg: string;
+    codeName?: string;
+    errInfo?: Document;
+  };
+  ok: number;
+  code?: number;
+  errorLabels?: string[];
+  [x: string | number]: unknown;
+}
+
+/**
  * An error thrown when the server reports a writeConcernError
  * @public
  * @category Error
@@ -1179,16 +1196,8 @@ export class MongoWriteConcernError extends MongoServerError {
    *
    * @public
    **/
-  constructor(result: {
-    writeConcernError: {
-      code: number;
-      errmsg: string;
-      codeName?: string;
-      errInfo?: Document;
-    };
-    errorLabels?: string[];
-  }) {
-    super({ ...result, ...result.writeConcernError });
+  constructor(result: WriteConcernErrorResult) {
+    super({ ...result.writeConcernError, ...result });
     this.errInfo = result.writeConcernError.errInfo;
     this.result = result;
   }
