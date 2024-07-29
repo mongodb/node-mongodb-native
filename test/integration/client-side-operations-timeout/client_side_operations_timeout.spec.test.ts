@@ -6,7 +6,9 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 const enabled = [
   'override-collection-timeoutMS',
   'override-database-timeoutMS',
-  'override-operation-timeoutMS'
+  'override-operation-timeoutMS',
+  'retryability-legacy-timeouts',
+  'retryability-timeoutMS'
 ];
 
 const cursorOperations = [
