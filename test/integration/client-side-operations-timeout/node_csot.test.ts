@@ -5,10 +5,13 @@ import * as sinon from 'sinon';
 import {
   type ClientSession,
   type Collection,
+  type CommandStartedEvent,
+  CountOperation,
   type Db,
   type FindCursor,
   LEGACY_HELLO_COMMAND,
-  type MongoClient,
+  MongoClient,
+  MongoError,
   MongoOperationTimeoutError
 } from '../../mongodb';
 
@@ -163,6 +166,210 @@ describe('CSOT driver tests', () => {
 
           expect(commandsStarted).to.have.length(0); // Ensure that we fail before we start the insertOne
         }
+      });
+    });
+  });
+
+  describe('retryable reads', () => {
+    let configClient: MongoClient;
+    let client: MongoClient;
+    const FAIL_COMMAND = {
+      configureFailPoint: 'failCommand',
+      mode: 'alwaysOn',
+      data: {
+        failCommands: ['count'],
+        errorCode: 10107,
+        closeConnection: false
+      }
+    };
+
+    const DISABLE_FAIL_COMMAND = {
+      configureFailPoint: 'failCommand',
+      mode: 'off',
+      data: {
+        failCommands: ['count'],
+        errorCode: 10107,
+        closeConnection: false
+      }
+    };
+
+    beforeEach(async function () {
+      configClient = new MongoClient(this.configuration.url());
+      await configClient.db().admin().command(FAIL_COMMAND);
+    });
+
+    afterEach(async function () {
+      await configClient.db().admin().command(DISABLE_FAIL_COMMAND);
+      await configClient.close();
+
+      await client.close();
+    });
+
+    context('when timeoutMS is undefined and retryable operation fails', () => {
+      const commandStartedEvents = [];
+      let maybeErr: Error | null;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient(this.configuration.url(), {
+          timeoutMS: undefined,
+          monitorCommands: true
+        });
+
+        client.on('commandStarted', (ev: CommandStartedEvent) => {
+          if (Object.hasOwn(ev.command, 'count')) commandStartedEvents.push(ev.command);
+        });
+        maybeErr = await client
+          .db('test')
+          .collection('test')
+          .count()
+          .then(
+            () => null,
+            e => e
+          );
+      });
+
+      it('makes exactly two total attempts and throws an error', async function () {
+        expect(maybeErr).to.be.instanceof(MongoError);
+        expect(commandStartedEvents).to.have.length(2);
+      });
+    });
+
+    context('when timeoutMS is a number and operation fails', () => {
+      const commandStartedEvents = [];
+      let start: number, end: number;
+      let maybeErr: Error | null;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient(this.configuration.url(), {
+          timeoutMS: 50,
+          monitorCommands: true
+        });
+
+        client.on('commandStarted', (ev: CommandStartedEvent) => {
+          if (Object.hasOwn(ev.command, 'count')) commandStartedEvents.push(ev.command);
+        });
+
+        start = performance.now();
+        maybeErr = await client
+          .db('test')
+          .collection('test')
+          .count()
+          .then(
+            () => null,
+            e => e
+          );
+        end = performance.now();
+      });
+
+      it('throws MongoOperationTimeoutError after timeoutMS', async function () {
+        expect(end - start).to.be.greaterThanOrEqual(client.options.timeoutMS);
+        expect(maybeErr).to.be.instanceof(MongoOperationTimeoutError);
+      });
+
+      it('attempts the command more than twice', async function () {
+        expect(commandStartedEvents).to.have.length.greaterThan(2);
+      });
+    });
+  });
+
+  describe('retryable writes', () => {
+    let configClient: MongoClient;
+    let client: MongoClient;
+    const FAIL_COMMAND = {
+      configureFailPoint: 'failCommand',
+      mode: 'alwaysOn',
+      data: {
+        failCommands: ['insert'],
+        errorCode: 10107,
+        closeConnection: false
+      }
+    };
+
+    const DISABLE_FAIL_COMMAND = {
+      configureFailPoint: 'failCommand',
+      mode: 'off',
+      data: {
+        failCommands: ['insert'],
+        errorCode: 10107,
+        closeConnection: false
+      }
+    };
+
+    beforeEach(async function () {
+      configClient = new MongoClient(this.configuration.url());
+      await configClient.db().admin().command(FAIL_COMMAND);
+    });
+
+    afterEach(async function () {
+      await configClient.db().admin().command(DISABLE_FAIL_COMMAND);
+      await configClient.close();
+
+      await client.close();
+    });
+
+    context('when timeoutMS is undefined and retryable operation fails', () => {
+      const commandStartedEvents = [];
+      let maybeErr: Error | null;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient(this.configuration.url(), {
+          timeoutMS: undefined,
+          monitorCommands: true
+        });
+
+        client.on('commandStarted', (ev: CommandStartedEvent) => {
+          if (Object.hasOwn(ev.command, 'insert')) commandStartedEvents.push(ev.command);
+        });
+        maybeErr = await client
+          .db('test')
+          .collection('test')
+          .insertOne({ a: 10 })
+          .then(
+            () => null,
+            e => e
+          );
+      });
+
+      it('makes exactly two total attempts and throws an error', async function () {
+        expect(maybeErr).to.be.instanceof(MongoError);
+        expect(commandStartedEvents).to.have.length(2);
+      });
+    });
+
+    context('when timeoutMS is a number and operation fails', () => {
+      const commandStartedEvents = [];
+      let start: number, end: number;
+      let maybeErr: Error | null;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient(this.configuration.url(), {
+          timeoutMS: 50,
+          monitorCommands: true
+        });
+
+        client.on('commandStarted', (ev: CommandStartedEvent) => {
+          if (Object.hasOwn(ev.command, 'insert')) commandStartedEvents.push(ev.command);
+        });
+
+        start = performance.now();
+        maybeErr = await client
+          .db('test')
+          .collection('test')
+          .insertOne({ a: 10 })
+          .then(
+            () => null,
+            e => e
+          );
+        end = performance.now();
+      });
+
+      it('throws MongoOperationTimeoutError after timeoutMS', async function () {
+        expect(end - start).to.be.greaterThanOrEqual(client.options.timeoutMS);
+        expect(maybeErr).to.be.instanceof(MongoOperationTimeoutError);
+      });
+
+      it('attempts the command more than twice', async function () {
+        expect(commandStartedEvents).to.have.length.greaterThan(2);
       });
     });
   });
