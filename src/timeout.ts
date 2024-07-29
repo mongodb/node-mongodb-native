@@ -1,7 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
-import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
-import { csotMin, noop } from './utils';
+import { MongoOperationTimeoutError, MongoRuntimeError } from './error';
+import { noop } from './utils';
 
 /** @internal */
 export class TimeoutError extends Error {
@@ -39,6 +39,7 @@ export class Timeout extends Promise<never> {
   public ended: number | null = null;
   public duration: number;
   public timedOut = false;
+  public cleared = false;
 
   get remainingTime(): number {
     if (this.timedOut) return 0;
@@ -53,10 +54,6 @@ export class Timeout extends Promise<never> {
   /** Create a new timeout that expires in `duration` ms */
   private constructor(executor: Executor = () => null, duration: number, unref = true) {
     let reject!: Reject;
-
-    if (duration < 0) {
-      throw new MongoInvalidArgumentError('Cannot create a Timeout with a negative duration');
-    }
 
     super((_, promiseReject) => {
       reject = promiseReject;
@@ -77,6 +74,12 @@ export class Timeout extends Promise<never> {
         // Ensure we do not keep the Node.js event loop running
         this.id.unref();
       }
+    } else if (duration < 0) {
+      process.nextTick(() => {
+        this.ended = Math.trunc(performance.now());
+        this.timedOut = true;
+        reject(new TimeoutError('Timed out immediately due to negative duration'));
+      });
     }
   }
 
@@ -86,12 +89,18 @@ export class Timeout extends Promise<never> {
   clear(): void {
     clearTimeout(this.id);
     this.id = undefined;
+    this.cleared = true;
   }
 
   throwIfExpired(): void {
     if (this.timedOut) throw new TimeoutError('Timed out');
   }
 
+  /**
+   * Creates a `Timeout` instance that expires after `durationMS`. Note that when `durationMS` is
+   * 0, this creates a `Timeout` that never expires. Note also that a negative `durationMS` will
+   * expire on the next tick of the event loop
+   * */
   public static expires(durationMS: number, unref?: boolean): Timeout {
     return new Timeout(undefined, durationMS, unref);
   }
@@ -214,19 +223,17 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
   get serverSelectionTimeout(): Timeout | null {
     // check for undefined
-    if (typeof this._serverSelectionTimeout !== 'object') {
+    if (typeof this._serverSelectionTimeout !== 'object' || this._serverSelectionTimeout?.cleared) {
+      const { remainingTimeMS, serverSelectionTimeoutMS } = this;
       const usingServerSelectionTimeoutMS =
-        this.serverSelectionTimeoutMS !== 0 &&
-        csotMin(this.timeoutMS, this.serverSelectionTimeoutMS) === this.serverSelectionTimeoutMS;
+        serverSelectionTimeoutMS !== 0 &&
+        !Number.isFinite(remainingTimeMS) &&
+        remainingTimeMS > serverSelectionTimeoutMS;
 
       if (usingServerSelectionTimeoutMS) {
-        this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
+        this._serverSelectionTimeout = Timeout.expires(serverSelectionTimeoutMS);
       } else {
-        if (this.timeoutMS > 0) {
-          this._serverSelectionTimeout = Timeout.expires(this.timeoutMS);
-        } else {
-          this._serverSelectionTimeout = null;
-        }
+        this._serverSelectionTimeout = Timeout.expires(remainingTimeMS);
       }
     }
 
@@ -234,7 +241,10 @@ export class CSOTTimeoutContext extends TimeoutContext {
   }
 
   get connectionCheckoutTimeout(): Timeout | null {
-    if (typeof this._connectionCheckoutTimeout !== 'object') {
+    if (
+      typeof this._connectionCheckoutTimeout !== 'object' ||
+      this._connectionCheckoutTimeout?.cleared
+    ) {
       if (typeof this._serverSelectionTimeout === 'object') {
         // null or Timeout
         this._connectionCheckoutTimeout = this._serverSelectionTimeout;
