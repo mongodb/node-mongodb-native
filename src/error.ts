@@ -1200,6 +1200,8 @@ export class MongoWriteConcernError extends MongoServerError {
     super({ ...result.writeConcernError, ...result });
     this.errInfo = result.writeConcernError.errInfo;
     this.result = result;
+    // original top-level code from server response
+    this.originalCode = result.code ?? undefined;
   }
 
   override get name(): string {
@@ -1256,12 +1258,10 @@ export function needsRetryableWriteLabel(
         error.result.writeConcernError.code ?? Number(error.code) ?? 0
       );
     }
-    if (error.result.writeConcernError.code !== Number(error.code)) {
-      return RETRYABLE_WRITE_ERROR_CODES.has(Number(error.code) ?? 0);
-    }
+    return RETRYABLE_WRITE_ERROR_CODES.has(Number(error.originalCode) ?? 0);
   }
 
-  if (error instanceof MongoError && !(error instanceof MongoWriteConcernError)) {
+  if (error instanceof MongoError) {
     return RETRYABLE_WRITE_ERROR_CODES.has(Number(error.code));
   }
 
