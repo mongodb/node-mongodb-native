@@ -14,7 +14,7 @@
   "dependencies": {
     "@types/chai": "^4.3.16",
     "chai": "^4.4.1",
-    "mongodb": "../../mongodb-6.8.0.tgz",
+    "mongodb": "../../mongodb-current.tgz",
     "tslib": "^2.6.3"
   },
   "devDependencies": {

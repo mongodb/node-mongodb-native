@@ -6,6 +6,10 @@ echo "Building driver..."
 npm pack
 echo "Building driver...finished."
 
+PACKAGE_FILE=$(ls mongodb-*.tgz)
+
+mv $PACKAGE_FILE mongodb-current.tgz
+
 echo "Node version: $(node -v)"
 cd test/explicit-resource-management
 
