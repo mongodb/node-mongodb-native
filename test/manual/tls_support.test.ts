@@ -1,7 +1,9 @@
 import * as process from 'node:process';
+import * as tls from 'node:tls';
 
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
+import * as sinon from 'sinon';
 
 import {
   LEGACY_HELLO_COMMAND,
@@ -61,6 +63,63 @@ describe('TLS Support', function () {
     });
 
     context('when tls filepaths have length > 0', () => {
+      context('when auto family options are not set', function () {
+        let tlsSpy;
+
+        afterEach(function () {
+          sinon.restore();
+        });
+
+        beforeEach(function () {
+          client = new MongoClient(CONNECTION_STRING, tlsSettings);
+          tlsSpy = sinon.spy(tls, 'connect');
+        });
+
+        it('sets the default options', async function () {
+          await client.connect();
+          expect(tlsSpy).to.have.been.calledWith({
+            autoSelectFamily: true,
+            host: 'localhost',
+            port: 27017,
+            servername: 'localhost',
+            ca: sinon.match.defined,
+            cert: sinon.match.defined,
+            key: sinon.match.defined
+          });
+        });
+      });
+
+      context('when auto family options are set', function () {
+        let tlsSpy;
+
+        afterEach(function () {
+          sinon.restore();
+        });
+
+        beforeEach(function () {
+          client = new MongoClient(CONNECTION_STRING, {
+            ...tlsSettings,
+            autoSelectFamily: false,
+            autoSelectFamilyAttemptTimeout: 100
+          });
+          tlsSpy = sinon.spy(tls, 'connect');
+        });
+
+        it('sets the provided options', async function () {
+          await client.connect();
+          expect(tlsSpy).to.have.been.calledWith({
+            autoSelectFamily: false,
+            autoSelectFamilyAttemptTimeout: 100,
+            host: 'localhost',
+            port: 27017,
+            servername: 'localhost',
+            ca: sinon.match.defined,
+            cert: sinon.match.defined,
+            key: sinon.match.defined
+          });
+        });
+      });
+
       context('when connection will succeed', () => {
         beforeEach(async () => {
           client = new MongoClient(CONNECTION_STRING, tlsSettings);

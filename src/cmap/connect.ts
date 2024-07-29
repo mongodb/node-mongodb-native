@@ -269,6 +269,8 @@ export const LEGAL_TLS_SOCKET_OPTIONS = [
 
 /** @public */
 export const LEGAL_TCP_SOCKET_OPTIONS = [
+  'autoSelectFamily',
+  'autoSelectFamilyAttemptTimeout',
   'family',
   'hints',
   'localAddress',
@@ -285,6 +287,10 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
     if (options[name] != null) {
       (result as Document)[name] = options[name];
     }
+  }
+
+  if (!('autoSelectFamily' in result)) {
+    result.autoSelectFamily = true;
   }
 
   if (typeof hostAddress.socketPath === 'string') {

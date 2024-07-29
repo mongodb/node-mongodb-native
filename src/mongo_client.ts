@@ -104,7 +104,7 @@ export type SupportedTLSSocketOptions = Pick<
 
 /** @public */
 export type SupportedSocketOptions = Pick<
-  TcpNetConnectOpts,
+  TcpNetConnectOpts & { autoSelectFamily?: boolean; autoSelectFamilyAttemptTimeout?: number },
   (typeof LEGAL_TCP_SOCKET_OPTIONS)[number]
 >;
 
