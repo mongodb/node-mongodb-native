@@ -1,12 +1,10 @@
 /* Anything javascript specific relating to timeouts */
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import {
   type ClientSession,
   type Collection,
   type CommandStartedEvent,
-  CountOperation,
   type Db,
   type FindCursor,
   LEGACY_HELLO_COMMAND,
@@ -16,10 +14,6 @@ import {
 } from '../../mongodb';
 
 describe('CSOT driver tests', () => {
-  afterEach(() => {
-    sinon.restore();
-  });
-
   describe('timeoutMS inheritance', () => {
     let client: MongoClient;
     let db: Db;
