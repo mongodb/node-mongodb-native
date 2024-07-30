@@ -26,10 +26,10 @@ describe('CSOT spec unit tests', function () {
 
       await client.db('db').collection('collection').insertOne({ x: 1 });
 
-      const createCalls = timeoutContextSpy.getCalls().filter(call => {
+      const createCalls = timeoutContextSpy.getCalls().filter(
         // @ts-expect-error accessing concrete field
-        return call.args[0].timeoutMS === 10000;
-      });
+        call => call.args[0].timeoutMS === 10000
+      );
 
       console.log(createCalls);
 
