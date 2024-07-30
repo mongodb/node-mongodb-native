@@ -31,8 +31,6 @@ describe('CSOT spec unit tests', function () {
         call => call.args[0].timeoutMS === 10000
       );
 
-      console.log(createCalls);
-
       expect(createCalls).to.have.length.greaterThanOrEqual(1);
       expect(Timeout.expires).to.not.have.been.calledWith(999999);
     });
