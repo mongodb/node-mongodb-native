@@ -365,7 +365,7 @@ functions:
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-resource-management.sh"
 
-  "check resource management smoke tests":
+  "check resource management feature integration":
     - command: subprocess.exec
       type: test
       params:

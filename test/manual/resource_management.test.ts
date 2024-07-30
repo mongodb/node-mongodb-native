@@ -3,7 +3,7 @@ import * as sinon from 'sinon';
 
 import { AbstractCursor, ChangeStream, ClientSession, MongoClient } from '../mongodb';
 
-describe('Explicit Resource Management Tests', function () {
+describe('Symbol.asyncDispose implementation tests', function () {
   let client: MongoClient;
 
   afterEach(async function () {

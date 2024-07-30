@@ -517,7 +517,7 @@ SINGLETON_TASKS.push(
       ]
     },
     {
-      name: 'test-explicit-resource-management-smoke-tests',
+      name: 'test-explicit-resource-management-feature-integration',
       tags: ['resource-management'],
       commands: [
         updateExpansions({
@@ -527,7 +527,7 @@ SINGLETON_TASKS.push(
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
-        { func: 'check resource management smoke tests' }
+        { func: 'check resource management feature integration' }
       ]
     },
     ...Array.from(makeTypescriptTasks())

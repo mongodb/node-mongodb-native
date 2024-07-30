@@ -327,7 +327,7 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-resource-management.sh
-  check resource management smoke tests:
+  check resource management feature integration:
     - command: subprocess.exec
       type: test
       params:
@@ -3508,7 +3508,7 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
       - func: check resource management
-  - name: test-explicit-resource-management-smoke-tests
+  - name: test-explicit-resource-management-feature-integration
     tags:
       - resource-management
     commands:
@@ -3521,7 +3521,7 @@ tasks:
             - {key: NODE_LTS_VERSION, value: latest}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: check resource management smoke tests
+      - func: check resource management feature integration
   - name: check-types-typescript-next-node-types-20.14.10
     tags:
       - check-types-typescript-next
