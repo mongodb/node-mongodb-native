@@ -164,36 +164,41 @@ describe('CSOT driver tests', () => {
     });
   });
 
+  function makeFailCommand(failCommands: string[], errorCode: number) {
+    return {
+      failCommand: {
+        configureFailPoint: 'failCommand',
+        mode: 'alwaysOn',
+        data: {
+          errorCode,
+          failCommands,
+          closeConnection: false
+        }
+      },
+      disableFailCommand: {
+        configureFailPoint: 'failCommand',
+        mode: 'off',
+        data: {
+          errorCode,
+          failCommands,
+          closeConnection: false
+        }
+      }
+    };
+  }
+
   describe('retryable reads', () => {
     let configClient: MongoClient;
     let client: MongoClient;
-    const FAIL_COMMAND = {
-      configureFailPoint: 'failCommand',
-      mode: 'alwaysOn',
-      data: {
-        failCommands: ['count'],
-        errorCode: 10107,
-        closeConnection: false
-      }
-    };
-
-    const DISABLE_FAIL_COMMAND = {
-      configureFailPoint: 'failCommand',
-      mode: 'off',
-      data: {
-        failCommands: ['count'],
-        errorCode: 10107,
-        closeConnection: false
-      }
-    };
+    const { failCommand, disableFailCommand } = makeFailCommand(['count'], 10107);
 
     beforeEach(async function () {
       configClient = new MongoClient(this.configuration.url());
-      await configClient.db().admin().command(FAIL_COMMAND);
+      await configClient.db().admin().command(failCommand);
     });
 
     afterEach(async function () {
-      await configClient.db().admin().command(DISABLE_FAIL_COMMAND);
+      await configClient.db().admin().command(disableFailCommand);
       await configClient.close();
 
       await client.close();
@@ -222,7 +227,7 @@ describe('CSOT driver tests', () => {
           );
       });
 
-      it('makes exactly two total attempts and throws an error', async function () {
+      it('makes exactly two attempts and throws an error', async function () {
         expect(maybeErr).to.be.instanceof(MongoError);
         expect(commandStartedEvents).to.have.length(2);
       });
@@ -269,33 +274,15 @@ describe('CSOT driver tests', () => {
   describe('retryable writes', () => {
     let configClient: MongoClient;
     let client: MongoClient;
-    const FAIL_COMMAND = {
-      configureFailPoint: 'failCommand',
-      mode: 'alwaysOn',
-      data: {
-        failCommands: ['insert'],
-        errorCode: 10107,
-        closeConnection: false
-      }
-    };
-
-    const DISABLE_FAIL_COMMAND = {
-      configureFailPoint: 'failCommand',
-      mode: 'off',
-      data: {
-        failCommands: ['insert'],
-        errorCode: 10107,
-        closeConnection: false
-      }
-    };
+    const { failCommand, disableFailCommand } = makeFailCommand(['insert'], 10107);
 
     beforeEach(async function () {
       configClient = new MongoClient(this.configuration.url());
-      await configClient.db().admin().command(FAIL_COMMAND);
+      await configClient.db().admin().command(failCommand);
     });
 
     afterEach(async function () {
-      await configClient.db().admin().command(DISABLE_FAIL_COMMAND);
+      await configClient.db().admin().command(disableFailCommand);
       await configClient.close();
 
       await client.close();
@@ -324,9 +311,12 @@ describe('CSOT driver tests', () => {
           );
       });
 
-      it('makes exactly two total attempts and throws an error', async function () {
-        expect(maybeErr).to.be.instanceof(MongoError);
-        expect(commandStartedEvents).to.have.length(2);
+      it('makes exactly two total attempts and throws an error', {
+        metadata: { requires: { topology: '!single' } },
+        test: async function () {
+          expect(maybeErr).to.be.instanceof(MongoError);
+          expect(commandStartedEvents).to.have.length(2);
+        }
       });
     });
 
@@ -337,6 +327,7 @@ describe('CSOT driver tests', () => {
 
       beforeEach(async function () {
         client = this.configuration.newClient(this.configuration.url(), {
+          retryWrites: true,
           timeoutMS: 50,
           monitorCommands: true
         });
@@ -357,13 +348,19 @@ describe('CSOT driver tests', () => {
         end = performance.now();
       });
 
-      it('throws MongoOperationTimeoutError after timeoutMS', async function () {
-        expect(end - start).to.be.greaterThanOrEqual(client.options.timeoutMS);
-        expect(maybeErr).to.be.instanceof(MongoOperationTimeoutError);
+      it('throws MongoOperationTimeoutError after timeoutMS', {
+        metadata: { requires: { topology: '!single' } },
+        test: async function () {
+          expect(end - start).to.be.greaterThanOrEqual(client.options.timeoutMS);
+          expect(maybeErr).to.be.instanceof(MongoOperationTimeoutError);
+        }
       });
 
-      it('attempts the command more than twice', async function () {
-        expect(commandStartedEvents).to.have.length.greaterThan(2);
+      it('attempts the command more than twice', {
+        metadata: { requires: { topology: '!single' } },
+        test: function () {
+          expect(commandStartedEvents).to.have.length.greaterThan(2);
+        }
       });
     });
   });
