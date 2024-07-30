@@ -8,7 +8,7 @@ import {
   type Db,
   type FindCursor,
   LEGACY_HELLO_COMMAND,
-  MongoClient,
+  type MongoClient,
   MongoError,
   MongoOperationTimeoutError
 } from '../../mongodb';
@@ -193,7 +193,7 @@ describe('CSOT driver tests', () => {
     const { failCommand, disableFailCommand } = makeFailCommand(['count'], 10107);
 
     beforeEach(async function () {
-      configClient = new MongoClient(this.configuration.url());
+      configClient = this.configuration.newClient();
       await configClient.db().admin().command(failCommand);
     });
 
@@ -277,7 +277,7 @@ describe('CSOT driver tests', () => {
     const { failCommand, disableFailCommand } = makeFailCommand(['insert'], 10107);
 
     beforeEach(async function () {
-      configClient = new MongoClient(this.configuration.url());
+      configClient = this.configuration.newClient();
       await configClient.db().admin().command(failCommand);
     });
 
