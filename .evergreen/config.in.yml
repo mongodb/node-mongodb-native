@@ -376,7 +376,7 @@ functions:
           MONGODB_URI: ${MONGODB_URI}
         binary: bash
         args:
-          - "${PROJECT_DIRECTORY}/.evergreen/run-resource-management-smoke-tests.sh"
+          - "${PROJECT_DIRECTORY}/.evergreen/run-resource-management-feature-integration.sh"
 
   "compile driver":
     - command: subprocess.exec

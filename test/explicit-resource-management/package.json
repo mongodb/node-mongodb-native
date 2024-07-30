@@ -15,9 +15,7 @@
     "@types/chai": "^4.3.16",
     "chai": "^4.4.1",
     "mongodb": "../../mongodb-current.tgz",
-    "tslib": "^2.6.3"
-  },
-  "devDependencies": {
+    "tslib": "^2.6.3",
     "mocha": "^10.7.0",
     "typescript": "5.5"
   }

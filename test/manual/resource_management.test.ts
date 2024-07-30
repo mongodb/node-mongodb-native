@@ -19,7 +19,7 @@ describe('Symbol.asyncDispose implementation tests', function () {
     });
 
     describe('MongoClient', function () {
-      it('closes the the client', async function () {
+      it('the Symbol.asyncDispose method calls close()', async function () {
         client = new MongoClient('mongodb://localhost:27017');
 
         const spy = sinon.spy(client, 'close');
@@ -29,7 +29,7 @@ describe('Symbol.asyncDispose implementation tests', function () {
     });
 
     describe('ClientSession', function () {
-      it('ends the session', async function () {
+      it('the Symbol.asyncDispose method calls endSession()', async function () {
         client = new MongoClient('mongodb://localhost:27017');
         const session = client.startSession();
 
@@ -40,7 +40,7 @@ describe('Symbol.asyncDispose implementation tests', function () {
     });
 
     describe('ChangeStreams', function () {
-      it('closes the change stream', async function () {
+      it('the Symbol.asyncDispose method calls close()', async function () {
         client = new MongoClient('mongodb://localhost:27017');
         const changeStream = client.watch();
 
@@ -51,7 +51,7 @@ describe('Symbol.asyncDispose implementation tests', function () {
     });
 
     describe('cursors', function () {
-      it('closes the cursor', async function () {
+      it('the Symbol.asyncDispose method calls close()', async function () {
         client = new MongoClient('mongodb://localhost:27017');
         const cursor = client.db('foo').collection('bar').find();
 

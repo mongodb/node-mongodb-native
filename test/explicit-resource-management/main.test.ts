@@ -14,7 +14,7 @@ async function setUpCollection(client: MongoClient) {
   return collection;
 }
 
-describe('explicit resource management smoke tests', function () {
+describe('explicit resource management feature integration tests', function () {
   describe('MongoClient', function () {
     it('does not crash or error when used with await-using syntax', async function () {
             await using client = new MongoClient(process.env.MONGODB_URI!);
@@ -30,8 +30,6 @@ describe('explicit resource management smoke tests', function () {
       const collection = await setUpCollection(client);
 
       await using cursor = collection.find();
-      await cursor.next();
-      await cursor.next();
       await cursor.next();
     })
 
