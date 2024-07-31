@@ -28,7 +28,11 @@ import {
   type KMSProviders,
   refreshKMSCredentials
 } from './providers/index';
-import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
+import {
+  type ClientEncryptionSocketOptions,
+  type CSFLEKMSTlsOptions,
+  StateMachine
+} from './state_machine';
 
 /**
  * @public
@@ -62,6 +66,8 @@ export class ClientEncryption {
   _tlsOptions: CSFLEKMSTlsOptions;
   /** @internal */
   _kmsProviders: KMSProviders;
+  /** @internal */
+  _socketOptions: ClientEncryptionSocketOptions;
 
   /** @internal */
   _mongoCrypt: MongoCrypt;
@@ -108,6 +114,15 @@ export class ClientEncryption {
     this._proxyOptions = options.proxyOptions ?? {};
     this._tlsOptions = options.tlsOptions ?? {};
     this._kmsProviders = options.kmsProviders || {};
+    this._socketOptions = {};
+
+    if ('autoSelectFamily' in client.s.options) {
+      this._socketOptions.autoSelectFamily = client.s.options.autoSelectFamily;
+    }
+    if ('autoSelectFamilyAttemptTimeout' in client.s.options) {
+      this._socketOptions.autoSelectFamilyAttemptTimeout =
+        client.s.options.autoSelectFamilyAttemptTimeout;
+    }
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -199,7 +214,8 @@ export class ClientEncryption {
 
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions
+      tlsOptions: this._tlsOptions,
+      socketOptions: this._socketOptions
     });
 
     const dataKey = deserialize(await stateMachine.execute(this, context)) as DataKey;
@@ -256,7 +272,8 @@ export class ClientEncryption {
     const context = this._mongoCrypt.makeRewrapManyDataKeyContext(filterBson, keyEncryptionKeyBson);
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions
+      tlsOptions: this._tlsOptions,
+      socketOptions: this._socketOptions
     });
 
     const { v: dataKeys } = deserialize(await stateMachine.execute(this, context));
@@ -637,7 +654,8 @@ export class ClientEncryption {
 
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions
+      tlsOptions: this._tlsOptions,
+      socketOptions: this._socketOptions
     });
 
     const { v } = deserialize(await stateMachine.execute(this, context));
@@ -715,7 +733,8 @@ export class ClientEncryption {
     const valueBuffer = serialize({ v: value });
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions
+      tlsOptions: this._tlsOptions,
+      socketOptions: this._socketOptions
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 

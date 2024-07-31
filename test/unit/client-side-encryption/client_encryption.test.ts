@@ -19,6 +19,11 @@ import { Binary, BSON, deserialize } from '../../mongodb';
 const { EJSON } = BSON;
 
 class MockClient {
+  s: any;
+
+  constructor(options?: any) {
+    this.s = { options: options || {} };
+  }
   db(dbName) {
     return {
       async createCollection(name, options) {

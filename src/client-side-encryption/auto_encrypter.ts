@@ -15,7 +15,11 @@ import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders, refreshKMSCredentials } from './providers';
-import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
+import {
+  type ClientEncryptionSocketOptions,
+  type CSFLEKMSTlsOptions,
+  StateMachine
+} from './state_machine';
 
 /** @public */
 export interface AutoEncryptionOptions {
@@ -101,6 +105,8 @@ export interface AutoEncryptionOptions {
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
   tlsOptions?: CSFLEKMSTlsOptions;
+  /** Options for KMS socket requests. */
+  socketOptions?: ClientEncryptionSocketOptions;
 }
 
 /**
@@ -150,6 +156,7 @@ export class AutoEncrypter {
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
+  _socketOptions: ClientEncryptionSocketOptions;
 
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
@@ -234,6 +241,7 @@ export class AutoEncrypter {
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
+    this._socketOptions = options.socketOptions || {};
 
     const mongoCryptOptions: MongoCryptOptions = {
       cryptoCallbacks
@@ -379,7 +387,8 @@ export class AutoEncrypter {
       promoteValues: false,
       promoteLongs: false,
       proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions
+      tlsOptions: this._tlsOptions,
+      socketOptions: this._socketOptions
     });
 
     return deserialize(await stateMachine.execute(this, context), {
@@ -399,7 +408,8 @@ export class AutoEncrypter {
     const stateMachine = new StateMachine({
       ...options,
       proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions
+      tlsOptions: this._tlsOptions,
+      socketOptions: this._socketOptions
     });
 
     return await stateMachine.execute(this, context);

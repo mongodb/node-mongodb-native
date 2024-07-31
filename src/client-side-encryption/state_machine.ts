@@ -115,6 +115,16 @@ export type CSFLEKMSTlsOptions = {
 };
 
 /**
+ * @public
+ *
+ * Socket options to use for KMS requests.
+ */
+export type ClientEncryptionSocketOptions = Pick<
+  MongoClientOptions,
+  'autoSelectFamily' | 'autoSelectFamilyAttemptTimeout'
+>;
+
+/**
  * This is kind of a hack.  For `rewrapManyDataKey`, we have tests that
  * guarantee that when there are no matching keys, `rewrapManyDataKey` returns
  * nothing.  We also have tests for auto encryption that guarantee for `encrypt`
@@ -153,6 +163,9 @@ export type StateMachineOptions = {
 
   /** TLS options for KMS requests, if set. */
   tlsOptions: CSFLEKMSTlsOptions;
+
+  /** Socket specific options we support. */
+  socketOptions: ClientEncryptionSocketOptions;
 } & Pick<BSONSerializeOptions, 'promoteLongs' | 'promoteValues'>;
 
 /**
@@ -289,13 +302,26 @@ export class StateMachine {
   async kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
-    const options: tls.ConnectionOptions & { host: string; port: number } = {
+    const options: tls.ConnectionOptions & {
+      host: string;
+      port: number;
+      autoSelectFamily?: boolean;
+      autoSelectFamilyAttemptTimeout?: number;
+    } = {
       host: parsedUrl[0],
       servername: parsedUrl[0],
       port
     };
     const message = request.message;
     const buffer = new BufferPool();
+
+    const socketOptions = this.options.socketOptions || {};
+    if ('autoSelectFamily' in socketOptions) {
+      options.autoSelectFamily = socketOptions.autoSelectFamily;
+    }
+    if ('autoSelectFamilyAttemptTimeout' in socketOptions) {
+      options.autoSelectFamilyAttemptTimeout = socketOptions.autoSelectFamilyAttemptTimeout;
+    }
 
     const netSocket: net.Socket = new net.Socket();
     let socket: tls.TLSSocket;

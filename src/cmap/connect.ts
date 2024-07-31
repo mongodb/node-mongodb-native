@@ -289,10 +289,6 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
     }
   }
 
-  if (!('autoSelectFamily' in result)) {
-    result.autoSelectFamily = true;
-  }
-
   if (typeof hostAddress.socketPath === 'string') {
     result.path = hostAddress.socketPath;
     return result as net.IpcNetConnectOpts;
