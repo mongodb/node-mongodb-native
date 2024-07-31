@@ -32,16 +32,13 @@ rm -rf "$DEP_WORKSPACE"
 mkdir -p "$DEP_WORKSPACE"
 
 pushd "$DEP_WORKSPACE"
-
-rm -rf mongodb-client-encryption
-
 git clone https://github.com/mongodb-js/mongodb-client-encryption.git
 
 pushd mongodb-client-encryption
 git fetch --tags
 git checkout "$CSFLE_GIT_REF" -b csfle-custom
 echo "checked out mongodb-client-encryption at $(git rev-parse HEAD)"
-npm run install:libmongocrypt -- --fastDownload
+npm run install:libmongocrypt
 npm install --ignore-scripts
 popd # mongodb-client-encryption
 

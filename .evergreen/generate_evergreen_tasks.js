@@ -20,7 +20,7 @@ const csfleTasks = [];
 
 const FLE_PINNED_COMMIT = '38f1be60e3f8d24b066642f742c90d0ffdd0cdc0';
 
-for (const version of ['5.0', '6.0', /* TODO: RangePreview question '7.0' */]) {
+for (const version of ['5.0', '6.0']) {
   for (const ref of [FLE_PINNED_COMMIT, 'main']) {
     csfleTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'main' ? ref : 'pinned-commit'}`,
