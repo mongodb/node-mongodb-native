@@ -279,7 +279,10 @@ export abstract class AbstractCursor<
     return !!this.cursorClient.topology?.loadBalanced;
   }
 
-  /** @beta */
+  /**
+   * @beta
+   * @experimental
+   */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
   async asyncDispose() {

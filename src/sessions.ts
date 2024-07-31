@@ -290,7 +290,10 @@ export class ClientSession
       maybeClearPinnedConnection(this, { force: true, ...options });
     }
   }
-  /** @beta */
+  /**
+   * @beta
+   * @experimental
+   */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
   async asyncDispose() {

@@ -2,7 +2,10 @@
  * @public
  */
 export interface AsyncDisposable {
-  /** @beta */
+  /**
+   * @beta
+   * @experimental
+   */
   [Symbol.asyncDispose](): Promise<void>;
 
   /**
@@ -28,6 +31,7 @@ export function configureResourceManagement(target: AsyncDisposable) {
 
 /**
  * @beta
+ * @experimental
  *
  * Attaches `Symbol.asyncDispose` methods to the MongoClient, Cursors, sessions and change streams
  * if Symbol.asyncDispose is defined.

@@ -405,7 +405,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     this.checkForNonGenuineHosts();
   }
 
-  /** @beta */
+  /**
+   * @beta
+   * @experimental
+   */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
   async asyncDispose() {

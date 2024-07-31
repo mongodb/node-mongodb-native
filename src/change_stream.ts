@@ -551,7 +551,10 @@ export class ChangeStream<
   extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>>
   implements AsyncDisposable
 {
-  /** @beta */
+  /**
+   * @beta
+   * @experimental
+   */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
   async asyncDispose() {
