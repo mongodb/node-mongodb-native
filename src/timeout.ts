@@ -218,7 +218,9 @@ export class CSOTTimeoutContext extends TimeoutContext {
     if (typeof this._serverSelectionTimeout !== 'object' || this._serverSelectionTimeout?.cleared) {
       const { remainingTimeMS, serverSelectionTimeoutMS } = this;
       if (remainingTimeMS <= 0)
-        throw new MongoOperationTimeoutError('Timed out in server selection');
+        throw new MongoOperationTimeoutError(
+          `Timed out in server selection after ${this.timeoutMS}ms`
+        );
       const usingServerSelectionTimeoutMS =
         serverSelectionTimeoutMS !== 0 &&
         csotMin(remainingTimeMS, serverSelectionTimeoutMS) === serverSelectionTimeoutMS;
