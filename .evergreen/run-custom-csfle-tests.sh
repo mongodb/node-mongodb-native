@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 set +o xtrace # Do not write AWS credentials to stderr
 
-# Initiail checks for running these tests
+# Initial checks for running these tests
 if [ -z ${AWS_ACCESS_KEY_ID+omitted} ]; then echo "AWS_ACCESS_KEY_ID is unset" && exit 1; fi
 if [ -z ${AWS_SECRET_ACCESS_KEY+omitted} ]; then echo "AWS_SECRET_ACCESS_KEY is unset" && exit 1; fi
 if [ -z ${CSFLE_KMS_PROVIDERS+omitted} ]; then echo "CSFLE_KMS_PROVIDERS is unset" && exit 1; fi
@@ -20,49 +20,35 @@ set -o errexit  # Exit the script with error if any of the commands fail
 # Get access to the AWS temporary credentials:
 echo "adding temporary AWS credentials to environment"
 # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
-. "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
-
-ABS_PATH_TO_PATCH=$(pwd)
+source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 
 # Environment Variables:
 # CSFLE_GIT_REF - set the git reference to checkout for a custom CSFLE version
-# CDRIVER_GIT_REF - set the git reference to checkout for a custom CDRIVER version (this is for libbson)
-CSFLE_GIT_REF=${CSFLE_GIT_REF:-master}
-CDRIVER_GIT_REF=${CDRIVER_GIT_REF:-1.17.6}
+CSFLE_GIT_REF=${CSFLE_GIT_REF:-main}
 
-rm -rf ../csfle-deps-tmp
-mkdir -p ../csfle-deps-tmp
-pushd ../csfle-deps-tmp
+DEP_WORKSPACE=$(realpath ../csfle-deps-tmp)
 
-rm -rf libmongocrypt mongo-c-driver
+rm -rf "$DEP_WORKSPACE"
+mkdir -p "$DEP_WORKSPACE"
 
-git clone https://github.com/mongodb/libmongocrypt.git
-pushd libmongocrypt
+pushd "$DEP_WORKSPACE"
+
+rm -rf mongodb-client-encryption
+
+git clone https://github.com/mongodb-js/mongodb-client-encryption.git
+
+pushd mongodb-client-encryption
 git fetch --tags
 git checkout "$CSFLE_GIT_REF" -b csfle-custom
-echo "checked out libmongocrypt at $(git rev-parse HEAD)"
-popd # libmongocrypt
+echo "checked out mongodb-client-encryption at $(git rev-parse HEAD)"
+npm run install:libmongocrypt -- --fastDownload
+npm install --ignore-scripts
+popd # mongodb-client-encryption
 
-git clone https://github.com/mongodb/mongo-c-driver.git
-pushd mongo-c-driver
-git fetch --tags
-git checkout "$CDRIVER_GIT_REF" -b cdriver-custom
-echo "checked out C driver at $(git rev-parse HEAD)"
-popd # mongo-c-driver
-
-pushd libmongocrypt/bindings/node
-
-npm install --production --ignore-scripts
-bash ./etc/build-static.sh
-
-npm run rebuild # just in case this is necessary?
-
-BINDINGS_DIR=$(pwd)
-popd # libmongocrypt/bindings/node
 popd # ../csfle-deps-tmp
 
 # copy mongodb-client-encryption into driver's node_modules
-npm link $BINDINGS_DIR
+npm link "$DEP_WORKSPACE/mongodb-client-encryption"
 
 export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"

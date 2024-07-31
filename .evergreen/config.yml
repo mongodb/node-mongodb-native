@@ -1239,12 +1239,12 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 51e172622a0ddf2bf761e4d1e26ca267359086dd}
+            - {key: CSFLE_GIT_REF, value: 38f1be60e3f8d24b066642f742c90d0ffdd0cdc0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run custom csfle tests
-  - name: run-custom-csfle-tests-5.0-master
+  - name: run-custom-csfle-tests-5.0-main
     tags:
       - run-custom-dependency-tests
       - csfle
@@ -1257,12 +1257,12 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
+            - {key: CSFLE_GIT_REF, value: main}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run custom csfle tests
-  - name: run-custom-csfle-tests-rapid-pinned-commit
+  - name: run-custom-csfle-tests-6.0-pinned-commit
     tags:
       - run-custom-dependency-tests
       - csfle
@@ -1273,14 +1273,14 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
+            - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 51e172622a0ddf2bf761e4d1e26ca267359086dd}
+            - {key: CSFLE_GIT_REF, value: 38f1be60e3f8d24b066642f742c90d0ffdd0cdc0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run custom csfle tests
-  - name: run-custom-csfle-tests-rapid-master
+  - name: run-custom-csfle-tests-6.0-main
     tags:
       - run-custom-dependency-tests
       - csfle
@@ -1291,45 +1291,9 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
+            - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
-  - name: run-custom-csfle-tests-latest-pinned-commit
-    tags:
-      - run-custom-dependency-tests
-      - csfle
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 51e172622a0ddf2bf761e4d1e26ca267359086dd}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
-  - name: run-custom-csfle-tests-latest-master
-    tags:
-      - run-custom-dependency-tests
-      - csfle
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
+            - {key: CSFLE_GIT_REF, value: main}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1530,8 +1494,6 @@ buildvariants:
       - csfle
     tasks:
       - run-custom-csfle-tests-5.0-pinned-commit
-      - run-custom-csfle-tests-5.0-master
-      - run-custom-csfle-tests-rapid-pinned-commit
-      - run-custom-csfle-tests-rapid-master
-      - run-custom-csfle-tests-latest-pinned-commit
-      - run-custom-csfle-tests-latest-master
+      - run-custom-csfle-tests-5.0-main
+      - run-custom-csfle-tests-6.0-pinned-commit
+      - run-custom-csfle-tests-6.0-main
