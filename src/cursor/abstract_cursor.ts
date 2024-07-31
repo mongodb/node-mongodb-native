@@ -281,8 +281,8 @@ export abstract class AbstractCursor<
   }
 
   /** Returns current buffered documents */
-  readBufferedDocuments(number?: number): TSchema[] {
-    const bufferedDocs: TSchema[] = [];
+  readBufferedDocuments(number?: number): NonNullable<TSchema>[] {
+    const bufferedDocs: NonNullable<TSchema>[] = [];
     const documentsToRead = Math.min(
       number ?? this.documents?.length ?? 0,
       this.documents?.length ?? 0
@@ -459,27 +459,21 @@ export abstract class AbstractCursor<
    */
   async toArray(): Promise<TSchema[]> {
     const array: TSchema[] = [];
-
-    // when each loop iteration ends,documents will be empty and a 'await (const document of this)' will run a getMore operation
+    // at the end of the loop (since readBufferedDocuments is called) the buffer will be empty
+    // then, the 'await of' syntax will run a getMore call
     for await (const document of this) {
       array.push(document);
-      let docs = this.readBufferedDocuments();
+      const docs = this.readBufferedDocuments();
       if (this.transform != null) {
-        docs = await Promise.all(
-          docs.map(async doc => {
-            if (doc != null) {
-              return await this.transformDocument(doc);
-            } else {
-              throw Error;
-            }
-          })
-        );
+        for (const doc of docs) {
+          array.push(await this.transformDocument(doc));
+        }
+      } else {
+        array.push(...docs);
       }
-      array.push(...docs);
     }
     return array;
   }
-
   /**
    * Add a cursor flag to the cursor
    *
@@ -820,7 +814,7 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
-  private async transformDocument(document: NonNullable<TSchema>): Promise<TSchema> {
+  private async transformDocument(document: NonNullable<TSchema>): Promise<NonNullable<TSchema>> {
     if (this.transform == null) return document;
 
     try {
