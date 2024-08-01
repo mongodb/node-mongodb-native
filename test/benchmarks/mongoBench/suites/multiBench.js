@@ -155,10 +155,11 @@ function makeMultiBench(suite) {
         })
         .teardown(dropDb)
         .teardown(disconnectClient)
-    ).benchmark('aggregateAMillionDocuments', benchmark =>
+    )
+    .benchmark('aggregateAMillionDocumentsAndToArray', benchmark =>
       benchmark
         .taskSize(16)
-        .setup(makeMakeClient(mongodbDriver))
+        .setup(makeClient)
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -185,11 +186,11 @@ function makeMultiBench(suite) {
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
-    .benchmark('aggregateAMillionTweets', benchmark =>
+    .benchmark('aggregateAMillionTweetsAndToArray', benchmark =>
       benchmark
         .taskSize(1500)
         .setup(makeLoadJSON('tweet.json'))
-        .setup(makeMakeClient(mongodbDriver))
+        .setup(makeClient)
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -212,26 +213,6 @@ function makeMultiBench(suite) {
               { $limit: 1000000 }
             ])
             .toArray();
-        })
-        .teardown(dropDb)
-        .teardown(disconnectClient)
-    )
-    .benchmark('findManyAndEmptyAMillionCursor', benchmark =>
-      benchmark
-        .taskSize(16.22)
-        .setup(makeMakeClient(mongodbDriver))
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .setup(initCollection)
-        .setup(async function () {
-          await this.collection.insertMany(Array.from({ length: 1_000_000 }, () => ({ field: 0 })));
-        })
-        .task(async function findManyAndEmptyCursor() {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          for await (const _ of this.collection.find({})) {
-            // do nothing
-          }
         })
         .teardown(dropDb)
         .teardown(disconnectClient)
