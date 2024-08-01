@@ -12,7 +12,7 @@ import { type Collection } from '../collection';
 import { type FindCursor } from '../cursor/find_cursor';
 import { type Db } from '../db';
 import { getMongoDBClientEncryption } from '../deps';
-import { type MongoClient } from '../mongo_client';
+import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Filter, type WithId } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
@@ -66,8 +66,6 @@ export class ClientEncryption {
   _tlsOptions: CSFLEKMSTlsOptions;
   /** @internal */
   _kmsProviders: KMSProviders;
-  /** @internal */
-  _socketOptions: ClientEncryptionSocketOptions;
 
   /** @internal */
   _mongoCrypt: MongoCrypt;
@@ -114,15 +112,6 @@ export class ClientEncryption {
     this._proxyOptions = options.proxyOptions ?? {};
     this._tlsOptions = options.tlsOptions ?? {};
     this._kmsProviders = options.kmsProviders || {};
-    this._socketOptions = {};
-
-    if ('autoSelectFamily' in client.s.options) {
-      this._socketOptions.autoSelectFamily = client.s.options.autoSelectFamily;
-    }
-    if ('autoSelectFamilyAttemptTimeout' in client.s.options) {
-      this._socketOptions.autoSelectFamilyAttemptTimeout =
-        client.s.options.autoSelectFamilyAttemptTimeout;
-    }
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -215,7 +204,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: this._socketOptions
+      socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
     const dataKey = deserialize(await stateMachine.execute(this, context)) as DataKey;
@@ -273,7 +262,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: this._socketOptions
+      socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
     const { v: dataKeys } = deserialize(await stateMachine.execute(this, context));
@@ -655,7 +644,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: this._socketOptions
+      socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
     const { v } = deserialize(await stateMachine.execute(this, context));
@@ -734,7 +723,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: this._socketOptions
+      socketOptions: autoSelectSocketOptions(this._client.options)
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
@@ -975,4 +964,22 @@ export interface RangeOptions {
   max?: any;
   sparsity: Long;
   precision?: number;
+}
+
+/**
+ * Get the socket options from the client.
+ * @param baseOptions - The mongo client options.
+ * @returns ClientEncryptionSocketOptions
+ */
+export function autoSelectSocketOptions(
+  baseOptions: MongoClientOptions
+): ClientEncryptionSocketOptions {
+  const options: ClientEncryptionSocketOptions = { autoSelectFamily: true };
+  if ('autoSelectFamily' in baseOptions) {
+    options.autoSelectFamily = baseOptions.autoSelectFamily;
+  }
+  if ('autoSelectFamilyAttemptTimeout' in baseOptions) {
+    options.autoSelectFamilyAttemptTimeout = baseOptions.autoSelectFamilyAttemptTimeout;
+  }
+  return options;
 }

@@ -3,6 +3,7 @@ import {
   type MongoCryptConstructor,
   type MongoCryptOptions
 } from 'mongodb-client-encryption';
+import * as net from 'net';
 
 import { deserialize, type Document, serialize } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
@@ -11,15 +12,12 @@ import { getMongoDBClientEncryption } from '../deps';
 import { MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
 import { MongoDBCollectionNamespace } from '../utils';
+import { autoSelectSocketOptions } from './client_encryption';
 import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders, refreshKMSCredentials } from './providers';
-import {
-  type ClientEncryptionSocketOptions,
-  type CSFLEKMSTlsOptions,
-  StateMachine
-} from './state_machine';
+import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /** @public */
 export interface AutoEncryptionOptions {
@@ -105,8 +103,6 @@ export interface AutoEncryptionOptions {
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
   tlsOptions?: CSFLEKMSTlsOptions;
-  /** Options for KMS socket requests. */
-  socketOptions?: ClientEncryptionSocketOptions;
 }
 
 /**
@@ -156,7 +152,6 @@ export class AutoEncrypter {
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
-  _socketOptions: ClientEncryptionSocketOptions;
 
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
@@ -241,7 +236,6 @@ export class AutoEncrypter {
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
-    this._socketOptions = options.socketOptions || {};
 
     const mongoCryptOptions: MongoCryptOptions = {
       cryptoCallbacks
@@ -305,8 +299,18 @@ export class AutoEncrypter {
         serverSelectionTimeoutMS: 10000
       };
 
-      if (options.extraOptions == null || typeof options.extraOptions.mongocryptdURI !== 'string') {
+      if (
+        (options.extraOptions == null || typeof options.extraOptions.mongocryptdURI !== 'string') &&
+        !net.getDefaultAutoSelectFamily
+      ) {
+        // Only set family if autoSelectFamily options are not supported.
         clientOptions.family = 4;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore: TS complains as this always returns true on versions where it is present.
+      if (net.getDefaultAutoSelectFamily) {
+        Object.assign(clientOptions, autoSelectSocketOptions(this._client.options));
       }
 
       this._mongocryptdClient = new MongoClient(this._mongocryptdManager.uri, clientOptions);
@@ -388,7 +392,7 @@ export class AutoEncrypter {
       promoteLongs: false,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: this._socketOptions
+      socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
     return deserialize(await stateMachine.execute(this, context), {
@@ -409,7 +413,7 @@ export class AutoEncrypter {
       ...options,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: this._socketOptions
+      socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
     return await stateMachine.execute(this, context);

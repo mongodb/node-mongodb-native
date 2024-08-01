@@ -1,7 +1,6 @@
 import { callbackify } from 'util';
 
 import { AutoEncrypter, type AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
-import { type ClientEncryptionSocketOptions } from './client-side-encryption/state_machine';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { getMongoDBClientEncryption } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
@@ -56,15 +55,6 @@ export class Encrypter {
         proxyPassword: options.proxyPassword
       };
     }
-
-    const socketOptions: ClientEncryptionSocketOptions = {};
-    if ('autoSelectFamily' in options) {
-      socketOptions.autoSelectFamily = options.autoSelectFamily;
-    }
-    if ('autoSelectFamilyAttemptTimeout' in options) {
-      socketOptions.autoSelectFamilyAttemptTimeout = options.autoSelectFamilyAttemptTimeout;
-    }
-    options.autoEncryption.socketOptions = socketOptions;
 
     this.autoEncrypter = new AutoEncrypter(client, options.autoEncryption);
   }

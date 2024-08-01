@@ -19,10 +19,10 @@ import { Binary, BSON, deserialize } from '../../mongodb';
 const { EJSON } = BSON;
 
 class MockClient {
-  s: any;
+  options: any;
 
   constructor(options?: any) {
-    this.s = { options: options || {} };
+    this.options = { options: options || {} };
   }
   db(dbName) {
     return {

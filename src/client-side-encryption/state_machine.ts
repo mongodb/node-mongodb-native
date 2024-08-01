@@ -14,7 +14,7 @@ import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '../utils';
-import { type DataKey } from './client_encryption';
+import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders } from './providers';
@@ -302,6 +302,7 @@ export class StateMachine {
   async kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
+    const socketOptions = autoSelectSocketOptions(this.options.socketOptions || {});
     const options: tls.ConnectionOptions & {
       host: string;
       port: number;
@@ -310,18 +311,11 @@ export class StateMachine {
     } = {
       host: parsedUrl[0],
       servername: parsedUrl[0],
-      port
+      port,
+      ...socketOptions
     };
     const message = request.message;
     const buffer = new BufferPool();
-
-    const socketOptions = this.options.socketOptions || {};
-    if ('autoSelectFamily' in socketOptions) {
-      options.autoSelectFamily = socketOptions.autoSelectFamily;
-    }
-    if ('autoSelectFamilyAttemptTimeout' in socketOptions) {
-      options.autoSelectFamilyAttemptTimeout = socketOptions.autoSelectFamilyAttemptTimeout;
-    }
 
     const netSocket: net.Socket = new net.Socket();
     let socket: tls.TLSSocket;
@@ -377,10 +371,12 @@ export class StateMachine {
 
     try {
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
-        netSocket.connect({
+        const netSocketOptions = {
           host: this.options.proxyOptions.proxyHost,
-          port: this.options.proxyOptions.proxyPort || 1080
-        });
+          port: this.options.proxyOptions.proxyPort || 1080,
+          ...socketOptions
+        };
+        netSocket.connect(netSocketOptions);
         await willConnect;
 
         try {
