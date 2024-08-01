@@ -155,6 +155,86 @@ function makeMultiBench(suite) {
         })
         .teardown(dropDb)
         .teardown(disconnectClient)
+    ).benchmark('aggregateAMillionDocuments', benchmark =>
+      benchmark
+        .taskSize(16)
+        .setup(makeMakeClient(mongodbDriver))
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .task(async function () {
+          await this.db
+            .aggregate([
+              { $documents: [{}] },
+              {
+                $set: {
+                  field: {
+                    $reduce: {
+                      input: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                      initialValue: [0],
+                      in: { $concatArrays: ['$$value', '$$value'] }
+                    }
+                  }
+                }
+              },
+              { $unwind: '$field' },
+              { $limit: 1000000 }
+            ])
+            .toArray();
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('aggregateAMillionTweets', benchmark =>
+      benchmark
+        .taskSize(1500)
+        .setup(makeLoadJSON('tweet.json'))
+        .setup(makeMakeClient(mongodbDriver))
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .task(async function () {
+          await this.db
+            .aggregate([
+              { $documents: [this.doc] },
+              {
+                $set: {
+                  id: {
+                    $reduce: {
+                      input: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                      initialValue: [0],
+                      in: { $concatArrays: ['$$value', '$$value'] }
+                    }
+                  }
+                }
+              },
+              { $unwind: '$id' },
+              { $limit: 1000000 }
+            ])
+            .toArray();
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('findManyAndEmptyAMillionCursor', benchmark =>
+      benchmark
+        .taskSize(16.22)
+        .setup(makeMakeClient(mongodbDriver))
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .setup(initCollection)
+        .setup(async function () {
+          await this.collection.insertMany(Array.from({ length: 1_000_000 }, () => ({ field: 0 })));
+        })
+        .task(async function findManyAndEmptyCursor() {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          for await (const _ of this.collection.find({})) {
+            // do nothing
+          }
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
     );
 }
 

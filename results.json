@@ -1,0 +1,16 @@
+[
+  {
+    "info": {
+      "test_name": "findManyAndToArrayOld",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 92.01875393495698
+      }
+    ]
+  }
+]
