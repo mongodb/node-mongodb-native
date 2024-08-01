@@ -7,7 +7,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { ConnectionPool, type MongoClient, Timeout, Topology } from '../../mongodb';
+import { ConnectionPool, type MongoClient, Timeout, TimeoutContext, Topology } from '../../mongodb';
 
 // TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec unit tests', function () {
@@ -22,10 +22,16 @@ describe('CSOT spec unit tests', function () {
     it('Operations should ignore waitQueueTimeoutMS if timeoutMS is also set.', async function () {
       client = this.configuration.newClient({ waitQueueTimeoutMS: 999999, timeoutMS: 10000 });
       sinon.spy(Timeout, 'expires');
+      const timeoutContextSpy = sinon.spy(TimeoutContext, 'create');
 
       await client.db('db').collection('collection').insertOne({ x: 1 });
 
-      expect(Timeout.expires).to.have.been.calledWith(10000);
+      const createCalls = timeoutContextSpy.getCalls().filter(
+        // @ts-expect-error accessing concrete field
+        call => call.args[0].timeoutMS === 10000
+      );
+
+      expect(createCalls).to.have.length.greaterThanOrEqual(1);
       expect(Timeout.expires).to.not.have.been.calledWith(999999);
     });
 
