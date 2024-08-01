@@ -109,6 +109,7 @@ const EXPECTED_EXPORTS = [
   'MongoOperationTimeoutError',
   'MongoUnexpectedServerResponseError',
   'MongoWriteConcernError',
+  'WriteConcernErrorResult',
   'ObjectId',
   'OrderedBulkOperation',
   'ProfilingLevel',

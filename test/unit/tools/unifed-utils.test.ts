@@ -4,19 +4,16 @@ import { mergeKMSProviders } from '../../tools/unified-spec-runner/unified-utils
 
 describe('parseOptions', function () {
   context('aws providers', function () {
-    it('does not configure the provider if none is given', function () {
-      const parsedProviders = mergeKMSProviders({}, {});
-      expect(parsedProviders).not.to.have.property('aws');
+    it('throws if none is given', function () {
+      expect(() => {
+        mergeKMSProviders({}, {});
+      }).to.throw();
     });
 
-    it('configures the provider without credentials if an empty object is supplied', function () {
-      const parsedProviders = mergeKMSProviders(
-        {
-          aws: {}
-        },
-        {}
-      );
-      expect(parsedProviders.aws).deep.equal({});
+    it('throws if an empty object is supplied', function () {
+      expect(() => {
+        mergeKMSProviders({ aws: {} }, {});
+      }).to.throw();
     });
 
     it('replaces a $$placeholder value with the value from the environment', function () {
@@ -37,18 +34,19 @@ describe('parseOptions', function () {
       });
     });
 
-    it('omits required fields if the field is not present in the kmsProviders', function () {
-      const parsedProviders = mergeKMSProviders(
-        {
-          aws: {
-            accessKeyId: { $$placeholder: 1 }
+    it('throws if required field is not present in the kmsProviders', function () {
+      expect(() => {
+        mergeKMSProviders(
+          {
+            aws: {
+              accessKeyId: { $$placeholder: 1 }
+            }
+          },
+          {
+            aws: { accessKeyId: 'accessKeyId' }
           }
-        },
-        {
-          aws: { accessKeyId: 'accessKeyId' }
-        }
-      );
-      expect(parsedProviders.aws).not.to.have.property('secretAccessKey');
+        );
+      }).to.throw();
     });
 
     it('configures the provider with the exact credentials from the test', function () {
@@ -76,9 +74,10 @@ describe('parseOptions', function () {
     });
   });
   context('local providers', function () {
-    it('does not configure the provider if none is given', function () {
-      const parsedProviders = mergeKMSProviders({}, {});
-      expect(parsedProviders).not.to.have.property('local');
+    it('throws if none is given', function () {
+      expect(() => {
+        mergeKMSProviders({}, {});
+      }).to.throw();
     });
 
     it('configures the provider without credentials if an empty object is supplied', function () {
@@ -127,19 +126,16 @@ describe('parseOptions', function () {
   });
 
   context('azure', function () {
-    it('does not configure the provider if none is given', function () {
-      const parsedProviders = mergeKMSProviders({}, {});
-      expect(parsedProviders).not.to.have.property('azure');
+    it('throws if none is given', function () {
+      expect(() => {
+        mergeKMSProviders({}, {});
+      }).to.throw();
     });
 
-    it('configures the provider without credentials if an empty object is supplied', function () {
-      const parsedProviders = mergeKMSProviders(
-        {
-          azure: {}
-        },
-        {}
-      );
-      expect(parsedProviders.azure).deep.equal({});
+    it('throws if an empty object is supplied', function () {
+      expect(() => {
+        mergeKMSProviders({ azure: {} }, {});
+      }).to.throw();
     });
 
     it('replaces a $$placeholder value with the value from the environment', function () {
@@ -166,18 +162,19 @@ describe('parseOptions', function () {
       });
     });
 
-    it('omits required fields if the field is not present in the kmsProviders', function () {
-      const parsedProviders = mergeKMSProviders(
-        {
-          azure: {
-            tenantId: 'tenantId',
-            clientSecret: 'clientSecret',
-            identityPlatformEndpoint: 'identifyPlatformEndpoint'
-          }
-        },
-        {}
-      );
-      expect(parsedProviders.azure).not.to.have.property('clientId');
+    it('throws if required field is not present in the kmsProviders', function () {
+      expect(() => {
+        mergeKMSProviders(
+          {
+            azure: {
+              tenantId: 'tenantId',
+              clientSecret: 'clientSecret',
+              identityPlatformEndpoint: 'identifyPlatformEndpoint'
+            }
+          },
+          {}
+        );
+      }).to.throw();
     });
 
     it('configures the provider with the exact credentials from the test otherwise', function () {
@@ -209,19 +206,21 @@ describe('parseOptions', function () {
   });
 
   context('gcp', function () {
-    it('does not configure the provider if none is given', function () {
-      const parsedProviders = mergeKMSProviders({}, {});
-      expect(parsedProviders).not.to.have.property('gcp');
+    it('throws if none is given', function () {
+      expect(() => {
+        mergeKMSProviders({}, {});
+      }).throw();
     });
 
-    it('configures the provider without credentials if an empty object is supplied', function () {
-      const parsedProviders = mergeKMSProviders(
-        {
-          gcp: {}
-        },
-        {}
-      );
-      expect(parsedProviders.gcp).deep.equal({});
+    it('throws if an empty object is supplied', function () {
+      expect(() => {
+        mergeKMSProviders(
+          {
+            gcp: {}
+          },
+          {}
+        );
+      }).to.throw();
     });
 
     it('replaces a $$placeholder value with the value from the environment', function () {
@@ -246,17 +245,18 @@ describe('parseOptions', function () {
       });
     });
 
-    it('omits required fields if the field is not present in the kmsProviders', function () {
-      const parsedProviders = mergeKMSProviders(
-        {
-          gcp: {
-            email: 'email',
-            endPoint: 'endPoint'
-          }
-        },
-        {}
-      );
-      expect(parsedProviders.gcp).not.to.have.property('privateKey');
+    it('throws if required field is not present in the kmsProviders', function () {
+      expect(() => {
+        mergeKMSProviders(
+          {
+            gcp: {
+              email: 'email',
+              endPoint: 'endPoint'
+            }
+          },
+          {}
+        );
+      }).to.throw();
     });
 
     it('configures the provider with the exact credentials from the test otherwise', function () {
@@ -285,9 +285,10 @@ describe('parseOptions', function () {
   });
 
   context('kmip', function () {
-    it('does not configure the provider if none is given', function () {
-      const parsedProviders = mergeKMSProviders({}, {});
-      expect(parsedProviders).not.to.have.property('kmip');
+    it('throws if none is given', function () {
+      expect(() => {
+        mergeKMSProviders({}, {});
+      }).to.throw();
     });
 
     it('configures the provider without credentials if an empty object is supplied', function () {

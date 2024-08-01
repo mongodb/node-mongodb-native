@@ -617,8 +617,8 @@ function handleMongoWriteConcernError(
   callback(
     new MongoBulkWriteError(
       {
-        message: err.result?.writeConcernError.errmsg,
-        code: err.result?.writeConcernError.result
+        message: err.result.writeConcernError.errmsg,
+        code: err.result.writeConcernError.code
       },
       new BulkWriteResult(bulkResult, isOrdered)
     )

@@ -74,7 +74,8 @@ export {
   MongoTopologyClosedError,
   MongoTransactionError,
   MongoUnexpectedServerResponseError,
-  MongoWriteConcernError
+  MongoWriteConcernError,
+  WriteConcernErrorResult
 } from './error';
 export {
   AbstractCursor,

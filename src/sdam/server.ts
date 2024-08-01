@@ -460,7 +460,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     } else {
       if (
         (isRetryableWritesEnabled(this.topology) || isTransactionCommand(cmd)) &&
-        needsRetryableWriteLabel(error, maxWireVersion(this)) &&
+        needsRetryableWriteLabel(error, maxWireVersion(this), this.description.type) &&
         !inActiveTransaction(session, cmd)
       ) {
         error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
