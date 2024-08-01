@@ -790,6 +790,8 @@ export function expectErrorCheck(
     expect(error).to.be.instanceof(MongoOperationTimeoutError);
   }
 
+  // TODO(NODE-6274): Check for MongoBulkWriteErrors that have a MongoOperationTimeoutError in their
+  // errorResponse field
   if (expected.isTimeoutError === false) {
     expect(error).to.not.be.instanceof(MongoOperationTimeoutError);
   } else if (expected.isTimeoutError === true) {
