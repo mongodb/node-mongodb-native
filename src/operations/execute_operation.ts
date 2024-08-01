@@ -227,12 +227,10 @@ async function tryOperation<
     session.incrementTransactionNumber();
   }
 
-  // TODO(NODE-6231): implement infinite retry within CSOT timeout here
-  const maxTries = willRetry ? 2 : 1;
+  const maxTries = willRetry ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 
-  // TODO(NODE-6231): implement infinite retry within CSOT timeout here
   for (let tries = 0; tries < maxTries; tries++) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
@@ -284,7 +282,6 @@ async function tryOperation<
       return await operation.execute(server, session, timeoutContext);
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;
-
       if (
         previousOperationError != null &&
         operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
@@ -293,6 +290,10 @@ async function tryOperation<
       }
       previousServer = server.description;
       previousOperationError = operationError;
+
+      // Reset timeouts
+      timeoutContext.serverSelectionTimeout?.clear();
+      timeoutContext.connectionCheckoutTimeout?.clear();
     }
   }
 
