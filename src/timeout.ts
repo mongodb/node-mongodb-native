@@ -39,6 +39,7 @@ export class Timeout extends Promise<never> {
   public ended: number | null = null;
   public duration: number;
   public timedOut = false;
+  public cleared = false;
 
   get remainingTime(): number {
     if (this.timedOut) return 0;
@@ -53,7 +54,6 @@ export class Timeout extends Promise<never> {
   /** Create a new timeout that expires in `duration` ms */
   private constructor(executor: Executor = () => null, duration: number, unref = true) {
     let reject!: Reject;
-
     if (duration < 0) {
       throw new MongoInvalidArgumentError('Cannot create a Timeout with a negative duration');
     }
@@ -86,6 +86,7 @@ export class Timeout extends Promise<never> {
   clear(): void {
     clearTimeout(this.id);
     this.id = undefined;
+    this.cleared = true;
   }
 
   throwIfExpired(): void {
@@ -214,16 +215,20 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
   get serverSelectionTimeout(): Timeout | null {
     // check for undefined
-    if (typeof this._serverSelectionTimeout !== 'object') {
+    if (typeof this._serverSelectionTimeout !== 'object' || this._serverSelectionTimeout?.cleared) {
+      const { remainingTimeMS, serverSelectionTimeoutMS } = this;
+      if (remainingTimeMS <= 0)
+        throw new MongoOperationTimeoutError(
+          `Timed out in server selection after ${this.timeoutMS}ms`
+        );
       const usingServerSelectionTimeoutMS =
-        this.serverSelectionTimeoutMS !== 0 &&
-        csotMin(this.timeoutMS, this.serverSelectionTimeoutMS) === this.serverSelectionTimeoutMS;
-
+        serverSelectionTimeoutMS !== 0 &&
+        csotMin(remainingTimeMS, serverSelectionTimeoutMS) === serverSelectionTimeoutMS;
       if (usingServerSelectionTimeoutMS) {
-        this._serverSelectionTimeout = Timeout.expires(this.serverSelectionTimeoutMS);
+        this._serverSelectionTimeout = Timeout.expires(serverSelectionTimeoutMS);
       } else {
-        if (this.timeoutMS > 0) {
-          this._serverSelectionTimeout = Timeout.expires(this.timeoutMS);
+        if (remainingTimeMS > 0 && Number.isFinite(remainingTimeMS)) {
+          this._serverSelectionTimeout = Timeout.expires(remainingTimeMS);
         } else {
           this._serverSelectionTimeout = null;
         }
@@ -234,7 +239,10 @@ export class CSOTTimeoutContext extends TimeoutContext {
   }
 
   get connectionCheckoutTimeout(): Timeout | null {
-    if (typeof this._connectionCheckoutTimeout !== 'object') {
+    if (
+      typeof this._connectionCheckoutTimeout !== 'object' ||
+      this._connectionCheckoutTimeout?.cleared
+    ) {
       if (typeof this._serverSelectionTimeout === 'object') {
         // null or Timeout
         this._connectionCheckoutTimeout = this._serverSelectionTimeout;
