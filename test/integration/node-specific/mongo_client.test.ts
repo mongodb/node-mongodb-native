@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
+import * as net from 'net';
 import * as sinon from 'sinon';
 
 import {
@@ -718,6 +719,58 @@ describe('class MongoClient', function () {
 
         expect(startedEvents).to.be.empty;
         expect(client.s.sessionPool.sessions).to.have.lengthOf(1);
+      });
+    });
+  });
+
+  context('when connecting', function () {
+    let netSpy;
+
+    beforeEach(function () {
+      netSpy = sinon.spy(net, 'createConnection');
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    context('when auto select options are provided', function () {
+      beforeEach(function () {
+        client = this.configuration.newClient({
+          autoSelectFamily: false,
+          autoSelectFamilyAttemptTimeout: 100
+        });
+      });
+
+      it('sets the provided options', {
+        metadata: { requires: { topology: ['single'] } },
+        test: async function () {
+          await client.connect();
+          expect(netSpy).to.have.been.calledWith({
+            autoSelectFamily: false,
+            autoSelectFamilyAttemptTimeout: 100,
+            host: 'localhost',
+            port: 27017
+          });
+        }
+      });
+    });
+
+    context('when auto select options are not provided', function () {
+      beforeEach(function () {
+        client = this.configuration.newClient();
+      });
+
+      it('sets the default options', {
+        metadata: { requires: { topology: ['single'] } },
+        test: async function () {
+          await client.connect();
+          expect(netSpy).to.have.been.calledWith({
+            autoSelectFamily: true,
+            host: 'localhost',
+            port: 27017
+          });
+        }
       });
     });
   });

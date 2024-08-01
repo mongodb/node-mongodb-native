@@ -248,6 +248,7 @@ export type {
   LocalKMSProviderConfiguration
 } from './client-side-encryption/providers/index';
 export type {
+  ClientEncryptionSocketOptions,
   ClientEncryptionTlsOptions,
   CSFLEKMSTlsOptions,
   StateMachineExecutable

@@ -269,6 +269,8 @@ export const LEGAL_TLS_SOCKET_OPTIONS = [
 
 /** @public */
 export const LEGAL_TCP_SOCKET_OPTIONS = [
+  'autoSelectFamily',
+  'autoSelectFamilyAttemptTimeout',
   'family',
   'hints',
   'localAddress',
