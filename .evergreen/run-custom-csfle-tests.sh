@@ -26,26 +26,26 @@ source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 # CSFLE_GIT_REF - set the git reference to checkout for a custom CSFLE version
 CSFLE_GIT_REF=${CSFLE_GIT_REF:-main}
 
-DEP_WORKSPACE=$(realpath ../csfle-deps-tmp)
-
-rm -rf "$DEP_WORKSPACE"
-mkdir -p "$DEP_WORKSPACE"
-
-pushd "$DEP_WORKSPACE"
+rm -rf mongodb-client-encryption
 git clone https://github.com/mongodb-js/mongodb-client-encryption.git
 
 pushd mongodb-client-encryption
+
 git fetch --tags
 git checkout "$CSFLE_GIT_REF" -b csfle-custom
 echo "checked out mongodb-client-encryption at $(git rev-parse HEAD)"
-npm run install:libmongocrypt
-npm install --ignore-scripts
-popd # mongodb-client-encryption
 
-popd # ../csfle-deps-tmp
+if [ -n "${LIBMONGOCRYPT_VERSION}" ]; then
+	# nightly tests test with `latest` to test against the laster FLE build.
+    npm run install:libmongocrypt -- --libVersion "$LIBMONGOCRYPT_VERSION"
+else
+	# otherwise use whatever is specified in the package.json.
+    npm run install:libmongocrypt
+fi
 
-# copy mongodb-client-encryption into driver's node_modules
-npm link "$DEP_WORKSPACE/mongodb-client-encryption"
+popd # ./mongodb-client-encryption
+
+npm link ./mongodb-client-encryption
 
 export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
