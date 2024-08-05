@@ -1,7 +1,6 @@
-# Requires libmongocrypt 1.8.0.
+# Requires libmongocrypt 1.8.0. libmongocrypt 1.10.0 has a bug (MONGOCRYPT-699) that may cause this test to fail on server version 7.
 runOn:
-  # TODO(NODE-6128): lower server version to 7.0.0
-  - minServerVersion: "8.0.0"
+  - minServerVersion: "7.0.0"
     # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
     # FLE 2 Encrypted collections are not supported on standalone.
     topology: [ "replicaset", "sharded", "load-balanced" ]
@@ -23,6 +22,8 @@ tests:
         arguments:
           command:
             compactStructuredEncryptionData: *collection_name
+        result:
+          ok: 1
     expectations:
       - command_started_event:
           command:
