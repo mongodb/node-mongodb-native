@@ -58,8 +58,11 @@ export interface ClientSessionOptions {
   snapshot?: boolean;
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
-  /** @internal
-   * The value of timeoutMS used for CSOT. Used to override client timeoutMS */
+  /**
+   * @public
+   * An overriding timeoutMS value to use for a client-side timeout.
+   * If not provided the session uses the timeoutMS specified on the MongoClient.
+   */
   defaultTimeoutMS?: number;
 
   /** @internal */
