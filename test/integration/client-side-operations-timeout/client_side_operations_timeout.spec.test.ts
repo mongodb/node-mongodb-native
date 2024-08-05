@@ -8,7 +8,10 @@ const enabled = [
   'override-database-timeoutMS',
   'override-operation-timeoutMS',
   'retryability-legacy-timeouts',
-  'retryability-timeoutMS'
+  'retryability-timeoutMS',
+  'sessions-override-operation-timeoutMS',
+  'sessions-override-timeoutMS',
+  'sessions-inherit-timeoutMS'
 ];
 
 const cursorOperations = [
