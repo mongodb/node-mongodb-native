@@ -5,7 +5,15 @@ import type {
   MongoCryptOptions
 } from 'mongodb-client-encryption';
 
-import { type Binary, deserialize, type Document, type Long, serialize, type UUID } from '../bson';
+import {
+  type Binary,
+  deserialize,
+  type Document,
+  type Int32,
+  type Long,
+  serialize,
+  type UUID
+} from '../bson';
 import { type AnyBulkWriteOperation, type BulkWriteResult } from '../bulk/common';
 import { type ProxyOptions } from '../cmap/connection';
 import { type Collection } from '../collection';
@@ -948,12 +956,13 @@ export interface ClientEncryptionRewrapManyDataKeyResult {
 /**
  * @public
  * RangeOptions specifies index options for a Queryable Encryption field supporting "rangePreview" queries.
- * min, max, sparsity, and range must match the values set in the encryptedFields of the destination collection.
+ * min, max, sparsity, trimFactor and range must match the values set in the encryptedFields of the destination collection.
  * For double and decimal128, min/max/precision must all be set, or all be unset.
  */
 export interface RangeOptions {
   min?: any;
   max?: any;
-  sparsity: Long;
+  sparsity?: Long;
+  trimFactor?: Int32;
   precision?: number;
 }
