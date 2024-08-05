@@ -554,6 +554,7 @@ export class ChangeStream<
   /**
    * @beta
    * @experimental
+   * An alias for {@link ChangeStream.close|ChangeStream.close()}.
    */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
@@ -779,7 +780,9 @@ export class ChangeStream<
     return this[kClosed] || this.cursor.closed;
   }
 
-  /** Close the Change Stream */
+  /**
+   * Frees the internal resources used by the change stream.
+   */
   async close(): Promise<void> {
     this[kClosed] = true;
 

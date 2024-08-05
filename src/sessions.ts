@@ -259,7 +259,10 @@ export class ClientSession
   }
 
   /**
-   * Ends this session on the server
+   * Frees any client-side resources held by the current session.  If a session is in a transaction,
+   * the transaction is aborted.
+   *
+   * Does not end the session on the server.
    *
    * @param options - Optional settings. Currently reserved for future use
    */
@@ -293,6 +296,7 @@ export class ClientSession
   /**
    * @beta
    * @experimental
+   * An alias for {@link ClientSession.endSession|ClientSession.endSession()}.
    */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */

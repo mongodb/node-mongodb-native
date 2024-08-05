@@ -408,6 +408,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /**
    * @beta
    * @experimental
+   * An alias for {@link MongoClient.close|MongoClient.close()}.
    */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
@@ -581,7 +582,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * Close the client and its underlying connections
+   * Cleans up client-side resources used by the MongoCLient and .  This includes:
+   *
+   * - Closes all open, unused connections (see note).
+   * - Ends all in-use sessions with {@link ClientSession#endSession|ClientSession.endSession()}.
+   * - Ends all unused sessions server-side.
+   * - Cleans up any resources being used for auto encryption if auto encryption is enabled.
+   *
+   * @remarks Any in-progress operations are not killed and any connections used by in progress operations
+   * will be cleaned up lazily as operations finish.
    *
    * @param force - Force close, emitting no events
    */

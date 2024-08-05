@@ -282,6 +282,7 @@ export abstract class AbstractCursor<
   /**
    * @beta
    * @experimental
+   * An alias for {@link AbstractCursor.close|AbstractCursor.close()}.
    */
   declare [Symbol.asyncDispose]: () => Promise<void>;
   /** @internal */
@@ -460,6 +461,9 @@ export abstract class AbstractCursor<
     }
   }
 
+  /**
+   * Frees any client-side resources used by the cursor.
+   */
   async close(): Promise<void> {
     await this.cleanup();
   }
