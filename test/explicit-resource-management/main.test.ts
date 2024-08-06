@@ -1,12 +1,14 @@
 
 import { describe, it } from 'mocha';
-import { GridFSBucket, MongoClient } from 'mongodb/lib/beta';
+import { AbstractCursor, ChangeStream, ClientSession, GridFSBucket, MongoClient } from 'mongodb/lib/beta';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { expect } from 'chai';
 import { setTimeout } from 'timers/promises';
 import { createReadStream } from 'fs';
 import { join } from 'path';
+
+import * as sinon from 'sinon';
 
 async function setUpCollection(client: MongoClient) {
   const collection = client.db('foo').collection<{ name: string }>('bar');
@@ -18,6 +20,19 @@ async function setUpCollection(client: MongoClient) {
 }
 
 describe('explicit resource management feature integration tests', function () {
+  const clientDisposeSpy = sinon.spy(MongoClient.prototype, Symbol.asyncDispose);
+  const sessionDisposeSpy = sinon.spy(ClientSession.prototype, Symbol.asyncDispose);
+  const changeStreamDisposeSpy = sinon.spy(ChangeStream.prototype, Symbol.asyncDispose);
+  const cursorDisposeSpy = sinon.spy(AbstractCursor.prototype, Symbol.asyncDispose);
+  const readableDisposeSpy = sinon.spy(Readable.prototype, Symbol.asyncDispose);
+
+  afterEach(function(){
+    clientDisposeSpy.resetHistory();
+    sessionDisposeSpy.resetHistory();
+    changeStreamDisposeSpy.resetHistory();
+    cursorDisposeSpy.resetHistory();
+    readableDisposeSpy.resetHistory();
+  })
   describe('MongoClient', function () {
     it('does not crash or error when used with await-using syntax', async function () {
       await using client = new MongoClient(process.env.MONGODB_URI!);
@@ -33,6 +48,7 @@ describe('explicit resource management feature integration tests', function () {
       })().catch(e => e);
 
       expect(error).to.match(/error thrown/);
+      expect(clientDisposeSpy.called).to.be.true;
     });
 
     it('works if client is explicitly closed', async function () {
@@ -73,6 +89,7 @@ describe('explicit resource management feature integration tests', function () {
       })().catch(e => e);
 
       expect(error).to.match(/error thrown/);
+      expect(cursorDisposeSpy.called).to.be.true;
     });
 
     it('works if cursor is explicitly closed', async function () {
@@ -116,6 +133,7 @@ describe('explicit resource management feature integration tests', function () {
         })().catch(e => e);
 
         expect(error).to.match(/error thrown/);
+        expect(readableDisposeSpy.called).to.be.true;
       });
 
       it('works if stream is explicitly closed', async function () {
@@ -157,6 +175,7 @@ describe('explicit resource management feature integration tests', function () {
       })().catch(e => e);
 
       expect(error).to.match(/error thrown/);
+      expect(sessionDisposeSpy.called).to.be.true;
     });
 
     it('works if session is explicitly closed', async function () {
@@ -202,6 +221,7 @@ describe('explicit resource management feature integration tests', function () {
       })().catch(e => e);
 
       expect(error).to.match(/error thrown/);
+      expect(changeStreamDisposeSpy.called).to.be.true;
     });
 
     it('works if change stream is explicitly closed', async function () {
@@ -250,6 +270,7 @@ describe('explicit resource management feature integration tests', function () {
       })().catch(e => e);
 
       expect(error).to.match(/error thrown/);
+      expect(readableDisposeSpy.called).to.be.true;
     });
 
     it('works if stream is explicitly closed', async function () {
