@@ -3,8 +3,6 @@ set -o errexit # Exit the script with error if any of the commands fail
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
-set -o xtrace
-
 case $TS_CHECK in
     COMPILE_DRIVER|CHECK_TYPES)  # Ok
         ;;
@@ -14,6 +12,7 @@ case $TS_CHECK in
 esac
 
 if [ -z "$TS_VERSION" ]; then echo "TS_VERSION must be set"; exit 1; fi
+if [ -z "$TYPES_VERSION" ]; then echo "TYPES_VERSION must be set"; exit 1; fi
 
 if [ ! -f "mongodb.d.ts" ]; then
     echo "mongodb.d.ts should always exist because of the installation in prior steps but in case it doesn't, build it"
@@ -31,10 +30,11 @@ function get_ts_version() {
 export TSC="./node_modules/typescript/bin/tsc"
 export TS_VERSION=$(get_ts_version)
 
-# On old versions of TS we need to put the node types back to 18.11.19
-npm install --no-save --force typescript@"$TS_VERSION" "$(if [[ $TS_VERSION == '4.4' ]]; then echo "@types/node@18.11.19"; else echo ""; fi)"
+npm install --no-save --force "typescript@$TS_VERSION" "@types/node@$TYPES_VERSION"
 
 echo "Typescript $($TSC -v)"
+echo "Types: $(cat node_modules/@types/node/package.json | jq -r .version)"
+echo "Nodejs: $(node -v)"
 
 # check resolution uses the default latest types
 echo "import * as mdb from '.'" > file.ts && node $TSC --noEmit --traceResolution file.ts | grep 'mongodb.d.ts' && rm file.ts
