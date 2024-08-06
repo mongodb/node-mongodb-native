@@ -164,7 +164,7 @@ export async function performInitialHandshake(
     } catch (error) {
       if (error instanceof MongoError) {
         error.addErrorLabel(MongoErrorLabel.HandshakeError);
-        if (needsRetryableWriteLabel(error, response.maxWireVersion)) {
+        if (needsRetryableWriteLabel(error, response.maxWireVersion, conn.description.type)) {
           error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
         }
       }
@@ -269,6 +269,8 @@ export const LEGAL_TLS_SOCKET_OPTIONS = [
 
 /** @public */
 export const LEGAL_TCP_SOCKET_OPTIONS = [
+  'autoSelectFamily',
+  'autoSelectFamilyAttemptTimeout',
   'family',
   'hints',
   'localAddress',
