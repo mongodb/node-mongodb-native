@@ -1,0 +1,48 @@
+{
+  "description": "listCollections",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "test"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "ListCollections succeeds",
+      "operations": [
+        {
+          "object": "database0",
+          "name": "listCollections"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1
+                },
+                "commandName": "listCollections",
+                "databaseName": "test"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

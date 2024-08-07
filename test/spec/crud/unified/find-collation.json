@@ -1,0 +1,69 @@
+{
+  "description": "find-collation",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.4",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": "ping"
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Find with a collation",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "x": "PING"
+            },
+            "collation": {
+              "locale": "en_US",
+              "strength": 2
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "x": "ping"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

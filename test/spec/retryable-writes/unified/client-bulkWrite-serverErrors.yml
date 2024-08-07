@@ -1,0 +1,412 @@
+description: "client bulkWrite retryable writes"
+schemaVersion: "1.21"
+runOnRequirements:
+  - minServerVersion: "8.0"
+    topologies:
+      - replicaset
+      - sharded
+      - load-balanced
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+      useMultipleMongoses: false
+  - client:
+      id: &clientRetryWritesFalse clientRetryWritesFalse
+      uriOptions:
+        retryWrites: false
+      observeEvents: [ commandStartedEvent ]
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name retryable-writes-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+_yamlAnchors:
+  namespace: &namespace "retryable-writes-tests.coll0"
+
+tests:
+  - description: "client bulkWrite with no multi: true operations succeeds after retryable top-level error"
+    operations:
+      - object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands: [ bulkWrite ]
+              errorCode: 189 # PrimarySteppedDown
+              errorLabels: [ RetryableWriteError ]
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 4, x: 44 }
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update:
+                  $inc: { x: 1 }
+            - replaceOne:
+                namespace: *namespace
+                filter: { _id: 2 }
+                replacement: { x: 222 }
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 3 }
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 2
+          modifiedCount: 2
+          deletedCount: 1
+          insertResults:
+            0:
+              insertedId: 4
+          updateResults:
+            1:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+            2:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+          deleteResults:
+            3:
+              deletedCount: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 4, x: 44 }
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods:
+                      $inc: { x: 1 }
+                    multi: false
+                  - update: 0
+                    filter: { _id: 2 }
+                    updateMods: { x: 222 }
+                    multi: false
+                  - delete: 0
+                    filter: { _id: 3 }
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+                lsid: { $$exists: true }
+                txnNumber: { $$exists: true }
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 4, x: 44 }
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods:
+                      $inc: { x: 1 }
+                    multi: false
+                  - update: 0
+                    filter: { _id: 2 }
+                    updateMods: { x: 222 }
+                    multi: false
+                  - delete: 0
+                    filter: { _id: 3 }
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+                lsid: { $$exists: true }
+                txnNumber: { $$exists: true }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 12 }
+          - { _id: 2, x: 222 }
+          - { _id: 4, x: 44 }
+  - description: "client bulkWrite with multi: true operations fails after retryable top-level error"
+    operations:
+      - object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands: [ bulkWrite ]
+              errorCode: 189 # PrimarySteppedDown
+              errorLabels: [ RetryableWriteError ]
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateMany:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update:
+                  $inc: { x: 1 }
+            - deleteMany:
+                namespace: *namespace
+                filter: { _id: 3 }
+        expectError:
+          errorCode: 189
+          errorLabelsContain: [ RetryableWriteError ]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: true
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods:
+                      $inc: { x: 1 }
+                    multi: true
+                  - delete: 0
+                    filter: { _id: 3 }
+                    multi: true
+                nsInfo:
+                  - ns: *namespace
+  - description: "client bulkWrite with no multi: true operations succeeds after retryable writeConcernError"
+    operations:
+      - object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands: [ bulkWrite ]
+              errorLabels: [ RetryableWriteError ]
+              writeConcernError:
+                code: 91
+                errmsg: "Replication is being shut down"
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 4, x: 44 }
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update:
+                  $inc: { x: 1 }
+            - replaceOne:
+                namespace: *namespace
+                filter: { _id: 2 }
+                replacement: { x: 222 }
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 3 }
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 2
+          modifiedCount: 2
+          deletedCount: 1
+          insertResults:
+            0:
+              insertedId: 4
+          updateResults:
+            1:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+            2:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+          deleteResults:
+            3:
+              deletedCount: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 4, x: 44 }
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods:
+                      $inc: { x: 1 }
+                    multi: false
+                  - update: 0
+                    filter: { _id: 2 }
+                    updateMods: { x: 222 }
+                    multi: false
+                  - delete: 0
+                    filter: { _id: 3 }
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+                lsid: { $$exists: true }
+                txnNumber: { $$exists: true }
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 4, x: 44 }
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods:
+                      $inc: { x: 1 }
+                    multi: false
+                  - update: 0
+                    filter: { _id: 2 }
+                    updateMods: { x: 222 }
+                    multi: false
+                  - delete: 0
+                    filter: { _id: 3 }
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+                lsid: { $$exists: true }
+                txnNumber: { $$exists: true }
+  - description: "client bulkWrite with multi: true operations fails after retryable writeConcernError"
+    operations:
+      - object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands: [ bulkWrite ]
+              errorLabels: [ RetryableWriteError ]
+              writeConcernError:
+                code: 91
+                errmsg: "Replication is being shut down"
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - updateMany:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update:
+                  $inc: { x: 1 }
+            - deleteMany:
+                namespace: *namespace
+                filter: { _id: 3 }
+        expectError:
+          writeConcernErrors:
+            - code: 91
+              message: "Replication is being shut down"
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: true
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods:
+                      $inc: { x: 1 }
+                    multi: true
+                  - delete: 0
+                    filter: { _id: 3 }
+                    multi: true
+                nsInfo:
+                  - ns: *namespace
+  - description: "client bulkWrite with retryWrites: false does not retry"
+    operations:
+      - object: testRunner
+        name: failPoint
+        arguments:
+          client: *clientRetryWritesFalse
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands: [ bulkWrite ]
+              errorCode: 189 # PrimarySteppedDown
+              errorLabels: [ RetryableWriteError ]
+      - object: *clientRetryWritesFalse
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 4, x: 44 }
+        expectError:
+          errorCode: 189
+          errorLabelsContain: [ RetryableWriteError ]
+    expectEvents:
+      - client: *clientRetryWritesFalse
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: true
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 4, x: 44 }
+                nsInfo:
+                  - ns: *namespace

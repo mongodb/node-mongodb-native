@@ -1,0 +1,152 @@
+description: "client bulkWrite with ordered option"
+schemaVersion: "1.1"
+runOnRequirements:
+  - minServerVersion: "8.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+
+tests:
+  - description: "client bulkWrite with ordered: false"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 1, x: 11 }
+          verboseResults: true
+          ordered: false
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 1
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: false
+                ops:
+                  - insert: 0
+                    document: { _id: 1, x: 11 }
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+  - description: "client bulkWrite with ordered: true"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 1, x: 11 }
+          verboseResults: true
+          ordered: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 1
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 1, x: 11 }
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+  - description: "client bulkWrite defaults to ordered: true"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 1, x: 11 }
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 1
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 1, x: 11 }
+                nsInfo:
+                  - ns: *namespace
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }

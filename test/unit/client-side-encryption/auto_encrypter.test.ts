@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as fs from 'fs';
+import * as net from 'net';
 import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -37,7 +38,13 @@ const MOCK_MONGOCRYPTD_RESPONSE = readExtendedJsonToBuffer(
 const MOCK_KEYDOCUMENT_RESPONSE = readExtendedJsonToBuffer(`${__dirname}/data/key-document.json`);
 const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(`${__dirname}/data/kms-decrypt-reply.txt`);
 
-class MockClient {}
+class MockClient {
+  options: any;
+
+  constructor(options?: any) {
+    this.options = { options: options || {} };
+  }
+}
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -105,15 +112,19 @@ describe('AutoEncrypter', function () {
       });
 
       context('when mongocryptdURI is not specified', () => {
-        it('sets the ip address family to ipv4', function () {
+        it('sets family options', function () {
           expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
           const options = autoEncrypter._mongocryptdClient?.s.options;
-          expect(options).to.have.property('family', 4);
+          if (net.getDefaultAutoSelectFamily) {
+            expect(options).to.have.property('autoSelectFamily', true);
+          } else {
+            expect(options).to.have.property('family', 4);
+          }
         });
       });
 
       context('when mongocryptdURI is specified', () => {
-        it('does not set the ip address family to ipv4', function () {
+        it('sets autoSelectFamily options', function () {
           const autoEncrypter = new AutoEncrypter(client, {
             ...autoEncrypterOptions,
             extraOptions: { mongocryptdURI: MongocryptdManager.DEFAULT_MONGOCRYPTD_URI }
@@ -121,7 +132,7 @@ describe('AutoEncrypter', function () {
 
           expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
           const options = autoEncrypter._mongocryptdClient?.s.options;
-          expect(options).not.to.have.property('family', 4);
+          expect(options).to.have.property('autoSelectFamily', true);
         });
       });
     });

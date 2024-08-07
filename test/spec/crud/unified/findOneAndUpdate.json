@@ -1,0 +1,448 @@
+{
+  "description": "findOneAndUpdate",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "FindOneAndUpdate when many documents match returning the document before modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "sort": {
+              "x": 1
+            }
+          },
+          "expectResult": {
+            "x": 22
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 23
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when many documents match returning the document after modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "returnDocument": "After",
+            "sort": {
+              "x": 1
+            }
+          },
+          "expectResult": {
+            "x": 23
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 23
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when one document matches returning the document before modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "sort": {
+              "x": 1
+            }
+          },
+          "expectResult": {
+            "x": 22
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 23
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when one document matches returning the document after modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "returnDocument": "After",
+            "sort": {
+              "x": 1
+            }
+          },
+          "expectResult": {
+            "x": 23
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 23
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when no documents match returning the document before modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 4
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "sort": {
+              "x": 1
+            }
+          },
+          "expectResult": null
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when no documents match with upsert returning the document before modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 4
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "upsert": true
+          },
+          "expectResult": null
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when no documents match returning the document after modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 4
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "returnDocument": "After",
+            "sort": {
+              "x": 1
+            }
+          },
+          "expectResult": null
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "FindOneAndUpdate when no documents match with upsert returning the document after modification",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 4
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "projection": {
+              "x": 1,
+              "_id": 0
+            },
+            "returnDocument": "After",
+            "sort": {
+              "x": 1
+            },
+            "upsert": true
+          },
+          "expectResult": {
+            "x": 1
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

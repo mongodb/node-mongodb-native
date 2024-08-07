@@ -1,0 +1,205 @@
+{
+  "description": "insertMany",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "InsertMany with non-existing documents",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 2,
+                "x": 22
+              },
+              {
+                "_id": 3,
+                "x": 33
+              }
+            ],
+            "ordered": true
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 2,
+                  "1": 3
+                }
+              }
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "InsertMany continue-on-error behavior with unordered (preexisting duplicate key)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1,
+                "x": 11
+              },
+              {
+                "_id": 2,
+                "x": 22
+              },
+              {
+                "_id": 3,
+                "x": 33
+              }
+            ],
+            "ordered": false
+          },
+          "expectError": {
+            "isError": true,
+            "expectResult": {
+              "deletedCount": 0,
+              "insertedCount": 2,
+              "matchedCount": 0,
+              "modifiedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {}
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "InsertMany continue-on-error behavior with unordered (duplicate key in requests)",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 2,
+                "x": 22
+              },
+              {
+                "_id": 2,
+                "x": 22
+              },
+              {
+                "_id": 3,
+                "x": 33
+              }
+            ],
+            "ordered": false
+          },
+          "expectError": {
+            "isError": true,
+            "expectResult": {
+              "deletedCount": 0,
+              "insertedCount": 2,
+              "matchedCount": 0,
+              "modifiedCount": 0,
+              "upsertedCount": 0,
+              "upsertedIds": {}
+            }
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "crud-v1",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

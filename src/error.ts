@@ -1,4 +1,5 @@
 import type { Document } from './bson';
+import type { ServerType } from './sdam/common';
 import type { TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
 
@@ -1159,6 +1160,23 @@ export class MongoServerSelectionError extends MongoSystemError {
 }
 
 /**
+ * The type of the result property of MongoWriteConcernError
+ * @public
+ */
+export interface WriteConcernErrorResult {
+  writeConcernError: {
+    code: number;
+    errmsg: string;
+    codeName?: string;
+    errInfo?: Document;
+  };
+  ok: number;
+  code?: number;
+  errorLabels?: string[];
+  [x: string | number]: unknown;
+}
+
+/**
  * An error thrown when the server reports a writeConcernError
  * @public
  * @category Error
@@ -1178,16 +1196,8 @@ export class MongoWriteConcernError extends MongoServerError {
    *
    * @public
    **/
-  constructor(result: {
-    writeConcernError: {
-      code: number;
-      errmsg: string;
-      codeName?: string;
-      errInfo?: Document;
-    };
-    errorLabels?: string[];
-  }) {
-    super({ ...result, ...result.writeConcernError });
+  constructor(result: WriteConcernErrorResult) {
+    super({ ...result.writeConcernError, ...result });
     this.errInfo = result.writeConcernError.errInfo;
     this.result = result;
   }
@@ -1217,7 +1227,11 @@ const RETRYABLE_READ_ERROR_CODES = new Set<number>([
 // see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms
 const RETRYABLE_WRITE_ERROR_CODES = RETRYABLE_READ_ERROR_CODES;
 
-export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): boolean {
+export function needsRetryableWriteLabel(
+  error: Error,
+  maxWireVersion: number,
+  serverType: ServerType
+): boolean {
   // pre-4.4 server, then the driver adds an error label for every valid case
   // execute operation will only inspect the label, code/message logic is handled here
   if (error instanceof MongoNetworkError) {
@@ -1237,11 +1251,17 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
   }
 
   if (error instanceof MongoWriteConcernError) {
-    return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);
+    if (serverType === 'Mongos' && maxWireVersion < 9) {
+      // use original top-level code from server response
+      return RETRYABLE_WRITE_ERROR_CODES.has(error.result.code ?? 0);
+    }
+    return RETRYABLE_WRITE_ERROR_CODES.has(
+      error.result.writeConcernError.code ?? Number(error.code) ?? 0
+    );
   }
 
-  if (error instanceof MongoError && typeof error.code === 'number') {
-    return RETRYABLE_WRITE_ERROR_CODES.has(error.code);
+  if (error instanceof MongoError) {
+    return RETRYABLE_WRITE_ERROR_CODES.has(Number(error.code));
   }
 
   const isNotWritablePrimaryError = LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE.test(error.message);

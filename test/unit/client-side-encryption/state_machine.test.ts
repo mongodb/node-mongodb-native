@@ -148,6 +148,30 @@ describe('StateMachine', function () {
       });
     });
 
+    context('when socket options are provided', function () {
+      const stateMachine = new StateMachine({
+        socketOptions: { autoSelectFamily: true, autoSelectFamilyAttemptTimeout: 300 }
+      } as any);
+      const request = new MockRequest(Buffer.from('foobar'), -1);
+      let connectOptions;
+
+      it('passes them through to the socket', async function () {
+        sandbox.stub(tls, 'connect').callsFake((options, callback) => {
+          connectOptions = options;
+          this.fakeSocket = new MockSocket(callback);
+          return this.fakeSocket;
+        });
+        const kmsRequestPromise = stateMachine.kmsRequest(request);
+
+        await setTimeoutAsync(0);
+        this.fakeSocket.emit('data', Buffer.alloc(0));
+
+        await kmsRequestPromise;
+        expect(connectOptions.autoSelectFamily).to.equal(true);
+        expect(connectOptions.autoSelectFamilyAttemptTimeout).to.equal(300);
+      });
+    });
+
     context('when tls options are provided', function () {
       context('when the options are insecure', function () {
         [

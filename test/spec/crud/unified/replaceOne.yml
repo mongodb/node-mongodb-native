@@ -1,0 +1,138 @@
+description: replaceOne
+
+schemaVersion: '1.0'
+
+runOnRequirements:
+  -
+    minServerVersion: '2.6'
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v1
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  -
+    # This test doesn't verify the output collection because we cannot assume
+    # which document gets replaced.
+    description: 'ReplaceOne when many documents match'
+    operations:
+      -
+        object: *collection0
+        name: replaceOne
+        arguments:
+          filter: { _id: { $gt: 1 } }
+          replacement: { x: 111 }
+        expectResult:
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+  -
+    description: 'ReplaceOne when one document matches'
+    operations:
+      -
+        object: *collection0
+        name: replaceOne
+        arguments:
+          filter: { _id: 1 }
+          replacement: { _id: 1, x: 111 }
+        expectResult:
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 111 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+  -
+    description: 'ReplaceOne when no documents match'
+    operations:
+      -
+        object: *collection0
+        name: replaceOne
+        arguments:
+          filter: { _id: 4 }
+          replacement: { _id: 4, x: 1 }
+        expectResult:
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 0
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+  -
+    description: 'ReplaceOne with upsert when no documents match without an id specified'
+    operations:
+      -
+        object: *collection0
+        name: replaceOne
+        arguments:
+          filter: { _id: 4 }
+          replacement: { x: 1 }
+          upsert: true
+        expectResult:
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 1
+          upsertedId: 4
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+          - { _id: 4, x: 1 }
+  -
+    description: 'ReplaceOne with upsert when no documents match with an id specified'
+    operations:
+      -
+        object: *collection0
+        name: replaceOne
+        arguments:
+          filter: { _id: 4 }
+          replacement: { _id: 4, x: 1 }
+          upsert: true
+        expectResult:
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 1
+          upsertedId: 4
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+          - { _id: 4, x: 1 }

@@ -73,7 +73,8 @@ export {
   MongoTopologyClosedError,
   MongoTransactionError,
   MongoUnexpectedServerResponseError,
-  MongoWriteConcernError
+  MongoWriteConcernError,
+  WriteConcernErrorResult
 } from './error';
 export { configureExplicitResourceManagement } from './resource_management';
 export {
@@ -248,6 +249,7 @@ export type {
   LocalKMSProviderConfiguration
 } from './client-side-encryption/providers/index';
 export type {
+  ClientEncryptionSocketOptions,
   ClientEncryptionTlsOptions,
   CSFLEKMSTlsOptions,
   StateMachineExecutable

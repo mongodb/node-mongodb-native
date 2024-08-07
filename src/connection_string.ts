@@ -740,6 +740,13 @@ export const OPTIONS = {
   autoEncryption: {
     type: 'record'
   },
+  autoSelectFamily: {
+    type: 'boolean',
+    default: true
+  },
+  autoSelectFamilyAttemptTimeout: {
+    type: 'uint'
+  },
   bsonRegExp: {
     type: 'boolean'
   },

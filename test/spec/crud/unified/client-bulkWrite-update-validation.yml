@@ -1,0 +1,79 @@
+description: "client-bulkWrite-update-validation"
+
+schemaVersion: "1.1"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+
+tests:
+  - description: "client bulkWrite replaceOne prohibits atomic modifiers"
+    operations:
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          models:
+            - replaceOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                replacement: { $set: { x: 22 } }
+        expectError:
+          isClientError: true
+    expectEvents:
+      - client: *client0
+        events: []
+    outcome: *initialData
+
+  - description: "client bulkWrite updateOne requires atomic modifiers"
+    operations:
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          models:
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update: { x: 22 }
+        expectError:
+          isClientError: true
+    expectEvents:
+      - client: *client0
+        events: []
+    outcome: *initialData
+
+  - description: "client bulkWrite updateMany requires atomic modifiers"
+    operations:
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          models:
+            - updateMany:
+                namespace: *namespace
+                filter: { _id: { $gt: 1 } }
+                update: { x: 44 }
+        expectError:
+          isClientError: true
+    expectEvents:
+      - client: *client0
+        events: []
+    outcome: *initialData

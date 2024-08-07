@@ -1,0 +1,52 @@
+description: count-empty
+
+schemaVersion: '1.0'
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+  -
+    database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v1
+  -
+    collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'Estimated document count with empty collection'
+    operations:
+      -
+        object: *collection0
+        name: estimatedDocumentCount
+        arguments: {  }
+        expectResult: 0
+  -
+    description: 'Count documents with empty collection'
+    operations:
+      -
+        object: *collection0
+        name: countDocuments
+        arguments:
+          filter: {  }
+        expectResult: 0
+  -
+    description: 'Deprecated count with empty collection'
+    operations:
+      -
+        object: *collection0
+        name: count
+        arguments:
+          filter: {  }
+        expectResult: 0

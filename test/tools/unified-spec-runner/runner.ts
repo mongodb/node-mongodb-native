@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect } from 'chai';
+import { AssertionError, expect } from 'chai';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
 import type { MongoClient } from '../../mongodb';
-import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mongodb';
+import {
+  MONGODB_ERROR_CODES,
+  MongoParseError,
+  MongoServerError,
+  ns,
+  ReadPreference,
+  TopologyType
+} from '../../mongodb';
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';
@@ -18,9 +25,15 @@ export function trace(message: string): void {
   }
 }
 
+async function isAtlasDataLake(client: MongoClient): Promise<boolean> {
+  const buildInfo = await client.db('admin').admin().buildInfo();
+  return 'dataLake' in buildInfo;
+}
+
 async function terminateOpenTransactions(client: MongoClient) {
   // Note: killAllSession is not supported on serverless, see CLOUDP-84298
-  if (process.env.SERVERLESS) {
+  // killAllSession is not allowed in ADL either.
+  if (process.env.SERVERLESS || (await isAtlasDataLake(client))) {
     return;
   }
   // TODO(NODE-3491): on sharded clusters this has to be run on each mongos
@@ -101,7 +114,9 @@ async function runUnifiedTest(
     await terminateOpenTransactions(utilClient);
 
     // Must fetch parameters before checking runOnRequirements
-    ctx.configuration.parameters = await utilClient.db().admin().command({ getParameter: '*' });
+    ctx.configuration.parameters = (await isAtlasDataLake(utilClient))
+      ? {}
+      : await utilClient.db().admin().command({ getParameter: '*' });
 
     // If test.runOnRequirements is specified, the test runner MUST skip the test unless one or more
     // runOnRequirement objects are satisfied.
@@ -298,13 +313,28 @@ async function runUnifiedTest(
  */
 export function runUnifiedSuite(
   specTests: uni.UnifiedSuite[],
-  skipFilter: uni.TestFilter = () => false
+  skipFilter: uni.TestFilter = () => false,
+  expectRuntimeError = false
 ): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const [index, test] of unifiedSuite.tests.entries()) {
         it(String(test.description === '' ? `Test ${index}` : test.description), async function () {
-          await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+          if (expectRuntimeError) {
+            const error = await runUnifiedTest(this, unifiedSuite, test, skipFilter).catch(
+              error => error
+            );
+            expect(error).to.satisfy(value => {
+              return (
+                value instanceof AssertionError ||
+                value instanceof MongoServerError ||
+                value instanceof TypeError ||
+                value instanceof MongoParseError
+              );
+            });
+          } else {
+            await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+          }
         });
       }
     });

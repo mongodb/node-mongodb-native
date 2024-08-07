@@ -1,0 +1,241 @@
+description: "gridfs-download"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name gridfs-tests
+  - bucket:
+      id: &bucket0 bucket0
+      database: *database0
+  - collection:
+      id: &bucket0_files_collection bucket0_files_collection
+      database: *database0
+      collectionName: &bucket0_files_collectionName fs.files
+  - collection:
+      id: &bucket0_chunks_collection bucket0_chunks_collection
+      database: *database0
+      collectionName: &bucket0_chunks_collectionName fs.chunks
+
+initialData:
+  - collectionName: *bucket0_files_collectionName
+    databaseName: *database0Name
+    documents:
+      - _id: { "$oid": "000000000000000000000001" }
+        length: 0
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "d41d8cd98f00b204e9800998ecf8427e"
+        filename: "length-0"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+      - _id: { "$oid": "000000000000000000000002" }
+        length: 0
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "d41d8cd98f00b204e9800998ecf8427e"
+        filename: "length-0-with-empty-chunk"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+      - _id: { "$oid": "000000000000000000000003" }
+        length: 2
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "c700ed4fdb1d27055aa3faa2c2432283"
+        filename: "length-2"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+      - _id: { "$oid": "000000000000000000000004" }
+        length: 8
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "dd254cdc958e53abaa67da9f797125f5"
+        filename: "length-8"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+      - _id: { "$oid": "000000000000000000000005" }
+        length: 10
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "57d83cd477bfb1ccd975ab33d827a92b"
+        filename: "length-10"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+      - _id: { "$oid": "000000000000000000000006" }
+        length: 2
+        chunkSize: 4
+        uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
+        md5: "c700ed4fdb1d27055aa3faa2c2432283"
+        # filename is intentionally omitted
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+  - collectionName: *bucket0_chunks_collectionName
+    databaseName: *database0Name
+    documents:
+      - _id: { "$oid": "000000000000000000000001" }
+        files_id: { "$oid": "000000000000000000000002" }
+        n: 0
+        data: { "$binary": { "base64": "", "subType": "00" } }
+      - _id: { "$oid": "000000000000000000000002" }
+        files_id: { "$oid": "000000000000000000000003" }
+        n: 0
+        data: { "$binary": { "base64": "ESI=", "subType": "00" } } # hex: 1122
+      - _id: { "$oid": "000000000000000000000003" }
+        files_id: { "$oid": "000000000000000000000004" }
+        n: 0
+        data: { "$binary": { "base64": "ESIzRA==", "subType": "00" } }  # hex: 11223344
+      - _id: { "$oid": "000000000000000000000004" }
+        files_id: { "$oid": "000000000000000000000004" }
+        n: 1
+        data: { "$binary": { "base64": "VWZ3iA==", "subType": "00" } } # hex: 55667788
+      - _id: { "$oid": "000000000000000000000005" }
+        files_id: { "$oid": "000000000000000000000005" }
+        n: 0
+        data: { "$binary": { "base64": "ESIzRA==", "subType": "00" } }  # hex: 11223344
+      - _id: { "$oid": "000000000000000000000006" }
+        files_id: { "$oid": "000000000000000000000005" }
+        n: 1
+        data: { "$binary": { "base64": "VWZ3iA==", "subType": "00" } } # hex: 55667788
+      - _id: { "$oid": "000000000000000000000007" }
+        files_id: { "$oid": "000000000000000000000005" }
+        n: 2
+        data: { "$binary" : { "base64": "mao=", "subType" : "00" } } # hex: 99aa
+      - _id: { "$oid": "000000000000000000000008" }
+        files_id: { "$oid": "000000000000000000000006" }
+        n: 0
+        data: { "$binary": { "base64": "ESI=", "subType": "00" } } # hex: 1122
+
+tests:
+  - description: "download when length is zero"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000001" }
+        expectResult: { $$matchesHexBytes: "" }
+  - description: "download when length is zero and there is one empty chunk"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000002" }
+        expectResult: { $$matchesHexBytes: "" }
+  - description: "download when there is one chunk"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000003" }
+        expectResult: { $$matchesHexBytes: "1122" }
+  - description: "download when there are two chunks"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000004" }
+        expectResult: { $$matchesHexBytes: "1122334455667788" }
+  - description: "download when there are three chunks"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000005" }
+        expectResult: { $$matchesHexBytes: "112233445566778899aa" }
+  - description: "download when files entry does not exist"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000000" }
+        expectError: { isError: true } # FileNotFound
+  - description: "download when an intermediate chunk is missing"
+    operations:
+      - name: deleteOne
+        object: *bucket0_chunks_collection
+        arguments:
+          filter:
+            files_id: { $oid: "000000000000000000000005" }
+            n: 1
+        expectResult:
+          deletedCount: 1
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000005" }
+        expectError: { isError: true } # ChunkIsMissing
+  - description: "download when final chunk is missing"
+    operations:
+      - name: deleteOne
+        object: *bucket0_chunks_collection
+        arguments:
+          filter:
+            files_id: { $oid: "000000000000000000000005" }
+            n: 2
+        expectResult:
+          deletedCount: 1
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000005" }
+        expectError: { isError: true } # ChunkIsMissing
+  - description: "download when an intermediate chunk is the wrong size"
+    operations:
+      - name: bulkWrite
+        object: *bucket0_chunks_collection
+        arguments:
+          requests:
+            - updateOne:
+                filter:
+                  files_id: { $oid: "000000000000000000000005" }
+                  n: 1
+                update:
+                  $set: { data: { "$binary": { "base64": "VWZ3", "subType": "00" } } } # hex: 556677
+            - updateOne:
+                filter:
+                  files_id: { $oid: "000000000000000000000005" }
+                  n: 2
+                update:
+                  $set: { data: { "$binary": { "base64": "iJmq", "subType": "00" } } } # hex: 8899aa
+        expectResult:
+          matchedCount: 2
+          modifiedCount: 2
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000005" }
+        expectError: { isError: true } # ChunkIsWrongSize
+  - description: "download when final chunk is the wrong size"
+    operations:
+      - name: updateOne
+        object: *bucket0_chunks_collection
+        arguments:
+          filter:
+            files_id: { $oid: "000000000000000000000005" }
+            n: 2
+          update:
+            $set: { data: { "$binary": { "base64": "mQ==", "subType": "00" } } } # hex: 99
+        expectResult:
+          matchedCount: 1
+          modifiedCount: 1
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000005" }
+        expectError: { isError: true } # ChunkIsWrongSize
+  - description: "download legacy file with no name"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: { $oid: "000000000000000000000006" }
+        expectResult: { $$matchesHexBytes: "1122" }

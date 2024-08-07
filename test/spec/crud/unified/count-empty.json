@@ -1,0 +1,71 @@
+{
+  "description": "count-empty",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "crud-v1",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Estimated document count with empty collection",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "estimatedDocumentCount",
+          "arguments": {},
+          "expectResult": 0
+        }
+      ]
+    },
+    {
+      "description": "Count documents with empty collection",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "countDocuments",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": 0
+        }
+      ]
+    },
+    {
+      "description": "Deprecated count with empty collection",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "count",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": 0
+        }
+      ]
+    }
+  ]
+}

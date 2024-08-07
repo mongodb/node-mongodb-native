@@ -1,0 +1,610 @@
+description: insertOne-errorLabels
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: 4.3.1 # failCommand errorLabels option
+    topologies: [ replicaset, sharded, load-balanced ]
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name retryable-writes-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'InsertOne succeeds with RetryableWriteError from server'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 112 # WriteConflict, not a retryable error code
+              # Override server behavior: send RetryableWriteError label with non-retryable error code
+              errorLabels:
+                - RetryableWriteError
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        # Driver retries operation and it succeeds
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne fails if server does not return RetryableWriteError'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 11600 # InterruptedAtShutdown, normally a retryable error code
+              errorLabels: []  # Override server behavior: do not send RetryableWriteError label with retryable code
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        # Driver does not retry operation because there was no RetryableWriteError label on response
+        expectError:
+          isError: true
+          errorLabelsOmit:
+            - RetryableWriteError
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'InsertOne succeeds after NotWritablePrimary'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 10107
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after NotPrimaryOrSecondary'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 13436
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after NotPrimaryNoSecondaryOk'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 13435
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after InterruptedDueToReplStateChange'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 11602
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after InterruptedAtShutdown'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 11600
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after PrimarySteppedDown'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 189
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after ShutdownInProgress'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 91
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after HostNotFound'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 7
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after HostUnreachable'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 6
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after SocketException'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 9001
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after NetworkTimeout'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 89
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after ExceededTimeLimit'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorCode: 262
+              errorLabels:
+                - RetryableWriteError
+              closeConnection: false
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after WriteConcernError InterruptedAtShutdown'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorLabels:
+                - RetryableWriteError
+              writeConcernError:
+                code: 11600
+                errmsg: 'Replication is being shut down'
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after WriteConcernError InterruptedDueToReplStateChange'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorLabels:
+                - RetryableWriteError
+              writeConcernError:
+                code: 11602
+                errmsg: 'Replication is being shut down'
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after WriteConcernError PrimarySteppedDown'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorLabels:
+                - RetryableWriteError
+              writeConcernError:
+                code: 189
+                errmsg: 'Replication is being shut down'
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne succeeds after WriteConcernError ShutdownInProgress'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorLabels:
+                - RetryableWriteError
+              writeConcernError:
+                code: 91
+                errmsg: 'Replication is being shut down'
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 }
+  -
+    description: 'InsertOne fails after multiple retryable writeConcernErrors'
+    operations:
+      -
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ insert ]
+              errorLabels:
+                - RetryableWriteError
+              writeConcernError:
+                code: 91
+                errmsg: 'Replication is being shut down'
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectError:
+          isError: true
+          errorLabelsContain:
+            - RetryableWriteError
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 11 } # The write was still applied.

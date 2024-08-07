@@ -192,12 +192,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
       ...this.cmdBase
     };
 
-    // Have we specified collation
-    try {
-      decorateWithCollation(cmd, coll, options);
-    } catch (err) {
-      return err;
-    }
+    decorateWithCollation(cmd, coll, options);
 
     if (options.hint) {
       // TODO: once this method becomes a CommandOperation we will have the server

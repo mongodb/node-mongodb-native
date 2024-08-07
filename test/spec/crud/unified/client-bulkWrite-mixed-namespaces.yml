@@ -1,0 +1,146 @@
+description: "client bulkWrite with mixed namespaces"
+schemaVersion: "1.1"
+runOnRequirements:
+  - minServerVersion: "8.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name db0
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+  - collection:
+      id: &collection1 collection1
+      database: *database0
+      collectionName: &collection1Name coll1
+  - database:
+      id: &database1 database1
+      client: *client0
+      databaseName: &database1Name db1
+  - collection:
+      id: &collection2 collection2
+      database: *database1
+      collectionName: &collection2Name coll2
+
+initialData:
+  - databaseName: *database0Name
+    collectionName: *collection0Name
+    documents: []
+  - databaseName: *database0Name
+    collectionName: *collection1Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+  - databaseName: *database1Name
+    collectionName: *collection2Name
+    documents:
+      - { _id: 3, x: 33 }
+      - { _id: 4, x: 44 }
+
+_yamlAnchors:
+  db0Coll0Namespace: &db0Coll0Namespace "db0.coll0"
+  db0Coll1Namespace: &db0Coll1Namespace "db0.coll1"
+  db1Coll2Namespace: &db1Coll2Namespace "db1.coll2"
+
+tests:
+  - description: "client bulkWrite with mixed namespaces"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *db0Coll0Namespace
+                document: { _id: 1 }
+            - insertOne:
+                namespace: *db0Coll0Namespace
+                document: { _id: 2 }
+            - updateOne:
+                namespace: *db0Coll1Namespace
+                filter: { _id: 1 }
+                update: { $inc: { x: 1 } }
+            - deleteOne:
+                namespace: *db1Coll2Namespace
+                filter: { _id: 3 }
+            - deleteOne:
+                namespace: *db0Coll1Namespace
+                filter: { _id: 2 }
+            - replaceOne:
+                namespace: *db1Coll2Namespace
+                filter: { _id: 4 }
+                replacement: { x: 45 }
+          verboseResults: true
+        expectResult:
+          insertedCount: 2
+          upsertedCount: 0
+          matchedCount: 2
+          modifiedCount: 2
+          deletedCount: 2
+          insertResults:
+            0:
+              insertedId: 1
+            1:
+              insertedId: 2
+          updateResults:
+            2:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+            5:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+          deleteResults:
+            3:
+              deletedCount: 1
+            4:
+              deletedCount: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                bulkWrite: 1
+                ops:
+                  - insert: 0
+                    document: { _id: 1 }
+                  - insert: 0
+                    document: { _id: 2 }
+                  - update: 1
+                    filter: { _id: 1 }
+                    updateMods: { $inc: { x: 1 } }
+                    multi: false
+                  - delete: 2
+                    filter: { _id: 3 }
+                    multi: false
+                  - delete: 1
+                    filter: { _id: 2 }
+                    multi: false
+                  - update: 2
+                    filter: { _id: 4 }
+                    updateMods: { x: 45 }
+                    multi: false
+                nsInfo:
+                  - ns: *db0Coll0Namespace
+                  - ns: *db0Coll1Namespace
+                  - ns: *db1Coll2Namespace
+    outcome:
+      - databaseName: *database0Name
+        collectionName: *collection0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+      - databaseName: *database0Name
+        collectionName: *collection1Name
+        documents:
+          - { _id: 1, x: 12 }
+      - databaseName: *database1Name
+        collectionName: *collection2Name
+        documents:
+          - { _id: 4, x: 45 }
