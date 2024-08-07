@@ -348,12 +348,27 @@ describe('class AbstractCursor', function () {
       });
     });
 
+    context('when the cursor is closed', function () {
+      context('when calling next()', function () {
+        it('raises a cursor exhausted error', async function () {
+          cursor = client.db().collection('test').find({});
+          await cursor.next();
+          await cursor.close();
+          const error = await cursor.next().catch(error => error);
+          expect(error).to.be.instanceOf(MongoCursorExhaustedError);
+          expect(cursor.id.isZero()).to.be.true;
+          expect(cursor).to.have.property('closed', true);
+          expect(cursor).to.have.property('killed', false);
+        });
+      });
+    });
+
     describe('when some documents have been iterated and the cursor is closed', () => {
-      it('has a zero id and is not closed and is killed', async function () {
+      it('has a zero id and is closed and is killed', async function () {
         cursor = client.db().collection('test').find({}, { batchSize: 2 });
         await cursor.next();
         await cursor.close();
-        expect(cursor).to.have.property('closed', false);
+        expect(cursor).to.have.property('closed', true);
         expect(cursor).to.have.property('killed', true);
         expect(cursor.id.isZero()).to.be.true;
         const error = await cursor.next().catch(error => error);
