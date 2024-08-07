@@ -155,6 +155,67 @@ function makeMultiBench(suite) {
         })
         .teardown(dropDb)
         .teardown(disconnectClient)
+    )
+    .benchmark('aggregateAMillionDocumentsAndToArray', benchmark =>
+      benchmark
+        .taskSize(16)
+        .setup(makeClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .task(async function () {
+          await this.db
+            .aggregate([
+              { $documents: [{}] },
+              {
+                $set: {
+                  field: {
+                    $reduce: {
+                      input: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                      initialValue: [0],
+                      in: { $concatArrays: ['$$value', '$$value'] }
+                    }
+                  }
+                }
+              },
+              { $unwind: '$field' },
+              { $limit: 1000000 }
+            ])
+            .toArray();
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('aggregateAMillionTweetsAndToArray', benchmark =>
+      benchmark
+        .taskSize(1500)
+        .setup(makeLoadJSON('tweet.json'))
+        .setup(makeClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .task(async function () {
+          await this.db
+            .aggregate([
+              { $documents: [this.doc] },
+              {
+                $set: {
+                  id: {
+                    $reduce: {
+                      input: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                      initialValue: [0],
+                      in: { $concatArrays: ['$$value', '$$value'] }
+                    }
+                  }
+                }
+              },
+              { $unwind: '$id' },
+              { $limit: 1000000 }
+            ])
+            .toArray();
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
     );
 }
 
