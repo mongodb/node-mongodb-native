@@ -17,6 +17,7 @@ import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
+import { type AsyncDisposable, configureResourceManagement } from '../resource_management';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type MongoDBNamespace, squashError } from '../utils';
@@ -124,9 +125,12 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-  TSchema = any,
-  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-> extends TypedEventEmitter<CursorEvents> {
+    TSchema = any,
+    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+  >
+  extends TypedEventEmitter<CursorEvents>
+  implements AsyncDisposable
+{
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -273,6 +277,17 @@ export abstract class AbstractCursor<
 
   get loadBalanced(): boolean {
     return !!this.cursorClient.topology?.loadBalanced;
+  }
+
+  /**
+   * @beta
+   * @experimental
+   * An alias for {@link AbstractCursor.close|AbstractCursor.close()}.
+   */
+  declare [Symbol.asyncDispose]: () => Promise<void>;
+  /** @internal */
+  async asyncDispose() {
+    await this.close();
   }
 
   /** Returns current buffered documents length */
@@ -446,6 +461,9 @@ export abstract class AbstractCursor<
     }
   }
 
+  /**
+   * Frees any client-side resources used by the cursor.
+   */
   async close(): Promise<void> {
     await this.cleanup();
   }
@@ -916,3 +934,5 @@ class ReadableCursorStream extends Readable {
     );
   }
 }
+
+configureResourceManagement(AbstractCursor.prototype);

@@ -31,6 +31,7 @@ const EXPECTED_EXPORTS = [
   'ClientSession',
   'Code',
   'Collection',
+  'configureExplicitResourceManagement',
   'CommandFailedEvent',
   'CommandStartedEvent',
   'CommandSucceededEvent',
