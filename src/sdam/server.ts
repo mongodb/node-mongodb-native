@@ -40,6 +40,7 @@ import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { isTransactionCommand } from '../transactions';
 import {
   type EventEmitterWithState,
@@ -103,6 +104,11 @@ export type ServerEvents = {
   ended(): void;
 } & ConnectionPoolEvents &
   EventEmitterWithState;
+
+/** @internal */
+export type ServerCommandOptions = Omit<CommandOptions, 'timeoutContext'> & {
+  timeoutContext: TimeoutContext;
+};
 
 /** @internal */
 export class Server extends TypedEventEmitter<ServerEvents> {
@@ -267,20 +273,20 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   public async command<T extends MongoDBResponseConstructor>(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions | undefined,
+    options: ServerCommandOptions,
     responseType: T | undefined
   ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
 
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options?: CommandOptions
+    options: ServerCommandOptions
   ): Promise<Document>;
 
   public async command(
     ns: MongoDBNamespace,
     cmd: Document,
-    options: CommandOptions,
+    options: ServerCommandOptions,
     responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     if (ns.db == null || typeof ns === 'string') {
@@ -311,7 +317,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     this.incrementOperationCount();
     if (conn == null) {
       try {
-        conn = await this.pool.checkOut();
+        conn = await this.pool.checkOut(options);
         if (this.loadBalanced && isPinnableCommand(cmd, session)) {
           session?.pin(conn);
         }
@@ -336,6 +342,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
         await this.pool.reauthenticate(conn);
+        // TODO(NODE-5682): Implement CSOT support for socket read/write at the connection layer
         try {
           const res = await conn.command(ns, cmd, finalOptions, responseType);
           throwIfWriteConcernError(res);
