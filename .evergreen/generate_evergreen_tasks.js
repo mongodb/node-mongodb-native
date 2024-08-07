@@ -18,12 +18,12 @@ function updateExpansions(expansions) {
 
 const csfleTasks = [];
 
-const FLE_PINNED_COMMIT = '51e172622a0ddf2bf761e4d1e26ca267359086dd';
+const FLE_PINNED_COMMIT = '38f1be60e3f8d24b066642f742c90d0ffdd0cdc0';
 
-for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of [FLE_PINNED_COMMIT, 'master']) {
+for (const version of ['5.0', '6.0']) {
+  for (const ref of [FLE_PINNED_COMMIT, 'main']) {
     csfleTasks.push({
-      name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
+      name: `run-custom-csfle-tests-${version}-${ref === 'main' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests', 'csfle'],
       commands: [
         updateExpansions({
