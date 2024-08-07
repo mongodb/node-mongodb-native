@@ -1,15 +1,21 @@
 /* Anything javascript specific relating to timeouts */
 import { expect } from 'chai';
+import * as semver from 'semver';
+import * as sinon from 'sinon';
 
 import {
+  BSON,
   type ClientSession,
   type Collection,
+  Connection,
   type Db,
   type FindCursor,
   LEGACY_HELLO_COMMAND,
   type MongoClient,
-  MongoOperationTimeoutError
+  MongoOperationTimeoutError,
+  MongoServerError
 } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 describe('CSOT driver tests', () => {
   describe('timeoutMS inheritance', () => {
@@ -161,4 +167,147 @@ describe('CSOT driver tests', () => {
       });
     });
   });
+
+  describe(
+    'server-side maxTimeMS errors are transformed',
+    { requires: { mongodb: '>=4.4' } },
+    () => {
+      let client: MongoClient;
+      let commandsSucceeded;
+      let commandsFailed;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({ timeoutMS: 500_000, monitorCommands: true });
+        commandsSucceeded = [];
+        commandsFailed = [];
+        client.on('commandSucceeded', event => {
+          if (event.commandName === 'configureFailPoint') return;
+          commandsSucceeded.push(event);
+        });
+        client.on('commandFailed', event => commandsFailed.push(event));
+      });
+
+      afterEach(async function () {
+        await client
+          .db()
+          .collection('a')
+          .drop()
+          .catch(() => null);
+        await client.close();
+        commandsSucceeded = undefined;
+        commandsFailed = undefined;
+      });
+
+      describe('when a maxTimeExpired error is returned at the top-level', () => {
+        // {ok: 0, code: 50, codeName: "MaxTimeMSExpired", errmsg: "operation time limit exceeded"}
+        const failpoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['ping'],
+            errorCode: 50
+          }
+        };
+
+        beforeEach(async () => {
+          await client.db('admin').command(failpoint);
+        });
+
+        afterEach(async () => {
+          await client.db('admin').command({ ...failpoint, mode: 'off' });
+        });
+
+        it('throws a MongoOperationTimeoutError error and emits command failed', async () => {
+          const error = await client
+            .db()
+            .command({ ping: 1 })
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(error.cause).to.be.instanceOf(MongoServerError);
+          expect(error.cause).to.have.property('code', 50);
+
+          expect(commandsFailed).to.have.lengthOf(1);
+          expect(commandsFailed).to.have.nested.property('[0].failure.cause.code', 50);
+        });
+      });
+
+      describe('when a maxTimeExpired error is returned inside a writeErrors array', () => {
+        // Okay so allegedly this can never happen.
+        // But the spec says it can, so let's be defensive and support it.
+        // {ok: 1, writeErrors: [{code: 50, codeName: "MaxTimeMSExpired", errmsg: "operation time limit exceeded"}]}
+
+        beforeEach(async () => {
+          const writeErrorsReply = BSON.serialize({
+            ok: 1,
+            writeErrors: [
+              { code: 50, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' }
+            ]
+          });
+          const commandSpy = sinon.spy(Connection.prototype, 'command');
+          const readManyStub = sinon
+            // @ts-expect-error: readMany is private
+            .stub(Connection.prototype, 'readMany')
+            .callsFake(async function* (...args) {
+              const realIterator = readManyStub.wrappedMethod.call(this, ...args);
+              const cmd = commandSpy.lastCall.args.at(1);
+              if ('giveMeWriteErrors' in cmd) {
+                await realIterator.next().catch(() => null); // dismiss response
+                yield { parse: () => writeErrorsReply };
+              } else {
+                yield (await realIterator.next()).value;
+              }
+            });
+        });
+
+        afterEach(() => sinon.restore());
+
+        it('throws a MongoOperationTimeoutError error and emits command succeeded', async () => {
+          const error = await client
+            .db('admin')
+            .command({ giveMeWriteErrors: 1 })
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(error.cause).to.be.instanceOf(MongoServerError);
+          expect(error.cause).to.have.nested.property('writeErrors[0].code', 50);
+
+          expect(commandsSucceeded).to.have.lengthOf(1);
+          expect(commandsSucceeded).to.have.nested.property('[0].reply.writeErrors[0].code', 50);
+        });
+      });
+
+      describe('when a maxTimeExpired error is returned inside a writeConcernError embedded document', () => {
+        // {ok: 1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}
+        const failpoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['insert'],
+            writeConcernError: { code: 50, errmsg: 'times up buster', errorLabels: [] }
+          }
+        };
+
+        beforeEach(async () => {
+          await client.db('admin').command(failpoint);
+        });
+
+        afterEach(async () => {
+          await client.db('admin').command({ ...failpoint, mode: 'off' });
+        });
+
+        it('throws a MongoOperationTimeoutError error and emits command succeeded', async () => {
+          const error = await client
+            .db()
+            .collection('a')
+            .insertOne({})
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(error.cause).to.be.instanceOf(MongoServerError);
+          expect(error.cause).to.have.nested.property('writeConcernError.code', 50);
+
+          expect(commandsSucceeded).to.have.lengthOf(1);
+          expect(commandsSucceeded).to.have.nested.property('[0].reply.writeConcernError.code', 50);
+        });
+      });
+    }
+  );
 });
