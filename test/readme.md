@@ -32,6 +32,7 @@ Below is a summary of the types of test automation in this repo.
 | TypeScript Definition   | `/test/types`       | The TypeScript definition tests verify the type definitions are correct.                                                                                                                                                                                                                                                                                                                                                                                                                        | `npm run check:tsd`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | GitHub Actions          | `/test/action`      | Tests that run as GitHub Actions such as dependency checking.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Currently, only `npm run check:dependencies` but could be expanded to more in the future.                                                                                                                                                                                                                                                                                                                                                                          |
 | Code Examples           | `/test/integration/node-specific/examples`    | Code examples that are also paired with tests that show they are working examples.                                                                                                                                                                                                                                                                                                                                                                                                              | Currently, `npm run check:lambda` to test the AWS Lambda example with default auth and `npm run check:lambda:aws` to test the AWS Lambda example with AWS auth.                                                                                                                                                                                                                                                                                                    |
+| Explicit Resource Management           | `/test/explicit-resource-management`    | Tests that use explicit resource management with the driver's disposable resources.                                                                                                                                                                                                                                                                                                                                                                                                             | `bash .evergreen/run-resource-management-feature-integration.sh`                                                                                                                                                                                                                                                                                      |
 
 ### Spec Tests
 
@@ -101,7 +102,7 @@ You can prefix `npm test` with a `MONGODB_URI` environment variable to point the
 MONGODB_URI=mongodb://localhost:27017 npm test
 ```
 
-For a replica set, you might use: 
+For a replica set, you might use:
 
 ```sh
 MONGODB_URI=mongodb://localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs npm test
@@ -115,14 +116,14 @@ The easiest way to run a single test is by appending `.only()` to the test conte
 it.only('cool test', function() {})
 ```
 
-Then, run the test using `npm run check:test` for a functional or integration test or 
+Then, run the test using `npm run check:test` for a functional or integration test or
 `npm run check:unit`
 for a unit test. See [Mocha's documentation][mocha-only] for more detailed information on `.only()`.
 
 Another way to run a single test is to use Mocha's `grep` flag. For functional or integration tests, run:
 ```sh
 npm run check:test -- -g <test name>
-``` 
+```
 For unit tests, run:
 ```sh
 npm run check:unit -- -g <test name>
@@ -133,7 +134,7 @@ See the [Mocha documentation][mocha-grep] for information on the `grep` flag.
 
 [Evergreen][evergreen-wiki] is the continuous integration (CI) system we use. Evergreen builds are automatically run whenever a pull request is created or when commits are pushed to particular branches (e.g., `main`, `4.0`, and `3.6`).
 
-Each Evergreen build runs the test suite against a variety of build variants that include a combination of topologies, special environments, and operating systems. By default, commits in pull requests only run a subset of the build variants in order to save time and resources. To configure a build, update `.evergreen/config.yml.in` and then generate a new Evergreen config via: 
+Each Evergreen build runs the test suite against a variety of build variants that include a combination of topologies, special environments, and operating systems. By default, commits in pull requests only run a subset of the build variants in order to save time and resources. To configure a build, update `.evergreen/config.yml.in` and then generate a new Evergreen config via:
 
 ```sh
 node .evergreen/generate_evergreen_tasks.js
@@ -353,13 +354,13 @@ The following steps will walk you through how to start and test a load balancer.
 
     Create two `mongos` running on ports `27017` and `27018`:
     ```sh
-    mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter loadBalancerPort=27050    
+    mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter loadBalancerPort=27050
     mongos --configdb test/localhost:27217 --port 27018 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter loadBalancerPort=27051
     ```
 
     Initiate cluster on `mongos` in shell:
     ```sh
-    mongosh "mongodb://localhost:27017" --eval "sh.addShard('testing/localhost:27218,localhost:27219,localhost:27220')"   
+    mongosh "mongodb://localhost:27017" --eval "sh.addShard('testing/localhost:27218,localhost:27219,localhost:27220')"
     mongosh "mongodb://localhost:27017" --eval "sh.enableSharding('test')"
     ```
 1. An alternative way to the fully manual cluster setup is to use `mlaunch`:
@@ -434,7 +435,7 @@ The following steps will walk you through how to run the tests for CSFLE.
 1. Install [MongoDB Client Encryption][npm-csfle] if you haven't already:
    ```sh
    npm install mongodb-client-encryption
-   ```   
+   ```
    > **Note:** if developing changes in `mongodb-client-encryption`,
    you can link it locally using `etc/tooling/fle.sh`.
 
@@ -599,7 +600,7 @@ lerna run test --scope @mongosh/service-provider-server
    npm i --no-save mongodb-client-encryption
    ```
 6. Launch a MongoDB server
-7. Run the full suite: 
+7. Run the full suite:
    ```sh
    npm run check:test
    ```
