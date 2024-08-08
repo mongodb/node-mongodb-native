@@ -8,7 +8,7 @@ import {
   pluckBSONSerializeOptions,
   type Timestamp
 } from '../../bson';
-import { MongoUnexpectedServerResponseError } from '../../error';
+import { MONGODB_ERROR_CODES, MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
 import { decorateDecryptionResult, ns } from '../../utils';
 import { type JSTypeOf, OnDemandDocument } from './on_demand/document';
@@ -103,6 +103,27 @@ export class MongoDBResponse extends OnDemandDocument {
 
   // {ok:1}
   static empty = new MongoDBResponse(new Uint8Array([13, 0, 0, 0, 16, 111, 107, 0, 1, 0, 0, 0, 0]));
+
+  /**
+   * Returns true iff:
+   * - ok is 0 and the top-level code === 50
+   * - ok is 1 and the writeErrors array contains a code === 50
+   * - ok is 1 and the writeConcern object contains a code === 50
+   */
+  get isMaxTimeExpiredError() {
+    return (
+      // {ok: 0, code: 50 ... }
+      (this.ok === 0 && this.code === MONGODB_ERROR_CODES.MaxTimeMSExpired) ||
+      // {ok: 1, writeErrors: [{code: 50 ... }]}
+      (this.ok === 1 &&
+        this.get('writeErrors', BSONType.array)?.get(0, BSONType.object)?.getNumber('code') ===
+          MONGODB_ERROR_CODES.MaxTimeMSExpired) ||
+      // {ok: 1, writeConcernError: {code: 50 ... }}
+      (this.ok === 1 &&
+        this.get('writeConcernError', BSONType.object)?.getNumber('code') ===
+          MONGODB_ERROR_CODES.MaxTimeMSExpired)
+    );
+  }
 
   /**
    * Drivers can safely assume that the `recoveryToken` field is always a BSON document but drivers MUST NOT modify the

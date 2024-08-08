@@ -15,6 +15,7 @@ import {
 } from '../constants';
 import {
   MongoCompatibilityError,
+  MONGODB_ERROR_CODES,
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
@@ -537,6 +538,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
 
         if (document.ok === 0) {
+          if (options.timeoutContext?.csotEnabled() && document.isMaxTimeExpiredError) {
+            throw new MongoOperationTimeoutError('Server reported a timeout error', {
+              cause: new MongoServerError((object ??= document.toObject(bsonOptions)))
+            });
+          }
           throw new MongoServerError((object ??= document.toObject(bsonOptions)));
         }
 
@@ -606,6 +612,25 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): Promise<Document> {
     this.throwIfAborted();
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
+      if (options.timeoutContext?.csotEnabled()) {
+        if (MongoDBResponse.is(document)) {
+          if (document.isMaxTimeExpiredError) {
+            throw new MongoOperationTimeoutError('Server reported a timeout error', {
+              cause: new MongoServerError(document.toObject())
+            });
+          }
+        } else {
+          if (
+            document?.writeErrors?.[0]?.code === MONGODB_ERROR_CODES.MaxTimeMSExpired ||
+            document?.writeConcernError?.code === MONGODB_ERROR_CODES.MaxTimeMSExpired
+          ) {
+            throw new MongoOperationTimeoutError('Server reported a timeout error', {
+              cause: new MongoServerError(document)
+            });
+          }
+        }
+      }
+
       return document;
     }
     throw new MongoUnexpectedServerResponseError('Unable to get response from server');
