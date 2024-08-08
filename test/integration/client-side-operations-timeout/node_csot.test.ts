@@ -1,11 +1,11 @@
 /* Anything javascript specific relating to timeouts */
 import { expect } from 'chai';
-import * as semver from 'semver';
 import * as sinon from 'sinon';
 
 import {
   BSON,
   type ClientSession,
+  Code,
   type Collection,
   Connection,
   type Db,
@@ -231,15 +231,56 @@ describe('CSOT driver tests', () => {
         });
       });
 
-      describe('when a maxTimeExpired error is returned inside a writeErrors array', () => {
-        // Okay so allegedly this can never happen.
-        // But the spec says it can, so let's be defensive and support it.
+      describe('when a maxTimeExpired error is returned as the first error in a writeErrors array', () => {
         // {ok: 1, writeErrors: [{code: 50, codeName: "MaxTimeMSExpired", errmsg: "operation time limit exceeded"}]}
+
+        let client;
+        let collection: Collection;
+
+        beforeEach(async function () {
+          const utilClient = this.configuration.newClient();
+          const collectionTmp = utilClient.db('test_db').collection('bulkWriteErrors');
+          await collectionTmp.drop().catch(() => null);
+          await collectionTmp.insertMany(Array.from({ length: 1000 }, () => ({})));
+          utilClient.close();
+
+          client = this.configuration.newClient({ timeoutMS: 500_000, monitorCommands: true });
+          collection = client.db('test_db').collection('bulkWriteErrors');
+        });
+
+        afterEach(async () => {
+          collection = undefined;
+          await client.close();
+        });
+
+        it('throws a MongoOperationTimeoutError error and emits command succeeded', async () => {
+          const updateOne = {
+            filter: { $where: new Code('function () { sleep(1 * 100); return true; }') },
+            update: { $inc: { x: 1 } }
+          };
+
+          const error = await collection.bulkWrite([{ updateOne }], { maxTimeMS: 4 }).catch(e => e);
+
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(error.cause).to.be.instanceOf(MongoServerError);
+          expect(error.cause).to.have.property('code', 50);
+
+          expect(commandsSucceeded).to.have.lengthOf(1);
+          expect(commandsSucceeded).to.have.nested.property('[0].reply.writeErrors[0].code', 50);
+        });
+      });
+
+      describe('when a maxTimeExpired error is returned deeper inside a writeErrors array', () => {
+        // The server should always return one maxTimeExpiredError at the front of the writeErrors array
+        // But for the sake of defensive programming we will find any maxTime error in the array.
 
         beforeEach(async () => {
           const writeErrorsReply = BSON.serialize({
             ok: 1,
             writeErrors: [
+              { code: 2, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' },
+              { code: 3, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' },
+              { code: 4, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' },
               { code: 50, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' }
             ]
           });
