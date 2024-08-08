@@ -5,7 +5,15 @@ import type {
   MongoCryptOptions
 } from 'mongodb-client-encryption';
 
-import { type Binary, deserialize, type Document, type Long, serialize, type UUID } from '../bson';
+import {
+  type Binary,
+  deserialize,
+  type Document,
+  type Int32,
+  type Long,
+  serialize,
+  type UUID
+} from '../bson';
 import { type AnyBulkWriteOperation, type BulkWriteResult } from '../bulk/common';
 import { type ProxyOptions } from '../cmap/connection';
 import { type Collection } from '../collection';
@@ -603,8 +611,6 @@ export class ClientEncryption {
    *
    * Only supported when queryType is "range" and algorithm is "Range".
    *
-   * @experimental The Range algorithm is experimental only. It is not intended for production use. It is subject to breaking changes.
-   *
    * @param expression - a BSON document of one of the following forms:
    *  1. A Match Expression of this form:
    *      `{$and: [{<field>: {$gt: <value1>}}, {<field>: {$lt: <value2> }}]}`
@@ -761,13 +767,11 @@ export interface ClientEncryptionEncryptOptions {
   contentionFactor?: bigint | number;
 
   /**
-   * The query type supported.  Only the queryType `equality` is stable.
-   *
-   * @experimental Public Technical Preview: The queryType `rangePreview` is experimental.
+   * The query type.
    */
   queryType?: 'equality' | 'range';
 
-  /** @experimental Public Technical Preview: The index options for a Queryable Encryption field supporting "rangePreview" queries.*/
+  /** The index options for a Queryable Encryption field supporting "range" queries.*/
   rangeOptions?: RangeOptions;
 }
 
@@ -955,14 +959,15 @@ export interface ClientEncryptionRewrapManyDataKeyResult {
 
 /**
  * @public
- * RangeOptions specifies index options for a Queryable Encryption field supporting "rangePreview" queries.
- * min, max, sparsity, and range must match the values set in the encryptedFields of the destination collection.
+ * RangeOptions specifies index options for a Queryable Encryption field supporting "range" queries.
+ * min, max, sparsity, trimFactor and range must match the values set in the encryptedFields of the destination collection.
  * For double and decimal128, min/max/precision must all be set, or all be unset.
  */
 export interface RangeOptions {
   min?: any;
   max?: any;
-  sparsity: Long;
+  sparsity?: Long;
+  trimFactor?: Int32;
   precision?: number;
 }
 
