@@ -13,6 +13,7 @@ const {
 
 function makeSingleBench(suite) {
   suite
+    .benchmark('emptyAsyncFunction', benchmark => benchmark.taskSize(1).task(async function () {}))
     .benchmark('runCommand', benchmark =>
       benchmark
         .taskSize(0.16)
