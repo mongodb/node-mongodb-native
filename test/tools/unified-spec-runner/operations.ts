@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { Readable } from 'node:stream';
@@ -7,16 +6,13 @@ import { pipeline } from 'node:stream/promises';
 import { AssertionError, expect } from 'chai';
 
 import {
-  AbstractCursor,
   type ChangeStream,
   Collection,
   CommandStartedEvent,
   Db,
   type Document,
-  type GridFSFile,
   type MongoClient,
   MongoError,
-  type ObjectId,
   ReadConcern,
   ReadPreference,
   SERVER_DESCRIPTION_CHANGED,
@@ -25,7 +21,7 @@ import {
   type TopologyType,
   WriteConcern
 } from '../../mongodb';
-import { getSymbolFrom, sleep } from '../../tools/utils';
+import { sleep } from '../../tools/utils';
 import { type TestConfiguration } from '../runner/config';
 import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
@@ -153,27 +149,27 @@ operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }
   expect(last.command.lsid.id.buffer.equals(secondLast.command.lsid.id.buffer)).to.be.true;
 });
 
-operations.set('assertSessionDirty', async ({ entities, operation }) => {
+operations.set('assertSessionDirty', async ({ operation }) => {
   const session = operation.arguments!.session;
   expect(session.serverSession.isDirty).to.be.true;
 });
 
-operations.set('assertSessionNotDirty', async ({ entities, operation }) => {
+operations.set('assertSessionNotDirty', async ({ operation }) => {
   const session = operation.arguments!.session;
   expect(session.serverSession.isDirty).to.be.false;
 });
 
-operations.set('assertSessionPinned', async ({ entities, operation }) => {
+operations.set('assertSessionPinned', async ({ operation }) => {
   const session = operation.arguments!.session;
   expect(session.isPinned, 'session should be pinned').to.be.true;
 });
 
-operations.set('assertSessionUnpinned', async ({ entities, operation }) => {
+operations.set('assertSessionUnpinned', async ({ operation }) => {
   const session = operation.arguments!.session;
   expect(session.isPinned, 'session should be unpinned').to.be.false;
 });
 
-operations.set('assertSessionTransactionState', async ({ entities, operation }) => {
+operations.set('assertSessionTransactionState', async ({ operation }) => {
   const session = operation.arguments!.session;
 
   const transactionStateTranslation = {
@@ -240,7 +236,7 @@ operations.set('commitTransaction', async ({ entities, operation }) => {
 
 operations.set('createChangeStream', async ({ entities, operation }) => {
   const watchable = entities.get(operation.object);
-  if (watchable == null || !('watch' in watchable)) {
+  if (watchable == null || typeof watchable !== 'object' || !('watch' in watchable)) {
     throw new AssertionError(`Entity ${operation.object} must be watchable`);
   }
 
@@ -292,7 +288,7 @@ operations.set('dropCollection', async ({ entities, operation }) => {
 
   // TODO(NODE-4243): dropCollection should suppress namespace not found errors
   try {
-    return await db.dropCollection(collection, opts);
+    await db.dropCollection(collection, opts);
   } catch (err) {
     if (!/ns not found/.test(err.message)) {
       throw err;
@@ -544,10 +540,10 @@ operations.set('upload', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
   const { filename, source, ...options } = operation.arguments ?? {};
 
-  const stream = bucket.openUploadStream(operation.arguments!.filename, options);
-  const filestream = Readable.from(Buffer.from(operation.arguments!.source.$$hexBytes, 'hex'));
+  const stream = bucket.openUploadStream(filename, options);
+  const fileStream = Readable.from(Buffer.from(source.$$hexBytes, 'hex'));
 
-  await pipeline(filestream, stream);
+  await pipeline(fileStream, stream);
   return stream.gridFSFile?._id;
 });
 
@@ -720,7 +716,7 @@ operations.set('withTransaction', async ({ entities, operation, client, testConf
 
   await session.withTransaction(async () => {
     for (const callbackOperation of operation.arguments!.callback) {
-      await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
+      await executeOperationAndCheck(callbackOperation, entities, client, testConfig, true);
     }
   }, options);
 });
@@ -935,7 +931,8 @@ export async function executeOperationAndCheck(
   operation: OperationDescription,
   entities: EntitiesMap,
   client: MongoClient,
-  testConfig: TestConfiguration
+  testConfig: TestConfiguration,
+  rethrow = false
 ): Promise<void> {
   const opFunc = operations.get(operation.name);
   expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
@@ -956,10 +953,12 @@ export async function executeOperationAndCheck(
   } catch (error) {
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);
+      if (rethrow) throw error;
       return;
     } else if (!operation.ignoreResultAndError || error instanceof MalformedOperationError) {
       throw error;
     }
+    if (rethrow) throw error;
   }
 
   // We check the positive outcome here so the try-catch above doesn't catch our chai assertions
