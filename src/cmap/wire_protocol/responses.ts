@@ -111,18 +111,31 @@ export class MongoDBResponse extends OnDemandDocument {
    * - ok is 1 and the writeConcern object contains a code === 50
    */
   get isMaxTimeExpiredError() {
-    return (
-      // {ok: 0, code: 50 ... }
-      (this.ok === 0 && this.code === MONGODB_ERROR_CODES.MaxTimeMSExpired) ||
-      // {ok: 1, writeErrors: [{code: 50 ... }]}
-      (this.ok === 1 &&
-        this.get('writeErrors', BSONType.array)?.get(0, BSONType.object)?.getNumber('code') ===
-          MONGODB_ERROR_CODES.MaxTimeMSExpired) ||
-      // {ok: 1, writeConcernError: {code: 50 ... }}
-      (this.ok === 1 &&
-        this.get('writeConcernError', BSONType.object)?.getNumber('code') ===
-          MONGODB_ERROR_CODES.MaxTimeMSExpired)
-    );
+    // {ok: 0, code: 50 ... }
+    const isTopLevel = this.ok === 0 && this.code === MONGODB_ERROR_CODES.MaxTimeMSExpired;
+    if (isTopLevel) return true;
+
+    if (this.ok === 0) return false;
+
+    // {ok: 1, writeConcernError: {code: 50 ... }}
+    const isWriteConcern =
+      this.get('writeConcernError', BSONType.object)?.getNumber('code') ===
+      MONGODB_ERROR_CODES.MaxTimeMSExpired;
+    if (isWriteConcern) return true;
+
+    const writeErrors = this.get('writeErrors', BSONType.array);
+    if (writeErrors?.size()) {
+      for (let i = 0; i < writeErrors.size(); i++) {
+        const isWriteError =
+          writeErrors.get(i, BSONType.object)?.getNumber('code') ===
+          MONGODB_ERROR_CODES.MaxTimeMSExpired;
+
+        // {ok: 1, writeErrors: [{code: 50 ... }]}
+        if (isWriteError) return true;
+      }
+    }
+
+    return false;
   }
 
   /**

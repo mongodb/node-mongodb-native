@@ -621,7 +621,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           }
         } else {
           if (
-            document?.writeErrors?.[0]?.code === MONGODB_ERROR_CODES.MaxTimeMSExpired ||
+            (Array.isArray(document?.writeErrors) &&
+              document.writeErrors.some(
+                error => error?.code === MONGODB_ERROR_CODES.MaxTimeMSExpired
+              )) ||
             document?.writeConcernError?.code === MONGODB_ERROR_CODES.MaxTimeMSExpired
           ) {
             throw new MongoOperationTimeoutError('Server reported a timeout error', {

@@ -1,11 +1,11 @@
 /* Anything javascript specific relating to timeouts */
 import { expect } from 'chai';
-import * as semver from 'semver';
 import * as sinon from 'sinon';
 
 import {
   BSON,
   type ClientSession,
+  Code,
   type Collection,
   Connection,
   type Db,
@@ -232,14 +232,16 @@ describe('CSOT driver tests', () => {
       });
 
       describe('when a maxTimeExpired error is returned inside a writeErrors array', () => {
-        // Okay so allegedly this can never happen.
-        // But the spec says it can, so let's be defensive and support it.
-        // {ok: 1, writeErrors: [{code: 50, codeName: "MaxTimeMSExpired", errmsg: "operation time limit exceeded"}]}
+        // The server should always return one maxTimeExpiredError at the front of the writeErrors array
+        // But for the sake of defensive programming we will find any maxTime error in the array.
 
         beforeEach(async () => {
           const writeErrorsReply = BSON.serialize({
             ok: 1,
             writeErrors: [
+              { code: 2, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' },
+              { code: 3, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' },
+              { code: 4, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' },
               { code: 50, codeName: 'MaxTimeMSExpired', errmsg: 'operation time limit exceeded' }
             ]
           });
@@ -268,10 +270,10 @@ describe('CSOT driver tests', () => {
             .catch(error => error);
           expect(error).to.be.instanceOf(MongoOperationTimeoutError);
           expect(error.cause).to.be.instanceOf(MongoServerError);
-          expect(error.cause).to.have.nested.property('writeErrors[0].code', 50);
+          expect(error.cause).to.have.nested.property('writeErrors[3].code', 50);
 
           expect(commandsSucceeded).to.have.lengthOf(1);
-          expect(commandsSucceeded).to.have.nested.property('[0].reply.writeErrors[0].code', 50);
+          expect(commandsSucceeded).to.have.nested.property('[0].reply.writeErrors[3].code', 50);
         });
       });
 
