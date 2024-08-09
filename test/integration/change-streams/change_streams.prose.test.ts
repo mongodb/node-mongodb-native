@@ -869,6 +869,7 @@ describe('Change Stream prose tests', function () {
         changeStream.on('change', change => {
           if (change.operationType === 'invalidate') {
             startAfter = change._id;
+            console.log('closing');
             changeStream.close(done);
           }
         });
@@ -890,7 +891,10 @@ describe('Change Stream prose tests', function () {
         const events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
-        this.defer(() => changeStream.close());
+        this.defer(() => {
+          console.log('defer');
+          changeStream.close();
+        });
 
         changeStream.once('change', change => {
           expect(change).to.containSubset({
