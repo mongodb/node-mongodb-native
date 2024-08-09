@@ -9,14 +9,14 @@ topology_description:
     type: RSPrimary
     avg_rtt_ms: 5
     lastUpdateTime: 0
-    maxWireVersion: 6
+    maxWireVersion: 21
     lastWrite: {lastWriteDate: {$numberLong: "125002"}}
   - &2
     address: b:27017
     type: RSSecondary
     avg_rtt_ms: 5
     lastUpdateTime: 0
-    maxWireVersion: 6
+    maxWireVersion: 21
     lastWrite: {lastWriteDate: {$numberLong: "2"}}  # 125 sec stale + 25 sec heartbeat <= 150 sec maxStaleness.
     tags:
       data_center: nyc
@@ -25,7 +25,7 @@ topology_description:
     type: RSSecondary
     avg_rtt_ms: 50  # Too far.
     lastUpdateTime: 1
-    maxWireVersion: 6
+    maxWireVersion: 21
     lastWrite: {lastWriteDate: {$numberLong: "1000001"}}  # Not used in estimate since we have a primary.
     tags:
       data_center: nyc
@@ -34,7 +34,7 @@ topology_description:
     type: RSSecondary
     avg_rtt_ms: 5
     lastUpdateTime: 0
-    maxWireVersion: 6
+    maxWireVersion: 21
     lastWrite: {lastWriteDate: {$numberLong: "1"}}  # Too stale.
     tags:
       data_center: nyc
@@ -43,7 +43,7 @@ topology_description:
     type: RSSecondary
     avg_rtt_ms: 5
     lastUpdateTime: 0
-    maxWireVersion: 6
+    maxWireVersion: 21
     lastWrite: {lastWriteDate: {$numberLong: "2"}}
     tags:
       data_center: tokyo  # No match.
