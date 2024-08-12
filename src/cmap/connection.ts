@@ -614,6 +614,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
       if (options.timeoutContext?.csotEnabled()) {
         if (MongoDBResponse.is(document)) {
+          // TODO(NODE-5684): test coverage to be added once cursors are enabling CSOT
           if (document.isMaxTimeExpiredError) {
             throw new MongoOperationTimeoutError('Server reported a timeout error', {
               cause: new MongoServerError(document.toObject())
