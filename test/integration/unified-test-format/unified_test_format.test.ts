@@ -19,7 +19,7 @@ describe('Unified Test Runner', () => {
       { client: { id: 'failPointClient', useMultipleMongoses: false } }
     ])
     .test(
-      TestBuilder.it('should propagation the error to the withTransaction API')
+      TestBuilder.it('should propagate the error to the withTransaction API')
         .operation({
           name: 'failPoint',
           object: 'testRunner',
