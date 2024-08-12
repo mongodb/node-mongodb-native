@@ -209,6 +209,10 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
       beforeEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command(failpoint);
+        else {
+          this.skipReason = 'Requires server version later than 4.4';
+          this.skip();
+        }
       });
 
       afterEach(async function () {
@@ -290,6 +294,10 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
       beforeEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command(failpoint);
+        else {
+          this.skipReason = 'Requires server version later than 4.4';
+          this.skip();
+        }
       });
 
       afterEach(async function () {
