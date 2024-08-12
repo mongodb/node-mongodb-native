@@ -1,11 +1,11 @@
 /* Anything javascript specific relating to timeouts */
 import { expect } from 'chai';
+import * as semver from 'semver';
 import * as sinon from 'sinon';
 
 import {
   BSON,
   type ClientSession,
-  Code,
   type Collection,
   Connection,
   type Db,
@@ -206,12 +206,14 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
         }
       };
 
-      beforeEach(async () => {
-        await client.db('admin').command(failpoint);
+      beforeEach(async function () {
+        if (semver.satisfies(this.configuration.version, '>=4.4'))
+          await client.db('admin').command(failpoint);
       });
 
-      afterEach(async () => {
-        await client.db('admin').command({ ...failpoint, mode: 'off' });
+      afterEach(async function () {
+        if (semver.satisfies(this.configuration.version, '>=4.4'))
+          await client.db('admin').command({ ...failpoint, mode: 'off' });
       });
 
       it('throws a MongoOperationTimeoutError error and emits command failed', async () => {
@@ -285,12 +287,14 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
         }
       };
 
-      beforeEach(async () => {
-        await client.db('admin').command(failpoint);
+      beforeEach(async function () {
+        if (semver.satisfies(this.configuration.version, '>=4.4'))
+          await client.db('admin').command(failpoint);
       });
 
-      afterEach(async () => {
-        await client.db('admin').command({ ...failpoint, mode: 'off' });
+      afterEach(async function () {
+        if (semver.satisfies(this.configuration.version, '>=4.4'))
+          await client.db('admin').command({ ...failpoint, mode: 'off' });
       });
 
       it('throws a MongoOperationTimeoutError error and emits command succeeded', async () => {
