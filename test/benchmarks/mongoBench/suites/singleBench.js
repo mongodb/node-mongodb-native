@@ -13,7 +13,14 @@ const {
 
 function makeSingleBench(suite) {
   suite
-    .benchmark('emptyAsyncFunction', benchmark => benchmark.taskSize(1).task(async function () {}))
+    .benchmark('returnDocument', benchmark =>
+      benchmark
+        .taskSize(1.531e-3) // One tweet is 1,531 bytes or 0.001531 MB
+        .setup(makeLoadJSON('tweet.json'))
+        .task(async function () {
+          return this.doc;
+        })
+    )
     .benchmark('runCommand', benchmark =>
       benchmark
         .taskSize(0.16)
