@@ -5,12 +5,14 @@ import { csotMin, noop } from './utils';
 
 /** @internal */
 export class TimeoutError extends Error {
+  duration: number;
   override get name(): 'TimeoutError' {
     return 'TimeoutError';
   }
 
-  constructor(message: string, options?: { cause?: Error }) {
+  constructor(message: string, options: { cause?: Error; duration: number }) {
     super(message, options);
+    this.duration = options.duration;
   }
 
   static is(error: unknown): error is TimeoutError {
@@ -52,7 +54,12 @@ export class Timeout extends Promise<never> {
   }
 
   /** Create a new timeout that expires in `duration` ms */
-  private constructor(executor: Executor = () => null, duration: number, unref = true) {
+  private constructor(
+    executor: Executor = () => null,
+    duration: number,
+    unref = true,
+    rejection: Error | null = null
+  ) {
     let reject!: Reject;
     if (duration < 0) {
       throw new MongoInvalidArgumentError('Cannot create a Timeout with a negative duration');
@@ -71,13 +78,15 @@ export class Timeout extends Promise<never> {
       this.id = setTimeout(() => {
         this.ended = Math.trunc(performance.now());
         this.timedOut = true;
-        reject(new TimeoutError(`Expired after ${duration}ms`));
+        reject(new TimeoutError(`Expired after ${duration}ms`, { duration }));
       }, this.duration);
       if (typeof this.id.unref === 'function' && unref) {
         // Ensure we do not keep the Node.js event loop running
         this.id.unref();
       }
     }
+
+    if (rejection != null) reject(rejection);
   }
 
   /**
@@ -90,7 +99,7 @@ export class Timeout extends Promise<never> {
   }
 
   throwIfExpired(): void {
-    if (this.timedOut) throw new TimeoutError('Timed out');
+    if (this.timedOut) throw new TimeoutError('Timed out', { duration: this.duration });
   }
 
   public static expires(durationMS: number, unref?: boolean): Timeout {
@@ -107,6 +116,10 @@ export class Timeout extends Promise<never> {
       // eslint-disable-next-line github/no-then
       typeof timeout.then === 'function'
     );
+  }
+
+  static override reject(rejection?: Error): Timeout {
+    return new Timeout(undefined, 0, true, rejection);
   }
 }
 
@@ -218,8 +231,8 @@ export class CSOTTimeoutContext extends TimeoutContext {
     if (typeof this._serverSelectionTimeout !== 'object' || this._serverSelectionTimeout?.cleared) {
       const { remainingTimeMS, serverSelectionTimeoutMS } = this;
       if (remainingTimeMS <= 0)
-        throw new MongoOperationTimeoutError(
-          `Timed out in server selection after ${this.timeoutMS}ms`
+        return Timeout.reject(
+          new MongoOperationTimeoutError(`Timed out in server selection after ${this.timeoutMS}ms`)
         );
       const usingServerSelectionTimeoutMS =
         serverSelectionTimeoutMS !== 0 &&
@@ -247,8 +260,10 @@ export class CSOTTimeoutContext extends TimeoutContext {
         // null or Timeout
         this._connectionCheckoutTimeout = this._serverSelectionTimeout;
       } else {
-        throw new MongoRuntimeError(
-          'Unreachable. If you are seeing this error, please file a ticket on the NODE driver project on Jira'
+        return Timeout.reject(
+          new MongoRuntimeError(
+            'Unreachable. If you are seeing this error, please file a ticket on the NODE driver project on Jira'
+          )
         );
       }
     }
@@ -259,14 +274,14 @@ export class CSOTTimeoutContext extends TimeoutContext {
     const { remainingTimeMS } = this;
     if (!Number.isFinite(remainingTimeMS)) return null;
     if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
-    throw new MongoOperationTimeoutError('Timed out before socket write');
+    return Timeout.reject(new MongoOperationTimeoutError('Timed out before socket write'));
   }
 
   get timeoutForSocketRead(): Timeout | null {
     const { remainingTimeMS } = this;
     if (!Number.isFinite(remainingTimeMS)) return null;
     if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
-    throw new MongoOperationTimeoutError('Timed out before socket read');
+    return Timeout.reject(new MongoOperationTimeoutError('Timed out before socket read'));
   }
 }
 

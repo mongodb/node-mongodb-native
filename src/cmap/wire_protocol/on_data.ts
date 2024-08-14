@@ -105,7 +105,7 @@ export function onData(
   function errorHandler(err: Error) {
     const promise = unconsumedPromises.shift();
     const timeoutError = TimeoutError.is(err)
-      ? new MongoOperationTimeoutError('Timed out during socket read')
+      ? new MongoOperationTimeoutError(`Timed out during socket read (${err.duration}ms)`)
       : undefined;
 
     if (promise != null) promise.reject(timeoutError ?? err);

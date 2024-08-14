@@ -281,9 +281,9 @@ export class ClientSession
     try {
       if (this.inTransaction()) {
         if (typeof options?.timeoutMS === 'number') {
-          await this.abortTransaction({ timeoutMS: options.timeoutMS });
+          await endTransaction(this, 'abortTransaction', { timeoutMS: options.timeoutMS });
         } else {
-          await this.abortTransaction();
+          await endTransaction(this, 'abortTransaction');
         }
       }
       if (!this.hasEnded) {
