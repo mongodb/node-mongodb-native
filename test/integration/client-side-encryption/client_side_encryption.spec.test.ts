@@ -97,6 +97,9 @@ describe('Client Side Encryption (Legacy)', function () {
     }
 
     if (isServerless) {
+      if (description === "Compact works with 'range' fields") {
+        return 'TODO(CLOUDP-267864): fix compactStructuredEncryptionData against serverless';
+      }
       // TODO(NODE-4730): Fix failing csfle tests against serverless
       const isSkippedTest = [
         'BypassQueryAnalysis decrypts',
