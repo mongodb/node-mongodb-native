@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { MongoAPIError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import { AggregateOperation, type AggregateOptions } from '../operations/aggregate';
@@ -8,7 +9,7 @@ import type { Sort } from '../sort';
 import type { MongoDBNamespace } from '../utils';
 import { mergeOptions } from '../utils';
 import type { AbstractCursorOptions, InitialCursorResponse } from './abstract_cursor';
-import { AbstractCursor } from './abstract_cursor';
+import { AbstractCursor, CursorTimeoutMode } from './abstract_cursor';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
@@ -36,6 +37,15 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
     this.pipeline = pipeline;
     this.aggregateOptions = options;
+
+    if (
+      this.cursorOptions.timeoutMS != null &&
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+      this.pipeline.filter(stage => {
+        Object.hasOwn(stage, '$out') || Object.hasOwn(stage, '$merge');
+      }).length > 0
+    )
+      throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
   }
 
   clone(): AggregationCursor<TSchema> {
@@ -93,6 +103,13 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   addStage<T = Document>(stage: Document): AggregationCursor<T>;
   addStage<T = Document>(stage: Document): AggregationCursor<T> {
     this.throwIfInitialized();
+    if (
+      this.cursorOptions.timeoutMS != null &&
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+      (Object.hasOwn(stage, '$out') || Object.hasOwn(stage, '$merge'))
+    ) {
+      throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
+    }
     this.pipeline.push(stage);
     return this as unknown as AggregationCursor<T>;
   }
