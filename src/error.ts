@@ -765,8 +765,21 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
  * @internal
  */
 export class MongoOperationTimeoutError extends MongoRuntimeError {
+  get [Symbol.toStringTag]() {
+    return 'MongoOperationTimeoutError';
+  }
+
   override get name(): string {
     return 'MongoOperationTimeoutError';
+  }
+
+  static is(error: unknown): error is MongoOperationTimeoutError {
+    return (
+      error != null &&
+      typeof error === 'object' &&
+      Symbol.toStringTag in error &&
+      error[Symbol.toStringTag] === 'MongoOperationTimeoutError'
+    );
   }
 }
 

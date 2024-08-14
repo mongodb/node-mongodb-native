@@ -1,6 +1,7 @@
 /* Specification prose tests */
 
 import { expect } from 'chai';
+import * as semver from 'semver';
 import * as sinon from 'sinon';
 
 import {
@@ -9,6 +10,7 @@ import {
   MongoServerSelectionError,
   now
 } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 // TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec prose tests', function () {
@@ -595,69 +597,192 @@ describe('CSOT spec prose tests', function () {
       'TODO(DRIVERS-2347): Requires this ticket to be implemented before we can assert on connection CSOT behaviour';
   });
 
-  context.skip('9. endSession', () => {
-    /**
-     * This test MUST only be run against replica sets and sharded clusters with server version 4.4 or higher. It MUST be
-     * run three times: once with the timeout specified via the MongoClient `timeoutMS` option, once with the timeout
-     * specified via the ClientSession `defaultTimeoutMS` option, and once more with the timeout specified via the
-     * `timeoutMS` option for the `endSession` operation. In all cases, the timeout MUST be set to 10 milliseconds.
-     *
-     * 1. Using `internalClient`, drop the `db.coll` collection.
-     * 1. Using `internalClient`, set the following fail point:
-     * ```js
-     * {
-     *     configureFailPoint: failCommand,
-     *     mode: { times: 1 },
-     *     data: {
-     *         failCommands: ["abortTransaction"],
-     *         blockConnection: true,
-     *         blockTimeMS: 15
-     *     }
-     * }
-     * ```
-     * 1. Create a new MongoClient (referred to as `client`) and an explicit ClientSession derived from that MongoClient (referred to as `session`).
-     * 1. Execute the following code:
-     * ```ts
-     *   coll = client.database("db").collection("coll")
-     *   session.start_transaction()
-     *   coll.insert_one({x: 1}, session=session)
-     * ```
-     * 1. Using `session`, execute `session.end_session`
-     *    - Expect this to fail with a timeout error after no more than 15ms.
-     */
-  });
-
-  context.skip('10. Convenient Transactions', () => {
-    /** Tests in this section MUST only run against replica sets and sharded clusters with server versions 4.4 or higher. */
-
-    context('timeoutMS is refreshed for abortTransaction if the callback fails', () => {
+  describe(
+    '9. endSession',
+    { requires: { topology: ['replicaset', 'sharded', 'load-balanced'] } },
+    () => {
       /**
+       * This test MUST only be run against replica sets and sharded clusters with server version 4.4 or higher. It MUST be
+       * run three times: once with the timeout specified via the MongoClient `timeoutMS` option, once with the timeout
+       * specified via the ClientSession `defaultTimeoutMS` option, and once more with the timeout specified via the
+       * `timeoutMS` option for the `endSession` operation. In all cases, the timeout MUST be set to 10 milliseconds.
+       *
        * 1. Using `internalClient`, drop the `db.coll` collection.
        * 1. Using `internalClient`, set the following fail point:
        * ```js
        * {
        *     configureFailPoint: failCommand,
-       *     mode: { times: 2 },
+       *     mode: { times: 1 },
        *     data: {
-       *         failCommands: ["insert", "abortTransaction"],
+       *         failCommands: ["abortTransaction"],
        *         blockConnection: true,
        *         blockTimeMS: 15
        *     }
        * }
        * ```
-       * 1. Create a new MongoClient (referred to as `client`) configured with `timeoutMS=10` and an explicit ClientSession derived from that MongoClient (referred to as `session`).
-       * 1. Using `session`, execute a `withTransaction` operation with the following callback:
-       * ```js
-       * function callback() {
+       * 1. Create a new MongoClient (referred to as `client`) and an explicit ClientSession derived from that MongoClient (referred to as `session`).
+       * 1. Execute the following code:
+       * ```ts
        *   coll = client.database("db").collection("coll")
-       *   coll.insert_one({ _id: 1 }, session=session)
-       * }
+       *   session.start_transaction()
+       *   coll.insert_one({x: 1}, session=session)
        * ```
-       * 1. Expect the previous `withTransaction` call to fail with a timeout error.
-       * 1. Verify that the following events were published during the `withTransaction` call:
-       *   1. `command_started` and `command_failed` events for an `insert` command.
-       *   1. `command_started` and `command_failed` events for an `abortTransaction` command.
+       * 1. Using `session`, execute `session.end_session`
+       *    - Expect this to fail with a timeout error after no more than 15ms.
        */
-    });
-  });
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: { failCommands: ['abortTransaction'], blockConnection: true, blockTimeMS: 15 }
+      };
+
+      beforeEach(async function () {
+        if (!semver.satisfies(this.configuration.version, '>=4.4')) {
+          this.skipReason = 'Requires server version 4.4+';
+          this.skip();
+        }
+        const internalClient = this.configuration.newClient();
+        await internalClient
+          .db('db')
+          .collection('coll')
+          .drop()
+          .catch(() => null);
+        await internalClient.db('admin').command(failpoint);
+        await internalClient.close();
+      });
+
+      let client: MongoClient;
+
+      afterEach(async () => {
+        await client?.close();
+      });
+
+      describe('when timeoutMS is provided to the client', () => {
+        it('throws a timeout error from endSession', async function () {
+          client = this.configuration.newClient({ timeoutMS: 10 });
+          const coll = client.db('db').collection('coll');
+          const session = client.startSession();
+          session.startTransaction();
+          await coll.insertOne({ x: 1 }, { session });
+          const error = await session.endSession().catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('when defaultTimeoutMS is provided to startSession', () => {
+        it('throws a timeout error from endSession', async function () {
+          client = this.configuration.newClient();
+          const coll = client.db('db').collection('coll');
+          const session = client.startSession({ defaultTimeoutMS: 10 });
+          session.startTransaction();
+          await coll.insertOne({ x: 1 }, { session });
+          const error = await session.endSession().catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('when timeoutMS is provided to endSession', () => {
+        it('throws a timeout error from endSession', async function () {
+          client = this.configuration.newClient();
+          const coll = client.db('db').collection('coll');
+          const session = client.startSession();
+          session.startTransaction();
+          await coll.insertOne({ x: 1 }, { session });
+          const error = await session.endSession({ timeoutMS: 10 }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+    }
+  );
+
+  describe(
+    '10. Convenient Transactions',
+    { requires: { topology: ['replicaset', 'sharded', 'load-balanced'] } },
+    () => {
+      /** Tests in this section MUST only run against replica sets and sharded clusters with server versions 4.4 or higher. */
+
+      describe('when an operation fails inside withTransaction callback', () => {
+        /**
+         * 1. Using `internalClient`, drop the `db.coll` collection.
+         * 1. Using `internalClient`, set the following fail point:
+         * ```js
+         * {
+         *     configureFailPoint: failCommand,
+         *     mode: { times: 2 },
+         *     data: {
+         *         failCommands: ["insert", "abortTransaction"],
+         *         blockConnection: true,
+         *         blockTimeMS: 15
+         *     }
+         * }
+         * ```
+         * 1. Create a new MongoClient (referred to as `client`) configured with `timeoutMS=10` and an explicit ClientSession derived from that MongoClient (referred to as `session`).
+         * 1. Using `session`, execute a `withTransaction` operation with the following callback:
+         * ```js
+         * function callback() {
+         *   coll = client.database("db").collection("coll")
+         *   coll.insert_one({ _id: 1 }, session=session)
+         * }
+         * ```
+         * 1. Expect the previous `withTransaction` call to fail with a timeout error.
+         * 1. Verify that the following events were published during the `withTransaction` call:
+         *   1. `command_started` and `command_failed` events for an `insert` command.
+         *   1. `command_started` and `command_failed` events for an `abortTransaction` command.
+         */
+
+        const failpoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: { times: 2 },
+          data: {
+            failCommands: ['insert', 'abortTransaction'],
+            blockConnection: true,
+            blockTimeMS: 15
+          }
+        };
+
+        beforeEach(async function () {
+          if (!semver.satisfies(this.configuration.version, '>=4.4')) {
+            this.skipReason = 'Requires server version 4.4+';
+            this.skip();
+          }
+          const internalClient = this.configuration.newClient();
+          await internalClient
+            .db('db')
+            .collection('coll')
+            .drop()
+            .catch(() => null);
+          await internalClient.db('admin').command(failpoint);
+          await internalClient.close();
+        });
+
+        let client: MongoClient;
+
+        afterEach(async () => {
+          await client?.close();
+        });
+
+        it('timeoutMS is refreshed for abortTransaction', async function () {
+          const commandsFailed = [];
+
+          client = this.configuration
+            .newClient({ timeoutMS: 10, monitorCommands: true })
+            .on('commandFailed', e => commandsFailed.push(e));
+
+          const coll = client.db('db').collection('coll');
+
+          const error = await client
+            .withSession(async session =>
+              session.withTransaction(async session => await coll.insertOne({ x: 1 }, { session }))
+            )
+            .catch(error => error);
+
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(commandsFailed.map(e => e.commandName)).to.deep.equal([
+            'insert',
+            'abortTransaction'
+          ]);
+        });
+      });
+    }
+  );
 });

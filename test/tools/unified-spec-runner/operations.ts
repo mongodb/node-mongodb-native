@@ -19,6 +19,7 @@ import {
   ServerType,
   type TopologyDescription,
   type TopologyType,
+  type TransactionOptions,
   WriteConcern
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
@@ -47,11 +48,6 @@ operations.set('createEntities', async ({ entities, operation, testConfig }) => 
     throw new AssertionError('encountered createEntities operation without entities argument');
   }
   await EntitiesMap.createEntities(testConfig, null, operation.arguments.entities!, entities);
-});
-
-operations.set('abortTransaction', async ({ entities, operation }) => {
-  const session = entities.getEntity('session', operation.object);
-  return session.abortTransaction();
 });
 
 operations.set('aggregate', async ({ entities, operation }) => {
@@ -231,7 +227,16 @@ operations.set('close', async ({ entities, operation }) => {
 
 operations.set('commitTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
-  return session.commitTransaction();
+  if (operation.arguments?.timeoutMS != null)
+    return await session.commitTransaction({ timeoutMS: operation.arguments.timeoutMS });
+  return await session.commitTransaction();
+});
+
+operations.set('abortTransaction', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.object);
+  if (operation.arguments?.timeoutMS != null)
+    return await session.abortTransaction({ timeoutMS: operation.arguments.timeoutMS });
+  return await session.abortTransaction();
 });
 
 operations.set('createChangeStream', async ({ entities, operation }) => {
@@ -361,7 +366,7 @@ operations.set('insertOne', async ({ entities, operation }) => {
   // Looping exposes the fact that we can generate _ids for inserted
   // documents and we don't want the original operation to get modified
   // and use the same _id for each insert.
-  return collection.insertOne({ ...document }, opts);
+  return await collection.insertOne({ ...document }, opts);
 });
 
 operations.set('insertMany', async ({ entities, operation }) => {
@@ -708,12 +713,16 @@ operations.set('waitForThread', async ({ entities, operation }) => {
 operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {
   const session = entities.getEntity('session', operation.object);
 
-  const options = {
+  const options: TransactionOptions = {
     readConcern: ReadConcern.fromOptions(operation.arguments),
     writeConcern: WriteConcern.fromOptions(operation.arguments),
     readPreference: ReadPreference.fromOptions(operation.arguments),
-    maxCommitTimeMS: operation.arguments!.maxCommitTimeMS
+    maxCommitTimeMS: operation.arguments?.maxCommitTimeMS
   };
+
+  if (typeof operation.arguments?.timeoutMS === 'number') {
+    options.timeoutMS = operation.arguments.timeoutMS;
+  }
 
   await session.withTransaction(async () => {
     for (const callbackOperation of operation.arguments!.callback) {
@@ -935,7 +944,7 @@ export async function executeOperationAndCheck(
   rethrow = false
 ): Promise<void> {
   const opFunc = operations.get(operation.name);
-  expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
+  if (opFunc == null) expect.fail(`Unknown operation: ${operation.name}`);
 
   if (operation.arguments && operation.arguments.session) {
     // The session could need to be either pulled from the entity map or in the case where
@@ -949,7 +958,7 @@ export async function executeOperationAndCheck(
   let result;
 
   try {
-    result = await opFunc!({ entities, operation, client, testConfig });
+    result = await opFunc({ entities, operation, client, testConfig });
   } catch (error) {
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);

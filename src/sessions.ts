@@ -16,6 +16,7 @@ import {
   MongoErrorLabel,
   MongoExpiredSessionError,
   MongoInvalidArgumentError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
@@ -29,6 +30,7 @@ import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
+import { type TimeoutContext } from './timeout';
 import {
   isTransactionCommand,
   Transaction,
@@ -101,6 +103,9 @@ export interface EndSessionOptions {
   error?: AnyError;
   force?: boolean;
   forceClear?: boolean;
+
+  /** @internal */
+  timeoutMS?: number;
 }
 
 /**
@@ -118,7 +123,7 @@ export class ClientSession
   /** @internal */
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
-  clientOptions?: MongoOptions;
+  clientOptions: MongoOptions;
   supports: { causalConsistency: boolean };
   clusterTime?: ClusterTime;
   operationTime?: Timestamp;
@@ -140,6 +145,9 @@ export class ClientSession
   /** @internal */
   timeoutMS?: number;
 
+  /** @internal */
+  public timeoutContext: TimeoutContext | null = null;
+
   /**
    * Create a client session.
    * @internal
@@ -152,7 +160,7 @@ export class ClientSession
     client: MongoClient,
     sessionPool: ServerSessionPool,
     options: ClientSessionOptions,
-    clientOptions?: MongoOptions
+    clientOptions: MongoOptions
   ) {
     super();
 
@@ -272,7 +280,11 @@ export class ClientSession
   async endSession(options?: EndSessionOptions): Promise<void> {
     try {
       if (this.inTransaction()) {
-        await this.abortTransaction();
+        if (typeof options?.timeoutMS === 'number') {
+          await this.abortTransaction({ timeoutMS: options.timeoutMS });
+        } else {
+          await this.abortTransaction();
+        }
       }
       if (!this.hasEnded) {
         const serverSession = this[kServerSession];
@@ -291,6 +303,7 @@ export class ClientSession
       }
     } catch (error) {
       // spec indicates that we should ignore all errors for `endSessions`
+      if (MongoOperationTimeoutError.is(error)) throw error;
       squashError(error);
     } finally {
       maybeClearPinnedConnection(this, { force: true, ...options });
@@ -444,6 +457,8 @@ export class ClientSession
 
   /**
    * Commits the currently active transaction in this session.
+   *
+   * @param options - Optional options, can be used to override `defaultTimeoutMS`.
    */
   async commitTransaction(): Promise<void> {
     if (this.transaction.state === TxnState.NO_TRANSACTION) {
@@ -538,6 +553,8 @@ export class ClientSession
 
   /**
    * Aborts the currently active transaction in this session.
+   *
+   * @param options - Optional options, can be used to override `defaultTimeoutMS`.
    */
   async abortTransaction(): Promise<void> {
     if (this.transaction.state === TxnState.NO_TRANSACTION) {

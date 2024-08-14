@@ -184,7 +184,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
   public minRoundTripTime = 0;
-  private start: number;
+  public start: number;
 
   constructor(options: CSOTTimeoutContextOptions) {
     super();

@@ -82,11 +82,6 @@ export async function executeOperation<
   } else if (session.client !== client) {
     throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');
   }
-  if (session.explicit && session?.timeoutMS != null && operation.options.timeoutMS != null) {
-    throw new MongoInvalidArgumentError(
-      'Do not specify timeoutMS on operation if already specified on an explicit session'
-    );
-  }
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
@@ -107,11 +102,13 @@ export async function executeOperation<
     session.unpin();
   }
 
-  timeoutContext ??= TimeoutContext.create({
-    serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
-    waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
-    timeoutMS: operation.options.timeoutMS
-  });
+  timeoutContext ??=
+    session.timeoutContext ??
+    TimeoutContext.create({
+      serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
+      waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
+      timeoutMS: operation.options.timeoutMS ?? session.timeoutMS
+    });
 
   try {
     return await tryOperation(operation, {

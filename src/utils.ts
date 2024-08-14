@@ -528,6 +528,12 @@ export function resolveOptions<T extends CommandOperationOptions>(
     result.readPreference = readPreference;
   }
 
+  if (session?.explicit && session.timeoutMS != null && options?.timeoutMS != null) {
+    throw new MongoInvalidArgumentError(
+      'Do not specify timeoutMS on operation if already specified on an explicit session'
+    );
+  }
+
   const timeoutMS = options?.timeoutMS;
 
   result.timeoutMS = timeoutMS ?? parent?.timeoutMS;
