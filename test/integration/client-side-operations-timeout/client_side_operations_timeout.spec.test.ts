@@ -8,16 +8,9 @@ const enabled = [
   'override-database-timeoutMS',
   'override-operation-timeoutMS',
   'retryability-legacy-timeouts',
-  'retryability-timeoutMS'
-];
-
-const cursorOperations = [
-  'aggregate',
-  'countDocuments',
-  'listIndexes',
-  'createChangeStream',
-  'listCollections',
-  'listCollectionNames'
+  'retryability-timeoutMS',
+  'runCursorCommand',
+  'close-cursors'
 ];
 
 const bulkWriteOperations = [
@@ -33,10 +26,6 @@ describe('CSOT spec tests', function () {
       if (!enabled.includes(spec.name)) {
         test.skipReason = 'TODO(NODE-5684): Not working yet';
       }
-
-      // Cursor operation
-      if (test.operations.find(operation => cursorOperations.includes(operation.name)))
-        test.skipReason = 'TODO(NODE-5684): Not working yet';
 
       if (bulkWriteOperations.includes(test.description))
         test.skipReason =
