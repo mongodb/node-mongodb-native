@@ -1,7 +1,7 @@
 import type { Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
+import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
 import type { Server } from '../sdam/server';
@@ -360,7 +360,9 @@ export class DropIndexOperation extends CommandOperation<Document> {
 }
 
 /** @public */
-export type ListIndexesOptions = AbstractCursorOptions;
+export type ListIndexesOptions = AbstractCursorOptions & {
+  timeoutMode?: CursorTimeoutMode;
+};
 
 /** @internal */
 export class ListIndexesOperation extends CommandOperation<CursorResponse> {

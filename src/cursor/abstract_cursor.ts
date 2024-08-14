@@ -59,6 +59,13 @@ export interface CursorStreamOptions {
 /** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
+export const CursorTimeoutMode = Object.freeze({
+  ITERATION: 'iteration',
+  LIFETIME: 'lifetime'
+} as const);
+
+export type CursorTimeoutMode = (typeof CursorTimeoutMode)[keyof typeof CursorTimeoutMode];
+
 /** @public */
 export interface AbstractCursorOptions extends BSONSerializeOptions {
   session?: ClientSession;
