@@ -3,12 +3,15 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+import { type CommandStartedEvent } from '../../../mongodb';
 import {
+  type CommandSucceededEvent,
   MongoClient,
   MongoOperationTimeoutError,
   MongoServerSelectionError,
   now
 } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 // TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec prose tests', function () {
@@ -220,6 +223,42 @@ describe('CSOT spec prose tests', function () {
      * blocking method for cursor iteration that executes `getMore` commands in a loop until a document is available or an
      * error occurs.
      */
+    const failpoint: FailPoint = {
+      configureFailPoint: 'failCommand',
+      mode: 'alwaysOn',
+      data: {
+        failCommands: ['getMore'],
+        blockConnection: true,
+        blockTimeMS: 15
+      }
+    };
+    let internalClient: MongoClient;
+    let client: MongoClient;
+    let commandStarted: CommandStartedEvent[];
+    let commandSucceeded: CommandSucceededEvent[];
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient();
+      await internalClient.db('db').dropCollection('coll');
+      await internalClient.db('db').collection('coll').insertOne({ x: 1 });
+      await internalClient.db().admin().command(failpoint);
+
+      client = this.configuration.newClient(undefined, { timeoutMS: 20 });
+      commandStarted = [];
+      commandSucceeded = [];
+
+      client.on('commandStarted', ev => commandStarted.push(ev));
+      client.on('commandSucceeded', ev => commandSucceeded.push(ev));
+    });
+
+    afterEach(async function () {
+      await internalClient
+        .db()
+        .admin()
+        .command({ ...failpoint, mode: 'off' });
+      await internalClient.close();
+      await client.close();
+    });
 
     context('Tailable cursors', () => {
       /**
@@ -246,6 +285,27 @@ describe('CSOT spec prose tests', function () {
        *    - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
+
+      it('send correct number of finds and getMores', async function () {
+        const cursor = client.db('db').collection('coll').find({}, { tailable: true });
+        const doc = await cursor.next();
+        // FIXME: Account for object id
+        expect(doc).to.deep.equal({ x: 1 });
+        // Check that there are no getMores sent
+        expect(commandStarted.filter(e => Object.hasOwn(e.command, 'getMore'))).to.have.lengthOf(0);
+
+        const maybeError = await cursor.next().then(
+          () => null,
+          e => e
+        );
+
+        expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+        expect(
+          commandStarted.filter(
+            e => Object.hasOwn(e.command, 'find') || Object.hasOwn(e.command, 'getMore')
+          )
+        ).to.have.lengthOf(3);
+      });
     });
 
     context('Change Streams', () => {
@@ -270,6 +330,20 @@ describe('CSOT spec prose tests', function () {
        *    - Expect this to fail with a timeout error.
        * 1. Verify that an `aggregate` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
+      it('sends correct number of aggregate and getMores', async function () {
+        const changeStream = client.db('db').collection('coll').watch();
+        const maybeError = await changeStream.next().then(
+          () => null,
+          e => e
+        );
+
+        expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+        expect(
+          commandStarted.filter(
+            e => Object.hasOwn(e.command, 'aggregate') || Object.hasOwn(e.command, 'getMore')
+          )
+        ).to.have.lengthOf(3);
+      });
     });
   });
 
