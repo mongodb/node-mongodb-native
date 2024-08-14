@@ -111,6 +111,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   noCursorTimeout?: boolean;
   /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
+  timeoutMode?: CursorTimeoutMode;
 }
 
 /** @internal */
@@ -189,6 +190,26 @@ export abstract class AbstractCursor<
       ...pluckBSONSerializeOptions(options)
     };
     this.cursorOptions.timeoutMS = options.timeoutMS;
+    if (this.cursorOptions.timeoutMS != null) {
+      this.cursorOptions.timeoutMode = options.timeoutMode;
+    }
+
+    if (this.cursorOptions.timeoutMS != null) {
+      if (this.cursorOptions.timeoutMode == null) {
+        if (this.cursorOptions.tailable) {
+          this.cursorOptions.timeoutMode = CursorTimeoutMode.ITERATION;
+        } else {
+          this.cursorOptions.timeoutMode = CursorTimeoutMode.LIFETIME;
+        }
+      } else {
+        if (
+          this.cursorOptions.tailable &&
+          this.cursorOptions.timeoutMode === CursorTimeoutMode.LIFETIME
+        ) {
+          throw new MongoAPIError("Cannot set tailable cursor's timeoutMode to LIFETIME");
+        }
+      }
+    }
 
     const readConcern = ReadConcern.fromOptions(options);
     if (readConcern) {
