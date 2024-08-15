@@ -9,7 +9,11 @@ import type { ReadConcernLike } from '../read_concern';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { ns } from '../utils';
-import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
+import {
+  AbstractCursor,
+  type CursorInitializeOptions,
+  type InitialCursorResponse
+} from './abstract_cursor';
 
 /** @public */
 export type RunCursorCommandOptions = {
@@ -97,15 +101,19 @@ export class RunCommandCursor extends AbstractCursor {
   }
 
   /** @internal */
-  protected async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
+  protected async _initialize(
+    session: ClientSession,
+    options?: CursorInitializeOptions
+  ): Promise<InitialCursorResponse> {
     const operation = new RunCommandOperation<CursorResponse>(this.db, this.command, {
       ...this.cursorOptions,
       session: session,
       readPreference: this.cursorOptions.readPreference,
+      omitMaxTimeMS: options?.omitMaxTimeMS,
       responseType: CursorResponse
     });
 
-    const response = await executeOperation(this.client, operation);
+    const response = await executeOperation(this.client, operation, options?.timeoutContext);
 
     return {
       server: operation.server,

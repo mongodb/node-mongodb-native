@@ -7,7 +7,11 @@ import {
   type ListCollectionsOptions
 } from '../operations/list_collections';
 import type { ClientSession } from '../sessions';
-import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
+import {
+  AbstractCursor,
+  type CursorInitializeOptions,
+  type InitialCursorResponse
+} from './abstract_cursor';
 
 /** @public */
 export class ListCollectionsCursor<
@@ -34,14 +38,18 @@ export class ListCollectionsCursor<
   }
 
   /** @internal */
-  async _initialize(session: ClientSession | undefined): Promise<InitialCursorResponse> {
+  async _initialize(
+    session: ClientSession | undefined,
+    options?: CursorInitializeOptions
+  ): Promise<InitialCursorResponse> {
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,
       ...this.options,
+      omitMaxTimeMS: options?.omitMaxTimeMS,
       session
     });
 
-    const response = await executeOperation(this.parent.client, operation);
+    const response = await executeOperation(this.parent.client, operation, options?.timeoutContext);
 
     return { server: operation.server, session, response };
   }

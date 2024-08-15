@@ -85,6 +85,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   documentsReturnedIn?: string;
   noResponse?: boolean;
   omitReadPreference?: boolean;
+  omitMaxTimeMS?: boolean;
 
   // TODO(NODE-2802): Currently the CommandOptions take a property willRetryWrite which is a hint
   // from executeOperation that the txnNum should be applied to this command.
@@ -418,7 +419,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       ...options
     };
 
-    if (options.timeoutContext?.csotEnabled()) {
+    if (!options.omitMaxTimeMS && options.timeoutContext?.csotEnabled()) {
       const { maxTimeMS } = options.timeoutContext;
       if (maxTimeMS > 0 && Number.isFinite(maxTimeMS)) cmd.maxTimeMS = maxTimeMS;
     }

@@ -106,7 +106,7 @@ export { AutoEncryptionLoggerLevel } from './client-side-encryption/auto_encrypt
 export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
-export { CURSOR_FLAGS } from './cursor/abstract_cursor';
+export { CURSOR_FLAGS, CursorInitializeOptions, CursorTimeoutMode } from './cursor/abstract_cursor';
 export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { ServerApiVersion } from './mongo_client';

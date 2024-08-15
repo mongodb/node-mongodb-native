@@ -2,7 +2,11 @@ import type { Collection } from '../collection';
 import { executeOperation } from '../operations/execute_operation';
 import { ListIndexesOperation, type ListIndexesOptions } from '../operations/indexes';
 import type { ClientSession } from '../sessions';
-import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
+import {
+  AbstractCursor,
+  type CursorInitializeOptions,
+  type InitialCursorResponse
+} from './abstract_cursor';
 
 /** @public */
 export class ListIndexesCursor extends AbstractCursor {
@@ -23,10 +27,14 @@ export class ListIndexesCursor extends AbstractCursor {
   }
 
   /** @internal */
-  async _initialize(session: ClientSession | undefined): Promise<InitialCursorResponse> {
+  async _initialize(
+    session: ClientSession | undefined,
+    options?: CursorInitializeOptions
+  ): Promise<InitialCursorResponse> {
     const operation = new ListIndexesOperation(this.parent, {
       ...this.cursorOptions,
       ...this.options,
+      omitMaxTimeMS: options?.omitMaxTimeMS,
       session
     });
 

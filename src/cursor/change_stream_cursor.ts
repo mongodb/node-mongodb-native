@@ -17,6 +17,7 @@ import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   AbstractCursor,
   type AbstractCursorOptions,
+  type CursorInitializeOptions,
   type InitialCursorResponse
 } from './abstract_cursor';
 
@@ -126,14 +127,22 @@ export class ChangeStreamCursor<
     });
   }
 
-  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
+  async _initialize(
+    session: ClientSession,
+    options?: CursorInitializeOptions
+  ): Promise<InitialCursorResponse> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
       ...this.changeStreamCursorOptions,
+      omitMaxTimeMS: options?.omitMaxTimeMS,
       session
     });
 
-    const response = await executeOperation(session.client, aggregateOperation);
+    const response = await executeOperation(
+      session.client,
+      aggregateOperation,
+      options?.timeoutContext
+    );
 
     const server = aggregateOperation.server;
     this.maxWireVersion = maxWireVersion(server);

@@ -8,7 +8,11 @@ import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
 import type { MongoDBNamespace } from '../utils';
 import { mergeOptions } from '../utils';
-import type { AbstractCursorOptions, InitialCursorResponse } from './abstract_cursor';
+import type {
+  AbstractCursorOptions,
+  CursorInitializeOptions,
+  InitialCursorResponse
+} from './abstract_cursor';
 import { AbstractCursor, CursorTimeoutMode } from './abstract_cursor';
 
 /** @public */
@@ -61,14 +65,22 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
+  async _initialize(
+    session: ClientSession,
+    options?: CursorInitializeOptions
+  ): Promise<InitialCursorResponse> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.aggregateOptions,
       ...this.cursorOptions,
+      omitMaxTimeMS: options?.omitMaxTimeMS,
       session
     });
 
-    const response = await executeOperation(this.client, aggregateOperation);
+    const response = await executeOperation(
+      this.client,
+      aggregateOperation,
+      options?.timeoutContext
+    );
 
     return { server: aggregateOperation.server, session, response };
   }

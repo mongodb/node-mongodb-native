@@ -11,7 +11,11 @@ import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
-import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
+import {
+  AbstractCursor,
+  type CursorInitializeOptions,
+  type InitialCursorResponse
+} from './abstract_cursor';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -62,14 +66,18 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
+  async _initialize(
+    session: ClientSession,
+    options?: CursorInitializeOptions
+  ): Promise<InitialCursorResponse> {
     const findOperation = new FindOperation(this.namespace, this.cursorFilter, {
       ...this.findOptions, // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
+      omitMaxTimeMS: options?.omitMaxTimeMS,
       session
     });
 
-    const response = await executeOperation(this.client, findOperation);
+    const response = await executeOperation(this.client, findOperation, options?.timeoutContext);
 
     // the response is not a cursor when `explain` is enabled
     this.numReturned = response.batchSize;
