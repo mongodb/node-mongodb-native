@@ -7,6 +7,7 @@ import {
   BSON,
   type ClientSession,
   type Collection,
+  type CommandStartedEvent,
   Connection,
   type Db,
   type FindCursor,
@@ -320,4 +321,124 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
       });
     });
   });
+
+  describe('Non-Tailable cursors', () => {
+    let client: MongoClient;
+    let internalClient: MongoClient;
+    let commandStarted: CommandStartedEvent[];
+    const failpoint: FailPoint = {
+      configureFailPoint: 'failCommand',
+      mode: 'alwaysOn',
+      data: {
+        failCommands: ['find'],
+        blockConnection: true,
+        blockTimeMS: 30
+      }
+    };
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient(undefined);
+      await internalClient.db('db').dropCollection('coll');
+      await internalClient
+        .db('db')
+        .collection('coll')
+        .insertMany(
+          Array.from({ length: 3 }, () => {
+            return { x: 1 };
+          })
+        );
+
+      await internalClient.db().admin().command(failpoint);
+
+      client = this.configuration.newClient(undefined, { timeoutMS: 20, monitorCommands: true });
+      commandStarted = [];
+      client.on('commandStarted', ev => commandStarted.push(ev));
+    });
+
+    afterEach(async function () {
+      await internalClient
+        .db()
+        .admin()
+        .command({ ...failpoint, mode: 'off' });
+      await internalClient.close();
+      await client.close();
+    });
+
+    context('ITERATION mode', () => {
+      context('when executing a valid operation', () => {
+        it('must apply the configured timeoutMS to the initial operation execution', async function () {
+          const cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { batchSize: 3, timeoutMode: 'iteration' })
+            .limit(3);
+
+          const maybeError = await cursor.next().then(
+            () => null,
+            e => e
+          );
+
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+
+        it('refreshes the timeout for any getMores', async function () {
+          const cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { batchSize: 1, timeoutMode: 'iteration' })
+            .project({ _id: 0 })
+            .limit(2);
+
+          const firstDoc = await cursor.next();
+          expect(firstDoc).to.deep.equal({ x: 1 });
+
+          const maybeError = await cursor.next().then(
+            () => null,
+            e => e
+          );
+
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+        it('does not append a maxTimeMS to the original command or getMores', async function () {
+          const cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { batchSize: 1, timeoutMode: 'iteration' })
+            .project({ _id: 0 });
+          await cursor.toArray();
+
+          expect(commandStarted).to.have.length.gte(3); // Find and 2 getMores
+          expect(
+            commandStarted.filter(ev => {
+              return (
+                ev.command.find != null &&
+                ev.command.getMore != null &&
+                ev.command.maxTimeMS != null
+              );
+            })
+          ).to.have.lengthOf(0);
+        });
+      });
+    });
+
+    context('LIFETIME mode', () => {
+      context('when executing a next call', () => {
+        context(
+          'when there are documents available from previously retrieved batch and timeout has expired',
+          () => {
+            it('returns documents without error');
+          }
+        );
+        context('when a getMore is required and the timeout has expired', () => {
+          it('throws a MongoOperationTimeoutError');
+        });
+        it('does not apply maxTimeMS to a getMore');
+      });
+    });
+  });
+
+  describe.skip('Tailable non-awaitData cursors').skipReason =
+    'TODO(NODE-6305): implement CSOT for Tailable cursors';
+  describe.skip('Tailable awaitData cursors').skipReason =
+    'TODO(NODE-6305): implement CSOT for Tailable cursors';
 });
