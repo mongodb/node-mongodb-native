@@ -218,6 +218,7 @@ export abstract class AbstractCursor<
         ) {
           throw new MongoAPIError("Cannot set tailable cursor's timeoutMode to LIFETIME");
         }
+        this.cursorOptions.timeoutMode = options.timeoutMode;
       }
     }
 

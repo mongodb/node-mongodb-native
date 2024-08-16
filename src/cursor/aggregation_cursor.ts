@@ -45,9 +45,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (
       this.cursorOptions.timeoutMS != null &&
       this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-      this.pipeline.filter(stage => {
-        Object.hasOwn(stage, '$out') || Object.hasOwn(stage, '$merge');
-      }).length > 0
+      this.pipeline.filter(s => s.$out != null || s.$merge != null).length > 0
     )
       throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
   }
