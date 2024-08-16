@@ -505,11 +505,20 @@ export class ClientSession
           await executeOperation(this.client, operation);
         } catch (retryCommitError) {
           // If the retry failed, we process that error instead of the original
+          if (shouldAddUnknownTransactionCommitResultLabel(retryCommitError)) {
+            retryCommitError.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
+          }
+
           if (shouldUnpinAfterCommitError(retryCommitError)) {
             this.unpin({ error: retryCommitError });
           }
+
           throw retryCommitError;
         }
+      }
+
+      if (shouldAddUnknownTransactionCommitResultLabel(firstCommitError)) {
+        firstCommitError.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
       }
 
       if (shouldUnpinAfterCommitError(firstCommitError)) {
@@ -580,14 +589,11 @@ export class ClientSession
         try {
           await executeOperation(this.client, operation);
         } catch (secondAbortError) {
-          if (secondAbortError instanceof MongoError) {
-            // Suppress driver/server known errors.
-            squashError(secondAbortError);
-            return;
-          }
-          throw secondAbortError; // Throw anything else (runtime, JS, unexpected conditions)
+          // we do not retry the retry
         }
       }
+
+      // The spec indicates that if the operation times out or fails with a non-retryable error, we should ignore all errors on `abortTransaction`
     } finally {
       this.transaction.transition(TxnState.TRANSACTION_ABORTED);
       if (this.loadBalanced) {
@@ -746,7 +752,6 @@ function shouldUnpinAfterCommitError(commitError: Error) {
       isMaxTimeMSExpiredError(commitError)
     ) {
       if (isUnknownTransactionCommitResult(commitError)) {
-        commitError.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
         // per txns spec, must unpin session in this case
         return true;
       }
@@ -757,7 +762,15 @@ function shouldUnpinAfterCommitError(commitError: Error) {
   return false;
 }
 
-function isUnknownTransactionCommitResult(err: MongoError) {
+function shouldAddUnknownTransactionCommitResultLabel(commitError: MongoError) {
+  let ok = isRetryableWriteError(commitError);
+  ok ||= commitError instanceof MongoWriteConcernError;
+  ok ||= isMaxTimeMSExpiredError(commitError);
+  ok &&= isUnknownTransactionCommitResult(commitError);
+  return ok;
+}
+
+function isUnknownTransactionCommitResult(err: MongoError): err is MongoError {
   const isNonDeterministicWriteConcernError =
     err instanceof MongoServerError &&
     err.codeName &&
@@ -812,14 +825,14 @@ export function maybeClearPinnedConnection(
   }
 }
 
-function isMaxTimeMSExpiredError(err: MongoError) {
+function isMaxTimeMSExpiredError(err: MongoError): boolean {
   if (err == null || !(err instanceof MongoServerError)) {
     return false;
   }
 
   return (
     err.code === MONGODB_ERROR_CODES.MaxTimeMSExpired ||
-    (err.writeConcernError && err.writeConcernError.code === MONGODB_ERROR_CODES.MaxTimeMSExpired)
+    err.writeConcernError?.code === MONGODB_ERROR_CODES.MaxTimeMSExpired
   );
 }
 
