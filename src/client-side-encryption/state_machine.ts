@@ -14,7 +14,7 @@ import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '../utils';
-import { type DataKey } from './client_encryption';
+import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders } from './providers';
@@ -115,6 +115,16 @@ export type CSFLEKMSTlsOptions = {
 };
 
 /**
+ * @public
+ *
+ * Socket options to use for KMS requests.
+ */
+export type ClientEncryptionSocketOptions = Pick<
+  MongoClientOptions,
+  'autoSelectFamily' | 'autoSelectFamilyAttemptTimeout'
+>;
+
+/**
  * This is kind of a hack.  For `rewrapManyDataKey`, we have tests that
  * guarantee that when there are no matching keys, `rewrapManyDataKey` returns
  * nothing.  We also have tests for auto encryption that guarantee for `encrypt`
@@ -153,6 +163,9 @@ export type StateMachineOptions = {
 
   /** TLS options for KMS requests, if set. */
   tlsOptions: CSFLEKMSTlsOptions;
+
+  /** Socket specific options we support. */
+  socketOptions: ClientEncryptionSocketOptions;
 } & Pick<BSONSerializeOptions, 'promoteLongs' | 'promoteValues'>;
 
 /**
@@ -289,10 +302,17 @@ export class StateMachine {
   async kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
-    const options: tls.ConnectionOptions & { host: string; port: number } = {
+    const socketOptions = autoSelectSocketOptions(this.options.socketOptions || {});
+    const options: tls.ConnectionOptions & {
+      host: string;
+      port: number;
+      autoSelectFamily?: boolean;
+      autoSelectFamilyAttemptTimeout?: number;
+    } = {
       host: parsedUrl[0],
       servername: parsedUrl[0],
-      port
+      port,
+      ...socketOptions
     };
     const message = request.message;
     const buffer = new BufferPool();
@@ -351,10 +371,12 @@ export class StateMachine {
 
     try {
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
-        netSocket.connect({
+        const netSocketOptions = {
           host: this.options.proxyOptions.proxyHost,
-          port: this.options.proxyOptions.proxyPort || 1080
-        });
+          port: this.options.proxyOptions.proxyPort || 1080,
+          ...socketOptions
+        };
+        netSocket.connect(netSocketOptions);
         await willConnect;
 
         try {

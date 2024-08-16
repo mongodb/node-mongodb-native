@@ -21,7 +21,7 @@ if (fs.existsSync(libPath)) {
   const definitionFiles = Array.from(walk(libPath)).filter(filePath => {
     return filePath.endsWith('.d.ts') || filePath.endsWith('.d.ts.map');
   });
-  for (const definitionFile of definitionFiles) {
+  for (const definitionFile of definitionFiles.filter(file => !file.endsWith('beta.d.ts'))) {
     fs.unlinkSync(definitionFile);
   }
 }

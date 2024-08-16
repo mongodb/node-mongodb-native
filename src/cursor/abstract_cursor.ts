@@ -17,6 +17,7 @@ import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
+import { type AsyncDisposable, configureResourceManagement } from '../resource_management';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type MongoDBNamespace, squashError } from '../utils';
@@ -124,9 +125,12 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-  TSchema = any,
-  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-> extends TypedEventEmitter<CursorEvents> {
+    TSchema = any,
+    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+  >
+  extends TypedEventEmitter<CursorEvents>
+  implements AsyncDisposable
+{
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -275,14 +279,25 @@ export abstract class AbstractCursor<
     return !!this.cursorClient.topology?.loadBalanced;
   }
 
+  /**
+   * @beta
+   * @experimental
+   * An alias for {@link AbstractCursor.close|AbstractCursor.close()}.
+   */
+  declare [Symbol.asyncDispose]: () => Promise<void>;
+  /** @internal */
+  async asyncDispose() {
+    await this.close();
+  }
+
   /** Returns current buffered documents length */
   bufferedCount(): number {
     return this.documents?.length ?? 0;
   }
 
   /** Returns current buffered documents */
-  readBufferedDocuments(number?: number): TSchema[] {
-    const bufferedDocs: TSchema[] = [];
+  readBufferedDocuments(number?: number): NonNullable<TSchema>[] {
+    const bufferedDocs: NonNullable<TSchema>[] = [];
     const documentsToRead = Math.min(
       number ?? this.documents?.length ?? 0,
       this.documents?.length ?? 0
@@ -297,6 +312,7 @@ export abstract class AbstractCursor<
 
     return bufferedDocs;
   }
+
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
     if (this.isClosed) {
       return;
@@ -446,6 +462,9 @@ export abstract class AbstractCursor<
     }
   }
 
+  /**
+   * Frees any client-side resources used by the cursor.
+   */
   async close(): Promise<void> {
     await this.cleanup();
   }
@@ -457,13 +476,22 @@ export abstract class AbstractCursor<
    * cursor.rewind() can be used to reset the cursor.
    */
   async toArray(): Promise<TSchema[]> {
-    const array = [];
+    const array: TSchema[] = [];
+    // at the end of the loop (since readBufferedDocuments is called) the buffer will be empty
+    // then, the 'await of' syntax will run a getMore call
     for await (const document of this) {
       array.push(document);
+      const docs = this.readBufferedDocuments();
+      if (this.transform != null) {
+        for (const doc of docs) {
+          array.push(await this.transformDocument(doc));
+        }
+      } else {
+        array.push(...docs);
+      }
     }
     return array;
   }
-
   /**
    * Add a cursor flag to the cursor
    *
@@ -804,7 +832,7 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
-  private async transformDocument(document: NonNullable<TSchema>): Promise<TSchema> {
+  private async transformDocument(document: NonNullable<TSchema>): Promise<NonNullable<TSchema>> {
     if (this.transform == null) return document;
 
     try {
@@ -916,3 +944,5 @@ class ReadableCursorStream extends Readable {
     );
   }
 }
+
+configureResourceManagement(AbstractCursor.prototype);

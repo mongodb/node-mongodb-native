@@ -34,6 +34,7 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
+import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import { readPreferenceServerSelector } from './sdam/server_selection';
@@ -104,7 +105,7 @@ export type SupportedTLSSocketOptions = Pick<
 
 /** @public */
 export type SupportedSocketOptions = Pick<
-  TcpNetConnectOpts,
+  TcpNetConnectOpts & { autoSelectFamily?: boolean; autoSelectFamilyAttemptTimeout?: number },
   (typeof LEGAL_TCP_SOCKET_OPTIONS)[number]
 >;
 
@@ -344,7 +345,7 @@ const kOptions = Symbol('options');
  * await client.insertOne({ name: 'spot', kind: 'dog' });
  * ```
  */
-export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
+export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements AsyncDisposable {
   /** @internal */
   s: MongoClientPrivate;
   /** @internal */
@@ -402,6 +403,17 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       }
     };
     this.checkForNonGenuineHosts();
+  }
+
+  /**
+   * @beta
+   * @experimental
+   * An alias for {@link MongoClient.close|MongoClient.close()}.
+   */
+  declare [Symbol.asyncDispose]: () => Promise<void>;
+  /** @internal */
+  async asyncDispose() {
+    await this.close();
   }
 
   /** @internal */
@@ -570,7 +582,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   }
 
   /**
-   * Close the client and its underlying connections
+   * Cleans up client-side resources used by the MongoCLient and .  This includes:
+   *
+   * - Closes all open, unused connections (see note).
+   * - Ends all in-use sessions with {@link ClientSession#endSession|ClientSession.endSession()}.
+   * - Ends all unused sessions server-side.
+   * - Cleans up any resources being used for auto encryption if auto encryption is enabled.
+   *
+   * @remarks Any in-progress operations are not killed and any connections used by in progress operations
+   * will be cleaned up lazily as operations finish.
    *
    * @param force - Force close, emitting no events
    */
@@ -757,6 +777,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
 }
+
+configureResourceManagement(MongoClient.prototype);
 
 /**
  * Parsed Mongo Client Options.

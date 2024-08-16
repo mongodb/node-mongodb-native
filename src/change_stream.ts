@@ -18,6 +18,7 @@ import { type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
+import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerSessionId } from './sessions';
 import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
@@ -544,9 +545,23 @@ export type ChangeStreamEvents<
  * @public
  */
 export class ChangeStream<
-  TSchema extends Document = Document,
-  TChange extends Document = ChangeStreamDocument<TSchema>
-> extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>> {
+    TSchema extends Document = Document,
+    TChange extends Document = ChangeStreamDocument<TSchema>
+  >
+  extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>>
+  implements AsyncDisposable
+{
+  /**
+   * @beta
+   * @experimental
+   * An alias for {@link ChangeStream.close|ChangeStream.close()}.
+   */
+  declare [Symbol.asyncDispose]: () => Promise<void>;
+  /** @internal */
+  async asyncDispose() {
+    await this.close();
+  }
+
   pipeline: Document[];
   /**
    * @remarks WriteConcern can still be present on the options because
@@ -765,7 +780,9 @@ export class ChangeStream<
     return this[kClosed] || this.cursor.closed;
   }
 
-  /** Close the Change Stream */
+  /**
+   * Frees the internal resources used by the change stream.
+   */
   async close(): Promise<void> {
     this[kClosed] = true;
 
@@ -986,3 +1003,5 @@ export class ChangeStream<
     }
   }
 }
+
+configureResourceManagement(ChangeStream.prototype);

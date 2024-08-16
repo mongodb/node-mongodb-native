@@ -5,6 +5,7 @@ import { Transform } from 'stream';
 import { inspect } from 'util';
 
 import {
+  AbstractCursor,
   type Collection,
   type FindCursor,
   MongoAPIError,
@@ -359,6 +360,39 @@ describe('class AbstractCursor', function () {
         const error = await cursor.next().catch(error => error);
         expect(error).to.be.instanceOf(MongoCursorExhaustedError);
       });
+    });
+  });
+
+  describe('toArray', () => {
+    let nextSpy;
+    let client: MongoClient;
+    let cursor: AbstractCursor;
+    let col: Collection;
+    const numBatches = 10;
+    const batchSize = 4;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      col = client.db().collection('test');
+      await col.deleteMany({});
+      for (let i = 0; i < numBatches; i++) {
+        await col.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }]);
+      }
+      nextSpy = sinon.spy(AbstractCursor.prototype, 'next');
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cursor.close();
+      await client.close();
+    });
+
+    it('iterates per batch not per document', async () => {
+      cursor = client.db().collection('test').find({}, { batchSize });
+      await cursor.toArray();
+      expect(nextSpy.callCount).to.equal(numBatches + 1);
+      const numDocuments = numBatches * batchSize;
+      expect(nextSpy.callCount).to.be.lessThan(numDocuments);
     });
   });
 });

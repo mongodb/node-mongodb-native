@@ -312,9 +312,33 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: ${TS_VERSION}
           TS_CHECK: CHECK_TYPES
+          TYPES_VERSION: ${TYPES_VERSION}
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
+  check resource management:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-resource-management.sh
+  check resource management feature integration:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          MONGODB_URI: ${MONGODB_URI}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-resource-management-feature-integration.sh
   compile driver:
     - command: subprocess.exec
       type: test
@@ -325,6 +349,7 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: ${TS_VERSION}
           TS_CHECK: COMPILE_DRIVER
+          TYPES_VERSION: ${TYPES_VERSION}
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
@@ -3459,7 +3484,45 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
       - func: run lint checks
-  - name: check-types-typescript-next
+  - name: run-resource-management-no-async-dispose
+    tags:
+      - resource-management
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: v16.20.2}
+            - {key: NPM_VERSION, value: '9'}
+      - func: install dependencies
+      - func: check resource management
+  - name: run-resource-management-async-dispose
+    tags:
+      - resource-management
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: latest}
+            - {key: NPM_VERSION, value: '9'}
+      - func: install dependencies
+      - func: check resource management
+  - name: test-explicit-resource-management-feature-integration
+    tags:
+      - resource-management
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: NODE_LTS_VERSION, value: latest}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: check resource management feature integration
+  - name: check-types-typescript-next-node-types-20.14.10
     tags:
       - check-types-typescript-next
       - typescript-compilation
@@ -3471,23 +3534,10 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: next}
+            - {key: TYPES_VERSION, value: 20.14.10}
       - func: install dependencies
       - func: check types
-  - name: compile-driver-typescript-current
-    tags:
-      - compile-driver-typescript-current
-      - typescript-compilation
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: current}
-      - func: install dependencies
-      - func: compile driver
-  - name: check-types-typescript-current
+  - name: check-types-typescript-current-node-types-20.14.10
     tags:
       - check-types-typescript-current
       - typescript-compilation
@@ -3499,9 +3549,40 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: current}
+            - {key: TYPES_VERSION, value: 20.14.10}
       - func: install dependencies
       - func: check types
-  - name: check-types-typescript-4.4
+  - name: check-types-typescript-next-node-types-16.x
+    tags:
+      - check-types-typescript-next
+      - typescript-compilation
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NPM_VERSION, value: '9'}
+            - {key: TS_VERSION, value: next}
+            - {key: TYPES_VERSION, value: 16.x}
+      - func: install dependencies
+      - func: check types
+  - name: check-types-typescript-current-node-types-16.x
+    tags:
+      - check-types-typescript-current
+      - typescript-compilation
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NPM_VERSION, value: '9'}
+            - {key: TS_VERSION, value: current}
+            - {key: TYPES_VERSION, value: 16.x}
+      - func: install dependencies
+      - func: check types
+  - name: check-types-typescript-4.4-node-types-18.11.9
     tags:
       - check-types-typescript-4.4
       - typescript-compilation
@@ -3513,8 +3594,24 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: '4.4'}
+            - {key: TYPES_VERSION, value: 18.11.9}
       - func: install dependencies
       - func: check types
+  - name: compile-driver-typescript-current-node-types-20.14.10
+    tags:
+      - compile-driver-typescript-current
+      - typescript-compilation
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NPM_VERSION, value: '9'}
+            - {key: TS_VERSION, value: current}
+            - {key: TYPES_VERSION, value: 20.14.10}
+      - func: install dependencies
+      - func: compile driver
   - name: download-and-merge-coverage
     tags: []
     commands:
@@ -5171,3 +5268,8 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - test_atlas_task_group_search_indexes
+  - name: resource management tests
+    display_name: resource management tests
+    run_on: rhel80-large
+    tasks:
+      - .resource-management

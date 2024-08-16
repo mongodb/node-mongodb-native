@@ -10,7 +10,8 @@
   "dtsRollup": {
     "enabled": true,
     "untrimmedFilePath": "",
-    "publicTrimmedFilePath": "<projectFolder>/<unscopedPackageName>.d.ts"
+    "publicTrimmedFilePath": "<projectFolder>/<unscopedPackageName>.d.ts",
+    "betaTrimmedFilePath": "<projectFolder>/lib/beta.d.ts"
   },
   "tsdocMetadata": {
     "enabled": false

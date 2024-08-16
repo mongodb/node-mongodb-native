@@ -271,7 +271,8 @@
     {
       // Settings for generated definition files
       "files": [
-        "mongodb.d.ts"
+        "**/*.d.ts",
+        "lib/*.d.ts"
       ],
       "parser": "@typescript-eslint/parser",
       "rules": {
