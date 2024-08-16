@@ -492,14 +492,10 @@ export class ClientSession
       bypassPinningCheck: true
     });
 
-    let commitError;
     try {
       await executeOperation(this.client, operation);
-      this.transaction.transition(TxnState.TRANSACTION_COMMITTED);
-      return; // committed.
     } catch (firstCommitError) {
-      commitError = firstCommitError;
-      if (firstCommitError instanceof MongoError && isRetryableWriteError(commitError)) {
+      if (firstCommitError instanceof MongoError && isRetryableWriteError(firstCommitError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
         // per txns spec, must unpin session in this case
@@ -507,33 +503,22 @@ export class ClientSession
 
         try {
           await executeOperation(this.client, operation);
-          this.transaction.transition(TxnState.TRANSACTION_COMMITTED);
-          return; // committed.
         } catch (retryCommitError) {
           // If the retry failed, we process that error instead of the original
-          commitError = retryCommitError;
-        }
-      }
-
-      this.transaction.transition(TxnState.TRANSACTION_COMMITTED);
-
-      if (commitError instanceof MongoError) {
-        if (
-          isRetryableWriteError(commitError) ||
-          commitError instanceof MongoWriteConcernError ||
-          isMaxTimeMSExpiredError(commitError)
-        ) {
-          if (isUnknownTransactionCommitResult(commitError)) {
-            commitError.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
-            // per txns spec, must unpin session in this case
-            this.unpin({ error: commitError });
+          if (shouldUnpinAfterCommitError(retryCommitError)) {
+            this.unpin({ error: retryCommitError });
           }
-        } else if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-          this.unpin({ error: commitError });
+          throw retryCommitError;
         }
       }
 
-      throw commitError;
+      if (shouldUnpinAfterCommitError(firstCommitError)) {
+        this.unpin({ error: firstCommitError });
+      }
+
+      throw firstCommitError;
+    } finally {
+      this.transaction.transition(TxnState.TRANSACTION_COMMITTED);
     }
   }
 
@@ -588,11 +573,6 @@ export class ClientSession
     try {
       await executeOperation(this.client, operation);
       this.unpin();
-      this.transaction.transition(TxnState.TRANSACTION_ABORTED);
-      if (this.loadBalanced) {
-        maybeClearPinnedConnection(this, { force: false });
-      }
-      return; // aborted.
     } catch (firstAbortError) {
       this.unpin();
 
@@ -602,15 +582,16 @@ export class ClientSession
         } catch (secondAbortError) {
           if (secondAbortError instanceof MongoError) {
             // Suppress driver/server known errors.
-            return squashError(secondAbortError);
+            squashError(secondAbortError);
+            return;
           }
           throw secondAbortError; // Throw anything else (runtime, JS, unexpected conditions)
-        } finally {
-          this.transaction.transition(TxnState.TRANSACTION_ABORTED);
-          if (this.loadBalanced) {
-            maybeClearPinnedConnection(this, { force: false });
-          }
         }
+      }
+    } finally {
+      this.transaction.transition(TxnState.TRANSACTION_ABORTED);
+      if (this.loadBalanced) {
+        maybeClearPinnedConnection(this, { force: false });
       }
     }
   }
@@ -685,10 +666,10 @@ export class ClientSession
           // Assume callback intentionally ended the transaction
           return result;
         }
-      } catch (error) {
-        if (!(error instanceof MongoError) || error instanceof MongoInvalidArgumentError) {
+      } catch (fnError) {
+        if (!(fnError instanceof MongoError) || fnError instanceof MongoInvalidArgumentError) {
           await this.abortTransaction();
-          throw error;
+          throw fnError;
         }
 
         if (
@@ -699,13 +680,13 @@ export class ClientSession
         }
 
         if (
-          error.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-          Date.now() - startTime < MAX_TIMEOUT
+          fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
+          now() - startTime < MAX_TIMEOUT
         ) {
           continue;
         }
 
-        throw error;
+        throw fnError;
       }
 
       while (!committed) {
@@ -717,7 +698,7 @@ export class ClientSession
            */
           await this.commitTransaction();
           committed = true;
-        } catch (error) {
+        } catch (commitError) {
           /*
            * Note: a maxTimeMS error will have the MaxTimeMSExpired
            * code (50) and can be reported as a top-level error or
@@ -726,21 +707,21 @@ export class ClientSession
            * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
            */
           if (
-            !isMaxTimeMSExpiredError(error) &&
-            error.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult) &&
+            !isMaxTimeMSExpiredError(commitError) &&
+            commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult) &&
             now() - startTime < MAX_TIMEOUT
           ) {
             continue;
           }
 
           if (
-            error.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
+            commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
             now() - startTime < MAX_TIMEOUT
           ) {
             break;
           }
 
-          throw error;
+          throw commitError;
         }
       }
     }
@@ -756,6 +737,25 @@ const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
   'UnknownReplWriteConcern',
   'UnsatisfiableWriteConcern'
 ]);
+
+function shouldUnpinAfterCommitError(commitError: Error) {
+  if (commitError instanceof MongoError) {
+    if (
+      isRetryableWriteError(commitError) ||
+      commitError instanceof MongoWriteConcernError ||
+      isMaxTimeMSExpiredError(commitError)
+    ) {
+      if (isUnknownTransactionCommitResult(commitError)) {
+        commitError.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
+        // per txns spec, must unpin session in this case
+        return true;
+      }
+    } else if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 function isUnknownTransactionCommitResult(err: MongoError) {
   const isNonDeterministicWriteConcernError =
