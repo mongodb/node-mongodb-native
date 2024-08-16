@@ -1,10 +1,11 @@
 import { expect } from 'chai';
 
 import {
-  type AggregationCursor,
+  AggregationCursor,
   CursorTimeoutMode,
   MongoAPIError,
-  MongoClient
+  MongoClient,
+  ns
 } from '../../mongodb';
 
 describe('class AggregationCursor', () => {
@@ -140,21 +141,21 @@ describe('class AggregationCursor', () => {
           .aggregate([], { timeoutMS: 100, timeoutMode: CursorTimeoutMode.ITERATION });
       });
 
-      context('when a $out stage is add with .addStage()', () => {
+      context('when a $out stage is added with .addStage()', () => {
         it('throws a MongoAPIError', function () {
           expect(() => {
             aggregationCursor.addStage({ $out: 'test' });
           }).to.throw(MongoAPIError);
         });
       });
-      context('when a $merge stage is add with .addStage()', () => {
+      context('when a $merge stage is added with .addStage()', () => {
         it('throws a MongoAPIError', function () {
           expect(() => {
             aggregationCursor.addStage({ $merge: {} });
           }).to.throw(MongoAPIError);
         });
       });
-      context('when a $out stage is add with .out()', () => {
+      context('when a $out stage is added with .out()', () => {
         it('throws a MongoAPIError', function () {
           expect(() => {
             aggregationCursor.out('test');
@@ -198,22 +199,26 @@ describe('class AggregationCursor', () => {
   describe('constructor()', () => {
     context('when CSOT is enabled', () => {
       context('when timeoutMode=ITERATION and a $out stage is provided', function () {
-        const client = new MongoClient('mongodb://iLoveJavascript', { timeoutMS: 100 });
-        expect(() => {
-          client
-            .db('test')
-            .collection('test')
-            .aggregate([{ $out: 'test' }], { timeoutMode: CursorTimeoutMode.ITERATION });
-        }).to.throw(MongoAPIError);
+        it('throws a MongoAPIError', function () {
+          expect(
+            () =>
+              new AggregationCursor(client, ns('db.coll'), [{ $out: 'test' }], {
+                timeoutMS: 100,
+                timeoutMode: 'iteration'
+              })
+          ).to.throw(MongoAPIError);
+        });
       });
       context('when timeoutMode=ITERATION and a $merge stage is provided', function () {
-        const client = new MongoClient('mongodb://iLoveJavascript', { timeoutMS: 100 });
-        expect(() => {
-          client
-            .db('test')
-            .collection('test')
-            .aggregate([{ $merge: 'test' }], { timeoutMode: CursorTimeoutMode.ITERATION });
-        }).to.throw(MongoAPIError);
+        it('throws a MongoAPIError', function () {
+          expect(
+            () =>
+              new AggregationCursor(client, ns('db.coll'), [{ $merge: 'test' }], {
+                timeoutMS: 100,
+                timeoutMode: 'iteration'
+              })
+          ).to.throw(MongoAPIError);
+        });
       });
     });
   });
