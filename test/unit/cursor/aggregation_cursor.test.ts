@@ -197,11 +197,8 @@ describe('class AggregationCursor', () => {
 
   describe('constructor()', () => {
     context('when CSOT is enabled', () => {
-      let client: MongoClient;
-      before(function () {
-        client = new MongoClient('mongodb://iLoveJavascript', { timeoutMS: 100 });
-      });
       context('when timeoutMode=ITERATION and a $out stage is provided', function () {
+        const client = new MongoClient('mongodb://iLoveJavascript', { timeoutMS: 100 });
         expect(() => {
           client
             .db('test')
@@ -210,6 +207,7 @@ describe('class AggregationCursor', () => {
         }).to.throw(MongoAPIError);
       });
       context('when timeoutMode=ITERATION and a $merge stage is provided', function () {
+        const client = new MongoClient('mongodb://iLoveJavascript', { timeoutMS: 100 });
         expect(() => {
           client
             .db('test')

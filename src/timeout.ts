@@ -174,6 +174,8 @@ export abstract class TimeoutContext {
   abstract csotEnabled(): this is CSOTTimeoutContext;
 
   abstract refresh(): void;
+
+  abstract clear(): void;
 }
 
 /** @internal */
@@ -280,6 +282,11 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this._serverSelectionTimeout?.clear();
     this._connectionCheckoutTimeout?.clear();
   }
+
+  clear(): void {
+    this._serverSelectionTimeout?.clear();
+    this._connectionCheckoutTimeout?.clear();
+  }
 }
 
 /** @internal */
@@ -320,6 +327,10 @@ export class LegacyTimeoutContext extends TimeoutContext {
   }
 
   refresh(): void {
+    return;
+  }
+
+  clear(): void {
     return;
   }
 }

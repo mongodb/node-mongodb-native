@@ -217,7 +217,7 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
-  context.skip('5. Blocking Iteration Methods', () => {
+  context('5. Blocking Iteration Methods', () => {
     /**
      * Tests in this section MUST only be run against server versions 4.4 and higher and only apply to drivers that have a
      * blocking method for cursor iteration that executes `getMore` commands in a loop until a document is available or an
@@ -229,7 +229,7 @@ describe('CSOT spec prose tests', function () {
       data: {
         failCommands: ['getMore'],
         blockConnection: true,
-        blockTimeMS: 15
+        blockTimeMS: 20
       }
     };
     let internalClient: MongoClient;
@@ -240,10 +240,11 @@ describe('CSOT spec prose tests', function () {
     beforeEach(async function () {
       internalClient = this.configuration.newClient();
       await internalClient.db('db').dropCollection('coll');
+      await internalClient.db('db').createCollection('coll', { capped: true, size: 1_000_000 });
       await internalClient.db('db').collection('coll').insertOne({ x: 1 });
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { timeoutMS: 20 });
+      client = this.configuration.newClient(undefined, { timeoutMS: 20, monitorCommands: true });
       commandStarted = [];
       commandSucceeded = [];
 
@@ -287,12 +288,16 @@ describe('CSOT spec prose tests', function () {
        */
 
       it('send correct number of finds and getMores', async function () {
-        const cursor = client.db('db').collection('coll').find({}, { tailable: true });
+        const cursor = client
+          .db('db')
+          .collection('coll')
+          .find({}, { tailable: true })
+          .project({ _id: 0 });
         const doc = await cursor.next();
         // FIXME: Account for object id
         expect(doc).to.deep.equal({ x: 1 });
         // Check that there are no getMores sent
-        expect(commandStarted.filter(e => Object.hasOwn(e.command, 'getMore'))).to.have.lengthOf(0);
+        expect(commandStarted.filter(e => e.command.getMore != null)).to.have.lengthOf(0);
 
         const maybeError = await cursor.next().then(
           () => null,
@@ -301,9 +306,7 @@ describe('CSOT spec prose tests', function () {
 
         expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
         expect(
-          commandStarted.filter(
-            e => Object.hasOwn(e.command, 'find') || Object.hasOwn(e.command, 'getMore')
-          )
+          commandStarted.filter(e => e.command.find != null || e.command.getMore != null)
         ).to.have.lengthOf(3);
       });
     });
