@@ -1,7 +1,92 @@
-const { expect } = require('chai');
-const { OpReply } = require('../../mongodb');
+import { expect } from 'chai';
+
+import { DocumentSequence, OpMsgRequest, OpReply } from '../../mongodb';
 
 describe('commands', function () {
+  describe('OpMsgRequest', function () {
+    describe('#toBin', function () {
+      /**
+       * Note that #toBin returns an array of buffers, in this case we are interested in
+       * the buffer at index 3 of the array, which is a single buffer of all the
+       * document sequence sections.
+       */
+      context('when the command has document sequences', function () {
+        context('when there is one document sequence', function () {
+          const command = {
+            test: 1,
+            field: new DocumentSequence('test', [{ test: 1 }])
+          };
+          const msg = new OpMsgRequest('admin', command, {});
+          const buffers = msg.toBin();
+
+          it('removes the document sequence fields from the command', function () {
+            expect(command).to.not.haveOwnProperty('field');
+          });
+
+          it('sets the document sequence section type to 1', function () {
+            // First byte is a one byte type.
+            expect(buffers[3][0]).to.equal(1);
+          });
+
+          it('sets the length of the document sequence', function () {
+            // Bytes starting at index 1 is a 4 byte length.
+            expect(buffers[3].readInt32LE(1)).to.equal(20);
+          });
+
+          it('sets the name of the first field to be replaced', function () {
+            // Bytes starting at index 5 is the field name.
+            expect(buffers[3].toString('utf8', 5, 10)).to.equal('field');
+          });
+        });
+
+        context('when there are multiple document sequences', function () {
+          const command = {
+            test: 1,
+            fieldOne: new DocumentSequence('test', [{ test: 1 }]),
+            fieldTwo: new DocumentSequence('test', [{ test: 1 }])
+          };
+          const msg = new OpMsgRequest('admin', command, {});
+          const buffers = msg.toBin();
+
+          it('removes the document sequence fields from the command', function () {
+            expect(command).to.not.haveOwnProperty('fieldOne');
+            expect(command).to.not.haveOwnProperty('fieldTwo');
+          });
+
+          it('sets the document sequence sections first type to 1', function () {
+            // First byte is a one byte type.
+            expect(buffers[3][0]).to.equal(1);
+          });
+
+          it('sets the length of the first document sequence', function () {
+            // Bytes starting at index 1 is a 4 byte length.
+            expect(buffers[3].readInt32LE(1)).to.equal(23);
+          });
+
+          it('sets the name of the first field to be replaced', function () {
+            // Bytes starting at index 5 is the field name.
+            expect(buffers[3].toString('utf8', 5, 13)).to.equal('fieldOne');
+          });
+
+          it('sets the document sequence sections second type to 1', function () {
+            // First byte is a one byte type.
+            expect(buffers[3][28]).to.equal(1);
+          });
+
+          it('sets the length of the second document sequence', function () {
+            // Bytes starting at index 1 is a 4 byte length.
+            expect(buffers[3].readInt32LE(29)).to.equal(23);
+          });
+
+          it('sets the name of the second field to be replaced', function () {
+            // Bytes starting at index 33 is the field name.
+            expect(buffers[3].toString('utf8', 33, 41)).to.equal('fieldTwo');
+          });
+        });
+      });
+    });
+  });
+
   describe('Response', function () {
     describe('#parse', function () {
       context('when the message body is invalid', function () {
