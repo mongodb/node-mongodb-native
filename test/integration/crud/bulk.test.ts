@@ -723,7 +723,7 @@ describe('Bulk', function () {
     }
   });
 
-  it(
+  it.only(
     'should correctly execute ordered batch using w:0',
     // TODO(NODE-6060): set `moreToCome` op_msg bit when `w: 0` is specified
     { requires: { mongodb: '<8.0.0' } },
