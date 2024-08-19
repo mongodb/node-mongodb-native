@@ -1,4 +1,4 @@
-import { type Binary, EJSON, Int32, Long } from 'bson';
+import { type Binary, EJSON, Int32, Long } from '../../mongodb';
 import { expect } from 'chai';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
