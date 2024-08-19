@@ -973,9 +973,9 @@ export interface RangeOptions {
   /** max is the minimum value for the encrypted index. Required if precision is set. */
   max?: any;
   /** sparsity may be used to tune performance. must be non-negative. When omitted, a default value is used. */
-  sparsity?: Long | bigint | number;
+  sparsity?: Long | bigint;
   /** trimFactor may be used to tune performance. must be non-negative. When omitted, a default value is used. */
-  trimFactor?: Int32 | bigint | number;
+  trimFactor?: Int32 | number;
   /* precision determines the number of significant digits after the decimal point. May only be set for double or decimal128. */
   precision?: number;
 }

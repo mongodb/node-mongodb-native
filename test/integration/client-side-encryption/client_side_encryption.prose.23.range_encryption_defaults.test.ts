@@ -1,8 +1,8 @@
-import { type Binary, EJSON, Int32, Long } from '../../mongodb';
 import { expect } from 'chai';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { type Binary, EJSON, Int32, Long } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
 const metaData: MongoDBMetadataUI = {
