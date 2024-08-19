@@ -968,10 +968,15 @@ export interface ClientEncryptionRewrapManyDataKeyResult {
  * For double and decimal128, min/max/precision must all be set, or all be unset.
  */
 export interface RangeOptions {
+  /** min is the minimum value for the encrypted index. Required if precision is set. */
   min?: any;
+  /** max is the minimum value for the encrypted index. Required if precision is set. */
   max?: any;
-  sparsity?: Long;
-  trimFactor?: Int32;
+  /** sparsity may be used to tune performance. must be non-negative. When omitted, a default value is used. */
+  sparsity?: Long | bigint | number;
+  /** trimFactor may be used to tune performance. must be non-negative. When omitted, a default value is used. */
+  trimFactor?: Int32 | bigint | number;
+  /* precision determines the number of significant digits after the decimal point. May only be set for double or decimal128. */
   precision?: number;
 }
 
