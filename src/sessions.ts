@@ -494,6 +494,7 @@ export class ClientSession
 
     try {
       await executeOperation(this.client, operation);
+      return;
     } catch (firstCommitError) {
       if (firstCommitError instanceof MongoError && isRetryableWriteError(firstCommitError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
@@ -503,6 +504,7 @@ export class ClientSession
 
         try {
           await executeOperation(this.client, operation);
+          return;
         } catch (retryCommitError) {
           // If the retry failed, we process that error instead of the original
           if (shouldAddUnknownTransactionCommitResultLabel(retryCommitError)) {
@@ -582,12 +584,14 @@ export class ClientSession
     try {
       await executeOperation(this.client, operation);
       this.unpin();
+      return;
     } catch (firstAbortError) {
       this.unpin();
 
       if (firstAbortError instanceof MongoError && isRetryableWriteError(firstAbortError)) {
         try {
           await executeOperation(this.client, operation);
+          return;
         } catch (secondAbortError) {
           // we do not retry the retry
         }
