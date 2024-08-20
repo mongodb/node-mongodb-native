@@ -11,8 +11,6 @@ import { AstrolabeTestConfiguration, TestConfiguration } from '../config';
 import { getEnvironmentalOptions } from '../../utils';
 import * as mock from '../../mongodb-mock/index';
 import { inspect } from 'util';
-import { setDefaultResultOrder } from 'dns';
-import { coerce, gte } from 'semver';
 
 import { ApiVersionFilter } from '../filters/api_version_filter';
 import { AuthFilter } from '../filters/auth_filter';
