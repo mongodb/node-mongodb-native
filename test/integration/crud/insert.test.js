@@ -1891,16 +1891,15 @@ describe('crud - insert', function () {
               expect(err).to.not.exist;
               test.ok(doc);
 
-              db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne(function (
-                err,
-                doc
-              ) {
-                expect(err).to.not.exist;
-                expect(err).to.not.exist;
-                test.ok('number', typeof doc.doc);
-                test.ok('number', typeof doc.array[0][0]);
-                client.close(done);
-              });
+              db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne(
+                function (err, doc) {
+                  expect(err).to.not.exist;
+                  expect(err).to.not.exist;
+                  test.ok('number', typeof doc.doc);
+                  test.ok('number', typeof doc.array[0][0]);
+                  client.close(done);
+                }
+              );
             }
           );
         });
@@ -1955,16 +1954,15 @@ describe('crud - insert', function () {
               expect(err).to.not.exist;
               test.ok(doc);
 
-              db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(function (
-                err,
-                doc
-              ) {
-                expect(err).to.not.exist;
-                expect(err).to.not.exist;
-                test.ok('number', typeof doc.doc);
-                test.ok('number', typeof doc.array[0][0]);
-                client.close(done);
-              });
+              db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(
+                function (err, doc) {
+                  expect(err).to.not.exist;
+                  expect(err).to.not.exist;
+                  test.ok('number', typeof doc.doc);
+                  test.ok('number', typeof doc.array[0][0]);
+                  client.close(done);
+                }
+              );
             }
           );
         });

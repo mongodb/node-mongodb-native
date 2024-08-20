@@ -89,7 +89,6 @@ export class Timeout extends Promise<never> {
       Symbol.toStringTag in timeout &&
       timeout[Symbol.toStringTag] === 'MongoDBTimeout' &&
       'then' in timeout &&
-      // eslint-disable-next-line github/no-then
       typeof timeout.then === 'function'
     );
   }

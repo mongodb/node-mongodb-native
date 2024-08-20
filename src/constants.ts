@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 export const SYSTEM_NAMESPACE_COLLECTION = 'system.namespaces';
 export const SYSTEM_INDEX_COLLECTION = 'system.indexes';
 export const SYSTEM_PROFILE_COLLECTION = 'system.profile';

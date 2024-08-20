@@ -40,7 +40,7 @@ function importMongoDBLegacy(exportsToOverride: Record<string, unknown>) {
   const mongodbLegacyIndex = fs.readFileSync(mongodbLegacyEntryPoint, {
     encoding: 'utf8'
   });
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+
   const localMongoDB = require('../src/index');
   const ctx = vm.createContext({
     module: { exports: null },

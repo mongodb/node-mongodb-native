@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 import chai = require('chai');
 
 chai.use(require('sinon-chai'));

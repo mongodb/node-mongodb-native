@@ -592,7 +592,7 @@ export class ClientSession
         try {
           await executeOperation(this.client, operation);
           return;
-        } catch (secondAbortError) {
+        } catch {
           // we do not retry the retry
         }
       }

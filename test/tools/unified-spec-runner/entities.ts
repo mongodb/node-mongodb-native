@@ -57,7 +57,7 @@ import {
 } from './unified-utils';
 
 export interface UnifiedChangeStream extends ChangeStream {
-  eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
+  eventCollector: InstanceType<(typeof import('../../tools/utils'))['EventCollector']>;
 }
 
 export class UnifiedThread {

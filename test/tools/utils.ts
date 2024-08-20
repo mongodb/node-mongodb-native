@@ -178,7 +178,7 @@ export function ejson(strings: TemplateStringsArray, ...values: any[]) {
       let stringifiedObject: string;
       try {
         stringifiedObject = EJSON.stringify(value, { relaxed: false });
-      } catch (error) {
+      } catch {
         stringifiedObject = inspect(value, {
           depth: Infinity,
           showHidden: true,
