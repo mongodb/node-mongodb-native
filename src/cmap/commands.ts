@@ -30,6 +30,8 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
+const encodeUTF8Into = BSON.BSON.onDemand.ByteUtils.encodeUTF8Into;
+
 /** @internal */
 export type WriteProtocolMessageType = OpQueryRequest | OpMsgRequest;
 
@@ -413,11 +415,9 @@ export interface OpMsgOptions {
 
 /** @internal */
 export class DocumentSequence {
-  field: string;
   documents: Document[];
 
-  constructor(field: string, documents: Document[]) {
-    this.field = field;
+  constructor(documents: Document[]) {
     this.documents = documents;
   }
 }
@@ -506,7 +506,7 @@ export class OpMsgRequest {
    */
   makeSections(buffers: Uint8Array[], document: Document): number {
     const sequencesBuffer = this.extractDocumentSequences(document);
-    const payloadTypeBuffer = Buffer.alloc(1);
+    const payloadTypeBuffer = Buffer.allocUnsafe(1);
     payloadTypeBuffer[0] = 0;
 
     const documentBuffer = this.serializeBson(document);
@@ -530,15 +530,11 @@ export class OpMsgRequest {
     for (const [key, value] of Object.entries(document)) {
       if (value instanceof DocumentSequence) {
         // Document sequences starts with type 1 at the first byte.
-        const payloadTypeBuffer = Buffer.alloc(1);
-        payloadTypeBuffer[0] = 1;
-        chunks.push(payloadTypeBuffer);
-        // Second part of the sequence is the length;
-        const lengthBuffer = Buffer.alloc(4);
-        chunks.push(lengthBuffer);
-        // Third part is the field name.
-        const fieldBuffer = Buffer.from(key);
-        chunks.push(fieldBuffer);
+        const buffer = Buffer.allocUnsafe(1 + 4 + key.length);
+        buffer[0] = 1;
+        // Third part is the field name at offset 5.
+        encodeUTF8Into(buffer, key, 5);
+        chunks.push(buffer);
         // Fourth part are the documents' bytes.
         let docsLength = 0;
         for (const doc of value.documents) {
@@ -546,7 +542,8 @@ export class OpMsgRequest {
           docsLength += docBson.length;
           chunks.push(docBson);
         }
-        lengthBuffer.writeInt32LE(fieldBuffer.length + docsLength);
+        // Second part of the sequence is the length at offset 1;
+        buffer.writeInt32LE(key.length + docsLength, 1);
         // Why are we removing the field from the command? This is because it needs to be
         // removed in the OP_MSG request first section, and DocumentSequence is not a
         // BSON type and is specific to the MongoDB wire protocol so there's nothing
@@ -560,6 +557,8 @@ export class OpMsgRequest {
     if (chunks.length > 0) {
       return Buffer.concat(chunks);
     }
+    // If we have no document sequences we return an empty buffer for nothing to add
+    // to the payload.
     return Buffer.alloc(0);
   }
 

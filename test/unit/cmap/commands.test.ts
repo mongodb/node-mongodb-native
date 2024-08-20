@@ -1,3 +1,4 @@
+import * as BSON from 'bson';
 import { expect } from 'chai';
 
 import { DocumentSequence, OpMsgRequest, OpReply } from '../../mongodb';
@@ -14,10 +15,20 @@ describe('commands', function () {
         context('when there is one document sequence', function () {
           const command = {
             test: 1,
-            field: new DocumentSequence('test', [{ test: 1 }])
+            field: new DocumentSequence([{ test: 1 }])
           };
           const msg = new OpMsgRequest('admin', command, {});
           const buffers = msg.toBin();
+
+          it('keeps the first section as type 0', function () {
+            // The type byte for the first section is at index 1.
+            expect(buffers[1][0]).to.equal(0);
+          });
+
+          it('does not serialize the document sequences in the first section', function () {
+            // Buffer at index 2 is the type 0 section - one document.
+            expect(BSON.deserialize(buffers[2])).to.deep.equal({ test: 1, $db: 'admin' });
+          });
 
           it('removes the document sequence fields from the command', function () {
             expect(command).to.not.haveOwnProperty('field');
@@ -42,11 +53,21 @@ describe('commands', function () {
         context('when there are multiple document sequences', function () {
           const command = {
             test: 1,
-            fieldOne: new DocumentSequence('test', [{ test: 1 }]),
-            fieldTwo: new DocumentSequence('test', [{ test: 1 }])
+            fieldOne: new DocumentSequence([{ test: 1 }]),
+            fieldTwo: new DocumentSequence([{ test: 1 }])
           };
           const msg = new OpMsgRequest('admin', command, {});
           const buffers = msg.toBin();
+
+          it('keeps the first section as type 0', function () {
+            // The type byte for the first section is at index 1.
+            expect(buffers[1][0]).to.equal(0);
+          });
+
+          it('does not serialize the document sequences in the first section', function () {
+            // Buffer at index 2 is the type 0 section - one document.
+            expect(BSON.deserialize(buffers[2])).to.deep.equal({ test: 1, $db: 'admin' });
+          });
 
           it('removes the document sequence fields from the command', function () {
             expect(command).to.not.haveOwnProperty('fieldOne');
