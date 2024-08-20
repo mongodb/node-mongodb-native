@@ -74,7 +74,7 @@ export class Timeout extends Promise<never> {
     this.duration = duration;
     this.start = Math.trunc(performance.now());
 
-    if (this.duration > 0) {
+    if (rejection == null && this.duration > 0) {
       this.id = setTimeout(() => {
         this.ended = Math.trunc(performance.now());
         this.timedOut = true;
@@ -84,9 +84,11 @@ export class Timeout extends Promise<never> {
         // Ensure we do not keep the Node.js event loop running
         this.id.unref();
       }
+    } else if (rejection != null) {
+      this.ended = Math.trunc(performance.now());
+      this.timedOut = true;
+      reject(rejection);
     }
-
-    if (rejection != null) reject(rejection);
   }
 
   /**
@@ -260,10 +262,8 @@ export class CSOTTimeoutContext extends TimeoutContext {
         // null or Timeout
         this._connectionCheckoutTimeout = this._serverSelectionTimeout;
       } else {
-        return Timeout.reject(
-          new MongoRuntimeError(
-            'Unreachable. If you are seeing this error, please file a ticket on the NODE driver project on Jira'
-          )
+        throw new MongoRuntimeError(
+          'Unreachable. If you are seeing this error, please file a ticket on the NODE driver project on Jira'
         );
       }
     }

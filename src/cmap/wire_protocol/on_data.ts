@@ -1,7 +1,6 @@
 import { type EventEmitter } from 'events';
 
-import { MongoOperationTimeoutError } from '../../error';
-import { type TimeoutContext, TimeoutError } from '../../timeout';
+import { type TimeoutContext } from '../../timeout';
 import { List, promiseWithResolvers } from '../../utils';
 
 /**
@@ -91,8 +90,11 @@ export function onData(
   // Adding event handlers
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
+
+  const timeoutForSocketRead = timeoutContext?.timeoutForSocketRead;
+  timeoutForSocketRead?.throwIfExpired();
   // eslint-disable-next-line github/no-then
-  timeoutContext?.timeoutForSocketRead?.then(undefined, errorHandler);
+  timeoutForSocketRead?.then(undefined, errorHandler);
 
   return iterator;
 
@@ -104,12 +106,9 @@ export function onData(
 
   function errorHandler(err: Error) {
     const promise = unconsumedPromises.shift();
-    const timeoutError = TimeoutError.is(err)
-      ? new MongoOperationTimeoutError(`Timed out during socket read (${err.duration}ms)`)
-      : undefined;
 
-    if (promise != null) promise.reject(timeoutError ?? err);
-    else error = timeoutError ?? err;
+    if (promise != null) promise.reject(err);
+    else error = err;
     void closeHandler();
   }
 
