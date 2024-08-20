@@ -1,8 +1,11 @@
 /* Anything javascript specific relating to timeouts */
+import { setTimeout } from 'node:timers/promises';
+
 import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
 
+import { type CommandSucceededEvent } from '../../../lib/cmap/command_monitoring_events';
 import {
   BSON,
   type ClientSession,
@@ -326,13 +329,14 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
     let client: MongoClient;
     let internalClient: MongoClient;
     let commandStarted: CommandStartedEvent[];
+    let commandSucceeded: CommandSucceededEvent[];
     const failpoint: FailPoint = {
       configureFailPoint: 'failCommand',
       mode: 'alwaysOn',
       data: {
-        failCommands: ['find'],
+        failCommands: ['find', 'getMore'],
         blockConnection: true,
-        blockTimeMS: 30
+        blockTimeMS: 25
       }
     };
 
@@ -350,9 +354,11 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
 
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { timeoutMS: 20, monitorCommands: true });
+      client = this.configuration.newClient(undefined, { monitorCommands: true });
       commandStarted = [];
+      commandSucceeded = [];
       client.on('commandStarted', ev => commandStarted.push(ev));
+      client.on('commandSucceeded', ev => commandSucceeded.push(ev));
     });
 
     afterEach(async function () {
@@ -365,12 +371,12 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
     });
 
     context('ITERATION mode', () => {
-      context('when executing a valid operation', () => {
+      context('when executing an operation', () => {
         it('must apply the configured timeoutMS to the initial operation execution', async function () {
           const cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { batchSize: 3, timeoutMode: 'iteration' })
+            .find({}, { batchSize: 3, timeoutMode: 'iteration', timeoutMS: 10 })
             .limit(3);
 
           const maybeError = await cursor.next().then(
@@ -385,25 +391,26 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
           const cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { batchSize: 1, timeoutMode: 'iteration' })
-            .project({ _id: 0 })
-            .limit(2);
+            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 50 })
+            .project({ _id: 0 });
 
-          const firstDoc = await cursor.next();
-          expect(firstDoc).to.deep.equal({ x: 1 });
+          // Iterating over 3 documents in the collection, each artificially taking ~25 ms due to failpoint. If timeoutMS is not refreshed, then we'd expect to error
+          for await (const doc of cursor) {
+            expect(doc).to.deep.equal({ x: 1 });
+          }
 
-          const maybeError = await cursor.next().then(
-            () => null,
-            e => e
-          );
+          const finds = commandSucceeded.filter(ev => ev.commandName === 'find');
+          const getMores = commandSucceeded.filter(ev => ev.commandName === 'getMore');
 
-          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(finds).to.have.length(1); // Expecting 1 find
+          expect(getMores).to.have.length(3); // Expecting 3 getMores (including final empty getMore)
         });
+
         it('does not append a maxTimeMS to the original command or getMores', async function () {
           const cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { batchSize: 1, timeoutMode: 'iteration' })
+            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 100 })
             .project({ _id: 0 });
           await cursor.toArray();
 
@@ -422,17 +429,116 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
     });
 
     context('LIFETIME mode', () => {
+      let client: MongoClient;
+      let internalClient: MongoClient;
+      let commandStarted: CommandStartedEvent[];
+      let commandSucceeded: CommandSucceededEvent[];
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: 'alwaysOn',
+        data: {
+          failCommands: ['find', 'getMore'],
+          blockConnection: true,
+          blockTimeMS: 25
+        }
+      };
+
+      beforeEach(async function () {
+        internalClient = this.configuration.newClient(undefined);
+        await internalClient.db('db').dropCollection('coll');
+        await internalClient
+          .db('db')
+          .collection('coll')
+          .insertMany(
+            Array.from({ length: 3 }, () => {
+              return { x: 1 };
+            })
+          );
+
+        await internalClient.db().admin().command(failpoint);
+
+        client = this.configuration.newClient(undefined, { monitorCommands: true });
+        commandStarted = [];
+        commandSucceeded = [];
+        client.on('commandStarted', ev => commandStarted.push(ev));
+        client.on('commandSucceeded', ev => commandSucceeded.push(ev));
+      });
+
+      afterEach(async function () {
+        await internalClient
+          .db()
+          .admin()
+          .command({ ...failpoint, mode: 'off' });
+        await internalClient.close();
+        await client.close();
+      });
       context('when executing a next call', () => {
         context(
           'when there are documents available from previously retrieved batch and timeout has expired',
           () => {
-            it('returns documents without error');
+            it('returns documents without error', async function () {
+              const cursor = client
+                .db('db')
+                .collection('coll')
+                .find({}, { timeoutMode: 'cursorLifetime', timeoutMS: 50 })
+                .project({ _id: 0 });
+              const doc = await cursor.next();
+              expect(doc).to.deep.equal({ x: 1 });
+              expect(cursor.documents.length).to.be.gt(0);
+
+              await setTimeout(50);
+
+              const docOrErr = await cursor.next().then(
+                d => d,
+                e => e
+              );
+
+              expect(docOrErr).to.not.be.instanceOf(MongoOperationTimeoutError);
+              expect(docOrErr).to.be.deep.equal({ x: 1 });
+            });
           }
         );
         context('when a getMore is required and the timeout has expired', () => {
-          it('throws a MongoOperationTimeoutError');
+          it('throws a MongoOperationTimeoutError', async function () {
+            const cursor = client
+              .db('db')
+              .collection('coll')
+              .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 50 })
+              .project({ _id: 0 });
+            const doc = await cursor.next();
+            expect(doc).to.deep.equal({ x: 1 });
+            expect(cursor.documents.length).to.equal(0);
+
+            await setTimeout(50);
+
+            const docOrErr = await cursor.next().then(
+              d => d,
+              e => e
+            );
+
+            expect(docOrErr).to.be.instanceOf(MongoOperationTimeoutError);
+          });
         });
-        it('does not apply maxTimeMS to a getMore');
+
+        it('does not apply maxTimeMS to a getMore', async function () {
+          const cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 1000 })
+            .project({ _id: 0 });
+          for await (const _doc of cursor) {
+            // Ignore _doc
+          }
+
+          const getMores = commandStarted
+            .filter(ev => ev.command.getMore != null)
+            .map(ev => ev.command);
+          expect(getMores.length).to.be.gt(0);
+
+          for (const getMore of getMores) {
+            expect(getMore.maxTimeMS).to.not.exist;
+          }
+        });
       });
     });
   });
