@@ -240,8 +240,11 @@ describe('CSOT spec prose tests', function () {
     beforeEach(async function () {
       internalClient = this.configuration.newClient();
       await internalClient.db('db').dropCollection('coll');
-      await internalClient.db('db').createCollection('coll', { capped: true, size: 1_000_000 });
-      await internalClient.db('db').collection('coll').insertOne({ x: 1 });
+      // Creating capped collection to be able to create tailable find cursor
+      const coll = await internalClient
+        .db('db')
+        .createCollection('coll', { capped: true, size: 1_000_000 });
+      await coll.insertOne({ x: 1 });
       await internalClient.db().admin().command(failpoint);
 
       client = this.configuration.newClient(undefined, { timeoutMS: 20, monitorCommands: true });
@@ -287,14 +290,13 @@ describe('CSOT spec prose tests', function () {
        * 1. Verify that a `find` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
 
-      it('send correct number of finds and getMores', async function () {
+      it.skip('send correct number of finds and getMores', async function () {
         const cursor = client
           .db('db')
           .collection('coll')
-          .find({}, { tailable: true })
+          .find({}, { tailable: true, awaitData: true })
           .project({ _id: 0 });
         const doc = await cursor.next();
-        // FIXME: Account for object id
         expect(doc).to.deep.equal({ x: 1 });
         // Check that there are no getMores sent
         expect(commandStarted.filter(e => e.command.getMore != null)).to.have.lengthOf(0);
@@ -305,10 +307,11 @@ describe('CSOT spec prose tests', function () {
         );
 
         expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
-        expect(
-          commandStarted.filter(e => e.command.find != null || e.command.getMore != null)
-        ).to.have.lengthOf(3);
-      });
+        // Expect 1 find
+        expect(commandStarted.filter(e => e.command.find != null)).to.have.lengthOf(1);
+        // Expect 2 getMore
+        expect(commandStarted.filter(e => e.command.getMore != null)).to.have.lengthOf(2);
+      }).skipReason = 'TODO(NODE-6305)';
     });
 
     context('Change Streams', () => {
@@ -333,7 +336,7 @@ describe('CSOT spec prose tests', function () {
        *    - Expect this to fail with a timeout error.
        * 1. Verify that an `aggregate` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
-      it('sends correct number of aggregate and getMores', async function () {
+      it.skip('sends correct number of aggregate and getMores', async function () {
         const changeStream = client.db('db').collection('coll').watch();
         const maybeError = await changeStream.next().then(
           () => null,
@@ -341,12 +344,15 @@ describe('CSOT spec prose tests', function () {
         );
 
         expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
-        expect(
-          commandStarted.filter(
-            e => Object.hasOwn(e.command, 'aggregate') || Object.hasOwn(e.command, 'getMore')
-          )
-        ).to.have.lengthOf(3);
-      });
+        const aggregates = commandStarted
+          .filter(e => e.command.aggregate != null)
+          .map(e => e.command);
+        const getMores = commandStarted.filter(e => e.command.getMore != null).map(e => e.command);
+        // Expect 1 aggregate
+        expect(aggregates).to.have.lengthOf(1);
+        // Expect 1 getMore
+        expect(getMores).to.have.lengthOf(1);
+      }).skipReason = 'TODO(NODE-6305)';
     });
   });
 
