@@ -428,12 +428,18 @@ export abstract class AbstractCursor<
       return false;
     }
 
-    do {
-      if ((this.documents?.length ?? 0) !== 0) {
-        return true;
+    try {
+      do {
+        if ((this.documents?.length ?? 0) !== 0) {
+          return true;
+        }
+        await this.fetchBatch();
+      } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
+    } finally {
+      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+        this.timeoutContext?.refresh();
       }
-      await this.fetchBatch();
-    } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
+    }
 
     return false;
   }
@@ -444,18 +450,20 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION) {
-      this.timeoutContext?.refresh();
-    }
-
-    do {
-      const doc = this.documents?.shift(this.cursorOptions);
-      if (doc != null) {
-        if (this.transform != null) return await this.transformDocument(doc);
-        return doc;
+    try {
+      do {
+        const doc = this.documents?.shift(this.cursorOptions);
+        if (doc != null) {
+          if (this.transform != null) return await this.transformDocument(doc);
+          return doc;
+        }
+        await this.fetchBatch();
+      } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
+    } finally {
+      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+        this.timeoutContext?.refresh();
       }
-      await this.fetchBatch();
-    } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
+    }
 
     return null;
   }
@@ -468,18 +476,24 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    let doc = this.documents?.shift(this.cursorOptions);
-    if (doc != null) {
-      if (this.transform != null) return await this.transformDocument(doc);
-      return doc;
-    }
+    try {
+      let doc = this.documents?.shift(this.cursorOptions);
+      if (doc != null) {
+        if (this.transform != null) return await this.transformDocument(doc);
+        return doc;
+      }
 
-    await this.fetchBatch();
+      await this.fetchBatch();
 
-    doc = this.documents?.shift(this.cursorOptions);
-    if (doc != null) {
-      if (this.transform != null) return await this.transformDocument(doc);
-      return doc;
+      doc = this.documents?.shift(this.cursorOptions);
+      if (doc != null) {
+        if (this.transform != null) return await this.transformDocument(doc);
+        return doc;
+      }
+    } finally {
+      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+        this.timeoutContext?.refresh();
+      }
     }
 
     return null;

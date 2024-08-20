@@ -268,28 +268,26 @@ export class CSOTTimeoutContext extends TimeoutContext {
     const { remainingTimeMS } = this;
     if (!Number.isFinite(remainingTimeMS)) return null;
     if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
-    throw new MongoOperationTimeoutError('Timed out before socket write');
+    throw new MongoOperationTimeoutError(`Timed out before socket write after ${this.timeoutMS}ms`);
   }
 
   get timeoutForSocketRead(): Timeout | null {
     const { remainingTimeMS } = this;
     if (!Number.isFinite(remainingTimeMS)) return null;
     if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
-    throw new MongoOperationTimeoutError('Timed out before socket read');
+    throw new MongoOperationTimeoutError(`Timed out before socket read after ${this.timeoutMS}ms`);
   }
 
   refresh(): void {
     this.start = Math.trunc(performance.now());
     this.minRoundTripTime = 0;
     this._serverSelectionTimeout?.clear();
-    this._serverSelectionTimeout = undefined;
-    this._connectionCheckoutTimeout = undefined;
+    this._connectionCheckoutTimeout?.clear();
   }
 
   clear(): void {
     this._serverSelectionTimeout?.clear();
-    this._serverSelectionTimeout = undefined;
-    this._connectionCheckoutTimeout = undefined;
+    this._connectionCheckoutTimeout?.clear();
   }
 }
 
