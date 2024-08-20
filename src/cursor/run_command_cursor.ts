@@ -12,6 +12,7 @@ import { ns } from '../utils';
 import {
   AbstractCursor,
   type CursorInitializeOptions,
+  type CursorTimeoutMode,
   type InitialCursorResponse
 } from './abstract_cursor';
 
@@ -19,6 +20,8 @@ import {
 export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
+  timeoutMS?: number;
+  timeoutMode?: CursorTimeoutMode;
 } & BSONSerializeOptions;
 
 /** @public */
@@ -131,6 +134,6 @@ export class RunCommandCursor extends AbstractCursor {
       ...this.getMoreOptions
     });
 
-    return await executeOperation(this.client, getMoreOperation);
+    return await executeOperation(this.client, getMoreOperation, this.timeoutContext);
   }
 }

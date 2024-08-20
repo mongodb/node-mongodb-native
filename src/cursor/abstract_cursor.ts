@@ -63,7 +63,7 @@ export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 /** @internal */
 export const CursorTimeoutMode = Object.freeze({
   ITERATION: 'iteration',
-  LIFETIME: 'lifetime'
+  LIFETIME: 'cursorLifetime'
 } as const);
 
 /** @internal
@@ -206,20 +206,20 @@ export abstract class AbstractCursor<
     this.cursorOptions.timeoutMS = options.timeoutMS;
     if (this.cursorOptions.timeoutMS != null) {
       if (options.timeoutMode == null) {
-        if (this.cursorOptions.tailable) {
+        if (options.tailable) {
           this.cursorOptions.timeoutMode = CursorTimeoutMode.ITERATION;
         } else {
           this.cursorOptions.timeoutMode = CursorTimeoutMode.LIFETIME;
         }
       } else {
-        if (
-          this.cursorOptions.tailable &&
-          this.cursorOptions.timeoutMode === CursorTimeoutMode.LIFETIME
-        ) {
+        if (options.tailable && this.cursorOptions.timeoutMode === CursorTimeoutMode.LIFETIME) {
           throw new MongoAPIError("Cannot set tailable cursor's timeoutMode to LIFETIME");
         }
         this.cursorOptions.timeoutMode = options.timeoutMode;
       }
+    } else {
+      if (options.timeoutMode != null)
+        throw new MongoAPIError('Cannot set timeoutMode without setting timeoutMS');
     }
 
     const readConcern = ReadConcern.fromOptions(options);
@@ -444,19 +444,22 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    do {
-      const doc = this.documents?.shift(this.cursorOptions);
-      if (doc != null) {
-        if (this.transform != null) return await this.transformDocument(doc);
-        return doc;
-      }
-      await this.fetchBatch();
-    } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
+    try {
+      do {
+        const doc = this.documents?.shift(this.cursorOptions);
+        if (doc != null) {
+          if (this.transform != null) return await this.transformDocument(doc);
+          return doc;
+        }
+        await this.fetchBatch();
+      } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
 
-    if (this.cursorOptions.timeoutMode === 'iteration') {
-      this.timeoutContext?.refresh();
+      return null;
+    } finally {
+      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION) {
+        this.timeoutContext?.refresh();
+      }
     }
-    return null;
   }
 
   /**
@@ -689,6 +692,8 @@ export abstract class AbstractCursor<
 
     this.cursorId = null;
     this.documents?.clear();
+    this.timeoutContext?.clear();
+    this.timeoutContext = undefined;
     this.isClosed = false;
     this.isKilled = false;
     this.initialized = false;
@@ -761,7 +766,8 @@ export abstract class AbstractCursor<
     }
     const omitMaxTimeMS =
       this.cursorOptions.timeoutMS != null &&
-      ((this.cursorOptions.timeoutMode === 'iteration' && !this.cursorOptions.tailable) ||
+      ((this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+        !this.cursorOptions.tailable) ||
         (this.cursorOptions.tailable && !this.cursorOptions.awaitData));
     try {
       const state = await this._initialize(this.cursorSession, {

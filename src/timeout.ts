@@ -209,6 +209,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
   }
 
   get maxTimeMS(): number {
+    console.log(this.remainingTimeMS, this.minRoundTripTime);
     return this.remainingTimeMS - this.minRoundTripTime;
   }
 
@@ -279,6 +280,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
   refresh(): void {
     this.start = Math.trunc(performance.now());
+    this.minRoundTripTime = 0;
     this._serverSelectionTimeout?.clear();
     this._connectionCheckoutTimeout?.clear();
   }
