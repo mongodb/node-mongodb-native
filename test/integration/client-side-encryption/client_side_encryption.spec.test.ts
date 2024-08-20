@@ -2,7 +2,6 @@ import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
 import { ClientSideEncryptionFilter } from '../../tools/runner/filters/client_encryption_filter';
-import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import {
   gatherTestSuites,
   generateTopologyTests,
@@ -70,8 +69,6 @@ describe('Client Side Encryption (Legacy)', function () {
     testContext
   );
 
-  installNodeDNSWorkaroundHooks();
-
   after(() => testContext.teardown());
 
   before(function () {
@@ -124,8 +121,6 @@ describe('Client Side Encryption (Legacy)', function () {
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  installNodeDNSWorkaroundHooks();
-
   before(async function () {
     await filter.initializeFilter({} as any, {});
   });

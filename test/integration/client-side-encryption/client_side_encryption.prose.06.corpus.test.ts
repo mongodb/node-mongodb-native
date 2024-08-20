@@ -8,7 +8,6 @@ import * as path from 'path';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { type MongoClient, WriteConcern } from '../../mongodb';
-import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 describe('Client Side Encryption Prose Corpus Test', function () {
@@ -145,8 +144,6 @@ describe('Client Side Encryption Prose Corpus Test', function () {
       throw new Error('Unexpected value for allowed: ' + expected.allowed);
     }
   }
-
-  installNodeDNSWorkaroundHooks();
 
   let client: MongoClient;
 

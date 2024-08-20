@@ -6,7 +6,6 @@ import * as crypto from 'crypto';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
 import * as BSON from '../../mongodb';
-import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata = {
@@ -22,8 +21,6 @@ describe('Client Side Encryption Functional', function () {
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-
-  installNodeDNSWorkaroundHooks();
 
   it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
     const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
