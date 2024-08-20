@@ -442,8 +442,6 @@ describe('Range Explicit Encryption with JS native types', function () {
     });
 
     keyId = await clientEncryption.createDataKey('local');
-
-
   });
 
   afterEach(async function () {
