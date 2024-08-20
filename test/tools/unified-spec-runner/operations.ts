@@ -772,7 +772,9 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
   const { command, ...opts } = operation.arguments!;
   const cursor = db.runCursorCommand(command, {
     readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
-    session: opts.session
+    session: opts.session,
+    timeoutMode: opts.timeoutMode,
+    timeoutMS: opts.timeoutMS
   });
 
   if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);

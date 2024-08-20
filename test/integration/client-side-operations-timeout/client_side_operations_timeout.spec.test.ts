@@ -3,27 +3,11 @@ import { join } from 'path';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
-const enabled = [
-  'override-collection-timeoutMS',
-  'override-database-timeoutMS',
-  'override-operation-timeoutMS',
-  'retryability-legacy-timeouts',
-  'retryability-timeoutMS',
-  'runCursorCommand',
-  'close-cursors',
-  'non-tailable-cursors',
-  'global-timeoutMS',
-  'legacy-timeouts',
-  'command-execution',
-  'cursors',
-  'error-transformations'
-];
-
 const skipped = {
   bulkWrite: 'TODO(NODE-6274)',
   'change-streams': 'TODO(NODE-6035)',
   'convenient-transactions': 'TODO(NODE-5687)',
-  //'deprecated-options': 'TODO(NODE-5689)',
+  'deprecated-options': 'TODO(NODE-5689)',
   'gridfs-advanced': 'TODO(NODE-6275)',
   'gridfs-delete': 'TODO(NODE-6275)',
   'gridfs-download': 'TODO(NODE-6275)',
