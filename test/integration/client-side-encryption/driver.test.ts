@@ -405,3 +405,74 @@ describe('Client Side Encryption Functional', function () {
     }
   );
 });
+
+describe('Range Explicit Encryption with JS native types', function () {
+  installNodeDNSWorkaroundHooks();
+
+  const metaData: MongoDBMetadataUI = {
+    requires: {
+      clientSideEncryption: '>=6.1.0',
+
+      // The Range Explicit Encryption tests require MongoDB server 7.0+ for QE v2.
+      // The tests must not run against a standalone.
+      //
+      // `range` is not supported on 8.0+ servers.
+      mongodb: '>=8.0.0',
+      topology: '!single'
+    }
+  };
+
+  const getKmsProviders = (): { local: { key: string } } => {
+    const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
+      local: { key: string };
+    };
+
+    return { local: result.local };
+  };
+
+  let clientEncryption: ClientEncryption;
+  let keyId;
+  let keyVaultClient;
+
+  beforeEach(async function () {
+    keyVaultClient = this.configuration.newClient();
+    clientEncryption = new ClientEncryption(keyVaultClient, {
+      keyVaultNamespace: 'keyvault.datakeys',
+      kmsProviders: getKmsProviders()
+    });
+
+    keyId = await clientEncryption.createDataKey('local');
+  });
+
+  afterEach(async function () {
+    await keyVaultClient.close();
+  });
+
+  it('supports a js number for trimFactor', metaData, async function () {
+    await clientEncryption.encrypt(new BSON.Int32(123), {
+      keyId,
+      algorithm: 'Range',
+      contentionFactor: 0,
+      rangeOptions: {
+        min: 0,
+        max: 1000,
+        trimFactor: 1,
+        sparsity: new BSON.Long(1)
+      }
+    });
+  });
+
+  it('supports a bigint for sparsity', metaData, async function () {
+    await clientEncryption.encrypt(new BSON.Int32(123), {
+      keyId,
+      algorithm: 'Range',
+      contentionFactor: 0,
+      rangeOptions: {
+        min: 0,
+        max: 1000,
+        trimFactor: new BSON.Int32(1),
+        sparsity: 1n
+      }
+    });
+  });
+});
