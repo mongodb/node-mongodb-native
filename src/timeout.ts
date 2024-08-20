@@ -87,6 +87,7 @@ export class Timeout extends Promise<never> {
   clear(): void {
     clearTimeout(this.id);
     this.id = undefined;
+    this.timedOut = false;
     this.cleared = true;
   }
 
@@ -209,7 +210,6 @@ export class CSOTTimeoutContext extends TimeoutContext {
   }
 
   get maxTimeMS(): number {
-    console.log(this.remainingTimeMS, this.minRoundTripTime);
     return this.remainingTimeMS - this.minRoundTripTime;
   }
 
@@ -282,12 +282,14 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this.start = Math.trunc(performance.now());
     this.minRoundTripTime = 0;
     this._serverSelectionTimeout?.clear();
-    this._connectionCheckoutTimeout?.clear();
+    this._serverSelectionTimeout = undefined;
+    this._connectionCheckoutTimeout = undefined;
   }
 
   clear(): void {
     this._serverSelectionTimeout?.clear();
-    this._connectionCheckoutTimeout?.clear();
+    this._serverSelectionTimeout = undefined;
+    this._connectionCheckoutTimeout = undefined;
   }
 }
 

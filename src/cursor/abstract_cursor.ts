@@ -444,22 +444,20 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    try {
-      do {
-        const doc = this.documents?.shift(this.cursorOptions);
-        if (doc != null) {
-          if (this.transform != null) return await this.transformDocument(doc);
-          return doc;
-        }
-        await this.fetchBatch();
-      } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
-
-      return null;
-    } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION) {
-        this.timeoutContext?.refresh();
-      }
+    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION) {
+      this.timeoutContext?.refresh();
     }
+
+    do {
+      const doc = this.documents?.shift(this.cursorOptions);
+      if (doc != null) {
+        if (this.transform != null) return await this.transformDocument(doc);
+        return doc;
+      }
+      await this.fetchBatch();
+    } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
+
+    return null;
   }
 
   /**
