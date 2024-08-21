@@ -131,7 +131,8 @@ export class RunCommandCursor extends AbstractCursor {
     const getMoreOperation = new GetMoreOperation(this.namespace, this.id!, this.server!, {
       ...this.cursorOptions,
       session: this.session,
-      ...this.getMoreOptions
+      ...this.getMoreOptions,
+      omitMaxTimeMS: this.cursorOptions.timeoutMode != null
     });
 
     return await executeOperation(this.client, getMoreOperation, this.timeoutContext);
