@@ -5,7 +5,6 @@ import { ClientEncryption } from '../../../src/client-side-encryption/client_enc
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptCreateEncryptedCollectionError } from '../../../src/client-side-encryption/errors';
 import { BSON, Collection, type Db, MongoServerError } from '../../mongodb';
-import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
@@ -19,8 +18,6 @@ const documentValidationFailureCode = 121;
 const typeMismatchCode = 14;
 
 describe('21. Automatic Data Encryption Keys', () => {
-  installNodeDNSWorkaroundHooks();
-
   let db: Db;
   let clientEncryption;
   let client;

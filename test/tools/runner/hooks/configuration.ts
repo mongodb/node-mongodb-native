@@ -11,8 +11,6 @@ import { AstrolabeTestConfiguration, TestConfiguration } from '../config';
 import { getEnvironmentalOptions } from '../../utils';
 import * as mock from '../../mongodb-mock/index';
 import { inspect } from 'util';
-import { setDefaultResultOrder } from 'dns';
-import { coerce, gte } from 'semver';
 
 import { ApiVersionFilter } from '../filters/api_version_filter';
 import { AuthFilter } from '../filters/auth_filter';
@@ -206,28 +204,6 @@ const beforeAllPluginImports = () => {
   // configure mocha
   require('mocha-sinon');
 };
-
-/**
- * @remarks TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set
- * the default dns resolution order for CI
- */
-export function installNodeDNSWorkaroundHooks() {
-  if (gte(coerce(process.version), coerce('18'))) {
-    // We set before hooks because some tests connect in before hooks
-    before(() => {
-      setDefaultResultOrder('ipv4first');
-    });
-
-    // We set beforeEach hooks to make this resilient to test ordering and
-    // ensure each affected test has the correct ip address resolution setting
-    beforeEach(() => {
-      setDefaultResultOrder('ipv4first');
-    });
-    afterEach(() => {
-      setDefaultResultOrder('verbatim');
-    });
-  }
-}
 
 export const mochaHooks = {
   beforeAll: [beforeAllPluginImports, testConfigBeforeHook],

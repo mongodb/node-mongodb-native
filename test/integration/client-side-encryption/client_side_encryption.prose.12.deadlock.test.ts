@@ -6,7 +6,6 @@ import * as path from 'path';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { type CommandStartedEvent, MongoClient, type MongoClientOptions } from '../../mongodb';
-import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { dropCollection } from '../shared';
 
@@ -104,8 +103,6 @@ const metadata = {
   }
 };
 describe('Connection Pool Deadlock Prevention', function () {
-  installNodeDNSWorkaroundHooks();
-
   beforeEach(async function () {
     const url: string = this.configuration.url();
 

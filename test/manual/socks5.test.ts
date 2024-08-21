@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
 
 import { LEGACY_HELLO_COMMAND, MongoClient, MongoParseError } from '../mongodb';
-import { installNodeDNSWorkaroundHooks } from '../tools/runner/hooks/configuration';
 
 /**
  * The SOCKS5_CONFIG environment variable is either a JSON 4-tuple
@@ -33,8 +32,6 @@ describe('Socks5 Connectivity', function () {
   rsConnectionString.searchParams.set('serverSelectionTimeoutMS', '2000');
   singleConnectionString.searchParams.set('serverSelectionTimeoutMS', '2000');
   singleConnectionString.searchParams.set('readPreference', 'primaryPreferred');
-
-  installNodeDNSWorkaroundHooks();
 
   context((proxyUsername ? 'with' : 'without') + ' Socks5 auth required', function () {
     context('with missing required Socks5 auth configuration', function () {
