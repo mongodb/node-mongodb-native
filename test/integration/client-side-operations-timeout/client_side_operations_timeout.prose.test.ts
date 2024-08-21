@@ -13,7 +13,7 @@ import {
 import { type FailPoint } from '../../tools/utils';
 
 // TODO(NODE-5824): Implement CSOT prose tests
-describe.only('CSOT spec prose tests', function () {
+describe('CSOT spec prose tests', function () {
   let internalClient: MongoClient;
   let client: MongoClient;
 
@@ -712,7 +712,7 @@ describe.only('CSOT spec prose tests', function () {
   describe('10. Convenient Transactions', () => {
     /** Tests in this section MUST only run against replica sets and sharded clusters with server versions 4.4 or higher. */
     const metadata: MongoDBMetadataUI = {
-      requires: { topology: ['replicaset', 'sharded', 'load-balanced'] }
+      requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.4' }
     };
 
     describe('when an operation fails inside withTransaction callback', () => {
@@ -782,24 +782,33 @@ describe.only('CSOT spec prose tests', function () {
 
       it('timeoutMS is refreshed for abortTransaction', metadata, async function () {
         const commandsFailed = [];
+        const commandsStarted = [];
 
         client = this.configuration
           .newClient({ timeoutMS: 500, monitorCommands: true })
-          .on('commandFailed', e => commandsFailed.push(e));
+          .on('commandStarted', e => commandsStarted.push(e.commandName))
+          .on('commandFailed', e => commandsFailed.push(e.commandName));
 
         const coll = client.db('db').collection('coll');
 
-        const error = await client
-          .withSession(async session =>
-            session.withTransaction(async session => await coll.insertOne({ x: 1 }, { session }))
-          )
+        const session = client.startSession();
+
+        let insertError: Error | null = null;
+        const withTransactionError = await session
+          .withTransaction(async session => {
+            insertError = await coll.insertOne({ x: 1 }, { session }).catch(error => error);
+            throw insertError;
+          })
           .catch(error => error);
 
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-        expect(commandsFailed.map(e => e.commandName)).to.deep.equal([
-          'insert',
-          'abortTransaction'
-        ]);
+        try {
+          expect(insertError).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(withTransactionError).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(commandsStarted, 'commands started').to.deep.equal(['insert', 'abortTransaction']);
+          expect(commandsFailed, 'commands failed').to.deep.equal(['insert', 'abortTransaction']);
+        } finally {
+          await session.endSession();
+        }
       });
     });
   });
