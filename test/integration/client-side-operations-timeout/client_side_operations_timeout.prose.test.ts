@@ -13,7 +13,7 @@ import {
 import { type FailPoint } from '../../tools/utils';
 
 // TODO(NODE-5824): Implement CSOT prose tests
-describe('CSOT spec prose tests', function () {
+describe.only('CSOT spec prose tests', function () {
   let internalClient: MongoClient;
   let client: MongoClient;
 
@@ -636,22 +636,27 @@ describe('CSOT spec prose tests', function () {
       data: {
         failCommands: ['abortTransaction'],
         blockConnection: true,
-        blockTimeMS: 60
+        blockTimeMS: 600
       }
     };
 
-    beforeEach(async function () {
+    before('drop collection', async function () {
+      const internalClient = this.configuration.newClient();
+      await internalClient
+        .db('endSession_db')
+        .collection('endSession_coll')
+        .drop()
+        .catch(() => null);
+      await internalClient.close();
+    });
+
+    beforeEach('setup failpoint', async function () {
       if (!semver.satisfies(this.configuration.version, '>=4.4')) {
         this.skipReason = 'Requires server version 4.4+';
         this.skip();
       }
 
       const internalClient = this.configuration.newClient();
-      await internalClient
-        .db('db')
-        .collection('coll')
-        .drop()
-        .catch(() => null);
       await internalClient.db('admin').command(failpoint);
       await internalClient.close();
     });
@@ -669,8 +674,8 @@ describe('CSOT spec prose tests', function () {
 
     describe('when timeoutMS is provided to the client', () => {
       it('throws a timeout error from endSession', metadata, async function () {
-        client = this.configuration.newClient({ timeoutMS: 50, monitorCommands: true });
-        const coll = client.db('db').collection('coll');
+        client = this.configuration.newClient({ timeoutMS: 500, monitorCommands: true });
+        const coll = client.db('endSession_db').collection('endSession_coll');
         const session = client.startSession();
         session.startTransaction();
         await coll.insertOne({ x: 1 }, { session });
@@ -682,8 +687,8 @@ describe('CSOT spec prose tests', function () {
     describe('when defaultTimeoutMS is provided to startSession', () => {
       it('throws a timeout error from endSession', metadata, async function () {
         client = this.configuration.newClient();
-        const coll = client.db('db').collection('coll');
-        const session = client.startSession({ defaultTimeoutMS: 50 });
+        const coll = client.db('endSession_db').collection('endSession_coll');
+        const session = client.startSession({ defaultTimeoutMS: 500 });
         session.startTransaction();
         await coll.insertOne({ x: 1 }, { session });
         const error = await session.endSession().catch(error => error);
@@ -694,11 +699,11 @@ describe('CSOT spec prose tests', function () {
     describe('when timeoutMS is provided to endSession', () => {
       it('throws a timeout error from endSession', metadata, async function () {
         client = this.configuration.newClient();
-        const coll = client.db('db').collection('coll');
+        const coll = client.db('endSession_db').collection('endSession_coll');
         const session = client.startSession();
         session.startTransaction();
         await coll.insertOne({ x: 1 }, { session });
-        const error = await session.endSession({ timeoutMS: 50 }).catch(error => error);
+        const error = await session.endSession({ timeoutMS: 500 }).catch(error => error);
         expect(error).to.be.instanceOf(MongoOperationTimeoutError);
       });
     });
@@ -745,7 +750,7 @@ describe('CSOT spec prose tests', function () {
         data: {
           failCommands: ['insert', 'abortTransaction'],
           blockConnection: true,
-          blockTimeMS: 60
+          blockTimeMS: 600
         }
       };
 
@@ -779,7 +784,7 @@ describe('CSOT spec prose tests', function () {
         const commandsFailed = [];
 
         client = this.configuration
-          .newClient({ timeoutMS: 50, monitorCommands: true })
+          .newClient({ timeoutMS: 500, monitorCommands: true })
           .on('commandFailed', e => commandsFailed.push(e));
 
         const coll = client.db('db').collection('coll');
