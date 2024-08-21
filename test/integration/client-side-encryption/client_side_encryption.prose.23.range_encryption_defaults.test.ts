@@ -3,7 +3,6 @@ import { expect } from 'chai';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { type Binary, EJSON, Int32, Long } from '../../mongodb';
-import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
 const metaData: MongoDBMetadataUI = {
   requires: {
@@ -27,8 +26,6 @@ const getKmsProviders = (): { local: { key: string } } => {
 };
 
 describe('Range Explicit Encryption Defaults', function () {
-  installNodeDNSWorkaroundHooks();
-
   let clientEncryption: ClientEncryption;
   let keyId;
   let keyVaultClient;

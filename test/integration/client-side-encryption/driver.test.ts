@@ -404,8 +404,6 @@ describe('Client Side Encryption Functional', function () {
 });
 
 describe('Range Explicit Encryption with JS native types', function () {
-  installNodeDNSWorkaroundHooks();
-
   const metaData: MongoDBMetadataUI = {
     requires: {
       clientSideEncryption: '>=6.1.0',
