@@ -209,7 +209,8 @@ operations.set('close', async ({ entities, operation }) => {
   /* eslint-disable no-empty */
   try {
     const cursor = entities.getEntity('cursor', operation.object);
-    await cursor.close();
+    const timeoutMS = operation.arguments?.timeoutMS;
+    await cursor.close(timeoutMS);
     return;
   } catch {}
 
