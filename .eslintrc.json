@@ -243,8 +243,7 @@
         "@typescript-eslint/restrict-plus-operands": "off",
         "@typescript-eslint/restrict-template-expressions": "off",
         "@typescript-eslint/require-await": "off",
-        "@typescript-eslint/no-redundant-type-constituents": "error",
-        // all chai assertions are unused expressions.
+        "@typescript-eslint/no-redundant-type-constituents": "off",
         "@typescript-eslint/no-unused-expressions": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "no-return-await": "off",
