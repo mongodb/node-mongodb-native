@@ -6,6 +6,7 @@ import { MongoClient } from '../mongodb';
 
 const expect = chai.expect;
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 chai.use(require('sinon-chai'));
 
 async function verifyKerberosAuthentication(client) {

@@ -71,9 +71,9 @@
     ],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "error",
+    // We use redundant type constituents for documentation purposes.
     "@typescript-eslint/no-redundant-type-constituents": "off",
     "@typescript-eslint/no-empty-function": "error",
-    "@typescript-eslint/no-require-imports": "off",
     "@typescript-eslint/require-await": "off",
     "@typescript-eslint/no-unused-expressions": "off",
     "@typescript-eslint/consistent-type-imports": [
@@ -165,6 +165,8 @@
         "@typescript-eslint/no-this-alias": "off",
         "@typescript-eslint/no-unused-vars": "off",
         "@typescript-eslint/consistent-type-imports": "off",
+        // JS test files use require
+        "@typescript-eslint/no-require-imports": "off",
         // Since we use ts-node we should always require the TS code
         // Also we have patches to apply to the mock server, so we should always import from there
         "no-restricted-modules": [
@@ -241,7 +243,8 @@
         "@typescript-eslint/restrict-plus-operands": "off",
         "@typescript-eslint/restrict-template-expressions": "off",
         "@typescript-eslint/require-await": "off",
-        "@typescript-eslint/no-redundant-type-constituents": "off",
+        "@typescript-eslint/no-redundant-type-constituents": "error",
+        // all chai assertions are unused expressions.
         "@typescript-eslint/no-unused-expressions": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "no-return-await": "off",

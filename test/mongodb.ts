@@ -41,6 +41,7 @@ function importMongoDBLegacy(exportsToOverride: Record<string, unknown>) {
     encoding: 'utf8'
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const localMongoDB = require('../src/index');
   const ctx = vm.createContext({
     module: { exports: null },
@@ -48,8 +49,10 @@ function importMongoDBLegacy(exportsToOverride: Record<string, unknown>) {
       if (mod === 'mongodb') {
         return localMongoDB;
       } else if (mod.startsWith('.')) {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         return require(path.join(mongodbLegacyLocation, mod));
       }
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       return require(mod);
     }
   });

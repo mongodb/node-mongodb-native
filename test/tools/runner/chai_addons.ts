@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import chai = require('chai');
 
 chai.use(require('sinon-chai'));
