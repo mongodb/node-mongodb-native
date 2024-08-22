@@ -134,7 +134,7 @@
     "check:lambda": "mocha --config test/mocha_lambda.json test/integration/node-specific/examples/handler.test.js",
     "check:lambda:aws": "mocha --config test/mocha_lambda.json test/integration/node-specific/examples/aws_handler.test.js",
     "check:lint": "npm run build:dts && npm run check:dts && npm run check:eslint && npm run check:tsd",
-    "check:eslint": "npm run  build:dts && ESLINT_USE_FLAT_CONFIG=false eslint -v && ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=0 --ext '.js,.ts' src test",
+    "check:eslint": "npm run build:dts && ESLINT_USE_FLAT_CONFIG=false eslint -v && ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=0 --ext '.js,.ts' src test",
     "check:tsd": "tsd --version && tsd",
     "check:dependencies": "mocha test/action/dependency.test.ts",
     "check:dts": "node ./node_modules/typescript/bin/tsc --noEmit mongodb.d.ts && tsd",
