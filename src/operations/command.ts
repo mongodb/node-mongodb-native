@@ -1,7 +1,7 @@
 import type { BSONSerializeOptions, Document } from '../bson';
 import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError } from '../error';
-import { Explain, type ExplainOptions } from '../explain';
+import { ExplainCommandOptions2, type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -72,7 +72,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
   override options: CommandOperationOptions;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
-  explain?: Explain;
+  explain?: ExplainCommandOptions2;
 
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
     super(options);
@@ -94,7 +94,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     this.writeConcern = WriteConcern.fromOptions(options);
 
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
-      this.explain = Explain.fromOptions(options);
+      this.explain = ExplainCommandOptions2.fromOptions(options);
     } else if (options?.explain != null) {
       throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
     }

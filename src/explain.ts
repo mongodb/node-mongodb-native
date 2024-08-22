@@ -19,10 +19,18 @@ export type ExplainVerbosity = string;
  */
 export type ExplainVerbosityLike = ExplainVerbosity | boolean;
 
+/**
+ * @public
+ */
+export interface ExplainCommandOptions {
+  verbosity: ExplainVerbosityLike;
+  maxTimeMS?: number;
+}
+
 /** @public */
 export interface ExplainOptions {
   /** Specifies the verbosity mode for the explain output. */
-  explain?: ExplainVerbosityLike;
+  explain?: ExplainVerbosityLike | ExplainCommandOptions;
 }
 
 /** @internal */
@@ -39,14 +47,34 @@ export class Explain {
     }
   }
 
-  static fromOptions(options?: ExplainOptions): Explain | undefined {
-    if (options?.explain == null) return;
+  static fromOptions({ explain }: ExplainOptions = {}): Explain | undefined {
+    if (explain == null) return;
 
-    const explain = options.explain;
     if (typeof explain === 'boolean' || typeof explain === 'string') {
       return new Explain(explain);
     }
 
-    throw new MongoInvalidArgumentError('Field "explain" must be a string or a boolean');
+    if (typeof explain === 'object') {
+      const { verbosity } = explain;
+      return new Explain(verbosity);
+    }
+
+    throw new MongoInvalidArgumentError(
+      'Field "explain" must be a string, a boolean or an ExplainCommandOptions object.'
+    );
+  }
+}
+
+export class ExplainCommandOptions2 {
+  private constructor(
+    public readonly explain: Explain,
+    public readonly maxTimeMS: number | undefined
+  ) {}
+
+  static fromOptions(options: ExplainOptions = {}): ExplainCommandOptions2 | undefined {
+    const explain = Explain.fromOptions(options);
+    const maxTimeMS = typeof options.explain === 'object' ? options.explain.maxTimeMS : undefined;
+
+    return explain ? new ExplainCommandOptions2(explain, maxTimeMS) : undefined;
   }
 }
