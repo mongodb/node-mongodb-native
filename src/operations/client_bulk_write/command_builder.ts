@@ -1,4 +1,4 @@
-import { type Document } from '../../bson';
+import { type Document, ObjectId } from '../../bson';
 import { DocumentSequence } from '../../cmap/commands';
 import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
 import { type CollationOptions } from '../command';
@@ -23,6 +23,7 @@ export interface ClientBulkWriteCommand {
   nsInfo: DocumentSequence;
   bypassDocumentValidation?: boolean;
   let?: Document;
+  comment?: any;
 }
 
 /** @internal */
@@ -88,6 +89,10 @@ export class ClientBulkWriteCommandBuilder {
     if (this.options.let) {
       command.let = this.options.let;
     }
+
+    if (this.options.comment != null) {
+      command.comment = this.options.comment;
+    }
     return [command];
   }
 }
@@ -112,6 +117,7 @@ export const buildInsertOneOperation = (
     insert: index,
     document: model.document
   };
+  document.document._id = model.document._id ?? new ObjectId();
   return document;
 };
 
@@ -175,6 +181,7 @@ export interface ClientUpdateOperation {
   hint?: Hint;
   upsert?: boolean;
   arrayFilters?: Document[];
+  collation?: CollationOptions;
 }
 
 /**
@@ -226,6 +233,9 @@ function createUpdateOperation(
   if (model.arrayFilters) {
     document.arrayFilters = model.arrayFilters;
   }
+  if (model.collation) {
+    document.collation = model.collation;
+  }
   return document;
 }
 
@@ -237,6 +247,7 @@ export interface ClientReplaceOneOperation {
   updateMods: WithoutId<Document>;
   hint?: Hint;
   upsert?: boolean;
+  collation?: CollationOptions;
 }
 
 /**
@@ -260,6 +271,9 @@ export const buildReplaceOneOperation = (
   }
   if (model.upsert) {
     document.upsert = model.upsert;
+  }
+  if (model.collation) {
+    document.collation = model.collation;
   }
   return document;
 };

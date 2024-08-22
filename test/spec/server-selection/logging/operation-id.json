@@ -47,6 +47,9 @@
       }
     }
   ],
+  "_yamlAnchors": {
+    "namespace": "logging-tests.server-selection"
+  },
   "tests": [
     {
       "description": "Successful bulkWrite operation: log messages have operationIds",
@@ -219,6 +222,190 @@
                   ]
                 },
                 "operation": "insert"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Successful client bulkWrite operation: log messages have operationIds",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "topologyDescriptionChangedEvent": {}
+            },
+            "count": 2
+          }
+        },
+        {
+          "name": "clientBulkWrite",
+          "object": "client",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "logging-tests.server-selection",
+                  "document": {
+                    "x": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectLogMessages": [
+        {
+          "client": "client",
+          "messages": [
+            {
+              "level": "debug",
+              "component": "serverSelection",
+              "data": {
+                "message": "Server selection started",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "operation": "bulkWrite"
+              }
+            },
+            {
+              "level": "debug",
+              "component": "serverSelection",
+              "data": {
+                "message": "Server selection succeeded",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "operation": "bulkWrite"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Failed client bulkWrite operation: log messages have operationIds",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "alwaysOn",
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "ismaster"
+                ],
+                "appName": "loggingClient",
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverDescriptionChangedEvent": {
+                "newDescription": {
+                  "type": "Unknown"
+                }
+              }
+            },
+            "count": 1
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "client",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "logging-tests.server-selection",
+                  "document": {
+                    "x": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectLogMessages": [
+        {
+          "client": "client",
+          "messages": [
+            {
+              "level": "debug",
+              "component": "serverSelection",
+              "data": {
+                "message": "Server selection started",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "operation": "bulkWrite"
+              }
+            },
+            {
+              "level": "info",
+              "component": "serverSelection",
+              "data": {
+                "message": "Waiting for suitable server to become available",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "operation": "bulkWrite"
+              }
+            },
+            {
+              "level": "debug",
+              "component": "serverSelection",
+              "data": {
+                "message": "Server selection failed",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "operation": "bulkWrite"
               }
             }
           ]

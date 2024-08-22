@@ -144,3 +144,77 @@ export type AnyClientBulkWriteModel =
   | ClientUpdateManyModel
   | ClientDeleteOneModel
   | ClientDeleteManyModel;
+
+/** @public */
+export interface ClientBulkWriteResult {
+  /**
+   * The total number of documents inserted across all insert operations.
+   */
+  insertedCount: number;
+  /**
+   * The total number of documents upserted across all update operations.
+   */
+  upsertedCount: number;
+  /**
+   * The total number of documents matched across all update operations.
+   */
+  matchedCount: number;
+  /**
+   * The total number of documents modified across all update operations.
+   */
+  modifiedCount: number;
+  /**
+   * The total number of documents deleted across all delete operations.
+   */
+  deletedCount: number;
+  /**
+   * The results of each individual insert operation that was successfully performed.
+   */
+  insertResults?: Map<number, ClientInsertOneResult>;
+  /**
+   * The results of each individual update operation that was successfully performed.
+   */
+  updateResults?: Map<number, ClientUpdateResult>;
+  /**
+   * The results of each individual delete operation that was successfully performed.
+   */
+  deleteResults?: Map<number, ClientDeleteResult>;
+}
+
+/** @public */
+export interface ClientInsertOneResult {
+  /**
+   * The _id of the inserted document.
+   */
+  insertedId: any;
+}
+
+/** @public */
+export interface ClientUpdateResult {
+  /**
+   * The number of documents that matched the filter.
+   */
+  matchedCount: number;
+
+  /**
+   * The number of documents that were modified.
+   */
+  modifiedCount: number;
+
+  /**
+   * The _id field of the upserted document if an upsert occurred.
+   *
+   * It MUST be possible to discern between a BSON Null upserted ID value and this field being
+   * unset. If necessary, drivers MAY add a didUpsert boolean field to differentiate between
+   * these two cases.
+   */
+  upsertedId?: any;
+}
+
+/** @public */
+export interface ClientDeleteResult {
+  /**
+   * The number of documents that were deleted.
+   */
+  deletedCount: number;
+}

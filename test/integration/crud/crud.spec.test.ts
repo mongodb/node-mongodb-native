@@ -5,8 +5,6 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const clientBulkWriteTests = new RegExp(
   [
-    'client bulk write delete with collation',
-    'client bulk write delete with hint',
     'client bulkWrite operations support errorResponse assertions',
     'an individual operation fails during an ordered bulkWrite',
     'an individual operation fails during an unordered bulkWrite',
@@ -15,7 +13,9 @@ const clientBulkWriteTests = new RegExp(
     'a bulk write with only errors does not report a partial result',
     'an empty list of write models is a client-side error',
     'a write concern error occurs during a bulkWrite',
-    'client bulkWrite'
+    'client bulkWrite replaceOne prohibits atomic modifiers',
+    'client bulkWrite updateOne requires atomic modifiers',
+    'client bulkWrite updateMany requires atomic modifiers'
   ].join('|')
 );
 
