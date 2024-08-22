@@ -10,7 +10,6 @@ const { EJSON } = BSON;
 const { LEGACY_HELLO_COMMAND, MongoCryptError } = require('../../mongodb');
 const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 const { coerce, gte } = require('semver');
 
 const {
@@ -78,8 +77,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
     'base64'
   );
-
-  installNodeDNSWorkaroundHooks();
 
   describe('Data key and double encryption', function () {
     // Data key and double encryption
