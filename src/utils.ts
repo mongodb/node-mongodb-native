@@ -25,7 +25,7 @@ import {
   MongoParseError,
   MongoRuntimeError
 } from './error';
-import type { ExplainCommandOptions2, ExplainVerbosity } from './explain';
+import type { Explain, ExplainVerbosity } from './explain';
 import type { MongoClient } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
@@ -253,24 +253,26 @@ export function decorateWithReadConcern(
  */
 export function decorateWithExplain(
   command: Document,
-  explainOptions: ExplainCommandOptions2
+  explain: Explain
 ): {
   explain: Document;
   verbosity: ExplainVerbosity;
   maxTimeMS?: number;
 } {
   type ExplainCommand = ReturnType<typeof decorateWithExplain>;
-  if ('explain' in command && 'verbosity' in command) {
-    return command as ExplainCommand;
+  const isExplainCommand = (doc: Document): doc is ExplainCommand => 'explain' in command;
+
+  if (isExplainCommand(command)) {
+    return command;
   }
 
-  const { explain, maxTimeMS } = explainOptions;
-  const { verbosity } = explain;
-
+  const { verbosity, maxTimeMS } = explain;
   const baseCommand: ExplainCommand = { explain: command, verbosity };
+
   if (typeof maxTimeMS === 'number') {
     baseCommand.maxTimeMS = maxTimeMS;
   }
+
   return baseCommand;
 }
 

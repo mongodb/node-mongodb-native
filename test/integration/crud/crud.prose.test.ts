@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
+import { type CommandStartedEvent } from '../../../mongodb';
 import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../mongodb';
+import { filterForCommands } from '../shared';
 
 describe('CRUD Prose Spec Tests', () => {
   let client: MongoClient;
@@ -141,6 +143,43 @@ describe('CRUD Prose Spec Tests', () => {
         const errInfoFromEvent = ev.reply.writeErrors[0].errInfo;
         expect(errInfoFromError).to.deep.equal(errInfoFromEvent);
       }
+    });
+  });
+
+  describe('14. `explain` helpers allow users to specify `maxTimeMS`', function () {
+    let client: MongoClient;
+    const commands: CommandStartedEvent[] = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      await client.connect();
+
+      client.on('commandStarted', filterForCommands('explain', commands));
+      commands.length = 0;
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('sets maxTimeMS on explain commands, when specfied', async function () {
+      // Create a collection, referred to as `collection`, with the namespace `explain-test.collection`.
+      const collection = client.db('explain-test').collection('collection');
+
+      await collection
+        .find(
+          { name: 'john doe' },
+          {
+            explain: {
+              maxTimeMS: 2000,
+              verbosity: 'queryPlanner'
+            }
+          }
+        )
+        .toArray();
+
+      const [{ command }] = commands;
+      expect(command).to.have.property('maxTimeMS', 2000);
     });
   });
 });

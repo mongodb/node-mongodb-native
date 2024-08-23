@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
+import { test } from 'mocha';
 
 import {
   type Collection,
@@ -8,6 +9,7 @@ import {
   type MongoClient,
   MongoServerError
 } from '../../mongodb';
+import { filterForCommands } from '../shared';
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
 
@@ -117,6 +119,122 @@ describe('CRUD API explain option', function () {
       });
     }
   }
+
+  describe('explain helpers w/ maxTimeMS', function () {
+    let client: MongoClient;
+    const commands: CommandStartedEvent[] = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      await client.connect();
+
+      client.on('commandStarted', filterForCommands('explain', commands));
+      commands.length = 0;
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    describe('cursor explain commands', function () {
+      describe('when maxTimeMS is specified via a cursor explain method, it sets the property on the command', function () {
+        test('find()', async function () {
+          const collection = client.db('explain-test').collection('collection');
+          await collection
+            .find({ name: 'john doe' })
+            .explain({ maxTimeMS: 2000, verbosity: 'queryPlanner' });
+
+          const [{ command }] = commands;
+          expect(command).to.have.property('maxTimeMS', 2000);
+        });
+
+        test('aggregate()', async function () {
+          const collection = client.db('explain-test').collection('collection');
+
+          await collection
+            .aggregate([{ $match: { name: 'john doe' } }])
+            .explain({ maxTimeMS: 2000, verbosity: 'queryPlanner' });
+
+          const [{ command }] = commands;
+          expect(command).to.have.property('maxTimeMS', 2000);
+        });
+      });
+
+      it('when maxTimeMS is not specified, it is not attached to the explain command', async function () {
+        // Create a collection, referred to as `collection`, with the namespace `explain-test.collection`.
+        const collection = client.db('explain-test').collection('collection');
+
+        await collection.find({ name: 'john doe' }).explain({ verbosity: 'queryPlanner' });
+
+        const [{ command }] = commands;
+        expect(command).not.to.have.property('maxTimeMS');
+      });
+
+      it('when maxTimeMS is specified as an explain option and a command-level option, the explain option takes precedence', async function () {
+        // Create a collection, referred to as `collection`, with the namespace `explain-test.collection`.
+        const collection = client.db('explain-test').collection('collection');
+
+        await collection
+          .find(
+            {},
+            {
+              maxTimeMS: 1000,
+              explain: {
+                verbosity: 'queryPlanner',
+                maxTimeMS: 2000
+              }
+            }
+          )
+          .toArray();
+
+        const [{ command }] = commands;
+        expect(command).to.have.property('maxTimeMS', 2000);
+      });
+    });
+
+    describe('regular commands w/ explain', function () {
+      it('when maxTimeMS is specified as an explain option and a command-level option, the explain option takes precedence', async function () {
+        // Create a collection, referred to as `collection`, with the namespace `explain-test.collection`.
+        const collection = client.db('explain-test').collection('collection');
+
+        await collection.deleteMany(
+          {},
+          {
+            maxTimeMS: 1000,
+            explain: {
+              verbosity: true,
+              maxTimeMS: 2000
+            }
+          }
+        );
+
+        const [{ command }] = commands;
+        expect(command).to.have.property('maxTimeMS', 2000);
+      });
+
+      describe('when maxTimeMS is specified as an explain option', function () {
+        it('attaches maxTimeMS to the explain command', async function () {
+          const collection = client.db('explain-test').collection('collection');
+          await collection.deleteMany(
+            {},
+            { explain: { maxTimeMS: 2000, verbosity: 'queryPlanner' } }
+          );
+
+          const [{ command }] = commands;
+          expect(command).to.have.property('maxTimeMS', 2000);
+        });
+      });
+
+      it('when maxTimeMS is not specified, it is not attached to the explain command', async function () {
+        const collection = client.db('explain-test').collection('collection');
+
+        await collection.deleteMany({}, { explain: { verbosity: 'queryPlanner' } });
+
+        const [{ command }] = commands;
+        expect(command).not.to.have.property('maxTimeMS');
+      });
+    });
+  });
 });
 
 function explainValueToExpectation(explainValue: boolean | string) {

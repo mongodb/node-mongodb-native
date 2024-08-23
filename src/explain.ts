@@ -1,5 +1,3 @@
-import { MongoInvalidArgumentError } from './error';
-
 /** @public */
 export const ExplainVerbosity = Object.freeze({
   queryPlanner: 'queryPlanner',
@@ -19,15 +17,43 @@ export type ExplainVerbosity = string;
  */
 export type ExplainVerbosityLike = ExplainVerbosity | boolean;
 
-/**
- * @public
- */
+/** @public */
 export interface ExplainCommandOptions {
-  verbosity: ExplainVerbosityLike;
+  /** The explain verbosity for the command. */
+  verbosity: ExplainVerbosity;
+  /** The maxTimeMS setting for the command. */
   maxTimeMS?: number;
 }
 
-/** @public */
+/**
+ * @public
+ *
+ * When set, this configures an explain command.  Valid values are boolean (for legacy compatibility,
+ * see {@link ExplainVerbosityLike}), a string containing the explain verbosity, or an object containing the verbosity and
+ * an optional maxTimeMS.
+ *
+ * Examples of valid usage:
+ *
+ * ```typescript
+ * collection.find({ name: 'john doe' }, { explain: true });
+ * collection.find({ name: 'john doe' }, { explain: false });
+ * collection.find({ name: 'john doe' }, { explain: 'queryPlanner' });
+ * collection.find({ name: 'john doe' }, { explain: { verbosity: 'queryPlanner' } });
+ * ```
+ *
+ * maxTimeMS can be configured to limit the amount of time the server
+ * spends executing an explain by providing an object:
+ *
+ * ```typescript
+ * // limits the `explain` command to no more than 2 seconds
+ * collection.find({ name: 'john doe' }, { explain:
+ *  {
+ *    verbosity: 'queryPlanner',
+ *    maxTimeMS: 2000
+ *  }
+ * });
+ * ```
+ */
 export interface ExplainOptions {
   /** Specifies the verbosity mode for the explain output. */
   explain?: ExplainVerbosityLike | ExplainCommandOptions;
@@ -35,9 +61,10 @@ export interface ExplainOptions {
 
 /** @internal */
 export class Explain {
-  verbosity: ExplainVerbosity;
+  readonly verbosity: ExplainVerbosity;
+  readonly maxTimeMS?: number;
 
-  constructor(verbosity: ExplainVerbosityLike) {
+  private constructor(verbosity: ExplainVerbosityLike, maxTimeMS?: number) {
     if (typeof verbosity === 'boolean') {
       this.verbosity = verbosity
         ? ExplainVerbosity.allPlansExecution
@@ -45,6 +72,8 @@ export class Explain {
     } else {
       this.verbosity = verbosity;
     }
+
+    this.maxTimeMS = maxTimeMS;
   }
 
   static fromOptions({ explain }: ExplainOptions = {}): Explain | undefined {
@@ -54,27 +83,7 @@ export class Explain {
       return new Explain(explain);
     }
 
-    if (typeof explain === 'object') {
-      const { verbosity } = explain;
-      return new Explain(verbosity);
-    }
-
-    throw new MongoInvalidArgumentError(
-      'Field "explain" must be a string, a boolean or an ExplainCommandOptions object.'
-    );
-  }
-}
-
-export class ExplainCommandOptions2 {
-  private constructor(
-    public readonly explain: Explain,
-    public readonly maxTimeMS: number | undefined
-  ) {}
-
-  static fromOptions(options: ExplainOptions = {}): ExplainCommandOptions2 | undefined {
-    const explain = Explain.fromOptions(options);
-    const maxTimeMS = typeof options.explain === 'object' ? options.explain.maxTimeMS : undefined;
-
-    return explain ? new ExplainCommandOptions2(explain, maxTimeMS) : undefined;
+    const { verbosity, maxTimeMS } = explain;
+    return new Explain(verbosity, maxTimeMS);
   }
 }
