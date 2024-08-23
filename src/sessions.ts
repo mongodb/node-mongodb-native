@@ -693,7 +693,16 @@ export class ClientSession
    */
   async withTransaction<T = any>(
     fn: WithTransactionCallback<T>,
-    options?: TransactionOptions
+    options?: TransactionOptions & {
+      /**
+       * Configures a timeoutMS expiry for the entire withTransactionCallback.
+       *
+       * @remarks
+       * - The remaining timeout will not be applied to callback operations that do not use the ClientSession.
+       * - Overriding timeoutMS for operations executed using the explicit session inside the provided callback will result in a client-side error.
+       */
+      timeoutMS?: number;
+    }
   ): Promise<T> {
     const MAX_TIMEOUT = 120000;
 
