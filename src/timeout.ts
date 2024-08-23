@@ -1,3 +1,5 @@
+import { performance } from 'node:perf_hooks';
+
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoInvalidArgumentError } from './error';
