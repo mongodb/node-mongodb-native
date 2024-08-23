@@ -56,15 +56,13 @@ export class Timeout extends Promise<never> {
   /** Create a new timeout that expires in `duration` ms */
   private constructor(
     executor: Executor = () => null,
-    duration: number,
-    unref = true,
-    rejection: Error | null = null
+    { duration, unref, rejection }: { duration: number; unref?: true; rejection?: Error }
   ) {
-    let reject!: Reject;
     if (duration < 0) {
       throw new MongoInvalidArgumentError('Cannot create a Timeout with a negative duration');
     }
 
+    let reject!: Reject;
     super((_, promiseReject) => {
       reject = promiseReject;
 
@@ -104,8 +102,8 @@ export class Timeout extends Promise<never> {
     if (this.timedOut) throw new TimeoutError('Timed out', { duration: this.duration });
   }
 
-  public static expires(durationMS: number, unref?: boolean): Timeout {
-    return new Timeout(undefined, durationMS, unref);
+  public static expires(duration: number, unref?: true): Timeout {
+    return new Timeout(undefined, { duration, unref });
   }
 
   static is(timeout: unknown): timeout is Timeout {
@@ -121,7 +119,7 @@ export class Timeout extends Promise<never> {
   }
 
   static override reject(rejection?: Error): Timeout {
-    return new Timeout(undefined, 0, true, rejection);
+    return new Timeout(undefined, { duration: 0, unref: true, rejection });
   }
 }
 
