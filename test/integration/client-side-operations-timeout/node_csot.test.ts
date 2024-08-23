@@ -5,12 +5,13 @@ import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
 
-import { type CommandSucceededEvent } from '../../../lib/cmap/command_monitoring_events';
 import {
   BSON,
   type ClientSession,
   type Collection,
+  type CommandFailedEvent,
   type CommandStartedEvent,
+  type CommandSucceededEvent,
   Connection,
   type Db,
   type FindCursor,
@@ -174,8 +175,8 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
 
   describe('server-side maxTimeMS errors are transformed', () => {
     let client: MongoClient;
-    let commandsSucceeded;
-    let commandsFailed;
+    let commandsSucceeded: CommandSucceededEvent[];
+    let commandsFailed: CommandFailedEvent[];
 
     beforeEach(async function () {
       client = this.configuration.newClient({ timeoutMS: 500_000, monitorCommands: true });
@@ -341,8 +342,11 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
     };
 
     beforeEach(async function () {
-      internalClient = this.configuration.newClient(undefined);
-      await internalClient.db('db').dropCollection('coll');
+      internalClient = this.configuration.newClient();
+      await internalClient
+        .db('db')
+        .dropCollection('coll')
+        .catch(() => null);
       await internalClient
         .db('db')
         .collection('coll')
@@ -444,8 +448,11 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
       };
 
       beforeEach(async function () {
-        internalClient = this.configuration.newClient(undefined);
-        await internalClient.db('db').dropCollection('coll');
+        internalClient = this.configuration.newClient();
+        await internalClient
+          .db('db')
+          .dropCollection('coll')
+          .catch(() => null);
         await internalClient
           .db('db')
           .collection('coll')
