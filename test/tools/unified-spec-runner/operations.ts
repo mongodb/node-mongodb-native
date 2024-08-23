@@ -227,16 +227,12 @@ operations.set('close', async ({ entities, operation }) => {
 
 operations.set('commitTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
-  if (operation.arguments?.timeoutMS != null)
-    return await session.commitTransaction({ timeoutMS: operation.arguments.timeoutMS });
-  return await session.commitTransaction();
+  return await session.commitTransaction({ timeoutMS: operation.arguments?.timeoutMS });
 });
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
-  if (operation.arguments?.timeoutMS != null)
-    return await session.abortTransaction({ timeoutMS: operation.arguments.timeoutMS });
-  return await session.abortTransaction();
+  return await session.abortTransaction({ timeoutMS: operation.arguments?.timeoutMS });
 });
 
 operations.set('createChangeStream', async ({ entities, operation }) => {
