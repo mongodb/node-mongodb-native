@@ -60,7 +60,7 @@ function isPair(t: Sort): t is [string, SortDirection] {
     try {
       prepareDirection(t[1]);
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }

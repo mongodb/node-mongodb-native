@@ -44,7 +44,7 @@ const CHANGE_DOMAIN_TYPES = {
   CLUSTER: Symbol('Cluster')
 };
 
-const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE];
+const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE] as const;
 
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
@@ -680,7 +680,7 @@ export class ChangeStream<
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       try {
         const hasNext = await this.cursor.hasNext();
@@ -706,7 +706,7 @@ export class ChangeStream<
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       try {
         const change = await this.cursor.next();
@@ -735,7 +735,7 @@ export class ChangeStream<
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       try {
         const change = await this.cursor.tryNext();
@@ -850,10 +850,10 @@ export class ChangeStream<
       this.type === CHANGE_DOMAIN_TYPES.CLUSTER
         ? (this.parent as MongoClient)
         : this.type === CHANGE_DOMAIN_TYPES.DATABASE
-        ? (this.parent as Db).client
-        : this.type === CHANGE_DOMAIN_TYPES.COLLECTION
-        ? (this.parent as Collection).client
-        : null;
+          ? (this.parent as Db).client
+          : this.type === CHANGE_DOMAIN_TYPES.COLLECTION
+            ? (this.parent as Collection).client
+            : null;
 
     if (client == null) {
       // This should never happen because of the assertion in the constructor
@@ -884,7 +884,6 @@ export class ChangeStream<
   private _closeEmitterModeWithError(error: AnyError): void {
     this.emit(ChangeStream.ERROR, error);
 
-    // eslint-disable-next-line github/no-then
     this.close().then(undefined, squashError);
   }
 
@@ -949,7 +948,7 @@ export class ChangeStream<
 
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
-      // eslint-disable-next-line github/no-then
+
       this.cursor.close().then(undefined, squashError);
 
       const topology = getTopology(this.parent);
@@ -957,7 +956,7 @@ export class ChangeStream<
         .selectServer(this.cursor.readPreference, {
           operationName: 'reconnect topology in change stream'
         })
-        // eslint-disable-next-line github/no-then
+
         .then(
           () => {
             this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);

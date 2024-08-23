@@ -98,7 +98,7 @@ describe('Db', function () {
         try {
           client.connect(function () {});
           test.ok(false);
-        } catch (err) {
+        } catch {
           client.close(done);
         }
       });

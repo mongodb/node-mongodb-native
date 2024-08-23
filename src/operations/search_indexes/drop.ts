@@ -8,7 +8,10 @@ import { AbstractOperation } from '../operation';
 
 /** @internal */
 export class DropSearchIndexOperation extends AbstractOperation<void> {
-  constructor(private readonly collection: Collection, private readonly name: string) {
+  constructor(
+    private readonly collection: Collection,
+    private readonly name: string
+  ) {
     super();
   }
 

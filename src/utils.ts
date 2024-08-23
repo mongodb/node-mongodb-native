@@ -192,7 +192,6 @@ export function isPromiseLike<T = unknown>(value?: unknown): value is PromiseLik
     value != null &&
     typeof value === 'object' &&
     'then' in value &&
-    // eslint-disable-next-line github/no-then
     typeof value.then === 'function'
   );
 }
@@ -301,7 +300,10 @@ export class MongoDBNamespace {
    * @param db - database name
    * @param collection - collection name
    */
-  constructor(public db: string, public collection?: string) {
+  constructor(
+    public db: string,
+    public collection?: string
+  ) {
     this.collection = collection === '' ? undefined : collection;
   }
 
@@ -333,7 +335,10 @@ export class MongoDBNamespace {
  * used in scenarios where this can be guaranteed.
  */
 export class MongoDBCollectionNamespace extends MongoDBNamespace {
-  constructor(db: string, override collection: string) {
+  constructor(
+    db: string,
+    override collection: string
+  ) {
     super(db, collection);
   }
 
@@ -996,7 +1001,7 @@ export const DEFAULT_PK_FACTORY = {
  * })
  * ```
  */
-export const MONGODB_WARNING_CODE = 'MONGODB DRIVER' as const;
+export const MONGODB_WARNING_CODE = 'MONGODB DRIVER';
 
 /** @internal */
 export function emitWarning(message: string): void {

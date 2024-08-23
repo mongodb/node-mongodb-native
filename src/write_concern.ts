@@ -169,8 +169,8 @@ export function throwIfWriteConcernError(response: unknown): void {
       MongoDBResponse.is(response) && response.has('writeConcernError')
         ? response.toObject()
         : !MongoDBResponse.is(response) && 'writeConcernError' in response
-        ? response
-        : null;
+          ? response
+          : null;
 
     if (writeConcernError != null) {
       throw new MongoWriteConcernError(writeConcernError as any);

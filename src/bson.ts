@@ -1,5 +1,4 @@
-import type { DeserializeOptions, SerializeOptions } from 'bson';
-import { BSON } from 'bson';
+import { BSON, type DeserializeOptions, type SerializeOptions } from 'bson';
 
 export {
   Binary,

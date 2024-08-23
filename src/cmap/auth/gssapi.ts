@@ -168,7 +168,7 @@ export async function performGSSAPICanonicalizeHostName(
       const results = await dns.promises.resolvePtr(address);
       // If the ptr did not error but had no results, return the host.
       return results.length > 0 ? results[0] : host;
-    } catch (error) {
+    } catch {
       // This can error as ptr records may not exist for all ips. In this case
       // fallback to a cname lookup as dns.lookup() does not return the
       // cname.

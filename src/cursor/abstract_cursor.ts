@@ -656,7 +656,6 @@ export abstract class AbstractCursor<
       // We only want to end this session if we created it, and it hasn't ended yet
       if (session.explicit === false) {
         if (!session.hasEnded) {
-          // eslint-disable-next-line github/no-then
           session.endSession().then(undefined, squashError);
         }
         this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
@@ -882,7 +881,6 @@ class ReadableCursorStream extends Readable {
   }
 
   override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
-    // eslint-disable-next-line github/no-then
     this._cursor.close().then(
       () => callback(error),
       closeError => callback(closeError)
@@ -895,13 +893,11 @@ class ReadableCursorStream extends Readable {
       return;
     }
 
-    // eslint-disable-next-line github/no-then
     this._cursor.next().then(
       result => {
         if (result == null) {
           this.push(null);
         } else if (this.destroyed) {
-          // eslint-disable-next-line github/no-then
           this._cursor.close().then(undefined, squashError);
         } else {
           if (this.push(result)) {
@@ -917,7 +913,6 @@ class ReadableCursorStream extends Readable {
         //       a client during iteration. Alternatively, we could do the "right" thing and
         //       propagate the error message by removing this special case.
         if (err.message.match(/server is closed/)) {
-          // eslint-disable-next-line github/no-then
           this._cursor.close().then(undefined, squashError);
           return this.push(null);
         }

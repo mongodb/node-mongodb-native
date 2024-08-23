@@ -47,17 +47,18 @@ import {
   FindOneAndUpdateOperation,
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
-import type {
-  CreateIndexesOptions,
-  DropIndexesOptions,
-  IndexDescription,
-  IndexDescriptionCompact,
-  IndexDescriptionInfo,
-  IndexInformationOptions,
-  IndexSpecification,
-  ListIndexesOptions
+import {
+  CreateIndexesOperation,
+  type CreateIndexesOptions,
+  type DropIndexesOptions,
+  DropIndexOperation,
+  type IndexDescription,
+  type IndexDescriptionCompact,
+  type IndexDescriptionInfo,
+  type IndexInformationOptions,
+  type IndexSpecification,
+  type ListIndexesOptions
 } from './operations/indexes';
-import { CreateIndexesOperation, DropIndexOperation } from './operations/indexes';
 import {
   InsertManyOperation,
   type InsertManyResult,
@@ -1121,8 +1122,8 @@ export class Collection<TSchema extends Document = Document> {
       indexNameOrOptions == null
         ? null
         : typeof indexNameOrOptions === 'object'
-        ? null
-        : indexNameOrOptions;
+          ? null
+          : indexNameOrOptions;
 
     return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, options);
   }
