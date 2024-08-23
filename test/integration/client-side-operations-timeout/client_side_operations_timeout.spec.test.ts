@@ -32,7 +32,13 @@ const skippedTests = {
   'timeoutMS applies to whole operation, not individual attempts - insertMany on collection':
     'TODO(NODE-6274)',
   'timeoutMS applies to whole operation, not individual attempts - bulkWrite on collection':
-    'TODO(NODE-6274)'
+    'TODO(NODE-6274)',
+  'command is not sent if RTT is greater than timeoutMS': 'TODO(DRIVERS-2965)',
+  'Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure':
+    'TODO(DRIVERS-2965)',
+  'Non-tailable cursor lifetime remaining timeoutMS applied to getMore if timeoutMode is unset':
+    'TODO(DRIVERS-2965)'
+  //'timeoutMS can be configured on a MongoClient - dropIndexes on collection': 'Successfully returns false on failure, but does not surface CSOT'
 };
 
 describe('CSOT spec tests', function () {
