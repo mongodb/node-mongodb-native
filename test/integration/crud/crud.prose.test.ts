@@ -160,6 +160,7 @@ describe('CRUD Prose Spec Tests', () => {
       client = this.configuration.newClient({}, { monitorCommands: true });
       await client.connect();
 
+      await client.db('explain-test').dropDatabase();
       collection = await client.db('explain-test').createCollection('collection');
 
       client.on('commandStarted', filterForCommands('explain', commands));

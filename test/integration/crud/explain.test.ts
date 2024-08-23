@@ -7,7 +7,8 @@ import {
   type CommandStartedEvent,
   type Db,
   type MongoClient,
-  MongoServerError
+  MongoServerError,
+  squashError
 } from '../../mongodb';
 import { filterForCommands } from '../shared';
 
@@ -129,6 +130,7 @@ describe('CRUD API explain option', function () {
       client = this.configuration.newClient({}, { monitorCommands: true });
       await client.connect();
 
+      await client.db('explain-test').dropDatabase();
       collection = await client.db('explain-test').createCollection('bar');
 
       client.on('commandStarted', filterForCommands('explain', commands));
