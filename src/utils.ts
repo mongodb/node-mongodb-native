@@ -528,9 +528,13 @@ export function resolveOptions<T extends CommandOperationOptions>(
     result.readPreference = readPreference;
   }
 
-  const timeoutMS = options?.timeoutMS;
+  if (session?.explicit && session?.timeoutContext != null && options?.timeoutMS != null) {
+    throw new MongoInvalidArgumentError(
+      'An operation cannot be given a timeoutMS setting when inside a withTransaction call that has a timeoutMS setting'
+    );
+  }
 
-  result.timeoutMS = timeoutMS ?? parent?.timeoutMS;
+  result.timeoutMS = options?.timeoutMS ?? parent?.timeoutMS;
 
   return result;
 }

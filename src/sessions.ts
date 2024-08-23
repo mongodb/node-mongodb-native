@@ -707,8 +707,11 @@ export class ClientSession
     const MAX_TIMEOUT = 120000;
 
     this.timeoutContext =
-      options != null && 'timeoutMS' in options && typeof options.timeoutMS === 'number'
-        ? TimeoutContext.create({ timeoutMS: options.timeoutMS, ...this.clientOptions })
+      typeof options?.timeoutMS === 'number' || typeof this.timeoutMS === 'number'
+        ? TimeoutContext.create({
+            timeoutMS: options?.timeoutMS ?? this.timeoutMS,
+            ...this.clientOptions
+          })
         : null;
 
     const startTime = this.timeoutContext?.csotEnabled() ? this.timeoutContext.start : now();

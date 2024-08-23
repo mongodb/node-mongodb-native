@@ -12,6 +12,7 @@ import {
   type FindCursor,
   LEGACY_HELLO_COMMAND,
   type MongoClient,
+  MongoInvalidArgumentError,
   MongoOperationTimeoutError,
   MongoServerError
 } from '../../mongodb';
@@ -317,6 +318,66 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
 
         expect(commandsSucceeded).to.have.lengthOf(1);
         expect(commandsSucceeded).to.have.nested.property('[0].reply.writeConcernError.code', 50);
+      });
+    });
+  });
+
+  describe.only('when using an explicit session', () => {
+    describe('created for a withTransaction callback', () => {
+      describe('passing a timeoutMS and a session with a timeoutContext', () => {
+        let client: MongoClient;
+
+        beforeEach(async function () {
+          client = this.configuration.newClient({ timeoutMS: 123 });
+        });
+
+        afterEach(async function () {
+          await client.close();
+        });
+
+        it('throws a validation error from the operation', async () => {
+          // Drivers MUST raise a validation error if an explicit session with a timeout is used and
+          // the timeoutMS option is set at the operation level for operations executed as part of a withTransaction callback.
+
+          const coll = client.db('db').collection('coll');
+
+          const session = client.startSession();
+
+          let insertError: Error | null = null;
+          const withTransactionError = await session
+            .withTransaction(async session => {
+              insertError = await coll
+                .insertOne({ x: 1 }, { session, timeoutMS: 1234 })
+                .catch(error => error);
+              throw insertError;
+            })
+            .catch(error => error);
+
+          expect(insertError).to.be.instanceOf(MongoInvalidArgumentError);
+          expect(withTransactionError).to.be.instanceOf(MongoInvalidArgumentError);
+        });
+      });
+    });
+
+    describe('created manually', () => {
+      describe('passing a timeoutMS and a session with an inherited timeoutMS', () => {
+        let client: MongoClient;
+
+        beforeEach(async function () {
+          client = this.configuration.newClient({ timeoutMS: 123 });
+        });
+
+        afterEach(async function () {
+          await client.close();
+        });
+
+        it('does not throw a validation error', async () => {
+          const coll = client.db('db').collection('coll');
+          const session = client.startSession();
+          session.startTransaction();
+          await coll.insertOne({ x: 1 }, { session, timeoutMS: 1234 });
+          await session.abortTransaction(); // this uses the inherited timeoutMS, not the insert
+        });
       });
     });
   });

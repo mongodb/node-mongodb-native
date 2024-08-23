@@ -56,8 +56,12 @@ export class Timeout extends Promise<never> {
   /** Create a new timeout that expires in `duration` ms */
   private constructor(
     executor: Executor = () => null,
-    { duration, unref, rejection }: { duration: number; unref?: true; rejection?: Error }
+    options?: { duration: number; unref?: true; rejection?: Error }
   ) {
+    const duration = options?.duration ?? 0;
+    const unref = !!options?.unref;
+    const rejection = options?.rejection;
+
     if (duration < 0) {
       throw new MongoInvalidArgumentError('Cannot create a Timeout with a negative duration');
     }
