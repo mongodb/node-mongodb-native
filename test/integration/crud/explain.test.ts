@@ -7,8 +7,7 @@ import {
   type CommandStartedEvent,
   type Db,
   type MongoClient,
-  MongoServerError,
-  squashError
+  MongoServerError
 } from '../../mongodb';
 import { filterForCommands } from '../shared';
 
