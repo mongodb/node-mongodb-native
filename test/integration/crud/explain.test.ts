@@ -123,10 +123,13 @@ describe('CRUD API explain option', function () {
   describe('explain helpers w/ maxTimeMS', function () {
     let client: MongoClient;
     const commands: CommandStartedEvent[] = [];
+    let collection: Collection;
 
     beforeEach(async function () {
       client = this.configuration.newClient({}, { monitorCommands: true });
       await client.connect();
+
+      collection = await client.db('explain-test').createCollection('bar');
 
       client.on('commandStarted', filterForCommands('explain', commands));
       commands.length = 0;
@@ -139,7 +142,6 @@ describe('CRUD API explain option', function () {
     describe('cursor explain commands', function () {
       describe('when maxTimeMS is specified via a cursor explain method, it sets the property on the command', function () {
         test('find()', async function () {
-          const collection = client.db('explain-test').collection('collection');
           await collection
             .find({ name: 'john doe' })
             .explain({ maxTimeMS: 2000, verbosity: 'queryPlanner' });
@@ -149,8 +151,6 @@ describe('CRUD API explain option', function () {
         });
 
         test('aggregate()', async function () {
-          const collection = client.db('explain-test').collection('collection');
-
           await collection
             .aggregate([{ $match: { name: 'john doe' } }])
             .explain({ maxTimeMS: 2000, verbosity: 'queryPlanner' });
@@ -161,9 +161,6 @@ describe('CRUD API explain option', function () {
       });
 
       it('when maxTimeMS is not specified, it is not attached to the explain command', async function () {
-        // Create a collection, referred to as `collection`, with the namespace `explain-test.collection`.
-        const collection = client.db('explain-test').collection('collection');
-
         await collection.find({ name: 'john doe' }).explain({ verbosity: 'queryPlanner' });
 
         const [{ command }] = commands;
@@ -171,9 +168,6 @@ describe('CRUD API explain option', function () {
       });
 
       it('when maxTimeMS is specified as an explain option and a command-level option, the explain option takes precedence', async function () {
-        // Create a collection, referred to as `collection`, with the namespace `explain-test.collection`.
-        const collection = client.db('explain-test').collection('collection');
-
         await collection
           .find(
             {},
@@ -194,15 +188,12 @@ describe('CRUD API explain option', function () {
 
     describe('regular commands w/ explain', function () {
       it('when maxTimeMS is specified as an explain option and a command-level option, the explain option takes precedence', async function () {
-        // Create a collection, referred to as `collection`, with the namespace `explain-test.collection`.
-        const collection = client.db('explain-test').collection('collection');
-
         await collection.deleteMany(
           {},
           {
             maxTimeMS: 1000,
             explain: {
-              verbosity: true,
+              verbosity: 'queryPlanner',
               maxTimeMS: 2000
             }
           }
@@ -214,7 +205,6 @@ describe('CRUD API explain option', function () {
 
       describe('when maxTimeMS is specified as an explain option', function () {
         it('attaches maxTimeMS to the explain command', async function () {
-          const collection = client.db('explain-test').collection('collection');
           await collection.deleteMany(
             {},
             { explain: { maxTimeMS: 2000, verbosity: 'queryPlanner' } }
@@ -226,8 +216,6 @@ describe('CRUD API explain option', function () {
       });
 
       it('when maxTimeMS is not specified, it is not attached to the explain command', async function () {
-        const collection = client.db('explain-test').collection('collection');
-
         await collection.deleteMany({}, { explain: { verbosity: 'queryPlanner' } });
 
         const [{ command }] = commands;

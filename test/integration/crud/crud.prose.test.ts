@@ -2,7 +2,12 @@ import { expect } from 'chai';
 import { once } from 'events';
 
 import { type CommandStartedEvent } from '../../../mongodb';
-import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../mongodb';
+import {
+  type Collection,
+  MongoBulkWriteError,
+  type MongoClient,
+  MongoServerError
+} from '../../mongodb';
 import { filterForCommands } from '../shared';
 
 describe('CRUD Prose Spec Tests', () => {
@@ -149,10 +154,13 @@ describe('CRUD Prose Spec Tests', () => {
   describe('14. `explain` helpers allow users to specify `maxTimeMS`', function () {
     let client: MongoClient;
     const commands: CommandStartedEvent[] = [];
+    let collection: Collection;
 
     beforeEach(async function () {
       client = this.configuration.newClient({}, { monitorCommands: true });
       await client.connect();
+
+      collection = await client.db('explain-test').createCollection('collection');
 
       client.on('commandStarted', filterForCommands('explain', commands));
       commands.length = 0;
@@ -163,9 +171,6 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('sets maxTimeMS on explain commands, when specfied', async function () {
-      // Create a collection, referred to as `collection`, with the namespace `explain-test.collection`.
-      const collection = client.db('explain-test').collection('collection');
-
       await collection
         .find(
           { name: 'john doe' },
