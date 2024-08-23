@@ -63,15 +63,14 @@ function dropCollection(dbObj, collectionName, options = {}) {
  * @returns a function that collects the specified comment events
  */
 function filterForCommands(commands, bag) {
-  const predicate =
-    typeof commands === 'function'
-      ? commands
-      : command => {
-          const specifiedCommandNames = [commands].flat();
-          return specifiedCommandNames.includes(command.commandName);
-        };
+  if (typeof commands === 'function') {
+    return function (event) {
+      if (commands(event.commandName)) bag.push(event);
+    };
+  }
+  commands = Array.isArray(commands) ? commands : [commands];
   return function (event) {
-    if (predicate(event.commandName)) bag.push(event);
+    if (commands.indexOf(event.commandName) !== -1) bag.push(event);
   };
 }
 
