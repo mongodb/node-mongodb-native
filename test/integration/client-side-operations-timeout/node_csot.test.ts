@@ -322,7 +322,9 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
     });
   });
 
-  describe.only('when using an explicit session', () => {
+  describe('when using an explicit session', () => {
+    const metadata = { requires: { topology: ['replicaset'] } };
+
     describe('created for a withTransaction callback', () => {
       describe('passing a timeoutMS and a session with a timeoutContext', () => {
         let client: MongoClient;
@@ -335,7 +337,7 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
           await client.close();
         });
 
-        it('throws a validation error from the operation', async () => {
+        it('throws a validation error from the operation', metadata, async () => {
           // Drivers MUST raise a validation error if an explicit session with a timeout is used and
           // the timeoutMS option is set at the operation level for operations executed as part of a withTransaction callback.
 
@@ -371,7 +373,7 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
           await client.close();
         });
 
-        it('does not throw a validation error', async () => {
+        it('does not throw a validation error', metadata, async () => {
           const coll = client.db('db').collection('coll');
           const session = client.startSession();
           session.startTransaction();
