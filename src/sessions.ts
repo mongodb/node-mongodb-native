@@ -16,7 +16,6 @@ import {
   MongoErrorLabel,
   MongoExpiredSessionError,
   MongoInvalidArgumentError,
-  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
@@ -284,7 +283,7 @@ export class ClientSession
       }
     } catch (error) {
       // spec indicates that we should ignore all errors for `endSessions`
-      if (MongoOperationTimeoutError.is(error)) throw error;
+      if (error.name === 'MongoOperationTimeoutError') throw error;
       squashError(error);
     } finally {
       if (!this.hasEnded) {
@@ -629,16 +628,20 @@ export class ClientSession
     } catch (firstAbortError) {
       this.unpin();
 
-      if (options?.throwTimeout && MongoOperationTimeoutError.is(firstAbortError))
+      if (firstAbortError.name === 'MongoRuntimeError') throw firstAbortError;
+      if (options?.throwTimeout && firstAbortError.name === 'MongoOperationTimeoutError') {
         throw firstAbortError;
+      }
 
       if (firstAbortError instanceof MongoError && isRetryableWriteError(firstAbortError)) {
         try {
           await executeOperation(this.client, operation, timeoutContext);
           return;
         } catch (secondAbortError) {
-          if (options?.throwTimeout && MongoOperationTimeoutError.is(secondAbortError))
+          if (secondAbortError.name === 'MongoRuntimeError') throw secondAbortError;
+          if (options?.throwTimeout && secondAbortError.name === 'MongoOperationTimeoutError') {
             throw secondAbortError;
+          }
           // we do not retry the retry
         }
       }

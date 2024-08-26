@@ -124,6 +124,9 @@ function isAggregateError(e: unknown): e is Error & { errors: Error[] } {
  * mongodb-client-encryption has a dependency on this error, it uses the constructor with a string argument
  */
 export class MongoError extends Error {
+  get [Symbol.toStringTag]() {
+    return this.name;
+  }
   /** @internal */
   [kErrorLabels]: Set<string>;
   /**
@@ -765,21 +768,8 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
  * @internal
  */
 export class MongoOperationTimeoutError extends MongoRuntimeError {
-  get [Symbol.toStringTag]() {
-    return 'MongoOperationTimeoutError';
-  }
-
   override get name(): string {
     return 'MongoOperationTimeoutError';
-  }
-
-  static is(error: unknown): error is MongoOperationTimeoutError {
-    return (
-      error != null &&
-      typeof error === 'object' &&
-      Symbol.toStringTag in error &&
-      error[Symbol.toStringTag] === 'MongoOperationTimeoutError'
-    );
   }
 }
 
