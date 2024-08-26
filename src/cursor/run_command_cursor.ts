@@ -21,6 +21,7 @@ export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
   timeoutMS?: number;
+  /** @internal */
   timeoutMode?: CursorTimeoutMode;
 } & BSONSerializeOptions;
 
