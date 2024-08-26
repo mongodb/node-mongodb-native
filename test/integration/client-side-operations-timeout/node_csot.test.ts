@@ -22,7 +22,9 @@ import {
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 
-describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
+const metadata = { requires: { mongodb: '>=4.4' } };
+
+describe('CSOT driver tests', metadata, () => {
   describe('timeoutMS inheritance', () => {
     let client: MongoClient;
     let db: Db;
@@ -225,18 +227,22 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
           await client.db('admin').command({ ...failpoint, mode: 'off' });
       });
 
-      it('throws a MongoOperationTimeoutError error and emits command failed', async () => {
-        const error = await client
-          .db()
-          .command({ ping: 1 })
-          .catch(error => error);
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-        expect(error.cause).to.be.instanceOf(MongoServerError);
-        expect(error.cause).to.have.property('code', 50);
+      it(
+        'throws a MongoOperationTimeoutError error and emits command failed',
+        metadata,
+        async () => {
+          const error = await client
+            .db()
+            .command({ ping: 1 })
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(error.cause).to.be.instanceOf(MongoServerError);
+          expect(error.cause).to.have.property('code', 50);
 
-        expect(commandsFailed).to.have.lengthOf(1);
-        expect(commandsFailed).to.have.nested.property('[0].failure.cause.code', 50);
-      });
+          expect(commandsFailed).to.have.lengthOf(1);
+          expect(commandsFailed).to.have.nested.property('[0].failure.cause.code', 50);
+        }
+      );
     });
 
     describe('when a maxTimeExpired error is returned inside a writeErrors array', () => {
@@ -271,18 +277,22 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
 
       afterEach(() => sinon.restore());
 
-      it('throws a MongoOperationTimeoutError error and emits command succeeded', async () => {
-        const error = await client
-          .db('admin')
-          .command({ giveMeWriteErrors: 1 })
-          .catch(error => error);
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-        expect(error.cause).to.be.instanceOf(MongoServerError);
-        expect(error.cause).to.have.nested.property('writeErrors[3].code', 50);
+      it(
+        'throws a MongoOperationTimeoutError error and emits command succeeded',
+        metadata,
+        async () => {
+          const error = await client
+            .db('admin')
+            .command({ giveMeWriteErrors: 1 })
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(error.cause).to.be.instanceOf(MongoServerError);
+          expect(error.cause).to.have.nested.property('writeErrors[3].code', 50);
 
-        expect(commandsSucceeded).to.have.lengthOf(1);
-        expect(commandsSucceeded).to.have.nested.property('[0].reply.writeErrors[3].code', 50);
-      });
+          expect(commandsSucceeded).to.have.lengthOf(1);
+          expect(commandsSucceeded).to.have.nested.property('[0].reply.writeErrors[3].code', 50);
+        }
+      );
     });
 
     describe('when a maxTimeExpired error is returned inside a writeConcernError embedded document', () => {
@@ -310,19 +320,23 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
           await client.db('admin').command({ ...failpoint, mode: 'off' });
       });
 
-      it('throws a MongoOperationTimeoutError error and emits command succeeded', async () => {
-        const error = await client
-          .db()
-          .collection('a')
-          .insertOne({})
-          .catch(error => error);
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-        expect(error.cause).to.be.instanceOf(MongoServerError);
-        expect(error.cause).to.have.nested.property('writeConcernError.code', 50);
+      it(
+        'throws a MongoOperationTimeoutError error and emits command succeeded',
+        metadata,
+        async () => {
+          const error = await client
+            .db()
+            .collection('a')
+            .insertOne({})
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(error.cause).to.be.instanceOf(MongoServerError);
+          expect(error.cause).to.have.nested.property('writeConcernError.code', 50);
 
-        expect(commandsSucceeded).to.have.lengthOf(1);
-        expect(commandsSucceeded).to.have.nested.property('[0].reply.writeConcernError.code', 50);
-      });
+          expect(commandsSucceeded).to.have.lengthOf(1);
+          expect(commandsSucceeded).to.have.nested.property('[0].reply.writeConcernError.code', 50);
+        }
+      );
     });
   });
 
@@ -376,22 +390,26 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
 
     context('ITERATION mode', () => {
       context('when executing an operation', () => {
-        it('must apply the configured timeoutMS to the initial operation execution', async function () {
-          const cursor = client
-            .db('db')
-            .collection('coll')
-            .find({}, { batchSize: 3, timeoutMode: 'iteration', timeoutMS: 10 })
-            .limit(3);
+        it(
+          'must apply the configured timeoutMS to the initial operation execution',
+          metadata,
+          async function () {
+            const cursor = client
+              .db('db')
+              .collection('coll')
+              .find({}, { batchSize: 3, timeoutMode: 'iteration', timeoutMS: 10 })
+              .limit(3);
 
-          const maybeError = await cursor.next().then(
-            () => null,
-            e => e
-          );
+            const maybeError = await cursor.next().then(
+              () => null,
+              e => e
+            );
 
-          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
-        });
+            expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+          }
+        );
 
-        it('refreshes the timeout for any getMores', async function () {
+        it('refreshes the timeout for any getMores', metadata, async function () {
           const cursor = client
             .db('db')
             .collection('coll')
@@ -410,25 +428,29 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
           expect(getMores).to.have.length(3); // Expecting 3 getMores (including final empty getMore)
         });
 
-        it('does not append a maxTimeMS to the original command or getMores', async function () {
-          const cursor = client
-            .db('db')
-            .collection('coll')
-            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 100 })
-            .project({ _id: 0 });
-          await cursor.toArray();
+        it(
+          'does not append a maxTimeMS to the original command or getMores',
+          metadata,
+          async function () {
+            const cursor = client
+              .db('db')
+              .collection('coll')
+              .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 100 })
+              .project({ _id: 0 });
+            await cursor.toArray();
 
-          expect(commandStarted).to.have.length.gte(3); // Find and 2 getMores
-          expect(
-            commandStarted.filter(ev => {
-              return (
-                ev.command.find != null &&
-                ev.command.getMore != null &&
-                ev.command.maxTimeMS != null
-              );
-            })
-          ).to.have.lengthOf(0);
-        });
+            expect(commandStarted).to.have.length.gte(3); // Find and 2 getMores
+            expect(
+              commandStarted.filter(ev => {
+                return (
+                  ev.command.find != null &&
+                  ev.command.getMore != null &&
+                  ev.command.maxTimeMS != null
+                );
+              })
+            ).to.have.lengthOf(0);
+          }
+        );
       });
     });
 
@@ -483,7 +505,7 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
         context(
           'when there are documents available from previously retrieved batch and timeout has expired',
           () => {
-            it('returns documents without error', async function () {
+            it('returns documents without error', metadata, async function () {
               const cursor = client
                 .db('db')
                 .collection('coll')
@@ -506,7 +528,7 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
           }
         );
         context('when a getMore is required and the timeout has expired', () => {
-          it('throws a MongoOperationTimeoutError', async function () {
+          it('throws a MongoOperationTimeoutError', metadata, async function () {
             const cursor = client
               .db('db')
               .collection('coll')
@@ -527,7 +549,7 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
           });
         });
 
-        it('does not apply maxTimeMS to a getMore', async function () {
+        it('does not apply maxTimeMS to a getMore', metadata, async function () {
           const cursor = client
             .db('db')
             .collection('coll')
