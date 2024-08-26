@@ -323,7 +323,9 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
   });
 
   describe('when using an explicit session', () => {
-    const metadata = { requires: { topology: ['replicaset'] } };
+    const metadata: MongoDBMetadataUI = {
+      requires: { topology: ['replicaset'], mongodb: '>=4.4' }
+    };
 
     describe('created for a withTransaction callback', () => {
       describe('passing a timeoutMS and a session with a timeoutContext', () => {
