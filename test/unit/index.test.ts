@@ -48,6 +48,8 @@ const EXPECTED_EXPORTS = [
   'ConnectionPoolMonitoringEvent',
   'ConnectionPoolReadyEvent',
   'ConnectionReadyEvent',
+  'CursorInitializeOptions',
+  'CursorTimeoutMode',
   'CURSOR_FLAGS',
   'Db',
   'DBRef',
