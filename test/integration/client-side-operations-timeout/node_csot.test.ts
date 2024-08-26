@@ -555,6 +555,7 @@ describe('CSOT driver tests', metadata, () => {
             .collection('coll')
             .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 1000 })
             .project({ _id: 0 });
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           for await (const _doc of cursor) {
             // Ignore _doc
           }
