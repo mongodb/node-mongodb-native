@@ -640,23 +640,16 @@ describe('CSOT spec prose tests', function () {
       }
     };
 
-    before('drop collection', async function () {
+    beforeEach(async function () {
       const internalClient = this.configuration.newClient();
+      // End in-progress transactions otherwise "drop" will hang
+      await internalClient.db('admin').command({ killAllSessions: [] });
       await internalClient
         .db('endSession_db')
         .collection('endSession_coll')
         .drop()
         .catch(() => null);
-      await internalClient.close();
-    });
-
-    beforeEach('setup failpoint', async function () {
-      if (!semver.satisfies(this.configuration.version, '>=4.4')) {
-        this.skipReason = 'Requires server version 4.4+';
-        this.skip();
-      }
-
-      const internalClient = this.configuration.newClient();
+      await internalClient.db('endSession_db').createCollection('endSession_coll');
       await internalClient.db('admin').command(failpoint);
       await internalClient.close();
     });
@@ -664,11 +657,9 @@ describe('CSOT spec prose tests', function () {
     let client: MongoClient;
 
     afterEach(async function () {
-      if (semver.satisfies(this.configuration.version, '>=4.4')) {
-        const internalClient = this.configuration.newClient();
-        await internalClient.db('admin').command({ ...failpoint, mode: 'off' });
-        await internalClient.close();
-      }
+      const internalClient = this.configuration.newClient();
+      await internalClient.db('admin').command({ ...failpoint, mode: 'off' });
+      await internalClient.close();
       await client?.close();
     });
 
