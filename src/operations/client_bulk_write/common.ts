@@ -43,7 +43,10 @@ export interface ClientInsertOneModel<TSchema extends Document = Document>
 export interface ClientDeleteOneModel<TSchema extends Document = Document>
   extends ClientWriteModel {
   name: 'deleteOne';
-  /** The filter to limit the deleted documents. */
+  /**
+   * The filter used to determine if a document should be deleted.
+   * For a deleteOne operation, the first match is removed.
+   */
   filter: Filter<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
@@ -55,7 +58,10 @@ export interface ClientDeleteOneModel<TSchema extends Document = Document>
 export interface ClientDeleteManyModel<TSchema extends Document = Document>
   extends ClientWriteModel {
   name: 'deleteMany';
-  /** The filter to limit the deleted documents. */
+  /**
+   * The filter used to determine if a document should be deleted.
+   * For a deleteOne operation, all matches are removed.
+   */
   filter: Filter<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
@@ -67,7 +73,10 @@ export interface ClientDeleteManyModel<TSchema extends Document = Document>
 export interface ClientReplaceOneModel<TSchema extends Document = Document>
   extends ClientWriteModel {
   name: 'replaceOne';
-  /** The filter to limit the replaced document. */
+  /**
+   * The filter used to determine if a document should be replaced.
+   * For a replaceOne operation, the first match is replaced.
+   */
   filter: Filter<TSchema>;
   /** The document with which to replace the matched document. */
   replacement: WithoutId<TSchema>;
@@ -83,7 +92,10 @@ export interface ClientReplaceOneModel<TSchema extends Document = Document>
 export interface ClientUpdateOneModel<TSchema extends Document = Document>
   extends ClientWriteModel {
   name: 'updateOne';
-  /** The filter to limit the updated documents. */
+  /**
+   * The filter used to determine if a document should be updated.
+   * For an updateOne operation, the first match is updated.
+   */
   filter: Filter<TSchema>;
   /**
    * The modifications to apply. The value can be either:
@@ -105,7 +117,10 @@ export interface ClientUpdateOneModel<TSchema extends Document = Document>
 export interface ClientUpdateManyModel<TSchema extends Document = Document>
   extends ClientWriteModel {
   name: 'updateMany';
-  /** The filter to limit the updated documents. */
+  /**
+   * The filter used to determine if a document should be updated.
+   * For an updateMany operation, all matches are updated.
+   */
   filter: Filter<TSchema>;
   /**
    * The modifications to apply. The value can be either:
