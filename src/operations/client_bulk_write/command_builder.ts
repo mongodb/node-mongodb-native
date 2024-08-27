@@ -1,6 +1,5 @@
 import { type Document } from '../../bson';
 import { DocumentSequence } from '../../cmap/commands';
-import { MongoInvalidArgumentError } from '../../error';
 import type {
   AnyClientBulkWriteModel,
   ClientBulkWriteOptions,
@@ -11,6 +10,17 @@ import type {
   ClientUpdateManyModel,
   ClientUpdateOneModel
 } from './common';
+
+/** @internal */
+export interface ClientBulkWriteCommand {
+  bulkWrite: 1;
+  errorsOnly: boolean;
+  ordered: boolean;
+  ops: DocumentSequence;
+  nsInfo: DocumentSequence;
+  bypassDocumentValidation?: boolean;
+  let?: Document;
+}
 
 /** @internal */
 export class ClientBulkWriteCommandBuilder {
@@ -40,12 +50,33 @@ export class ClientBulkWriteCommandBuilder {
   /**
    * Build the bulk write commands from the models.
    */
-  buildCommands(): Document[] {
+  buildCommands(): ClientBulkWriteCommand[] {
+    // Iterate the models to build the ops and nsInfo fields.
+    const operations = [];
+    let currentNamespaceIndex = 0;
+    const namespaces = new Map<string, number>();
+    for (const model of this.models) {
+      const ns = model.namespace;
+      if (namespaces.has(ns)) {
+        operations.push(buildOperation(model, namespaces.get(ns) as number));
+      } else {
+        namespaces.set(ns, currentNamespaceIndex);
+        operations.push(buildOperation(model, currentNamespaceIndex));
+        currentNamespaceIndex++;
+      }
+    }
+
+    const nsInfo = Array.from(namespaces.keys()).map(ns => {
+      return { ns: ns };
+    });
+
     // The base command.
-    const command: Document = {
+    const command: ClientBulkWriteCommand = {
       bulkWrite: 1,
       errorsOnly: this.errorsOnly,
-      ordered: this.options.ordered ?? true
+      ordered: this.options.ordered ?? true,
+      ops: new DocumentSequence(operations),
+      nsInfo: new DocumentSequence(nsInfo)
     };
     // Add bypassDocumentValidation if it was present in the options.
     if ('bypassDocumentValidation' in this.options) {
@@ -55,108 +86,43 @@ export class ClientBulkWriteCommandBuilder {
     if ('let' in this.options) {
       command.let = this.options.let;
     }
-
-    // Iterate the models to build the ops and nsInfo fields.
-    const operations = [];
-    let currentNamespaceIndex = 0;
-    const namespaces = new Map<string, number>();
-    for (const model of this.models) {
-      const ns = model.namespace;
-      if (namespaces.has(ns)) {
-        operations.push(builderFor(model).buildOperation(namespaces.get(ns) as number));
-      } else {
-        namespaces.set(ns, currentNamespaceIndex);
-        operations.push(builderFor(model).buildOperation(currentNamespaceIndex));
-        currentNamespaceIndex++;
-      }
-    }
-
-    const nsInfo = Array.from(namespaces.keys()).map(ns => {
-      return { ns: ns };
-    });
-    command.ops = new DocumentSequence(operations);
-    command.nsInfo = new DocumentSequence(nsInfo);
     return [command];
   }
 }
 
-/** @internal */
-export interface OperationBuilder {
-  buildOperation(index: number): Document;
-}
+/**
+ * Build the insert one operation.
+ * @param model - The insert one model.
+ * @param index - The namespace index.
+ * @returns the operation.
+ */
+export const buildInsertOneOperation = (model: ClientInsertOneModel, index: number): Document => {
+  const document: Document = {
+    insert: index,
+    document: model.document
+  };
+  return document;
+};
 
 /**
- * Builds insert one operations given the model.
- * @internal
+ * Build the delete one operation.
+ * @param model - The insert many model.
+ * @param index - The namespace index.
+ * @returns the operation.
  */
-export class InsertOneOperationBuilder implements OperationBuilder {
-  model: ClientInsertOneModel;
+export const buildDeleteOneOperation = (model: ClientDeleteOneModel, index: number): Document => {
+  return createDeleteOperation(model, index, false);
+};
 
-  /**
-   * Instantiate the builder.
-   * @param model - The client insert one model.
-   */
-  constructor(model: ClientInsertOneModel) {
-    this.model = model;
-  }
-
-  /**
-   * Build the operation.
-   * @param index - The namespace index.
-   * @returns the operation.
-   */
-  buildOperation(index: number): Document {
-    const document: Document = {
-      insert: index,
-      document: this.model.document
-    };
-    return document;
-  }
-}
-
-/** @internal */
-export class DeleteOneOperationBuilder implements OperationBuilder {
-  model: ClientDeleteOneModel;
-
-  /**
-   * Instantiate the builder.
-   * @param model - The client delete one model.
-   */
-  constructor(model: ClientDeleteOneModel) {
-    this.model = model;
-  }
-
-  /**
-   * Build the operation.
-   * @param index - The namespace index.
-   * @returns the operation.
-   */
-  buildOperation(index: number): Document {
-    return createDeleteOperation(this.model, index, false);
-  }
-}
-
-/** @internal */
-export class DeleteManyOperationBuilder implements OperationBuilder {
-  model: ClientDeleteManyModel;
-
-  /**
-   * Instantiate the builder.
-   * @param model - The client delete many model.
-   */
-  constructor(model: ClientDeleteManyModel) {
-    this.model = model;
-  }
-
-  /**
-   * Build the operation.
-   * @param index - The namespace index.
-   * @returns the operation.
-   */
-  buildOperation(index: number): Document {
-    return createDeleteOperation(this.model, index, true);
-  }
-}
+/**
+ * Build the delete many operation.
+ * @param model - The delete many model.
+ * @param index - The namespace index.
+ * @returns the operation.
+ */
+export const buildDeleteManyOperation = (model: ClientDeleteManyModel, index: number): Document => {
+  return createDeleteOperation(model, index, true);
+};
 
 /**
  * Creates a delete operation based on the parameters.
@@ -180,49 +146,25 @@ function createDeleteOperation(
   return document;
 }
 
-/** @internal */
-export class UpdateOneOperationBuilder implements OperationBuilder {
-  model: ClientUpdateOneModel;
+/**
+ * Build the update one operation.
+ * @param model - The update one model.
+ * @param index - The namespace index.
+ * @returns the operation.
+ */
+export const buildUpdateOneOperation = (model: ClientUpdateOneModel, index: number): Document => {
+  return createUpdateOperation(model, index, false);
+};
 
-  /**
-   * Instantiate the builder.
-   * @param model - The client update one model.
-   */
-  constructor(model: ClientUpdateOneModel) {
-    this.model = model;
-  }
-
-  /**
-   * Build the operation.
-   * @param index - The namespace index.
-   * @returns the operation.
-   */
-  buildOperation(index: number): Document {
-    return createUpdateOperation(this.model, index, false);
-  }
-}
-
-/** @internal */
-export class UpdateManyOperationBuilder implements OperationBuilder {
-  model: ClientUpdateManyModel;
-
-  /**
-   * Instantiate the builder.
-   * @param model - The client update many model.
-   */
-  constructor(model: ClientUpdateManyModel) {
-    this.model = model;
-  }
-
-  /**
-   * Build the operation.
-   * @param index - The namespace index.
-   * @returns the operation.
-   */
-  buildOperation(index: number): Document {
-    return createUpdateOperation(this.model, index, true);
-  }
-}
+/**
+ * Build the update many operation.
+ * @param model - The update many model.
+ * @param index - The namespace index.
+ * @returns the operation.
+ */
+export const buildUpdateManyOperation = (model: ClientUpdateManyModel, index: number): Document => {
+  return createUpdateOperation(model, index, true);
+};
 
 /**
  * Creates a delete operation based on the parameters.
@@ -250,53 +192,42 @@ function createUpdateOperation(
   return document;
 }
 
-/** @internal */
-export class ReplaceOneOperationBuilder implements OperationBuilder {
-  model: ClientReplaceOneModel;
-
-  /**
-   * Instantiate the builder.
-   * @param model - The client replace one model.
-   */
-  constructor(model: ClientReplaceOneModel) {
-    this.model = model;
+/**
+ * Build the replace one operation.
+ * @param model - The replace one model.
+ * @param index - The namespace index.
+ * @returns the operation.
+ */
+export const buildReplaceOneOperation = (model: ClientReplaceOneModel, index: number): Document => {
+  const document: Document = {
+    update: index,
+    multi: false,
+    filter: model.filter,
+    updateMods: model.replacement
+  };
+  if (model.hint) {
+    document.hint = model.hint;
   }
-
-  /**
-   * Build the operation.
-   * @param index - The namespace index.
-   * @returns the operation.
-   */
-  buildOperation(index: number): Document {
-    const document: Document = {
-      update: index,
-      multi: false,
-      filter: this.model.filter,
-      updateMods: this.model.replacement
-    };
-    if (this.model.hint) {
-      document.hint = this.model.hint;
-    }
-    if (this.model.upsert) {
-      document.upsert = this.model.upsert;
-    }
-    return document;
+  if (model.upsert) {
+    document.upsert = model.upsert;
   }
-}
-
-const BUILDERS: Map<string, (model: AnyClientBulkWriteModel) => OperationBuilder> = new Map();
-BUILDERS.set('insertOne', model => new InsertOneOperationBuilder(model as ClientInsertOneModel));
-BUILDERS.set('deleteMany', model => new DeleteManyOperationBuilder(model as ClientDeleteManyModel));
-BUILDERS.set('deleteOne', model => new DeleteOneOperationBuilder(model as ClientDeleteOneModel));
-BUILDERS.set('updateMany', model => new UpdateManyOperationBuilder(model as ClientUpdateManyModel));
-BUILDERS.set('updateOne', model => new UpdateOneOperationBuilder(model as ClientUpdateOneModel));
-BUILDERS.set('replaceOne', model => new ReplaceOneOperationBuilder(model as ClientReplaceOneModel));
+  return document;
+};
 
 /** @internal */
-export function builderFor(model: AnyClientBulkWriteModel): OperationBuilder {
-  const builder = BUILDERS.get(model.name)?.(model);
-  if (!builder) {
-    throw new MongoInvalidArgumentError(`Could not load builder for model ${model.name}`);
+export function buildOperation(model: AnyClientBulkWriteModel, index: number): Document {
+  switch (model.name) {
+    case 'insertOne':
+      return buildInsertOneOperation(model, index);
+    case 'deleteOne':
+      return buildDeleteOneOperation(model, index);
+    case 'deleteMany':
+      return buildDeleteManyOperation(model, index);
+    case 'updateOne':
+      return buildUpdateOneOperation(model, index);
+    case 'updateMany':
+      return buildUpdateManyOperation(model, index);
+    case 'replaceOne':
+      return buildReplaceOneOperation(model, index);
   }
-  return builder;
 }

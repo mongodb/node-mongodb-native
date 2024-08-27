@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 
 import {
-  builderFor,
+  buildDeleteManyOperation,
+  buildDeleteOneOperation,
+  buildInsertOneOperation,
+  buildReplaceOneOperation,
+  buildUpdateManyOperation,
+  buildUpdateOneOperation,
   ClientBulkWriteCommandBuilder,
   type ClientDeleteManyModel,
   type ClientDeleteOneModel,
@@ -9,13 +14,7 @@ import {
   type ClientReplaceOneModel,
   type ClientUpdateManyModel,
   type ClientUpdateOneModel,
-  DeleteManyOperationBuilder,
-  DeleteOneOperationBuilder,
-  DocumentSequence,
-  InsertOneOperationBuilder,
-  ReplaceOneOperationBuilder,
-  UpdateManyOperationBuilder,
-  UpdateOneOperationBuilder
+  DocumentSequence
 } from '../../../mongodb';
 
 describe('ClientBulkWriteCommandBuilder', function () {
@@ -205,333 +204,222 @@ describe('ClientBulkWriteCommandBuilder', function () {
     });
   });
 
-  describe('.builderFor', function () {
-    context('when the model is an insert one', function () {
-      const model: ClientInsertOneModel = {
-        name: 'insertOne',
-        namespace: 'test.coll',
-        document: { name: 1 }
-      };
+  describe('#buildInsertOneOperation', function () {
+    const model: ClientInsertOneModel = {
+      name: 'insertOne',
+      namespace: 'test.coll',
+      document: { name: 1 }
+    };
+    const operation = buildInsertOneOperation(model, 5);
 
-      it('returns an insert one operation builder', function () {
-        expect(builderFor(model)).to.be.instanceOf(InsertOneOperationBuilder);
+    it('generates the insert operation', function () {
+      expect(operation).to.deep.equal({ insert: 5, document: { name: 1 } });
+    });
+  });
+
+  describe('#buildDeleteOneOperation', function () {
+    context('with only required fields', function () {
+      const model: ClientDeleteOneModel = {
+        name: 'deleteOne',
+        namespace: 'test.coll',
+        filter: { name: 1 }
+      };
+      const operation = buildDeleteOneOperation(model, 5);
+
+      it('generates the delete operation', function () {
+        expect(operation).to.deep.equal({ delete: 5, filter: { name: 1 }, multi: false });
       });
     });
 
-    context('when the model is an update one', function () {
+    context('with optional fields', function () {
+      const model: ClientDeleteOneModel = {
+        name: 'deleteOne',
+        namespace: 'test.coll',
+        filter: { name: 1 },
+        hint: 'test',
+        collation: { locale: 'de' }
+      };
+      const operation = buildDeleteOneOperation(model, 5);
+
+      it('generates the delete operation', function () {
+        expect(operation).to.deep.equal({
+          delete: 5,
+          filter: { name: 1 },
+          multi: false,
+          hint: 'test',
+          collation: { locale: 'de' }
+        });
+      });
+    });
+  });
+
+  describe('#buildDeleteManyOperation', function () {
+    context('with only required fields', function () {
+      const model: ClientDeleteManyModel = {
+        name: 'deleteMany',
+        namespace: 'test.coll',
+        filter: { name: 1 }
+      };
+      const operation = buildDeleteManyOperation(model, 5);
+
+      it('generates the delete operation', function () {
+        expect(operation).to.deep.equal({ delete: 5, filter: { name: 1 }, multi: true });
+      });
+    });
+
+    context('with optional fields', function () {
+      const model: ClientDeleteManyModel = {
+        name: 'deleteMany',
+        namespace: 'test.coll',
+        filter: { name: 1 },
+        hint: 'test',
+        collation: { locale: 'de' }
+      };
+      const operation = buildDeleteManyOperation(model, 5);
+
+      it('generates the delete operation', function () {
+        expect(operation).to.deep.equal({
+          delete: 5,
+          filter: { name: 1 },
+          multi: true,
+          hint: 'test',
+          collation: { locale: 'de' }
+        });
+      });
+    });
+  });
+
+  describe('#buildUpdateOneOperation', function () {
+    context('with only required fields', function () {
       const model: ClientUpdateOneModel = {
         name: 'updateOne',
         namespace: 'test.coll',
         filter: { name: 1 },
         update: { $set: { name: 2 } }
       };
+      const operation = buildUpdateOneOperation(model, 5);
 
-      it('returns an update one operation builder', function () {
-        expect(builderFor(model)).to.be.instanceOf(UpdateOneOperationBuilder);
+      it('generates the update operation', function () {
+        expect(operation).to.deep.equal({
+          update: 5,
+          filter: { name: 1 },
+          updateMods: { $set: { name: 2 } },
+          multi: false
+        });
       });
     });
 
-    context('when the model is an update many', function () {
+    context('with optional fields', function () {
+      const model: ClientUpdateOneModel = {
+        name: 'updateOne',
+        namespace: 'test.coll',
+        filter: { name: 1 },
+        update: { $set: { name: 2 } },
+        hint: 'test',
+        upsert: true,
+        arrayFilters: [{ test: 1 }]
+      };
+      const operation = buildUpdateOneOperation(model, 5);
+
+      it('generates the update operation', function () {
+        expect(operation).to.deep.equal({
+          update: 5,
+          filter: { name: 1 },
+          updateMods: { $set: { name: 2 } },
+          multi: false,
+          hint: 'test',
+          upsert: true,
+          arrayFilters: [{ test: 1 }]
+        });
+      });
+    });
+  });
+
+  describe('#buildUpdateManyOperation', function () {
+    context('with only required fields', function () {
       const model: ClientUpdateManyModel = {
         name: 'updateMany',
         namespace: 'test.coll',
         filter: { name: 1 },
         update: { $set: { name: 2 } }
       };
+      const operation = buildUpdateManyOperation(model, 5);
 
-      it('returns an update many operation builder', function () {
-        expect(builderFor(model)).to.be.instanceOf(UpdateManyOperationBuilder);
+      it('generates the update operation', function () {
+        expect(operation).to.deep.equal({
+          update: 5,
+          filter: { name: 1 },
+          updateMods: { $set: { name: 2 } },
+          multi: true
+        });
       });
     });
 
-    context('when the model is a replace one', function () {
+    context('with optional fields', function () {
+      const model: ClientUpdateManyModel = {
+        name: 'updateMany',
+        namespace: 'test.coll',
+        filter: { name: 1 },
+        update: { $set: { name: 2 } },
+        hint: 'test',
+        upsert: true,
+        arrayFilters: [{ test: 1 }]
+      };
+      const operation = buildUpdateManyOperation(model, 5);
+
+      it('generates the update operation', function () {
+        expect(operation).to.deep.equal({
+          update: 5,
+          filter: { name: 1 },
+          updateMods: { $set: { name: 2 } },
+          multi: true,
+          hint: 'test',
+          upsert: true,
+          arrayFilters: [{ test: 1 }]
+        });
+      });
+    });
+  });
+
+  describe('#buildReplaceOneOperation', function () {
+    context('with only required fields', function () {
       const model: ClientReplaceOneModel = {
         name: 'replaceOne',
         namespace: 'test.coll',
         filter: { name: 1 },
         replacement: { name: 2 }
       };
+      const operation = buildReplaceOneOperation(model, 5);
 
-      it('returns an replace one operation builder', function () {
-        expect(builderFor(model)).to.be.instanceOf(ReplaceOneOperationBuilder);
+      it('generates the update operation', function () {
+        expect(operation).to.deep.equal({
+          update: 5,
+          filter: { name: 1 },
+          updateMods: { name: 2 },
+          multi: false
+        });
       });
     });
 
-    context('when the model is a delete one', function () {
-      const model: ClientDeleteOneModel = {
-        name: 'deleteOne',
+    context('with optional fields', function () {
+      const model: ClientReplaceOneModel = {
+        name: 'replaceOne',
         namespace: 'test.coll',
-        filter: { name: 1 }
+        filter: { name: 1 },
+        replacement: { name: 2 },
+        hint: 'test',
+        upsert: true
       };
+      const operation = buildReplaceOneOperation(model, 5);
 
-      it('returns an delete one operation builder', function () {
-        expect(builderFor(model)).to.be.instanceOf(DeleteOneOperationBuilder);
-      });
-    });
-
-    context('when the model is a delete many', function () {
-      const model: ClientDeleteManyModel = {
-        name: 'deleteMany',
-        namespace: 'test.coll',
-        filter: { name: 1 }
-      };
-
-      it('returns an delete many operation builder', function () {
-        expect(builderFor(model)).to.be.instanceOf(DeleteManyOperationBuilder);
-      });
-    });
-  });
-
-  describe('InsertOneOperationBuilder', function () {
-    const model: ClientInsertOneModel = {
-      name: 'insertOne',
-      namespace: 'test.coll',
-      document: { name: 1 }
-    };
-
-    describe('#buildOperation', function () {
-      const builder = new InsertOneOperationBuilder(model);
-      const operation = builder.buildOperation(5);
-
-      it('generates the insert operation', function () {
-        expect(operation).to.deep.equal({ insert: 5, document: { name: 1 } });
-      });
-    });
-  });
-
-  describe('DeleteOneOperationBuilder', function () {
-    describe('#buildOperation', function () {
-      context('with only required fields', function () {
-        const model: ClientDeleteOneModel = {
-          name: 'deleteOne',
-          namespace: 'test.coll',
-          filter: { name: 1 }
-        };
-
-        const builder = new DeleteOneOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the delete operation', function () {
-          expect(operation).to.deep.equal({ delete: 5, filter: { name: 1 }, multi: false });
-        });
-      });
-
-      context('with optional fields', function () {
-        const model: ClientDeleteOneModel = {
-          name: 'deleteOne',
-          namespace: 'test.coll',
+      it('generates the update operation', function () {
+        expect(operation).to.deep.equal({
+          update: 5,
           filter: { name: 1 },
-          hint: 'test',
-          collation: { locale: 'de' }
-        };
-
-        const builder = new DeleteOneOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the delete operation', function () {
-          expect(operation).to.deep.equal({
-            delete: 5,
-            filter: { name: 1 },
-            multi: false,
-            hint: 'test',
-            collation: { locale: 'de' }
-          });
-        });
-      });
-    });
-  });
-
-  describe('DeleteManyOperationBuilder', function () {
-    describe('#buildOperation', function () {
-      context('with only required fields', function () {
-        const model: ClientDeleteManyModel = {
-          name: 'deleteMany',
-          namespace: 'test.coll',
-          filter: { name: 1 }
-        };
-
-        const builder = new DeleteManyOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the delete operation', function () {
-          expect(operation).to.deep.equal({ delete: 5, filter: { name: 1 }, multi: true });
-        });
-      });
-
-      context('with optional fields', function () {
-        const model: ClientDeleteManyModel = {
-          name: 'deleteMany',
-          namespace: 'test.coll',
-          filter: { name: 1 },
-          hint: 'test',
-          collation: { locale: 'de' }
-        };
-
-        const builder = new DeleteManyOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the delete operation', function () {
-          expect(operation).to.deep.equal({
-            delete: 5,
-            filter: { name: 1 },
-            multi: true,
-            hint: 'test',
-            collation: { locale: 'de' }
-          });
-        });
-      });
-    });
-  });
-
-  describe('UpdateOneOperationBuilder', function () {
-    describe('#buildOperation', function () {
-      context('with only required fields', function () {
-        const model: ClientUpdateOneModel = {
-          name: 'updateOne',
-          namespace: 'test.coll',
-          filter: { name: 1 },
-          update: { $set: { name: 2 } }
-        };
-
-        const builder = new UpdateOneOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the update operation', function () {
-          expect(operation).to.deep.equal({
-            update: 5,
-            filter: { name: 1 },
-            updateMods: { $set: { name: 2 } },
-            multi: false
-          });
-        });
-      });
-
-      context('with optional fields', function () {
-        const model: ClientUpdateOneModel = {
-          name: 'updateOne',
-          namespace: 'test.coll',
-          filter: { name: 1 },
-          update: { $set: { name: 2 } },
-          hint: 'test',
-          upsert: true,
-          arrayFilters: [{ test: 1 }]
-        };
-
-        const builder = new UpdateOneOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the update operation', function () {
-          expect(operation).to.deep.equal({
-            update: 5,
-            filter: { name: 1 },
-            updateMods: { $set: { name: 2 } },
-            multi: false,
-            hint: 'test',
-            upsert: true,
-            arrayFilters: [{ test: 1 }]
-          });
-        });
-      });
-    });
-  });
-
-  describe('UpdateManyOperationBuilder', function () {
-    describe('#buildOperation', function () {
-      context('with only required fields', function () {
-        const model: ClientUpdateManyModel = {
-          name: 'updateMany',
-          namespace: 'test.coll',
-          filter: { name: 1 },
-          update: { $set: { name: 2 } }
-        };
-
-        const builder = new UpdateManyOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the update operation', function () {
-          expect(operation).to.deep.equal({
-            update: 5,
-            filter: { name: 1 },
-            updateMods: { $set: { name: 2 } },
-            multi: true
-          });
-        });
-      });
-
-      context('with optional fields', function () {
-        const model: ClientUpdateManyModel = {
-          name: 'updateMany',
-          namespace: 'test.coll',
-          filter: { name: 1 },
-          update: { $set: { name: 2 } },
-          hint: 'test',
-          upsert: true,
-          arrayFilters: [{ test: 1 }]
-        };
-
-        const builder = new UpdateManyOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the update operation', function () {
-          expect(operation).to.deep.equal({
-            update: 5,
-            filter: { name: 1 },
-            updateMods: { $set: { name: 2 } },
-            multi: true,
-            hint: 'test',
-            upsert: true,
-            arrayFilters: [{ test: 1 }]
-          });
-        });
-      });
-    });
-  });
-
-  describe('ReplaceOneOperationBuilder', function () {
-    describe('#buildOperation', function () {
-      context('with only required fields', function () {
-        const model: ClientReplaceOneModel = {
-          name: 'replaceOne',
-          namespace: 'test.coll',
-          filter: { name: 1 },
-          replacement: { name: 2 }
-        };
-
-        const builder = new ReplaceOneOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the update operation', function () {
-          expect(operation).to.deep.equal({
-            update: 5,
-            filter: { name: 1 },
-            updateMods: { name: 2 },
-            multi: false
-          });
-        });
-      });
-
-      context('with optional fields', function () {
-        const model: ClientReplaceOneModel = {
-          name: 'replaceOne',
-          namespace: 'test.coll',
-          filter: { name: 1 },
-          replacement: { name: 2 },
+          updateMods: { name: 2 },
+          multi: false,
           hint: 'test',
           upsert: true
-        };
-
-        const builder = new ReplaceOneOperationBuilder(model);
-        const operation = builder.buildOperation(5);
-
-        it('generates the update operation', function () {
-          expect(operation).to.deep.equal({
-            update: 5,
-            filter: { name: 1 },
-            updateMods: { name: 2 },
-            multi: false,
-            hint: 'test',
-            upsert: true
-          });
         });
       });
     });
