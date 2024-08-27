@@ -60,8 +60,9 @@ export class ClientBulkWriteCommandBuilder {
     const namespaces = new Map<string, number>();
     for (const model of this.models) {
       const ns = model.namespace;
-      if (namespaces.has(ns)) {
-        operations.push(buildOperation(model, namespaces.get(ns) as number));
+      const index = namespaces.get(ns);
+      if (index != null) {
+        operations.push(buildOperation(model, index));
       } else {
         namespaces.set(ns, currentNamespaceIndex);
         operations.push(buildOperation(model, currentNamespaceIndex));
@@ -92,7 +93,7 @@ export class ClientBulkWriteCommandBuilder {
 }
 
 /** @internal */
-export interface InsertOperation<TSchema extends Document = Document> {
+interface ClientInsertOperation<TSchema extends Document = Document> {
   insert: number;
   document: OptionalId<TSchema>;
 }
@@ -103,8 +104,11 @@ export interface InsertOperation<TSchema extends Document = Document> {
  * @param index - The namespace index.
  * @returns the operation.
  */
-export const buildInsertOneOperation = (model: ClientInsertOneModel, index: number): Document => {
-  const document: InsertOperation = {
+export const buildInsertOneOperation = (
+  model: ClientInsertOneModel,
+  index: number
+): ClientInsertOperation => {
+  const document: ClientInsertOperation = {
     insert: index,
     document: model.document
   };
@@ -112,7 +116,7 @@ export const buildInsertOneOperation = (model: ClientInsertOneModel, index: numb
 };
 
 /** @internal */
-export interface DeleteOperation<TSchema extends Document = Document> {
+export interface ClientDeleteOperation<TSchema extends Document = Document> {
   delete: number;
   multi: boolean;
   filter: Filter<TSchema>;
@@ -147,8 +151,8 @@ function createDeleteOperation(
   model: ClientDeleteOneModel | ClientDeleteManyModel,
   index: number,
   multi: boolean
-): DeleteOperation {
-  const document: DeleteOperation = {
+): ClientDeleteOperation {
+  const document: ClientDeleteOperation = {
     delete: index,
     multi: multi,
     filter: model.filter
@@ -163,7 +167,7 @@ function createDeleteOperation(
 }
 
 /** @internal */
-export interface UpdateOperation<TSchema extends Document = Document> {
+export interface ClientUpdateOperation<TSchema extends Document = Document> {
   update: number;
   multi: boolean;
   filter: Filter<TSchema>;
@@ -182,7 +186,7 @@ export interface UpdateOperation<TSchema extends Document = Document> {
 export const buildUpdateOneOperation = (
   model: ClientUpdateOneModel,
   index: number
-): UpdateOperation => {
+): ClientUpdateOperation => {
   return createUpdateOperation(model, index, false);
 };
 
@@ -195,7 +199,7 @@ export const buildUpdateOneOperation = (
 export const buildUpdateManyOperation = (
   model: ClientUpdateManyModel,
   index: number
-): UpdateOperation => {
+): ClientUpdateOperation => {
   return createUpdateOperation(model, index, true);
 };
 
@@ -206,8 +210,8 @@ function createUpdateOperation(
   model: ClientUpdateOneModel | ClientUpdateManyModel,
   index: number,
   multi: boolean
-): UpdateOperation {
-  const document: UpdateOperation = {
+): ClientUpdateOperation {
+  const document: ClientUpdateOperation = {
     update: index,
     multi: multi,
     filter: model.filter,
@@ -226,7 +230,7 @@ function createUpdateOperation(
 }
 
 /** @internal */
-export interface ReplaceOneOperation<TSchema extends Document = Document> {
+export interface ClientReplaceOneOperation<TSchema extends Document = Document> {
   update: number;
   multi: boolean;
   filter: Filter<TSchema>;
@@ -244,8 +248,8 @@ export interface ReplaceOneOperation<TSchema extends Document = Document> {
 export const buildReplaceOneOperation = (
   model: ClientReplaceOneModel,
   index: number
-): ReplaceOneOperation => {
-  const document: ReplaceOneOperation = {
+): ClientReplaceOneOperation => {
+  const document: ClientReplaceOneOperation = {
     update: index,
     multi: false,
     filter: model.filter,
