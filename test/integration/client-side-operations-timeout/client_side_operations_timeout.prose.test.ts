@@ -673,8 +673,8 @@ describe('CSOT spec prose tests', function () {
         const start = performance.now();
         const error = await session.endSession().catch(error => error);
         const end = performance.now();
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(480, 520);
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
       });
     });
 
@@ -688,8 +688,8 @@ describe('CSOT spec prose tests', function () {
         const start = performance.now();
         const error = await session.endSession().catch(error => error);
         const end = performance.now();
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(480, 520);
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
       });
     });
 
@@ -703,8 +703,8 @@ describe('CSOT spec prose tests', function () {
         const start = performance.now();
         const error = await session.endSession({ timeoutMS: 500 }).catch(error => error);
         const end = performance.now();
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(480, 520);
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
       });
     });
   });
