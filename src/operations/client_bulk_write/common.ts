@@ -60,7 +60,7 @@ export interface ClientDeleteManyModel<TSchema extends Document = Document>
   name: 'deleteMany';
   /**
    * The filter used to determine if a document should be deleted.
-   * For a deleteOne operation, all matches are removed.
+   * For a deleteMany operation, all matches are removed.
    */
   filter: Filter<TSchema>;
   /** Specifies a collation. */
