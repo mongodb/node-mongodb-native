@@ -1,5 +1,8 @@
 import { type Document } from '../../bson';
 import { DocumentSequence } from '../../cmap/commands';
+import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
+import { type CollationOptions } from '../command';
+import { type Hint } from '../operation';
 import type {
   AnyClientBulkWriteModel,
   ClientBulkWriteOptions,
@@ -66,9 +69,7 @@ export class ClientBulkWriteCommandBuilder {
       }
     }
 
-    const nsInfo = Array.from(namespaces.keys()).map(ns => {
-      return { ns: ns };
-    });
+    const nsInfo = Array.from(namespaces.keys(), ns => ({ ns }));
 
     // The base command.
     const command: ClientBulkWriteCommand = {
@@ -83,11 +84,17 @@ export class ClientBulkWriteCommandBuilder {
       command.bypassDocumentValidation = this.options.bypassDocumentValidation;
     }
     // Add let if it was present in the options.
-    if ('let' in this.options) {
+    if (this.options.let) {
       command.let = this.options.let;
     }
     return [command];
   }
+}
+
+/** @internal */
+export interface InsertOperation<TSchema extends Document = Document> {
+  insert: number;
+  document: OptionalId<TSchema>;
 }
 
 /**
@@ -97,12 +104,21 @@ export class ClientBulkWriteCommandBuilder {
  * @returns the operation.
  */
 export const buildInsertOneOperation = (model: ClientInsertOneModel, index: number): Document => {
-  const document: Document = {
+  const document: InsertOperation = {
     insert: index,
     document: model.document
   };
   return document;
 };
+
+/** @internal */
+export interface DeleteOperation<TSchema extends Document = Document> {
+  delete: number;
+  multi: boolean;
+  filter: Filter<TSchema>;
+  hint?: Hint;
+  collation?: CollationOptions;
+}
 
 /**
  * Build the delete one operation.
@@ -131,8 +147,8 @@ function createDeleteOperation(
   model: ClientDeleteOneModel | ClientDeleteManyModel,
   index: number,
   multi: boolean
-): Document {
-  const document: Document = {
+): DeleteOperation {
+  const document: DeleteOperation = {
     delete: index,
     multi: multi,
     filter: model.filter
@@ -146,13 +162,27 @@ function createDeleteOperation(
   return document;
 }
 
+/** @internal */
+export interface UpdateOperation<TSchema extends Document = Document> {
+  update: number;
+  multi: boolean;
+  filter: Filter<TSchema>;
+  updateMods: UpdateFilter<TSchema> | Document[];
+  hint?: Hint;
+  upsert?: boolean;
+  arrayFilters?: Document[];
+}
+
 /**
  * Build the update one operation.
  * @param model - The update one model.
  * @param index - The namespace index.
  * @returns the operation.
  */
-export const buildUpdateOneOperation = (model: ClientUpdateOneModel, index: number): Document => {
+export const buildUpdateOneOperation = (
+  model: ClientUpdateOneModel,
+  index: number
+): UpdateOperation => {
   return createUpdateOperation(model, index, false);
 };
 
@@ -162,7 +192,10 @@ export const buildUpdateOneOperation = (model: ClientUpdateOneModel, index: numb
  * @param index - The namespace index.
  * @returns the operation.
  */
-export const buildUpdateManyOperation = (model: ClientUpdateManyModel, index: number): Document => {
+export const buildUpdateManyOperation = (
+  model: ClientUpdateManyModel,
+  index: number
+): UpdateOperation => {
   return createUpdateOperation(model, index, true);
 };
 
@@ -173,8 +206,8 @@ function createUpdateOperation(
   model: ClientUpdateOneModel | ClientUpdateManyModel,
   index: number,
   multi: boolean
-): Document {
-  const document: Document = {
+): UpdateOperation {
+  const document: UpdateOperation = {
     update: index,
     multi: multi,
     filter: model.filter,
@@ -192,14 +225,27 @@ function createUpdateOperation(
   return document;
 }
 
+/** @internal */
+export interface ReplaceOneOperation<TSchema extends Document = Document> {
+  update: number;
+  multi: boolean;
+  filter: Filter<TSchema>;
+  updateMods: WithoutId<TSchema>;
+  hint?: Hint;
+  upsert?: boolean;
+}
+
 /**
  * Build the replace one operation.
  * @param model - The replace one model.
  * @param index - The namespace index.
  * @returns the operation.
  */
-export const buildReplaceOneOperation = (model: ClientReplaceOneModel, index: number): Document => {
-  const document: Document = {
+export const buildReplaceOneOperation = (
+  model: ClientReplaceOneModel,
+  index: number
+): ReplaceOneOperation => {
+  const document: ReplaceOneOperation = {
     update: index,
     multi: false,
     filter: model.filter,

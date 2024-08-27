@@ -138,7 +138,14 @@ export interface ClientUpdateManyModel<TSchema extends Document = Document>
   upsert?: boolean;
 }
 
-/** @public */
+/**
+ * Used to represent any of the client bulk write models that can be passed as an array
+ * to MongoClient#bulkWrite. TSchema can be different on each of the individual models
+ * and must always match the appropriate namespace that it defines provided to each of the models.
+ * The schema is used on ClientInsertOneModel for the document field getting inserted, while all other
+ * models use it for the filter document field.
+ * @public
+ */
 export type AnyClientBulkWriteModel<TSchema extends Document = Document> =
   | ClientInsertOneModel<TSchema>
   | ClientReplaceOneModel<TSchema>
