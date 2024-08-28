@@ -1,11 +1,17 @@
 import { expect } from 'chai';
 
-import { ReadPreference } from '../../mongodb';
+import { type MongoClient, ReadPreference } from '../../mongodb';
 import { filterForCommands, ignoreNsNotFound, setupDatabase } from '../shared';
 
 describe('Command Monitoring', function () {
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  let client: MongoClient;
+
+  afterEach(async function () {
+    await client?.close();
   });
 
   it('should correctly receive the APM events for an insert', {
@@ -98,47 +104,34 @@ describe('Command Monitoring', function () {
     }
   });
 
-  it('should correctly receive the APM events for a listIndexes command', {
-    metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
+  it('should correctly receive the APM events for a listIndexes command', async function () {
+    const started = [];
+    const succeeded = [];
+    client = this.configuration.newClient(
+      { writeConcern: { w: 1 } },
+      { maxPoolSize: 1, monitorCommands: true }
+    );
 
-    test: function () {
-      const started = [];
-      const succeeded = [];
-      const client = this.configuration.newClient(
-        { writeConcern: { w: 1 } },
-        { maxPoolSize: 1, monitorCommands: true }
-      );
+    client.on('commandStarted', filterForCommands('listIndexes', started));
+    client.on('commandSucceeded', filterForCommands('listIndexes', succeeded));
 
-      const desiredEvents = ['listIndexes', 'find'];
-      client.on('commandStarted', filterForCommands(desiredEvents, started));
-      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
+    const db = client.db(this.configuration.db);
 
-      const db = client.db(this.configuration.db);
+    await db
+      .collection('apm_test_list_collections')
+      .insertOne({ a: 1 }, this.configuration.writeConcernMax());
 
-      return db
-        .collection('apm_test_list_collections')
-        .insertOne({ a: 1 }, this.configuration.writeConcernMax())
-        .then(r => {
-          expect(r).property('insertedId').to.exist;
+    await db
+      .collection('apm_test_list_collections')
+      .listIndexes({ readPreference: ReadPreference.PRIMARY })
+      .toArray();
 
-          return db
-            .collection('apm_test_list_collections')
-            .listIndexes({ readPreference: ReadPreference.PRIMARY })
-            .toArray();
-        })
-        .then(() =>
-          db
-            .collection('apm_test_list_collections')
-            .listIndexes({ readPreference: ReadPreference.SECONDARY })
-            .toArray()
-        )
-        .then(() => {
-          expect(started).to.have.lengthOf(2);
-          expect(started[0]).property('address').to.not.equal(started[1].address);
-
-          return client.close();
-        });
-    }
+    await db
+      .collection('apm_test_list_collections')
+      .listIndexes({ readPreference: ReadPreference.SECONDARY })
+      .toArray();
+    expect(started).to.have.lengthOf(2);
+    expect(started[0]).property('address').to.not.equal(started[1].address);
   });
 
   it('should correctly receive the APM events for a find with getmore and killcursor', {
