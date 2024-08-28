@@ -5,7 +5,6 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const skippedSpecs = {
   bulkWrite: 'TODO(NODE-6274)',
-  'change-streams': 'TODO(NODE-6035)',
   'convenient-transactions': 'TODO(NODE-5687)',
   'deprecated-options': 'TODO(NODE-5689)',
   'gridfs-advanced': 'TODO(NODE-6275)',
@@ -15,9 +14,7 @@ const skippedSpecs = {
   'gridfs-upload': 'TODO(NODE-6275)',
   'sessions-inherit-timeoutMS': 'TODO(NODE-5687)',
   'sessions-override-operation-timeoutMS': 'TODO(NODE-5687)',
-  'sessions-override-timeoutMS': 'TODO(NODE-5687)',
-  'tailable-awaitData': 'TODO(NODE-6035)',
-  'tailable-non-awaitData': 'TODO(NODE-6035)'
+  'sessions-override-timeoutMS': 'TODO(NODE-5687)'
 };
 
 const skippedTests = {
