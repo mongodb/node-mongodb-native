@@ -1,6 +1,5 @@
 import { clearTimeout, setTimeout } from 'timers';
 
-import { type CursorTimeoutMode } from './cursor/abstract_cursor';
 import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
 import { csotMin, noop } from './utils';
 
@@ -127,7 +126,6 @@ export type CSOTTimeoutContextOptions = {
   timeoutMS: number;
   serverSelectionTimeoutMS: number;
   socketTimeoutMS?: number;
-  cursorTimeoutMode?: CursorTimeoutMode;
 };
 
 function isLegacyTimeoutContextOptions(v: unknown): v is LegacyTimeoutContextOptions {
@@ -187,7 +185,6 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
   clearConnectionCheckoutTimeout: boolean;
   clearServerSelectionTimeout: boolean;
-  cursorTimeoutMode?: CursorTimeoutMode;
 
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
@@ -203,7 +200,6 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
 
     this.socketTimeoutMS = options.socketTimeoutMS;
-    this.cursorTimeoutMode = options.cursorTimeoutMode;
 
     this.clearServerSelectionTimeout = false;
     this.clearConnectionCheckoutTimeout = true;
