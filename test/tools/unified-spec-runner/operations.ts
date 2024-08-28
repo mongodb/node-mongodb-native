@@ -210,7 +210,7 @@ operations.set('close', async ({ entities, operation }) => {
   try {
     const cursor = entities.getEntity('cursor', operation.object);
     const timeoutMS = operation.arguments?.timeoutMS;
-    await cursor.close(timeoutMS);
+    await cursor.close({ timeoutMS });
     return;
   } catch {}
 
