@@ -290,7 +290,7 @@ describe('CSOT spec prose tests', function () {
        * 1. Verify that a `find` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
 
-      it.skip('send correct number of finds and getMores', async function () {
+      it('send correct number of finds and getMores', async function () {
         const cursor = client
           .db('db')
           .collection('coll')
@@ -336,7 +336,7 @@ describe('CSOT spec prose tests', function () {
        *    - Expect this to fail with a timeout error.
        * 1. Verify that an `aggregate` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
-      it.skip('sends correct number of aggregate and getMores', async function () {
+      it('sends correct number of aggregate and getMores', async function () {
         const changeStream = client.db('db').collection('coll').watch();
         const maybeError = await changeStream.next().then(
           () => null,
