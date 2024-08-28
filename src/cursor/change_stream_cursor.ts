@@ -127,21 +127,18 @@ export class ChangeStreamCursor<
     });
   }
 
-  async _initialize(
-    session: ClientSession,
-    options?: CursorInitializeOptions
-  ): Promise<InitialCursorResponse> {
+  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
       ...this.changeStreamCursorOptions,
-      omitMaxTimeMS: options?.omitMaxTimeMS,
+      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
       session
     });
 
     const response = await executeOperation(
       session.client,
       aggregateOperation,
-      options?.timeoutContext
+      this.timeoutContext
     );
 
     const server = aggregateOperation.server;

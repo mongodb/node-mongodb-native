@@ -38,18 +38,15 @@ export class ListCollectionsCursor<
   }
 
   /** @internal */
-  async _initialize(
-    session: ClientSession | undefined,
-    options?: CursorInitializeOptions
-  ): Promise<InitialCursorResponse> {
+  async _initialize(session: ClientSession | undefined): Promise<InitialCursorResponse> {
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,
       ...this.options,
-      omitMaxTimeMS: options?.omitMaxTimeMS,
+      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
       session
     });
 
-    const response = await executeOperation(this.parent.client, operation, options?.timeoutContext);
+    const response = await executeOperation(this.parent.client, operation, this.timeoutContext);
 
     return { server: operation.server, session, response };
   }

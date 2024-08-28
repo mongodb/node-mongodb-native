@@ -105,19 +105,16 @@ export class RunCommandCursor extends AbstractCursor {
   }
 
   /** @internal */
-  protected async _initialize(
-    session: ClientSession,
-    options?: CursorInitializeOptions
-  ): Promise<InitialCursorResponse> {
+  protected async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const operation = new RunCommandOperation<CursorResponse>(this.db, this.command, {
       ...this.cursorOptions,
       session: session,
       readPreference: this.cursorOptions.readPreference,
-      omitMaxTimeMS: options?.omitMaxTimeMS,
+      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
       responseType: CursorResponse
     });
 
-    const response = await executeOperation(this.client, operation, options?.timeoutContext);
+    const response = await executeOperation(this.client, operation, this?.timeoutContext);
 
     return {
       server: operation.server,
@@ -133,7 +130,7 @@ export class RunCommandCursor extends AbstractCursor {
       ...this.cursorOptions,
       session: this.session,
       ...this.getMoreOptions,
-      omitMaxTimeMS: this.cursorOptions.timeoutMode != null
+      omitMaxTimeMS: this.cursorOptions.omitMaxTimeMSOnGetMore
     });
 
     return await executeOperation(this.client, getMoreOperation, this.timeoutContext);

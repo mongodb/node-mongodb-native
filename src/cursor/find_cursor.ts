@@ -66,18 +66,15 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  async _initialize(
-    session: ClientSession,
-    options?: CursorInitializeOptions
-  ): Promise<InitialCursorResponse> {
+  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const findOperation = new FindOperation(this.namespace, this.cursorFilter, {
       ...this.findOptions, // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
-      omitMaxTimeMS: options?.omitMaxTimeMS,
+      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
       session
     });
 
-    const response = await executeOperation(this.client, findOperation, options?.timeoutContext);
+    const response = await executeOperation(this.client, findOperation, this.timeoutContext);
 
     // the response is not a cursor when `explain` is enabled
     this.numReturned = response.batchSize;

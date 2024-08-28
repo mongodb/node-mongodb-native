@@ -63,22 +63,15 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  async _initialize(
-    session: ClientSession,
-    options?: CursorInitializeOptions
-  ): Promise<InitialCursorResponse> {
+  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.aggregateOptions,
       ...this.cursorOptions,
-      omitMaxTimeMS: options?.omitMaxTimeMS,
+      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
       session
     });
 
-    const response = await executeOperation(
-      this.client,
-      aggregateOperation,
-      options?.timeoutContext
-    );
+    const response = await executeOperation(this.client, aggregateOperation, this.timeoutContext);
 
     return { server: aggregateOperation.server, session, response };
   }
