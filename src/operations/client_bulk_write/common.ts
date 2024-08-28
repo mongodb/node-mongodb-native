@@ -32,22 +32,20 @@ export interface ClientWriteModel {
 }
 
 /** @public */
-export interface ClientInsertOneModel<TSchema extends Document = Document>
-  extends ClientWriteModel {
+export interface ClientInsertOneModel extends ClientWriteModel {
   name: 'insertOne';
   /** The document to insert. */
-  document: OptionalId<TSchema>;
+  document: OptionalId<Document>;
 }
 
 /** @public */
-export interface ClientDeleteOneModel<TSchema extends Document = Document>
-  extends ClientWriteModel {
+export interface ClientDeleteOneModel extends ClientWriteModel {
   name: 'deleteOne';
   /**
    * The filter used to determine if a document should be deleted.
    * For a deleteOne operation, the first match is removed.
    */
-  filter: Filter<TSchema>;
+  filter: Filter<Document>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -55,14 +53,13 @@ export interface ClientDeleteOneModel<TSchema extends Document = Document>
 }
 
 /** @public */
-export interface ClientDeleteManyModel<TSchema extends Document = Document>
-  extends ClientWriteModel {
+export interface ClientDeleteManyModel extends ClientWriteModel {
   name: 'deleteMany';
   /**
    * The filter used to determine if a document should be deleted.
    * For a deleteMany operation, all matches are removed.
    */
-  filter: Filter<TSchema>;
+  filter: Filter<Document>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -70,16 +67,15 @@ export interface ClientDeleteManyModel<TSchema extends Document = Document>
 }
 
 /** @public */
-export interface ClientReplaceOneModel<TSchema extends Document = Document>
-  extends ClientWriteModel {
+export interface ClientReplaceOneModel extends ClientWriteModel {
   name: 'replaceOne';
   /**
    * The filter used to determine if a document should be replaced.
    * For a replaceOne operation, the first match is replaced.
    */
-  filter: Filter<TSchema>;
+  filter: Filter<Document>;
   /** The document with which to replace the matched document. */
-  replacement: WithoutId<TSchema>;
+  replacement: WithoutId<Document>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -89,20 +85,19 @@ export interface ClientReplaceOneModel<TSchema extends Document = Document>
 }
 
 /** @public */
-export interface ClientUpdateOneModel<TSchema extends Document = Document>
-  extends ClientWriteModel {
+export interface ClientUpdateOneModel extends ClientWriteModel {
   name: 'updateOne';
   /**
    * The filter used to determine if a document should be updated.
    * For an updateOne operation, the first match is updated.
    */
-  filter: Filter<TSchema>;
+  filter: Filter<Document>;
   /**
    * The modifications to apply. The value can be either:
-   * UpdateFilter<TSchema> - A document that contains update operator expressions,
+   * UpdateFilter<Document> - A document that contains update operator expressions,
    * Document[] - an aggregation pipeline.
    */
-  update: UpdateFilter<TSchema> | Document[];
+  update: UpdateFilter<Document> | Document[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -114,20 +109,19 @@ export interface ClientUpdateOneModel<TSchema extends Document = Document>
 }
 
 /** @public */
-export interface ClientUpdateManyModel<TSchema extends Document = Document>
-  extends ClientWriteModel {
+export interface ClientUpdateManyModel extends ClientWriteModel {
   name: 'updateMany';
   /**
    * The filter used to determine if a document should be updated.
    * For an updateMany operation, all matches are updated.
    */
-  filter: Filter<TSchema>;
+  filter: Filter<Document>;
   /**
    * The modifications to apply. The value can be either:
-   * UpdateFilter<TSchema> - A document that contains update operator expressions,
+   * UpdateFilter<Document> - A document that contains update operator expressions,
    * Document[] - an aggregation pipeline.
    */
-  update: UpdateFilter<TSchema> | Document[];
+  update: UpdateFilter<Document> | Document[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -140,16 +134,13 @@ export interface ClientUpdateManyModel<TSchema extends Document = Document>
 
 /**
  * Used to represent any of the client bulk write models that can be passed as an array
- * to MongoClient#bulkWrite. TSchema can be different on each of the individual models
- * and must always match the appropriate namespace that it defines provided to each of the models.
- * The schema is used on ClientInsertOneModel for the document field getting inserted, while all other
- * models use it for the filter document field.
+ * to MongoClient#bulkWrite.
  * @public
  */
-export type AnyClientBulkWriteModel<TSchema extends Document = Document> =
-  | ClientInsertOneModel<TSchema>
-  | ClientReplaceOneModel<TSchema>
-  | ClientUpdateOneModel<TSchema>
-  | ClientUpdateManyModel<TSchema>
-  | ClientDeleteOneModel<TSchema>
-  | ClientDeleteManyModel<TSchema>;
+export type AnyClientBulkWriteModel =
+  | ClientInsertOneModel
+  | ClientReplaceOneModel
+  | ClientUpdateOneModel
+  | ClientUpdateManyModel
+  | ClientDeleteOneModel
+  | ClientDeleteManyModel;

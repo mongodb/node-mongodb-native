@@ -81,7 +81,7 @@ export class ClientBulkWriteCommandBuilder {
       nsInfo: new DocumentSequence(nsInfo)
     };
     // Add bypassDocumentValidation if it was present in the options.
-    if ('bypassDocumentValidation' in this.options) {
+    if (this.options.bypassDocumentValidation != null) {
       command.bypassDocumentValidation = this.options.bypassDocumentValidation;
     }
     // Add let if it was present in the options.
@@ -93,9 +93,9 @@ export class ClientBulkWriteCommandBuilder {
 }
 
 /** @internal */
-interface ClientInsertOperation<TSchema extends Document = Document> {
+interface ClientInsertOperation {
   insert: number;
-  document: OptionalId<TSchema>;
+  document: OptionalId<Document>;
 }
 
 /**
@@ -116,10 +116,10 @@ export const buildInsertOneOperation = (
 };
 
 /** @internal */
-export interface ClientDeleteOperation<TSchema extends Document = Document> {
+export interface ClientDeleteOperation {
   delete: number;
   multi: boolean;
-  filter: Filter<TSchema>;
+  filter: Filter<Document>;
   hint?: Hint;
   collation?: CollationOptions;
 }
@@ -167,11 +167,11 @@ function createDeleteOperation(
 }
 
 /** @internal */
-export interface ClientUpdateOperation<TSchema extends Document = Document> {
+export interface ClientUpdateOperation {
   update: number;
   multi: boolean;
-  filter: Filter<TSchema>;
-  updateMods: UpdateFilter<TSchema> | Document[];
+  filter: Filter<Document>;
+  updateMods: UpdateFilter<Document> | Document[];
   hint?: Hint;
   upsert?: boolean;
   arrayFilters?: Document[];
@@ -230,11 +230,11 @@ function createUpdateOperation(
 }
 
 /** @internal */
-export interface ClientReplaceOneOperation<TSchema extends Document = Document> {
+export interface ClientReplaceOneOperation {
   update: number;
   multi: boolean;
-  filter: Filter<TSchema>;
-  updateMods: WithoutId<TSchema>;
+  filter: Filter<Document>;
+  updateMods: WithoutId<Document>;
   hint?: Hint;
   upsert?: boolean;
 }
