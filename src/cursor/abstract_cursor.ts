@@ -201,13 +201,6 @@ export abstract class AbstractCursor<
       ...pluckBSONSerializeOptions(options)
     };
     this.cursorOptions.timeoutMS = options.timeoutMS;
-    this.cursorOptions.omitMaxTimeMSOnInitialCommand =
-      this.cursorOptions.timeoutMS != null &&
-      ((this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-        !this.cursorOptions.tailable) ||
-        (this.cursorOptions.tailable && !this.cursorOptions.awaitData));
-    this.cursorOptions.omitMaxTimeMSOnGetMore = this.cursorOptions.timeoutMS != null;
-
     if (this.cursorOptions.timeoutMS != null) {
       if (options.timeoutMode == null) {
         if (options.tailable) {
@@ -227,6 +220,12 @@ export abstract class AbstractCursor<
       if (options.timeoutMode != null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
+    this.cursorOptions.omitMaxTimeMSOnInitialCommand =
+      this.cursorOptions.timeoutMS != null &&
+      ((this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+        !this.cursorOptions.tailable) ||
+        (this.cursorOptions.tailable && !this.cursorOptions.awaitData));
+    this.cursorOptions.omitMaxTimeMSOnGetMore = this.cursorOptions.timeoutMS != null;
 
     const readConcern = ReadConcern.fromOptions(options);
     if (readConcern) {
