@@ -1,0 +1,153 @@
+{
+  "description": "timeoutMS behaves correctly during command execution",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4.7",
+      "topologies": [
+        "single",
+        "replicaset",
+        "sharded"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "test",
+      "documents": []
+    },
+    {
+      "collectionName": "timeoutColl",
+      "databaseName": "test",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "maxTimeMS value in the command is less than timeoutMS",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "alwaysOn",
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "isMaster"
+                ],
+                "appName": "reduceMaxTimeMSTest",
+                "blockConnection": true,
+                "blockTimeMS": 50
+              }
+            }
+          }
+        },
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "useMultipleMongoses": false,
+                  "uriOptions": {
+                    "appName": "reduceMaxTimeMSTest",
+                    "w": 1,
+                    "timeoutMS": 500,
+                    "heartbeatFrequencyMS": 500
+                  },
+                  "observeEvents": [
+                    "commandStartedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "database",
+                  "client": "client",
+                  "databaseName": "test"
+                }
+              },
+              {
+                "collection": {
+                  "id": "timeoutCollection",
+                  "database": "database",
+                  "collectionName": "timeoutColl"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 1
+            },
+            "timeoutMS": 100000
+          }
+        },
+        {
+          "name": "wait",
+          "object": "testRunner",
+          "arguments": {
+            "ms": 1500
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 2
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "timeoutColl"
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "timeoutColl",
+                  "maxTimeMS": {
+                    "$$lte": 450
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

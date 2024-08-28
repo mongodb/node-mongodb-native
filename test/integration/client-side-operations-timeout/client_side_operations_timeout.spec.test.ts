@@ -38,11 +38,10 @@ const skippedTests = {
     'TODO(DRIVERS-2965)',
   'Non-tailable cursor lifetime remaining timeoutMS applied to getMore if timeoutMode is unset':
     'TODO(DRIVERS-2965)'
-  //'timeoutMS can be configured on a MongoClient - dropIndexes on collection': 'Successfully returns false on failure, but does not surface CSOT'
 };
 
 describe('CSOT spec tests', function () {
-  const specs = loadSpecTests(join('client-side-operations-timeout'));
+  const specs = loadSpecTests('client-side-operations-timeout');
   for (const spec of specs) {
     for (const test of spec.tests) {
       if (skippedSpecs[spec.name] != null) {
@@ -54,5 +53,12 @@ describe('CSOT spec tests', function () {
     }
   }
 
+  runUnifiedSuite(specs);
+});
+
+describe('CSOT modified spec tests', function () {
+  const specs = loadSpecTests(
+    join('..', 'integration', 'client-side-operations-timeout', 'unified-csot-node-specs')
+  );
   runUnifiedSuite(specs);
 });
