@@ -17,7 +17,6 @@ import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   AbstractCursor,
   type AbstractCursorOptions,
-  type CursorInitializeOptions,
   type InitialCursorResponse
 } from './abstract_cursor';
 

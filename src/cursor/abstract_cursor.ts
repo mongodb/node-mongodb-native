@@ -528,8 +528,8 @@ export abstract class AbstractCursor<
   /**
    * Frees any client-side resources used by the cursor.
    */
-  async close(timeoutMS?: number): Promise<void> {
-    await this.cleanup(timeoutMS);
+  async close(options?: { timeoutMS?: number }): Promise<void> {
+    await this.cleanup(options?.timeoutMS);
   }
 
   /**

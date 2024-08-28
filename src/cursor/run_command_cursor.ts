@@ -11,7 +11,6 @@ import type { ClientSession } from '../sessions';
 import { ns } from '../utils';
 import {
   AbstractCursor,
-  type CursorInitializeOptions,
   type CursorTimeoutMode,
   type InitialCursorResponse
 } from './abstract_cursor';
@@ -20,6 +19,7 @@ import {
 export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
+  /** @internal */
   timeoutMS?: number;
   /** @internal */
   timeoutMode?: CursorTimeoutMode;

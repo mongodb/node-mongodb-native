@@ -7,11 +7,7 @@ import {
   type ListCollectionsOptions
 } from '../operations/list_collections';
 import type { ClientSession } from '../sessions';
-import {
-  AbstractCursor,
-  type CursorInitializeOptions,
-  type InitialCursorResponse
-} from './abstract_cursor';
+import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
 
 /** @public */
 export class ListCollectionsCursor<

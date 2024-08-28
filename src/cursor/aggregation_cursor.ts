@@ -8,11 +8,7 @@ import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
 import type { MongoDBNamespace } from '../utils';
 import { mergeOptions } from '../utils';
-import type {
-  AbstractCursorOptions,
-  CursorInitializeOptions,
-  InitialCursorResponse
-} from './abstract_cursor';
+import type { AbstractCursorOptions, InitialCursorResponse } from './abstract_cursor';
 import { AbstractCursor, CursorTimeoutMode } from './abstract_cursor';
 
 /** @public */
@@ -45,7 +41,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (
       this.cursorOptions.timeoutMS != null &&
       this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-      this.pipeline.filter(s => s.$out != null || s.$merge != null).length > 0
+      this.pipeline.find(stage => stage.$out != null || stage.$merge != null) != null
     )
       throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
   }
@@ -109,7 +105,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (
       this.cursorOptions.timeoutMS != null &&
       this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-      (Object.hasOwn(stage, '$out') || Object.hasOwn(stage, '$merge'))
+      (stage.$out != null || stage.$merge != null)
     ) {
       throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
     }

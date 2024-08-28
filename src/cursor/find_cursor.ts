@@ -11,11 +11,7 @@ import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
-import {
-  AbstractCursor,
-  type CursorInitializeOptions,
-  type InitialCursorResponse
-} from './abstract_cursor';
+import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
