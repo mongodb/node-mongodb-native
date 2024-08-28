@@ -114,7 +114,7 @@ export class RunCommandCursor extends AbstractCursor {
       responseType: CursorResponse
     });
 
-    const response = await executeOperation(this.client, operation, this?.timeoutContext);
+    const response = await executeOperation(this.client, operation, this.timeoutContext);
 
     return {
       server: operation.server,
