@@ -140,12 +140,6 @@ export type AbstractCursorEvents = {
   [AbstractCursor.CLOSE](): void;
 };
 
-/** @internal */
-export type CursorInitializeOptions = {
-  omitMaxTimeMS?: boolean;
-  timeoutContext?: TimeoutContext;
-};
-
 /** @public */
 export abstract class AbstractCursor<
     TSchema = any,
