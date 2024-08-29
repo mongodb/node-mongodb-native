@@ -385,4 +385,89 @@ describe('CSOT driver tests', { requires: { mongodb: '>=4.4' } }, () => {
       });
     });
   });
+
+  describe('Convenient Transactions', () => {
+    /** Tests in this section MUST only run against replica sets and sharded clusters with server versions 4.4 or higher. */
+    const metadata: MongoDBMetadataUI = {
+      requires: { topology: ['replicaset', 'sharded'], mongodb: '>=5.0' }
+    };
+
+    describe('when an operation fails inside withTransaction callback', () => {
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 2 },
+        data: {
+          failCommands: ['insert', 'abortTransaction'],
+          blockConnection: true,
+          blockTimeMS: 600
+        }
+      };
+
+      beforeEach(async function () {
+        if (!semver.satisfies(this.configuration.version, '>=4.4')) {
+          this.skipReason = 'Requires server version 4.4+';
+          this.skip();
+        }
+        const internalClient = this.configuration.newClient();
+        await internalClient
+          .db('db')
+          .collection('coll')
+          .drop()
+          .catch(() => null);
+        await internalClient.db('admin').command(failpoint);
+        await internalClient.close();
+      });
+
+      let client: MongoClient;
+
+      afterEach(async function () {
+        if (semver.satisfies(this.configuration.version, '>=4.4')) {
+          const internalClient = this.configuration.newClient();
+          await internalClient
+            .db('admin')
+            .command({ configureFailPoint: 'failCommand', mode: 'off' });
+          await internalClient.close();
+        }
+        await client?.close();
+      });
+
+      it(
+        'timeoutMS is refreshed for abortTransaction and the timeout error is thrown from the operation',
+        metadata,
+        async function () {
+          const commandsFailed = [];
+          const commandsStarted = [];
+
+          client = this.configuration
+            .newClient({ timeoutMS: 500, monitorCommands: true })
+            .on('commandStarted', e => commandsStarted.push(e.commandName))
+            .on('commandFailed', e => commandsFailed.push(e.commandName));
+
+          const coll = client.db('db').collection('coll');
+
+          const session = client.startSession();
+
+          let insertError: Error | null = null;
+          const withTransactionError = await session
+            .withTransaction(async session => {
+              insertError = await coll.insertOne({ x: 1 }, { session }).catch(error => error);
+              throw insertError;
+            })
+            .catch(error => error);
+
+          try {
+            expect(insertError).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(withTransactionError).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(commandsStarted, 'commands started').to.deep.equal([
+              'insert',
+              'abortTransaction'
+            ]);
+            expect(commandsFailed, 'commands failed').to.deep.equal(['insert', 'abortTransaction']);
+          } finally {
+            await session.endSession();
+          }
+        }
+      );
+    });
+  });
 });

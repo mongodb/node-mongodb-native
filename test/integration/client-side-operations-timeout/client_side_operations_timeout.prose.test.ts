@@ -774,13 +774,23 @@ describe('CSOT spec prose tests', function () {
       afterEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4')) {
           const internalClient = this.configuration.newClient();
-          await internalClient.db('admin').command({ ...failpoint, mode: 'off' });
+          await internalClient
+            .db('admin')
+            .command({ configureFailPoint: 'failCommand', mode: 'off' });
           await internalClient.close();
         }
         await client?.close();
       });
 
       it('timeoutMS is refreshed for abortTransaction', metadata, async function () {
+        if (
+          this.configuration.topologyType === 'ReplicaSetWithPrimary' &&
+          semver.satisfies(this.configuration.version, '<=4.4')
+        ) {
+          this.skipReason = '4.4 replicaset fail point does not blockConnection for requested time';
+          this.skip();
+        }
+
         const commandsFailed = [];
         const commandsStarted = [];
 
@@ -793,16 +803,13 @@ describe('CSOT spec prose tests', function () {
 
         const session = client.startSession();
 
-        let insertError: Error | null = null;
         const withTransactionError = await session
           .withTransaction(async session => {
-            insertError = await coll.insertOne({ x: 1 }, { session }).catch(error => error);
-            throw insertError;
+            await coll.insertOne({ x: 1 }, { session });
           })
           .catch(error => error);
 
         try {
-          expect(insertError).to.be.instanceOf(MongoOperationTimeoutError);
           expect(withTransactionError).to.be.instanceOf(MongoOperationTimeoutError);
           expect(commandsStarted, 'commands started').to.deep.equal(['insert', 'abortTransaction']);
           expect(commandsFailed, 'commands failed').to.deep.equal(['insert', 'abortTransaction']);

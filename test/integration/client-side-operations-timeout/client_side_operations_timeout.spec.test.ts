@@ -1,4 +1,5 @@
 import { join } from 'path';
+import * as semver from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
@@ -46,5 +47,13 @@ describe('CSOT spec tests', function () {
           'TODO(NODE-6274): update test runner to check errorResponse field of MongoBulkWriteError in isTimeoutError assertion';
     }
   }
-  runUnifiedSuite(specs);
+  runUnifiedSuite(specs, (test, configuration) => {
+    if (
+      configuration.topologyType === 'ReplicaSetWithPrimary' &&
+      semver.satisfies(configuration.version, '<=4.4')
+    ) {
+      return '4.4 replicaset fail point does not blockConnection for requested time';
+    }
+    return false;
+  });
 });
