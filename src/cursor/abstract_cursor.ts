@@ -776,8 +776,7 @@ export abstract class AbstractCursor<
     if (this.cursorOptions.timeoutMS != null) {
       this.timeoutContext = TimeoutContext.create({
         serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
-        timeoutMS: this.cursorOptions.timeoutMS,
-        cursorTimeoutMode: this.cursorOptions.timeoutMode
+        timeoutMS: this.cursorOptions.timeoutMS
       });
     }
     try {
