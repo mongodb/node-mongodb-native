@@ -513,7 +513,14 @@ export class ClientSession
         : null;
 
     const timeoutContext =
-      this.timeoutContext ?? TimeoutContext.create({ timeoutMS, ...this.clientOptions });
+      this.timeoutContext ??
+      (typeof timeoutMS === 'number'
+        ? TimeoutContext.create({
+            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+            socketTimeoutMS: this.clientOptions.socketTimeoutMS,
+            timeoutMS
+          })
+        : null);
 
     try {
       await executeOperation(this.client, operation, timeoutContext);

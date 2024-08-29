@@ -59,7 +59,7 @@ type ResultTypeFromOperation<TOperation> = TOperation extends AbstractOperation<
 export async function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T, timeoutContext?: TimeoutContext): Promise<TResult> {
+>(client: MongoClient, operation: T, timeoutContext?: TimeoutContext | null): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
@@ -102,13 +102,12 @@ export async function executeOperation<
     session.unpin();
   }
 
-  timeoutContext ??=
-    session.timeoutContext ??
-    TimeoutContext.create({
-      serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
-      waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
-      timeoutMS: operation.options.timeoutMS ?? session.timeoutMS
-    });
+  timeoutContext ??= TimeoutContext.create({
+    session,
+    serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
+    waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
+    timeoutMS: operation.options.timeoutMS
+  });
 
   try {
     return await tryOperation(operation, {

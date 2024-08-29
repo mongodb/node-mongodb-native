@@ -1,6 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
+import { type ClientSession } from './sessions';
 import { csotMin, noop } from './utils';
 
 /** @internal */
@@ -128,7 +129,9 @@ export class Timeout extends Promise<never> {
 }
 
 /** @internal */
-export type TimeoutContextOptions = LegacyTimeoutContextOptions | CSOTTimeoutContextOptions;
+export type TimeoutContextOptions = (LegacyTimeoutContextOptions | CSOTTimeoutContextOptions) & {
+  session?: ClientSession;
+};
 
 /** @internal */
 export type LegacyTimeoutContextOptions = {
@@ -169,6 +172,7 @@ function isCSOTTimeoutContextOptions(v: unknown): v is CSOTTimeoutContextOptions
 /** @internal */
 export abstract class TimeoutContext {
   static create(options: TimeoutContextOptions): TimeoutContext {
+    if (options.session?.timeoutContext != null) return options.session?.timeoutContext;
     if (isCSOTTimeoutContextOptions(options)) return new CSOTTimeoutContext(options);
     else if (isLegacyTimeoutContextOptions(options)) return new LegacyTimeoutContext(options);
     else throw new MongoRuntimeError('Unrecognized options');

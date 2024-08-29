@@ -48,7 +48,9 @@ describe('CSOT spec tests', function () {
     }
   }
   runUnifiedSuite(specs, (test, configuration) => {
+    const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
     if (
+      sessionCSOTTests.includes(test.description) &&
       configuration.topologyType === 'ReplicaSetWithPrimary' &&
       semver.satisfies(configuration.version, '<=4.4')
     ) {
