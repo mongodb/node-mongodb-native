@@ -10,7 +10,6 @@ const { EJSON } = BSON;
 const { LEGACY_HELLO_COMMAND, MongoCryptError } = require('../../mongodb');
 const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { coerce, gte } = require('semver');
 
 const {
   externalSchema
