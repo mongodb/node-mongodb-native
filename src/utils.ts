@@ -501,6 +501,10 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
 /**
  * Merge inherited properties from parent into options, prioritizing values from options,
  * then values from parent.
+ *
+ * @param parent - An optional owning class of the operation being run. ex. Db/Collection/MongoClient.
+ * @param options - The options passed to the operation method.
+ *
  * @internal
  */
 export function resolveOptions<T extends CommandOperationOptions>(
