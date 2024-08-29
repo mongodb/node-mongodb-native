@@ -573,8 +573,23 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe.skip('Tailable non-awaitData cursors').skipReason =
-    'TODO(NODE-6305): implement CSOT for Tailable cursors';
-  describe.skip('Tailable awaitData cursors').skipReason =
-    'TODO(NODE-6305): implement CSOT for Tailable cursors';
+  describe('Tailable cursors', function () {
+    context('when in ITERATION mode', function () {
+      context('awaitData cursors', function () {
+        it('applies timeoutMS to initial command');
+        it('refreshes the timeout for subsequent getMores');
+        it('does not use timeoutMS to compute maxTimeMS for getMores');
+        context('when maxAwaitTimeMS is specified', function () {
+          it('sets maxTimeMS to the configured maxAwaitTimeMS value on getMores');
+        });
+      });
+
+      context('non-awaitData cursors', function () {
+        it('applies timeoutMS to initial command');
+        it('refreshes the timeout for subsequent getMores');
+        it('does not append a maxTimeMS field to original command');
+        it('does not append a maxTimeMS field to subsequent getMores');
+      });
+    });
+  });
 });
