@@ -636,7 +636,7 @@ describe('CSOT spec prose tests', function () {
       data: {
         failCommands: ['abortTransaction'],
         blockConnection: true,
-        blockTimeMS: 600
+        blockTimeMS: 200
       }
     };
 
@@ -665,7 +665,7 @@ describe('CSOT spec prose tests', function () {
 
     describe('when timeoutMS is provided to the client', () => {
       it('throws a timeout error from endSession', metadata, async function () {
-        client = this.configuration.newClient({ timeoutMS: 500, monitorCommands: true });
+        client = this.configuration.newClient({ timeoutMS: 150, monitorCommands: true });
         const coll = client.db('endSession_db').collection('endSession_coll');
         const session = client.startSession();
         session.startTransaction();
@@ -673,7 +673,7 @@ describe('CSOT spec prose tests', function () {
         const start = performance.now();
         const error = await session.endSession().catch(error => error);
         const end = performance.now();
-        expect(end - start).to.be.within(480, 520);
+        expect(end - start).to.be.within(100, 170);
         expect(error).to.be.instanceOf(MongoOperationTimeoutError);
       });
     });
@@ -682,13 +682,13 @@ describe('CSOT spec prose tests', function () {
       it('throws a timeout error from endSession', metadata, async function () {
         client = this.configuration.newClient();
         const coll = client.db('endSession_db').collection('endSession_coll');
-        const session = client.startSession({ defaultTimeoutMS: 500 });
+        const session = client.startSession({ defaultTimeoutMS: 150 });
         session.startTransaction();
         await coll.insertOne({ x: 1 }, { session });
         const start = performance.now();
         const error = await session.endSession().catch(error => error);
         const end = performance.now();
-        expect(end - start).to.be.within(480, 520);
+        expect(end - start).to.be.within(100, 170);
         expect(error).to.be.instanceOf(MongoOperationTimeoutError);
       });
     });
@@ -701,9 +701,9 @@ describe('CSOT spec prose tests', function () {
         session.startTransaction();
         await coll.insertOne({ x: 1 }, { session });
         const start = performance.now();
-        const error = await session.endSession({ timeoutMS: 500 }).catch(error => error);
+        const error = await session.endSession({ timeoutMS: 150 }).catch(error => error);
         const end = performance.now();
-        expect(end - start).to.be.within(480, 520);
+        expect(end - start).to.be.within(100, 170);
         expect(error).to.be.instanceOf(MongoOperationTimeoutError);
       });
     });
@@ -726,7 +726,7 @@ describe('CSOT spec prose tests', function () {
        *     data: {
        *         failCommands: ["insert", "abortTransaction"],
        *         blockConnection: true,
-       *         blockTimeMS: 15
+       *         blockTimeMS: 200
        *     }
        * }
        * ```
@@ -750,7 +750,7 @@ describe('CSOT spec prose tests', function () {
         data: {
           failCommands: ['insert', 'abortTransaction'],
           blockConnection: true,
-          blockTimeMS: 600
+          blockTimeMS: 200
         }
       };
 
@@ -795,7 +795,7 @@ describe('CSOT spec prose tests', function () {
         const commandsStarted = [];
 
         client = this.configuration
-          .newClient({ timeoutMS: 500, monitorCommands: true })
+          .newClient({ timeoutMS: 150, monitorCommands: true })
           .on('commandStarted', e => commandsStarted.push(e.commandName))
           .on('commandFailed', e => commandsFailed.push(e.commandName));
 
