@@ -512,9 +512,8 @@ export class ClientSession
         ? this.timeoutMS
         : null;
 
-    const timeoutContext = this.timeoutContext?.csotEnabled()
-      ? this.timeoutContext
-      : TimeoutContext.create({ timeoutMS, ...this.clientOptions });
+    const timeoutContext =
+      this.timeoutContext ?? TimeoutContext.create({ timeoutMS, ...this.clientOptions });
 
     try {
       await executeOperation(this.client, operation, timeoutContext);
