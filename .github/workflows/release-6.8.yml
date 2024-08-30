@@ -101,7 +101,9 @@ jobs:
 
         # Just picking a string to put here so that releases from this branch are not marked "latest",
         # we should go and rm-dist-tag after this is published, no reason to keep it tagged.
-      - run: npm publish --provenance --tag=stable
+      - run: |
+          npm publish --provenance --tag=tag-for-publishing-older-releases
+          npm dist-tag rm mongodb tag-for-publishing-older-releases
         if: ${{ needs.release_please.outputs.release_created }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
