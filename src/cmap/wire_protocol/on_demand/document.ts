@@ -10,6 +10,7 @@ import {
   getInt32LE,
   ObjectId,
   parseToElementsToArray,
+  pluckBSONSerializeOptions,
   Timestamp,
   toUTF8
 } from '../../../bson';
@@ -330,11 +331,23 @@ export class OnDemandDocument {
    * @param options - BSON deserialization options
    */
   public toObject(options?: BSONSerializeOptions): Record<string, any> {
-    return BSON.deserialize(this.bson, {
-      ...options,
+    const exactBSONOptions = {
+      ...pluckBSONSerializeOptions(options ?? {}),
+      validation: this.parseBsonSerializationOptions(options),
       index: this.offset,
       allowObjectSmallerThanBufferSize: true
-    });
+    };
+    return BSON.deserialize(this.bson, exactBSONOptions);
+  }
+
+  private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
+    utf8: { writeErrors: false } | false;
+  } {
+    const enableUtf8Validation = options?.enableUtf8Validation;
+    if (enableUtf8Validation === false) {
+      return { utf8: false };
+    }
+    return { utf8: { writeErrors: false } };
   }
 
   /** Returns this document's bytes only */

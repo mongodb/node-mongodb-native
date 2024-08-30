@@ -1,10 +1,14 @@
 import { expect } from 'chai';
+import * as net from 'net';
 import * as sinon from 'sinon';
 
 import {
   BSON,
+  BSONError,
+  type Collection,
   type MongoClient,
   MongoDBResponse,
+  MongoError,
   MongoServerError,
   OpMsgResponse
 } from '../../../mongodb';
@@ -152,4 +156,211 @@ describe('class MongoDBResponse', () => {
       });
     }
   );
+});
+
+describe('utf8 validation with cursors', function () {
+  let client: MongoClient;
+  let collection: Collection;
+
+  /**
+   * Inserts a document with malformed utf8 bytes.  This method spies on socket.write, and then waits
+   * for an OP_MSG payload corresponding to `collection.insertOne({ field: 'é' })`, and then modifies the
+   * bytes of the character 'é', to produce invalid utf8.
+   */
+  async function insertDocumentWithInvalidUTF8() {
+    const targetCharacter = Buffer.from('é').toString('hex');
+
+    const stub = sinon.stub(net.Socket.prototype, 'write').callsFake(function (...args) {
+      const providedBuffer = args[0].toString('hex');
+      const targetCharacter = Buffer.from('é').toString('hex');
+      if (providedBuffer.includes(targetCharacter)) {
+        if (providedBuffer.split(targetCharacter).length !== 2) {
+          throw new Error('received buffer more than one `c3a9` sequences.  or perhaps none?');
+        }
+        const buffer = Buffer.from(providedBuffer.replace('c3a9', 'c301'), 'hex');
+        const result = stub.wrappedMethod.apply(this, [buffer]);
+        sinon.restore();
+        return result;
+      }
+      const result = stub.wrappedMethod.apply(this, args);
+      return result;
+    });
+
+    const document = {
+      field: targetCharacter
+    };
+
+    await collection.insertOne(document);
+
+    sinon.restore();
+  }
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+    await client.connect();
+    const db = client.db('test');
+    collection = db.collection('invalidutf');
+
+    await collection.deleteMany({});
+    await insertDocumentWithInvalidUTF8();
+  });
+
+  afterEach(async function () {
+    await client.close();
+  });
+
+  context('when utf-8 validation is explicitly disabled', function () {
+    it('documents can be read using a for-await loop without errors', async function () {
+      for await (const _doc of collection.find({}, { enableUtf8Validation: false }));
+    });
+    it('documents can be read using next() without errors', async function () {
+      const cursor = collection.find({}, { enableUtf8Validation: false });
+
+      while (await cursor.hasNext()) {
+        await cursor.next();
+      }
+    });
+
+    it('documents can be read using toArray() without errors', async function () {
+      const cursor = collection.find({}, { enableUtf8Validation: false });
+      await cursor.toArray();
+    });
+
+    it('documents can be read using .stream() without errors', async function () {
+      const cursor = collection.find({}, { enableUtf8Validation: false });
+      await cursor.stream().toArray();
+    });
+
+    it('documents can be read with tryNext() without error', async function () {
+      const cursor = collection.find({}, { enableUtf8Validation: false });
+
+      while (await cursor.hasNext()) {
+        await cursor.tryNext();
+      }
+    });
+  });
+
+  async function expectReject(fn: () => Promise<void>, options?: { regex?: RegExp; errorClass }) {
+    const regex = options?.regex ?? /.*/;
+    const errorClass = options?.errorClass ?? MongoError;
+    try {
+      await fn();
+      expect.fail('expected the provided callback function to reject, but it did not.');
+    } catch (error) {
+      expect(error).to.match(regex);
+      expect(error).to.be.instanceOf(errorClass);
+    }
+  }
+
+  context('when utf-8 validation is explicitly enabled', function () {
+    it('a for-await loop throw a BSON error', async function () {
+      await expectReject(
+        async () => {
+          for await (const _doc of collection.find({}, { enableUtf8Validation: true }));
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+    it('next() throws a BSON error', async function () {
+      await expectReject(
+        async () => {
+          const cursor = collection.find({}, { enableUtf8Validation: true });
+
+          while (await cursor.hasNext()) {
+            await cursor.next();
+          }
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+
+    it('toArray() throws a BSON error', async function () {
+      await expectReject(
+        async () => {
+          const cursor = collection.find({}, { enableUtf8Validation: true });
+          await cursor.toArray();
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+
+    it('.stream() throws a BSONError', async function () {
+      await expectReject(
+        async () => {
+          const cursor = collection.find({}, { enableUtf8Validation: true });
+          await cursor.stream().toArray();
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+
+    it('tryNext() throws a BSONError', async function () {
+      await expectReject(
+        async () => {
+          const cursor = collection.find({}, { enableUtf8Validation: true });
+
+          while (await cursor.hasNext()) {
+            await cursor.tryNext();
+          }
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+  });
+
+  context('utf-8 validation defaults to enabled', function () {
+    it('a for-await loop throw a BSON error', async function () {
+      await expectReject(
+        async () => {
+          for await (const _doc of collection.find({}));
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+    it('next() throws a BSON error', async function () {
+      await expectReject(
+        async () => {
+          const cursor = collection.find({});
+
+          while (await cursor.hasNext()) {
+            await cursor.next();
+          }
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+
+    it('toArray() throws a BSON error', async function () {
+      await expectReject(
+        async () => {
+          const cursor = collection.find({});
+          await cursor.toArray();
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+
+    it('.stream() throws a BSONError', async function () {
+      await expectReject(
+        async () => {
+          const cursor = collection.find({});
+          await cursor.stream().toArray();
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+
+    it('tryNext() throws a BSONError', async function () {
+      await expectReject(
+        async () => {
+          const cursor = collection.find({}, { enableUtf8Validation: true });
+
+          while (await cursor.hasNext()) {
+            await cursor.tryNext();
+          }
+        },
+        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
+      );
+    });
+  });
 });
