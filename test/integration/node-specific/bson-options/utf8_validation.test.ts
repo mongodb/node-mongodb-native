@@ -8,7 +8,6 @@ import {
   type Collection,
   type MongoClient,
   MongoDBResponse,
-  MongoError,
   MongoServerError,
   OpMsgResponse
 } from '../../../mongodb';
@@ -240,127 +239,95 @@ describe('utf8 validation with cursors', function () {
     });
   });
 
-  async function expectReject(fn: () => Promise<void>, options?: { regex?: RegExp; errorClass }) {
-    const regex = options?.regex ?? /.*/;
-    const errorClass = options?.errorClass ?? MongoError;
+  async function expectReject(fn: () => Promise<void>) {
     try {
       await fn();
       expect.fail('expected the provided callback function to reject, but it did not.');
     } catch (error) {
-      expect(error).to.match(regex);
-      expect(error).to.be.instanceOf(errorClass);
+      expect(error).to.match(/Invalid UTF-8 string in BSON document/);
+      expect(error).to.be.instanceOf(BSONError);
     }
   }
 
   context('when utf-8 validation is explicitly enabled', function () {
     it('a for-await loop throw a BSON error', async function () {
-      await expectReject(
-        async () => {
-          for await (const _doc of collection.find({}, { enableUtf8Validation: true }));
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+      await expectReject(async () => {
+        for await (const _doc of collection.find({}, { enableUtf8Validation: true }));
+      });
     });
     it('next() throws a BSON error', async function () {
-      await expectReject(
-        async () => {
-          const cursor = collection.find({}, { enableUtf8Validation: true });
+      await expectReject(async () => {
+        const cursor = collection.find({}, { enableUtf8Validation: true });
 
-          while (await cursor.hasNext()) {
-            await cursor.next();
-          }
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+        while (await cursor.hasNext()) {
+          await cursor.next();
+        }
+      });
     });
 
     it('toArray() throws a BSON error', async function () {
-      await expectReject(
-        async () => {
-          const cursor = collection.find({}, { enableUtf8Validation: true });
-          await cursor.toArray();
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+      await expectReject(async () => {
+        const cursor = collection.find({}, { enableUtf8Validation: true });
+        await cursor.toArray();
+      });
     });
 
     it('.stream() throws a BSONError', async function () {
-      await expectReject(
-        async () => {
-          const cursor = collection.find({}, { enableUtf8Validation: true });
-          await cursor.stream().toArray();
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+      await expectReject(async () => {
+        const cursor = collection.find({}, { enableUtf8Validation: true });
+        await cursor.stream().toArray();
+      });
     });
 
     it('tryNext() throws a BSONError', async function () {
-      await expectReject(
-        async () => {
-          const cursor = collection.find({}, { enableUtf8Validation: true });
+      await expectReject(async () => {
+        const cursor = collection.find({}, { enableUtf8Validation: true });
 
-          while (await cursor.hasNext()) {
-            await cursor.tryNext();
-          }
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+        while (await cursor.hasNext()) {
+          await cursor.tryNext();
+        }
+      });
     });
   });
 
   context('utf-8 validation defaults to enabled', function () {
     it('a for-await loop throw a BSON error', async function () {
-      await expectReject(
-        async () => {
-          for await (const _doc of collection.find({}));
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+      await expectReject(async () => {
+        for await (const _doc of collection.find({}));
+      });
     });
     it('next() throws a BSON error', async function () {
-      await expectReject(
-        async () => {
-          const cursor = collection.find({});
+      await expectReject(async () => {
+        const cursor = collection.find({});
 
-          while (await cursor.hasNext()) {
-            await cursor.next();
-          }
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+        while (await cursor.hasNext()) {
+          await cursor.next();
+        }
+      });
     });
 
     it('toArray() throws a BSON error', async function () {
-      await expectReject(
-        async () => {
-          const cursor = collection.find({});
-          await cursor.toArray();
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+      await expectReject(async () => {
+        const cursor = collection.find({});
+        await cursor.toArray();
+      });
     });
 
     it('.stream() throws a BSONError', async function () {
-      await expectReject(
-        async () => {
-          const cursor = collection.find({});
-          await cursor.stream().toArray();
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+      await expectReject(async () => {
+        const cursor = collection.find({});
+        await cursor.stream().toArray();
+      });
     });
 
     it('tryNext() throws a BSONError', async function () {
-      await expectReject(
-        async () => {
-          const cursor = collection.find({}, { enableUtf8Validation: true });
+      await expectReject(async () => {
+        const cursor = collection.find({}, { enableUtf8Validation: true });
 
-          while (await cursor.hasNext()) {
-            await cursor.tryNext();
-          }
-        },
-        { errorClass: BSONError, regex: /Invalid UTF-8 string in BSON document/ }
-      );
+        while (await cursor.hasNext()) {
+          await cursor.tryNext();
+        }
+      });
     });
   });
 });
