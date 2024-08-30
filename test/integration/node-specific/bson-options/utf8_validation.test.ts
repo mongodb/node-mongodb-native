@@ -167,13 +167,12 @@ describe('utf8 validation with cursors', function () {
    * bytes of the character 'é', to produce invalid utf8.
    */
   async function insertDocumentWithInvalidUTF8() {
-    const targetCharacter = Buffer.from('é').toString('hex');
-
     const stub = sinon.stub(net.Socket.prototype, 'write').callsFake(function (...args) {
       const providedBuffer = args[0].toString('hex');
-      const targetCharacter = Buffer.from('é').toString('hex');
-      if (providedBuffer.includes(targetCharacter)) {
-        if (providedBuffer.split(targetCharacter).length !== 2) {
+      const targetBytes = Buffer.from('é').toString('hex');
+
+      if (providedBuffer.includes(targetBytes)) {
+        if (providedBuffer.split(targetBytes).length !== 2) {
           throw new Error('received buffer more than one `c3a9` sequences.  or perhaps none?');
         }
         const buffer = Buffer.from(providedBuffer.replace('c3a9', 'c301'), 'hex');
@@ -186,7 +185,7 @@ describe('utf8 validation with cursors', function () {
     });
 
     const document = {
-      field: targetCharacter
+      field: 'é'
     };
 
     await collection.insertOne(document);
