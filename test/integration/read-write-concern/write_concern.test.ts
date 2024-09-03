@@ -11,7 +11,7 @@ import {
 import * as mock from '../../tools/mongodb-mock/index';
 import { filterForCommands } from '../shared';
 
-describe('Write Concern', function () {
+describe.only('Write Concern', function () {
   context('when the WriteConcern is set in the uri', function () {
     let client;
     const events: CommandStartedEvent[] = [];
@@ -29,7 +29,8 @@ describe('Write Concern', function () {
       expect(events[0]).to.containSubset({
         commandName: 'insert',
         command: {
-          writeConcern: { w: 0 }
+          writeConcern: { w: 0 },
+          moreToCome: true
         }
       });
     });

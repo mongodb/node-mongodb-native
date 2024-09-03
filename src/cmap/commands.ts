@@ -450,7 +450,7 @@ export class OpMsgRequest {
 
     // flags
     this.checksumPresent = false;
-    this.moreToCome = options.moreToCome || false;
+    this.moreToCome = options.moreToCome || options.writeConcern?.w === 0 || false;
     this.exhaustAllowed =
       typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
