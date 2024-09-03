@@ -204,6 +204,7 @@ describe('utf8 validation with cursors', function () {
   });
 
   afterEach(async function () {
+    sinon.restore();
     await client.close();
   });
 
