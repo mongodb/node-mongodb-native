@@ -55,7 +55,7 @@ export class ChangeStreamCursor<
     pipeline: Document[] = [],
     options: ChangeStreamCursorOptions = {}
   ) {
-    super(client, namespace, options);
+    super(client, namespace, {...options, tailable: true, awaitData: true});
 
     this.pipeline = pipeline;
     this.changeStreamCursorOptions = options;
@@ -130,7 +130,7 @@ export class ChangeStreamCursor<
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
       ...this.changeStreamCursorOptions,
-      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
+      omitMaxTimeMS: false,
       session
     });
 

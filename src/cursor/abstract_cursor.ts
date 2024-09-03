@@ -133,6 +133,7 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
 
   omitMaxTimeMSOnInitialCommand?: boolean;
   omitMaxTimeMSOnGetMore?: boolean;
+  useMaxAwaitTimeMSAsMaxTimeMS?: boolean;
 };
 
 /** @public */
@@ -142,12 +143,11 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-    TSchema = any,
-    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-  >
+  TSchema = any,
+  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+>
   extends TypedEventEmitter<CursorEvents>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -236,6 +236,7 @@ export abstract class AbstractCursor<
         !this.cursorOptions.tailable) ||
         (this.cursorOptions.tailable && !this.cursorOptions.awaitData));
     this.cursorOptions.omitMaxTimeMSOnGetMore = this.cursorOptions.timeoutMS != null;
+    this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS = this.cursorOptions.tailable && this.cursorOptions.awaitData;
 
     const readConcern = ReadConcern.fromOptions(options);
     if (readConcern) {
@@ -764,7 +765,7 @@ export abstract class AbstractCursor<
       ...this.cursorOptions,
       session: this.cursorSession,
       batchSize,
-      omitMaxTimeMS: this.cursorOptions.omitMaxTimeMSOnGetMore
+      omitMaxTimeMS: this.cursorOptions.omitMaxTimeMSOnGetMore || this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS,
     };
 
     if (
