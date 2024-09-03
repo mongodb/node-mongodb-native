@@ -135,6 +135,7 @@ describe('package.json', function () {
 
     beforeEach(async function () {
       for (const key of Object.keys(require.cache)) delete require.cache[key];
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../../src');
       imports = Array.from(
         new Set(

@@ -405,7 +405,7 @@ function runTestSuiteTest(configuration, spec, context) {
           session0: JSON.parse(EJSON.stringify(session0.id)),
           session1: JSON.parse(EJSON.stringify(session1.id))
         };
-      } catch (err) {
+      } catch {
         // ignore
       }
     }

@@ -1,8 +1,13 @@
 import { expect } from 'chai';
 import { MongoClient as LegacyMongoClient } from 'mongodb-legacy';
 
-import type { CommandStartedEvent, CommandSucceededEvent, MongoClient } from '../../mongodb';
-import { LEGACY_HELLO_COMMAND, MongoServerError } from '../../mongodb';
+import {
+  type CommandStartedEvent,
+  type CommandSucceededEvent,
+  LEGACY_HELLO_COMMAND,
+  type MongoClient,
+  MongoServerError
+} from '../../mongodb';
 import type { TestConfiguration } from '../../tools/runner/config';
 import { setupDatabase } from '../shared';
 

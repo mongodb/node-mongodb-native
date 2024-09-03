@@ -10,7 +10,6 @@ import {
   type MongoClient,
   MongoNetworkError
 } from '../../mongodb';
-import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
@@ -27,8 +26,6 @@ const LOCAL_KEY = Buffer.from(
 );
 
 describe('14. Decryption Events', metadata, function () {
-  installNodeDNSWorkaroundHooks();
-
   let setupClient: MongoClient;
   let clientEncryption;
   let keyId: Binary;

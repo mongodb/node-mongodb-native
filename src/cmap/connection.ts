@@ -332,7 +332,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this.socket.destroy();
     this.error = error;
-    // eslint-disable-next-line github/no-then
+
     this.dataEvents?.throw(error).then(undefined, squashError);
     this.closed = true;
     this.emit(Connection.CLOSE);
@@ -602,7 +602,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
       throw new MongoUnexpectedServerResponseError('Server ended moreToCome unexpectedly');
     };
-    // eslint-disable-next-line github/no-then
+
     exhaustLoop().then(undefined, replyListener);
   }
 

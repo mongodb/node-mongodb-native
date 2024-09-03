@@ -22,7 +22,10 @@ describe('StateMachine', function () {
     endpoint = 'some.fake.host.com';
     _kmsProvider = 'aws';
 
-    constructor(public _message: Buffer, bytesNeeded) {
+    constructor(
+      public _message: Buffer,
+      bytesNeeded
+    ) {
       this._bytesNeeded = typeof bytesNeeded === 'number' ? bytesNeeded : 1024;
     }
 

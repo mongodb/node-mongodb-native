@@ -1,7 +1,6 @@
 import { expectAssignable, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
-import type { Document, InferIdType } from '../mongodb';
-import { Collection, Db, MongoClient, ObjectId } from '../mongodb';
+import { Collection, Db, type Document, type InferIdType, MongoClient, ObjectId } from '../mongodb';
 
 const db = new Db(new MongoClient(''), '');
 
@@ -55,7 +54,7 @@ expectNotType<insertOneArg>({ a: 2 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // InferIdType -
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type Empty = {};
 const a: never = 0 as never;
 const oid = new ObjectId();

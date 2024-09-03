@@ -22,7 +22,6 @@ async function getRTTPingers(client: MongoClient) {
 
   if (!client.topology) expect.fail('Must provide a connected client');
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const servers = client.topology.s.servers.values();
     const rttPingers = Array.from(servers, s => s.monitor?.rttPinger).filter(pingers);

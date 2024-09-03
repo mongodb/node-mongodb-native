@@ -5,10 +5,12 @@ import { AggregateOperation, type AggregateOptions } from '../operations/aggrega
 import { executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
-import type { MongoDBNamespace } from '../utils';
-import { mergeOptions } from '../utils';
-import type { AbstractCursorOptions, InitialCursorResponse } from './abstract_cursor';
-import { AbstractCursor } from './abstract_cursor';
+import { mergeOptions, type MongoDBNamespace } from '../utils';
+import {
+  AbstractCursor,
+  type AbstractCursorOptions,
+  type InitialCursorResponse
+} from './abstract_cursor';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import type { PeerCertificate } from 'tls';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
@@ -14,6 +13,7 @@ type MongoDBImport = typeof import('../../../src');
 
 const mongodb: MongoDBImport = null as unknown as MongoDBImport;
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 expectNotType<Function>(mongodb);
 expectType<PropExists<MongoDBImport, 'connect'>>(false);
 
@@ -22,7 +22,7 @@ const options: MongoClientOptions = {};
 // .readPreference no longer accepts boolean
 expectNotType<boolean>(options.readPreference);
 // .pkFactory cannot be an empty object
-expectNotType<{}>(options.pkFactory);
+expectNotType<Record<string, never>>(options.pkFactory);
 // .checkServerIdentity cannot be `true`
 expectNotType<true>(options.checkServerIdentity);
 
@@ -70,13 +70,13 @@ expectType<PropExists<typeof cursor, 'snapshot'>>(false);
 const db = new MongoClient('').db();
 const collection = db.collection('');
 // collection.find
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 expectError(collection.find({}, {}, (e: unknown, c: unknown) => undefined));
 // collection.aggregate
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 expectError(collection.aggregate({}, {}, (e: unknown, c: unknown) => undefined));
 // db.aggregate
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 expectError(db.aggregate({}, {}, (e: unknown, c: unknown) => undefined));
 
 // insertOne and insertMany doesn't return:
