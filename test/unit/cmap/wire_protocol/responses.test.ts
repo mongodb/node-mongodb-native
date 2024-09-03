@@ -36,7 +36,11 @@ describe('class MongoDBResponse', () => {
 
         expect(deseriailzeSpy).to.have.been.called;
 
-        const [_buffer, { validation }] = deseriailzeSpy.getCalls()[0].args;
+        const [
+          {
+            args: [_buffer, { validation }]
+          }
+        ] = deseriailzeSpy.getCalls();
 
         expect(validation).to.deep.equal({ utf8: { writeErrors: false } });
       });
@@ -50,7 +54,11 @@ describe('class MongoDBResponse', () => {
 
         expect(deseriailzeSpy).to.have.been.called;
 
-        const [_buffer, { validation }] = deseriailzeSpy.getCalls()[0].args;
+        const [
+          {
+            args: [_buffer, { validation }]
+          }
+        ] = deseriailzeSpy.getCalls();
 
         expect(validation).to.deep.equal({ utf8: { writeErrors: false } });
       });
@@ -64,7 +72,11 @@ describe('class MongoDBResponse', () => {
 
         expect(deseriailzeSpy).to.have.been.called;
 
-        const [_buffer, { validation }] = deseriailzeSpy.getCalls()[0].args;
+        const [
+          {
+            args: [_buffer, { validation }]
+          }
+        ] = deseriailzeSpy.getCalls();
 
         expect(validation).to.deep.equal({ utf8: false });
       });
