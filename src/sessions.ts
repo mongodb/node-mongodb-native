@@ -625,7 +625,14 @@ export class ClientSession
         ? this.timeoutMS
         : null;
 
-    const timeoutContext = TimeoutContext.create({ timeoutMS, ...this.clientOptions });
+    const timeoutContext =
+      timeoutMS != null
+        ? TimeoutContext.create({
+            timeoutMS,
+            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+            socketTimeoutMS: this.clientOptions.socketTimeoutMS
+          })
+        : null;
 
     try {
       await executeOperation(this.client, operation, timeoutContext);
@@ -715,11 +722,13 @@ export class ClientSession
   ): Promise<T> {
     const MAX_TIMEOUT = 120000;
 
+    const timeoutMS = options?.timeoutMS ?? this.timeoutMS ?? null;
     this.timeoutContext =
-      typeof options?.timeoutMS === 'number' || typeof this.timeoutMS === 'number'
+      timeoutMS != null
         ? TimeoutContext.create({
-            timeoutMS: options?.timeoutMS ?? this.timeoutMS,
-            ...this.clientOptions
+            timeoutMS,
+            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+            socketTimeoutMS: this.clientOptions.socketTimeoutMS
           })
         : null;
 
