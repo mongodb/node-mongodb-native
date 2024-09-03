@@ -47,6 +47,13 @@ type CachedBSONElement = { element: BSONElement; value: any | undefined };
 /** @internal */
 export class OnDemandDocument {
   /**
+   * @internal
+   *
+   * Used for testing purposes.
+   */
+  private static BSON: typeof BSON = BSON;
+
+  /**
    * Maps JS strings to elements and jsValues for speeding up subsequent lookups.
    * - If `false` then name does not exist in the BSON document
    * - If `CachedBSONElement` instance name exists
@@ -337,7 +344,7 @@ export class OnDemandDocument {
       index: this.offset,
       allowObjectSmallerThanBufferSize: true
     };
-    return BSON.deserialize(this.bson, exactBSONOptions);
+    return OnDemandDocument.BSON.deserialize(this.bson, exactBSONOptions);
   }
 
   private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {

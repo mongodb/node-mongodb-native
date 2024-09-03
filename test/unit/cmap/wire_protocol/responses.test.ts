@@ -1,3 +1,4 @@
+import * as SPYABLE_BSON from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
@@ -16,17 +17,28 @@ describe('class MongoDBResponse', () => {
   });
 
   context('utf8 validation', () => {
-    afterEach(() => sinon.restore());
+    let deseriailzeSpy: sinon.SinonSpy;
+    beforeEach(function () {
+      // @ts-expect-error accessing internal property.
+      OnDemandDocument.BSON = SPYABLE_BSON;
+
+      deseriailzeSpy = sinon.spy(SPYABLE_BSON, 'deserialize');
+    });
+    afterEach(function () {
+      sinon.restore();
+    });
 
     context('when enableUtf8Validation is not specified', () => {
       const options = { enableUtf8Validation: undefined };
       it('calls BSON deserialize with writeErrors validation turned off', () => {
         const res = new MongoDBResponse(BSON.serialize({}));
-        const toObject = sinon.spy(Object.getPrototypeOf(Object.getPrototypeOf(res)), 'toObject');
         res.toObject(options);
-        expect(toObject).to.have.been.calledWith(
-          sinon.match({ validation: { utf8: { writeErrors: false } } })
-        );
+
+        expect(deseriailzeSpy).to.have.been.called;
+
+        const [_buffer, { validation }] = deseriailzeSpy.getCalls()[0].args;
+
+        expect(validation).to.deep.equal({ utf8: { writeErrors: false } });
       });
     });
 
@@ -34,11 +46,13 @@ describe('class MongoDBResponse', () => {
       const options = { enableUtf8Validation: true };
       it('calls BSON deserialize with writeErrors validation turned off', () => {
         const res = new MongoDBResponse(BSON.serialize({}));
-        const toObject = sinon.spy(Object.getPrototypeOf(Object.getPrototypeOf(res)), 'toObject');
         res.toObject(options);
-        expect(toObject).to.have.been.calledWith(
-          sinon.match({ validation: { utf8: { writeErrors: false } } })
-        );
+
+        expect(deseriailzeSpy).to.have.been.called;
+
+        const [_buffer, { validation }] = deseriailzeSpy.getCalls()[0].args;
+
+        expect(validation).to.deep.equal({ utf8: { writeErrors: false } });
       });
     });
 
@@ -46,9 +60,13 @@ describe('class MongoDBResponse', () => {
       const options = { enableUtf8Validation: false };
       it('calls BSON deserialize with all validation disabled', () => {
         const res = new MongoDBResponse(BSON.serialize({}));
-        const toObject = sinon.spy(Object.getPrototypeOf(Object.getPrototypeOf(res)), 'toObject');
         res.toObject(options);
-        expect(toObject).to.have.been.calledWith(sinon.match({ validation: { utf8: false } }));
+
+        expect(deseriailzeSpy).to.have.been.called;
+
+        const [_buffer, { validation }] = deseriailzeSpy.getCalls()[0].args;
+
+        expect(validation).to.deep.equal({ utf8: false });
       });
     });
   });
