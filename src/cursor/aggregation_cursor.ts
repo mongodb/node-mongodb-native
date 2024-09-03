@@ -38,13 +38,12 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     this.pipeline = pipeline;
     this.aggregateOptions = options;
 
-    const lastStage = this.pipeline[this.pipeline.length - 1];
+    const lastStage: Document | undefined = this.pipeline[this.pipeline.length - 1];
 
     if (
-      (this.cursorOptions.timeoutMS != null &&
-        this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-        lastStage.$out != null) ||
-      lastStage.$merge != null
+      this.cursorOptions.timeoutMS != null &&
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+      (lastStage?.$merge != null || lastStage?.$out != null)
     )
       throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
   }

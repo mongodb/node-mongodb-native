@@ -889,9 +889,8 @@ export abstract class AbstractCursor<
     } catch (error) {
       if (error instanceof MongoOperationTimeoutError) {
         throw error;
-      } else {
-        squashError(error);
       }
+      squashError(error);
     } finally {
       if (session?.owner === this) {
         await session.endSession({ error });
