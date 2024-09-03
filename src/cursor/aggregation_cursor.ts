@@ -12,7 +12,7 @@ import type { AbstractCursorOptions, InitialCursorResponse } from './abstract_cu
 import { AbstractCursor, CursorTimeoutMode } from './abstract_cursor';
 
 /** @public */
-export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions { }
+export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
 
 /**
  * The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
@@ -41,9 +41,10 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const lastStage = this.pipeline[this.pipeline.length - 1];
 
     if (
-      this.cursorOptions.timeoutMS != null &&
-      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-      lastStage.$out != null || lastStage.$merge != null
+      (this.cursorOptions.timeoutMS != null &&
+        this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+        lastStage.$out != null) ||
+      lastStage.$merge != null
     )
       throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
   }
