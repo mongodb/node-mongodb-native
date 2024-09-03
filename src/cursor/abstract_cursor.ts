@@ -7,6 +7,7 @@ import {
   MongoCursorExhaustedError,
   MongoCursorInUseError,
   MongoInvalidArgumentError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoTailableCursorError
 } from '../error';
@@ -142,12 +143,11 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-    TSchema = any,
-    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-  >
+  TSchema = any,
+  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+>
   extends TypedEventEmitter<CursorEvents>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -886,7 +886,11 @@ export abstract class AbstractCursor<
         );
       }
     } catch (error) {
-      squashError(error);
+      if (error instanceof MongoOperationTimeoutError) {
+        throw error;
+      } else {
+        squashError(error);
+      }
     } finally {
       if (session?.owner === this) {
         await session.endSession({ error });
