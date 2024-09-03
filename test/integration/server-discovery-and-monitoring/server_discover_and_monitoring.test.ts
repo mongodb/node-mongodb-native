@@ -109,8 +109,11 @@ describe('Monitoring rtt tests', function () {
             for (const [server, durations] of Object.entries(heartbeatDurations)) {
               const relevantDurations = durations.slice(IGNORE_SIZE);
               expect(relevantDurations).to.have.length.gt(0);
+              const averageDuration =
+                relevantDurations.reduce((acc, x) => acc + x) / relevantDurations.length;
               const rtt = client.topology.description.servers.get(server).roundTripTime;
               expect(rtt).to.not.equal(0);
+              expect(rtt).to.be.approximately(averageDuration, 3);
             }
           }
         });
