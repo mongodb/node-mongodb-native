@@ -438,7 +438,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         zlibCompressionLevel: this.description.zlibCompressionLevel
       });
 
-      if (options.noResponse) {
+      if (options.noResponse || ('moreToCome' in message && message?.moreToCome)) {
         yield MongoDBResponse.empty;
         return;
       }
