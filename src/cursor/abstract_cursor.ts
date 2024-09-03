@@ -205,6 +205,16 @@ export abstract class AbstractCursor<
       if (options.timeoutMode == null) {
         if (options.tailable) {
           this.cursorOptions.timeoutMode = CursorTimeoutMode.ITERATION;
+
+          if (options.awaitData) {
+            if (
+              options.maxAwaitTimeMS != null &&
+              options.maxAwaitTimeMS >= this.cursorOptions.timeoutMS
+            )
+              throw new MongoInvalidArgumentError(
+                'Cannot specify maxAwaitTimeMS >= timeoutMS for a tailable awaitData cursor'
+              );
+          }
         } else {
           this.cursorOptions.timeoutMode = CursorTimeoutMode.LIFETIME;
         }
@@ -750,16 +760,26 @@ export abstract class AbstractCursor<
         'Unexpected null selectedServer. A cursor creating command should have set this'
       );
     }
+    const getMoreOptions = {
+      ...this.cursorOptions,
+      session: this.cursorSession,
+      batchSize,
+      omitMaxTimeMS: this.cursorOptions.omitMaxTimeMSOnGetMore
+    };
+
+    if (
+      this.cursorOptions.tailable &&
+      this.cursorOptions.awaitData &&
+      this.cursorOptions.maxAwaitTimeMS != null
+    ) {
+      getMoreOptions.maxTimeMS = this.cursorOptions.maxAwaitTimeMS;
+    }
+
     const getMoreOperation = new GetMoreOperation(
       this.cursorNamespace,
       this.cursorId,
       this.selectedServer,
-      {
-        ...this.cursorOptions,
-        session: this.cursorSession,
-        batchSize,
-        omitMaxTimeMS: this.cursorOptions.omitMaxTimeMSOnGetMore
-      }
+      getMoreOptions
     );
 
     return await executeOperation(this.cursorClient, getMoreOperation, this.timeoutContext);
