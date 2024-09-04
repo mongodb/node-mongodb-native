@@ -20,12 +20,6 @@ const skippedSpecs = {
 const skippedTests = {
   'timeoutMS can be configured on a MongoClient - insertMany on collection': 'TODO(NODE-6274)',
   'timeoutMS can be configured on a MongoClient - bulkWrite on collection': 'TODO(NODE-6274)',
-  'timeoutMS can be configured on a MongoClient - createChangeStream on client': 'TODO(NODE-6305)',
-  'timeoutMS applies to whole operation, not individual attempts - createChangeStream on client':
-    'TODO(NODE-6305)',
-  'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(NODE-6305)',
-  'Tailable cursor awaitData iteration timeoutMS is refreshed for getMore - failure':
-    'TODO(NODE-6305)',
   'timeoutMS applies to whole operation, not individual attempts - insertMany on collection':
     'TODO(NODE-6274)',
   'timeoutMS applies to whole operation, not individual attempts - bulkWrite on collection':
