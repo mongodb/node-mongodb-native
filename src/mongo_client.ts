@@ -475,6 +475,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     return this.s.bsonOptions;
   }
 
+  /** @internal */
+  get timeoutMS(): number | undefined {
+    return this.options.timeoutMS;
+  }
+
   /**
    * Connect to MongoDB using a url
    *

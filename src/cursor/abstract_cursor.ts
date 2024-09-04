@@ -202,6 +202,8 @@ export abstract class AbstractCursor<
       ...pluckBSONSerializeOptions(options)
     };
     this.cursorOptions.timeoutMS = options.timeoutMS;
+    this.cursorOptions.tailable = options.tailable;
+    this.cursorOptions.awaitData = options.awaitData;
     if (this.cursorOptions.timeoutMS != null) {
       if (options.timeoutMode == null) {
         if (options.tailable) {
@@ -235,7 +237,10 @@ export abstract class AbstractCursor<
       this.cursorOptions.timeoutMS != null &&
       this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
       !this.cursorOptions.tailable;
-    this.cursorOptions.omitMaxTimeMSOnGetMore = this.cursorOptions.timeoutMS != null;
+    this.cursorOptions.omitMaxTimeMSOnGetMore =
+      this.cursorOptions.timeoutMS != null &&
+      !(this.cursorOptions.tailable && this.cursorOptions.awaitData);
+
     this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS =
       this.cursorOptions.tailable && this.cursorOptions.awaitData;
 
