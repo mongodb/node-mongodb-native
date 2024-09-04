@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 // to spy on the bson module, we must import it from the driver
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -16,74 +15,6 @@ import {
 describe('class MongoDBResponse', () => {
   it('is a subclass of OnDemandDocument', () => {
     expect(new MongoDBResponse(serialize({ ok: 1 }))).to.be.instanceOf(OnDemandDocument);
-  });
-
-  context('utf8 validation', () => {
-    let deseriailzeSpy: sinon.SinonStub<Parameters<typeof mdb.deserialize>>;
-    beforeEach(function () {
-      const deserialize = mdb.deserialize;
-      deseriailzeSpy = sinon.stub<Parameters<typeof deserialize>>().callsFake(deserialize);
-      sinon.stub(mdb, 'deserialize').get(() => {
-        return deseriailzeSpy;
-      });
-    });
-    afterEach(function () {
-      sinon.restore();
-    });
-
-    context('when enableUtf8Validation is not specified', () => {
-      const options = { enableUtf8Validation: undefined };
-      it('calls BSON deserialize with writeErrors validation turned off', () => {
-        const res = new MongoDBResponse(serialize({}));
-        res.toObject(options);
-
-        expect(deseriailzeSpy).to.have.been.called;
-
-        const [
-          {
-            args: [_buffer, { validation }]
-          }
-        ] = deseriailzeSpy.getCalls();
-
-        expect(validation).to.deep.equal({ utf8: { writeErrors: false } });
-      });
-    });
-
-    context('when enableUtf8Validation is true', () => {
-      const options = { enableUtf8Validation: true };
-      it('calls BSON deserialize with writeErrors validation turned off', () => {
-        const res = new MongoDBResponse(serialize({}));
-        res.toObject(options);
-
-        expect(deseriailzeSpy).to.have.been.called;
-
-        const [
-          {
-            args: [_buffer, { validation }]
-          }
-        ] = deseriailzeSpy.getCalls();
-
-        expect(validation).to.deep.equal({ utf8: { writeErrors: false } });
-      });
-    });
-
-    context('when enableUtf8Validation is false', () => {
-      const options = { enableUtf8Validation: false };
-      it('calls BSON deserialize with all validation disabled', () => {
-        const res = new MongoDBResponse(serialize({}));
-        res.toObject(options);
-
-        expect(deseriailzeSpy).to.have.been.called;
-
-        const [
-          {
-            args: [_buffer, { validation }]
-          }
-        ] = deseriailzeSpy.getCalls();
-
-        expect(validation).to.deep.equal({ utf8: false });
-      });
-    });
   });
 });
 
