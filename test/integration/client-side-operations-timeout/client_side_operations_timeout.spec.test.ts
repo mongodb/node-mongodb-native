@@ -37,7 +37,9 @@ const skippedTests = {
   'Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure':
     'TODO(DRIVERS-2965)',
   'Non-tailable cursor lifetime remaining timeoutMS applied to getMore if timeoutMode is unset':
-    'TODO(DRIVERS-2965)'
+    'TODO(DRIVERS-2965)',
+  'maxTimeMS value in the command is less than timeoutMS':
+    'TODO(DRIVERS-2970): see modified test in unified-csot-node-specs'
 };
 
 describe('CSOT spec tests', function () {
