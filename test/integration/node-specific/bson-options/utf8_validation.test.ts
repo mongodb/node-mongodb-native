@@ -159,7 +159,7 @@ describe('class MongoDBResponse', () => {
   );
 });
 
-describe('utf8 validation with cursors', function () {
+describe('utf8 validation with cursors' + i, function () {
   let client: MongoClient;
   let collection: Collection;
 
@@ -171,15 +171,15 @@ describe('utf8 validation with cursors', function () {
   async function insertDocumentWithInvalidUTF8() {
     const stub = sinon.stub(net.Socket.prototype, 'write').callsFake(function (...args) {
       const providedBuffer = args[0].toString('hex');
-      const targetBytes = Buffer.from('é').toString('hex');
+      const targetBytes = Buffer.from(document.field, 'utf-8').toString('hex');
 
       if (providedBuffer.includes(targetBytes)) {
         if (providedBuffer.split(targetBytes).length !== 2) {
           sinon.restore();
-          const message = `expected exactly one c3a9 sequence, received ${providedBuffer.split(targetBytes).length}\n.  command: ${inspect(deserialize(args[0]), { depth: Infinity })}`;
+          const message = `too many target bytes sequences: received ${providedBuffer.split(targetBytes).length}\n.  command: ${inspect(deserialize(args[0]), { depth: Infinity })}`;
           throw new Error(message);
         }
-        const buffer = Buffer.from(providedBuffer.replace('c3a9', 'c301'), 'hex');
+        const buffer = Buffer.from(providedBuffer.replace(targetBytes, 'c301'.repeat(8)), 'hex');
         const result = stub.wrappedMethod.apply(this, [buffer]);
         sinon.restore();
         return result;
@@ -189,7 +189,7 @@ describe('utf8 validation with cursors', function () {
     });
 
     const document = {
-      field: 'é'
+      field: 'é'.repeat(8)
     };
 
     await collection.insertOne(document);
