@@ -332,6 +332,7 @@ operations.set('find', async ({ entities, operation }) => {
     default:
       break;
   }
+  delete opts.cursorType;
   return queryable.find(filter, opts).toArray();
 });
 
