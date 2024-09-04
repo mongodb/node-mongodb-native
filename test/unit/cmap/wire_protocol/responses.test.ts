@@ -1,28 +1,31 @@
-import * as SPYABLE_BSON from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+// to spy on the bson module, we must import it from the driver
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as mdb from '../../../../src/bson';
 import {
-  BSON,
   CursorResponse,
   Int32,
   MongoDBResponse,
   MongoUnexpectedServerResponseError,
-  OnDemandDocument
+  OnDemandDocument,
+  serialize
 } from '../../../mongodb';
 
 describe('class MongoDBResponse', () => {
   it('is a subclass of OnDemandDocument', () => {
-    expect(new MongoDBResponse(BSON.serialize({ ok: 1 }))).to.be.instanceOf(OnDemandDocument);
+    expect(new MongoDBResponse(serialize({ ok: 1 }))).to.be.instanceOf(OnDemandDocument);
   });
 
   context('utf8 validation', () => {
-    let deseriailzeSpy: sinon.SinonSpy;
+    let deseriailzeSpy: sinon.SinonStub<Parameters<typeof mdb.deserialize>>;
     beforeEach(function () {
-      // @ts-expect-error accessing internal property.
-      OnDemandDocument.BSON = SPYABLE_BSON;
-
-      deseriailzeSpy = sinon.spy(SPYABLE_BSON, 'deserialize');
+      const deserialize = mdb.deserialize;
+      deseriailzeSpy = sinon.stub<Parameters<typeof deserialize>>().callsFake(deserialize);
+      sinon.stub(mdb, 'deserialize').get(() => {
+        return deseriailzeSpy;
+      });
     });
     afterEach(function () {
       sinon.restore();
@@ -31,7 +34,7 @@ describe('class MongoDBResponse', () => {
     context('when enableUtf8Validation is not specified', () => {
       const options = { enableUtf8Validation: undefined };
       it('calls BSON deserialize with writeErrors validation turned off', () => {
-        const res = new MongoDBResponse(BSON.serialize({}));
+        const res = new MongoDBResponse(serialize({}));
         res.toObject(options);
 
         expect(deseriailzeSpy).to.have.been.called;
@@ -49,7 +52,7 @@ describe('class MongoDBResponse', () => {
     context('when enableUtf8Validation is true', () => {
       const options = { enableUtf8Validation: true };
       it('calls BSON deserialize with writeErrors validation turned off', () => {
-        const res = new MongoDBResponse(BSON.serialize({}));
+        const res = new MongoDBResponse(serialize({}));
         res.toObject(options);
 
         expect(deseriailzeSpy).to.have.been.called;
@@ -67,7 +70,7 @@ describe('class MongoDBResponse', () => {
     context('when enableUtf8Validation is false', () => {
       const options = { enableUtf8Validation: false };
       it('calls BSON deserialize with all validation disabled', () => {
-        const res = new MongoDBResponse(BSON.serialize({}));
+        const res = new MongoDBResponse(serialize({}));
         res.toObject(options);
 
         expect(deseriailzeSpy).to.have.been.called;
@@ -87,7 +90,7 @@ describe('class MongoDBResponse', () => {
 describe('class CursorResponse', () => {
   describe('get cursor()', () => {
     it('throws if input does not contain cursor embedded document', () => {
-      expect(() => new CursorResponse(BSON.serialize({ ok: 1 })).cursor).to.throw(
+      expect(() => new CursorResponse(serialize({ ok: 1 })).cursor).to.throw(
         MongoUnexpectedServerResponseError,
         /"cursor" is missing/
       );
@@ -96,7 +99,7 @@ describe('class CursorResponse', () => {
 
   describe('get id()', () => {
     it('throws if input does not contain cursor.id int64', () => {
-      expect(() => new CursorResponse(BSON.serialize({ ok: 1, cursor: {} })).id).to.throw(
+      expect(() => new CursorResponse(serialize({ ok: 1, cursor: {} })).id).to.throw(
         MongoUnexpectedServerResponseError,
         /"id" is missing/
       );
@@ -107,22 +110,22 @@ describe('class CursorResponse', () => {
     it('throws if input does not contain firstBatch nor nextBatch', () => {
       expect(
         // @ts-expect-error: testing private getter
-        () => new CursorResponse(BSON.serialize({ ok: 1, cursor: { id: 0n, batch: [] } })).batch
+        () => new CursorResponse(serialize({ ok: 1, cursor: { id: 0n, batch: [] } })).batch
       ).to.throw(MongoUnexpectedServerResponseError, /did not contain a batch/);
     });
   });
 
   describe('get ns()', () => {
     it('sets namespace to null if input does not contain cursor.ns', () => {
-      expect(new CursorResponse(BSON.serialize({ ok: 1, cursor: { id: 0n, firstBatch: [] } })).ns)
-        .to.be.null;
+      expect(new CursorResponse(serialize({ ok: 1, cursor: { id: 0n, firstBatch: [] } })).ns).to.be
+        .null;
     });
   });
 
   describe('get batchSize()', () => {
     it('reports the returned batch size', () => {
       const response = new CursorResponse(
-        BSON.serialize({ ok: 1, cursor: { id: 0n, nextBatch: [{}, {}, {}] } })
+        serialize({ ok: 1, cursor: { id: 0n, nextBatch: [{}, {}, {}] } })
       );
       expect(response.batchSize).to.equal(3);
       expect(response.shift()).to.deep.equal({});
@@ -133,7 +136,7 @@ describe('class CursorResponse', () => {
   describe('get length()', () => {
     it('reports number of documents remaining in the batch', () => {
       const response = new CursorResponse(
-        BSON.serialize({ ok: 1, cursor: { id: 0n, nextBatch: [{}, {}, {}] } })
+        serialize({ ok: 1, cursor: { id: 0n, nextBatch: [{}, {}, {}] } })
       );
       expect(response).to.have.lengthOf(3);
       expect(response.shift()).to.deep.equal({});
@@ -146,7 +149,7 @@ describe('class CursorResponse', () => {
 
     beforeEach(async function () {
       response = new CursorResponse(
-        BSON.serialize({
+        serialize({
           ok: 1,
           cursor: { id: 0n, nextBatch: [{ _id: 1 }, { _id: 2 }, { _id: 3 }] }
         })
@@ -173,7 +176,7 @@ describe('class CursorResponse', () => {
 
     beforeEach(async function () {
       response = new CursorResponse(
-        BSON.serialize({
+        serialize({
           ok: 1,
           cursor: { id: 0n, nextBatch: [{ _id: 1 }, { _id: 2 }, { _id: 3 }] }
         })

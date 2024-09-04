@@ -9,8 +9,8 @@ import {
   type Collection,
   deserialize,
   type MongoClient,
-  MongoDBResponse,
   MongoServerError,
+  OnDemandDocument,
   OpMsgResponse
 } from '../../../mongodb';
 
@@ -28,12 +28,12 @@ describe('class MongoDBResponse', () => {
   let bsonSpy: sinon.SinonSpy;
 
   beforeEach(() => {
-    bsonSpy = sinon.spy(MongoDBResponse.prototype, 'parseBsonSerializationOptions');
+    // @ts-expect-error private function
+    bsonSpy = sinon.spy(OnDemandDocument.prototype, 'parseBsonSerializationOptions');
   });
 
   afterEach(() => {
     bsonSpy?.restore();
-    // @ts-expect-error: Allow this to be garbage collected
     bsonSpy = null;
   });
 
@@ -159,7 +159,7 @@ describe('class MongoDBResponse', () => {
   );
 });
 
-describe('utf8 validation with cursors' + i, function () {
+describe('utf8 validation with cursors', function () {
   let client: MongoClient;
   let collection: Collection;
 

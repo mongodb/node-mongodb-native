@@ -1,10 +1,10 @@
 import {
   Binary,
-  BSON,
   type BSONElement,
   BSONError,
   type BSONSerializeOptions,
   BSONType,
+  deserialize,
   getBigInt64LE,
   getFloat64LE,
   getInt32LE,
@@ -46,13 +46,6 @@ type CachedBSONElement = { element: BSONElement; value: any | undefined };
 
 /** @internal */
 export class OnDemandDocument {
-  /**
-   * @internal
-   *
-   * Used for testing purposes.
-   */
-  private static BSON: typeof BSON = BSON;
-
   /**
    * Maps JS strings to elements and jsValues for speeding up subsequent lookups.
    * - If `false` then name does not exist in the BSON document
@@ -344,7 +337,7 @@ export class OnDemandDocument {
       index: this.offset,
       allowObjectSmallerThanBufferSize: true
     };
-    return OnDemandDocument.BSON.deserialize(this.bson, exactBSONOptions);
+    return deserialize(this.bson, exactBSONOptions);
   }
 
   private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
