@@ -10,7 +10,7 @@ set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
 rm -rf mongodb-client-encryption
-git clone https://github.com/mongodb-js/mongodb-client-encryption.git
+git clone https://github.com/mongodb-js/mongodb-client-encryption.git -b explicit-lifetime-chaining
 pushd mongodb-client-encryption
 
 if [ -n "${LIBMONGOCRYPT_VERSION}" ]; then

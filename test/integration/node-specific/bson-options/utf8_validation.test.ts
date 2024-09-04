@@ -1,11 +1,13 @@
 import { expect } from 'chai';
 import * as net from 'net';
 import * as sinon from 'sinon';
+import { inspect } from 'util';
 
 import {
   BSON,
   BSONError,
   type Collection,
+  deserialize,
   type MongoClient,
   MongoDBResponse,
   MongoServerError,
@@ -173,7 +175,9 @@ describe('utf8 validation with cursors', function () {
 
       if (providedBuffer.includes(targetBytes)) {
         if (providedBuffer.split(targetBytes).length !== 2) {
-          throw new Error('received buffer more than one `c3a9` sequences.  or perhaps none?');
+          sinon.restore();
+          const message = `expected exactly one c3a9 sequence, received ${providedBuffer.split(targetBytes).length}\n.  command: ${inspect(deserialize(args[0]), { depth: Infinity })}`;
+          throw new Error(message);
         }
         const buffer = Buffer.from(providedBuffer.replace('c3a9', 'c301'), 'hex');
         const result = stub.wrappedMethod.apply(this, [buffer]);
