@@ -7,7 +7,6 @@ import {
   MongoCursorExhaustedError,
   MongoCursorInUseError,
   MongoInvalidArgumentError,
-  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoTailableCursorError
 } from '../error';
