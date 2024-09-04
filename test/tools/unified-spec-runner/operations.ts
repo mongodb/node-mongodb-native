@@ -321,6 +321,17 @@ operations.set('find', async ({ entities, operation }) => {
     queryable = entities.getEntity('collection', operation.object);
   }
   const { filter, ...opts } = operation.arguments!;
+  switch (opts.cursorType) {
+    case 'tailableAwait':
+      opts.tailable = true;
+      opts.awaitData = true;
+      break;
+    case 'tailable':
+      opts.tailable = true;
+      break;
+    default:
+      break;
+  }
   return queryable.find(filter, opts).toArray();
 });
 

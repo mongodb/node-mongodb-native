@@ -55,7 +55,7 @@ export class ChangeStreamCursor<
     pipeline: Document[] = [],
     options: ChangeStreamCursorOptions = {}
   ) {
-    super(client, namespace, {...options, tailable: true, awaitData: true});
+    super(client, namespace, { ...options, tailable: true, awaitData: true });
 
     this.pipeline = pipeline;
     this.changeStreamCursorOptions = options;
