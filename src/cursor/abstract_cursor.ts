@@ -870,6 +870,7 @@ export abstract class AbstractCursor<
         this.cursorId = Long.ZERO;
         let timeoutContext: TimeoutContext | undefined;
         if (timeoutMS != null) {
+          this.timeoutContext?.clear();
           timeoutContext = TimeoutContext.create({
             serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
             timeoutMS
@@ -887,9 +888,6 @@ export abstract class AbstractCursor<
         );
       }
     } catch (error) {
-      if (error instanceof MongoOperationTimeoutError) {
-        throw error;
-      }
       squashError(error);
     } finally {
       if (session?.owner === this) {
