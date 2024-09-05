@@ -56,7 +56,7 @@ describe(
     });
 
     context(
-      'When given a DNS resolution that does NOT end with the original SRVs domain name',
+      'When given a host from DNS resolution that does NOT end with the original SRVs domain name',
       function () {
         beforeEach(async function () {
           sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
@@ -128,7 +128,7 @@ describe(
     );
 
     context(
-      'When given a DNS resolution that is identical to the original SRVs hostname',
+      'When given a host from DNS resolution that is identical to the original SRVs hostname',
       function () {
         beforeEach(async function () {
           sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
