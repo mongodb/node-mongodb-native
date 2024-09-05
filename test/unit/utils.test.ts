@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import {
   BufferPool,
   ByteUtils,
+  checkParentDomainMatch,
   compareObjectId,
   HostAddress,
   hostMatchesWildcards,
@@ -10,7 +11,6 @@ import {
   isUint8Array,
   LEGACY_HELLO_COMMAND,
   List,
-  matchesParentDomain,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
   MongoRuntimeError,
@@ -937,7 +937,7 @@ describe('driver utils', function () {
     });
   });
 
-  describe('matchesParentDomain()', () => {
+  describe('checkParentDomainMatch()', () => {
     const exampleSrvName = 'i-love-javascript.mongodb.io';
     const exampleSrvNameWithDot = 'i-love-javascript.mongodb.io.';
     const exampleHostNameWithoutDot = 'i-love-javascript-00.mongodb.io';
@@ -946,35 +946,40 @@ describe('driver utils', function () {
     const exampleHostNamThatDoNotMatchParentWithDot = 'i-love-javascript-00.evil-mongodb.io.';
 
     context('when address does not match parent domain', () => {
-      it('without a trailing dot returns false', () => {
-        expect(matchesParentDomain(exampleHostNamThatDoNotMatchParent, exampleSrvName)).to.be.false;
+      it('without a trailing dot throws', () => {
+        expect(() =>
+          checkParentDomainMatch(exampleHostNamThatDoNotMatchParent, exampleSrvName)
+        ).to.throw('Server record does not share hostname with parent URI');
       });
 
-      it('with a trailing dot returns false', () => {
-        expect(matchesParentDomain(exampleHostNamThatDoNotMatchParentWithDot, exampleSrvName)).to.be
-          .false;
+      it('with a trailing dot throws', () => {
+        expect(() =>
+          checkParentDomainMatch(exampleHostNamThatDoNotMatchParentWithDot, exampleSrvName)
+        ).to.throw('Server record does not share hostname with parent URI');
       });
     });
 
     context('when addresses in SRV record end with a dot', () => {
       it('accepts address since it is considered to still match the parent domain', () => {
-        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
+        expect(() => checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvName)).to.not.throw;
       });
     });
 
     context('when SRV host ends with a dot', () => {
       it('accepts address if it ends with a dot', () => {
-        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvNameWithDot)).to.be.true;
+        expect(() => checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvNameWithDot)).to.not
+          .throw;
       });
 
       it('accepts address if it does not end with a dot', () => {
-        expect(matchesParentDomain(exampleHostNameWithoutDot, exampleSrvName)).to.be.true;
+        expect(() => checkParentDomainMatch(exampleHostNameWithoutDot, exampleSrvName)).to.not
+          .throw;
       });
     });
 
     context('when addresses in SRV record end without dots', () => {
       it('accepts address since it matches the parent domain', () => {
-        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
+        expect(() => checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvName)).to.not.throw;
       });
     });
   });
