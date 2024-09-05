@@ -1,6 +1,5 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
-import * as dns from 'dns';
 import { on, once } from 'events';
 import { gte, lt } from 'semver';
 import * as sinon from 'sinon';

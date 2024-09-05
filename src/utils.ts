@@ -1141,14 +1141,21 @@ export function matchesParentDomain(address: string, srvHost: string): boolean {
   const normalizedSrvHost = srvHost.endsWith('.') ? srvHost.slice(0, srvHost.length - 1) : srvHost;
 
   const allCharacterBeforeFirstDot = /^.*?\./;
+  const srvIsLessThanThreeParts = srvHost.split('.').length < 3;
   // Remove all characters before first dot
   // Add leading dot back to string so
   //   an srvHostDomain = '.trusted.site'
   //   will not satisfy an addressDomain that endsWith '.fake-trusted.site'
   const addressDomain = `.${normalizedAddress.replace(allCharacterBeforeFirstDot, '')}`;
-  const srvHostDomain = `.${normalizedSrvHost.replace(allCharacterBeforeFirstDot, '')}`;
+  const srvHostDomain = srvIsLessThanThreeParts
+    ? normalizedSrvHost
+    : `.${normalizedSrvHost.replace(allCharacterBeforeFirstDot, '')}`;
 
-  return addressDomain.endsWith(srvHostDomain);
+  return (
+    addressDomain.endsWith(srvHostDomain) &&
+    (!srvIsLessThanThreeParts ||
+      normalizedAddress.split('.').length > normalizedSrvHost.split('.').length)
+  );
 }
 
 interface RequestOptions {

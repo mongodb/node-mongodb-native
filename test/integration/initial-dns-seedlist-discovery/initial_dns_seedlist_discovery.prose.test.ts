@@ -1,52 +1,183 @@
 import * as dns from 'dns';
 import sinon = require('sinon');
-// import { expect } from 'chai';
 
-import { type MongoClient } from '../../mongodb';
+import { expect } from 'chai';
+
+import { MongoAPIError, Server, ServerDescription, Topology } from '../../mongodb';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe(
   'Initial DNS Seedlist Discovery (Prose Tests)',
   { requires: { topology: 'single' } },
   () => {
-    let client: MongoClient;
+    context('When running validation on an SRV string before DNS resolution', function () {
+      beforeEach(async function () {
+        // this fn stubs DNS resolution to always pass - so we are only checking pre-DNS validation
 
-    function makeSrvStub() {
-      sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
-        return [
-          {
-            name: 'localhost',
-            port: 27017,
-            weight: 0,
-            priority: 0
-          }
-        ];
+        sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+          return [
+            {
+              name: 'resolved.mongodb.localhost',
+              port: 27017,
+              weight: 0,
+              priority: 0
+            }
+          ];
+        });
+
+        sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
+          throw { code: 'ENODATA' };
+        });
+
+        sinon.stub(Topology.prototype, 'selectServer').callsFake(async () => {
+          return new Server(
+            topologyWithPlaceholderClient([], {} as any),
+            new ServerDescription('a:1'),
+            {} as any
+          );
+        });
       });
 
-      sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
-        throw { code: 'ENODATA' };
+      afterEach(async function () {
+        sinon.restore();
       });
-    }
 
-    afterEach(async function () {
-      sinon.restore();
+      it('do not error on an SRV because it has one domain level', async function () {
+        const client = await this.configuration.newClient('mongodb+srv://localhost', {});
+        client.connect();
+        client.close();
+      });
+
+      it('do not error on an SRV because it has two domain levels', async function () {
+        const client = await this.configuration.newClient('mongodb+srv://mongodb.localhost', {});
+        client.connect();
+        client.close();
+      });
     });
 
-    it('1.1 Driver should not throw error on valid SRV URI with one part', async function () {
-      // 1. make dns resolution always pass
-      //makeSrvStub();
-      // 2. assert that creating a MongoClient with the uri 'mongodb+srv:/localhost' does not cause an error
-      client = this.configuration.newClient('mongodb://localhost', {});
-      // 3. assert that connecting the client from 2. to the server does not cause an error
-      await client.connect();
-    });
+    context(
+      'When given a DNS resolution that does NOT end with the original SRVs domain name',
+      function () {
+        beforeEach(async function () {
+          sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
+            throw { code: 'ENODATA' };
+          });
+        });
 
-    it('1.1 Driver should not throw error on valid SRV URI with two parts', async function () {
-      // 1. make dns resolution always pass
-      makeSrvStub();
-      // 2. assert that creating a MongoClient with the uri 'mongodb+srv://mongodb.localhost' does not cause an error
-      //const client = new MongoClient('mongodb+srv://mongodb.localhost', {});
-      // 3. assert that connecting the client to the server does not cause an error
-      //await client.connect();
-    });
+        afterEach(async function () {
+          sinon.restore();
+        });
+
+        it('an SRV with one domain level causes a runtime error', async function () {
+          sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+            return [
+              {
+                name: 'localhost.mongodb', // this string contains the SRV but does not end with it
+                port: 27017,
+                weight: 0,
+                priority: 0
+              }
+            ];
+          });
+          const err = await this.configuration
+            .newClient('mongodb+srv://localhost', {})
+            .connect()
+            .catch(e => e);
+          expect(err).to.be.instanceOf(MongoAPIError);
+          expect(err.message).to.equal('Server record does not share hostname with parent URI');
+        });
+
+        it('an SRV with two domain levels causes a runtime error', async function () {
+          sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+            return [
+              {
+                name: 'evil.localhost', // this string only ends with part of the domain, not all of it!
+                port: 27017,
+                weight: 0,
+                priority: 0
+              }
+            ];
+          });
+          const err = await this.configuration
+            .newClient('mongodb+srv://mongodb.localhost', {})
+            .connect()
+            .catch(e => e);
+          expect(err).to.be.instanceOf(MongoAPIError);
+          expect(err.message).to.equal('Server record does not share hostname with parent URI');
+        });
+
+        it('an SRV with three or more domain levels causes a runtime error', async function () {
+          sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+            return [
+              {
+                name: 'blogs.evil.co.uk',
+                port: 27017,
+                weight: 0,
+                priority: 0
+              }
+            ];
+          });
+          const err = await this.configuration
+            .newClient('mongodb+srv://blogs.mongodb.com', {})
+            .connect()
+            .catch(e => e);
+          expect(err).to.be.instanceOf(MongoAPIError);
+          expect(err.message).to.equal('Server record does not share hostname with parent URI');
+        });
+      }
+    );
+
+    context(
+      'When given a DNS resolution that is identical to the original SRVs hostname',
+      function () {
+        beforeEach(async function () {
+          sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
+            throw { code: 'ENODATA' };
+          });
+        });
+
+        afterEach(async function () {
+          sinon.restore();
+        });
+
+        it('an SRV with one domain level causes a runtime error', async function () {
+          sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+            return [
+              {
+                name: 'localhost', // this string contains the SRV but does not end with it
+                port: 27017,
+                weight: 0,
+                priority: 0
+              }
+            ];
+          });
+          const err = await this.configuration
+            .newClient('mongodb+srv://localhost', {})
+            .connect()
+            .catch(e => e);
+          expect(err).to.be.instanceOf(MongoAPIError);
+          expect(err.message).to.equal('Server record does not share hostname with parent URI');
+        });
+
+        it('an SRV with two domain levels causes a runtime error', async function () {
+          sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+            return [
+              {
+                name: 'mongodb.localhost', // this string only ends with part of the domain, not all of it!
+                port: 27017,
+                weight: 0,
+                priority: 0
+              }
+            ];
+          });
+          const err = await this.configuration
+            .newClient('mongodb+srv://mongodb.localhost', {})
+            .connect()
+            .catch(e => e);
+          expect(err).to.be.instanceOf(MongoAPIError);
+          expect(err.message).to.equal('Server record does not share hostname with parent URI');
+        });
+      }
+    );
   }
 );
