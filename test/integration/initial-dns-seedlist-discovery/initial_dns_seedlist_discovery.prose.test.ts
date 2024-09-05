@@ -144,7 +144,7 @@ describe(
           sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
             return [
               {
-                name: 'localhost', // this string contains the SRV but does not end with it
+                name: 'localhost',
                 port: 27017,
                 weight: 0,
                 priority: 0
@@ -163,7 +163,7 @@ describe(
           sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
             return [
               {
-                name: 'mongodb.localhost', // this string only ends with part of the domain, not all of it!
+                name: 'mongodb.localhost',
                 port: 27017,
                 weight: 0,
                 priority: 0
