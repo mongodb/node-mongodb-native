@@ -308,7 +308,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     // duration
     const duration =
       isAwaitable && monitor.rttPinger
-        ? monitor.rttPinger.latestRtt ?? calculateDurationInMs(start)
+        ? (monitor.rttPinger.latestRtt ?? calculateDurationInMs(start))
         : calculateDurationInMs(start);
 
     monitor.addRttSample(duration);
@@ -378,7 +378,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     awaited = false;
     connection
       .command(ns('admin.$cmd'), cmd, options)
-      // eslint-disable-next-line github/no-then
+
       .then(onHeartbeatSucceeded, onHeartbeatFailed);
 
     return;
@@ -397,7 +397,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       connection.destroy();
       throw error;
     }
-    // eslint-disable-next-line github/no-then
   })().then(
     connection => {
       if (isInCloseState(monitor)) {
@@ -547,7 +546,6 @@ export class RTTPinger {
 
     const connection = this.connection;
     if (connection == null) {
-      // eslint-disable-next-line github/no-then
       connect(this.monitor.connectOptions).then(
         connection => {
           this.measureAndReschedule(start, connection);
@@ -561,7 +559,7 @@ export class RTTPinger {
 
     const commandName =
       connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
-    // eslint-disable-next-line github/no-then
+
     connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
       () => this.measureAndReschedule(start),
       () => {

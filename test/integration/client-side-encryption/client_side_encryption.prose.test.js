@@ -10,8 +10,6 @@ const { EJSON } = BSON;
 const { LEGACY_HELLO_COMMAND, MongoCryptError } = require('../../mongodb');
 const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
-const { coerce, gte } = require('semver');
 
 const {
   externalSchema
@@ -78,8 +76,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
     'base64'
   );
-
-  installNodeDNSWorkaroundHooks();
 
   describe('Data key and double encryption', function () {
     // Data key and double encryption
@@ -1657,17 +1653,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKey = {};
 
       it('should fail with no TLS', metadata, async function () {
-        if (gte(coerce(process.version), coerce('19'))) {
-          this.test.skipReason = 'TODO(NODE-4942): fix failing csfle kmip test on Node19+';
-          this.skip();
-        }
-        try {
-          await clientEncryptionNoTls.createDataKey('kmip', { masterKey });
-          expect.fail('it must fail with no tls');
-        } catch (e) {
-          //Expect an error indicating TLS handshake failed.
-          expect(e.cause.message).to.match(/before secure TLS connection|handshake/);
-        }
+        const e = await clientEncryptionNoTls.createDataKey('kmip', { masterKey }).catch(e => e);
+        //Expect an error indicating TLS handshake failed.
+        expect(e.cause.message).to.match(/before secure TLS connection|handshake/);
       });
 
       it('should succeed with valid TLS options', metadata, async function () {

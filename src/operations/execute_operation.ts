@@ -31,9 +31,8 @@ const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
-type ResultTypeFromOperation<TOperation> = TOperation extends AbstractOperation<infer K>
-  ? K
-  : never;
+type ResultTypeFromOperation<TOperation> =
+  TOperation extends AbstractOperation<infer K> ? K : never;
 
 /**
  * Executes the given operation with provided arguments.
@@ -276,5 +275,8 @@ async function tryOperation<
     }
   }
 
-  throw previousOperationError;
+  throw (
+    previousOperationError ??
+    new MongoRuntimeError('Tried to propagate retryability error, but no error was found.')
+  );
 }

@@ -1255,9 +1255,8 @@ export function needsRetryableWriteLabel(
       // use original top-level code from server response
       return RETRYABLE_WRITE_ERROR_CODES.has(error.result.code ?? 0);
     }
-    return RETRYABLE_WRITE_ERROR_CODES.has(
-      error.result.writeConcernError.code ?? Number(error.code) ?? 0
-    );
+    const code = error.result.writeConcernError.code ?? Number(error.code);
+    return RETRYABLE_WRITE_ERROR_CODES.has(Number.isNaN(code) ? 0 : code);
   }
 
   if (error instanceof MongoError) {

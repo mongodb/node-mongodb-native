@@ -78,8 +78,8 @@ export class MongoDBAWS extends AuthProvider {
       accessKeyId && secretAccessKey && sessionToken
         ? { accessKeyId, secretAccessKey, sessionToken }
         : accessKeyId && secretAccessKey
-        ? { accessKeyId, secretAccessKey }
-        : undefined;
+          ? { accessKeyId, secretAccessKey }
+          : undefined;
 
     const db = credentials.source;
     const nonce = await randomBytes(32);

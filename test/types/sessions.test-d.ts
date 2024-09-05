@@ -1,7 +1,15 @@
 import { expectAssignable, expectError, expectType } from 'tsd';
 
-import type { Binary, ClientSession, ClusterTime, Long, Timestamp } from '../mongodb';
-import { MongoClient, ReadConcern, ReadConcernLevel } from '../mongodb';
+import {
+  type Binary,
+  type ClientSession,
+  type ClusterTime,
+  type Long,
+  MongoClient,
+  ReadConcern,
+  ReadConcernLevel,
+  type Timestamp
+} from '../mongodb';
 
 // test mapped cursor types
 const client = new MongoClient('');

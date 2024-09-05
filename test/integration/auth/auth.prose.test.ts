@@ -344,7 +344,7 @@ describe('Authentication Spec Prose Tests', function () {
 
         try {
           await Promise.all(users.map(user => db.removeUser(user.username)));
-        } catch (err) {
+        } catch {
           /** We ensure that users are deleted. No action needed. */
         }
 

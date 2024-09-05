@@ -1,7 +1,15 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 
-import type { Collection, Db, Filter, FindCursor, FindOptions, WithId } from '../../../../src';
-import { MongoClient, ObjectId } from '../../../../src';
+import {
+  type Collection,
+  type Db,
+  type Filter,
+  type FindCursor,
+  type FindOptions,
+  MongoClient,
+  ObjectId,
+  type WithId
+} from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
 // collection.findX tests
@@ -271,7 +279,6 @@ const fooObj: Foo = {
   a: 'john doe'
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const fooFilter: Filter<Foo> = fooObj;
 
 // Specifically test that arrays can be included as a part of an object
@@ -284,7 +291,6 @@ const fooObjWithArray: FooWithArray = {
   a: [1, 2, 3, 4]
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const fooFilterWithArray: Filter<FooWithArray> = fooObjWithArray;
 
 declare const coll: Collection<{ a: number; b: string }>;

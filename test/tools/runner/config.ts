@@ -87,7 +87,10 @@ export class TestConfiguration {
   isSrv: boolean;
   serverlessCredentials: { username: string | undefined; password: string | undefined };
 
-  constructor(private uri: string, private context: Record<string, any>) {
+  constructor(
+    private uri: string,
+    private context: Record<string, any>
+  ) {
     const url = new ConnectionString(uri);
     const { hosts } = url;
     const hostAddresses = hosts.map(HostAddress.fromString);

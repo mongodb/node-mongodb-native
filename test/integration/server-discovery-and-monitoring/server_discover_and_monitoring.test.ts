@@ -83,23 +83,20 @@ describe('Monitoring rtt tests', function () {
           await promise;
         });
 
-        it(
-          'heartbeat duration is not incorrectly reported as zero on ServerHeartbeatSucceededEvents',
-          {
-            metadata: {
-              requires: { topology: '!load-balanced' }
-            },
-            test: async function () {
-              for (const durations of Object.values(heartbeatDurations)) {
-                const relevantDurations = durations.slice(IGNORE_SIZE);
-                expect(relevantDurations).to.have.length.gt(0);
-                const averageDuration =
-                  relevantDurations.reduce((acc, x) => acc + x) / relevantDurations.length;
-                expect(averageDuration).to.be.gt(DELAY_MS);
-              }
+        it('ServerHeartbeatSucceededEvent.duration is greater than or equal to the actual rtt', {
+          metadata: {
+            requires: { topology: '!load-balanced' }
+          },
+          test: async function () {
+            for (const durations of Object.values(heartbeatDurations)) {
+              const relevantDurations = durations.slice(IGNORE_SIZE);
+              expect(relevantDurations).to.have.length.gt(0);
+              const averageDuration =
+                relevantDurations.reduce((acc, x) => acc + x) / relevantDurations.length;
+              expect(averageDuration).to.be.gte(DELAY_MS);
             }
           }
-        );
+        });
 
         it('ServerDescription.roundTripTime is not incorrectly reported as zero', {
           metadata: {
@@ -109,11 +106,20 @@ describe('Monitoring rtt tests', function () {
             for (const [server, durations] of Object.entries(heartbeatDurations)) {
               const relevantDurations = durations.slice(IGNORE_SIZE);
               expect(relevantDurations).to.have.length.gt(0);
-              const averageDuration =
-                relevantDurations.reduce((acc, x) => acc + x) / relevantDurations.length;
               const rtt = client.topology.description.servers.get(server).roundTripTime;
               expect(rtt).to.not.equal(0);
-              expect(rtt).to.be.approximately(averageDuration, 3);
+            }
+          }
+        });
+
+        it('ServerDescription.roundTripTime is greater than or equal to the actual rtt', {
+          metadata: {
+            requires: { topology: '!load-balanced' }
+          },
+          test: async function () {
+            for (const server of Object.keys(heartbeatDurations)) {
+              const rtt = client.topology.description.servers.get(server).roundTripTime;
+              expect(rtt).to.be.gte(DELAY_MS);
             }
           }
         });

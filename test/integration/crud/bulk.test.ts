@@ -546,7 +546,7 @@ describe('Bulk', function () {
     try {
       batch.insert({ string: hugeString });
       test.ok(false);
-    } catch (err) {
+    } catch {
       // should throw
     }
   });

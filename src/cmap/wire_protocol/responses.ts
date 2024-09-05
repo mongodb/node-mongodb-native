@@ -5,7 +5,6 @@ import {
   type Document,
   Long,
   parseToElementsToArray,
-  pluckBSONSerializeOptions,
   type Timestamp
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
@@ -165,24 +164,6 @@ export class MongoDBResponse extends OnDemandDocument {
       this.clusterTime = { clusterTime, signature };
     }
     return this.clusterTime ?? null;
-  }
-
-  public override toObject(options?: BSONSerializeOptions): Record<string, any> {
-    const exactBSONOptions = {
-      ...pluckBSONSerializeOptions(options ?? {}),
-      validation: this.parseBsonSerializationOptions(options)
-    };
-    return super.toObject(exactBSONOptions);
-  }
-
-  private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
-    utf8: { writeErrors: false } | false;
-  } {
-    const enableUtf8Validation = options?.enableUtf8Validation;
-    if (enableUtf8Validation === false) {
-      return { utf8: false };
-    }
-    return { utf8: { writeErrors: false } };
   }
 }
 
