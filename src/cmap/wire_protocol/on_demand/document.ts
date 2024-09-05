@@ -1,10 +1,11 @@
+import { type DeserializeOptions } from 'bson';
+
 import {
   Binary,
-  BSON,
   type BSONElement,
   BSONError,
-  type BSONSerializeOptions,
   BSONType,
+  deserialize,
   getBigInt64LE,
   getFloat64LE,
   getInt32LE,
@@ -329,8 +330,10 @@ export class OnDemandDocument {
    * Deserialize this object, DOES NOT cache result so avoid multiple invocations
    * @param options - BSON deserialization options
    */
-  public toObject(options?: BSONSerializeOptions): Record<string, any> {
-    return BSON.deserialize(this.bson, {
+  public toObject(
+    options?: DeserializeOptions & { validation: NonNullable<DeserializeOptions['validation']> }
+  ): Record<string, any> {
+    return deserialize(this.bson, {
       ...options,
       index: this.offset,
       allowObjectSmallerThanBufferSize: true

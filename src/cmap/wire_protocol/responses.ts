@@ -1,3 +1,5 @@
+import { type DeserializeOptions } from 'bson';
+
 import {
   type BSONElement,
   type BSONSerializeOptions,
@@ -5,6 +7,7 @@ import {
   type Document,
   Long,
   parseToElementsToArray,
+  parseUtf8ValidationOption,
   pluckBSONSerializeOptions,
   type Timestamp
 } from '../../bson';
@@ -113,7 +116,8 @@ export class MongoDBResponse extends OnDemandDocument {
       this.get('recoveryToken', BSONType.object)?.toObject({
         promoteValues: false,
         promoteLongs: false,
-        promoteBuffers: false
+        promoteBuffers: false,
+        validation: { utf8: false }
       }) ?? null
     );
   }
@@ -170,19 +174,9 @@ export class MongoDBResponse extends OnDemandDocument {
   public override toObject(options?: BSONSerializeOptions): Record<string, any> {
     const exactBSONOptions = {
       ...pluckBSONSerializeOptions(options ?? {}),
-      validation: this.parseBsonSerializationOptions(options)
+      validation: parseUtf8ValidationOption(options)
     };
     return super.toObject(exactBSONOptions);
-  }
-
-  private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
-    utf8: { writeErrors: false } | false;
-  } {
-    const enableUtf8Validation = options?.enableUtf8Validation;
-    if (enableUtf8Validation === false) {
-      return { utf8: false };
-    }
-    return { utf8: { writeErrors: false } };
   }
 }
 
@@ -267,12 +261,15 @@ export class CursorResponse extends MongoDBResponse {
       this.cursor.get('postBatchResumeToken', BSONType.object)?.toObject({
         promoteValues: false,
         promoteLongs: false,
-        promoteBuffers: false
+        promoteBuffers: false,
+        validation: { utf8: false }
       }) ?? null
     );
   }
 
-  public shift(options?: BSONSerializeOptions): any {
+  public shift(
+    options: DeserializeOptions & { validation: NonNullable<DeserializeOptions['validation']> }
+  ): any {
     if (this.iterated >= this.batchSize) {
       return null;
     }
@@ -324,7 +321,7 @@ export class ExplainedCursorResponse extends CursorResponse {
     return this._length;
   }
 
-  override shift(options?: BSONSerializeOptions | undefined) {
+  override shift(options?: DeserializeOptions) {
     if (this._length === 0) return null;
     this._length -= 1;
     return this.toObject(options);
