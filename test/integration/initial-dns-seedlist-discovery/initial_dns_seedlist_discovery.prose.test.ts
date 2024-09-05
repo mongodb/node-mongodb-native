@@ -1,7 +1,6 @@
-import * as dns from 'dns';
-import sinon = require('sinon');
-
 import { expect } from 'chai';
+import * as dns from 'dns';
+import * as sinon from 'sinon';
 
 import { MongoAPIError, Server, ServerDescription, Topology } from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
@@ -156,7 +155,9 @@ describe(
             .connect()
             .catch(e => e);
           expect(err).to.be.instanceOf(MongoAPIError);
-          expect(err.message).to.equal('Server record does not share hostname with parent URI');
+          expect(err.message).to.equal(
+            'Server record does not have least one more domain than parent URI'
+          );
         });
 
         it('an SRV with two domain levels causes a runtime error', async function () {
@@ -175,7 +176,9 @@ describe(
             .connect()
             .catch(e => e);
           expect(err).to.be.instanceOf(MongoAPIError);
-          expect(err.message).to.equal('Server record does not share hostname with parent URI');
+          expect(err.message).to.equal(
+            'Server record does not have least one more domain than parent URI'
+          );
         });
       }
     );

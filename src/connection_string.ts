@@ -34,11 +34,11 @@ import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import {
+  checkParentDomainMatch,
   DEFAULT_PK_FACTORY,
   emitWarning,
   HostAddress,
   isRecord,
-  matchesParentDomain,
   parseInteger,
   setDifference,
   squashError
@@ -81,9 +81,7 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
   }
 
   for (const { name } of addresses) {
-    if (!matchesParentDomain(name, lookupAddress)) {
-      throw new MongoAPIError('Server record does not share hostname with parent URI');
-    }
+    checkParentDomainMatch(name, lookupAddress);
   }
 
   const hostAddresses = addresses.map(r => HostAddress.fromString(`${r.name}:${r.port ?? 27017}`));
