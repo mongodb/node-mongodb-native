@@ -1,11 +1,11 @@
+import { type DeserializeOptions } from 'bson';
+
 import {
   type BSONElement,
-  type BSONSerializeOptions,
   BSONType,
   type Document,
   Long,
   parseToElementsToArray,
-  pluckBSONSerializeOptions,
   type Timestamp
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
@@ -166,24 +166,6 @@ export class MongoDBResponse extends OnDemandDocument {
     }
     return this.clusterTime ?? null;
   }
-
-  public override toObject(options?: BSONSerializeOptions): Record<string, any> {
-    const exactBSONOptions = {
-      ...pluckBSONSerializeOptions(options ?? {}),
-      validation: this.parseBsonSerializationOptions(options)
-    };
-    return super.toObject(exactBSONOptions);
-  }
-
-  private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
-    utf8: { writeErrors: false } | false;
-  } {
-    const enableUtf8Validation = options?.enableUtf8Validation;
-    if (enableUtf8Validation === false) {
-      return { utf8: false };
-    }
-    return { utf8: { writeErrors: false } };
-  }
 }
 
 /** @internal */
@@ -272,7 +254,7 @@ export class CursorResponse extends MongoDBResponse {
     );
   }
 
-  public shift(options?: BSONSerializeOptions): any {
+  public shift(options: DeserializeOptions): any {
     if (this.iterated >= this.batchSize) {
       return null;
     }
@@ -324,7 +306,7 @@ export class ExplainedCursorResponse extends CursorResponse {
     return this._length;
   }
 
-  override shift(options?: BSONSerializeOptions | undefined) {
+  override shift(options?: DeserializeOptions) {
     if (this._length === 0) return null;
     this._length -= 1;
     return this.toObject(options);

@@ -1,0 +1,30 @@
+[
+  {
+    "info": {
+      "test_name": "everything on",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 63.0252103274527
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "certain fields",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 11.1656989784575
+      }
+    ]
+  }
+]

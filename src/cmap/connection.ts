@@ -1,7 +1,14 @@
+import { type DeserializeOptions } from 'bson';
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
-import { type BSONSerializeOptions, deserialize, type Document, type ObjectId } from '../bson';
+import {
+  type BSONSerializeOptions,
+  deserialize,
+  type Document,
+  type ObjectId,
+  parseUtf8ValidationOption
+} from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import {
   CLOSE,
@@ -487,7 +494,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // If `documentsReturnedIn` not set or raw is not enabled, use input bson options
     // Otherwise, support raw flag. Raw only works for cursors that hardcode firstBatch/nextBatch fields
-    const bsonOptions =
+    const bsonOptions: DeserializeOptions =
       options.documentsReturnedIn == null || !options.raw
         ? options
         : {
@@ -495,6 +502,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             raw: false,
             fieldsAsRaw: { [options.documentsReturnedIn]: true }
           };
+
+    // if (bsonOptions.validation == null) {
+    //   bsonOptions.validation = parseUtf8ValidationOption(bsonOptions as BSONSerializeOptions);
+    // }
 
     /** MongoDBResponse instance or subclass */
     let document: MongoDBResponse | undefined = undefined;
