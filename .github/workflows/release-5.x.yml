@@ -37,6 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: '5.x'
 
       - name: Install Node and dependencies
         uses: mongodb-labs/drivers-github-tools/node/setup@v2
@@ -95,6 +97,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: '5.x'
 
       - name: Install Node and dependencies
         uses: mongodb-labs/drivers-github-tools/node/setup@v2
