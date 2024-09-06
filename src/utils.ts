@@ -532,7 +532,8 @@ export function resolveOptions<T extends CommandOperationOptions>(
     result.readPreference = readPreference;
   }
 
-  if (session?.explicit && session?.timeoutContext != null && options?.timeoutMS != null) {
+  const isConvenientTransaction = session?.explicit && session?.timeoutContext != null;
+  if (isConvenientTransaction && options?.timeoutMS != null) {
     throw new MongoInvalidArgumentError(
       'An operation cannot be given a timeoutMS setting when inside a withTransaction call that has a timeoutMS setting'
     );
