@@ -276,7 +276,15 @@
       ],
       "parser": "@typescript-eslint/parser",
       "rules": {
-        "unused-imports/no-unused-imports": "error"
+        "unused-imports/no-unused-imports": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            "prefer": "type-imports",
+            "disallowTypeAnnotations": false,
+            "fixStyle": "separate-type-imports"
+          }
+        ]
       }
     }
   ]
