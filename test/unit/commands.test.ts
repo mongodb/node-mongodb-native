@@ -6,8 +6,6 @@ import * as compression from '../../src/cmap/wire_protocol/compression';
 import {
   compress,
   Compressor,
-  Connection,
-  MongoClient,
   OP_MSG,
   OP_QUERY,
   OpCompressedRequest,
@@ -112,11 +110,11 @@ describe('class OpCompressedRequest', () => {
   });
 });
 
-describe.only('fire-and-forget', () => {
-  describe('OpMsgRequest', () => {
-    context('when writeConcern.w is 0', () => {
+describe('OpMsgRequest', () => {
+  describe('fire-and-forget', () => {
+    context('when writeConcern = 0', () => {
       it('moreToCome is set to true', async () => {
-        const request = new OpMsgRequest('db', { a: 1 }, { writeConcern: { w: 0 } });
+        const request = new OpMsgRequest('db', { a: 1, writeConcern: { w: 0 } }, {});
         expect(request.moreToCome).to.be.true;
       });
     });
