@@ -1,13 +1,6 @@
-import { type DeserializeOptions } from 'bson';
 import { Readable, Transform } from 'stream';
 
-import {
-  type BSONSerializeOptions,
-  type Document,
-  Long,
-  parseUtf8ValidationOption,
-  pluckBSONSerializeOptions
-} from '../bson';
+import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
 import { type OnDemandDocumentDeserializeOptions } from '../cmap/wire_protocol/on_demand/document';
 import { type CursorResponse } from '../cmap/wire_protocol/responses';
 import {
