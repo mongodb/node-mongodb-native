@@ -633,8 +633,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           });
 
     const buffer = Buffer.concat(await finalCommand.toBin());
-    if (this.socket.write(buffer)) return;
 
+    if (this.socket.write(buffer)) return;
     return await once(this.socket, 'drain');
   }
 
