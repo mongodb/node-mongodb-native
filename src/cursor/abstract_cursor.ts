@@ -236,7 +236,7 @@ export abstract class AbstractCursor<
     this.cursorOptions.omitMaxTimeMSOnInitialCommand =
       this.cursorOptions.timeoutMS != null &&
       this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-      !this.cursorOptions.tailable;
+      !this.cursorOptions.awaitData;
     this.cursorOptions.omitMaxTimeMSOnGetMore =
       this.cursorOptions.timeoutMS != null &&
       !(this.cursorOptions.tailable && this.cursorOptions.awaitData);
@@ -860,9 +860,9 @@ export abstract class AbstractCursor<
     } catch (error) {
       try {
         await this.cleanup(undefined, error);
-      } catch (error) {
+      } catch (cleanupError) {
         // `cleanupCursor` should never throw, squash and throw the original error
-        squashError(error);
+        squashError(cleanupError);
       }
       throw error;
     }

@@ -23,6 +23,8 @@ export type RunCursorCommandOptions = {
   timeoutMS?: number;
   /** @internal */
   timeoutMode?: CursorTimeoutMode;
+  tailable?: boolean;
+  awaitData?: boolean;
 } & BSONSerializeOptions;
 
 /** @public */
@@ -100,6 +102,7 @@ export class RunCommandCursor extends AbstractCursor {
   /** @internal */
   constructor(db: Db, command: Document, options: RunCursorCommandOptions = {}) {
     super(db.client, ns(db.namespace), options);
+    console.log(options.timeoutMS);
     this.db = db;
     this.command = Object.freeze({ ...command });
   }
