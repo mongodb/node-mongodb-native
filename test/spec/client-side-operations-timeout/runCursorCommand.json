@@ -378,6 +378,10 @@
         },
         {
           "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
           "object": "tailableCursor",
           "expectError": {
             "isTimeoutError": true
@@ -413,6 +417,24 @@
                   "awaitData": {
                     "$$exists": false
                   },
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "db",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "cappedCollection",
                   "maxTimeMS": {
                     "$$exists": false
                   }

@@ -178,6 +178,15 @@
           "saveResultAsEntity": "changeStream"
         },
         {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "_id": 0
+            }
+          }
+        },
+        {
           "name": "iterateOnce",
           "object": "changeStream"
         }
