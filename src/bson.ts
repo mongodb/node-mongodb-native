@@ -133,3 +133,14 @@ export function resolveBSONOptions(
       options?.enableUtf8Validation ?? parentOptions?.enableUtf8Validation ?? true
   };
 }
+
+/** @internal */
+export function parseUtf8ValidationOption(options?: { enableUtf8Validation?: boolean }): {
+  utf8: { writeErrors: false } | false;
+} {
+  const enableUtf8Validation = options?.enableUtf8Validation;
+  if (enableUtf8Validation === false) {
+    return { utf8: false };
+  }
+  return { utf8: { writeErrors: false } };
+}

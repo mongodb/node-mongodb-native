@@ -1,6 +1,14 @@
+import { type DeserializeOptions } from 'bson';
 import { Readable, Transform } from 'stream';
 
-import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
+import {
+  type BSONSerializeOptions,
+  type Document,
+  Long,
+  parseUtf8ValidationOption,
+  pluckBSONSerializeOptions
+} from '../bson';
+import { type OnDemandDocumentDeserializeOptions } from '../cmap/wire_protocol/on_demand/document';
 import { type CursorResponse } from '../cmap/wire_protocol/responses';
 import {
   MongoAPIError,
@@ -154,6 +162,9 @@ export abstract class AbstractCursor<
   static readonly CLOSE = 'close' as const;
 
   /** @internal */
+  protected deserializationOptions: OnDemandDocumentDeserializeOptions;
+
+  /** @internal */
   protected constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
@@ -207,6 +218,13 @@ export abstract class AbstractCursor<
     } else {
       this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
     }
+
+    this.deserializationOptions = {
+      ...this.cursorOptions,
+      validation: {
+        utf8: options?.enableUtf8Validation === false ? false : true
+      }
+    };
   }
 
   /**
@@ -289,7 +307,7 @@ export abstract class AbstractCursor<
     );
 
     for (let count = 0; count < documentsToRead; count++) {
-      const document = this.documents?.shift(this.cursorOptions);
+      const document = this.documents?.shift(this.deserializationOptions);
       if (document != null) {
         bufferedDocs.push(document);
       }
@@ -390,7 +408,7 @@ export abstract class AbstractCursor<
     }
 
     do {
-      const doc = this.documents?.shift(this.cursorOptions);
+      const doc = this.documents?.shift(this.deserializationOptions);
       if (doc != null) {
         if (this.transform != null) return await this.transformDocument(doc);
         return doc;
@@ -409,7 +427,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    let doc = this.documents?.shift(this.cursorOptions);
+    let doc = this.documents?.shift(this.deserializationOptions);
     if (doc != null) {
       if (this.transform != null) return await this.transformDocument(doc);
       return doc;
@@ -417,7 +435,7 @@ export abstract class AbstractCursor<
 
     await this.fetchBatch();
 
-    doc = this.documents?.shift(this.cursorOptions);
+    doc = this.documents?.shift(this.deserializationOptions);
     if (doc != null) {
       if (this.transform != null) return await this.transformDocument(doc);
       return doc;

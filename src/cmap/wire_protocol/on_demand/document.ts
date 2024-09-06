@@ -1,8 +1,9 @@
+import { type DeserializeOptions } from 'bson';
+
 import {
   Binary,
   type BSONElement,
   BSONError,
-  type BSONSerializeOptions,
   BSONType,
   deserialize,
   getBigInt64LE,
@@ -10,7 +11,6 @@ import {
   getInt32LE,
   ObjectId,
   parseToElementsToArray,
-  pluckBSONSerializeOptions,
   Timestamp,
   toUTF8
 } from '../../../bson';
@@ -43,6 +43,15 @@ export type JSTypeOf = {
 
 /** @internal */
 type CachedBSONElement = { element: BSONElement; value: any | undefined };
+
+/**
+ * @internal
+ *
+ * Options for `OnDemandDocument.toObject()`. Validation is required to ensure
+ * that callers provide utf8 validation options. */
+export type OnDemandDocumentDeserializeOptions = DeserializeOptions & {
+  validation: NonNullable<DeserializeOptions['validation']>;
+};
 
 /** @internal */
 export class OnDemandDocument {
@@ -330,14 +339,12 @@ export class OnDemandDocument {
    * Deserialize this object, DOES NOT cache result so avoid multiple invocations
    * @param options - BSON deserialization options
    */
-  public toObject(options?: BSONSerializeOptions): Record<string, any> {
-    const exactBSONOptions = {
-      ...pluckBSONSerializeOptions(options ?? {}),
-      validation: this.parseBsonSerializationOptions(options),
+  public toObject(options?: OnDemandDocumentDeserializeOptions): Record<string, any> {
+    return deserialize(this.bson, {
+      ...options,
       index: this.offset,
       allowObjectSmallerThanBufferSize: true
-    };
-    return deserialize(this.bson, exactBSONOptions);
+    });
   }
 
   private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
