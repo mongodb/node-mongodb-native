@@ -24,6 +24,12 @@ export function onData(
   emitter: EventEmitter,
   { timeoutContext }: { timeoutContext?: TimeoutContext }
 ) {
+  const capture: { stack?: string; name?: string; message?: string } = Object.create(null);
+  capture.name = 'MongoOperationTimeoutError';
+  capture.message = 'Timed out during socket read';
+
+  Error.captureStackTrace(capture);
+
   // Setup pending events and pending promise lists
   /**
    * When the caller has not yet called .next(), we store the
@@ -107,6 +113,8 @@ export function onData(
     const timeoutError = TimeoutError.is(err)
       ? new MongoOperationTimeoutError('Timed out during socket read')
       : undefined;
+
+    if (timeoutError) timeoutError.stack = capture.stack;
 
     if (promise != null) promise.reject(timeoutError ?? err);
     else error = timeoutError ?? err;

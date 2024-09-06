@@ -251,7 +251,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 150
+                "blockTimeMS":270 
               }
             }
           }
@@ -261,11 +261,20 @@
           "object": "collection",
           "arguments": {
             "pipeline": [],
-            "timeoutMS": 200,
+            "timeoutMS": 500,
             "batchSize": 2,
             "maxAwaitTimeMS": 1
           },
           "saveResultAsEntity": "changeStream"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "a": 10
+            }
+          }
         },
         {
           "name": "iterateOnce",

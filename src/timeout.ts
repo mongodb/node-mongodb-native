@@ -188,6 +188,8 @@ export class CSOTTimeoutContext extends TimeoutContext {
 
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
+  private _socketReadTimeout?: Timeout | null;
+  private _socketWriteTimeout?: Timeout | null;
   public minRoundTripTime = 0;
   private start: number;
 
@@ -261,17 +263,37 @@ export class CSOTTimeoutContext extends TimeoutContext {
   }
 
   get timeoutForSocketWrite(): Timeout | null {
-    const { remainingTimeMS } = this;
-    if (!Number.isFinite(remainingTimeMS)) return null;
-    if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
-    throw new MongoOperationTimeoutError(`Timed out before socket write after ${this.timeoutMS}ms`);
+    if (!this._socketWriteTimeout || this._socketWriteTimeout.cleared) {
+      const { remainingTimeMS } = this;
+      if (!Number.isFinite(remainingTimeMS)) {
+        this._socketWriteTimeout = null;
+      } else if (remainingTimeMS > 0) {
+        this._socketWriteTimeout = Timeout.expires(remainingTimeMS);
+      } else {
+        throw new MongoOperationTimeoutError(
+          `Timed out before socket write after ${this.timeoutMS}ms`
+        );
+      }
+    }
+
+    return this._socketWriteTimeout;
   }
 
   get timeoutForSocketRead(): Timeout | null {
-    const { remainingTimeMS } = this;
-    if (!Number.isFinite(remainingTimeMS)) return null;
-    if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
-    throw new MongoOperationTimeoutError(`Timed out before socket read after ${this.timeoutMS}ms`);
+    if (!this._socketReadTimeout || this._socketReadTimeout.cleared) {
+      const { remainingTimeMS } = this;
+      if (!Number.isFinite(remainingTimeMS)) {
+        this._socketReadTimeout = null;
+      } else if (remainingTimeMS > 0) {
+        this._socketReadTimeout = Timeout.expires(remainingTimeMS);
+      } else {
+        throw new MongoOperationTimeoutError(
+          `Timed out before socket read after ${this.timeoutMS}ms`
+        );
+      }
+    }
+
+    return this._socketReadTimeout;
   }
 
   refresh(): void {
@@ -279,11 +301,15 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this.minRoundTripTime = 0;
     this._serverSelectionTimeout?.clear();
     this._connectionCheckoutTimeout?.clear();
+    this._socketReadTimeout?.clear();
+    this._socketWriteTimeout?.clear();
   }
 
   clear(): void {
     this._serverSelectionTimeout?.clear();
     this._connectionCheckoutTimeout?.clear();
+    this._socketReadTimeout?.clear();
+    this._socketWriteTimeout?.clear();
   }
 }
 
