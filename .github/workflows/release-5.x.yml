@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [5.x]
+    branches: ['5.x']
   workflow_dispatch: {}
 
 permissions:
@@ -19,7 +19,7 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@v4
         with:
-          target-branch: 5.x
+          target-branch: '5.x'
 
   build:
     needs: [release_please]
@@ -75,7 +75,7 @@ jobs:
         with:
           release_version: ${{ env.package_version }}
           product_name: mongodb
-          sarif_report_target_ref: 5.x
+          sarif_report_target_ref: '5.x'
           third_party_dependency_tool: n/a
           dist_filenames: artifacts/*
           token: ${{ github.token }}
