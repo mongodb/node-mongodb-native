@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.8.1](https://github.com/mongodb/node-mongodb-native/compare/v6.8.0...v6.8.1) (2024-09-06)
+
+
+### Bug Fixes
+
+* **NODE-6355:** respect utf8 validation option when iterating cursors ([#4220](https://github.com/mongodb/node-mongodb-native/issues/4220)) ([886cefb](https://github.com/mongodb/node-mongodb-native/commit/886cefb4197e2747f26eeb680a9d0a779d6d28f1))
+* revert 6.8.1 release ([#4225](https://github.com/mongodb/node-mongodb-native/issues/4225)) ([0a4958d](https://github.com/mongodb/node-mongodb-native/commit/0a4958d6c92f26274b3e6850dd9c68f139799f5d))
+
 ## [6.8.0](https://github.com/mongodb/node-mongodb-native/compare/v6.7.0...v6.8.0) (2024-06-27)
 
 
