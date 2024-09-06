@@ -124,7 +124,8 @@
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
-        "argsIgnorePattern": "^_"
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
       }
     ]
   },
@@ -275,7 +276,15 @@
       ],
       "parser": "@typescript-eslint/parser",
       "rules": {
-        "unused-imports/no-unused-imports": "error"
+        "unused-imports/no-unused-imports": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            "prefer": "type-imports",
+            "disallowTypeAnnotations": false,
+            "fixStyle": "separate-type-imports"
+          }
+        ]
       }
     }
   ]

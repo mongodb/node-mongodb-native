@@ -74,7 +74,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
           explain: verbosity ?? true
         })
       )
-    ).shift(this.aggregateOptions);
+    ).shift(this.deserializationOptions);
   }
 
   /** Add a stage to the aggregation pipeline
