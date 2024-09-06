@@ -1,13 +1,11 @@
 import { expect } from 'chai';
 import * as net from 'net';
 import * as sinon from 'sinon';
-import { inspect } from 'util';
 
 import {
   BSON,
   BSONError,
   type Collection,
-  deserialize,
   type MongoClient,
   MongoServerError,
   OpMsgResponse
@@ -26,47 +24,59 @@ describe('class MongoDBResponse', () => {
     () => {
       let client: MongoClient;
       let error: MongoServerError;
-      beforeEach(async function () {
-        client = this.configuration.newClient();
+      for (const { optionDescription, options } of [
+        { optionDescription: 'explicitly enabled', options: { enableUtf8Validation: true } },
+        { optionDescription: 'explicitly disabled', options: { enableUtf8Validation: false } },
+        { optionDescription: 'omitted', options: {} }
+      ]) {
+        context('when utf8 validation is ' + optionDescription, function () {
+          beforeEach(async function () {
+            client = this.configuration.newClient();
 
-        async function generateWriteErrorWithInvalidUtf8() {
-          // Insert a large string of multibyte UTF-8 characters
-          const _id = '\u{1F92A}'.repeat(100);
+            async function generateWriteErrorWithInvalidUtf8() {
+              // Insert a large string of multibyte UTF-8 characters
+              const _id = '\u{1F92A}'.repeat(100);
 
-          const test = client.db('parsing').collection<{ _id: string }>('parsing');
-          await test.insertOne({ _id });
+              const test = client.db('parsing').collection<{ _id: string }>('parsing');
+              await test.insertOne({ _id }, options);
 
-          const spy = sinon.spy(OpMsgResponse.prototype, 'parse');
+              const spy = sinon.spy(OpMsgResponse.prototype, 'parse');
 
-          error = await test.insertOne({ _id }).catch(error => error);
+              error = await test.insertOne({ _id }).catch(error => error);
 
-          // Check that the server sent us broken BSON (bad UTF)
-          expect(() => {
-            BSON.deserialize(spy.returnValues[0], { validation: { utf8: true } });
-          }).to.throw(BSON.BSONError, /Invalid UTF/i, 'did not generate error with invalid utf8');
-        }
+              // Check that the server sent us broken BSON (bad UTF)
+              expect(() => {
+                BSON.deserialize(spy.returnValues[0], { validation: { utf8: true } });
+              }).to.throw(
+                BSON.BSONError,
+                /Invalid UTF/i,
+                'did not generate error with invalid utf8'
+              );
+            }
 
-        await generateWriteErrorWithInvalidUtf8();
-      });
+            await generateWriteErrorWithInvalidUtf8();
+          });
 
-      afterEach(async function () {
-        sinon.restore();
-        await client.db('parsing').dropDatabase();
-        await client.close();
-      });
+          afterEach(async function () {
+            sinon.restore();
+            await client.db('parsing').dropDatabase();
+            await client.close();
+          });
 
-      it('does not throw a UTF-8 parsing error', function () {
-        // Assert the driver squashed it
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(error.message).to.match(/duplicate/i);
-        expect(error.message).to.not.match(/utf/i);
-        expect(error.errmsg).to.include('\uFFFD');
-      });
+          it('does not throw a UTF-8 parsing error', function () {
+            // Assert the driver squashed it
+            expect(error).to.be.instanceOf(MongoServerError);
+            expect(error.message).to.match(/duplicate/i);
+            expect(error.message).to.not.match(/utf/i);
+            expect(error.errmsg).to.include('\uFFFD');
+          });
+        });
+      }
     }
   );
 });
 
-describe('utf8 validation with cursors', function () {
+describe('parsing of utf8-invalid documents wish cursors', function () {
   let client: MongoClient;
   let collection: Collection;
 
@@ -85,7 +95,7 @@ describe('utf8 validation with cursors', function () {
           sinon.restore();
           const message = `too many target bytes sequences: received ${
             providedBuffer.split(targetBytes).length
-          }\n.  command: ${inspect(deserialize(args[0]), { depth: Infinity })}`;
+          }`;
           throw new Error(message);
         }
         const buffer = Buffer.from(providedBuffer.replace(targetBytes, 'c301'.repeat(8)), 'hex');
@@ -163,7 +173,7 @@ describe('utf8 validation with cursors', function () {
   }
 
   context('when utf-8 validation is explicitly enabled', function () {
-    it('a for-await loop throw a BSON error', async function () {
+    it('a for-await loop throws a BSON error', async function () {
       await expectReject(async () => {
         for await (const _doc of collection.find({}, { enableUtf8Validation: true }));
       });
@@ -204,7 +214,7 @@ describe('utf8 validation with cursors', function () {
   });
 
   context('utf-8 validation defaults to enabled', function () {
-    it('a for-await loop throw a BSON error', async function () {
+    it('a for-await loop throws a BSON error', async function () {
       await expectReject(async () => {
         for await (const _doc of collection.find({}));
       });

@@ -49,9 +49,8 @@ type CachedBSONElement = { element: BSONElement; value: any | undefined };
  *
  * Options for `OnDemandDocument.toObject()`. Validation is required to ensure
  * that callers provide utf8 validation options. */
-export type OnDemandDocumentDeserializeOptions = DeserializeOptions & {
-  validation: NonNullable<DeserializeOptions['validation']>;
-};
+export type OnDemandDocumentDeserializeOptions = Omit<DeserializeOptions, 'validation'> &
+  Required<Pick<DeserializeOptions, 'validation'>>;
 
 /** @internal */
 export class OnDemandDocument {
@@ -345,16 +344,6 @@ export class OnDemandDocument {
       index: this.offset,
       allowObjectSmallerThanBufferSize: true
     });
-  }
-
-  private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
-    utf8: { writeErrors: false } | false;
-  } {
-    const enableUtf8Validation = options?.enableUtf8Validation;
-    if (enableUtf8Validation === false) {
-      return { utf8: false };
-    }
-    return { utf8: { writeErrors: false } };
   }
 
   /** Returns this document's bytes only */
