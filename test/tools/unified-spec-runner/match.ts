@@ -512,6 +512,13 @@ function compareCommandFailedEvents(
   }
 }
 
+function expectInstanceOf<T extends new (...args: any[]) => any>(
+  instance: any,
+  ctor: T
+): asserts instance is InstanceType<T> {
+  expect(instance).to.be.instanceOf(ctor);
+}
+
 function compareEvents(
   actual: CommandEvent[] | CmapEvent[] | SdamEvent[],
   expected: (ExpectedCommandEvent & ExpectedCmapEvent & ExpectedSdamEvent)[],
@@ -526,9 +533,7 @@ function compareEvents(
 
     if (expectedEvent.commandStartedEvent) {
       const path = `${rootPrefix}.commandStartedEvent`;
-      if (!(actualEvent instanceof CommandStartedEvent)) {
-        expect.fail(`expected ${path} to be instanceof CommandStartedEvent`);
-      }
+      expectInstanceOf(actualEvent, CommandStartedEvent);
       compareCommandStartedEvents(actualEvent, expectedEvent.commandStartedEvent, entities, path);
       if (expectedEvent.commandStartedEvent.hasServerConnectionId) {
         expect(actualEvent).property('serverConnectionId').to.be.a('bigint');
@@ -537,9 +542,7 @@ function compareEvents(
       }
     } else if (expectedEvent.commandSucceededEvent) {
       const path = `${rootPrefix}.commandSucceededEvent`;
-      if (!(actualEvent instanceof CommandSucceededEvent)) {
-        expect.fail(`expected ${path} to be instanceof CommandSucceededEvent`);
-      }
+      expectInstanceOf(actualEvent, CommandSucceededEvent);
       compareCommandSucceededEvents(
         actualEvent,
         expectedEvent.commandSucceededEvent,
@@ -553,9 +556,7 @@ function compareEvents(
       }
     } else if (expectedEvent.commandFailedEvent) {
       const path = `${rootPrefix}.commandFailedEvent`;
-      if (!(actualEvent instanceof CommandFailedEvent)) {
-        expect.fail(`expected ${path} to be instanceof CommandFailedEvent`);
-      }
+      expectInstanceOf(actualEvent, CommandFailedEvent);
       compareCommandFailedEvents(actualEvent, expectedEvent.commandFailedEvent, entities, path);
       if (expectedEvent.commandFailedEvent.hasServerConnectionId) {
         expect(actualEvent).property('serverConnectionId').to.be.a('bigint');

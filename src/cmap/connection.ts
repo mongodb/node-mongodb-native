@@ -742,6 +742,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           return;
         }
       }
+    } catch (readError) {
+      if (TimeoutError.is(readError)) {
+        throw new MongoOperationTimeoutError(
+          `Timed out during socket read (${readError.duration}ms)`
+        );
+      }
+      throw readError;
     } finally {
       this.dataEvents = null;
       this.throwIfAborted();
