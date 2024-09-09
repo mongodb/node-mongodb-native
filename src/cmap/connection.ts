@@ -438,7 +438,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         zlibCompressionLevel: this.description.zlibCompressionLevel
       });
 
-      if (options.noResponse) {
+      if (options.noResponse || ('moreToCome' in message && message.moreToCome)) {
         yield MongoDBResponse.empty;
         return;
       }
@@ -500,13 +500,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let document: MongoDBResponse | undefined = undefined;
     /** Cached result of a toObject call */
     let object: Document | undefined = undefined;
-    const wireOptions = options;
-    if (message instanceof OpMsgRequest) {
-      wireOptions.noResponse = options.noResponse || message.moreToCome;
-    }
     try {
       this.throwIfAborted();
-      for await (document of this.sendWire(message, wireOptions, responseType)) {
+      for await (document of this.sendWire(message, options, responseType)) {
         object = undefined;
         if (options.session != null) {
           updateSessionFromResponse(options.session, document);
@@ -530,7 +526,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              wireOptions.noResponse ? { ok: 1 } : (object ??= document.toObject(bsonOptions)),
+              options.noResponse
+                ? undefined
+                : 'moreToCome' in message && message.moreToCome
+                  ? { ok: 1 }
+                  : (object ??= document.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )
