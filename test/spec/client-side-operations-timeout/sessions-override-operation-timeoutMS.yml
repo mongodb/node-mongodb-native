@@ -50,7 +50,7 @@ tests:
             data:
               failCommands: ["commitTransaction"]
               blockConnection: true
-              blockTimeMS: 60
+              blockTimeMS: 600
       - name: startTransaction
         object: *session
       - name: insertOne
@@ -61,7 +61,7 @@ tests:
       - name: commitTransaction
         object: *session
         arguments:
-          timeoutMS: 50
+          timeoutMS: 500
         expectError:
           isTimeoutError: true
     expectEvents:
@@ -95,7 +95,7 @@ tests:
             data:
               failCommands: ["abortTransaction"]
               blockConnection: true
-              blockTimeMS: 60
+              blockTimeMS: 600
       - name: startTransaction
         object: *session
       - name: insertOne
@@ -106,7 +106,7 @@ tests:
       - name: abortTransaction
         object: *session
         arguments:
-          timeoutMS: 50
+          timeoutMS: 500
     expectEvents:
       - client: *client
         events:
@@ -138,11 +138,11 @@ tests:
             data:
               failCommands: ["insert"]
               blockConnection: true
-              blockTimeMS: 60
+              blockTimeMS: 600
       - name: withTransaction
         object: *session
         arguments:
-          timeoutMS: 50
+          timeoutMS: 500
           callback:
             - name: insertOne
               object: *collection
@@ -156,9 +156,6 @@ tests:
     expectEvents:
       - client: *client
         events:
-          # Because the insert expects an error and gets an error, it technically succeeds, so withTransaction will
-          # try to run commitTransaction. This will fail client-side, though, because the timeout has already expired,
-          # so no command is sent.
           - commandStartedEvent:
               commandName: insert
               databaseName: *databaseName
@@ -169,3 +166,11 @@ tests:
                 maxTimeMS: { $$type: ["int", "long"] }
           - commandFailedEvent:
               commandName: insert
+          - commandStartedEvent:
+              commandName: abortTransaction
+              databaseName: admin
+              command:
+                abortTransaction: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandFailedEvent:
+              commandName: abortTransaction
