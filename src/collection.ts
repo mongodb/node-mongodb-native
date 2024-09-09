@@ -469,10 +469,14 @@ export class Collection<TSchema extends Document = Document> {
     // Intentionally, we do not inherit options from parent for this operation.
     return await executeOperation(
       this.client,
-      new RenameOperation(this as TODO_NODE_3286, newName, {
-        ...options,
-        readPreference: ReadPreference.PRIMARY
-      }) as TODO_NODE_3286
+      new RenameOperation(
+        this as TODO_NODE_3286,
+        newName,
+        resolveOptions(undefined, {
+          ...options,
+          readPreference: ReadPreference.PRIMARY
+        })
+      ) as TODO_NODE_3286
     );
   }
 

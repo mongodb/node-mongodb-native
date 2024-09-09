@@ -59,7 +59,7 @@ type ResultTypeFromOperation<TOperation> = TOperation extends AbstractOperation<
 export async function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T, timeoutContext?: TimeoutContext): Promise<TResult> {
+>(client: MongoClient, operation: T, timeoutContext?: TimeoutContext | null): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
@@ -82,11 +82,6 @@ export async function executeOperation<
   } else if (session.client !== client) {
     throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');
   }
-  if (session.explicit && session?.timeoutMS != null && operation.options.timeoutMS != null) {
-    throw new MongoInvalidArgumentError(
-      'Do not specify timeoutMS on operation if already specified on an explicit session'
-    );
-  }
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
@@ -108,6 +103,7 @@ export async function executeOperation<
   }
 
   timeoutContext ??= TimeoutContext.create({
+    session,
     serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
     waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
     timeoutMS: operation.options.timeoutMS
