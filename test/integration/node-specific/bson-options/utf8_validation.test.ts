@@ -76,7 +76,7 @@ describe('class MongoDBResponse', () => {
   );
 });
 
-describe('parsing of utf8-invalid documents wish cursors', function () {
+describe('parsing of utf8-invalid documents with cursors', function () {
   let client: MongoClient;
   let collection: Collection;
 
