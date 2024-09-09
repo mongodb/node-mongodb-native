@@ -13,6 +13,7 @@ import {
   OpMsgRequest
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
+import { sleep } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 describe('Write Concern', function () {
@@ -98,6 +99,7 @@ describe('Write Concern', function () {
 
         afterEach(async function () {
           await db.dropDatabase();
+          await sleep(1000);
           await client.close();
         });
 
@@ -134,9 +136,10 @@ describe('Write Concern', function () {
           await col.createIndex({ b: -1 });
           await col.createIndex({ a: 1, b: -1 });
 
+          await sleep(1000);
+
           const listIndexesResult = col.listIndexes({ batchSize: 2 });
           const err = await listIndexesResult.toArray().catch(e => e);
-
           expect(err).to.not.be.instanceOf(Error);
         });
 
@@ -164,6 +167,8 @@ describe('Write Concern', function () {
               ],
               { writeConcern: { w: 'majority' } }
             );
+
+            await sleep(1000);
 
             const err = await changes.next().catch(e => e);
             expect(err).to.not.be.instanceOf(Error);
