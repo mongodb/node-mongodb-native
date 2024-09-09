@@ -1,16 +1,19 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
+import { type ClientSession } from './sessions';
 import { csotMin, noop } from './utils';
 
 /** @internal */
 export class TimeoutError extends Error {
+  duration: number;
   override get name(): 'TimeoutError' {
     return 'TimeoutError';
   }
 
-  constructor(message: string, options?: { cause?: Error }) {
+  constructor(message: string, options: { cause?: Error; duration: number }) {
     super(message, options);
+    this.duration = options.duration;
   }
 
   static is(error: unknown): error is TimeoutError {
@@ -52,12 +55,19 @@ export class Timeout extends Promise<never> {
   }
 
   /** Create a new timeout that expires in `duration` ms */
-  private constructor(executor: Executor = () => null, duration: number, unref = true) {
-    let reject!: Reject;
+  private constructor(
+    executor: Executor = () => null,
+    options?: { duration: number; unref?: true; rejection?: Error }
+  ) {
+    const duration = options?.duration ?? 0;
+    const unref = !!options?.unref;
+    const rejection = options?.rejection;
+
     if (duration < 0) {
       throw new MongoInvalidArgumentError('Cannot create a Timeout with a negative duration');
     }
 
+    let reject!: Reject;
     super((_, promiseReject) => {
       reject = promiseReject;
 
@@ -67,16 +77,20 @@ export class Timeout extends Promise<never> {
     this.duration = duration;
     this.start = Math.trunc(performance.now());
 
-    if (this.duration > 0) {
+    if (rejection == null && this.duration > 0) {
       this.id = setTimeout(() => {
         this.ended = Math.trunc(performance.now());
         this.timedOut = true;
-        reject(new TimeoutError(`Expired after ${duration}ms`));
+        reject(new TimeoutError(`Expired after ${duration}ms`, { duration }));
       }, this.duration);
       if (typeof this.id.unref === 'function' && unref) {
         // Ensure we do not keep the Node.js event loop running
         this.id.unref();
       }
+    } else if (rejection != null) {
+      this.ended = Math.trunc(performance.now());
+      this.timedOut = true;
+      reject(rejection);
     }
   }
 
@@ -90,11 +104,11 @@ export class Timeout extends Promise<never> {
   }
 
   throwIfExpired(): void {
-    if (this.timedOut) throw new TimeoutError('Timed out');
+    if (this.timedOut) throw new TimeoutError('Timed out', { duration: this.duration });
   }
 
-  public static expires(durationMS: number, unref?: boolean): Timeout {
-    return new Timeout(undefined, durationMS, unref);
+  public static expires(duration: number, unref?: true): Timeout {
+    return new Timeout(undefined, { duration, unref });
   }
 
   static is(timeout: unknown): timeout is Timeout {
@@ -107,10 +121,16 @@ export class Timeout extends Promise<never> {
       typeof timeout.then === 'function'
     );
   }
+
+  static override reject(rejection?: Error): Timeout {
+    return new Timeout(undefined, { duration: 0, unref: true, rejection });
+  }
 }
 
 /** @internal */
-export type TimeoutContextOptions = LegacyTimeoutContextOptions | CSOTTimeoutContextOptions;
+export type TimeoutContextOptions = (LegacyTimeoutContextOptions | CSOTTimeoutContextOptions) & {
+  session?: ClientSession;
+};
 
 /** @internal */
 export type LegacyTimeoutContextOptions = {
@@ -151,6 +171,7 @@ function isCSOTTimeoutContextOptions(v: unknown): v is CSOTTimeoutContextOptions
 /** @internal */
 export abstract class TimeoutContext {
   static create(options: TimeoutContextOptions): TimeoutContext {
+    if (options.session?.timeoutContext != null) return options.session?.timeoutContext;
     if (isCSOTTimeoutContextOptions(options)) return new CSOTTimeoutContext(options);
     else if (isLegacyTimeoutContextOptions(options)) return new LegacyTimeoutContext(options);
     else throw new MongoRuntimeError('Unrecognized options');
@@ -183,7 +204,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
   public minRoundTripTime = 0;
-  private start: number;
+  public start: number;
 
   constructor(options: CSOTTimeoutContextOptions) {
     super();
@@ -217,8 +238,8 @@ export class CSOTTimeoutContext extends TimeoutContext {
     if (typeof this._serverSelectionTimeout !== 'object' || this._serverSelectionTimeout?.cleared) {
       const { remainingTimeMS, serverSelectionTimeoutMS } = this;
       if (remainingTimeMS <= 0)
-        throw new MongoOperationTimeoutError(
-          `Timed out in server selection after ${this.timeoutMS}ms`
+        return Timeout.reject(
+          new MongoOperationTimeoutError(`Timed out in server selection after ${this.timeoutMS}ms`)
         );
       const usingServerSelectionTimeoutMS =
         serverSelectionTimeoutMS !== 0 &&
@@ -258,14 +279,14 @@ export class CSOTTimeoutContext extends TimeoutContext {
     const { remainingTimeMS } = this;
     if (!Number.isFinite(remainingTimeMS)) return null;
     if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
-    throw new MongoOperationTimeoutError('Timed out before socket write');
+    return Timeout.reject(new MongoOperationTimeoutError('Timed out before socket write'));
   }
 
   get timeoutForSocketRead(): Timeout | null {
     const { remainingTimeMS } = this;
     if (!Number.isFinite(remainingTimeMS)) return null;
     if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
-    throw new MongoOperationTimeoutError('Timed out before socket read');
+    return Timeout.reject(new MongoOperationTimeoutError('Timed out before socket read'));
   }
 }
 
