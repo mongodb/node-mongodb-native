@@ -1,3 +1,4 @@
+import { type DeserializeOptions } from 'bson';
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
@@ -487,7 +488,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // If `documentsReturnedIn` not set or raw is not enabled, use input bson options
     // Otherwise, support raw flag. Raw only works for cursors that hardcode firstBatch/nextBatch fields
-    const bsonOptions =
+    const bsonOptions: DeserializeOptions =
       options.documentsReturnedIn == null || !options.raw
         ? options
         : {
