@@ -1228,7 +1228,8 @@ export const OPTIONS = {
   // Custom types for modifying core behavior
   connectionType: { type: 'any' },
   srvPoller: { type: 'any' },
-  // Accepted NodeJS Options
+  // Accepted Node.js Options
+  allowPartialTrustChain: { type: 'any' },
   minDHSize: { type: 'any' },
   pskCallback: { type: 'any' },
   secureContext: { type: 'any' },
