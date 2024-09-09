@@ -1,4 +1,5 @@
 import { join } from 'path';
+import * as semver from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
@@ -8,7 +9,10 @@ const enabled = [
   'override-database-timeoutMS',
   'override-operation-timeoutMS',
   'retryability-legacy-timeouts',
-  'retryability-timeoutMS'
+  'retryability-timeoutMS',
+  'sessions-override-operation-timeoutMS',
+  'sessions-override-timeoutMS',
+  'sessions-inherit-timeoutMS'
 ];
 
 const cursorOperations = [
@@ -43,5 +47,15 @@ describe('CSOT spec tests', function () {
           'TODO(NODE-6274): update test runner to check errorResponse field of MongoBulkWriteError in isTimeoutError assertion';
     }
   }
-  runUnifiedSuite(specs);
+  runUnifiedSuite(specs, (test, configuration) => {
+    const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
+    if (
+      sessionCSOTTests.includes(test.description) &&
+      configuration.topologyType === 'ReplicaSetWithPrimary' &&
+      semver.satisfies(configuration.version, '<=4.4')
+    ) {
+      return '4.4 replicaset fail point does not blockConnection for requested time';
+    }
+    return false;
+  });
 });
