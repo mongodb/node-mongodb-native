@@ -517,6 +517,10 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
 /**
  * Merge inherited properties from parent into options, prioritizing values from options,
  * then values from parent.
+ *
+ * @param parent - An optional owning class of the operation being run. ex. Db/Collection/MongoClient.
+ * @param options - The options passed to the operation method.
+ *
  * @internal
  */
 export function resolveOptions<T extends CommandOperationOptions>(
@@ -544,9 +548,14 @@ export function resolveOptions<T extends CommandOperationOptions>(
     result.readPreference = readPreference;
   }
 
-  const timeoutMS = options?.timeoutMS;
+  const isConvenientTransaction = session?.explicit && session?.timeoutContext != null;
+  if (isConvenientTransaction && options?.timeoutMS != null) {
+    throw new MongoInvalidArgumentError(
+      'An operation cannot be given a timeoutMS setting when inside a withTransaction call that has a timeoutMS setting'
+    );
+  }
 
-  result.timeoutMS = timeoutMS ?? parent?.timeoutMS;
+  result.timeoutMS = options?.timeoutMS ?? parent?.timeoutMS;
 
   return result;
 }
