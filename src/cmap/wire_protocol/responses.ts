@@ -1,3 +1,5 @@
+import { type DeserializeOptions } from 'bson';
+
 import {
   type BSONElement,
   type BSONSerializeOptions,
@@ -5,12 +7,18 @@ import {
   type Document,
   Long,
   parseToElementsToArray,
+  parseUtf8ValidationOption,
+  pluckBSONSerializeOptions,
   type Timestamp
 } from '../../bson';
 import { MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
 import { decorateDecryptionResult, ns } from '../../utils';
-import { type JSTypeOf, OnDemandDocument } from './on_demand/document';
+import {
+  type JSTypeOf,
+  OnDemandDocument,
+  type OnDemandDocumentDeserializeOptions
+} from './on_demand/document';
 
 // eslint-disable-next-line no-restricted-syntax
 const enum BSONElementOffset {
@@ -112,7 +120,8 @@ export class MongoDBResponse extends OnDemandDocument {
       this.get('recoveryToken', BSONType.object)?.toObject({
         promoteValues: false,
         promoteLongs: false,
-        promoteBuffers: false
+        promoteBuffers: false,
+        validation: { utf8: true }
       }) ?? null
     );
   }
@@ -164,6 +173,14 @@ export class MongoDBResponse extends OnDemandDocument {
       this.clusterTime = { clusterTime, signature };
     }
     return this.clusterTime ?? null;
+  }
+
+  public override toObject(options?: BSONSerializeOptions): Record<string, any> {
+    const exactBSONOptions = {
+      ...pluckBSONSerializeOptions(options ?? {}),
+      validation: parseUtf8ValidationOption(options)
+    };
+    return super.toObject(exactBSONOptions);
   }
 }
 
@@ -248,12 +265,13 @@ export class CursorResponse extends MongoDBResponse {
       this.cursor.get('postBatchResumeToken', BSONType.object)?.toObject({
         promoteValues: false,
         promoteLongs: false,
-        promoteBuffers: false
+        promoteBuffers: false,
+        validation: { utf8: true }
       }) ?? null
     );
   }
 
-  public shift(options?: BSONSerializeOptions): any {
+  public shift(options: OnDemandDocumentDeserializeOptions): any {
     if (this.iterated >= this.batchSize) {
       return null;
     }
@@ -305,7 +323,7 @@ export class ExplainedCursorResponse extends CursorResponse {
     return this._length;
   }
 
-  override shift(options?: BSONSerializeOptions | undefined) {
+  override shift(options?: DeserializeOptions) {
     if (this._length === 0) return null;
     this._length -= 1;
     return this.toObject(options);
