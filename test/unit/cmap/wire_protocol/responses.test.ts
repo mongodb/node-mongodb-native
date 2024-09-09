@@ -1,8 +1,5 @@
 import { expect } from 'chai';
 
-// to spy on the bson module, we must import it from the driver
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import * as mdb from '../../../../src/bson';
 import {
   CursorResponse,
   Int32,

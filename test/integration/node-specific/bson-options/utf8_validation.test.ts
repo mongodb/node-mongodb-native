@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import * as net from 'net';
 import * as sinon from 'sinon';
-import { inspect } from 'util';
 
 import {
   BSON,
@@ -9,7 +8,6 @@ import {
   type Collection,
   type MongoClient,
   MongoServerError,
-  OnDemandDocument,
   OpMsgResponse
 } from '../../../mongodb';
 
