@@ -1,4 +1,5 @@
 import { join } from 'path';
+import * as semver from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
@@ -13,9 +14,6 @@ const skippedSpecs = {
   'gridfs-download': 'TODO(NODE-6275)',
   'gridfs-find': 'TODO(NODE-6275)',
   'gridfs-upload': 'TODO(NODE-6275)',
-  'sessions-inherit-timeoutMS': 'TODO(NODE-5687)',
-  'sessions-override-operation-timeoutMS': 'TODO(NODE-5687)',
-  'sessions-override-timeoutMS': 'TODO(NODE-5687)',
   'tailable-awaitData': 'TODO(NODE-6035)',
   'tailable-non-awaitData': 'TODO(NODE-6035)'
 };
@@ -55,7 +53,17 @@ describe('CSOT spec tests', function () {
     }
   }
 
-  runUnifiedSuite(specs);
+   runUnifiedSuite(specs, (test, configuration) => {
+    const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
+    if (
+      sessionCSOTTests.includes(test.description) &&
+      configuration.topologyType === 'ReplicaSetWithPrimary' &&
+      semver.satisfies(configuration.version, '<=4.4')
+    ) {
+      return '4.4 replicaset fail point does not blockConnection for requested time';
+    }
+    return false;
+  });
 });
 
 describe('CSOT modified spec tests', function () {
