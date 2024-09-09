@@ -536,7 +536,7 @@ describe('CSOT driver tests', metadata, () => {
               .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 100 })
 
               .project({ _id: 0 });
-            
+
             const doc = await cursor.next();
             expect(doc).to.deep.equal({ x: 1 });
             expect(cursor.documents.length).to.equal(0);
