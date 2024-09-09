@@ -466,7 +466,7 @@ describe('CSOT driver tests', metadata, () => {
         data: {
           failCommands: ['find', 'getMore'],
           blockConnection: true,
-          blockTimeMS: 25
+          blockTimeMS: 50
         }
       };
 
@@ -510,13 +510,13 @@ describe('CSOT driver tests', metadata, () => {
               const cursor = client
                 .db('db')
                 .collection('coll')
-                .find({}, { timeoutMode: 'cursorLifetime', timeoutMS: 50 })
+                .find({}, { timeoutMode: 'cursorLifetime', timeoutMS: 100 })
                 .project({ _id: 0 });
               const doc = await cursor.next();
               expect(doc).to.deep.equal({ x: 1 });
               expect(cursor.documents.length).to.be.gt(0);
 
-              await setTimeout(50);
+              await setTimeout(100);
 
               const docOrErr = await cursor.next().then(
                 d => d,
@@ -533,13 +533,15 @@ describe('CSOT driver tests', metadata, () => {
             const cursor = client
               .db('db')
               .collection('coll')
-              .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 50 })
+              .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 100 })
+
               .project({ _id: 0 });
+            
             const doc = await cursor.next();
             expect(doc).to.deep.equal({ x: 1 });
             expect(cursor.documents.length).to.equal(0);
 
-            await setTimeout(50);
+            await setTimeout(100);
 
             const docOrErr = await cursor.next().then(
               d => d,
