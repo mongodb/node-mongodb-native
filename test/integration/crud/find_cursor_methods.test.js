@@ -361,4 +361,55 @@ describe('Find Cursor', function () {
       }
     });
   });
+
+  describe.only('next + Symbol.asyncIterator()', function () {
+    let client;
+    let collection;
+
+    before(async function () {
+      client = this.configuration.newClient();
+      await client.connect();
+      collection = client.db('next-symbolasynciterator').collection('bar');
+      await collection.deleteMany({}, { writeConcern: { w: 'majority' } });
+      await collection.insertMany([{ a: 1 }, { a: 2 }], { writeConcern: { w: 'majority' } });
+    });
+
+    after(async function () {
+      await client.close();
+    });
+
+    // fails
+    it('allows combining iteration modes', async function () {
+      let count = 0;
+      const cursor = collection.find().map(doc => {
+        count++;
+        return doc;
+      });
+
+      await cursor.next();
+      for await (const _ of cursor) {
+        /* empty */
+      }
+
+      expect(count).to.equal(2);
+    });
+
+    // passes
+    it('works with next + next() loop', async function () {
+      let count = 0;
+      const cursor = collection.find().map(doc => {
+        count++;
+        return doc;
+      });
+
+      await cursor.next();
+
+      let doc;
+      while ((doc = (await cursor.next()) && doc != null)) {
+        /** empty */
+      }
+
+      expect(count).to.equal(2);
+    });
+  });
 });
