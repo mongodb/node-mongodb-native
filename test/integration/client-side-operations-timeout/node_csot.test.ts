@@ -352,7 +352,7 @@ describe('CSOT driver tests', metadata, () => {
       data: {
         failCommands: ['find', 'getMore'],
         blockConnection: true,
-        blockTimeMS: 25
+        blockTimeMS: 50
       }
     };
 
@@ -414,10 +414,10 @@ describe('CSOT driver tests', metadata, () => {
           const cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 50 })
+            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 100 })
             .project({ _id: 0 });
 
-          // Iterating over 3 documents in the collection, each artificially taking ~25 ms due to failpoint. If timeoutMS is not refreshed, then we'd expect to error
+          // Iterating over 3 documents in the collection, each artificially taking ~50 ms due to failpoint. If timeoutMS is not refreshed, then we'd expect to error
           for await (const doc of cursor) {
             expect(doc).to.deep.equal({ x: 1 });
           }
