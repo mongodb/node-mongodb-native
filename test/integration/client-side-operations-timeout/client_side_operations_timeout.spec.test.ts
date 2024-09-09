@@ -53,7 +53,7 @@ describe('CSOT spec tests', function () {
     }
   }
 
-   runUnifiedSuite(specs, (test, configuration) => {
+  runUnifiedSuite(specs, (test, configuration) => {
     const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
     if (
       sessionCSOTTests.includes(test.description) &&
