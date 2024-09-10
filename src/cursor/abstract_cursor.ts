@@ -314,11 +314,9 @@ export abstract class AbstractCursor<
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
-    /*
     if (this.isClosed) {
       return;
     }
-    */
 
     try {
       while (true) {
@@ -468,6 +466,7 @@ export abstract class AbstractCursor<
    * Frees any client-side resources used by the cursor.
    */
   async close(): Promise<void> {
+    this.isClosed = true;
     await this.cleanup();
   }
 
@@ -783,7 +782,6 @@ export abstract class AbstractCursor<
 
   /** @internal */
   private async cleanup(error?: Error) {
-    this.isClosed = true;
     const session = this.cursorSession;
     try {
       if (
