@@ -1,11 +1,7 @@
 'use strict';
 const { expect } = require('chai');
 const { filterForCommands } = require('../shared');
-const {
-  promiseWithResolvers,
-  MongoExpiredSessionError,
-  MongoCursorExhaustedError
-} = require('../../mongodb');
+const { promiseWithResolvers, MongoCursorExhaustedError } = require('../../mongodb');
 
 describe('Find Cursor', function () {
   let client;
