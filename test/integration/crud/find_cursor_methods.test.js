@@ -432,7 +432,7 @@ describe('Find Cursor', function () {
         expect(count).to.equal(2);
       });
 
-      it.only('allows partial iteration with for await syntax and then calling .next()', async function () {
+      it('allows partial iteration with for await syntax and then calling .next()', async function () {
         let count = 0;
         cursor = collection.find({}, { batchSize: 2 }).map(doc => {
           count++;
