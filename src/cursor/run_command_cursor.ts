@@ -110,7 +110,6 @@ export class RunCommandCursor extends AbstractCursor {
       ...this.cursorOptions,
       session: session,
       readPreference: this.cursorOptions.readPreference,
-      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
       responseType: CursorResponse
     });
 
@@ -130,7 +129,6 @@ export class RunCommandCursor extends AbstractCursor {
       ...this.cursorOptions,
       session: this.session,
       ...this.getMoreOptions,
-      omitMaxTimeMS: this.cursorOptions.omitMaxTimeMSOnGetMore
     });
 
     return await executeOperation(this.client, getMoreOperation, this.timeoutContext);

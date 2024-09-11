@@ -41,7 +41,7 @@ export class Timeout extends Promise<never> {
   public readonly start: number;
   public ended: number | null = null;
   public duration: number;
-  public timedOut = false;
+  private timedOut = false;
   public cleared = false;
 
   get remainingTime(): number {
