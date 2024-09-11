@@ -389,6 +389,7 @@ describe('Find Cursor', function () {
         });
 
         await cursor.next();
+        // eslint-disable-next-line no-unused-vars
         for await (const _ of cursor) {
           /* empty */
         }
@@ -423,6 +424,7 @@ describe('Find Cursor', function () {
         });
 
         await cursor.next();
+        // eslint-disable-next-line no-unused-vars
         for await (const _ of cursor) {
           /* empty */
         }
