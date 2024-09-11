@@ -362,11 +362,12 @@ describe('Find Cursor', function () {
     });
   });
 
-  describe.only('next + Symbol.asyncIterator()', function () {
+  describe('next + Symbol.asyncIterator()', function () {
     let client;
     let collection;
+    let cursor;
 
-    before(async function () {
+    beforeEach(async function () {
       client = this.configuration.newClient();
       await client.connect();
       collection = client.db('next-symbolasynciterator').collection('bar');
@@ -374,42 +375,77 @@ describe('Find Cursor', function () {
       await collection.insertMany([{ a: 1 }, { a: 2 }], { writeConcern: { w: 'majority' } });
     });
 
-    after(async function () {
+    afterEach(async function () {
+      await cursor.close();
       await client.close();
     });
 
-    // fails
-    it('allows combining iteration modes', async function () {
-      let count = 0;
-      const cursor = collection.find().map(doc => {
-        count++;
-        return doc;
+    context('when all documents are retrieved in the first batch', function () {
+      it('allows combining iteration modes', async function () {
+        let count = 0;
+        cursor = collection.find().map(doc => {
+          count++;
+          return doc;
+        });
+
+        await cursor.next();
+        for await (const _ of cursor) {
+          /* empty */
+        }
+
+        expect(count).to.equal(2);
       });
 
-      await cursor.next();
-      for await (const _ of cursor) {
-        /* empty */
-      }
+      it('works with next + next() loop', async function () {
+        let count = 0;
+        cursor = collection.find().map(doc => {
+          count++;
+          return doc;
+        });
 
-      expect(count).to.equal(2);
+        await cursor.next();
+
+        let doc;
+        while ((doc = (await cursor.next()) && doc != null)) {
+          /** empty */
+        }
+
+        expect(count).to.equal(2);
+      });
     });
 
-    // passes
-    it('works with next + next() loop', async function () {
-      let count = 0;
-      const cursor = collection.find().map(doc => {
-        count++;
-        return doc;
+    context('when there are documents are not retrieved in the first batch', function () {
+      it('allows combining iteration modes', async function () {
+        let count = 0;
+        cursor = collection.find({}, { batchSize: 1 }).map(doc => {
+          count++;
+          return doc;
+        });
+
+        await cursor.next();
+        for await (const _ of cursor) {
+          /* empty */
+        }
+
+        expect(count).to.equal(2);
       });
 
-      await cursor.next();
+      it('works with next + next() loop', async function () {
+        let count = 0;
+        cursor = collection.find({}, { batchSize: 1 }).map(doc => {
+          count++;
+          return doc;
+        });
 
-      let doc;
-      while ((doc = (await cursor.next()) && doc != null)) {
-        /** empty */
-      }
+        await cursor.next();
 
-      expect(count).to.equal(2);
+        let doc;
+        while ((doc = (await cursor.next()) && doc != null)) {
+          /** empty */
+        }
+
+        expect(count).to.equal(2);
+      });
     });
   });
 });
