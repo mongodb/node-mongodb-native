@@ -4,7 +4,7 @@ import { on, once } from 'events';
 import { gte, lt } from 'semver';
 import * as sinon from 'sinon';
 import { PassThrough } from 'stream';
-import { setTimeout } from 'timers';
+import { clearTimeout, setTimeout } from 'timers';
 
 import {
   type ChangeStream,
@@ -773,7 +773,50 @@ describe('Change Streams', function () {
     });
   });
 
-  describe('when close is called while changes are pending', function () {
+  describe.only('when close is called while changes are pending', function () {
+    let client;
+    let db;
+    let collection: Collection<{ insertCount: number }>;
+    let changeStream: ChangeStream<{ insertCount: number }>;
+    let insertInterval = undefined;
+    let insertCount = 0;
+
+    /** insertOne every 300ms without running the next insert before the previous one completes */
+    function setInsertInterval() {
+      // start an insert
+      //   if first one, create a timeout and refresh
+      //   if NOT first one, just refresh
+      collection?.insertOne({ insertCount: insertCount++ }).then(() => {
+        insertInterval ??= setTimeout(setInsertInterval, 300);
+        insertInterval.refresh();
+      });
+    }
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      await client.connect();
+      db = client.db('test');
+      collection = db.collection('test_close');
+      await collection.drop().catch(() => null);
+      changeStream = collection.watch();
+
+      insertCount = 0;
+      setInsertInterval();
+    });
+
+    afterEach(async function () {
+      clearTimeout(insertInterval);
+      await collection.drop().catch(() => null);
+      await client.close();
+
+      db = undefined;
+      client = undefined;
+      collection = undefined;
+      changeStream = undefined;
+      insertInterval = undefined;
+      insertCount = 0;
+    });
+
     it(
       'rejects promises already returned by next',
       { requires: { topology: 'replicaset' } },
@@ -789,6 +832,47 @@ describe('Change Streams', function () {
           const message = /ChangeStream is closed/i;
           expect(results).nested.property(`[${i}].reason`).to.match(message);
         }
+      }
+    );
+
+    it(
+      'rejects promises already returned by next after awaiting the first one',
+      { requires: { topology: 'replicaset' } },
+      async function () {
+        const changes = Array.from({ length: 20 }, () => changeStream.next());
+        await changes[0];
+        const allChanges = Promise.allSettled(changes);
+
+        await changeStream.close();
+
+        const results = await allChanges;
+
+        const statuses = results.map(({ status }) => status);
+        expect(statuses).to.deep.equal([
+          'fulfilled',
+          ...Array.from({ length: 19 }, () => 'rejected')
+        ]);
+      }
+    );
+
+    it(
+      'rejects promises already returned by next after awaiting half of them',
+      { requires: { topology: 'replicaset' } },
+      async function () {
+        const changes = Array.from({ length: 20 }, () => changeStream.next());
+        const allChanges = Promise.allSettled(changes);
+
+        await Promise.allSettled(changes.slice(10));
+
+        await changeStream.close();
+
+        const results = await allChanges;
+
+        const statuses = results.map(({ status }) => status);
+        expect(statuses).to.deep.equal([
+          ...Array.from({ length: 10 }, () => 'fulfilled'),
+          ...Array.from({ length: 10 }, () => 'rejected')
+        ]);
       }
     );
   });
