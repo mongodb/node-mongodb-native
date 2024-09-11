@@ -219,7 +219,7 @@ export abstract class AbstractCursor<
       if (options.timeoutMode != null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
-    this.cursorOptions.omitMaxTimeMS = 
+    this.cursorOptions.omitMaxTimeMS =
       this.cursorOptions.timeoutMS != null &&
       ((this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
         !this.cursorOptions.tailable) ||
@@ -431,9 +431,9 @@ export abstract class AbstractCursor<
       return false;
     }
 
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
-        this.timeoutContext?.refresh();
-      }
+    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      this.timeoutContext?.refresh();
+    }
     try {
       do {
         if ((this.documents?.length ?? 0) !== 0) {
@@ -455,9 +455,9 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
-        this.timeoutContext?.refresh();
-      }
+    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      this.timeoutContext?.refresh();
+    }
 
     try {
       do {
@@ -485,9 +485,9 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
-        this.timeoutContext?.refresh();
-      }
+    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      this.timeoutContext?.refresh();
+    }
     try {
       let doc = this.documents?.shift(this.cursorOptions);
       if (doc != null) {
