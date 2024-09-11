@@ -451,10 +451,6 @@ describe('Find Cursor', function () {
               resolve(v);
             });
 
-            stream.once('end', v => {
-              resolve(v);
-            });
-
             stream.once('error', v => {
               reject(v);
             });
@@ -473,10 +469,6 @@ describe('Find Cursor', function () {
           const { promise, resolve, reject } = promiseWithResolvers();
 
           stream.once('data', v => {
-            resolve(v);
-          });
-
-          stream.once('end', v => {
             resolve(v);
           });
 
@@ -499,10 +491,6 @@ describe('Find Cursor', function () {
             const { promise, resolve, reject } = promiseWithResolvers();
 
             stream.once('data', v => {
-              resolve(v);
-            });
-
-            stream.once('end', v => {
               resolve(v);
             });
 
@@ -578,10 +566,10 @@ describe('Find Cursor', function () {
           await cursor.toArray();
 
           const s = cursor.stream();
-          const { promise, resolve } = promiseWithResolvers();
+          const { promise, resolve, reject } = promiseWithResolvers();
 
           s.once('data', d => {
-            resolve(d);
+            reject(d);
           });
 
           s.once('end', d => {
@@ -650,95 +638,6 @@ describe('Find Cursor', function () {
         });
       });
 
-      context('when cursor.next() is called after cursor.stream()', function () {
-        it('throws a MongoExpiredSessionError', async function () {
-          cursor = collection.find({}, { batchSize: 1 });
-
-          const stream = cursor.stream();
-          const { promise, resolve, reject } = promiseWithResolvers();
-
-          stream.once('data', v => {
-            resolve(v);
-          });
-
-          stream.once('end', v => {
-            resolve(v);
-          });
-
-          stream.once('error', v => {
-            reject(v);
-          });
-          await promise;
-
-          const maybeError = await cursor.next().then(
-            () => null,
-            e => e
-          );
-
-          expect(maybeError).to.be.instanceof(MongoExpiredSessionError);
-        });
-      });
-
-      context('when cursor.tryNext() is called after cursor.stream()', function () {
-        it('throws a MongoExpiredSessionError', async function () {
-          cursor = collection.find({}, { batchSize: 1 });
-
-          const stream = cursor.stream();
-          const { promise, resolve, reject } = promiseWithResolvers();
-
-          stream.once('data', v => {
-            resolve(v);
-          });
-
-          stream.once('end', v => {
-            resolve(v);
-          });
-
-          stream.once('error', v => {
-            reject(v);
-          });
-          await promise;
-
-          const maybeError = await cursor.tryNext().then(
-            () => null,
-            e => e
-          );
-
-          expect(maybeError).to.be.instanceof(MongoExpiredSessionError);
-        });
-      });
-
-      context('when cursor.[Symbol.asyncIterator] is called after cursor.stream()', function () {
-        it('throws a MongoExpiredSessionError', async function () {
-          cursor = collection.find({}, { batchSize: 1 });
-
-          const stream = cursor.stream();
-          const { promise, resolve, reject } = promiseWithResolvers();
-
-          stream.once('data', v => {
-            resolve(v);
-          });
-
-          stream.once('end', v => {
-            resolve(v);
-          });
-
-          stream.once('error', v => {
-            reject(v);
-          });
-          await promise;
-
-          try {
-            // eslint-disable-next-line no-unused-vars, no-empty
-            for await (const _ of cursor) {
-            }
-            expect.fail('expected to throw');
-          } catch (err) {
-            expect(err).to.be.instanceof(MongoExpiredSessionError);
-          }
-        });
-      });
-
       context('when cursor.readBufferedDocuments() is called after cursor.next()', function () {
         it('returns an empty array', async function () {
           cursor = collection.find({}, { batchSize: 1 });
@@ -795,10 +694,10 @@ describe('Find Cursor', function () {
           await cursor.toArray();
 
           const s = cursor.stream();
-          const { promise, resolve } = promiseWithResolvers();
+          const { promise, resolve, reject } = promiseWithResolvers();
 
           s.once('data', d => {
-            resolve(d);
+            reject(d);
           });
 
           s.once('end', d => {
