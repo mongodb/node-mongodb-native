@@ -824,6 +824,7 @@ export abstract class AbstractCursor<
 
     // otherwise need to call getMore
     const batchSize = this.cursorOptions.batchSize || 1000;
+    // TODO: move calculation of omitMaxTimeMS to here
 
     try {
       const response = await this.getMore(batchSize);

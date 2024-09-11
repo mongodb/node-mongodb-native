@@ -678,7 +678,8 @@ export class Collection<TSchema extends Document = Document> {
       );
       return true;
     } catch (error) {
-      if (error instanceof MongoOperationTimeoutError) throw error;
+      if (error instanceof MongoOperationTimeoutError) throw error; // TODO: Check the spec for index management behaviour/file a drivers ticket for this
+      // Seems like we should throw all errors
       return false;
     }
   }
@@ -1131,8 +1132,8 @@ export class Collection<TSchema extends Document = Document> {
       indexNameOrOptions == null
         ? null
         : typeof indexNameOrOptions === 'object'
-        ? null
-        : indexNameOrOptions;
+          ? null
+          : indexNameOrOptions;
 
     return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, options);
   }
