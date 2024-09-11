@@ -773,115 +773,24 @@ describe('Change Streams', function () {
     });
   });
 
-  describe('should properly handle a changeStream event being processed mid-close', function () {
-    let client, coll, changeStream;
+  describe('when close is called while changes are pending', function () {
+    it(
+      'rejects promises already returned by next',
+      { requires: { topology: 'replicaset' } },
+      async function () {
+        const changes = Array.from({ length: 20 }, () => changeStream.next());
+        await changeStream.close();
+        const results = await Promise.allSettled(changes);
 
-    function write() {
-      return Promise.resolve()
-        .then(() => coll.insertOne({ a: 1 }))
-        .then(() => coll.insertOne({ b: 2 }));
-    }
-
-    function lastWrite() {
-      return coll.insertOne({ c: 3 });
-    }
-
-    beforeEach(function () {
-      client = this.configuration.newClient();
-      return client.connect().then(_client => {
-        client = _client;
-        coll = client.db(this.configuration.db).collection('tester');
-        changeStream = coll.watch();
-      });
-    });
-
-    afterEach(async function () {
-      await changeStream?.close();
-      await client?.close();
-      coll = undefined;
-      changeStream = undefined;
-      client = undefined;
-    });
-
-    it('when invoked with promises', {
-      metadata: { requires: { topology: 'replicaset' } },
-      test: function () {
-        const read = () => {
-          return Promise.resolve()
-            .then(() => changeStream.next())
-            .then(() => changeStream.next())
-            .then(() => {
-              this.defer(lastWrite());
-              const nextP = changeStream.next();
-              return changeStream.close().then(() => nextP);
-            });
-        };
-
-        return Promise.all([read(), write()]).then(
-          () => Promise.reject(new Error('Expected operation to fail with error')),
-          err => expect(err.message).to.equal('ChangeStream is closed')
-        );
-      }
-    });
-
-    it('when invoked with callbacks', {
-      metadata: { requires: { topology: 'replicaset' } },
-      test: function (done) {
-        const ops = [];
-        changeStream.next(() => {
-          changeStream.next(() => {
-            ops.push(lastWrite());
-
-            // explicitly close the change stream after the write has begun
-            ops.push(changeStream.close());
-
-            changeStream.next(err => {
-              try {
-                expect(err)
-                  .property('message')
-                  .to.match(/ChangeStream is closed/);
-                Promise.all(ops).then(() => done(), done);
-              } catch (e) {
-                done(e);
-              }
-            });
-          });
-        });
-
-        ops.push(
-          write().catch(() => {
-            // ignore
-          })
-        );
-      }
-    });
-
-    it.skip('when invoked using eventEmitter API', {
-      metadata: {
-        requires: { topology: 'replicaset' }
-      },
-      async test() {
-        const changes = on(changeStream, 'change');
-        await once(changeStream.cursor, 'init');
-
-        await write();
-        await lastWrite().catch(() => null);
-
-        let counter = 0;
-
-        for await (const _ of changes) {
-          counter += 1;
-          if (counter === 2) {
-            await changeStream.close();
-            break;
-          }
+        for (const i of changes.keys()) {
+          expect(results)
+            .to.have.nested.property(`[${i}].reason`)
+            .that.is.instanceOf(MongoAPIError);
+          const message = /ChangeStream is closed/i;
+          expect(results).nested.property(`[${i}].reason`).to.match(message);
         }
-
-        const result = await Promise.race([changes.next(), sleep(800).then(() => 42)]);
-        expect(result, 'should not have recieved a third event').to.equal(42);
       }
-    }).skipReason =
-      'This test only worked because of timing, changeStream.close does not remove the change listener';
+    );
   });
 
   describe('iterator api', function () {
