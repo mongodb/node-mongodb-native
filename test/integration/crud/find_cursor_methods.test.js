@@ -1,6 +1,11 @@
 'use strict';
 const { expect } = require('chai');
 const { filterForCommands } = require('../shared');
+const {
+  promiseWithResolvers,
+  MongoExpiredSessionError,
+  MongoCursorExhaustedError
+} = require('../../mongodb');
 
 describe('Find Cursor', function () {
   let client;
@@ -362,7 +367,7 @@ describe('Find Cursor', function () {
     });
   });
 
-  describe('next + Symbol.asyncIterator()', function () {
+  describe('mixing iteration APIs', function () {
     let client;
     let collection;
     let cursor;
@@ -413,9 +418,182 @@ describe('Find Cursor', function () {
 
         expect(count).to.equal(2);
       });
+
+      context('when next() is called in a loop after a single invocation', function () {
+        it('iterates over all documents', async function () {
+          let count = 0;
+          cursor = collection.find({}).map(doc => {
+            count++;
+            return doc;
+          });
+
+          await cursor.next();
+
+          let doc;
+          while ((doc = (await cursor.next()) && doc != null)) {
+            /** empty */
+          }
+
+          expect(count).to.equal(2);
+        });
+      });
+
+      context(
+        'when cursor.next() is called after cursor.stream() is partially iterated',
+        function () {
+          it('returns null', async function () {
+            cursor = collection.find({});
+
+            const stream = cursor.stream();
+            const { promise, resolve, reject } = promiseWithResolvers();
+
+            stream.once('data', v => {
+              resolve(v);
+            });
+
+            stream.once('end', v => {
+              resolve(v);
+            });
+
+            stream.once('error', v => {
+              reject(v);
+            });
+            await promise;
+
+            expect(await cursor.next()).to.be.null;
+          });
+        }
+      );
+
+      context('when cursor.tryNext() is called after cursor.stream()', function () {
+        it('returns null', async function () {
+          cursor = collection.find({});
+
+          const stream = cursor.stream();
+          const { promise, resolve, reject } = promiseWithResolvers();
+
+          stream.once('data', v => {
+            resolve(v);
+          });
+
+          stream.once('end', v => {
+            resolve(v);
+          });
+
+          stream.once('error', v => {
+            reject(v);
+          });
+          await promise;
+
+          expect(await cursor.tryNext()).to.be.null;
+        });
+      });
+
+      context(
+        'when cursor.[Symbol.asyncIterator] is called after cursor.stream() is partly iterated',
+        function () {
+          it('returns an empty iterator', async function () {
+            cursor = collection.find({});
+
+            const stream = cursor.stream();
+            const { promise, resolve, reject } = promiseWithResolvers();
+
+            stream.once('data', v => {
+              resolve(v);
+            });
+
+            stream.once('end', v => {
+              resolve(v);
+            });
+
+            stream.once('error', v => {
+              reject(v);
+            });
+            await promise;
+
+            let count = 0;
+            // eslint-disable-next-line no-unused-vars
+            for await (const _ of cursor) {
+              count++;
+            }
+
+            expect(count).to.equal(0);
+          });
+        }
+      );
+
+      context('when cursor.readBufferedDocuments() is called after cursor.next()', function () {
+        it('returns an array with remaining buffered documents', async function () {
+          cursor = collection.find({});
+
+          await cursor.next();
+          const docs = cursor.readBufferedDocuments();
+
+          expect(docs).to.have.lengthOf(1);
+        });
+      });
+
+      context('when cursor.next() is called after cursor.toArray()', function () {
+        it('returns null', async function () {
+          cursor = collection.find({});
+
+          await cursor.toArray();
+          expect(await cursor.next()).to.be.null;
+        });
+      });
+
+      context('when cursor.tryNext is called after cursor.toArray()', function () {
+        it('returns null', async function () {
+          cursor = collection.find({});
+
+          await cursor.toArray();
+          expect(await cursor.tryNext()).to.be.null;
+        });
+      });
+
+      context('when cursor.[Symbol.asyncIterator] is called after cursor.toArray()', function () {
+        it('should not iterate', async function () {
+          cursor = collection.find({});
+
+          await cursor.toArray();
+          // eslint-disable-next-line no-unused-vars
+          for await (const _ of cursor) {
+            expect.fail('should not iterate');
+          }
+        });
+      });
+
+      context('when cursor.readBufferedDocuments() is called after cursor.toArray()', function () {
+        it('return and empty array', async function () {
+          cursor = collection.find({});
+
+          await cursor.toArray();
+          expect(cursor.readBufferedDocuments()).to.have.lengthOf(0);
+        });
+      });
+
+      context('when cursor.stream() is called after cursor.toArray()', function () {
+        it('returns an empty stream', async function () {
+          cursor = collection.find({});
+          await cursor.toArray();
+
+          const s = cursor.stream();
+          const { promise, resolve } = promiseWithResolvers();
+
+          s.once('data', d => {
+            resolve(d);
+          });
+
+          s.once('end', d => {
+            resolve(d);
+          });
+
+          expect(await promise).to.be.undefined;
+        });
+      });
     });
 
-    context('when there are documents are not retrieved in the first batch', function () {
+    context('when there are documents that are not retrieved in the first batch', function () {
       it('allows combining next() and for await syntax', async function () {
         let count = 0;
         cursor = collection.find({}, { batchSize: 1 }).map(doc => {
@@ -432,39 +610,203 @@ describe('Find Cursor', function () {
         expect(count).to.equal(2);
       });
 
-      it('allows partial iteration with for await syntax and then calling .next()', async function () {
-        let count = 0;
-        cursor = collection.find({}, { batchSize: 2 }).map(doc => {
-          count++;
-          return doc;
-        });
+      context(
+        'when a cursor is partially iterated with for await and then .next() is called',
+        function () {
+          it('throws a MongoCursorExhaustedError', async function () {
+            cursor = collection.find({}, { batchSize: 1 });
 
-        for await (const doc of cursor) {
-          console.log(doc);
-          /* empty */
-          break;
+            // eslint-disable-next-line no-unused-vars
+            for await (const _ of cursor) {
+              /* empty */
+              break;
+            }
+
+            const maybeError = await cursor.next().then(
+              () => null,
+              e => e
+            );
+            expect(maybeError).to.be.instanceof(MongoCursorExhaustedError);
+          });
         }
+      );
 
-        await cursor.next();
+      context('when next() is called in a loop after a single invocation', function () {
+        it('iterates over all documents', async function () {
+          let count = 0;
+          cursor = collection.find({}, { batchSize: 1 }).map(doc => {
+            count++;
+            return doc;
+          });
 
-        expect(count).to.equal(2);
+          await cursor.next();
+
+          let doc;
+          while ((doc = (await cursor.next()) && doc != null)) {
+            /** empty */
+          }
+
+          expect(count).to.equal(2);
+        });
       });
 
-      it('works with next + next() loop', async function () {
-        let count = 0;
-        cursor = collection.find({}, { batchSize: 1 }).map(doc => {
-          count++;
-          return doc;
+      context('when cursor.next() is called after cursor.stream()', function () {
+        it('throws a MongoExpiredSessionError', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
+
+          const stream = cursor.stream();
+          const { promise, resolve, reject } = promiseWithResolvers();
+
+          stream.once('data', v => {
+            resolve(v);
+          });
+
+          stream.once('end', v => {
+            resolve(v);
+          });
+
+          stream.once('error', v => {
+            reject(v);
+          });
+          await promise;
+
+          const maybeError = await cursor.next().then(
+            () => null,
+            e => e
+          );
+
+          expect(maybeError).to.be.instanceof(MongoExpiredSessionError);
         });
+      });
 
-        await cursor.next();
+      context('when cursor.tryNext() is called after cursor.stream()', function () {
+        it('throws a MongoExpiredSessionError', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
 
-        let doc;
-        while ((doc = (await cursor.next()) && doc != null)) {
-          /** empty */
-        }
+          const stream = cursor.stream();
+          const { promise, resolve, reject } = promiseWithResolvers();
 
-        expect(count).to.equal(2);
+          stream.once('data', v => {
+            resolve(v);
+          });
+
+          stream.once('end', v => {
+            resolve(v);
+          });
+
+          stream.once('error', v => {
+            reject(v);
+          });
+          await promise;
+
+          const maybeError = await cursor.tryNext().then(
+            () => null,
+            e => e
+          );
+
+          expect(maybeError).to.be.instanceof(MongoExpiredSessionError);
+        });
+      });
+
+      context('when cursor.[Symbol.asyncIterator] is called after cursor.stream()', function () {
+        it('throws a MongoExpiredSessionError', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
+
+          const stream = cursor.stream();
+          const { promise, resolve, reject } = promiseWithResolvers();
+
+          stream.once('data', v => {
+            resolve(v);
+          });
+
+          stream.once('end', v => {
+            resolve(v);
+          });
+
+          stream.once('error', v => {
+            reject(v);
+          });
+          await promise;
+
+          try {
+            // eslint-disable-next-line no-unused-vars, no-empty
+            for await (const _ of cursor) {
+            }
+            expect.fail('expected to throw');
+          } catch (err) {
+            expect(err).to.be.instanceof(MongoExpiredSessionError);
+          }
+        });
+      });
+
+      context('when cursor.readBufferedDocuments() is called after cursor.next()', function () {
+        it('returns an empty array', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
+
+          await cursor.next();
+          const docs = cursor.readBufferedDocuments();
+
+          expect(docs).to.have.lengthOf(0);
+        });
+      });
+
+      context('when cursor.next() is called after cursor.toArray()', function () {
+        it('returns null', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
+
+          await cursor.toArray();
+          expect(await cursor.next()).to.be.null;
+        });
+      });
+
+      context('when cursor.tryNext is called after cursor.toArray()', function () {
+        it('returns null', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
+
+          await cursor.toArray();
+          expect(await cursor.tryNext()).to.be.null;
+        });
+      });
+
+      context('when cursor.[Symbol.asyncIterator] is called after cursor.toArray()', function () {
+        it('should not iterate', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
+
+          await cursor.toArray();
+          // eslint-disable-next-line no-unused-vars
+          for await (const _ of cursor) {
+            expect.fail('should not iterate');
+          }
+        });
+      });
+
+      context('when cursor.readBufferedDocuments() is called after cursor.toArray()', function () {
+        it('return and empty array', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
+
+          await cursor.toArray();
+          expect(cursor.readBufferedDocuments()).to.have.lengthOf(0);
+        });
+      });
+
+      context('when cursor.stream() is called after cursor.toArray()', function () {
+        it('returns an empty stream', async function () {
+          cursor = collection.find({}, { batchSize: 1 });
+          await cursor.toArray();
+
+          const s = cursor.stream();
+          const { promise, resolve } = promiseWithResolvers();
+
+          s.once('data', d => {
+            resolve(d);
+          });
+
+          s.once('end', d => {
+            resolve(d);
+          });
+
+          expect(await promise).to.be.undefined;
+        });
       });
     });
   });
