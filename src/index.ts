@@ -302,7 +302,11 @@ export type { ClientMetadata, ClientMetadataOptions } from './cmap/handshake/cli
 export type { ConnectionPoolMetrics } from './cmap/metrics';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
 export type { CompressorName } from './cmap/wire_protocol/compression';
-export type { JSTypeOf, OnDemandDocument } from './cmap/wire_protocol/on_demand/document';
+export type {
+  JSTypeOf,
+  OnDemandDocument,
+  OnDemandDocumentDeserializeOptions
+} from './cmap/wire_protocol/on_demand/document';
 export type {
   CursorResponse,
   MongoDBResponse,
