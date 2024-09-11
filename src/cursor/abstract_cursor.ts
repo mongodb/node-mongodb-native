@@ -412,7 +412,7 @@ export abstract class AbstractCursor<
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
   async next(): Promise<TSchema | null> {
-    if (this.cursorId === Long.ZERO) {
+    if (this.cursorId === Long.ZERO && (this.documents?.length ?? 0) === 0) {
       throw new MongoCursorExhaustedError();
     }
 
