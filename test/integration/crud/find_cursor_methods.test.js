@@ -416,7 +416,7 @@ describe('Find Cursor', function () {
     });
 
     context('when there are documents are not retrieved in the first batch', function () {
-      it('allows combining iteration modes', async function () {
+      it('allows combining next() and for await syntax', async function () {
         let count = 0;
         cursor = collection.find({}, { batchSize: 1 }).map(doc => {
           count++;
@@ -428,6 +428,24 @@ describe('Find Cursor', function () {
         for await (const _ of cursor) {
           /* empty */
         }
+
+        expect(count).to.equal(2);
+      });
+
+      it.only('allows partial iteration with for await syntax and then calling .next()', async function () {
+        let count = 0;
+        cursor = collection.find({}, { batchSize: 2 }).map(doc => {
+          count++;
+          return doc;
+        });
+
+        for await (const doc of cursor) {
+          console.log(doc);
+          /* empty */
+          break;
+        }
+
+        await cursor.next();
 
         expect(count).to.equal(2);
       });
