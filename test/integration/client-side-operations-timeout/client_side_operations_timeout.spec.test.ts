@@ -4,49 +4,55 @@ import * as semver from 'semver';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
-const enabled = [
-  'override-collection-timeoutMS',
-  'override-database-timeoutMS',
-  'override-operation-timeoutMS',
-  'retryability-legacy-timeouts',
-  'retryability-timeoutMS',
-  'sessions-override-operation-timeoutMS',
-  'sessions-override-timeoutMS',
-  'sessions-inherit-timeoutMS'
-];
+const skippedSpecs = {
+  bulkWrite: 'TODO(NODE-6274)',
+  'change-streams': 'TODO(NODE-6035)',
+  'convenient-transactions': 'TODO(NODE-5687)',
+  'deprecated-options': 'TODO(NODE-5689)',
+  'gridfs-advanced': 'TODO(NODE-6275)',
+  'gridfs-delete': 'TODO(NODE-6275)',
+  'gridfs-download': 'TODO(NODE-6275)',
+  'gridfs-find': 'TODO(NODE-6275)',
+  'gridfs-upload': 'TODO(NODE-6275)',
+  'tailable-awaitData': 'TODO(NODE-6035)',
+  'tailable-non-awaitData': 'TODO(NODE-6035)'
+};
 
-const cursorOperations = [
-  'aggregate',
-  'countDocuments',
-  'listIndexes',
-  'createChangeStream',
-  'listCollections',
-  'listCollectionNames'
-];
-
-const bulkWriteOperations = [
-  'timeoutMS applies to whole operation, not individual attempts - bulkWrite on collection',
-  'timeoutMS applies to whole operation, not individual attempts - insertMany on collection'
-];
+const skippedTests = {
+  'timeoutMS can be configured on a MongoClient - insertMany on collection': 'TODO(NODE-6274)',
+  'timeoutMS can be configured on a MongoClient - bulkWrite on collection': 'TODO(NODE-6274)',
+  'timeoutMS can be configured on a MongoClient - createChangeStream on client': 'TODO(NODE-6305)',
+  'timeoutMS applies to whole operation, not individual attempts - createChangeStream on client':
+    'TODO(NODE-6305)',
+  'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(NODE-6305)',
+  'Tailable cursor awaitData iteration timeoutMS is refreshed for getMore - failure':
+    'TODO(NODE-6305)',
+  'timeoutMS applies to whole operation, not individual attempts - insertMany on collection':
+    'TODO(NODE-6274)',
+  'timeoutMS applies to whole operation, not individual attempts - bulkWrite on collection':
+    'TODO(NODE-6274)',
+  'command is not sent if RTT is greater than timeoutMS': 'TODO(DRIVERS-2965)',
+  'Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure':
+    'TODO(DRIVERS-2965)',
+  'Non-tailable cursor lifetime remaining timeoutMS applied to getMore if timeoutMode is unset':
+    'TODO(DRIVERS-2965)',
+  'maxTimeMS value in the command is less than timeoutMS':
+    'TODO(DRIVERS-2970): see modified test in unified-csot-node-specs'
+};
 
 describe('CSOT spec tests', function () {
-  const specs = loadSpecTests(join('client-side-operations-timeout'));
+  const specs = loadSpecTests('client-side-operations-timeout');
   for (const spec of specs) {
     for (const test of spec.tests) {
-      // not one of the test suites listed in kickoff
-      if (!enabled.includes(spec.name)) {
-        test.skipReason = 'TODO(NODE-5684): Not working yet';
+      if (skippedSpecs[spec.name] != null) {
+        test.skipReason = skippedSpecs[spec.name];
       }
-
-      // Cursor operation
-      if (test.operations.find(operation => cursorOperations.includes(operation.name)))
-        test.skipReason = 'TODO(NODE-5684): Not working yet';
-
-      if (bulkWriteOperations.includes(test.description))
-        test.skipReason =
-          'TODO(NODE-6274): update test runner to check errorResponse field of MongoBulkWriteError in isTimeoutError assertion';
+      if (skippedTests[test.description] != null) {
+        test.skipReason = skippedTests[test.description];
+      }
     }
   }
+
   runUnifiedSuite(specs, (test, configuration) => {
     const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
     if (
@@ -58,4 +64,11 @@ describe('CSOT spec tests', function () {
     }
     return false;
   });
+});
+
+describe('CSOT modified spec tests', function () {
+  const specs = loadSpecTests(
+    join('..', 'integration', 'client-side-operations-timeout', 'unified-csot-node-specs')
+  );
+  runUnifiedSuite(specs);
 });

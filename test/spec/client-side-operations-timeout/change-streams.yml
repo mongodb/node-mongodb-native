@@ -67,12 +67,12 @@ tests:
             data:
               failCommands: ["aggregate"]
               blockConnection: true
-              blockTimeMS: 55
+              blockTimeMS: 250
       - name: createChangeStream
         object: *collection
         arguments:
           pipeline: []
-          timeoutMS: 50
+          timeoutMS: 200
         expectError:
           isTimeoutError: true
     expectEvents:
@@ -142,12 +142,12 @@ tests:
             data:
               failCommands: ["aggregate", "getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 150
       - name: createChangeStream
         object: *collection
         arguments:
           pipeline: []
-          timeoutMS: 20
+          timeoutMS: 200
           batchSize: 2
           maxAwaitTimeMS: 1
         saveResultAsEntity: &changeStream changeStream
@@ -171,16 +171,16 @@ tests:
                 maxTimeMS: 1
 
   # The timeout should be applied to the entire resume attempt, not individually to each command. The test creates a
-  # change stream with timeoutMS=20 which returns an empty initial batch and then sets a fail point to block both
-  # getMore and aggregate for 12ms each and fail with a resumable error. When the resume attempt happens, the getMore
-  # and aggregate block for longer than 20ms total, so it times out.
+  # change stream with timeoutMS=200 which returns an empty initial batch and then sets a fail point to block both
+  # getMore and aggregate for 120ms each and fail with a resumable error. When the resume attempt happens, the getMore
+  # and aggregate block for longer than 200ms total, so it times out.
   - description: "timeoutMS applies to full resume attempt in a next call"
     operations:
       - name: createChangeStream
         object: *collection
         arguments:
           pipeline: []
-          timeoutMS: 20
+          timeoutMS: 200
         saveResultAsEntity: &changeStream changeStream
       - name: failPoint
         object: testRunner
@@ -192,7 +192,7 @@ tests:
             data:
               failCommands: ["getMore", "aggregate"]
               blockConnection: true
-              blockTimeMS: 12
+              blockTimeMS: 120
               errorCode: 7 # HostNotFound - resumable but does not require an SDAM state change.
               # failCommand doesn't correctly add the ResumableChangeStreamError by default. It needs to be specified
               # manually here so the error is considered resumable. The failGetMoreAfterCursorCheckout fail point
@@ -234,9 +234,9 @@ tests:
           # Specify a short maxAwaitTimeMS because otherwise the getMore on the new cursor will wait for 1000ms and
           # time out.
           maxAwaitTimeMS: 1
-          timeoutMS: 100
+          timeoutMS: 200
         saveResultAsEntity: &changeStream changeStream
-      # Block getMore for 150ms to force the next() call to time out.
+      # Block getMore for 250ms to force the next() call to time out.
       - name: failPoint
         object: testRunner
         arguments:
@@ -247,7 +247,7 @@ tests:
             data:
               failCommands: ["getMore"]
               blockConnection: true
-              blockTimeMS: 150
+              blockTimeMS: 250
       # The original aggregate didn't return any events so this should do a getMore and return a timeout error.
       - name: iterateUntilDocumentOrError
         object: *changeStream
@@ -290,7 +290,7 @@ tests:
                 collection: *collectionName
 
   # The timeoutMS value should be refreshed for getMore's. This is a failure test. The createChangeStream operation
-  # sets timeoutMS=10 and the getMore blocks for 15ms, causing iteration to fail with a timeout error.
+  # sets timeoutMS=200 and the getMore blocks for 250ms, causing iteration to fail with a timeout error.
   - description: "timeoutMS is refreshed for getMore - failure"
     operations:
       - name: failPoint
@@ -303,12 +303,12 @@ tests:
             data:
               failCommands: ["getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 250
       - name: createChangeStream
         object: *collection
         arguments:
           pipeline: []
-          timeoutMS: 10
+          timeoutMS: 200
         saveResultAsEntity: &changeStream changeStream
       # The first iteration should do a getMore
       - name: iterateUntilDocumentOrError
