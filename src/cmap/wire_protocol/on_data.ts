@@ -93,7 +93,6 @@ export function onData(
 
   const timeoutForSocketRead = timeoutContext?.timeoutForSocketRead;
   timeoutForSocketRead?.throwIfExpired();
-  // eslint-disable-next-line github/no-then
   timeoutForSocketRead?.then(undefined, errorHandler);
 
   const timeoutForSocketRead = timeoutContext?.timeoutForSocketRead;
