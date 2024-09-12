@@ -215,7 +215,8 @@ operations.set('close', async ({ entities, operation }) => {
   /* eslint-disable no-empty */
   try {
     const cursor = entities.getEntity('cursor', operation.object);
-    await cursor.close();
+    const timeoutMS = operation.arguments?.timeoutMS;
+    await cursor.close({ timeoutMS });
     return;
   } catch {}
 
@@ -787,7 +788,9 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
   const { command, ...opts } = operation.arguments!;
   const cursor = db.runCursorCommand(command, {
     readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
-    session: opts.session
+    session: opts.session,
+    timeoutMode: opts.timeoutMode,
+    timeoutMS: opts.timeoutMS
   });
 
   if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);

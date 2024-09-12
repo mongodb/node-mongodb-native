@@ -17,6 +17,8 @@ export type RunCommandOptions = {
   readPreference?: ReadPreferenceLike;
   /** @internal */
   timeoutMS?: number;
+  /** @internal */
+  omitMaxTimeMS?: boolean;
 } & BSONSerializeOptions;
 
 /** @internal */
