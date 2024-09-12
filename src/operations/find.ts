@@ -1,5 +1,6 @@
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
@@ -64,6 +65,9 @@ export interface FindOptions<TSchema extends Document = Document>
    * @deprecated Starting from MongoDB 4.4 this flag is not needed and will be ignored.
    */
   oplogReplay?: boolean;
+
+  /** @internal*/
+  timeoutMode?: CursorTimeoutMode;
 }
 
 /** @internal */

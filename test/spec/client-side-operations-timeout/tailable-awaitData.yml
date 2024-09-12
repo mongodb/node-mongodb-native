@@ -12,7 +12,7 @@ createEntities:
   - client:
       id: &client client
       uriOptions:
-        timeoutMS: 10
+        timeoutMS: 200
       useMultipleMongoses: false
       observeEvents:
         - commandStartedEvent
@@ -83,7 +83,7 @@ tests:
             data:
               failCommands: ["find"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 300
       - name: find
         object: *collection
         arguments:
@@ -117,13 +117,13 @@ tests:
             data:
               failCommands: ["find", "getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 150
       - name: createFindCursor
         object: *collection
         arguments:
           filter: {}
           cursorType: tailableAwait
-          timeoutMS: 20
+          timeoutMS: 250
           batchSize: 1
         saveResultAsEntity: &tailableCursor tailableCursor
       # Iterate twice to force a getMore. The first iteration will return the document from the first batch and the
@@ -165,13 +165,13 @@ tests:
             data:
               failCommands: ["find", "getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 150
       - name: createFindCursor
         object: *collection
         arguments:
           filter: {}
           cursorType: tailableAwait
-          timeoutMS: 20
+          timeoutMS: 250
           batchSize: 1
           maxAwaitTimeMS: 1
         saveResultAsEntity: &tailableCursor tailableCursor
@@ -199,8 +199,8 @@ tests:
                 collection: *collectionName
                 maxTimeMS: 1
 
-  # The timeoutMS value should be refreshed for getMore's. This is a failure test. The find inherits timeoutMS=10 from
-  # the collection and the getMore blocks for 15ms, causing iteration to fail with a timeout error.
+  # The timeoutMS value should be refreshed for getMore's. This is a failure test. The find inherits timeoutMS=200 from
+  # the collection and the getMore blocks for 250ms, causing iteration to fail with a timeout error.
   - description: "timeoutMS is refreshed for getMore - failure"
     operations:
       - name: failPoint
@@ -213,7 +213,7 @@ tests:
             data:
               failCommands: ["getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 250
       - name: createFindCursor
         object: *collection
         arguments:

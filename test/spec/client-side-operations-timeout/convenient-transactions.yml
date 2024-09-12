@@ -13,7 +13,7 @@ createEntities:
   - client:
       id: &client client
       uriOptions:
-        timeoutMS: 50
+        timeoutMS: 500
       useMultipleMongoses: false
       observeEvents:
         - commandStartedEvent
@@ -49,6 +49,8 @@ tests:
                 timeoutMS: 100
               expectError:
                 isClientError: true
+        expectError:
+          isClientError: true
     expectEvents:
       # The only operation run fails with a client-side error, so there should be no events for the client.
       - client: *client
@@ -66,7 +68,7 @@ tests:
             data:
               failCommands: ["insert"]
               blockConnection: true
-              blockTimeMS: 30
+              blockTimeMS: 300
       - name: withTransaction
         object: *session
         arguments:
@@ -88,9 +90,6 @@ tests:
     expectEvents:
       - client: *client
         events:
-          # Because the second insert expects an error and gets an error, it technically succeeds, so withTransaction
-          # will try to run commitTransaction. This will fail client-side, though, because the timeout has already
-          # expired, so no command is sent.
           - commandStartedEvent:
               commandName: insert
               databaseName: *databaseName
@@ -103,3 +102,9 @@ tests:
               command:
                 insert: *collectionName
                 maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: abortTransaction
+              databaseName: admin
+              command:
+                abortTransaction: 1
+                maxTimeMS: { $$type: [ "int", "long" ] }

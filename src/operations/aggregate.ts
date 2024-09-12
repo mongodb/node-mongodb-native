@@ -1,5 +1,6 @@
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -36,6 +37,9 @@ export interface AggregateOptions extends CommandOperationOptions {
   let?: Document;
 
   out?: string;
+
+  /** @internal */
+  timeoutMode?: CursorTimeoutMode;
 }
 
 /** @internal */
