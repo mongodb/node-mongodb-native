@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { MongoAPIError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import { AggregateOperation, type AggregateOptions } from '../operations/aggregate';
@@ -9,6 +10,7 @@ import { mergeOptions, type MongoDBNamespace } from '../utils';
 import {
   AbstractCursor,
   type AbstractCursorOptions,
+  CursorTimeoutMode,
   type InitialCursorResponse
 } from './abstract_cursor';
 
@@ -38,6 +40,15 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
     this.pipeline = pipeline;
     this.aggregateOptions = options;
+
+    const lastStage: Document | undefined = this.pipeline[this.pipeline.length - 1];
+
+    if (
+      this.cursorOptions.timeoutMS != null &&
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+      (lastStage?.$merge != null || lastStage?.$out != null)
+    )
+      throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
   }
 
   clone(): AggregationCursor<TSchema> {
@@ -60,7 +71,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
       session
     });
 
-    const response = await executeOperation(this.client, aggregateOperation);
+    const response = await executeOperation(this.client, aggregateOperation, this.timeoutContext);
 
     return { server: aggregateOperation.server, session, response };
   }
@@ -95,6 +106,13 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   addStage<T = Document>(stage: Document): AggregationCursor<T>;
   addStage<T = Document>(stage: Document): AggregationCursor<T> {
     this.throwIfInitialized();
+    if (
+      this.cursorOptions.timeoutMS != null &&
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+      (stage.$out != null || stage.$merge != null)
+    ) {
+      throw new MongoAPIError('Cannot use $out or $merge stage with ITERATION timeoutMode');
+    }
     this.pipeline.push(stage);
     return this as unknown as AggregationCursor<T>;
   }
