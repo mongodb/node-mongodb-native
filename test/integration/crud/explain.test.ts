@@ -140,89 +140,162 @@ describe('CRUD API explain option', function () {
       await client.close();
     });
 
-    describe('cursor explain commands', function () {
-      describe('when maxTimeMS is specified via a cursor explain method, it sets the property on the command', function () {
-        test('find()', async function () {
-          await collection
-            .find({ name: 'john doe' })
-            .explain({ maxTimeMS: 2000, verbosity: 'queryPlanner' });
+    describe('maxTimeMS provided to explain, not to command', function () {
+      describe('cursor commands', function () {
+        describe('options API', function () {
+          beforeEach(async function () {
+            await collection
+              .find({}, { explain: { maxTimeMS: 1000, verbosity: 'queryPlanner' } })
+              .toArray();
+          });
 
-          const [{ command }] = commands;
-          expect(command).to.have.property('maxTimeMS', 2000);
+          it('attaches maxTimeMS to the explain command', expectOnExplain(1000));
+
+          it('does not attach maxTimeMS to the find command', expectNotOnCommand());
         });
 
-        test('aggregate()', async function () {
-          await collection
-            .aggregate([{ $match: { name: 'john doe' } }])
-            .explain({ maxTimeMS: 2000, verbosity: 'queryPlanner' });
+        describe('fluent API', function () {
+          beforeEach(async function () {
+            await collection.find({}).explain({ maxTimeMS: 1000, verbosity: 'queryPlanner' });
+          });
 
-          const [{ command }] = commands;
-          expect(command).to.have.property('maxTimeMS', 2000);
+          it('attaches maxTimeMS to the explain command', expectOnExplain(1000));
+
+          it('does not attach maxTimeMS to the find command', expectNotOnCommand());
         });
       });
 
-      it('when maxTimeMS is not specified, it is not attached to the explain command', async function () {
-        await collection.find({ name: 'john doe' }).explain({ verbosity: 'queryPlanner' });
-
-        const [{ command }] = commands;
-        expect(command).not.to.have.property('maxTimeMS');
-      });
-
-      it('when maxTimeMS is specified as an explain option and a command-level option, the explain option takes precedence', async function () {
-        await collection
-          .find(
-            {},
-            {
-              maxTimeMS: 1000,
-              explain: {
-                verbosity: 'queryPlanner',
-                maxTimeMS: 2000
-              }
-            }
-          )
-          .toArray();
-
-        const [{ command }] = commands;
-        expect(command).to.have.property('maxTimeMS', 2000);
-      });
-    });
-
-    describe('regular commands w/ explain', function () {
-      it('when maxTimeMS is specified as an explain option and a command-level option, the explain option takes precedence', async function () {
-        await collection.deleteMany(
-          {},
-          {
-            maxTimeMS: 1000,
-            explain: {
-              verbosity: 'queryPlanner',
-              maxTimeMS: 2000
-            }
-          }
-        );
-
-        const [{ command }] = commands;
-        expect(command).to.have.property('maxTimeMS', 2000);
-      });
-
-      describe('when maxTimeMS is specified as an explain option', function () {
-        it('attaches maxTimeMS to the explain command', async function () {
+      describe('non-cursor commands', function () {
+        beforeEach(async function () {
           await collection.deleteMany(
             {},
-            { explain: { maxTimeMS: 2000, verbosity: 'queryPlanner' } }
+            { explain: { maxTimeMS: 1000, verbosity: 'queryPlanner' } }
           );
+        });
 
-          const [{ command }] = commands;
-          expect(command).to.have.property('maxTimeMS', 2000);
+        it('attaches maxTimeMS to the explain command', expectOnExplain(1000));
+
+        it('does not attach maxTimeMS to the explained command', expectNotOnCommand());
+      });
+    });
+
+    describe('maxTimeMS provided to command, not explain', function () {
+      describe('cursor commands', function () {
+        describe('options API', function () {
+          beforeEach(async function () {
+            await collection
+              .find({}, { maxTimeMS: 1000, explain: { verbosity: 'queryPlanner' } })
+              .toArray();
+          });
+
+          it('does not attach maxTimeMS to the explain command', expectNotOnExplain());
+
+          it('attaches maxTimeMS to the find command', expectOnCommand(1000));
+        });
+
+        describe('fluent API', function () {
+          beforeEach(async function () {
+            await collection.find({}, { maxTimeMS: 1000 }).explain({ verbosity: 'queryPlanner' });
+          });
+
+          it('does not attach maxTimeMS to the explain command', expectNotOnExplain());
+
+          it('attaches maxTimeMS to the find command', expectOnCommand(1000));
         });
       });
 
-      it('when maxTimeMS is not specified, it is not attached to the explain command', async function () {
-        await collection.deleteMany({}, { explain: { verbosity: 'queryPlanner' } });
+      describe('non-cursor commands', function () {
+        beforeEach(async function () {
+          await collection.deleteMany(
+            {},
+            { maxTimeMS: 1000, explain: { verbosity: 'queryPlanner' } }
+          );
+        });
 
-        const [{ command }] = commands;
-        expect(command).not.to.have.property('maxTimeMS');
+        it('does nto attach maxTimeMS to the explain command', expectNotOnExplain());
+
+        it('attaches maxTimeMS to the explained command', expectOnCommand(1000));
       });
     });
+
+    describe('maxTimeMS specified in command options and explain options', function () {
+      describe('cursor commands', function () {
+        describe('options API', function () {
+          beforeEach(async function () {
+            await collection
+              .find(
+                {},
+                { maxTimeMS: 1000, explain: { maxTimeMS: 2000, verbosity: 'queryPlanner' } }
+              )
+              .toArray();
+          });
+
+          it('attaches maxTimeMS from the explain options to explain', expectOnExplain(2000));
+
+          it('attaches maxTimeMS from the find options to the find command', expectOnCommand(1000));
+        });
+
+        describe('fluent API', function () {
+          beforeEach(async function () {
+            await collection
+              .find({}, { maxTimeMS: 1000 })
+              .explain({ maxTimeMS: 2000, verbosity: 'queryPlanner' });
+          });
+
+          it('attaches maxTimeMS from the explain options to explain', expectOnExplain(2000));
+
+          it('attaches maxTimeMS from the find options to the find command', expectOnCommand(1000));
+        });
+      });
+
+      describe('non-cursor commands', function () {
+        beforeEach(async function () {
+          await collection.deleteMany(
+            {},
+            { maxTimeMS: 1000, explain: { maxTimeMS: 2000, verbosity: 'queryPlanner' } }
+          );
+        });
+
+        it('attaches maxTimeMS to the explain command', expectOnExplain(2000));
+
+        it('attaches maxTimeMS to the explained command', expectOnCommand(1000));
+      });
+    });
+
+    function expectOnExplain(value: number) {
+      return function () {
+        const [{ command }] = commands;
+        expect(command).to.have.property('maxTimeMS', value);
+      };
+    }
+
+    function expectNotOnExplain() {
+      return function () {
+        const [{ command }] = commands;
+        expect(command).not.to.have.property('maxTimeMS');
+      };
+    }
+
+    function expectOnCommand(value: number) {
+      return function () {
+        const [
+          {
+            command: { explain }
+          }
+        ] = commands;
+        expect(explain).to.have.property('maxTimeMS', value);
+      };
+    }
+    function expectNotOnCommand() {
+      return function () {
+        const [
+          {
+            command: { explain }
+          }
+        ] = commands;
+        expect(explain).not.to.have.property('maxTimeMS');
+      };
+    }
   });
 });
 
