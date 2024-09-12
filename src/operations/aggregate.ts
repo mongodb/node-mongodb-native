@@ -1,5 +1,6 @@
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import { type ExplainOptions } from '../explain';
 import type { Server } from '../sdam/server';
@@ -44,6 +45,8 @@ export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain
    * or `db.aggregate().explain()`.
    */
   explain?: ExplainOptions['explain'];
+  /** @internal */
+  timeoutMode?: CursorTimeoutMode;
 }
 
 /** @internal */

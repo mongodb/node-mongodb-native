@@ -41,7 +41,7 @@ export class Timeout extends Promise<never> {
   public readonly start: number;
   public ended: number | null = null;
   public duration: number;
-  public timedOut = false;
+  private timedOut = false;
   public cleared = false;
 
   get remainingTime(): number {
@@ -100,6 +100,7 @@ export class Timeout extends Promise<never> {
   clear(): void {
     clearTimeout(this.id);
     this.id = undefined;
+    this.timedOut = false;
     this.cleared = true;
   }
 
@@ -190,6 +191,10 @@ export abstract class TimeoutContext {
   abstract get timeoutForSocketRead(): Timeout | null;
 
   abstract csotEnabled(): this is CSOTTimeoutContext;
+
+  abstract refresh(): void;
+
+  abstract clear(): void;
 }
 
 /** @internal */
@@ -288,6 +293,18 @@ export class CSOTTimeoutContext extends TimeoutContext {
     if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
     return Timeout.reject(new MongoOperationTimeoutError('Timed out before socket read'));
   }
+
+  refresh(): void {
+    this.start = Math.trunc(performance.now());
+    this.minRoundTripTime = 0;
+    this._serverSelectionTimeout?.clear();
+    this._connectionCheckoutTimeout?.clear();
+  }
+
+  clear(): void {
+    this._serverSelectionTimeout?.clear();
+    this._connectionCheckoutTimeout?.clear();
+  }
 }
 
 /** @internal */
@@ -325,5 +342,13 @@ export class LegacyTimeoutContext extends TimeoutContext {
 
   get timeoutForSocketRead(): Timeout | null {
     return null;
+  }
+
+  refresh(): void {
+    return;
+  }
+
+  clear(): void {
+    return;
   }
 }

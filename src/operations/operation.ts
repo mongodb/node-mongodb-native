@@ -32,6 +32,9 @@ export interface OperationOptions extends BSONSerializeOptions {
   bypassPinningCheck?: boolean;
   omitReadPreference?: boolean;
 
+  /** @internal Hint to `executeOperation` to omit maxTimeMS */
+  omitMaxTimeMS?: boolean;
+
   /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }

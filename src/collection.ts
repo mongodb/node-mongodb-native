@@ -11,7 +11,7 @@ import {
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
-import { MongoInvalidArgumentError } from './error';
+import { MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Filter,
@@ -678,7 +678,9 @@ export class Collection<TSchema extends Document = Document> {
         new DropIndexOperation(this as TODO_NODE_3286, '*', resolveOptions(this, options))
       );
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof MongoOperationTimeoutError) throw error; // TODO: Check the spec for index management behaviour/file a drivers ticket for this
+      // Seems like we should throw all errors
       return false;
     }
   }
