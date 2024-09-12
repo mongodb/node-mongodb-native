@@ -576,11 +576,6 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe.skip('Tailable non-awaitData cursors').skipReason =
-    'TODO(NODE-6305): implement CSOT for Tailable cursors';
-  describe.skip('Tailable awaitData cursors').skipReason =
-    'TODO(NODE-6305): implement CSOT for Tailable cursors';
-
   describe('when using an explicit session', () => {
     const metadata: MongoDBMetadataUI = {
       requires: { topology: ['replicaset'], mongodb: '>=4.4' }
