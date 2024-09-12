@@ -310,7 +310,7 @@ export class MongoAPIError extends MongoDriverError {
 
 /**
  * An error generated when the driver encounters unexpected input
- * or reaches an unexpected/invalid internal state
+ * or reaches an unexpected/invalid internal state.
  *
  * @privateRemarks
  * Should **never** be directly instantiated.
@@ -792,9 +792,24 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
 }
 
 /**
- * @internal
+ * @public
+ * @category Error
+ *
+ * This error is thrown when an operation could not be completed within the specified `timeoutMS`.
+ * TODO(NODE-5688): expand this documentation.
+ *
+ * @example
+ * ```ts
+ * try {
+ *   await blogs.insertOne(blogPost, { timeoutMS: 60_000 })
+ * } catch (error) {
+ *   if (error instanceof MongoOperationTimeoutError) {
+ *     console.log(`Oh no! writer's block!`, error);
+ *   }
+ * }
+ * ```
  */
-export class MongoOperationTimeoutError extends MongoRuntimeError {
+export class MongoOperationTimeoutError extends MongoDriverError {
   override get name(): string {
     return 'MongoOperationTimeoutError';
   }
