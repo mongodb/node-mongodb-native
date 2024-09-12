@@ -50,7 +50,6 @@ export interface OpQueryOptions extends CommandOptions {
   secondaryOk?: boolean;
 
   requestId?: number;
-  moreToCome?: boolean;
   exhaustAllowed?: boolean;
 }
 
@@ -412,7 +411,6 @@ export interface OpMsgOptions {
   ignoreUndefined: boolean;
   checkKeys: boolean;
   maxBsonSize: number;
-  moreToCome: boolean;
   exhaustAllowed: boolean;
   readPreference: ReadPreference;
 }
@@ -465,7 +463,7 @@ export class OpMsgRequest {
 
     // flags
     this.checksumPresent = false;
-    this.moreToCome = options.moreToCome || command.writeConcern?.w === 0 || false;
+    this.moreToCome = command.writeConcern?.w === 0 || false;
     this.exhaustAllowed =
       typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
