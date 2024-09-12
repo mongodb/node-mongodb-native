@@ -288,8 +288,7 @@ async function tryOperation<
       previousOperationError = operationError;
 
       // Reset timeouts
-      timeoutContext.serverSelectionTimeout?.clear();
-      timeoutContext.connectionCheckoutTimeout?.clear();
+      timeoutContext.clear();
     }
   }
 

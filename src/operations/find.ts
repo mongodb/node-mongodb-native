@@ -1,5 +1,6 @@
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import { type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
@@ -71,6 +72,8 @@ export interface FindOptions<TSchema extends Document = Document>
    * @deprecated This API is deprecated in favor of `collection.find().explain()`.
    */
   explain?: ExplainOptions['explain'];
+  /** @internal*/
+  timeoutMode?: CursorTimeoutMode;
 }
 
 /** @internal */
