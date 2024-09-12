@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { once } from 'events';
-import { test } from 'mocha';
 
 import {
   type Collection,
