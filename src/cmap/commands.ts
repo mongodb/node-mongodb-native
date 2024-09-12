@@ -73,6 +73,8 @@ export class OpQueryRequest {
   awaitData: boolean;
   exhaust: boolean;
   partial: boolean;
+  /** moreToCome is an OP_MSG only concept */
+  moreToCome = false;
 
   constructor(
     public databaseName: string,

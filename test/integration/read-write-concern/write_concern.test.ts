@@ -136,6 +136,7 @@ describe('Write Concern', function () {
 
           const listIndexesResult = col.listIndexes({ batchSize: 2 });
           const err = await listIndexesResult.toArray().catch(e => e);
+
           expect(err).to.not.be.instanceOf(Error);
         });
 

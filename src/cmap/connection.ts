@@ -439,7 +439,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         zlibCompressionLevel: this.description.zlibCompressionLevel
       });
 
-      if (options.noResponse || ('moreToCome' in message && message.moreToCome)) {
+      if (options.noResponse || message.moreToCome) {
         yield MongoDBResponse.empty;
         return;
       }
@@ -529,7 +529,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
               message,
               options.noResponse
                 ? undefined
-                : 'moreToCome' in message && message.moreToCome
+                : message.moreToCome
                   ? { ok: 1 }
                   : (object ??= document.toObject(bsonOptions)),
               started,
