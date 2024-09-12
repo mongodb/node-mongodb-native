@@ -309,7 +309,7 @@ export abstract class AbstractCursor<
     return bufferedDocs;
   }
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
-    if (this.isClosed) {
+    if (this.closed) {
       return;
     }
 
