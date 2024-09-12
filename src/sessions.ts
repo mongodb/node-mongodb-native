@@ -509,8 +509,8 @@ export class ClientSession
       typeof options?.timeoutMS === 'number'
         ? options.timeoutMS
         : typeof this.timeoutMS === 'number'
-        ? this.timeoutMS
-        : null;
+          ? this.timeoutMS
+          : null;
 
     const timeoutContext =
       this.timeoutContext ??
@@ -620,10 +620,10 @@ export class ClientSession
       typeof options?.timeoutMS === 'number'
         ? options.timeoutMS
         : this.timeoutContext?.csotEnabled()
-        ? this.timeoutContext.timeoutMS // refresh timeoutMS for abort operation
-        : typeof this.timeoutMS === 'number'
-        ? this.timeoutMS
-        : null;
+          ? this.timeoutContext.timeoutMS // refresh timeoutMS for abort operation
+          : typeof this.timeoutMS === 'number'
+            ? this.timeoutMS
+            : null;
 
     const timeoutContext =
       timeoutMS != null
