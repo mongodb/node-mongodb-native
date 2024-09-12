@@ -325,7 +325,7 @@ export abstract class AbstractCursor<
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
-    if (this.isClosed) {
+    if (this.closed) {
       return;
     }
 
