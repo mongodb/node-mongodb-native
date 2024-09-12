@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.8.2](https://github.com/mongodb/node-mongodb-native/compare/v6.8.1...v6.8.2) (2024-09-12)
+
+
+### Bug Fixes
+
+* **NODE-6367:** enable mixed use of iteration APIs ([#4234](https://github.com/mongodb/node-mongodb-native/issues/4234)) ([d63bf6f](https://github.com/mongodb/node-mongodb-native/commit/d63bf6fae303ec921335c363865e86c912286d6c))
+
 ## [6.8.1](https://github.com/mongodb/node-mongodb-native/compare/v6.8.0...v6.8.1) (2024-09-06)
 
 
