@@ -260,12 +260,6 @@ export function decorateWithExplain(
   maxTimeMS?: number;
 } {
   type ExplainCommand = ReturnType<typeof decorateWithExplain>;
-  const isExplainCommand = (doc: Document): doc is ExplainCommand => 'explain' in command;
-
-  if (isExplainCommand(command)) {
-    return command;
-  }
-
   const { verbosity, maxTimeMS } = explain;
   const baseCommand: ExplainCommand = { explain: command, verbosity };
 

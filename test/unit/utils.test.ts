@@ -1007,11 +1007,11 @@ describe('driver utils', function () {
   });
 
   describe('decorateWithExplain()', function () {
-    it('when the command is a valid explain command, the command is returned unmodified', function () {
-      const command = Object.freeze({ explain: { hello: 'world' } });
+    it('when the command is a valid explain command, the command is still wrapped', function () {
+      const command = { explain: { hello: 'world' } };
       const result = decorateWithExplain(command, Explain.fromOptions({ explain: true }));
 
-      expect(result).to.deep.equal(command);
+      expect(result).to.deep.equal({ explain: command, verbosity: 'allPlansExecution' });
     });
 
     it('when the options have a maxTimeMS, it is attached to the explain command', function () {
