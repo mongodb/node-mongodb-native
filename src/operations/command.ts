@@ -55,6 +55,7 @@ export interface CommandOperationOptions
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
+  /** @deprecated Will be removed in the next major version. Set writeConcern.w to 0 instead. */
   noResponse?: boolean;
 }
 
