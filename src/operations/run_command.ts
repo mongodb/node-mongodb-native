@@ -51,7 +51,6 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
   constructor(
     public command: Document,
     public override options: RunCommandOptions & {
-      /** @deprecated Will be removed in the next major version, and replaced with an option to set writeConcern.w to 0 */
       noResponse?: boolean;
       bypassPinningCheck?: boolean;
     }
