@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { test } from 'mocha';
 
 import {
   BufferPool,
@@ -1008,14 +1007,14 @@ describe('driver utils', function () {
   });
 
   describe('decorateWithExplain()', function () {
-    test('when the command is a valid explain command, the command is returned unmodified', function () {
+    it('when the command is a valid explain command, the command is returned unmodified', function () {
       const command = Object.freeze({ explain: { hello: 'world' } });
       const result = decorateWithExplain(command, Explain.fromOptions({ explain: true }));
 
       expect(result).to.deep.equal(command);
     });
 
-    test('when the options have a maxTimeMS, it is attached to the explain command', function () {
+    it('when the options have a maxTimeMS, it is attached to the explain command', function () {
       const command = { ping: 1 };
       const result = decorateWithExplain(
         command,
@@ -1030,7 +1029,7 @@ describe('driver utils', function () {
       });
     });
 
-    test('when the options have do not have a maxTimeMS, it is not attached to the explain command', function () {
+    it('when the options have do not have a maxTimeMS, it is not attached to the explain command', function () {
       const command = { ping: 1 };
       const result = decorateWithExplain(
         command,
