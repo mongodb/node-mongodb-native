@@ -171,7 +171,7 @@ describe('CRUD Prose Spec Tests', () => {
       await client.close();
     });
 
-    it('sets maxTimeMS on explain commands, when specfied', async function () {
+    it('sets maxTimeMS on explain commands, when specified', async function () {
       await collection
         .find(
           { name: 'john doe' },
