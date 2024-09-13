@@ -46,8 +46,8 @@ export interface ExplainCommandOptions {
  *
  * ```typescript
  * // limits the `explain` command to no more than 2 seconds
- * collection.find({ name: 'john doe' }, { explain:
- *  {
+ * collection.find({ name: 'john doe' }, {
+ *   explain:  {
  *    verbosity: 'queryPlanner',
  *    maxTimeMS: 2000
  *  }
