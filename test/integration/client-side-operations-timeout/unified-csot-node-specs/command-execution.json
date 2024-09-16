@@ -140,7 +140,7 @@
                 "command": {
                   "insert": "timeoutColl",
                   "maxTimeMS": {
-                    "$$lte": 500
+                    "$$lte": 450
                   }
                 }
               }

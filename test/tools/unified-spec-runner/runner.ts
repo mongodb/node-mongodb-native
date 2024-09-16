@@ -2,8 +2,8 @@
 import { AssertionError, expect } from 'chai';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
+import type { MongoClient } from '../../mongodb';
 import {
-  type MongoClient,
   MONGODB_ERROR_CODES,
   MongoParseError,
   MongoServerError,

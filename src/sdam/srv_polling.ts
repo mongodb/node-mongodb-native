@@ -95,6 +95,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
 
     this._timeout = setTimeout(() => {
+      // eslint-disable-next-line github/no-then
       this._poll().then(undefined, squashError);
     }, this.intervalMS);
   }
@@ -116,7 +117,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
 
     try {
       srvRecords = await dns.promises.resolveSrv(this.srvAddress);
-    } catch {
+    } catch (dnsError) {
       this.failure();
       return;
     }

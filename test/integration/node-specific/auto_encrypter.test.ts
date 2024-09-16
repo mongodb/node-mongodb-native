@@ -10,14 +10,8 @@ import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypte
 import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import {
-  BSON,
-  deserialize,
-  type MongoClient,
-  MongoError,
-  MongoNetworkTimeoutError,
-  serialize
-} from '../../mongodb';
+import { BSON, deserialize, serialize } from '../../mongodb';
+import { type MongoClient, MongoError, MongoNetworkTimeoutError } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const { EJSON } = BSON;

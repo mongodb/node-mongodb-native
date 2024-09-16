@@ -16,7 +16,7 @@
               "b:27017"
             ],
             "minWireVersion": 0,
-            "maxWireVersion": 21
+            "maxWireVersion": 6
           }
         ],
         [
@@ -30,9 +30,7 @@
             "hosts": [
               "a:27017",
               "b:27017"
-            ],
-            "minWireVersion": 999,
-            "maxWireVersion": 1000
+            ]
           }
         ]
       ],

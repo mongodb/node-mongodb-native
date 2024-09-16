@@ -42,7 +42,7 @@ export class IDMSMockServerFilter extends Filter {
     try {
       await isMockServerSetup();
       this.isRunning = true;
-    } catch {
+    } catch (error) {
       this.isRunning = false;
     }
   }

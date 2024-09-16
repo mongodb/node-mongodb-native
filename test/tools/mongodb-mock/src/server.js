@@ -108,7 +108,7 @@ class MockServer extends EventEmitter {
           // this is when the driver closes connections
           // change false to true to start printing the logs,
           // keep CI logs clear for test reporting
-          console.warn('connection error: ', e);
+          false && console.warn('connection error: ', e);
         });
 
         c.on(

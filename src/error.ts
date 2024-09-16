@@ -124,9 +124,6 @@ function isAggregateError(e: unknown): e is Error & { errors: Error[] } {
  * mongodb-client-encryption has a dependency on this error, it uses the constructor with a string argument
  */
 export class MongoError extends Error {
-  get [Symbol.toStringTag]() {
-    return this.name;
-  }
   /** @internal */
   [kErrorLabels]: Set<string>;
   /**
@@ -310,7 +307,7 @@ export class MongoAPIError extends MongoDriverError {
 
 /**
  * An error generated when the driver encounters unexpected input
- * or reaches an unexpected/invalid internal state.
+ * or reaches an unexpected/invalid internal state
  *
  * @privateRemarks
  * Should **never** be directly instantiated.
@@ -765,24 +762,9 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
 }
 
 /**
- * @public
- * @category Error
- *
- * This error is thrown when an operation could not be completed within the specified `timeoutMS`.
- * TODO(NODE-5688): expand this documentation.
- *
- * @example
- * ```ts
- * try {
- *   await blogs.insertOne(blogPost, { timeoutMS: 60_000 })
- * } catch (error) {
- *   if (error instanceof MongoOperationTimeoutError) {
- *     console.log(`Oh no! writer's block!`, error);
- *   }
- * }
- * ```
+ * @internal
  */
-export class MongoOperationTimeoutError extends MongoDriverError {
+export class MongoOperationTimeoutError extends MongoRuntimeError {
   override get name(): string {
     return 'MongoOperationTimeoutError';
   }
@@ -1282,8 +1264,9 @@ export function needsRetryableWriteLabel(
       // use original top-level code from server response
       return RETRYABLE_WRITE_ERROR_CODES.has(error.result.code ?? 0);
     }
-    const code = error.result.writeConcernError.code ?? Number(error.code);
-    return RETRYABLE_WRITE_ERROR_CODES.has(Number.isNaN(code) ? 0 : code);
+    return RETRYABLE_WRITE_ERROR_CODES.has(
+      error.result.writeConcernError.code ?? Number(error.code) ?? 0
+    );
   }
 
   if (error instanceof MongoError) {

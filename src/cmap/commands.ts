@@ -75,11 +75,7 @@ export class OpQueryRequest {
   exhaust: boolean;
   partial: boolean;
 
-  constructor(
-    public databaseName: string,
-    public query: Document,
-    options: OpQueryOptions
-  ) {
+  constructor(public databaseName: string, public query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     // TODO(NODE-3483): Replace with MongoCommandError
     const ns = `${databaseName}.$cmd`;

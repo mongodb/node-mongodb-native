@@ -57,7 +57,7 @@ import {
 } from './unified-utils';
 
 export interface UnifiedChangeStream extends ChangeStream {
-  eventCollector: InstanceType<(typeof import('../../tools/utils'))['EventCollector']>;
+  eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
 }
 
 export class UnifiedThread {
@@ -618,10 +618,6 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const client = map.getEntity('client', entity.session.client);
 
         const options = Object.create(null);
-
-        if (entity.session.sessionOptions?.defaultTimeoutMS != null) {
-          options.defaultTimeoutMS = entity.session.sessionOptions?.defaultTimeoutMS;
-        }
 
         if (entity.session.sessionOptions?.causalConsistency) {
           options.causalConsistency = entity.session.sessionOptions?.causalConsistency;

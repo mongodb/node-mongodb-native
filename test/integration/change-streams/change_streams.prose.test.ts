@@ -527,7 +527,7 @@ describe('Change Stream prose tests', function () {
               try {
                 // @ts-expect-error: e.reply is unknown
                 return e.reply.cursor;
-              } catch {
+              } catch (e) {
                 return {};
               }
             });
@@ -577,7 +577,7 @@ describe('Change Stream prose tests', function () {
               try {
                 // @ts-expect-error: e.reply is unknown
                 return e.reply.cursor;
-              } catch {
+              } catch (e) {
                 return {};
               }
             });
@@ -701,7 +701,7 @@ describe('Change Stream prose tests', function () {
               try {
                 // @ts-expect-error: e.reply is unknown
                 return e.reply.cursor;
-              } catch {
+              } catch (e) {
                 return {};
               }
             });

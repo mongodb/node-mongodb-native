@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { type Stream } from './cmap/connect';
 import { MongoMissingDependencyError } from './error';
 import type { Callback } from './utils';
@@ -23,7 +24,6 @@ export function getKerberos(): Kerberos {
   let kerberos: Kerberos;
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     kerberos = require('kerberos');
   } catch (error) {
     kerberos = makeErrorModule(
@@ -63,7 +63,6 @@ export type ZStandard = ZStandardLib | { kModuleError: MongoMissingDependencyErr
 export function getZstdLibrary(): ZStandardLib | { kModuleError: MongoMissingDependencyError } {
   let ZStandard: ZStandardLib | { kModuleError: MongoMissingDependencyError };
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     ZStandard = require('@mongodb-js/zstd');
   } catch (error) {
     ZStandard = makeErrorModule(
@@ -102,7 +101,6 @@ export function getAwsCredentialProvider():
   | { kModuleError: MongoMissingDependencyError } {
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const credentialProvider = require('@aws-sdk/credential-providers');
     return credentialProvider;
   } catch (error) {
@@ -124,7 +122,6 @@ export type GcpMetadata =
 export function getGcpMetadata(): GcpMetadata {
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const credentialProvider = require('gcp-metadata');
     return credentialProvider;
   } catch (error) {
@@ -156,7 +153,6 @@ export type SnappyLib = {
 export function getSnappy(): SnappyLib | { kModuleError: MongoMissingDependencyError } {
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const value = require('snappy');
     return value;
   } catch (error) {
@@ -191,7 +187,6 @@ export type SocksLib = {
 export function getSocks(): SocksLib | { kModuleError: MongoMissingDependencyError } {
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const value = require('socks');
     return value;
   } catch (error) {
@@ -249,7 +244,6 @@ export const aws4: AWS4 | { kModuleError: MongoMissingDependencyError } = loadAw
 function loadAws4() {
   let aws4: AWS4 | { kModuleError: MongoMissingDependencyError };
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     aws4 = require('aws4');
   } catch (error) {
     aws4 = makeErrorModule(
@@ -273,7 +267,6 @@ export function getMongoDBClientEncryption():
     // NOTE(NODE-3199): Ensure you always wrap an optional require literally in the try block
     // Cannot be moved to helper utility function, bundlers search and replace the actual require call
     // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     mongodbClientEncryption = require('mongodb-client-encryption');
   } catch (error) {
     const kModuleError = new MongoMissingDependencyError(

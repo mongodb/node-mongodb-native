@@ -2,7 +2,7 @@ name: Build and commit docs
 
 on:
   push:
-    branches: ['main']
+    branches: [main]
 
 permissions:
   contents: write

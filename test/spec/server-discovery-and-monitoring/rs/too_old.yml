@@ -10,7 +10,7 @@ phases: [
                     setName: "rs",
                     hosts: ["a:27017", "b:27017"],
                     minWireVersion: 0,
-                    maxWireVersion: 21
+                    maxWireVersion: 6
                 }],
                 ["b:27017", {
                     ok: 1,
@@ -18,9 +18,7 @@ phases: [
                     isWritablePrimary: false,
                     secondary: true,
                     setName: "rs",
-                    hosts: ["a:27017", "b:27017"],
-                    minWireVersion: 999,
-                    maxWireVersion: 1000
+                    hosts: ["a:27017", "b:27017"]
                 }]
         ],
         outcome: {

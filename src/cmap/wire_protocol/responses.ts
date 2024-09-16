@@ -1,5 +1,3 @@
-import { type DeserializeOptions } from 'bson';
-
 import {
   type BSONElement,
   type BSONSerializeOptions,
@@ -7,18 +5,13 @@ import {
   type Document,
   Long,
   parseToElementsToArray,
-  parseUtf8ValidationOption,
   pluckBSONSerializeOptions,
   type Timestamp
 } from '../../bson';
 import { MONGODB_ERROR_CODES, MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
 import { decorateDecryptionResult, ns } from '../../utils';
-import {
-  type JSTypeOf,
-  OnDemandDocument,
-  type OnDemandDocumentDeserializeOptions
-} from './on_demand/document';
+import { type JSTypeOf, OnDemandDocument } from './on_demand/document';
 
 // eslint-disable-next-line no-restricted-syntax
 const enum BSONElementOffset {
@@ -154,8 +147,7 @@ export class MongoDBResponse extends OnDemandDocument {
       this.get('recoveryToken', BSONType.object)?.toObject({
         promoteValues: false,
         promoteLongs: false,
-        promoteBuffers: false,
-        validation: { utf8: true }
+        promoteBuffers: false
       }) ?? null
     );
   }
@@ -212,9 +204,19 @@ export class MongoDBResponse extends OnDemandDocument {
   public override toObject(options?: BSONSerializeOptions): Record<string, any> {
     const exactBSONOptions = {
       ...pluckBSONSerializeOptions(options ?? {}),
-      validation: parseUtf8ValidationOption(options)
+      validation: this.parseBsonSerializationOptions(options)
     };
     return super.toObject(exactBSONOptions);
+  }
+
+  private parseBsonSerializationOptions(options?: { enableUtf8Validation?: boolean }): {
+    utf8: { writeErrors: false } | false;
+  } {
+    const enableUtf8Validation = options?.enableUtf8Validation;
+    if (enableUtf8Validation === false) {
+      return { utf8: false };
+    }
+    return { utf8: { writeErrors: false } };
   }
 }
 
@@ -299,13 +301,12 @@ export class CursorResponse extends MongoDBResponse {
       this.cursor.get('postBatchResumeToken', BSONType.object)?.toObject({
         promoteValues: false,
         promoteLongs: false,
-        promoteBuffers: false,
-        validation: { utf8: true }
+        promoteBuffers: false
       }) ?? null
     );
   }
 
-  public shift(options: OnDemandDocumentDeserializeOptions): any {
+  public shift(options?: BSONSerializeOptions): any {
     if (this.iterated >= this.batchSize) {
       return null;
     }
@@ -357,7 +358,7 @@ export class ExplainedCursorResponse extends CursorResponse {
     return this._length;
   }
 
-  override shift(options?: DeserializeOptions) {
+  override shift(options?: BSONSerializeOptions | undefined) {
     if (this._length === 0) return null;
     this._length -= 1;
     return this.toObject(options);

@@ -1,25 +1,20 @@
 import { expectAssignable, expectError, expectNotAssignable, expectNotType } from 'tsd';
 
-import {
-  type AddToSetOperators,
-  type ArrayOperator,
-  type Collection,
-  Decimal128,
-  type Document,
-  Double,
-  Int32,
-  Long,
-  type MatchKeysAndValues,
-  MongoClient,
-  ObjectId,
-  type PullAllOperator,
-  type PullOperator,
-  type PushOperator,
-  type SetFields,
-  type StrictUpdateFilter,
-  type Timestamp,
-  type UpdateFilter
+import type {
+  AddToSetOperators,
+  ArrayOperator,
+  Collection,
+  Document,
+  MatchKeysAndValues,
+  PullAllOperator,
+  PullOperator,
+  PushOperator,
+  SetFields,
+  StrictUpdateFilter,
+  Timestamp,
+  UpdateFilter
 } from '../../../mongodb';
+import { Decimal128, Double, Int32, Long, MongoClient, ObjectId } from '../../../mongodb';
 
 // MatchKeysAndValues - for basic mapping keys to their values, restricts that key types must be the same but optional, and permit dot array notation
 expectAssignable<MatchKeysAndValues<{ a: number; b: string; c: { d: boolean } }>>({

@@ -14,15 +14,12 @@ import {
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   MONGODB_ERROR_CODES,
-  MongoDriverError,
   MongoError,
   MongoErrorLabel,
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoOperationTimeoutError,
   MongoParseError,
-  MongoRuntimeError,
   MongoServerError,
   MongoSystemError,
   MongoWriteConcernError,
@@ -173,23 +170,6 @@ describe('MongoErrors', () => {
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', undefined);
       });
-    });
-  });
-
-  describe('class MongoOperationTimeoutError', () => {
-    it('has a name property equal to MongoOperationTimeoutError', () => {
-      const error = new MongoOperationTimeoutError('time out!');
-      expect(error).to.have.property('name', 'MongoOperationTimeoutError');
-    });
-
-    it('is instanceof MongoDriverError', () => {
-      const error = new MongoOperationTimeoutError('time out!');
-      expect(error).to.be.instanceOf(MongoDriverError);
-    });
-
-    it('is not instanceof MongoRuntimeError', () => {
-      const error = new MongoOperationTimeoutError('time out!');
-      expect(error).to.not.be.instanceOf(MongoRuntimeError);
     });
   });
 

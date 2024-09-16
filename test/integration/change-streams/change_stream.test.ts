@@ -875,7 +875,7 @@ describe('Change Streams', function () {
         await lastWrite().catch(() => null);
 
         let counter = 0;
-
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _ of changes) {
           counter += 1;
           if (counter === 2) {
@@ -1027,6 +1027,7 @@ describe('Change Streams', function () {
             changeStream = collection.watch();
 
             const loop = (async function () {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               for await (const _change of changeStream) {
                 return 'loop entered'; // loop should never be entered
               }

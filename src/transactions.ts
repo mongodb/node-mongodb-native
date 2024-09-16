@@ -2,7 +2,8 @@ import type { Document } from './bson';
 import { MongoRuntimeError, MongoTransactionError } from './error';
 import type { CommandOperationOptions } from './operations/command';
 import { ReadConcern, type ReadConcernLike } from './read_concern';
-import { ReadPreference, type ReadPreferenceLike } from './read_preference';
+import type { ReadPreferenceLike } from './read_preference';
+import { ReadPreference } from './read_preference';
 import type { Server } from './sdam/server';
 import { WriteConcern } from './write_concern';
 
@@ -60,7 +61,7 @@ const COMMITTED_STATES: Set<TxnState> = new Set([
  * Configuration options for a transaction.
  * @public
  */
-export interface TransactionOptions extends Omit<CommandOperationOptions, 'timeoutMS'> {
+export interface TransactionOptions extends CommandOperationOptions {
   // TODO(NODE-3344): These options use the proper class forms of these settings, it should accept the basic enum values too
   /** A default read concern for commands in this transaction */
   readConcern?: ReadConcernLike;
@@ -68,10 +69,7 @@ export interface TransactionOptions extends Omit<CommandOperationOptions, 'timeo
   writeConcern?: WriteConcern;
   /** A default read preference for commands in this transaction */
   readPreference?: ReadPreferenceLike;
-  /**
-   * Specifies the maximum amount of time to allow a commit action on a transaction to run in milliseconds
-   * @deprecated This option is deprecated in favor of `timeoutMS` or `defaultTimeoutMS`.
-   */
+  /** Specifies the maximum amount of time to allow a commit action on a transaction to run in milliseconds */
   maxCommitTimeMS?: number;
 }
 

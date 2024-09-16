@@ -275,16 +275,12 @@ export class Db {
     // Intentionally, we do not inherit options from parent for this operation.
     return await executeOperation(
       this.client,
-      new RunCommandOperation(
-        this,
-        command,
-        resolveOptions(undefined, {
-          ...resolveBSONOptions(options),
-          timeoutMS: options?.timeoutMS ?? this.timeoutMS,
-          session: options?.session,
-          readPreference: options?.readPreference
-        })
-      )
+      new RunCommandOperation(this, command, {
+        ...resolveBSONOptions(options),
+        timeoutMS: options?.timeoutMS ?? this.timeoutMS,
+        session: options?.session,
+        readPreference: options?.readPreference
+      })
     );
   }
 
@@ -389,11 +385,7 @@ export class Db {
       new RenameOperation(
         this.collection<TSchema>(fromCollection) as TODO_NODE_3286,
         toCollection,
-        resolveOptions(undefined, {
-          ...options,
-          new_collection: true,
-          readPreference: ReadPreference.primary
-        })
+        { ...options, new_collection: true, readPreference: ReadPreference.primary }
       ) as TODO_NODE_3286
     );
   }

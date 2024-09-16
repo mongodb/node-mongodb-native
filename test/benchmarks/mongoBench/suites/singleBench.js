@@ -13,30 +13,8 @@ const {
 
 function makeSingleBench(suite) {
   suite
-    .benchmark('returnDocument', benchmark =>
-      benchmark
-        .taskSize(1.531e-3) // One tweet is 1,531 bytes or 0.001531 MB
-        .setup(makeLoadJSON('tweet.json'))
-        .task(async function () {
-          return this.doc;
-        })
-    )
-    .benchmark('ping', benchmark =>
-      benchmark
-        .taskSize(0.15) // { ping: 1 } is 15 bytes of BSON x 10,000 iterations
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .task(async function () {
-          for (let i = 0; i < 10000; ++i) {
-            await this.db.command({ ping: 1 });
-          }
-        })
-        .teardown(disconnectClient)
-    )
     .benchmark('runCommand', benchmark =>
       benchmark
-        // { hello: true } is 13 bytes. However the legacy hello was 16 bytes, to preserve history comparison data we leave this value as is.
         .taskSize(0.16)
         .setup(makeClient)
         .setup(connectClient)

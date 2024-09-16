@@ -18,6 +18,11 @@ export const Aspect = {
 /** @public */
 export type Hint = string | Document;
 
+// eslint-disable-next-line @typescript-eslint/ban-types
+export interface OperationConstructor extends Function {
+  aspects?: Set<symbol>;
+}
+
 /** @public */
 export interface OperationOptions extends BSONSerializeOptions {
   /** Specify ClientSession for this command */
@@ -67,12 +72,10 @@ export abstract class AbstractOperation<TResult = any> {
 
   [kSession]: ClientSession | undefined;
 
-  static aspects?: Set<symbol>;
-
   constructor(options: OperationOptions = {}) {
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
-      : (ReadPreference.fromOptions(options) ?? ReadPreference.primary);
+      : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
 
     // Pull the BSON serialize options from the already-resolved options
     this.bsonOptions = resolveBSONOptions(options);
@@ -95,7 +98,7 @@ export abstract class AbstractOperation<TResult = any> {
   ): Promise<TResult>;
 
   hasAspect(aspect: symbol): boolean {
-    const ctor = this.constructor as { aspects?: Set<symbol> };
+    const ctor = this.constructor as OperationConstructor;
     if (ctor.aspects == null) {
       return false;
     }
@@ -121,7 +124,7 @@ export abstract class AbstractOperation<TResult = any> {
 }
 
 export function defineAspects(
-  operation: { aspects?: Set<symbol> },
+  operation: OperationConstructor,
   aspects: symbol | symbol[] | Set<symbol>
 ): Set<symbol> {
   if (!Array.isArray(aspects) && !(aspects instanceof Set)) {

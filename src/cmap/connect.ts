@@ -249,7 +249,6 @@ export async function prepareHandshakeDocument(
 
 /** @public */
 export const LEGAL_TLS_SOCKET_OPTIONS = [
-  'allowPartialTrustChain',
   'ALPNProtocols',
   'ca',
   'cert',

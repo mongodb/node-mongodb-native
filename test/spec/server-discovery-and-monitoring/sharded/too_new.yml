@@ -15,9 +15,7 @@ phases: [
                     ok: 1,
                     helloOk: true,
                     isWritablePrimary: true,
-                    msg: "isdbgrid",
-                    minWireVersion: 7,
-                    maxWireVersion: 900
+                    msg: "isdbgrid"
                 }]
         ],
         outcome: {

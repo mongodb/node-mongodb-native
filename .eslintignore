@@ -2,3 +2,5 @@
 lib
 test/disabled
 !etc/docs
+
+test/explicit-resource-management

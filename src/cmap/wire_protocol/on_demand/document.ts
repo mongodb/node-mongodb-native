@@ -1,11 +1,10 @@
-import { type DeserializeOptions } from 'bson';
-
 import {
   Binary,
+  BSON,
   type BSONElement,
   BSONError,
+  type BSONSerializeOptions,
   BSONType,
-  deserialize,
   getBigInt64LE,
   getFloat64LE,
   getInt32LE,
@@ -43,14 +42,6 @@ export type JSTypeOf = {
 
 /** @internal */
 type CachedBSONElement = { element: BSONElement; value: any | undefined };
-
-/**
- * @internal
- *
- * Options for `OnDemandDocument.toObject()`. Validation is required to ensure
- * that callers provide utf8 validation options. */
-export type OnDemandDocumentDeserializeOptions = Omit<DeserializeOptions, 'validation'> &
-  Required<Pick<DeserializeOptions, 'validation'>>;
 
 /** @internal */
 export class OnDemandDocument {
@@ -338,8 +329,8 @@ export class OnDemandDocument {
    * Deserialize this object, DOES NOT cache result so avoid multiple invocations
    * @param options - BSON deserialization options
    */
-  public toObject(options?: OnDemandDocumentDeserializeOptions): Record<string, any> {
-    return deserialize(this.bson, {
+  public toObject(options?: BSONSerializeOptions): Record<string, any> {
+    return BSON.deserialize(this.bson, {
       ...options,
       index: this.offset,
       allowObjectSmallerThanBufferSize: true

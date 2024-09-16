@@ -683,7 +683,7 @@ describe('Find', function () {
               { _id: ObjectId.createFromHexString('5e9bd59248305adf18ebc15703a1') },
               function () {}
             );
-          } catch {
+          } catch (err) {
             client.close(done);
           }
         });

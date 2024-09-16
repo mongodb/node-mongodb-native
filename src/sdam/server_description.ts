@@ -1,7 +1,8 @@
 import { type Document, Long, type ObjectId } from '../bson';
 import { type MongoError, MongoRuntimeError } from '../error';
 import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
-import { type ClusterTime, ServerType } from './common';
+import type { ClusterTime } from './common';
+import { ServerType } from './common';
 
 const WRITABLE_SERVER_TYPES = new Set<ServerType>([
   ServerType.RSPrimary,
@@ -261,15 +262,15 @@ export function compareTopologyVersion(
     typeof currentTv.counter === 'bigint'
       ? Long.fromBigInt(currentTv.counter)
       : Long.isLong(currentTv.counter)
-        ? currentTv.counter
-        : Long.fromNumber(currentTv.counter);
+      ? currentTv.counter
+      : Long.fromNumber(currentTv.counter);
 
   const newCounter =
     typeof newTv.counter === 'bigint'
       ? Long.fromBigInt(newTv.counter)
       : Long.isLong(newTv.counter)
-        ? newTv.counter
-        : Long.fromNumber(newTv.counter);
+      ? newTv.counter
+      : Long.fromNumber(newTv.counter);
 
   return currentCounter.compare(newCounter);
 }

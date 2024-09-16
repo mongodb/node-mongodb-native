@@ -144,7 +144,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
           explain: verbosity ?? true
         })
       )
-    ).shift(this.deserializationOptions);
+    ).shift(this.findOptions);
   }
 
   /** Set the cursor query */

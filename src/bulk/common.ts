@@ -1,6 +1,6 @@
 import { promisify } from 'util';
 
-import { type BSONSerializeOptions, type Document, EJSON, resolveBSONOptions } from '../bson';
+import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
 import type { Collection } from '../collection';
 import {
   type AnyError,
@@ -21,12 +21,12 @@ import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
+import { maybeAddIdToDocuments } from '../utils';
 import {
   applyRetryableWrites,
   type Callback,
   getTopology,
   hasAtomicOperators,
-  maybeAddIdToDocuments,
   type MongoDBNamespace,
   resolveOptions
 } from '../utils';
@@ -295,7 +295,7 @@ export class BulkWriteResult {
   }
 
   toString(): string {
-    return `BulkWriteResult(${EJSON.stringify(this.result)})`;
+    return `BulkWriteResult(${this.result})`;
   }
 
   isOk(): boolean {
@@ -584,12 +584,13 @@ function executeCommands(
     const operation = isInsertBatch(batch)
       ? new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
       : isUpdateBatch(batch)
-        ? new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
-        : isDeleteBatch(batch)
-          ? new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
-          : null;
+      ? new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+      : isDeleteBatch(batch)
+      ? new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+      : null;
 
     if (operation != null) {
+      // eslint-disable-next-line github/no-then
       executeOperation(bulkOperation.s.collection.client, operation).then(
         result => resultHandler(undefined, result),
         error => resultHandler(error)
@@ -922,11 +923,7 @@ export abstract class BulkOperationBase {
    * Create a new OrderedBulkOperation or UnorderedBulkOperation instance
    * @internal
    */
-  constructor(
-    private collection: Collection,
-    options: BulkWriteOptions,
-    isOrdered: boolean
-  ) {
+  constructor(private collection: Collection, options: BulkWriteOptions, isOrdered: boolean) {
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 

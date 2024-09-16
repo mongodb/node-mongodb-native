@@ -26,6 +26,7 @@ const options: MongoClientOptions = {
   family: 4,
   ssl: true,
   tlsAllowInvalidCertificates: false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   checkServerIdentity(host, cert) {
     return undefined;
   },

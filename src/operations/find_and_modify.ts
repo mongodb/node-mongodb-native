@@ -214,7 +214,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
 
     // Execute the command
     const result = await super.executeCommand(server, session, cmd, timeoutContext);
-    return options.includeResultMetadata ? result : (result.value ?? null);
+    return options.includeResultMetadata ? result : result.value ?? null;
   }
 }
 

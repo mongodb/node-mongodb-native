@@ -1974,7 +1974,7 @@ describe('Cursor', function () {
           try {
             await db.collection('cursor_tailable').drop();
             // eslint-disable-next-line no-empty
-          } catch {}
+          } catch (_) {}
 
           const collection = await db.createCollection('cursor_tailable', {
             capped: true,

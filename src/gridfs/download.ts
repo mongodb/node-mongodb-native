@@ -216,7 +216,7 @@ function doRead(stream: GridFSBucketReadStream): void {
 
     if (!doc) {
       stream.push(null);
-
+      // eslint-disable-next-line github/no-then
       stream.s.cursor?.close().then(undefined, error => stream.destroy(error));
       return;
     }
@@ -288,6 +288,7 @@ function doRead(stream: GridFSBucketReadStream): void {
     return;
   };
 
+  // eslint-disable-next-line github/no-then
   stream.s.cursor.next().then(handleReadResult, error => {
     if (stream.destroyed) return;
     stream.destroy(error);
@@ -371,6 +372,7 @@ function init(stream: GridFSBucketReadStream): void {
     return;
   };
 
+  // eslint-disable-next-line github/no-then
   stream.s.files.findOne(stream.s.filter, findOneOptions).then(handleReadResult, error => {
     if (stream.destroyed) return;
     stream.destroy(error);

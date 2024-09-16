@@ -9,7 +9,7 @@ import { LEGACY_HELLO_COMMAND, MongoClient, MongoParseError } from '../mongodb';
  */
 
 describe('Socks5 Connectivity', function () {
-  if (typeof process.env.SOCKS5_CONFIG !== 'string' || process.env.SOCKS5_CONFIG.length === 0) {
+  if (!process.env.SOCKS5_CONFIG == null) {
     console.error('skipping Socks5 tests, SOCKS5_CONFIG environment variable is not defined');
 
     return;

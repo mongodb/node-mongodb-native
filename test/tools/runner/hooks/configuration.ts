@@ -1,6 +1,7 @@
 /* eslint-disable simple-import-sort/imports */
+/* eslint-disable import/first */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('source-map-support').install({
   hookRequire: true
 });
@@ -199,10 +200,8 @@ const cleanUpMocksAfterHook = () => mock.cleanup();
 
 const beforeAllPluginImports = () => {
   // optionally enable test runner-wide plugins
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('../plugins/deferred');
   // configure mocha
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('mocha-sinon');
 };
 

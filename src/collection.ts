@@ -47,18 +47,17 @@ import {
   FindOneAndUpdateOperation,
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
-import {
-  CreateIndexesOperation,
-  type CreateIndexesOptions,
-  type DropIndexesOptions,
-  DropIndexOperation,
-  type IndexDescription,
-  type IndexDescriptionCompact,
-  type IndexDescriptionInfo,
-  type IndexInformationOptions,
-  type IndexSpecification,
-  type ListIndexesOptions
+import type {
+  CreateIndexesOptions,
+  DropIndexesOptions,
+  IndexDescription,
+  IndexDescriptionCompact,
+  IndexDescriptionInfo,
+  IndexInformationOptions,
+  IndexSpecification,
+  ListIndexesOptions
 } from './operations/indexes';
+import { CreateIndexesOperation, DropIndexOperation } from './operations/indexes';
 import {
   InsertManyOperation,
   type InsertManyResult,
@@ -470,14 +469,10 @@ export class Collection<TSchema extends Document = Document> {
     // Intentionally, we do not inherit options from parent for this operation.
     return await executeOperation(
       this.client,
-      new RenameOperation(
-        this as TODO_NODE_3286,
-        newName,
-        resolveOptions(undefined, {
-          ...options,
-          readPreference: ReadPreference.PRIMARY
-        })
-      ) as TODO_NODE_3286
+      new RenameOperation(this as TODO_NODE_3286, newName, {
+        ...options,
+        readPreference: ReadPreference.PRIMARY
+      }) as TODO_NODE_3286
     );
   }
 
@@ -679,8 +674,7 @@ export class Collection<TSchema extends Document = Document> {
       );
       return true;
     } catch (error) {
-      if (error instanceof MongoOperationTimeoutError) throw error; // TODO: Check the spec for index management behaviour/file a drivers ticket for this
-      // Seems like we should throw all errors
+      if (error instanceof MongoOperationTimeoutError) throw error;
       return false;
     }
   }
@@ -1133,8 +1127,8 @@ export class Collection<TSchema extends Document = Document> {
       indexNameOrOptions == null
         ? null
         : typeof indexNameOrOptions === 'object'
-          ? null
-          : indexNameOrOptions;
+        ? null
+        : indexNameOrOptions;
 
     return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, options);
   }

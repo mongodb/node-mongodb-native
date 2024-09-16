@@ -6,13 +6,10 @@ import { AggregateOperation, type AggregateOptions } from '../operations/aggrega
 import { executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
-import { mergeOptions, type MongoDBNamespace } from '../utils';
-import {
-  AbstractCursor,
-  type AbstractCursorOptions,
-  CursorTimeoutMode,
-  type InitialCursorResponse
-} from './abstract_cursor';
+import type { MongoDBNamespace } from '../utils';
+import { mergeOptions } from '../utils';
+import type { AbstractCursorOptions, InitialCursorResponse } from './abstract_cursor';
+import { AbstractCursor, CursorTimeoutMode } from './abstract_cursor';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}
@@ -88,7 +85,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
           explain: verbosity ?? true
         })
       )
-    ).shift(this.deserializationOptions);
+    ).shift(this.aggregateOptions);
   }
 
   /** Add a stage to the aggregation pipeline

@@ -10,9 +10,7 @@
     --light-color-text: #222;
     --light-color-text-aside: #6e6e6e;
     --light-color-link: #1f70c2;
-    --light-color-focus-outline: #3584e4;
 
-    --light-color-ts-keyword: #056bd6;
     --light-color-ts-project: #b111c9;
     --light-color-ts-module: var(--light-color-ts-project);
     --light-color-ts-namespace: var(--light-color-ts-project);
@@ -30,13 +28,13 @@
     --light-color-ts-constructor-signature: var(--light-color-ts-constructor);
     --light-color-ts-parameter: var(--light-color-ts-variable);
     /* type literal not included as links will never be generated to it */
-    --light-color-ts-type-parameter: #a55c0e;
+    --light-color-ts-type-parameter: var(--light-color-ts-type-alias);
     --light-color-ts-accessor: var(--light-color-ts-property);
     --light-color-ts-get-signature: var(--light-color-ts-accessor);
     --light-color-ts-set-signature: var(--light-color-ts-accessor);
+    /* object literal not included as it is not used and will be removed in 0.25 */
     --light-color-ts-type-alias: #d51270;
     /* reference not included as links will be colored with the kind that it points to */
-    --light-color-document: #000000;
 
     --light-external-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' width='10' height='10'><path fill-opacity='0' stroke='%23000' stroke-width='10' d='m43,35H5v60h60V57M45,5v10l10,10-30,30 20,20 30-30 10,10h10V5z'/></svg>");
     --light-color-scheme: light;
@@ -52,9 +50,7 @@
     --dark-color-text: #f5f5f5;
     --dark-color-text-aside: #dddddd;
     --dark-color-link: #00aff4;
-    --dark-color-focus-outline: #4c97f2;
 
-    --dark-color-ts-keyword: #3399ff;
     --dark-color-ts-project: #e358ff;
     --dark-color-ts-module: var(--dark-color-ts-project);
     --dark-color-ts-namespace: var(--dark-color-ts-project);
@@ -72,13 +68,13 @@
     --dark-color-ts-constructor-signature: var(--dark-color-ts-constructor);
     --dark-color-ts-parameter: var(--dark-color-ts-variable);
     /* type literal not included as links will never be generated to it */
-    --dark-color-ts-type-parameter: #e07d13;
+    --dark-color-ts-type-parameter: var(--dark-color-ts-type-alias);
     --dark-color-ts-accessor: var(--dark-color-ts-property);
     --dark-color-ts-get-signature: var(--dark-color-ts-accessor);
     --dark-color-ts-set-signature: var(--dark-color-ts-accessor);
+    /* object literal not included as it is not used and will be removed in 0.25 */
     --dark-color-ts-type-alias: #ff6492;
     /* reference not included as links will be colored with the kind that it points to */
-    --dark-color-document: #ffffff;
 
     --dark-external-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' width='10' height='10'><path fill-opacity='0' stroke='%23fff' stroke-width='10' d='m43,35H5v60h60V57M45,5v10l10,10-30,30 20,20 30-30 10,10h10V5z'/></svg>");
     --dark-color-scheme: dark;
@@ -96,9 +92,7 @@
         --color-text: var(--light-color-text);
         --color-text-aside: var(--light-color-text-aside);
         --color-link: var(--light-color-link);
-        --color-focus-outline: var(--light-color-focus-outline);
 
-        --color-ts-keyword: var(--light-color-ts-keyword);
         --color-ts-module: var(--light-color-ts-module);
         --color-ts-namespace: var(--light-color-ts-namespace);
         --color-ts-enum: var(--light-color-ts-enum);
@@ -121,7 +115,6 @@
         --color-ts-get-signature: var(--light-color-ts-get-signature);
         --color-ts-set-signature: var(--light-color-ts-set-signature);
         --color-ts-type-alias: var(--light-color-ts-type-alias);
-        --color-document: var(--light-color-document);
 
         --external-icon: var(--light-external-icon);
         --color-scheme: var(--light-color-scheme);
@@ -140,9 +133,7 @@
         --color-text: var(--dark-color-text);
         --color-text-aside: var(--dark-color-text-aside);
         --color-link: var(--dark-color-link);
-        --color-focus-outline: var(--dark-color-focus-outline);
 
-        --color-ts-keyword: var(--dark-color-ts-keyword);
         --color-ts-module: var(--dark-color-ts-module);
         --color-ts-namespace: var(--dark-color-ts-namespace);
         --color-ts-enum: var(--dark-color-ts-enum);
@@ -165,7 +156,6 @@
         --color-ts-get-signature: var(--dark-color-ts-get-signature);
         --color-ts-set-signature: var(--dark-color-ts-set-signature);
         --color-ts-type-alias: var(--dark-color-ts-type-alias);
-        --color-document: var(--dark-color-document);
 
         --external-icon: var(--dark-external-icon);
         --color-scheme: var(--dark-color-scheme);
@@ -191,9 +181,7 @@ body {
     --color-text: var(--light-color-text);
     --color-text-aside: var(--light-color-text-aside);
     --color-link: var(--light-color-link);
-    --color-focus-outline: var(--light-color-focus-outline);
 
-    --color-ts-keyword: var(--light-color-ts-keyword);
     --color-ts-module: var(--light-color-ts-module);
     --color-ts-namespace: var(--light-color-ts-namespace);
     --color-ts-enum: var(--light-color-ts-enum);
@@ -216,7 +204,6 @@ body {
     --color-ts-get-signature: var(--light-color-ts-get-signature);
     --color-ts-set-signature: var(--light-color-ts-set-signature);
     --color-ts-type-alias: var(--light-color-ts-type-alias);
-    --color-document: var(--light-color-document);
 
     --external-icon: var(--light-external-icon);
     --color-scheme: var(--light-color-scheme);
@@ -233,9 +220,7 @@ body {
     --color-text: var(--dark-color-text);
     --color-text-aside: var(--dark-color-text-aside);
     --color-link: var(--dark-color-link);
-    --color-focus-outline: var(--dark-color-focus-outline);
 
-    --color-ts-keyword: var(--dark-color-ts-keyword);
     --color-ts-module: var(--dark-color-ts-module);
     --color-ts-namespace: var(--dark-color-ts-namespace);
     --color-ts-enum: var(--dark-color-ts-enum);
@@ -258,15 +243,9 @@ body {
     --color-ts-get-signature: var(--dark-color-ts-get-signature);
     --color-ts-set-signature: var(--dark-color-ts-set-signature);
     --color-ts-type-alias: var(--dark-color-ts-type-alias);
-    --color-document: var(--dark-color-document);
 
     --external-icon: var(--dark-external-icon);
     --color-scheme: var(--dark-color-scheme);
-}
-
-*:focus-visible,
-.tsd-accordion-summary:focus-visible svg {
-    outline: 2px solid var(--color-focus-outline);
 }
 
 .always-visible,
@@ -281,6 +260,16 @@ h4,
 h5,
 h6 {
     line-height: 1.2;
+}
+
+h1 > a,
+h2 > a,
+h3 > a,
+h4 > a,
+h5 > a,
+h6 > a {
+    text-decoration: none;
+    color: var(--color-text);
 }
 
 h1 {
@@ -313,6 +302,10 @@ h6 {
     margin: 2.33rem 0;
 }
 
+.uppercase {
+    text-transform: uppercase;
+}
+
 dl,
 menu,
 ol,
@@ -330,14 +323,17 @@ dd {
 }
 
 /* Footer */
-footer {
+.tsd-generator {
     border-top: 1px solid var(--color-accent);
     padding-top: 1rem;
     padding-bottom: 1rem;
     max-height: 3.5rem;
 }
-footer > p {
-    margin: 0 1em;
+
+.tsd-generator > p {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0 1rem;
 }
 
 .container-main {
@@ -405,8 +401,7 @@ footer > p {
 }
 body {
     background: var(--color-background);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
-        Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    font-family: "Segoe UI", sans-serif;
     font-size: 16px;
     color: var(--color-text);
 }
@@ -423,9 +418,6 @@ a.external[target="_blank"] {
     background-position: top 3px right;
     background-repeat: no-repeat;
     padding-right: 13px;
-}
-a.tsd-anchor-link {
-    color: var(--color-text);
 }
 
 code,
@@ -476,12 +468,13 @@ blockquote {
     padding: 0 0 0 20px;
     margin: 0;
 }
+.tsd-typography h4,
 .tsd-typography .tsd-index-panel h3,
 .tsd-index-panel .tsd-typography h3,
-.tsd-typography h4,
 .tsd-typography h5,
 .tsd-typography h6 {
     font-size: 1em;
+    margin: 0;
 }
 .tsd-typography h5,
 .tsd-typography h6 {
@@ -491,19 +484,6 @@ blockquote {
 .tsd-typography ul,
 .tsd-typography ol {
     margin: 1em 0;
-}
-.tsd-typography table {
-    border-collapse: collapse;
-    border: none;
-}
-.tsd-typography td,
-.tsd-typography th {
-    padding: 6px 13px;
-    border: 1px solid var(--color-accent);
-}
-.tsd-typography thead,
-.tsd-typography tr:nth-child(even) {
-    background-color: var(--color-background-secondary);
 }
 
 .tsd-breadcrumb {
@@ -586,13 +566,13 @@ dl.tsd-comment-tag-group p {
 }
 .tsd-filter-input {
     display: flex;
-    width: -moz-fit-content;
     width: fit-content;
+    width: -moz-fit-content;
     align-items: center;
+    user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    user-select: none;
     cursor: pointer;
 }
 .tsd-filter-input input[type="checkbox"] {
@@ -615,8 +595,11 @@ dl.tsd-comment-tag-group p {
     Don't remove unless you know what you're doing. */
     opacity: 0.99;
 }
-.tsd-filter-input input[type="checkbox"]:focus-visible + svg {
-    outline: 2px solid var(--color-focus-outline);
+.tsd-filter-input input[type="checkbox"]:focus + svg {
+    transform: scale(0.95);
+}
+.tsd-filter-input input[type="checkbox"]:focus:not(:focus-visible) + svg {
+    transform: scale(1);
 }
 .tsd-checkbox-background {
     fill: var(--color-accent);
@@ -633,18 +616,13 @@ input[type="checkbox"]:checked ~ svg .tsd-checkbox-checkmark {
     stroke: var(--color-accent);
 }
 
-.settings-label {
-    font-weight: bold;
-    text-transform: uppercase;
-    display: inline-block;
+.tsd-theme-toggle {
+    padding-top: 0.75rem;
 }
-
-.tsd-filter-visibility .settings-label {
-    margin: 0.75rem 0 0.5rem 0;
-}
-
-.tsd-theme-toggle .settings-label {
-    margin: 0.75rem 0.75rem 0 0;
+.tsd-theme-toggle > h4 {
+    display: inline;
+    vertical-align: middle;
+    margin-right: 0.75rem;
 }
 
 .tsd-hierarchy {
@@ -653,28 +631,6 @@ input[type="checkbox"]:checked ~ svg .tsd-checkbox-checkmark {
 }
 .tsd-hierarchy .target {
     font-weight: bold;
-}
-
-.tsd-full-hierarchy:not(:last-child) {
-    margin-bottom: 1em;
-    padding-bottom: 1em;
-    border-bottom: 1px solid var(--color-accent);
-}
-.tsd-full-hierarchy,
-.tsd-full-hierarchy ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-.tsd-full-hierarchy ul {
-    padding-left: 1.5rem;
-}
-.tsd-full-hierarchy a {
-    padding: 0.25rem 0 !important;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    color: var(--color-text);
 }
 
 .tsd-panel-group.tsd-index-group {
@@ -742,15 +698,12 @@ input[type="checkbox"]:checked ~ svg .tsd-checkbox-checkmark {
 }
 .tsd-navigation > a,
 .tsd-navigation .tsd-accordion-summary {
-    width: calc(100% - 0.25rem);
-    display: flex;
-    align-items: center;
+    width: calc(100% - 0.5rem);
 }
 .tsd-navigation a,
 .tsd-navigation summary > span,
 .tsd-page-navigation a {
-    display: flex;
-    width: calc(100% - 0.25rem);
+    display: inline-flex;
     align-items: center;
     padding: 0.25rem;
     color: var(--color-text);
@@ -777,9 +730,6 @@ input[type="checkbox"]:checked ~ svg .tsd-checkbox-checkmark {
     padding: 0;
     max-width: 100%;
 }
-.tsd-navigation .tsd-nav-link {
-    display: none;
-}
 .tsd-nested-navigation {
     margin-left: 3rem;
 }
@@ -793,15 +743,11 @@ input[type="checkbox"]:checked ~ svg .tsd-checkbox-checkmark {
     margin-left: -1.5rem;
 }
 
-.tsd-page-navigation-section {
-    margin-left: 10px;
+.tsd-nested-navigation > li > a,
+.tsd-nested-navigation > li > span {
+    width: calc(100% - 1.75rem - 0.5rem);
 }
-.tsd-page-navigation-section > summary {
-    padding: 0.25rem;
-}
-.tsd-page-navigation-section > div {
-    margin-left: 20px;
-}
+
 .tsd-page-navigation ul {
     padding-left: 1.75rem;
 }
@@ -832,10 +778,10 @@ a.tsd-index-link {
 }
 .tsd-accordion-summary,
 .tsd-accordion-summary a {
+    user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
-    user-select: none;
 
     cursor: pointer;
 }
@@ -848,9 +794,8 @@ a.tsd-index-link {
     padding-top: 0;
     padding-bottom: 0;
 }
-.tsd-accordion .tsd-accordion-summary > svg {
+.tsd-index-accordion .tsd-accordion-summary > svg {
     margin-left: 0.25rem;
-    vertical-align: text-top;
 }
 .tsd-index-content > :not(:first-child) {
     margin-top: 0.75rem;
@@ -898,16 +843,13 @@ a.tsd-index-link {
 }
 
 .tsd-panel-group {
-    margin: 2rem 0;
+    margin: 4rem 0;
 }
 .tsd-panel-group.tsd-index-group {
     margin: 2rem 0;
 }
 .tsd-panel-group.tsd-index-group details {
     margin: 2rem 0;
-}
-.tsd-panel-group > .tsd-accordion-summary {
-    margin-bottom: 1rem;
 }
 
 #tsd-search {
@@ -958,9 +900,8 @@ a.tsd-index-link {
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
 }
 #tsd-search .results li {
+    padding: 0 10px;
     background-color: var(--color-background);
-    line-height: initial;
-    padding: 4px;
 }
 #tsd-search .results li:nth-child(even) {
     background-color: var(--color-background-secondary);
@@ -968,15 +909,12 @@ a.tsd-index-link {
 #tsd-search .results li.state {
     display: none;
 }
-#tsd-search .results li.current:not(.no-results),
-#tsd-search .results li:hover:not(.no-results) {
+#tsd-search .results li.current,
+#tsd-search .results li:hover {
     background-color: var(--color-accent);
 }
 #tsd-search .results a {
-    display: flex;
-    align-items: center;
-    padding: 0.25rem;
-    box-sizing: border-box;
+    display: block;
 }
 #tsd-search .results a:before {
     top: 10px;
@@ -1032,11 +970,6 @@ a.tsd-index-link {
     overflow-x: auto;
 }
 
-.tsd-signature-keyword {
-    color: var(--color-ts-keyword);
-    font-weight: normal;
-}
-
 .tsd-signature-symbol {
     color: var(--color-text-aside);
     font-weight: normal;
@@ -1057,12 +990,6 @@ a.tsd-index-link {
     border-color: var(--color-accent);
     border-width: 1px 0;
     transition: background-color 0.1s;
-}
-.tsd-signatures .tsd-index-signature:not(:last-child) {
-    margin-bottom: 1em;
-}
-.tsd-signatures .tsd-index-signature .tsd-signature {
-    border-width: 1px;
 }
 .tsd-description .tsd-signatures .tsd-signature {
     border-width: 1px;
@@ -1143,9 +1070,7 @@ ul.tsd-type-parameter-list h5 {
     overflow: hidden;
     opacity: 0.8;
     height: 40px;
-    transition:
-        opacity 0.1s,
-        background-color 0.2s;
+    transition: opacity 0.1s, background-color 0.2s;
     vertical-align: bottom;
     cursor: pointer;
 }
@@ -1197,7 +1122,7 @@ img {
 }
 
 .deprecated {
-    text-decoration: line-through !important;
+    text-decoration: line-through;
 }
 
 .warning {
@@ -1376,12 +1301,6 @@ img {
     }
     .has-menu .tsd-navigation {
         max-height: 100%;
-    }
-    #tsd-toolbar-links {
-        display: none;
-    }
-    .tsd-navigation .tsd-nav-link {
-        display: flex;
     }
 }
 

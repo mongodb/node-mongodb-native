@@ -1,4 +1,3 @@
-import { type DeserializeOptions } from 'bson';
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
@@ -340,7 +339,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this.socket.destroy();
     this.error = error;
-
+    // eslint-disable-next-line github/no-then
     this.dataEvents?.throw(error).then(undefined, squashError);
     this.closed = true;
     this.emit(Connection.CLOSE);
@@ -513,7 +512,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // If `documentsReturnedIn` not set or raw is not enabled, use input bson options
     // Otherwise, support raw flag. Raw only works for cursors that hardcode firstBatch/nextBatch fields
-    const bsonOptions: DeserializeOptions =
+    const bsonOptions =
       options.documentsReturnedIn == null || !options.raw
         ? options
         : {
@@ -655,7 +654,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
       throw new MongoUnexpectedServerResponseError('Server ended moreToCome unexpectedly');
     };
-
+    // eslint-disable-next-line github/no-then
     exhaustLoop().then(undefined, replyListener);
   }
 
@@ -738,13 +737,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           return;
         }
       }
-    } catch (readError) {
-      if (TimeoutError.is(readError)) {
-        throw new MongoOperationTimeoutError(
-          `Timed out during socket read (${readError.duration}ms)`
-        );
-      }
-      throw readError;
     } finally {
       this.dataEvents = null;
       this.throwIfAborted();

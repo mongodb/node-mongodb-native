@@ -1,6 +1,7 @@
 import { Writable } from 'stream';
 
-import { type Document, ObjectId } from '../bson';
+import type { Document } from '../bson';
+import { ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import { MongoAPIError, MONGODB_ERROR_CODES, MongoError } from '../error';
 import { type Callback, squashError } from '../utils';
@@ -134,6 +135,7 @@ export class GridFSBucketWriteStream extends Writable {
     if (!this.bucket.s.calledOpenUploadStream) {
       this.bucket.s.calledOpenUploadStream = true;
 
+      // eslint-disable-next-line github/no-then
       checkIndexes(this).then(() => {
         this.bucket.s.checkedIndexes = true;
         this.bucket.emit('index');
@@ -270,6 +272,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
       return;
     }
 
+    // eslint-disable-next-line github/no-then
     stream.files.insertOne(gridFSFile, { writeConcern: stream.writeConcern }).then(
       () => {
         stream.gridFSFile = gridFSFile;
@@ -393,6 +396,7 @@ function doWrite(
         return;
       }
 
+      // eslint-disable-next-line github/no-then
       stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern }).then(
         () => {
           --stream.state.outstandingRequests;
@@ -433,6 +437,7 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void
     return;
   }
 
+  // eslint-disable-next-line github/no-then
   stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern }).then(
     () => {
       --stream.state.outstandingRequests;

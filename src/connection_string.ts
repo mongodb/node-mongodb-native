@@ -73,7 +73,7 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
   // the SRV record is resolved before starting a second DNS query.
   const lookupAddress = options.srvHost;
   const txtResolutionPromise = dns.promises.resolveTxt(lookupAddress);
-
+  // eslint-disable-next-line github/no-then
   txtResolutionPromise.then(undefined, squashError); // rejections will be handled later
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
@@ -552,6 +552,7 @@ export function parseOptions(
 
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
 
+  // eslint-disable-next-line github/no-then
   mongoOptions.extendedMetadata = addContainerMetadata(mongoOptions.metadata).then(
     undefined,
     squashError
@@ -1228,8 +1229,7 @@ export const OPTIONS = {
   // Custom types for modifying core behavior
   connectionType: { type: 'any' },
   srvPoller: { type: 'any' },
-  // Accepted Node.js Options
-  allowPartialTrustChain: { type: 'any' },
+  // Accepted NodeJS Options
   minDHSize: { type: 'any' },
   pskCallback: { type: 'any' },
   secureContext: { type: 'any' },
