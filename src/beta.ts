@@ -9,7 +9,7 @@ export * from './index';
  *
  * This is used in the generated JS.  Adapted from https://github.com/microsoft/TypeScript/blob/aafdfe5b3f76f5c41abeec412ce73c86da94c75f/src/compiler/factory/emitHelpers.ts#L1202.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 function __exportStar(mod: Document) {
   for (const key of Object.keys(mod)) {
     Object.defineProperty(exports, key, {

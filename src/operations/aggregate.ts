@@ -11,8 +11,9 @@ import { type CollationOptions, CommandOperation, type CommandOperationOptions }
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @internal */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 export const DB_AGGREGATE_COLLECTION = 1 as const;
-const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8 as const;
+const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
 
 /** @public */
 export interface AggregateOptions extends CommandOperationOptions {

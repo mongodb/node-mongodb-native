@@ -251,7 +251,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS":270 
+                "blockTimeMS": 150
               }
             }
           }
@@ -261,7 +261,7 @@
           "object": "collection",
           "arguments": {
             "pipeline": [],
-            "timeoutMS": 500,
+            "timeoutMS": 200,
             "batchSize": 2,
             "maxAwaitTimeMS": 1
           },

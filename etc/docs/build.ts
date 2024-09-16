@@ -24,7 +24,7 @@ const RELEASES_JSON_FILE = './template/static/versions.json';
 
 const copyGeneratedDocsToDocsFolder = () => exec(`cp -R temp/. ../../docs/.`);
 const removeTempDirectory = () => exec('rm -rf temp');
-const installDependencies = () => exec('npm i --no-save --legacy-peer-deps typedoc@0.26.5');
+const installDependencies = () => exec('npm i --no-save --legacy-peer-deps typedoc@0.26.7');
 const buildDocs = ({ tag }: VersionSchema) => {
   const revision = tag === LATEST_TAG ? 'main' : `v${tag}.0`;
   return exec(`npm run build:typedoc -- --gitRevision ${revision}`);

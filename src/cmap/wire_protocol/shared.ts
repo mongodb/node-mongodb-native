@@ -1,6 +1,5 @@
 import { MongoInvalidArgumentError } from '../../error';
-import type { ReadPreferenceLike } from '../../read_preference';
-import { ReadPreference } from '../../read_preference';
+import { ReadPreference, type ReadPreferenceLike } from '../../read_preference';
 import { ServerType } from '../../sdam/common';
 import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';

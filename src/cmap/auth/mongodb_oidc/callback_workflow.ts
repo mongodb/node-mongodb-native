@@ -160,9 +160,9 @@ export abstract class CallbackWorkflow implements Workflow {
       // previous lock, only the current callback's value would get returned.
       await lock;
       lock = lock
-        // eslint-disable-next-line github/no-then
+
         .catch(() => null)
-        // eslint-disable-next-line github/no-then
+
         .then(async () => {
           const difference = Date.now() - this.lastExecutionTime;
           if (difference <= THROTTLE_MS) {

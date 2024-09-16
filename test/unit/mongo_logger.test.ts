@@ -1052,7 +1052,6 @@ describe('class MongoLogger', function () {
 
               context('when serviceId is not present', function () {
                 beforeEach(function () {
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
                   const { serviceId: _, ...connectionPoolClearedNoServiceId } =
                     connectionPoolCleared;
                   logger[severityLevel]('connection', connectionPoolClearedNoServiceId);

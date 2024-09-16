@@ -17,6 +17,7 @@ import {
   type FindCursor,
   LEGACY_HELLO_COMMAND,
   type MongoClient,
+  MongoInvalidArgumentError,
   MongoOperationTimeoutError,
   MongoServerError
 } from '../../mongodb';
@@ -351,7 +352,7 @@ describe('CSOT driver tests', metadata, () => {
       data: {
         failCommands: ['find', 'getMore'],
         blockConnection: true,
-        blockTimeMS: 25
+        blockTimeMS: 50
       }
     };
 
@@ -413,10 +414,10 @@ describe('CSOT driver tests', metadata, () => {
           const cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 50 })
+            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 100 })
             .project({ _id: 0 });
 
-          // Iterating over 3 documents in the collection, each artificially taking ~25 ms due to failpoint. If timeoutMS is not refreshed, then we'd expect to error
+          // Iterating over 3 documents in the collection, each artificially taking ~50 ms due to failpoint. If timeoutMS is not refreshed, then we'd expect to error
           for await (const doc of cursor) {
             expect(doc).to.deep.equal({ x: 1 });
           }
@@ -465,7 +466,7 @@ describe('CSOT driver tests', metadata, () => {
         data: {
           failCommands: ['find', 'getMore'],
           blockConnection: true,
-          blockTimeMS: 25
+          blockTimeMS: 50
         }
       };
 
@@ -509,13 +510,13 @@ describe('CSOT driver tests', metadata, () => {
               const cursor = client
                 .db('db')
                 .collection('coll')
-                .find({}, { timeoutMode: 'cursorLifetime', timeoutMS: 50 })
+                .find({}, { timeoutMode: 'cursorLifetime', timeoutMS: 100 })
                 .project({ _id: 0 });
               const doc = await cursor.next();
               expect(doc).to.deep.equal({ x: 1 });
               expect(cursor.documents.length).to.be.gt(0);
 
-              await setTimeout(50);
+              await setTimeout(100);
 
               const docOrErr = await cursor.next().then(
                 d => d,
@@ -532,13 +533,15 @@ describe('CSOT driver tests', metadata, () => {
             const cursor = client
               .db('db')
               .collection('coll')
-              .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 50 })
+              .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 100 })
+
               .project({ _id: 0 });
+
             const doc = await cursor.next();
             expect(doc).to.deep.equal({ x: 1 });
             expect(cursor.documents.length).to.equal(0);
 
-            await setTimeout(50);
+            await setTimeout(100);
 
             const docOrErr = await cursor.next().then(
               d => d,
@@ -555,7 +558,7 @@ describe('CSOT driver tests', metadata, () => {
             .collection('coll')
             .find({}, { batchSize: 1, timeoutMode: 'cursorLifetime', timeoutMS: 1000 })
             .project({ _id: 0 });
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
           for await (const _doc of cursor) {
             // Ignore _doc
           }
@@ -716,6 +719,152 @@ describe('CSOT driver tests', metadata, () => {
           expect(commandStarted[0].command.maxTimeMS).to.not.exist;
         });
       });
+  describe('when using an explicit session', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: { topology: ['replicaset'], mongodb: '>=4.4' }
+    };
+
+    describe('created for a withTransaction callback', () => {
+      describe('passing a timeoutMS and a session with a timeoutContext', () => {
+        let client: MongoClient;
+
+        beforeEach(async function () {
+          client = this.configuration.newClient({ timeoutMS: 123 });
+        });
+
+        afterEach(async function () {
+          await client.close();
+        });
+
+        it('throws a validation error from the operation', metadata, async () => {
+          // Drivers MUST raise a validation error if an explicit session with a timeout is used and
+          // the timeoutMS option is set at the operation level for operations executed as part of a withTransaction callback.
+
+          const coll = client.db('db').collection('coll');
+
+          const session = client.startSession();
+
+          let insertError: Error | null = null;
+          const withTransactionError = await session
+            .withTransaction(async session => {
+              insertError = await coll
+                .insertOne({ x: 1 }, { session, timeoutMS: 1234 })
+                .catch(error => error);
+              throw insertError;
+            })
+            .catch(error => error);
+
+          expect(insertError).to.be.instanceOf(MongoInvalidArgumentError);
+          expect(withTransactionError).to.be.instanceOf(MongoInvalidArgumentError);
+        });
+      });
+    });
+
+    describe('created manually', () => {
+      describe('passing a timeoutMS and a session with an inherited timeoutMS', () => {
+        let client: MongoClient;
+
+        beforeEach(async function () {
+          client = this.configuration.newClient({ timeoutMS: 123 });
+        });
+
+        afterEach(async function () {
+          await client.close();
+        });
+
+        it('does not throw a validation error', metadata, async () => {
+          const coll = client.db('db').collection('coll');
+          const session = client.startSession();
+          session.startTransaction();
+          await coll.insertOne({ x: 1 }, { session, timeoutMS: 1234 });
+          await session.abortTransaction(); // this uses the inherited timeoutMS, not the insert
+        });
+      });
+    });
+  });
+
+  describe('Convenient Transactions', () => {
+    /** Tests in this section MUST only run against replica sets and sharded clusters with server versions 4.4 or higher. */
+    const metadata: MongoDBMetadataUI = {
+      requires: { topology: ['replicaset', 'sharded'], mongodb: '>=5.0' }
+    };
+
+    describe('when an operation fails inside withTransaction callback', () => {
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 2 },
+        data: {
+          failCommands: ['insert', 'abortTransaction'],
+          blockConnection: true,
+          blockTimeMS: 600
+        }
+      };
+
+      beforeEach(async function () {
+        if (!semver.satisfies(this.configuration.version, '>=4.4')) {
+          this.skipReason = 'Requires server version 4.4+';
+          this.skip();
+        }
+        const internalClient = this.configuration.newClient();
+        await internalClient
+          .db('db')
+          .collection('coll')
+          .drop()
+          .catch(() => null);
+        await internalClient.db('admin').command(failpoint);
+        await internalClient.close();
+      });
+
+      let client: MongoClient;
+
+      afterEach(async function () {
+        if (semver.satisfies(this.configuration.version, '>=4.4')) {
+          const internalClient = this.configuration.newClient();
+          await internalClient
+            .db('admin')
+            .command({ configureFailPoint: 'failCommand', mode: 'off' });
+          await internalClient.close();
+        }
+        await client?.close();
+      });
+
+      it(
+        'timeoutMS is refreshed for abortTransaction and the timeout error is thrown from the operation',
+        metadata,
+        async function () {
+          const commandsFailed = [];
+          const commandsStarted = [];
+
+          client = this.configuration
+            .newClient({ timeoutMS: 500, monitorCommands: true })
+            .on('commandStarted', e => commandsStarted.push(e.commandName))
+            .on('commandFailed', e => commandsFailed.push(e.commandName));
+
+          const coll = client.db('db').collection('coll');
+
+          const session = client.startSession();
+
+          let insertError: Error | null = null;
+          const withTransactionError = await session
+            .withTransaction(async session => {
+              insertError = await coll.insertOne({ x: 1 }, { session }).catch(error => error);
+              throw insertError;
+            })
+            .catch(error => error);
+
+          try {
+            expect(insertError).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(withTransactionError).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(commandsStarted, 'commands started').to.deep.equal([
+              'insert',
+              'abortTransaction'
+            ]);
+            expect(commandsFailed, 'commands failed').to.deep.equal(['insert', 'abortTransaction']);
+          } finally {
+            await session.endSession();
+          }
+        }
+      );
     });
   });
 });
