@@ -107,7 +107,6 @@ export * from '../src/cmap/auth/auth_provider';
 export * from '../src/cmap/auth/aws_temporary_credentials';
 export * from '../src/cmap/auth/gssapi';
 export * from '../src/cmap/auth/mongo_credentials';
-export * from '../src/cmap/auth/mongocr';
 export * from '../src/cmap/auth/mongodb_aws';
 export * from '../src/cmap/auth/mongodb_oidc';
 export * from '../src/cmap/auth/mongodb_oidc/azure_machine_workflow';

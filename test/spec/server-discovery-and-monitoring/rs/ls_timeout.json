@@ -20,7 +20,7 @@
             "setName": "rs",
             "logicalSessionTimeoutMinutes": 3,
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
@@ -58,7 +58,7 @@
             "isWritablePrimary": false,
             "isreplicaset": true,
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
@@ -104,7 +104,7 @@
             "setName": "rs",
             "arbiterOnly": true,
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
@@ -152,7 +152,7 @@
             "setName": "rs",
             "logicalSessionTimeoutMinutes": 2,
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
@@ -194,7 +194,7 @@
             "hidden": true,
             "logicalSessionTimeoutMinutes": 1,
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
@@ -244,7 +244,7 @@
             "setName": "rs",
             "logicalSessionTimeoutMinutes": null,
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],

@@ -93,6 +93,21 @@
       ],
       "auth": null,
       "options": null
+    },
+    {
+      "description": "Comma in a key value pair causes a warning",
+      "uri": "mongodb://localhost?authMechanism=MONGODB-OIDC&authMechanismProperties=TOKEN_RESOURCE:mongodb://host1%2Chost2",
+      "valid": true,
+      "warning": true,
+      "hosts": [
+        {
+          "type": "hostname",
+          "host": "localhost",
+          "port": null
+        }
+      ],
+      "auth": null,
+      "options": null
     }
   ]
 }

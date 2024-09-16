@@ -249,5 +249,3 @@ tests:
         hosts: ~
         auth: ~
         options: ~
-
-    
