@@ -16,9 +16,7 @@ describe('class ServerDescription', function () {
         detached: true
       });
 
-      childProcess.on('error', error =>
-        console.warn('class ServerDescription when connecting to mongocryptd:', error)
-      );
+      childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
       client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`);
     });
 
