@@ -1,6 +1,7 @@
 import { Readable, Transform } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
+import { type OnDemandDocumentDeserializeOptions } from '../cmap/wire_protocol/on_demand/document';
 import { type CursorResponse } from '../cmap/wire_protocol/responses';
 import {
   MongoAPIError,
@@ -60,13 +61,13 @@ export interface CursorStreamOptions {
 /** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
-/** @internal */
+/** @public*/
 export const CursorTimeoutMode = Object.freeze({
   ITERATION: 'iteration',
   LIFETIME: 'cursorLifetime'
 } as const);
 
-/** @internal
+/** @public
  * TODO(NODE-5688): Document and release
  * */
 export type CursorTimeoutMode = (typeof CursorTimeoutMode)[keyof typeof CursorTimeoutMode];
@@ -131,9 +132,7 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
   exhaust?: boolean;
   partial?: boolean;
 
-  omitMaxTimeMSOnInitialCommand?: boolean;
-  omitMaxTimeMSOnGetMore?: boolean;
-  useMaxAwaitTimeMSAsMaxTimeMS?: boolean;
+  omitMaxTimeMS?: boolean;
 };
 
 /** @public */
@@ -176,6 +175,9 @@ export abstract class AbstractCursor<
 
   /** @event */
   static readonly CLOSE = 'close' as const;
+
+  /** @internal */
+  protected deserializationOptions: OnDemandDocumentDeserializeOptions;
 
   /** @internal */
   protected constructor(
@@ -233,16 +235,14 @@ export abstract class AbstractCursor<
       if (options.timeoutMode != null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
-    this.cursorOptions.omitMaxTimeMSOnInitialCommand =
-      this.cursorOptions.timeoutMS != null &&
-      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-      !this.cursorOptions.awaitData;
-    this.cursorOptions.omitMaxTimeMSOnGetMore =
-      this.cursorOptions.timeoutMS != null &&
-      !(this.cursorOptions.tailable && this.cursorOptions.awaitData);
 
     this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS =
       this.cursorOptions.tailable && this.cursorOptions.awaitData;
+    this.cursorOptions.omitMaxTimeMS =
+      this.cursorOptions.timeoutMS != null &&
+      ((this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
+        !this.cursorOptions.tailable) ||
+        (this.cursorOptions.tailable && !this.cursorOptions.awaitData));
 
     const readConcern = ReadConcern.fromOptions(options);
     if (readConcern) {
@@ -272,6 +272,13 @@ export abstract class AbstractCursor<
     } else {
       this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
     }
+
+    this.deserializationOptions = {
+      ...this.cursorOptions,
+      validation: {
+        utf8: options?.enableUtf8Validation === false ? false : true
+      }
+    };
   }
 
   /**
@@ -365,7 +372,7 @@ export abstract class AbstractCursor<
     );
 
     for (let count = 0; count < documentsToRead; count++) {
-      const document = this.documents?.shift(this.cursorOptions);
+      const document = this.documents?.shift(this.deserializationOptions);
       if (document != null) {
         bufferedDocs.push(document);
       }
@@ -375,7 +382,7 @@ export abstract class AbstractCursor<
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
-    if (this.isClosed) {
+    if (this.closed) {
       return;
     }
 
@@ -471,6 +478,9 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
+    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      this.timeoutContext?.refresh();
+    }
 
     try {
       do {
@@ -483,7 +493,7 @@ export abstract class AbstractCursor<
       } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
     } finally {
       if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
-        this.timeoutContext?.refresh();
+        this.timeoutContext?.clear();
       }
     }
 
@@ -498,8 +508,11 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
+    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      this.timeoutContext?.refresh();
+    }
     try {
-      let doc = this.documents?.shift(this.cursorOptions);
+      let doc = this.documents?.shift(this.deserializationOptions);
       if (doc != null) {
         if (this.transform != null) return await this.transformDocument(doc);
         return doc;
@@ -507,14 +520,14 @@ export abstract class AbstractCursor<
 
       await this.fetchBatch();
 
-      doc = this.documents?.shift(this.cursorOptions);
+      doc = this.documents?.shift(this.deserializationOptions);
       if (doc != null) {
         if (this.transform != null) return await this.transformDocument(doc);
         return doc;
       }
     } finally {
       if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
-        this.timeoutContext?.refresh();
+        this.timeoutContext?.clear();
       }
     }
 
@@ -737,7 +750,6 @@ export abstract class AbstractCursor<
       // We only want to end this session if we created it, and it hasn't ended yet
       if (session.explicit === false) {
         if (!session.hasEnded) {
-          // eslint-disable-next-line github/no-then
           session.endSession().then(undefined, squashError);
         }
         this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
@@ -852,6 +864,7 @@ export abstract class AbstractCursor<
 
     // otherwise need to call getMore
     const batchSize = this.cursorOptions.batchSize || 1000;
+    this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
 
     try {
       const response = await this.getMore(batchSize);
@@ -993,7 +1006,6 @@ class ReadableCursorStream extends Readable {
   }
 
   override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
-    // eslint-disable-next-line github/no-then
     this._cursor.close().then(
       () => callback(error),
       closeError => callback(closeError)
@@ -1006,13 +1018,11 @@ class ReadableCursorStream extends Readable {
       return;
     }
 
-    // eslint-disable-next-line github/no-then
     this._cursor.next().then(
       result => {
         if (result == null) {
           this.push(null);
         } else if (this.destroyed) {
-          // eslint-disable-next-line github/no-then
           this._cursor.close().then(undefined, squashError);
         } else {
           if (this.push(result)) {
@@ -1028,7 +1038,6 @@ class ReadableCursorStream extends Readable {
         //       a client during iteration. Alternatively, we could do the "right" thing and
         //       propagate the error message by removing this special case.
         if (err.message.match(/server is closed/)) {
-          // eslint-disable-next-line github/no-then
           this._cursor.close().then(undefined, squashError);
           return this.push(null);
         }

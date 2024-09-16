@@ -1,4 +1,5 @@
 import { join } from 'path';
+import * as semver from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
@@ -11,10 +12,7 @@ const skippedSpecs = {
   'gridfs-delete': 'TODO(NODE-6275)',
   'gridfs-download': 'TODO(NODE-6275)',
   'gridfs-find': 'TODO(NODE-6275)',
-  'gridfs-upload': 'TODO(NODE-6275)',
-  'sessions-inherit-timeoutMS': 'TODO(NODE-5687)',
-  'sessions-override-operation-timeoutMS': 'TODO(NODE-5687)',
-  'sessions-override-timeoutMS': 'TODO(NODE-5687)'
+  'gridfs-upload': 'TODO(NODE-6275)'
 };
 
 const skippedTests = {

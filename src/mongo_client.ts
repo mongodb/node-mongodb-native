@@ -93,8 +93,10 @@ export interface PkFactory {
 
 /** @public */
 export type SupportedTLSConnectionOptions = Pick<
-  TLSConnectionOptions,
-  Extract<keyof TLSConnectionOptions, (typeof LEGAL_TLS_SOCKET_OPTIONS)[number]>
+  TLSConnectionOptions & {
+    allowPartialTrustChain?: boolean;
+  },
+  (typeof LEGAL_TLS_SOCKET_OPTIONS)[number]
 >;
 
 /** @public */

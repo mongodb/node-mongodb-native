@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import type Sinon from 'sinon';
+// eslint-disable-next-line no-duplicate-imports
 import * as sinon from 'sinon';
 
 import {

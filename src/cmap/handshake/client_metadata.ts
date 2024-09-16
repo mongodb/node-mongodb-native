@@ -6,7 +6,7 @@ import { MongoInvalidArgumentError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
 import { fileIsAccessible } from '../../utils';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const NODE_DRIVER_VERSION = require('../../../package.json').version;
 
 /**

@@ -332,8 +332,8 @@ describe('AWS KMS Credential Fetching', function () {
       this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
         ? 'Test must run in an AWS auth testing environment'
         : AWSTemporaryCredentialProvider.isAWSSDKInstalled
-        ? 'This test must run in an environment where the AWS SDK is not installed.'
-        : undefined;
+          ? 'This test must run in an environment where the AWS SDK is not installed.'
+          : undefined;
       this.currentTest?.skipReason && this.skip();
     });
     it('fetching AWS KMS credentials throws an error', async function () {
@@ -347,8 +347,8 @@ describe('AWS KMS Credential Fetching', function () {
       this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
         ? 'Test must run in an AWS auth testing environment'
         : !AWSTemporaryCredentialProvider.isAWSSDKInstalled
-        ? 'This test must run in an environment where the AWS SDK is installed.'
-        : undefined;
+          ? 'This test must run in an environment where the AWS SDK is installed.'
+          : undefined;
       this.currentTest?.skipReason && this.skip();
     });
     it('KMS credentials are successfully fetched.', async function () {

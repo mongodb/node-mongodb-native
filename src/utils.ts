@@ -192,7 +192,6 @@ export function isPromiseLike<T = unknown>(value?: unknown): value is PromiseLik
     value != null &&
     typeof value === 'object' &&
     'then' in value &&
-    // eslint-disable-next-line github/no-then
     typeof value.then === 'function'
   );
 }
@@ -301,7 +300,10 @@ export class MongoDBNamespace {
    * @param db - database name
    * @param collection - collection name
    */
-  constructor(public db: string, public collection?: string) {
+  constructor(
+    public db: string,
+    public collection?: string
+  ) {
     this.collection = collection === '' ? undefined : collection;
   }
 
@@ -333,7 +335,10 @@ export class MongoDBNamespace {
  * used in scenarios where this can be guaranteed.
  */
 export class MongoDBCollectionNamespace extends MongoDBNamespace {
-  constructor(db: string, override collection: string) {
+  constructor(
+    db: string,
+    override collection: string
+  ) {
     super(db, collection);
   }
 
@@ -501,6 +506,10 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
 /**
  * Merge inherited properties from parent into options, prioritizing values from options,
  * then values from parent.
+ *
+ * @param parent - An optional owning class of the operation being run. ex. Db/Collection/MongoClient.
+ * @param options - The options passed to the operation method.
+ *
  * @internal
  */
 export function resolveOptions<T extends CommandOperationOptions>(
@@ -526,6 +535,13 @@ export function resolveOptions<T extends CommandOperationOptions>(
   const readPreference = ReadPreference.fromOptions(options) ?? parent?.readPreference;
   if (readPreference) {
     result.readPreference = readPreference;
+  }
+
+  const isConvenientTransaction = session?.explicit && session?.timeoutContext != null;
+  if (isConvenientTransaction && options?.timeoutMS != null) {
+    throw new MongoInvalidArgumentError(
+      'An operation cannot be given a timeoutMS setting when inside a withTransaction call that has a timeoutMS setting'
+    );
   }
 
   result.timeoutMS = options?.timeoutMS ?? parent?.timeoutMS;
@@ -998,7 +1014,7 @@ export const DEFAULT_PK_FACTORY = {
  * })
  * ```
  */
-export const MONGODB_WARNING_CODE = 'MONGODB DRIVER' as const;
+export const MONGODB_WARNING_CODE = 'MONGODB DRIVER';
 
 /** @internal */
 export function emitWarning(message: string): void {

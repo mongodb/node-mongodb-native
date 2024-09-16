@@ -34,11 +34,11 @@ export type InferIdType<TSchema> = TSchema extends { _id: infer IdType }
     ? never // explicitly forbid empty objects as the type of _id
     : IdType
   : TSchema extends { _id?: infer IdType }
-  ? // optional _id defined - return ObjectId | IdType
-    unknown extends IdType
-    ? ObjectId // infer the _id type as ObjectId if the type of _id is unknown
-    : IdType
-  : ObjectId; // user has not defined _id on schema
+    ? // optional _id defined - return ObjectId | IdType
+      unknown extends IdType
+      ? ObjectId // infer the _id type as ObjectId if the type of _id is unknown
+      : IdType
+    : ObjectId; // user has not defined _id on schema
 
 /** Add an _id field to an object shaped type @public */
 export type WithId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id: InferIdType<TSchema> };
@@ -68,8 +68,8 @@ export type OptionalUnlessRequiredId<TSchema> = TSchema extends { _id: any }
 export type EnhancedOmit<TRecordOrUnion, KeyUnion> = string extends keyof TRecordOrUnion
   ? TRecordOrUnion // TRecordOrUnion has indexed type e.g. { _id: string; [k: string]: any; } or it is "any"
   : TRecordOrUnion extends any
-  ? Pick<TRecordOrUnion, Exclude<keyof TRecordOrUnion, KeyUnion>> // discriminated unions
-  : never;
+    ? Pick<TRecordOrUnion, Exclude<keyof TRecordOrUnion, KeyUnion>> // discriminated unions
+    : never;
 
 /** Remove the _id field from an object shaped type @public */
 export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
@@ -88,9 +88,8 @@ export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<
  * array types can be searched using their element type
  * @public
  */
-export type AlternativeType<T> = T extends ReadonlyArray<infer U>
-  ? T | RegExpOrString<U>
-  : RegExpOrString<T>;
+export type AlternativeType<T> =
+  T extends ReadonlyArray<infer U> ? T | RegExpOrString<U> : RegExpOrString<T>;
 
 /** @public */
 export type RegExpOrString<T> = T extends string ? BSONRegExp | RegExp | T : T;
@@ -192,9 +191,10 @@ export type IntegerType = number | Int32 | Long | bigint;
 export type NumericType = IntegerType | Decimal128 | Double;
 
 /** @public */
-export type FilterOperations<T> = T extends Record<string, any>
-  ? { [key in keyof T]?: FilterOperators<T[key]> }
-  : FilterOperators<T>;
+export type FilterOperations<T> =
+  T extends Record<string, any>
+    ? { [key in keyof T]?: FilterOperators<T[key]> }
+    : FilterOperators<T>;
 
 /** @public */
 export type KeysOfAType<TSchema, Type> = {
@@ -412,6 +412,7 @@ export declare interface TypedEventEmitter<Events extends EventsDescription> ext
  * @public
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class TypedEventEmitter<Events extends EventsDescription> extends EventEmitter {
   /** @internal */
   protected mongoLogger?: MongoLogger;
@@ -480,31 +481,31 @@ export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
 export type Join<T extends unknown[], D extends string> = T extends []
   ? ''
   : T extends [string | number]
-  ? `${T[0]}`
-  : T extends [string | number, ...infer R]
-  ? `${T[0]}${D}${Join<R, D>}`
-  : string;
+    ? `${T[0]}`
+    : T extends [string | number, ...infer R]
+      ? `${T[0]}${D}${Join<R, D>}`
+      : string;
 
 /** @public */
 export type PropertyType<Type, Property extends string> = string extends Property
   ? unknown
   : Property extends keyof Type
-  ? Type[Property]
-  : Property extends `${number}`
-  ? Type extends ReadonlyArray<infer ArrayType>
-    ? ArrayType
-    : unknown
-  : Property extends `${infer Key}.${infer Rest}`
-  ? Key extends `${number}`
-    ? Type extends ReadonlyArray<infer ArrayType>
-      ? PropertyType<ArrayType, Rest>
-      : unknown
-    : Key extends keyof Type
-    ? Type[Key] extends Map<string, infer MapType>
-      ? MapType
-      : PropertyType<Type[Key], Rest>
-    : unknown
-  : unknown;
+    ? Type[Property]
+    : Property extends `${number}`
+      ? Type extends ReadonlyArray<infer ArrayType>
+        ? ArrayType
+        : unknown
+      : Property extends `${infer Key}.${infer Rest}`
+        ? Key extends `${number}`
+          ? Type extends ReadonlyArray<infer ArrayType>
+            ? PropertyType<ArrayType, Rest>
+            : unknown
+          : Key extends keyof Type
+            ? Type[Key] extends Map<string, infer MapType>
+              ? MapType
+              : PropertyType<Type[Key], Rest>
+            : unknown
+        : unknown;
 
 /**
  * @public
@@ -521,41 +522,41 @@ export type PropertyType<Type, Property extends string> = string extends Propert
 export type NestedPaths<Type, Depth extends number[]> = Depth['length'] extends 8
   ? []
   : Type extends
-      | string
-      | number
-      | bigint
-      | boolean
-      | Date
-      | RegExp
-      | Buffer
-      | Uint8Array
-      | ((...args: any[]) => any)
-      | { _bsontype: string }
-  ? []
-  : Type extends ReadonlyArray<infer ArrayType>
-  ? [] | [number, ...NestedPaths<ArrayType, [...Depth, 1]>]
-  : Type extends Map<string, any>
-  ? [string]
-  : Type extends object
-  ? {
-      [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
-        ? [Key]
-        : // for a recursive union type, the child will never extend the parent type.
-        // but the parent will still extend the child
-        Type extends Type[Key]
-        ? [Key]
-        : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
-        ? Type extends ArrayType // is the type of the parent the same as the type of the array?
-          ? [Key] // yes, it's a recursive array type
-          : // for unions, the child type extends the parent
-          ArrayType extends Type
-          ? [Key] // we have a recursive array union
-          : // child is an array, but it's not a recursive array
-            [Key, ...NestedPaths<Type[Key], [...Depth, 1]>]
-        : // child is not structured the same as the parent
-          [Key, ...NestedPaths<Type[Key], [...Depth, 1]>] | [Key];
-    }[Extract<keyof Type, string>]
-  : [];
+        | string
+        | number
+        | bigint
+        | boolean
+        | Date
+        | RegExp
+        | Buffer
+        | Uint8Array
+        | ((...args: any[]) => any)
+        | { _bsontype: string }
+    ? []
+    : Type extends ReadonlyArray<infer ArrayType>
+      ? [] | [number, ...NestedPaths<ArrayType, [...Depth, 1]>]
+      : Type extends Map<string, any>
+        ? [string]
+        : Type extends object
+          ? {
+              [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
+                ? [Key]
+                : // for a recursive union type, the child will never extend the parent type.
+                  // but the parent will still extend the child
+                  Type extends Type[Key]
+                  ? [Key]
+                  : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
+                    ? Type extends ArrayType // is the type of the parent the same as the type of the array?
+                      ? [Key] // yes, it's a recursive array type
+                      : // for unions, the child type extends the parent
+                        ArrayType extends Type
+                        ? [Key] // we have a recursive array union
+                        : // child is an array, but it's not a recursive array
+                          [Key, ...NestedPaths<Type[Key], [...Depth, 1]>]
+                    : // child is not structured the same as the parent
+                      [Key, ...NestedPaths<Type[Key], [...Depth, 1]>] | [Key];
+            }[Extract<keyof Type, string>]
+          : [];
 
 /**
  * @public

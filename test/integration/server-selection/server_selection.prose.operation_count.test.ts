@@ -30,7 +30,7 @@ async function runTaskGroup(collection: Collection, count: 10 | 100 | 1000) {
 
 async function ensurePoolIsFull(client: MongoClient): Promise<boolean> {
   let connectionCount = 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   for await (const _event of on(client, 'connectionCreated')) {
     connectionCount++;
     if (connectionCount === POOL_SIZE * 2) {

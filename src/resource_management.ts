@@ -58,13 +58,13 @@ export function configureExplicitResourceManagement() {
   // function, but keeping all resource-management related code together seemed preferable and I chose
   // lazy requiring of resources instead.
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { MongoClient } = require('./mongo_client');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { ClientSession } = require('./sessions');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { AbstractCursor } = require('./cursor/abstract_cursor');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { ChangeStream } = require('./change_stream');
 
   configureResourceManagement(MongoClient.prototype);

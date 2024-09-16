@@ -30,6 +30,7 @@ export class ClientSideEncryptionFilter extends Filter {
     this.csfleKMSProviders = process.env.CSFLE_KMS_PROVIDERS;
     let mongodbClientEncryption;
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       mongodbClientEncryption = require('mongodb-client-encryption');
       ClientSideEncryptionFilter.libmongocrypt = (
         mongodbClientEncryption as typeof import('mongodb-client-encryption')
