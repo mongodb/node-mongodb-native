@@ -5,8 +5,9 @@ import { type TODO_NODE_3286 } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import type { WriteConcern } from '../write_concern';
 import { MongoDBNamespace } from '../utils';
-import { AbstractOperation } from './operation';
+import { Aspect, defineAspects, AbstractOperation } from './operation';
 
 /** @public */
 export type RunCommandOptions = {
@@ -51,7 +52,7 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
   constructor(
     public command: Document,
     public override options: RunCommandOptions & {
-      noResponse?: boolean;
+      moreToCome?: boolean;
       bypassPinningCheck?: boolean;
     }
   ) {

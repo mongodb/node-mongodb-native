@@ -682,7 +682,7 @@ describe('class MongoClient', function () {
       expect(result2).to.have.property('ok', 1);
     });
 
-    it('sends endSessions with noResponse set', async () => {
+    it('sends endSessions with writeConcern w = 0 set', async () => {
       const session = client.startSession(); // make a session to be ended
       await client.db('test').command({ ping: 1 }, { session });
       await session.endSession();
@@ -698,7 +698,7 @@ describe('class MongoClient', function () {
       expect(startedEvents).to.have.lengthOf(1);
       expect(startedEvents[0]).to.have.property('commandName', 'endSessions');
       expect(endEvents).to.have.lengthOf(1);
-      expect(endEvents[0]).to.have.property('reply', undefined); // noReponse: true
+      expect(endEvents[0]).to.containSubset({ reply: { ok: 1 } }); // writeConcern.w = 0
     });
 
     context('when server selection would return no servers', () => {
