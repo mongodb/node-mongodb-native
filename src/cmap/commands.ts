@@ -475,7 +475,7 @@ export class OpMsgRequest {
 
     // flags
     this.checksumPresent = false;
-    this.moreToCome = options.moreToCome || command.writeConcern?.w === 0 || false;
+    this.moreToCome = options.moreToCome ?? command.writeConcern?.w === 0;
     this.exhaustAllowed =
       typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
