@@ -15,7 +15,7 @@ describe('Collection', function () {
   });
 
   context('#createIndex', () => {
-    it('should error when createIndex fails', function (done) {
+    it.only('should error when createIndex fails', function (done) {
       const ERROR_RESPONSE = {
         ok: 0,
         errmsg:

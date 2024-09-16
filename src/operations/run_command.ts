@@ -5,9 +5,8 @@ import { type TODO_NODE_3286 } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { WriteConcern } from '../write_concern';
 import { MongoDBNamespace } from '../utils';
-import { Aspect, defineAspects, AbstractOperation } from './operation';
+import { AbstractOperation } from './operation';
 
 /** @public */
 export type RunCommandOptions = {
