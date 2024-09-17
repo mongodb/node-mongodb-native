@@ -656,7 +656,9 @@ describe('CSOT driver tests', metadata, () => {
           }
         });
 
-        it('does not use timeoutMS to compute maxTimeMS for getMores', async function () {});
+        it('does not use timeoutMS to compute maxTimeMS for getMores', async function () {
+          // TODO(NODE_6305)
+        });
 
         context('when maxAwaitTimeMS is specified', function () {
           it('sets maxTimeMS to the configured maxAwaitTimeMS value on getMores');
