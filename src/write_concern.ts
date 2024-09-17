@@ -58,7 +58,10 @@ interface CommandWriteConcernOptions {
  * @see https://www.mongodb.com/docs/manual/reference/write-concern/
  */
 export class WriteConcern {
-  /** Request acknowledgment that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags. */
+  /**
+   * Request acknowledgment that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags.
+   * If w is 0 and is set on a write operation, the server will not send a response.
+   */
   readonly w?: W;
   /** Request acknowledgment that the write operation has been written to the on-disk journal */
   readonly journal?: boolean;

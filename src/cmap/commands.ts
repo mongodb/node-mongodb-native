@@ -74,6 +74,8 @@ export class OpQueryRequest {
   awaitData: boolean;
   exhaust: boolean;
   partial: boolean;
+  /** moreToCome is an OP_MSG only concept */
+  moreToCome = false;
 
   constructor(
     public databaseName: string,
@@ -407,13 +409,21 @@ const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
 /** @internal */
 export interface OpMsgOptions {
-  requestId: number;
-  serializeFunctions: boolean;
-  ignoreUndefined: boolean;
-  checkKeys: boolean;
-  maxBsonSize: number;
-  moreToCome: boolean;
-  exhaustAllowed: boolean;
+  socketTimeoutMS?: number;
+  session?: ClientSession;
+  numberToSkip?: number;
+  numberToReturn?: number;
+  returnFieldSelector?: Document;
+  pre32Limit?: number;
+  serializeFunctions?: boolean;
+  ignoreUndefined?: boolean;
+  maxBsonSize?: number;
+  checkKeys?: boolean;
+  secondaryOk?: boolean;
+
+  requestId?: number;
+  moreToCome?: boolean;
+  exhaustAllowed?: boolean;
   readPreference: ReadPreference;
 }
 
@@ -465,7 +475,7 @@ export class OpMsgRequest {
 
     // flags
     this.checksumPresent = false;
-    this.moreToCome = options.moreToCome || false;
+    this.moreToCome = options.moreToCome ?? command.writeConcern?.w === 0;
     this.exhaustAllowed =
       typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
