@@ -709,7 +709,7 @@ export class ChangeStream<
     this._setIsIterator();
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
-    // fails.
+    // fails or until a timeout error is encountered
 
     while (true) {
       try {
@@ -721,7 +721,7 @@ export class ChangeStream<
           await this._processErrorIteratorMode(error);
         } catch (error) {
           if (error instanceof MongoOperationTimeoutError) {
-            throw error;
+            throw error; // Don't close the change stream, but throw the timeout error
           }
           try {
             await this.close();

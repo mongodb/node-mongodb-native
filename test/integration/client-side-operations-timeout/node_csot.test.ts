@@ -31,7 +31,7 @@ describe('CSOT driver tests', metadata, () => {
     let db: Db;
     let coll: Collection;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = this.configuration.newClient(undefined, { timeoutMS: 100 });
       db = client.db('test', { timeoutMS: 200 });
     });
@@ -108,7 +108,7 @@ describe('CSOT driver tests', metadata, () => {
   describe('autoconnect', () => {
     let client: MongoClient;
 
-    afterEach(async function() {
+    afterEach(async function () {
       await client?.close();
       client = undefined;
     });
@@ -116,7 +116,7 @@ describe('CSOT driver tests', metadata, () => {
     describe('when failing autoconnect with timeoutMS defined', () => {
       let configClient: MongoClient;
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         configClient = this.configuration.newClient();
         const result = await configClient
           .db()
@@ -133,7 +133,7 @@ describe('CSOT driver tests', metadata, () => {
         expect(result).to.have.property('ok', 1);
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         const result = await configClient
           .db()
           .admin()
@@ -152,7 +152,7 @@ describe('CSOT driver tests', metadata, () => {
 
       it('throws a MongoOperationTimeoutError', {
         metadata: { requires: { mongodb: '>=4.4', topology: '!load-balanced' } },
-        test: async function() {
+        test: async function () {
           const commandsStarted = [];
           client = this.configuration.newClient(undefined, { timeoutMS: 1, monitorCommands: true });
 
@@ -181,7 +181,7 @@ describe('CSOT driver tests', metadata, () => {
     let commandsSucceeded: CommandSucceededEvent[];
     let commandsFailed: CommandFailedEvent[];
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = this.configuration.newClient({ timeoutMS: 500_000, monitorCommands: true });
       commandsSucceeded = [];
       commandsFailed = [];
@@ -192,7 +192,7 @@ describe('CSOT driver tests', metadata, () => {
       client.on('commandFailed', event => commandsFailed.push(event));
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await client
         .db()
         .collection('a')
@@ -214,7 +214,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command(failpoint);
         else {
@@ -223,7 +223,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command({ ...failpoint, mode: 'off' });
       });
@@ -264,7 +264,7 @@ describe('CSOT driver tests', metadata, () => {
         const readManyStub = sinon
           // @ts-expect-error: readMany is private
           .stub(Connection.prototype, 'readMany')
-          .callsFake(async function*(...args) {
+          .callsFake(async function* (...args) {
             const realIterator = readManyStub.wrappedMethod.call(this, ...args);
             const cmd = commandSpy.lastCall.args.at(1);
             if ('giveMeWriteErrors' in cmd) {
@@ -307,7 +307,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command(failpoint);
         else {
@@ -316,7 +316,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command({ ...failpoint, mode: 'off' });
       });
@@ -356,7 +356,7 @@ describe('CSOT driver tests', metadata, () => {
       }
     };
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       internalClient = this.configuration.newClient();
       await internalClient
         .db('db')
@@ -380,7 +380,7 @@ describe('CSOT driver tests', metadata, () => {
       client.on('commandSucceeded', ev => commandSucceeded.push(ev));
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await internalClient
         .db()
         .admin()
@@ -394,7 +394,7 @@ describe('CSOT driver tests', metadata, () => {
         it(
           'must apply the configured timeoutMS to the initial operation execution',
           metadata,
-          async function() {
+          async function () {
             const cursor = client
               .db('db')
               .collection('coll')
@@ -410,7 +410,7 @@ describe('CSOT driver tests', metadata, () => {
           }
         );
 
-        it('refreshes the timeout for any getMores', metadata, async function() {
+        it('refreshes the timeout for any getMores', metadata, async function () {
           const cursor = client
             .db('db')
             .collection('coll')
@@ -432,7 +432,7 @@ describe('CSOT driver tests', metadata, () => {
         it(
           'does not append a maxTimeMS to the original command or getMores',
           metadata,
-          async function() {
+          async function () {
             const cursor = client
               .db('db')
               .collection('coll')
@@ -470,7 +470,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         internalClient = this.configuration.newClient();
         await internalClient
           .db('db')
@@ -494,7 +494,7 @@ describe('CSOT driver tests', metadata, () => {
         client.on('commandSucceeded', ev => commandSucceeded.push(ev));
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         await internalClient
           .db()
           .admin()
@@ -506,7 +506,7 @@ describe('CSOT driver tests', metadata, () => {
         context(
           'when there are documents available from previously retrieved batch and timeout has expired',
           () => {
-            it('returns documents without error', metadata, async function() {
+            it('returns documents without error', metadata, async function () {
               const cursor = client
                 .db('db')
                 .collection('coll')
@@ -529,7 +529,7 @@ describe('CSOT driver tests', metadata, () => {
           }
         );
         context('when a getMore is required and the timeout has expired', () => {
-          it('throws a MongoOperationTimeoutError', metadata, async function() {
+          it('throws a MongoOperationTimeoutError', metadata, async function () {
             const cursor = client
               .db('db')
               .collection('coll')
@@ -552,7 +552,7 @@ describe('CSOT driver tests', metadata, () => {
           });
         });
 
-        it('does not apply maxTimeMS to a getMore', metadata, async function() {
+        it('does not apply maxTimeMS to a getMore', metadata, async function () {
           const cursor = client
             .db('db')
             .collection('coll')
@@ -576,7 +576,7 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe('Tailable cursors', function() {
+  describe('Tailable cursors', function () {
     let client: MongoClient;
     let internalClient: MongoClient;
     let commandStarted: CommandStartedEvent[];
@@ -591,7 +591,7 @@ describe('CSOT driver tests', metadata, () => {
       }
     };
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       internalClient = this.configuration.newClient();
       await internalClient
         .db('db')
@@ -616,7 +616,7 @@ describe('CSOT driver tests', metadata, () => {
       client.on('commandStarted', ev => commandStarted.push(ev));
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await internalClient
         .db()
         .admin()
@@ -625,14 +625,14 @@ describe('CSOT driver tests', metadata, () => {
       await client.close();
     });
 
-    context('when in ITERATION mode', function() {
-      context('awaitData cursors', function() {
+    context('when in ITERATION mode', function () {
+      context('awaitData cursors', function () {
         let cursor: FindCursor;
-        afterEach(async function() {
+        afterEach(async function () {
           if (cursor) await cursor.close();
         });
 
-        it('applies timeoutMS to initial command', async function() {
+        it('applies timeoutMS to initial command', async function () {
           cursor = client
             .db('db')
             .collection('coll')
@@ -644,7 +644,7 @@ describe('CSOT driver tests', metadata, () => {
           expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
         });
 
-        it('refreshes the timeout for subsequent getMores', async function() {
+        it('refreshes the timeout for subsequent getMores', async function () {
           cursor = client
             .db('db')
             .collection('coll')
@@ -656,21 +656,21 @@ describe('CSOT driver tests', metadata, () => {
           }
         });
 
-        it('does not use timeoutMS to compute maxTimeMS for getMores', async function() { });
+        it('does not use timeoutMS to compute maxTimeMS for getMores', async function () {});
 
-        context('when maxAwaitTimeMS is specified', function() {
+        context('when maxAwaitTimeMS is specified', function () {
           it('sets maxTimeMS to the configured maxAwaitTimeMS value on getMores');
         });
       });
 
-      context('non-awaitData cursors', function() {
+      context('non-awaitData cursors', function () {
         let cursor: FindCursor;
 
-        afterEach(async function() {
+        afterEach(async function () {
           if (cursor) await cursor.close();
         });
 
-        it('applies timeoutMS to initial command', async function() {
+        it('applies timeoutMS to initial command', async function () {
           cursor = client
             .db('db')
             .collection('coll')
@@ -682,7 +682,7 @@ describe('CSOT driver tests', metadata, () => {
           expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
         });
 
-        it('refreshes the timeout for subsequent getMores', async function() {
+        it('refreshes the timeout for subsequent getMores', async function () {
           cursor = client
             .db('db')
             .collection('coll')
@@ -694,7 +694,7 @@ describe('CSOT driver tests', metadata, () => {
           }
         });
 
-        it('does not append a maxTimeMS field to original command', async function() {
+        it('does not append a maxTimeMS field to original command', async function () {
           cursor = client
             .db('db')
             .collection('coll')
@@ -706,7 +706,7 @@ describe('CSOT driver tests', metadata, () => {
           expect(commandStarted[0].command.find).to.exist;
           expect(commandStarted[0].command.maxTimeMS).to.not.exist;
         });
-        it('does not append a maxTimeMS field to subsequent getMores', async function() {
+        it('does not append a maxTimeMS field to subsequent getMores', async function () {
           cursor = client
             .db('db')
             .collection('coll')
@@ -732,11 +732,11 @@ describe('CSOT driver tests', metadata, () => {
       describe('passing a timeoutMS and a session with a timeoutContext', () => {
         let client: MongoClient;
 
-        beforeEach(async function() {
+        beforeEach(async function () {
           client = this.configuration.newClient({ timeoutMS: 123 });
         });
 
-        afterEach(async function() {
+        afterEach(async function () {
           await client.close();
         });
 
@@ -768,12 +768,15 @@ describe('CSOT driver tests', metadata, () => {
       describe('passing a timeoutMS and a session with an inherited timeoutMS', () => {
         let client: MongoClient;
 
-        beforeEach(async function() {
+        beforeEach(async function () {
           client = this.configuration.newClient({ timeoutMS: 123 });
-          await client.db('db').dropCollection('coll').catch(() => null);
+          await client
+            .db('db')
+            .dropCollection('coll')
+            .catch(() => null);
         });
 
-        afterEach(async function() {
+        afterEach(async function () {
           await client.close();
         });
 
@@ -805,7 +808,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         if (!semver.satisfies(this.configuration.version, '>=4.4')) {
           this.skipReason = 'Requires server version 4.4+';
           this.skip();
@@ -822,7 +825,7 @@ describe('CSOT driver tests', metadata, () => {
 
       let client: MongoClient;
 
-      afterEach(async function() {
+      afterEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4')) {
           const internalClient = this.configuration.newClient();
           await internalClient
@@ -836,7 +839,7 @@ describe('CSOT driver tests', metadata, () => {
       it(
         'timeoutMS is refreshed for abortTransaction and the timeout error is thrown from the operation',
         metadata,
-        async function() {
+        async function () {
           const commandsFailed = [];
           const commandsStarted = [];
 
@@ -864,10 +867,7 @@ describe('CSOT driver tests', metadata, () => {
               'insert',
               'abortTransaction'
             ]);
-            expect(commandsFailed, 'commands failed').to.deep.equal([
-              'insert',
-              'abortTransaction'
-            ]);
+            expect(commandsFailed, 'commands failed').to.deep.equal(['insert', 'abortTransaction']);
           } finally {
             await session.endSession();
           }
