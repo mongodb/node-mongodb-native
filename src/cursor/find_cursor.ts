@@ -66,7 +66,6 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const findOperation = new FindOperation(this.namespace, this.cursorFilter, {
       ...this.findOptions, // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
-      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
       session
     });
 

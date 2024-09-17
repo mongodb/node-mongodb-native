@@ -133,6 +133,7 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
   partial?: boolean;
 
   omitMaxTimeMS?: boolean;
+  useMaxAwaitTimeMSAsMaxTimeMS?: boolean;
 };
 
 /** @public */
@@ -238,6 +239,8 @@ export abstract class AbstractCursor<
 
     this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS =
       this.cursorOptions.tailable && this.cursorOptions.awaitData;
+
+    // Set for initial command
     this.cursorOptions.omitMaxTimeMS =
       this.cursorOptions.timeoutMS != null &&
       ((this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
@@ -484,7 +487,7 @@ export abstract class AbstractCursor<
 
     try {
       do {
-        const doc = this.documents?.shift(this.cursorOptions);
+        const doc = this.documents?.shift(this.deserializationOptions);
         if (doc != null) {
           if (this.transform != null) return await this.transformDocument(doc);
           return doc;
@@ -784,7 +787,7 @@ export abstract class AbstractCursor<
       session: this.cursorSession,
       batchSize,
       omitMaxTimeMS:
-        this.cursorOptions.omitMaxTimeMSOnGetMore || this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS
+        this.cursorOptions.omitMaxTimeMS || this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS
     };
 
     if (
@@ -865,6 +868,8 @@ export abstract class AbstractCursor<
     // otherwise need to call getMore
     const batchSize = this.cursorOptions.batchSize || 1000;
     this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
+    this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS =
+      this.cursorOptions.tailable && this.cursorOptions.awaitData;
 
     try {
       const response = await this.getMore(batchSize);

@@ -68,7 +68,6 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.aggregateOptions,
       ...this.cursorOptions,
-      omitMaxTimeMS: this.cursorOptions?.omitMaxTimeMSOnInitialCommand,
       session
     });
 
