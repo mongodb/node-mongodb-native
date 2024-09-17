@@ -4,6 +4,7 @@ const {
   loadSpecFile,
   makeLoadJSON,
   makeClient,
+  makeCSOTClient,
   connectClient,
   initDb,
   dropDb,
@@ -219,4 +220,191 @@ function makeMultiBench(suite) {
     );
 }
 
-module.exports = { makeMultiBench };
+function makeCSOTMultiBench(suite) {
+  return suite
+    .benchmark('findManyAndEmptyCursor_timeoutMS_0', benchmark =>
+      benchmark
+        .taskSize(16.22)
+        .setup(makeLoadJSON('tweet.json'))
+        .setup(makeCSOTClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .setup(initCollection)
+        .setup(makeLoadTweets(false))
+        .task(async function () {
+          // eslint-disable-next-line no-unused-vars
+          for await (const _ of this.collection.find({})) {
+            // do nothing
+          }
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('smallDocBulkInsert_timeoutMS_0', benchmark =>
+      benchmark
+        .taskSize(2.75)
+        .setup(makeLoadJSON('small_doc.json'))
+        .setup(makeLoadInsertDocs(10000))
+        .setup(makeCSOTClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .setup(initDb)
+        .setup(initCollection)
+        .setup(createCollection)
+        .beforeTask(dropCollection)
+        .beforeTask(createCollection)
+        .beforeTask(initCollection)
+        .task(async function () {
+          await this.collection.insertMany(this.docs, { ordered: true });
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('largeDocBulkInsert_timeoutMS_0', benchmark =>
+      benchmark
+        .taskSize(27.31)
+        .setup(makeLoadJSON('large_doc.json'))
+        .setup(makeLoadInsertDocs(10))
+        .setup(makeCSOTClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .setup(initDb)
+        .setup(initCollection)
+        .setup(createCollection)
+        .beforeTask(dropCollection)
+        .beforeTask(createCollection)
+        .beforeTask(initCollection)
+        .task(async function () {
+          await this.collection.insertMany(this.docs, { ordered: true });
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('gridFsUpload_timeoutMS_0', benchmark =>
+      benchmark
+        .taskSize(52.43)
+        .setup(loadGridFs)
+        .setup(makeCSOTClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .setup(initDb)
+        .setup(initCollection)
+        .beforeTask(dropBucket)
+        .beforeTask(initBucket)
+        .beforeTask(gridFsInitUploadStream)
+        .beforeTask(writeSingleByteFileToBucket)
+        .task(gridFsUpload)
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('gridFsDownload_timeoutMS_0', benchmark =>
+      benchmark
+        .taskSize(52.43)
+        .setup(loadGridFs)
+        .setup(makeCSOTClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .setup(initDb)
+        .setup(initCollection)
+        .setup(dropBucket)
+        .setup(initBucket)
+        .setup(gridFsInitUploadStream)
+        .setup(async function () {
+          await gridFsUpload.call(this);
+          this.id = this.uploadStream.id;
+          this.uploadData = undefined;
+        })
+        .task(async function () {
+          // eslint-disable-next-line no-unused-vars
+          for await (const _ of this.bucket.openDownloadStream(this.id)) {
+            // do nothing
+          }
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('findManyAndToArray_timeoutMS_0', benchmark =>
+      benchmark
+        .taskSize(16.22)
+        .setup(makeLoadJSON('tweet.json'))
+        .setup(makeCSOTClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .setup(initCollection)
+        .setup(makeLoadTweets(false))
+        .task(async function () {
+          await this.collection.find({}).toArray();
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('aggregateAMillionDocumentsAndToArray_timeoutMS_0', benchmark =>
+      benchmark
+        .taskSize(16)
+        .setup(makeCSOTClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .task(async function () {
+          await this.db
+            .aggregate([
+              { $documents: [{}] },
+              {
+                $set: {
+                  field: {
+                    $reduce: {
+                      input: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                      initialValue: [0],
+                      in: { $concatArrays: ['$$value', '$$value'] }
+                    }
+                  }
+                }
+              },
+              { $unwind: '$field' },
+              { $limit: 1000000 }
+            ])
+            .toArray();
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    )
+    .benchmark('aggregateAMillionTweetsAndToArray_timeoutMS_0', benchmark =>
+      benchmark
+        .taskSize(1500)
+        .setup(makeLoadJSON('tweet.json'))
+        .setup(makeCSOTClient)
+        .setup(connectClient)
+        .setup(initDb)
+        .setup(dropDb)
+        .task(async function () {
+          await this.db
+            .aggregate([
+              { $documents: [this.doc] },
+              {
+                $set: {
+                  id: {
+                    $reduce: {
+                      input: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                      initialValue: [0],
+                      in: { $concatArrays: ['$$value', '$$value'] }
+                    }
+                  }
+                }
+              },
+              { $unwind: '$id' },
+              { $limit: 1000000 }
+            ])
+            .toArray();
+        })
+        .teardown(dropDb)
+        .teardown(disconnectClient)
+    );
+}
+
+module.exports = { makeMultiBench, makeCSOTMultiBench };

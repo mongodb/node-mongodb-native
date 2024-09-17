@@ -1,9 +1,12 @@
-const { makeParallelBenchmarks } = require('./parallelBench');
-const { makeSingleBench } = require('./singleBench');
-const { makeMultiBench } = require('./multiBench');
+const { makeParallelBenchmarks, makeCSOTParallelBenchmarks } = require('./parallelBench');
+const { makeSingleBench, makeCSOTSingleBench } = require('./singleBench');
+const { makeMultiBench, makeCSOTMultiBench } = require('./multiBench');
 
 module.exports = {
   makeParallelBenchmarks,
+  makeCSOTParallelBenchmarks,
   makeSingleBench,
-  makeMultiBench
+  makeCSOTSingleBench,
+  makeMultiBench,
+  makeCSOTMultiBench
 };
