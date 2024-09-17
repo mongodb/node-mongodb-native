@@ -248,7 +248,7 @@ describe('CSOT spec prose tests', function () {
       await coll.insertOne({ x: 1 });
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { timeoutMS: 20, monitorCommands: true });
+      client = this.configuration.newClient(undefined, { monitorCommands: true, timeoutMS: 30 });
       commandStarted = [];
       commandSucceeded = [];
 
@@ -291,11 +291,11 @@ describe('CSOT spec prose tests', function () {
        * 1. Verify that a `find` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
 
-      it.skip('send correct number of finds and getMores', async function () {
+      it('send correct number of finds and getMores', async function () {
         const cursor = client
           .db('db')
           .collection('coll')
-          .find({}, { tailable: true, awaitData: true })
+          .find({}, { tailable: true })
           .project({ _id: 0 });
         const doc = await cursor.next();
         expect(doc).to.deep.equal({ x: 1 });
@@ -312,7 +312,7 @@ describe('CSOT spec prose tests', function () {
         expect(commandStarted.filter(e => e.command.find != null)).to.have.lengthOf(1);
         // Expect 2 getMore
         expect(commandStarted.filter(e => e.command.getMore != null)).to.have.lengthOf(2);
-      }).skipReason = 'TODO(NODE-6305)';
+      });
     });
 
     context('Change Streams', () => {
@@ -337,8 +337,11 @@ describe('CSOT spec prose tests', function () {
        *    - Expect this to fail with a timeout error.
        * 1. Verify that an `aggregate` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
-      it.skip('sends correct number of aggregate and getMores', async function () {
-        const changeStream = client.db('db').collection('coll').watch();
+      it('sends correct number of aggregate and getMores', async function () {
+        const changeStream = client
+          .db('db')
+          .collection('coll')
+          .watch([], { timeoutMS: 20, maxAwaitTimeMS: 19 });
         const maybeError = await changeStream.next().then(
           () => null,
           e => e
@@ -351,9 +354,9 @@ describe('CSOT spec prose tests', function () {
         const getMores = commandStarted.filter(e => e.command.getMore != null).map(e => e.command);
         // Expect 1 aggregate
         expect(aggregates).to.have.lengthOf(1);
-        // Expect 1 getMore
-        expect(getMores).to.have.lengthOf(1);
-      }).skipReason = 'TODO(NODE-6305)';
+        // Expect 2 getMores
+        expect(getMores).to.have.lengthOf(2);
+      });
     });
   });
 
