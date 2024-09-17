@@ -69,6 +69,8 @@ export class ServerDescription {
   setVersion: number | null;
   electionId: ObjectId | null;
   logicalSessionTimeoutMinutes: number | null;
+  /** Indicates server is a mongocryptd instance. */
+  iscryptd: boolean;
 
   // NOTE: does this belong here? It seems we should gossip the cluster time at the CMAP level
   $clusterTime?: ClusterTime;
@@ -114,6 +116,7 @@ export class ServerDescription {
     this.primary = hello?.primary ?? null;
     this.me = hello?.me?.toLowerCase() ?? null;
     this.$clusterTime = hello?.$clusterTime ?? null;
+    this.iscryptd = Boolean(hello?.iscryptd);
   }
 
   get hostAddress(): HostAddress {
@@ -167,6 +170,7 @@ export class ServerDescription {
 
     return (
       other != null &&
+      other.iscryptd === this.iscryptd &&
       errorStrictEqual(this.error, other.error) &&
       this.type === other.type &&
       this.minWireVersion === other.minWireVersion &&
