@@ -20,7 +20,7 @@
               "$oid": "000000000000000000000001"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ],
         [
@@ -39,7 +39,7 @@
               "$oid": "000000000000000000000001"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],

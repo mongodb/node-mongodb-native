@@ -16,7 +16,7 @@ phases: [
                 setVersion: 1,
                 electionId: {"$oid": "000000000000000000000001"},
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 7
             }]
         ],
 
@@ -53,7 +53,7 @@ phases: [
                 setName: "rs",
                 setVersion: 2,
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 7
             }]
         ],
 
@@ -91,7 +91,7 @@ phases: [
                 setVersion: 1,
                 electionId: {"$oid": "000000000000000000000002"},
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 7
             }]
         ],
         outcome: {

@@ -1,7 +1,6 @@
 import { type AuthProvider } from './cmap/auth/auth_provider';
 import { GSSAPI } from './cmap/auth/gssapi';
 import { type AuthMechanismProperties } from './cmap/auth/mongo_credentials';
-import { MongoCR } from './cmap/auth/mongocr';
 import { MongoDBAWS } from './cmap/auth/mongodb_aws';
 import { MongoDBOIDC, OIDC_WORKFLOWS, type Workflow } from './cmap/auth/mongodb_oidc';
 import { AutomatedCallbackWorkflow } from './cmap/auth/mongodb_oidc/automated_callback_workflow';
@@ -16,7 +15,14 @@ import { MongoInvalidArgumentError } from './error';
 /** @internal */
 const AUTH_PROVIDERS = new Map<AuthMechanism | string, (workflow?: Workflow) => AuthProvider>([
   [AuthMechanism.MONGODB_AWS, () => new MongoDBAWS()],
-  [AuthMechanism.MONGODB_CR, () => new MongoCR()],
+  [
+    AuthMechanism.MONGODB_CR,
+    () => {
+      throw new MongoInvalidArgumentError(
+        'MONGODB-CR is no longer a supported auth mechanism in MongoDB 4.0+'
+      );
+    }
+  ],
   [AuthMechanism.MONGODB_GSSAPI, () => new GSSAPI()],
   [AuthMechanism.MONGODB_OIDC, (workflow?: Workflow) => new MongoDBOIDC(workflow)],
   [AuthMechanism.MONGODB_PLAIN, () => new Plain()],

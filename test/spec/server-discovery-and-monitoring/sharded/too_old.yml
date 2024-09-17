@@ -9,7 +9,7 @@ phases: [
                     isWritablePrimary: true,
                     msg: "isdbgrid",
                     minWireVersion: 2,
-                    maxWireVersion: 6
+                    maxWireVersion: 21
                 }],
                 ["b:27017", {
                     ok: 1,

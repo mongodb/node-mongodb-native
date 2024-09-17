@@ -42,6 +42,26 @@ function dropCollection(dbObj, collectionName, options = {}) {
   return dbObj.dropCollection(collectionName, options).catch(ignoreNsNotFound);
 }
 
+/**
+ * Given a set of commands to look for when command monitoring and a destination to store them, returns an event handler
+ * that collects the specified events.
+ *
+ * ```typescript
+ * const commands = [];
+ *
+ * // one command
+ * client.on('commandStarted', filterForCommands('ping', commands));
+ * // multiple commands
+ * client.on('commandStarted', filterForCommands(['ping', 'find'], commands));
+ * // custom predicate
+ * client.on('commandStarted', filterForCommands((command) => command.commandName === 'find', commands));
+ * ```
+ * @param {string | string[] | (arg0: string) => boolean} commands A set of commands to look for.  Either
+ * a single command name (string), a list of command names (string[]) or a predicate function that
+ * determines whether or not a command should be kept.
+ * @param {Array} bag the output for the filtered commands
+ * @returns a function that collects the specified comment events
+ */
 function filterForCommands(commands, bag) {
   if (typeof commands === 'function') {
     return function (event) {

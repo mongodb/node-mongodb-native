@@ -17,7 +17,7 @@
             "me": "a:27017",
             "setName": "rs",
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
@@ -52,7 +52,7 @@
             "me": "c:27017",
             "setName": "rs",
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],

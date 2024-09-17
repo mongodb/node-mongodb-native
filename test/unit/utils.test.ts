@@ -5,6 +5,8 @@ import {
   ByteUtils,
   checkParentDomainMatch,
   compareObjectId,
+  decorateWithExplain,
+  Explain,
   HostAddress,
   hostMatchesWildcards,
   isHello,
@@ -1007,5 +1009,43 @@ describe('driver utils', function () {
 
     describe('when given an object that does not respond to Symbol.toStringTag', () =>
       it('returns false', () => expect(isUint8Array(Object.create(null))).to.be.false));
+  });
+
+  describe('decorateWithExplain()', function () {
+    it('when the command is a valid explain command, the command is still wrapped', function () {
+      const command = { explain: { hello: 'world' } };
+      const result = decorateWithExplain(command, Explain.fromOptions({ explain: true }));
+
+      expect(result).to.deep.equal({ explain: command, verbosity: 'allPlansExecution' });
+    });
+
+    it('when the options have a maxTimeMS, it is attached to the explain command', function () {
+      const command = { ping: 1 };
+      const result = decorateWithExplain(
+        command,
+        Explain.fromOptions({
+          explain: { verbosity: 'queryPlanner', maxTimeMS: 1000 }
+        })
+      );
+      expect(result).to.deep.equal({
+        explain: { ping: 1 },
+        verbosity: 'queryPlanner',
+        maxTimeMS: 1000
+      });
+    });
+
+    it('when the options have do not have a maxTimeMS, it is not attached to the explain command', function () {
+      const command = { ping: 1 };
+      const result = decorateWithExplain(
+        command,
+        Explain.fromOptions({
+          explain: { verbosity: 'queryPlanner' }
+        })
+      );
+      expect(result).to.deep.equal({
+        explain: { ping: 1 },
+        verbosity: 'queryPlanner'
+      });
+    });
   });
 });

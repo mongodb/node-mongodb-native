@@ -14,7 +14,7 @@ phases: [
                 setName: "rs",
                 logicalSessionTimeoutMinutes: 3,
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 21
             }],
         ],
         outcome: {
@@ -51,7 +51,7 @@ phases: [
                 isWritablePrimary: false,
                 isreplicaset: true,
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 21
             }],
         ],
         outcome: {
@@ -90,7 +90,7 @@ phases: [
                 setName: "rs",
                 arbiterOnly: true,
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 21
             }]
         ],
         outcome: {
@@ -131,7 +131,7 @@ phases: [
                 setName: "rs",
                 logicalSessionTimeoutMinutes: 2,
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 21
             }],
         ],
         outcome: {
@@ -172,7 +172,7 @@ phases: [
                 hidden: true,
                 logicalSessionTimeoutMinutes: 1,
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 21
             }],
         ],
         outcome: {
@@ -214,7 +214,7 @@ phases: [
                 setName: "rs",
                 logicalSessionTimeoutMinutes: null,
                 minWireVersion: 0,
-                maxWireVersion: 6
+                maxWireVersion: 21
             }]
         ],
 
