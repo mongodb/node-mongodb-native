@@ -657,11 +657,46 @@ describe('CSOT driver tests', metadata, () => {
         });
 
         it('does not use timeoutMS to compute maxTimeMS for getMores', async function () {
-          // TODO(NODE_6305)
+          cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { timeoutMS: 10_000, tailable: true, awaitData: true, batchSize: 1 });
+          await cursor.next();
+          await cursor.next();
+
+          const getMores = commandStarted
+            .filter(x => x.command.getMore != null)
+            .map(x => x.command);
+          expect(getMores).to.have.lengthOf(1);
+
+          const [getMore] = getMores;
+          expect(getMore).to.not.haveOwnProperty('maxTimeMS');
         });
 
         context('when maxAwaitTimeMS is specified', function () {
-          it('sets maxTimeMS to the configured maxAwaitTimeMS value on getMores');
+          it('sets maxTimeMS to the configured maxAwaitTimeMS value on getMores', async function () {
+            cursor = client.db('db').collection('coll').find(
+              {},
+              {
+                timeoutMS: 10_000,
+                tailable: true,
+                awaitData: true,
+                batchSize: 1,
+                maxAwaitTimeMS: 100
+              }
+            );
+            await cursor.next();
+            await cursor.next();
+
+            const getMores = commandStarted
+              .filter(x => x.command.getMore != null)
+              .map(x => x.command);
+            expect(getMores).to.have.lengthOf(1);
+
+            const [getMore] = getMores;
+            expect(getMore).to.haveOwnProperty('maxTimeMS');
+            expect(getMore.maxTimeMS).to.equal(100);
+          });
         });
       });
 
