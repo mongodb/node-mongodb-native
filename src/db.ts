@@ -279,7 +279,7 @@ export class Db {
   }
 
   /**
-   * Execute an aggregation framework pipeline against the database, needs MongoDB \>= 3.6
+   * Execute an aggregation framework pipeline against the database.
    *
    * @param pipeline - An array of aggregation stages to be executed
    * @param options - Optional settings for the command

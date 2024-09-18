@@ -1,7 +1,7 @@
 tests:
     -
         description: "Option names are normalized to lowercase"
-        uri: "mongodb://alice:secret@example.com/admin?AUTHMechanism=MONGODB-CR"
+        uri: "mongodb://alice:secret@example.com/admin?AUTHMechanism=PLAIN"
         valid: true
         warning: false
         hosts:
@@ -14,7 +14,7 @@ tests:
             password: "secret"
             db: "admin"
         options:
-            authmechanism: "MONGODB-CR"
+            authmechanism: "PLAIN"
     -
         description: "Missing delimiting slash between hosts and options"
         uri: "mongodb://example.com?tls=true"
@@ -28,3 +28,17 @@ tests:
         auth: ~
         options:
               tls: true
+    -
+        description: Colon in a key value pair
+        uri: mongodb://example.com/?authMechanism=MONGODB-OIDC&authMechanismProperties=TOKEN_RESOURCE:mongodb://test-cluster
+        valid: true
+        warning: false
+        hosts:
+            - 
+                type: hostname
+                host: example.com
+                port: ~
+        auth: ~
+        options:
+            authmechanismProperties:
+                TOKEN_RESOURCE: 'mongodb://test-cluster'
