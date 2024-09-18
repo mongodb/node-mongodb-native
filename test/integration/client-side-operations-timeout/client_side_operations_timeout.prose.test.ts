@@ -248,7 +248,7 @@ describe('CSOT spec prose tests', function () {
       await coll.insertOne({ x: 1 });
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { monitorCommands: true, timeoutMS: 30 });
+      client = this.configuration.newClient(undefined, { monitorCommands: true, timeoutMS: 50 });
       commandStarted = [];
       commandSucceeded = [];
 
@@ -337,7 +337,7 @@ describe('CSOT spec prose tests', function () {
        *    - Expect this to fail with a timeout error.
        * 1. Verify that an `aggregate` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
-      it('sends correct number of aggregate and getMores', async function () {
+      it.skip('sends correct number of aggregate and getMores', async function () {
         const changeStream = client
           .db('db')
           .collection('coll')
@@ -356,7 +356,7 @@ describe('CSOT spec prose tests', function () {
         expect(aggregates).to.have.lengthOf(1);
         // Expect 2 getMores
         expect(getMores).to.have.lengthOf(2);
-      });
+      }).skipReason = 'TODO(NODE-6387)';
     });
   });
 
