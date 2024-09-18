@@ -97,7 +97,6 @@ export function onData(
   // Adding event handlers
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
-  timeoutContext?.timeoutForSocketRead?.then(undefined, errorHandler);
 
   const timeoutForSocketRead = timeoutContext?.timeoutForSocketRead;
   timeoutForSocketRead?.throwIfExpired();
