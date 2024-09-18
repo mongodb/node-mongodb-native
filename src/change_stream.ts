@@ -11,7 +11,6 @@ import {
   isResumableError,
   MongoAPIError,
   MongoChangeStreamError,
-  MongoOperationTimeoutError,
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
@@ -690,9 +689,6 @@ export class ChangeStream<
         try {
           await this._processErrorIteratorMode(error);
         } catch (error) {
-          if (error instanceof MongoOperationTimeoutError) {
-            throw error;
-          }
           try {
             await this.close();
           } catch (error) {
@@ -709,7 +705,7 @@ export class ChangeStream<
     this._setIsIterator();
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
-    // fails or until a timeout error is encountered
+    // fails.
 
     while (true) {
       try {
@@ -720,9 +716,6 @@ export class ChangeStream<
         try {
           await this._processErrorIteratorMode(error);
         } catch (error) {
-          if (error instanceof MongoOperationTimeoutError) {
-            throw error; // Don't close the change stream, but throw the timeout error
-          }
           try {
             await this.close();
           } catch (error) {
@@ -751,9 +744,6 @@ export class ChangeStream<
         try {
           await this._processErrorIteratorMode(error);
         } catch (error) {
-          if (error instanceof MongoOperationTimeoutError) {
-            throw error; // throw the error without closing the change stream
-          }
           try {
             await this.close();
           } catch (error) {
@@ -956,10 +946,6 @@ export class ChangeStream<
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
-    if (changeStreamError instanceof MongoOperationTimeoutError) {
-      return; // FIXME: At least emit the error
-    }
-
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
 
@@ -989,10 +975,7 @@ export class ChangeStream<
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    if (
-      !isResumableError(changeStreamError, this.cursor.maxWireVersion) &&
-      !(changeStreamError instanceof MongoOperationTimeoutError)
-    ) {
+    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       try {
         await this.close();
       } catch (error) {
@@ -1017,8 +1000,6 @@ export class ChangeStream<
       await this.close();
       throw changeStreamError;
     }
-
-    if (changeStreamError instanceof MongoOperationTimeoutError) throw changeStreamError;
   }
 }
 
