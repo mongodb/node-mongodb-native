@@ -248,7 +248,7 @@ describe('CSOT spec prose tests', function () {
       await coll.insertOne({ x: 1 });
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { monitorCommands: true, timeoutMS: 50 });
+      client = this.configuration.newClient(undefined, { monitorCommands: true, timeoutMS: 20 });
       commandStarted = [];
       commandSucceeded = [];
 
