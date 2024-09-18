@@ -31,10 +31,11 @@ const skippedTests = {
     'TODO(DRIVERS-2970): see modified test in unified-csot-node-specs',
   'Tailable cursor awaitData iteration timeoutMS is refreshed for getMore - failure':
     'TODO(DRIVERS-2965)',
-  'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(DRIVERS-2965)'
+  'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(DRIVERS-2965)',
+  'timeoutMS is refreshed for getMore - failure': 'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs', // Skipping for both tailable awaitData and tailable non-awaitData cursors
 };
 
-describe('CSOT spec tests', function () {
+describe('CSOT spec tests', function() {
   const specs = loadSpecTests('client-side-operations-timeout');
   for (const spec of specs) {
     for (const test of spec.tests) {
@@ -50,7 +51,7 @@ describe('CSOT spec tests', function () {
   runUnifiedSuite(specs);
 });
 
-describe('CSOT modified spec tests', function () {
+describe('CSOT modified spec tests', function() {
   const specs = loadSpecTests(
     join('..', 'integration', 'client-side-operations-timeout', 'unified-csot-node-specs')
   );
