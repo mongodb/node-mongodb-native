@@ -24,13 +24,11 @@ export function onData(
   emitter: EventEmitter,
   { timeoutContext }: { timeoutContext?: TimeoutContext }
 ) {
-  const capture: { stack?: string; name?: string; message?: string } = Object.create(null);
-  /*
-  capture.name = 'MongoOperationTimeoutError';
-  capture.message = 'Timed out during socket read';
-
-  Error.captureStackTrace(capture);
-  */
+  // NOTE: Uncomment the block below to capture stack traces for debugging purposes
+  // const capture: { stack?: string; name?: string; message?: string } = Object.create(null);
+  // capture.name = 'MongoOperationTimeoutError';
+  // capture.message = 'Timed out during socket read';
+  // Error.captureStackTrace(capture);
 
   // Setup pending events and pending promise lists
   /**
@@ -99,7 +97,6 @@ export function onData(
   // Adding event handlers
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
-  // eslint-disable-next-line github/no-then
   timeoutContext?.timeoutForSocketRead?.then(undefined, errorHandler);
 
   const timeoutForSocketRead = timeoutContext?.timeoutForSocketRead;
@@ -119,6 +116,9 @@ export function onData(
     const timeoutError = TimeoutError.is(err)
       ? new MongoOperationTimeoutError('Timed out during socket read')
       : undefined;
+
+    // NOTE: Uncomment this for debugging purposes
+    // if (timeoutError instanceof MongoOperationTimeoutError && capture) timeoutError.stack = capture.stack;
 
     if (promise != null) promise.reject(timeoutError ?? err);
     else error = timeoutError ?? err;
