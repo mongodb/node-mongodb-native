@@ -143,12 +143,11 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-    TSchema = any,
-    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-  >
+  TSchema = any,
+  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+>
   extends TypedEventEmitter<CursorEvents>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -460,6 +459,9 @@ export abstract class AbstractCursor<
       return false;
     }
 
+    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      this.timeoutContext?.refresh();
+    }
     try {
       do {
         if ((this.documents?.length ?? 0) !== 0) {
@@ -469,7 +471,7 @@ export abstract class AbstractCursor<
       } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
     } finally {
       if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
-        this.timeoutContext?.refresh();
+        this.timeoutContext?.clear();
       }
     }
 
