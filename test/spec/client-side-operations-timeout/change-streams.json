@@ -178,15 +178,6 @@
           "saveResultAsEntity": "changeStream"
         },
         {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "document": {
-              "_id": 0
-            }
-          }
-        },
-        {
           "name": "iterateOnce",
           "object": "changeStream"
         }
@@ -266,15 +257,6 @@
             "maxAwaitTimeMS": 1
           },
           "saveResultAsEntity": "changeStream"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "document": {
-              "a": 10
-            }
-          }
         },
         {
           "name": "iterateOnce",
