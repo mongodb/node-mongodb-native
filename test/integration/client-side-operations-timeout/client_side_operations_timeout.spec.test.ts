@@ -11,7 +11,8 @@ const skippedSpecs = {
   'gridfs-delete': 'TODO(NODE-6275)',
   'gridfs-download': 'TODO(NODE-6275)',
   'gridfs-find': 'TODO(NODE-6275)',
-  'gridfs-upload': 'TODO(NODE-6275)'
+  'gridfs-upload': 'TODO(NODE-6275)',
+  'change-streams': 'TODO(NODE-6387)'
 };
 
 const skippedTests = {
