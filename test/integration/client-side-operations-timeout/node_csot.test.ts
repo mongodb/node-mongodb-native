@@ -587,7 +587,7 @@ describe('CSOT driver tests', metadata, () => {
       data: {
         failCommands: ['aggregate', 'find'],
         blockConnection: true,
-        blockTimeMS: 50
+        blockTimeMS: 100
       }
     };
 
@@ -636,7 +636,7 @@ describe('CSOT driver tests', metadata, () => {
           cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { timeoutMS: 30, tailable: true, awaitData: true, batchSize: 1 });
+            .find({}, { timeoutMS: 50, tailable: true, awaitData: true, batchSize: 1 });
           const maybeError = await cursor.next().then(
             () => null,
             e => e
@@ -648,9 +648,9 @@ describe('CSOT driver tests', metadata, () => {
           cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { timeoutMS: 100, tailable: true, awaitData: true, batchSize: 1 });
+            .find({}, { timeoutMS: 150, tailable: true, awaitData: true, batchSize: 1 });
           for (let i = 0; i < 5; i++) {
-            // Iterate cursor 5 times (server would have blocked for 250ms overall, but client
+            // Iterate cursor 5 times (server would have blocked for 500ms overall, but client
             // should not throw
             await cursor.next();
           }
@@ -711,7 +711,7 @@ describe('CSOT driver tests', metadata, () => {
           cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { timeoutMS: 30, tailable: true, batchSize: 1 });
+            .find({}, { timeoutMS: 50, tailable: true, batchSize: 1 });
           const maybeError = await cursor.next().then(
             () => null,
             e => e
@@ -723,9 +723,9 @@ describe('CSOT driver tests', metadata, () => {
           cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { timeoutMS: 100, tailable: true, batchSize: 1 });
+            .find({}, { timeoutMS: 150, tailable: true, batchSize: 1 });
           for (let i = 0; i < 5; i++) {
-            // Iterate cursor 5 times (server would have blocked for 250ms overall, but client
+            // Iterate cursor 5 times (server would have blocked for 500ms overall, but client
             // should not throw
             await cursor.next();
           }
