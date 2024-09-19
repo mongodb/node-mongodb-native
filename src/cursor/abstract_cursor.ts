@@ -785,8 +785,7 @@ export abstract class AbstractCursor<
       ...this.cursorOptions,
       session: this.cursorSession,
       batchSize,
-      omitMaxTimeMS:
-        this.cursorOptions.omitMaxTimeMS
+      omitMaxTimeMS: this.cursorOptions.omitMaxTimeMS
     };
 
     if (
