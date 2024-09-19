@@ -1,4 +1,5 @@
 /* Anything javascript specific relating to timeouts */
+import { on } from 'node:events';
 import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
@@ -22,19 +23,11 @@ import {
   MongoServerError
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
-import { on } from 'node:events';
 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
-
 describe('CSOT driver tests', metadata, () => {
   const minPoolSize = 20;
-  async function ensurePoolIsFull(client: MongoClient) {
-    let connectionCount = 0;
-    for await (const _ of on(client, 'connectionCreated')) {
-      if (connectionCount++ >= minPoolSize) break;
-    }
-  }
 
   describe('timeoutMS inheritance', () => {
     let client: MongoClient;
@@ -586,7 +579,7 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe.only('Tailable cursors', function () {
+  describe('Tailable cursors', function () {
     let client: MongoClient;
     let internalClient: MongoClient;
     let commandStarted: CommandStartedEvent[];

@@ -230,7 +230,7 @@ describe('CSOT spec prose tests', function () {
       data: {
         failCommands: ['getMore'],
         blockConnection: true,
-        blockTimeMS: 20
+        blockTimeMS: 90
       }
     };
     let internalClient: MongoClient;
@@ -248,7 +248,13 @@ describe('CSOT spec prose tests', function () {
       await coll.insertOne({ x: 1 });
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { monitorCommands: true, timeoutMS: 20 });
+      client = this.configuration.newClient(undefined, {
+        monitorCommands: true,
+        timeoutMS: 100,
+        minPoolSize: 20
+      });
+      await client.connect();
+
       commandStarted = [];
       commandSucceeded = [];
 
