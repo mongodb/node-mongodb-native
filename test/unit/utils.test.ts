@@ -963,25 +963,31 @@ describe('driver utils', function () {
 
     context('when addresses in SRV record end with a dot', () => {
       it('accepts address since it is considered to still match the parent domain', () => {
-        expect(() => checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvName)).to.not.throw;
+        expect(() =>
+          checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvName)
+        ).to.not.throw();
       });
     });
 
     context('when SRV host ends with a dot', () => {
       it('accepts address if it ends with a dot', () => {
-        expect(() => checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvNameWithDot)).to.not
-          .throw;
+        expect(() =>
+          checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvNameWithDot)
+        ).to.not.throw();
       });
 
       it('accepts address if it does not end with a dot', () => {
-        expect(() => checkParentDomainMatch(exampleHostNameWithoutDot, exampleSrvName)).to.not
-          .throw;
+        expect(() =>
+          checkParentDomainMatch(exampleHostNameWithoutDot, exampleSrvName)
+        ).to.not.throw();
       });
     });
 
     context('when addresses in SRV record end without dots', () => {
       it('accepts address since it matches the parent domain', () => {
-        expect(() => checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvName)).to.not.throw;
+        expect(() =>
+          checkParentDomainMatch(exampleHostNamesWithDot, exampleSrvName)
+        ).to.not.throw();
       });
     });
   });
