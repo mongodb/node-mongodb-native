@@ -10,14 +10,7 @@ let bsonType = 'js-bson';
 
 const { inspect } = require('util');
 const { writeFile } = require('fs/promises');
-const {
-  makeParallelBenchmarks,
-  makeSingleBench,
-  makeMultiBench,
-  makeCSOTSingleBench,
-  makeCSOTMultiBench,
-  makeCSOTParallelBenchmarks
-} = require('../mongoBench/suites');
+const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
 
 const hw = os.cpus();
 const ram = os.totalmem() / 1024 ** 3;
@@ -39,11 +32,8 @@ function average(arr) {
 
 const benchmarkRunner = new Runner()
   .suite('singleBench', suite => makeSingleBench(suite))
-  .suite('singleBenchCSOT', suite => makeCSOTSingleBench(suite))
   .suite('multiBench', suite => makeMultiBench(suite))
-  .suite('multiBenchCSOT', suite => makeCSOTMultiBench(suite))
-  .suite('parallel', suite => makeParallelBenchmarks(suite))
-  .suite('parallelCSOT', suite => makeCSOTParallelBenchmarks(suite));
+  .suite('parallel', suite => makeParallelBenchmarks(suite));
 
 benchmarkRunner
   .run()
@@ -53,28 +43,13 @@ benchmarkRunner
       microBench.singleBench.smallDocInsertOne,
       microBench.singleBench.largeDocInsertOne
     ]);
-
-    const singleBenchCSOT = average([
-      microBench.singleBenchCSOT.findOne_timeoutMS_0,
-      microBench.singleBenchCSOT.smallDocInsertOne_timeoutMS_0,
-      microBench.singleBenchCSOT.largeDocInsertOne_timeoutMS_0
-    ]);
-
     const multiBench = average(Object.values(microBench.multiBench));
-    const multiBenchCSOT = average(Object.values(microBench.multiBenchCSOT));
 
     const parallelBench = average([
       microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.ldjsonMultiFileExport,
       microBench.parallel.gridfsMultiFileUpload,
       microBench.parallel.gridfsMultiFileDownload
-    ]);
-
-    const parallelBenchCSOT = average([
-      microBench.parallelCSOT.ldjsonMultiFileUpload_timeoutMS_0,
-      microBench.parallelCSOT.ldjsonMultiFileExport_timeoutMS_0,
-      microBench.parallelCSOT.gridfsMultiFileUpload_timeoutMS_0,
-      microBench.parallelCSOT.gridfsMultiFileDownload_timeoutMS_0
     ]);
 
     const readBench = average([
@@ -84,15 +59,6 @@ benchmarkRunner
       microBench.parallel.gridfsMultiFileDownload,
       microBench.parallel.ldjsonMultiFileExport
     ]);
-
-    const readBenchCSOT = average([
-      microBench.singleBenchCSOT.findOne_timeoutMS_0,
-      microBench.multiBenchCSOT.findManyAndEmptyCursor_timeoutMS_0,
-      microBench.multiBenchCSOT.gridFsDownload_timeoutMS_0,
-      microBench.parallelCSOT.gridfsMultiFileDownload_timeoutMS_0,
-      microBench.parallelCSOT.ldjsonMultiFileExport_timeoutMS_0
-    ]);
-
     const writeBench = average([
       microBench.singleBench.smallDocInsertOne,
       microBench.singleBench.largeDocInsertOne,
@@ -103,31 +69,15 @@ benchmarkRunner
       microBench.parallel.gridfsMultiFileUpload
     ]);
 
-    const writeBenchCSOT = average([
-      microBench.singleBenchCSOT.smallDocInsertOne_timeoutMS_0,
-      microBench.singleBenchCSOT.largeDocInsertOne_timeoutMS_0,
-      microBench.multiBenchCSOT.smallDocBulkInsert_timeoutMS_0,
-      microBench.multiBenchCSOT.largeDocBulkInsert_timeoutMS_0,
-      microBench.multiBenchCSOT.gridFsUpload_timeoutMS_0,
-      microBench.parallelCSOT.ldjsonMultiFileUpload_timeoutMS_0,
-      microBench.parallelCSOT.gridfsMultiFileUpload_timeoutMS_0
-    ]);
-
     const driverBench = average([readBench, writeBench]);
-    const driverBenchCSOT = average([readBenchCSOT, writeBenchCSOT]);
+
     const benchmarkResults = {
       singleBench,
-      singleBenchCSOT,
       multiBench,
-      multiBenchCSOT,
       parallelBench,
-      parallelBenchCSOT,
       readBench,
-      readBenchCSOT,
       writeBench,
-      writeBenchCSOT,
       driverBench,
-      driverBenchCSOT,
       ...microBench.parallel,
       ...microBench.bsonBench,
       ...microBench.singleBench,

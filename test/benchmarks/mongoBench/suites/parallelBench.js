@@ -7,7 +7,6 @@ const { Readable } = require('stream');
 const readline = require('readline');
 const {
   makeClient,
-  makeCSOTClient,
   disconnectClient,
   dropDb,
   initBucket,
@@ -113,97 +112,13 @@ async function gridfsMultiFileDownload() {
  * @param {Suite} suite
  * @returns Benchmark
  */
-function makeCSOTParallelBenchmarks(suite) {
-  return suite
-    .benchmark('ldjsonMultiFileUpload_timeoutMS_0', benchmark =>
-      // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-import
-      benchmark
-        .taskSize(565)
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .beforeTask(initCollection)
-        .beforeTask(dropCollection)
-        .beforeTask(createCollection)
-        .task(ldjsonMultiUpload)
-        .teardown(dropDb)
-        .teardown(disconnectClient)
-    )
-    .benchmark('ldjsonMultiFileExport_timeoutMS_0', benchmark =>
-      // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-export
-      benchmark
-        .taskSize(565)
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .beforeTask(initCollection)
-        .beforeTask(dropCollection)
-        .beforeTask(createCollection)
-        .beforeTask(ldjsonMultiUpload)
-        .beforeTask(initTemporaryDirectory)
-        .task(ldjsonMultiExport)
-        .afterTask(clearTemporaryDirectory)
-        .teardown(dropDb)
-        .teardown(async function () {
-          await rm(this.temporaryDirectory, { recursive: true, force: true });
-        })
-        .teardown(disconnectClient)
-    )
-    .benchmark('gridfsMultiFileUpload_timeoutMS_0', benchmark =>
-      // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-upload
-      benchmark
-        .taskSize(262.144)
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .setup(initDb)
-        .setup(initCollection)
-        .beforeTask(dropBucket)
-        .beforeTask(initBucket)
-        .beforeTask(async function () {
-          const stream = this.bucket.openUploadStream('setup-file.txt');
-          const oneByteFile = Readable.from('a');
-          return pipeline(oneByteFile, stream);
-        })
-        .task(gridfsMultiFileUpload)
-        .teardown(dropDb)
-        .teardown(disconnectClient)
-    )
-    .benchmark('gridfsMultiFileDownload_timeoutMS_0', benchmark =>
-      // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-download
-      benchmark
-        .taskSize(262.144)
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .setup(initDb)
-        .setup(initCollection)
-        .setup(initTemporaryDirectory)
-        .setup(dropBucket)
-        .setup(initBucket)
-        .setup(gridfsMultiFileUpload)
-        .beforeTask(clearTemporaryDirectory)
-        .setup(initBucket)
-        .task(gridfsMultiFileDownload)
-        .teardown(dropDb)
-        .teardown(async function () {
-          await rm(this.temporaryDirectory, { recursive: true, force: true });
-        })
-        .teardown(disconnectClient)
-    );
-}
-
 function makeParallelBenchmarks(suite) {
   return suite
     .benchmark('ldjsonMultiFileUpload', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-import
       benchmark
         .taskSize(565)
-        .setup(makeCSOTClient)
+        .setup(makeClient)
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -218,7 +133,7 @@ function makeParallelBenchmarks(suite) {
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-export
       benchmark
         .taskSize(565)
-        .setup(makeCSOTClient)
+        .setup(makeClient)
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -239,7 +154,7 @@ function makeParallelBenchmarks(suite) {
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-upload
       benchmark
         .taskSize(262.144)
-        .setup(makeCSOTClient)
+        .setup(makeClient)
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -260,7 +175,7 @@ function makeParallelBenchmarks(suite) {
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-download
       benchmark
         .taskSize(262.144)
-        .setup(makeCSOTClient)
+        .setup(makeClient)
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -281,4 +196,4 @@ function makeParallelBenchmarks(suite) {
     );
 }
 
-module.exports = { makeParallelBenchmarks, makeCSOTParallelBenchmarks };
+module.exports = { makeParallelBenchmarks };

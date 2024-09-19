@@ -1,5 +1,4 @@
 /* Anything javascript specific relating to timeouts */
-import { on } from 'node:events';
 import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
@@ -588,7 +587,7 @@ describe('CSOT driver tests', metadata, () => {
       configureFailPoint: 'failCommand',
       mode: 'alwaysOn',
       data: {
-        failCommands: ['aggregate', 'find'],
+        failCommands: ['aggregate', 'find', 'getMore'],
         blockConnection: true,
         blockTimeMS: 100
       }

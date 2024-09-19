@@ -41,7 +41,7 @@ type RunOperationFn = (
 ) => Promise<Document | boolean | number | null | void | string>;
 export const operations = new Map<string, RunOperationFn>();
 
-export class MalformedOperationError extends AssertionError { }
+export class MalformedOperationError extends AssertionError {}
 
 operations.set('createEntities', async ({ entities, operation, testConfig }) => {
   if (!operation.arguments?.entities) {
@@ -208,19 +208,19 @@ operations.set('close', async ({ entities, operation }) => {
     const timeoutMS = operation.arguments?.timeoutMS;
     await cursor.close({ timeoutMS });
     return;
-  } catch { }
+  } catch {}
 
   try {
     const changeStream = entities.getEntity('stream', operation.object);
     await changeStream.close();
     return;
-  } catch { }
+  } catch {}
 
   try {
     const client = entities.getEntity('client', operation.object);
     await client.close();
     return;
-  } catch { }
+  } catch {}
   /* eslint-enable no-empty */
 
   throw new AssertionError(`No closable entity with key ${operation.object}`);
