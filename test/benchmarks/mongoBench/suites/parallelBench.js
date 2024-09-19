@@ -115,7 +115,7 @@ async function gridfsMultiFileDownload() {
  */
 function makeCSOTParallelBenchmarks(suite) {
   return suite
-    .benchmark('ldjsonMultiFileUpload', benchmark =>
+    .benchmark('ldjsonMultiFileUpload_timeoutMS_0', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-import
       benchmark
         .taskSize(565)
@@ -130,7 +130,7 @@ function makeCSOTParallelBenchmarks(suite) {
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
-    .benchmark('ldjsonMultiFileExport', benchmark =>
+    .benchmark('ldjsonMultiFileExport_timeoutMS_0', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-export
       benchmark
         .taskSize(565)
@@ -151,7 +151,7 @@ function makeCSOTParallelBenchmarks(suite) {
         })
         .teardown(disconnectClient)
     )
-    .benchmark('gridfsMultiFileUpload', benchmark =>
+    .benchmark('gridfsMultiFileUpload_timeoutMS_0', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-upload
       benchmark
         .taskSize(262.144)
@@ -172,7 +172,7 @@ function makeCSOTParallelBenchmarks(suite) {
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
-    .benchmark('gridfsMultiFileDownload', benchmark =>
+    .benchmark('gridfsMultiFileDownload_timeoutMS_0', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-download
       benchmark
         .taskSize(262.144)
@@ -199,7 +199,7 @@ function makeCSOTParallelBenchmarks(suite) {
 
 function makeParallelBenchmarks(suite) {
   return suite
-    .benchmark('ldjsonMultiFileUpload_timeoutMS_0', benchmark =>
+    .benchmark('ldjsonMultiFileUpload', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-import
       benchmark
         .taskSize(565)
@@ -214,7 +214,7 @@ function makeParallelBenchmarks(suite) {
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
-    .benchmark('ldjsonMultiFileExport_timeoutMS_0', benchmark =>
+    .benchmark('ldjsonMultiFileExport', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-export
       benchmark
         .taskSize(565)
@@ -235,7 +235,7 @@ function makeParallelBenchmarks(suite) {
         })
         .teardown(disconnectClient)
     )
-    .benchmark('gridfsMultiFileUpload_timeoutMS_0', benchmark =>
+    .benchmark('gridfsMultiFileUpload', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-upload
       benchmark
         .taskSize(262.144)
@@ -256,7 +256,7 @@ function makeParallelBenchmarks(suite) {
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
-    .benchmark('gridfsMultiFileDownload_timeoutMS_0', benchmark =>
+    .benchmark('gridfsMultiFileDownload', benchmark =>
       // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-download
       benchmark
         .taskSize(262.144)
