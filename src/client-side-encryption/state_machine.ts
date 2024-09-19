@@ -18,6 +18,7 @@ import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders } from './providers';
+import { TimeoutContext } from '../timeout';
 
 let socks: SocksLib | null = null;
 function loadSocks(): SocksLib {
@@ -182,7 +183,7 @@ export class StateMachine {
   /**
    * Executes the state machine according to the specification
    */
-  async execute(executor: StateMachineExecutable, context: MongoCryptContext): Promise<Uint8Array> {
+  async execute(executor: StateMachineExecutable, context: MongoCryptContext, timeoutContext?: TimeoutContext): Promise<Uint8Array> {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
     const metaDataClient = executor._metaDataClient;
@@ -201,6 +202,8 @@ export class StateMachine {
               'unreachable state machine state: entered MONGOCRYPT_CTX_NEED_MONGO_COLLINFO but metadata client is undefined'
             );
           }
+
+          // TODO: timeout here
           const collInfo = await this.fetchCollectionInfo(metaDataClient, context.ns, filter);
 
           if (collInfo) {
@@ -233,6 +236,7 @@ export class StateMachine {
 
         case MONGOCRYPT_CTX_NEED_MONGO_KEYS: {
           const filter = context.nextMongoOperation();
+          // TODO: timeout here
           const keys = await this.fetchKeys(keyVaultClient, keyVaultNamespace, filter);
 
           if (keys.length === 0) {
