@@ -133,7 +133,6 @@ export type InternalAbstractCursorOptions = Omit<AbstractCursorOptions, 'readPre
   partial?: boolean;
 
   omitMaxTimeMS?: boolean;
-  useMaxAwaitTimeMSAsMaxTimeMS?: boolean;
 };
 
 /** @public */
@@ -236,9 +235,6 @@ export abstract class AbstractCursor<
       if (options.timeoutMode != null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
-
-    this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS =
-      this.cursorOptions.tailable && this.cursorOptions.awaitData;
 
     // Set for initial command
     this.cursorOptions.omitMaxTimeMS =
@@ -790,7 +786,7 @@ export abstract class AbstractCursor<
       session: this.cursorSession,
       batchSize,
       omitMaxTimeMS:
-        this.cursorOptions.omitMaxTimeMS || this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS
+        this.cursorOptions.omitMaxTimeMS
     };
 
     if (
@@ -871,9 +867,6 @@ export abstract class AbstractCursor<
     // otherwise need to call getMore
     const batchSize = this.cursorOptions.batchSize || 1000;
     this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
-    this.cursorOptions.useMaxAwaitTimeMSAsMaxTimeMS =
-      this.cursorOptions.tailable && this.cursorOptions.awaitData;
-
     try {
       const response = await this.getMore(batchSize);
       this.cursorId = response.id;

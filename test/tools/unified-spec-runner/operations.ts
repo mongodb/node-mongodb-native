@@ -41,7 +41,7 @@ type RunOperationFn = (
 ) => Promise<Document | boolean | number | null | void | string>;
 export const operations = new Map<string, RunOperationFn>();
 
-export class MalformedOperationError extends AssertionError {}
+export class MalformedOperationError extends AssertionError { }
 
 operations.set('createEntities', async ({ entities, operation, testConfig }) => {
   if (!operation.arguments?.entities) {
@@ -208,19 +208,19 @@ operations.set('close', async ({ entities, operation }) => {
     const timeoutMS = operation.arguments?.timeoutMS;
     await cursor.close({ timeoutMS });
     return;
-  } catch {}
+  } catch { }
 
   try {
     const changeStream = entities.getEntity('stream', operation.object);
     await changeStream.close();
     return;
-  } catch {}
+  } catch { }
 
   try {
     const client = entities.getEntity('client', operation.object);
     await client.close();
     return;
-  } catch {}
+  } catch { }
   /* eslint-enable no-empty */
 
   throw new AssertionError(`No closable entity with key ${operation.object}`);
@@ -257,8 +257,8 @@ operations.set('createCollection', async ({ entities, operation }) => {
 
 operations.set('createFindCursor', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments!;
-  switch (opts.cursorType) {
+  const { filter, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
     case 'tailableAwait':
       opts.tailable = true;
       opts.awaitData = true;
@@ -269,7 +269,6 @@ operations.set('createFindCursor', async ({ entities, operation }) => {
     default:
       break;
   }
-  delete opts.cursorType;
   const cursor = collection.find(filter, opts);
   // The spec dictates that we create the cursor and force the find command
   // to execute, but don't move the cursor forward. hasNext() accomplishes
@@ -333,8 +332,8 @@ operations.set('find', async ({ entities, operation }) => {
   } else {
     queryable = entities.getEntity('collection', operation.object);
   }
-  const { filter, ...opts } = operation.arguments!;
-  switch (opts.cursorType) {
+  const { filter, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
     case 'tailableAwait':
       opts.tailable = true;
       opts.awaitData = true;
@@ -345,7 +344,6 @@ operations.set('find', async ({ entities, operation }) => {
     default:
       break;
   }
-  delete opts.cursorType;
   return queryable.find(filter, opts).toArray();
 });
 
@@ -816,8 +814,8 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
 
 operations.set('createCommandCursor', async ({ entities, operation }: OperationFunctionParams) => {
   const collection = entities.getEntity('db', operation.object);
-  const { command, ...opts } = operation.arguments!;
-  switch (opts.cursorType) {
+  const { command, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
     case 'tailableAwait':
       opts.tailable = true;
       opts.awaitData = true;
@@ -828,7 +826,6 @@ operations.set('createCommandCursor', async ({ entities, operation }: OperationF
     default:
       break;
   }
-  delete opts.cursorType;
   const cursor = collection.runCursorCommand(command, {
     readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
     session: opts.session,
