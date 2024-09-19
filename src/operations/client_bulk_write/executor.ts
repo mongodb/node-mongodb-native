@@ -1,6 +1,7 @@
 import { type Document } from 'bson';
 
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
+import { MongoClientBulkWriteExecutionError } from '../../error';
 import { type MongoClient } from '../../mongo_client';
 import { WriteConcern } from '../../write_concern';
 import { executeOperation } from '../execute_operation';
@@ -49,6 +50,23 @@ export class ClientBulkWriteExecutor {
    * @returns The result.
    */
   async execute(): Promise<ClientBulkWriteResult | { ok: 1 }> {
+    const topologyDescription = this.client.topology?.description;
+    const maxMessageSizeBytes = topologyDescription?.maxMessageSizeBytes;
+    const maxWriteBatchSize = topologyDescription?.maxWriteBatchSize;
+    // If we don't know the maxMessageSizeBytes or for some reason it's 0
+    // then we cannot calculate the batch.
+    if (!maxMessageSizeBytes) {
+      throw new MongoClientBulkWriteExecutionError(
+        'No maxMessageSizeBytes value found - client bulk writes cannot execute without this value set from the monitoring connections.'
+      );
+    }
+
+    if (!maxWriteBatchSize) {
+      throw new MongoClientBulkWriteExecutionError(
+        'No maxWriteBatchSize value found - client bulk writes cannot execute without this value set from the monitoring connections.'
+      );
+    }
+
     // The command builder will take the user provided models and potential split the batch
     // into multiple commands due to size.
     const pkFactory = this.client.s.options.pkFactory;
@@ -57,7 +75,7 @@ export class ClientBulkWriteExecutor {
       this.options,
       pkFactory
     );
-    const commands = commandBuilder.buildCommands();
+    const commands = commandBuilder.buildCommands(maxMessageSizeBytes, maxWriteBatchSize);
     if (this.options.writeConcern?.w === 0) {
       return await executeUnacknowledged(this.client, this.options, commands);
     }
@@ -75,10 +93,14 @@ async function executeAcknowledged(
 ): Promise<ClientBulkWriteResult> {
   const resultsMerger = new ClientBulkWriteResultsMerger(options);
   // For each command will will create and exhaust a cursor for the results.
+  let currentBatchOffset = 0;
   for (const command of commands) {
     const cursor = new ClientBulkWriteCursor(client, command, options);
     const docs = await cursor.toArray();
-    resultsMerger.merge(command.ops.documents, cursor.response, docs);
+    const operations = command.ops.documents;
+    resultsMerger.merge(currentBatchOffset, operations, cursor.response, docs);
+    // Set the new batch index so we can back back to the index in the original models.
+    currentBatchOffset += operations.length;
   }
   return resultsMerger.result;
 }

@@ -1,4 +1,4 @@
-import { type Document } from '../../bson';
+import { BSON, type Document } from '../../bson';
 import { DocumentSequence } from '../../cmap/commands';
 import { type PkFactory } from '../../mongo_client';
 import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
@@ -27,6 +27,11 @@ export interface ClientBulkWriteCommand {
   let?: Document;
   comment?: any;
 }
+
+/**
+ * The bytes overhead for the extra fields added post command generation.
+ */
+const MESSAGE_OVERHEAD_BYTES = 1000;
 
 /** @internal */
 export class ClientBulkWriteCommandBuilder {
@@ -62,32 +67,148 @@ export class ClientBulkWriteCommandBuilder {
   /**
    * Build the bulk write commands from the models.
    */
-  buildCommands(): ClientBulkWriteCommand[] {
+  buildCommands(maxMessageSizeBytes: number, maxWriteBatchSize: number): ClientBulkWriteCommand[] {
     // Iterate the models to build the ops and nsInfo fields.
-    const operations = [];
+    // We need to do this in a loop which creates one command each up
+    // to the max bson size or max message size.
+    const commands: ClientBulkWriteCommand[] = [];
+    let currentCommandLength = 0;
     let currentNamespaceIndex = 0;
+    let currentCommand: ClientBulkWriteCommand = this.baseCommand();
     const namespaces = new Map<string, number>();
+
     for (const model of this.models) {
       const ns = model.namespace;
       const index = namespaces.get(ns);
+
+      /**
+       * Convenience function for resetting everything when a new batch
+       * is started.
+       */
+      const reset = () => {
+        commands.push(currentCommand);
+        namespaces.clear();
+        currentNamespaceIndex = 0;
+        currentCommand = this.baseCommand();
+        namespaces.set(ns, currentNamespaceIndex);
+      };
+
       if (index != null) {
-        operations.push(buildOperation(model, index, this.pkFactory));
+        // Pushing to the ops document sequence returns the bytes length added.
+        const operation = buildOperation(model, index, this.pkFactory);
+        const operationBuffer = BSON.serialize(operation);
+
+        // Check if the operation buffer can fit in the current command. If it can,
+        // then add the operation to the document sequence and increment the
+        // current length as long as the ops don't exceed the maxWriteBatchSize.
+        if (
+          currentCommandLength + operationBuffer.length < maxMessageSizeBytes &&
+          currentCommand.ops.documents.length < maxWriteBatchSize
+        ) {
+          // Pushing to the ops document sequence returns the bytes length added.
+          currentCommandLength =
+            MESSAGE_OVERHEAD_BYTES + this.addOperation(currentCommand, operation, operationBuffer);
+        } else {
+          // We need to batch. Push the current command to the commands
+          // array and create a new current command. We aslo need to clear the namespaces
+          // map for the new command.
+          reset();
+
+          const nsInfo = { ns: ns };
+          const nsInfoBuffer = BSON.serialize(nsInfo);
+          currentCommandLength =
+            MESSAGE_OVERHEAD_BYTES +
+            this.addOperationAndNsInfo(
+              currentCommand,
+              operation,
+              operationBuffer,
+              nsInfo,
+              nsInfoBuffer
+            );
+        }
       } else {
         namespaces.set(ns, currentNamespaceIndex);
-        operations.push(buildOperation(model, currentNamespaceIndex, this.pkFactory));
+        const nsInfo = { ns: ns };
+        const nsInfoBuffer = BSON.serialize(nsInfo);
+        const operation = buildOperation(model, currentNamespaceIndex, this.pkFactory);
+        const operationBuffer = BSON.serialize(operation);
+
+        // Check if the operation and nsInfo buffers can fit in the command. If they
+        // can, then add the operation and nsInfo to their respective document
+        // sequences and increment the current length as long as the ops don't exceed
+        // the maxWriteBatchSize.
+        if (
+          currentCommandLength + nsInfoBuffer.length + operationBuffer.length <
+            maxMessageSizeBytes &&
+          currentCommand.ops.documents.length < maxWriteBatchSize
+        ) {
+          currentCommandLength =
+            MESSAGE_OVERHEAD_BYTES +
+            this.addOperationAndNsInfo(
+              currentCommand,
+              operation,
+              operationBuffer,
+              nsInfo,
+              nsInfoBuffer
+            );
+        } else {
+          // We need to batch. Push the current command to the commands
+          // array and create a new current command. Aslo clear the namespaces map.
+          reset();
+
+          currentCommandLength =
+            MESSAGE_OVERHEAD_BYTES +
+            this.addOperationAndNsInfo(
+              currentCommand,
+              operation,
+              operationBuffer,
+              nsInfo,
+              nsInfoBuffer
+            );
+        }
+        // We've added a new namespace, increment the namespace index.
         currentNamespaceIndex++;
       }
     }
 
-    const nsInfo = Array.from(namespaces.keys(), ns => ({ ns }));
+    // After we've finisihed iterating all the models put the last current command
+    // only if there are operations in it.
+    if (currentCommand.ops.documents.length > 0) {
+      commands.push(currentCommand);
+    }
 
-    // The base command.
+    return commands;
+  }
+
+  private addOperation(
+    command: ClientBulkWriteCommand,
+    operation: Document,
+    operationBuffer: Uint8Array
+  ): number {
+    // Pushing to the ops document sequence returns the bytes length added.
+    return command.ops.push(operation, operationBuffer);
+  }
+
+  private addOperationAndNsInfo(
+    command: ClientBulkWriteCommand,
+    operation: Document,
+    operationBuffer: Uint8Array,
+    nsInfo: Document,
+    nsInfoBuffer: Uint8Array
+  ): number {
+    // Pushing to the nsInfo document sequence returns the bytes length added.
+    const nsInfoLength = command.nsInfo.push(nsInfo, nsInfoBuffer);
+    const opsLength = this.addOperation(command, operation, operationBuffer);
+    return nsInfoLength + opsLength;
+  }
+
+  private baseCommand(): ClientBulkWriteCommand {
     const command: ClientBulkWriteCommand = {
       bulkWrite: 1,
       errorsOnly: this.errorsOnly,
       ordered: this.options.ordered ?? true,
-      ops: new DocumentSequence(operations),
-      nsInfo: new DocumentSequence(nsInfo)
+      ops: new DocumentSequence('ops'),
+      nsInfo: new DocumentSequence('nsInfo')
     };
     // Add bypassDocumentValidation if it was present in the options.
     if (this.options.bypassDocumentValidation != null) {
@@ -103,7 +224,8 @@ export class ClientBulkWriteCommandBuilder {
     if (this.options.comment !== undefined) {
       command.comment = this.options.comment;
     }
-    return [command];
+
+    return command;
   }
 }
 
