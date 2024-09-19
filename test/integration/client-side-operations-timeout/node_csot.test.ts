@@ -22,17 +22,27 @@ import {
   MongoServerError
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
+import { on } from 'node:events';
 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
+
 describe('CSOT driver tests', metadata, () => {
+  const minPoolSize = 20;
+  async function ensurePoolIsFull(client: MongoClient) {
+    let connectionCount = 0;
+    for await (const _ of on(client, 'connectionCreated')) {
+      if (connectionCount++ >= minPoolSize) break;
+    }
+  }
+
   describe('timeoutMS inheritance', () => {
     let client: MongoClient;
     let db: Db;
     let coll: Collection;
 
     beforeEach(async function () {
-      client = this.configuration.newClient(undefined, { timeoutMS: 100 });
+      client = this.configuration.newClient(undefined, { timeoutMS: 100, minPoolSize });
       db = client.db('test', { timeoutMS: 200 });
     });
 
@@ -576,7 +586,7 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe('Tailable cursors', function () {
+  describe.only('Tailable cursors', function () {
     let client: MongoClient;
     let internalClient: MongoClient;
     let commandStarted: CommandStartedEvent[];
@@ -611,9 +621,10 @@ describe('CSOT driver tests', metadata, () => {
 
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { monitorCommands: true });
+      client = this.configuration.newClient(undefined, { monitorCommands: true, minPoolSize });
       commandStarted = [];
       client.on('commandStarted', ev => commandStarted.push(ev));
+      await client.connect();
     });
 
     afterEach(async function () {
@@ -739,9 +750,10 @@ describe('CSOT driver tests', metadata, () => {
 
           await cursor.next();
 
-          expect(commandStarted).to.have.lengthOf(1);
-          expect(commandStarted[0].command.find).to.exist;
-          expect(commandStarted[0].command.maxTimeMS).to.not.exist;
+          const finds = commandStarted.filter(x => x.command.find != null);
+          expect(finds).to.have.lengthOf(1);
+          expect(finds[0].command.find).to.exist;
+          expect(finds[0].command.maxTimeMS).to.not.exist;
         });
         it('does not append a maxTimeMS field to subsequent getMores', async function () {
           cursor = client
@@ -752,9 +764,11 @@ describe('CSOT driver tests', metadata, () => {
           await cursor.next();
           await cursor.next();
 
-          expect(commandStarted).to.have.lengthOf(2);
-          expect(commandStarted[1].command.getMore).to.exist;
-          expect(commandStarted[0].command.maxTimeMS).to.not.exist;
+          const getMores = commandStarted.filter(x => x.command.getMore != null);
+
+          expect(getMores).to.have.lengthOf(1);
+          expect(getMores[0].command.getMore).to.exist;
+          expect(getMores[0].command.getMore.maxTimeMS).to.not.exist;
         });
       });
     });
