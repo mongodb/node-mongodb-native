@@ -1,6 +1,6 @@
 import type { Document } from '../bson';
 import { type ClientBulkWriteCursorResponse } from '../cmap/wire_protocol/responses';
-import { MongoBulkWriteCursorError } from '../error';
+import { MongoClientBulkWriteCursorError } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ClientBulkWriteOperation } from '../operations/client_bulk_write/client_bulk_write';
 import { type ClientBulkWriteOptions } from '../operations/client_bulk_write/common';
@@ -44,7 +44,7 @@ export class ClientBulkWriteCursor extends AbstractCursor {
    */
   get response(): ClientBulkWriteCursorResponse {
     if (this.cursorResponse) return this.cursorResponse;
-    throw new MongoBulkWriteCursorError(
+    throw new MongoClientBulkWriteCursorError(
       'No client bulk write cursor response returned from the server.'
     );
   }
