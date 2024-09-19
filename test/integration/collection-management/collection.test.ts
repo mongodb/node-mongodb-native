@@ -1,6 +1,13 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import { Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
+import {
+  Collection,
+  CreateIndexesOperation,
+  type Db,
+  type MongoClient,
+  MongoServerError
+} from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
@@ -419,6 +426,41 @@ describe('Collection', function () {
     it('returns the total documents in the collection', async function () {
       const result = await collection.estimatedDocumentCount();
       expect(result).to.equal(1);
+    });
+  });
+
+  describe('#createIndex', () => {
+    let client: MongoClient;
+    let db: Db;
+    let coll: Collection<{ a: string }>;
+    const ERROR_RESPONSE = {
+      ok: 0,
+      errmsg:
+        'WiredTigerIndex::insert: key too large to index, failing  1470 { : "56f37cb8e4b089e98d52ab0e", : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." }',
+      code: 17280
+    };
+
+    beforeEach(async function () {
+      client = configuration.newClient({ w: 1 });
+      db = client.db(configuration.db);
+      coll = db.collection('test_coll');
+      await client.connect();
+      sinon.stub(CreateIndexesOperation.prototype, 'execute').callsFake(() => {
+        throw ERROR_RESPONSE;
+      });
+    });
+
+    afterEach(async function () {
+      await coll.drop();
+      await client.close();
+      sinon.restore();
+    });
+
+    it('should error when createIndex fails', async function () {
+      const e = await coll.createIndex({ a: 1 }).catch(e => e);
+      expect(e).to.have.property('ok', ERROR_RESPONSE.ok);
+      expect(e).to.have.property('errmsg', ERROR_RESPONSE.errmsg);
+      expect(e).to.have.property('code', ERROR_RESPONSE.code);
     });
   });
 
