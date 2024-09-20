@@ -10,7 +10,7 @@ cd $PROJECT_DIRECTORY
 tar -xzf src.tgz .
 
 # load node.js
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
 
 # run the tests
 npm install aws4

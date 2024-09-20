@@ -16,7 +16,7 @@ if [ -z ${TASK_ID+omitted} ]; then echo "TASK_ID is unset" && exit 1; fi
 
 MONGOSH_RUN_ONLY_IN_PACKAGE=${MONGOSH_RUN_ONLY_IN_PACKAGE:-""}
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
 
 npm cache clear --force || true
 npm install --global npm@8.x || true

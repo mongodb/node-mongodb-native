@@ -15,3 +15,6 @@ source ./.drivers-tools/.evergreen/install-node.sh
 npm install "${NPM_OPTIONS}"
 
 npm ls
+
+
+source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
 
 set -o errexit
 

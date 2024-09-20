@@ -4,7 +4,7 @@ set -o xtrace   # Write all commands first to stderr
 
 ENVIRONMENT=${ENVIRONMENT:-"test"}
 PROJECT_DIRECTORY=${PROJECT_DIRECTORY:-"."}
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
 
 if [ -z "${MONGODB_URI_SINGLE}" ]; then
   echo "Must specify MONGODB_URI_SINGLE"

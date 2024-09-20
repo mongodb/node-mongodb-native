@@ -29,7 +29,7 @@ echo "Running $AUTH tests over $SSL, connecting to $MONGODB_URI"
 if [[ -z "${SKIP_DEPS}" ]]; then
   source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
 else
-  source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+  source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
 fi
 
 if [ "$COMPRESSOR" != "" ]; then
