@@ -219,6 +219,7 @@ describe('CSOT spec prose tests', function () {
   });
 
   context('5. Blocking Iteration Methods', () => {
+    const metadata = { requires: { mongodb: '>=4.4' } };
     /**
      * Tests in this section MUST only be run against server versions 4.4 and higher and only apply to drivers that have a
      * blocking method for cursor iteration that executes `getMore` commands in a loop until a document is available or an
@@ -297,7 +298,7 @@ describe('CSOT spec prose tests', function () {
        * 1. Verify that a `find` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
 
-      it('send correct number of finds and getMores', async function () {
+      it('send correct number of finds and getMores', metadata, async function () {
         const cursor = client
           .db('db')
           .collection('coll')
@@ -343,7 +344,7 @@ describe('CSOT spec prose tests', function () {
        *    - Expect this to fail with a timeout error.
        * 1. Verify that an `aggregate` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
-      it.skip('sends correct number of aggregate and getMores', async function () {
+      it.skip('sends correct number of aggregate and getMores', metadata, async function () {
         const changeStream = client
           .db('db')
           .collection('coll')
