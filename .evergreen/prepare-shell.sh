@@ -1,14 +1,15 @@
 #! /usr/bin/env bash
 
-set -o xtrace
-set -o errexit
+# Only set errexit and xtrace if shell is NOT interactive
+[[ $- == *i* ]] || set -o xtrace
+[[ $- == *i* ]] || set -o errexit
 
 # This script prepares a shell to run the remaining scripts in this folder
 # It MUST be kept idempotent! It will overwrite the orchestration config and expansion.yml file upon every run
 # and it will only clone drivers-tools if they do not exist one directory above our driver src
 
 PROJECT_DIRECTORY="$(pwd)"
-DRIVERS_TOOLS=$(cd .. && echo "$(pwd)/drivers-tools")
+DRIVERS_TOOLS="$PROJECT_DIRECTORY/.drivers-tools"
 MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
 MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
 UPLOAD_BUCKET="${project}"
