@@ -2,6 +2,7 @@ import { Readable } from 'stream';
 
 import type { Document, ObjectId } from '../bson';
 import type { Collection } from '../collection';
+import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { FindCursor } from '../cursor/find_cursor';
 import {
   MongoGridFSChunkError,
@@ -14,6 +15,7 @@ import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
 import type { Callback } from '../utils';
 import type { GridFSChunk } from './upload';
+import { TimeoutContext } from '../timeout';
 
 /** @public */
 export interface GridFSBucketReadStreamOptions {
@@ -28,7 +30,7 @@ export interface GridFSBucketReadStreamOptions {
    * to be returned by the stream. `end` is non-inclusive
    */
   end?: number;
-  /** @internal TODO(NODE-5688): make this public */
+  /** @public */
   timeoutMS?: number;
 }
 
@@ -98,8 +100,10 @@ export interface GridFSBucketReadStreamPrivate {
     skip?: number;
     start: number;
     end: number;
+    timeoutMS?: number;
   };
   readPreference?: ReadPreference;
+  timeoutContext?: TimeoutContext;
 }
 
 /**
@@ -352,7 +356,7 @@ function init(stream: GridFSBucketReadStream): void {
         filter['n'] = { $gte: skip };
       }
     }
-    stream.s.cursor = stream.s.chunks.find(filter).sort({ n: 1 });
+    stream.s.cursor = stream.s.chunks.find(filter, { timeoutMode: CursorTimeoutMode.LIFETIME, timeoutMS: stream.s.options.timeoutMS }).sort({ n: 1 });
 
     if (stream.s.readPreference) {
       stream.s.cursor.withReadPreference(stream.s.readPreference);

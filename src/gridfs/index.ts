@@ -82,6 +82,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     super();
     this.setMaxListeners(0);
     const privateOptions = {
+      timeoutMS: db.timeoutMS,
       ...DEFAULT_GRIDFS_BUCKET_OPTIONS,
       ...options,
       writeConcern: WriteConcern.fromOptions(options)
@@ -92,7 +93,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       _chunksCollection: db.collection<GridFSChunk>(privateOptions.bucketName + '.chunks'),
       _filesCollection: db.collection<GridFSFile>(privateOptions.bucketName + '.files'),
       checkedIndexes: false,
-      calledOpenUploadStream: false
+      calledOpenUploadStream: false,
     };
   }
 
