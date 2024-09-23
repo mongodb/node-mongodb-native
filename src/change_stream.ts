@@ -11,6 +11,7 @@ import {
   isResumableError,
   MongoAPIError,
   MongoChangeStreamError,
+  MongoOperationTimeoutError,
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
@@ -20,6 +21,7 @@ import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerSessionId } from './sessions';
+import { TimeoutContext } from './timeout';
 import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
 /** @internal */
@@ -584,6 +586,8 @@ export class ChangeStream<
   /** @internal */
   [kMode]: false | 'iterator' | 'emitter';
 
+  private timeoutContext?: TimeoutContext;
+
   /** @event */
   static readonly RESPONSE = RESPONSE;
   /** @event */
@@ -689,6 +693,9 @@ export class ChangeStream<
         try {
           await this._processErrorIteratorMode(error);
         } catch (error) {
+          if (error instanceof MongoOperationTimeoutError) {
+            throw error;
+          }
           try {
             await this.close();
           } catch (error) {
@@ -705,25 +712,33 @@ export class ChangeStream<
     this._setIsIterator();
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
-    // fails.
+    // fails or until a timeout error is encountered
+    this.timeoutContext?.refresh();
 
-    while (true) {
-      try {
-        const change = await this.cursor.next();
-        const processedChange = this._processChange(change ?? null);
-        return processedChange;
-      } catch (error) {
+    try {
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
+          const change = await this.cursor.next();
+          const processedChange = this._processChange(change ?? null);
+          return processedChange;
         } catch (error) {
           try {
-            await this.close();
+            await this._processErrorIteratorMode(error);
           } catch (error) {
-            squashError(error);
+            if (error instanceof MongoOperationTimeoutError) {
+              throw error; // Don't close the change stream, but throw the timeout error
+            }
+            try {
+              await this.close();
+            } catch (error) {
+              squashError(error);
+            }
+            throw error;
           }
-          throw error;
         }
       }
+    } finally {
+      this.timeoutContext?.clear();
     }
   }
 
@@ -744,6 +759,9 @@ export class ChangeStream<
         try {
           await this._processErrorIteratorMode(error);
         } catch (error) {
+          if (error instanceof MongoOperationTimeoutError) {
+            throw error; // throw the error without closing the change stream
+          }
           try {
             await this.close();
           } catch (error) {
@@ -862,11 +880,20 @@ export class ChangeStream<
       );
     }
 
+    if (this.options.timeoutMS != null) {
+      this.timeoutContext ??= TimeoutContext.create({
+        timeoutMS: this.options.timeoutMS,
+        serverSelectionTimeoutMS: client.options.serverSelectionTimeoutMS
+      });
+      delete this.options.timeoutMS;
+    }
+
     const changeStreamCursor = new ChangeStreamCursor<TSchema, TChange>(
       client,
       this.namespace,
       pipeline,
-      options
+      options,
+      this.timeoutContext
     );
 
     for (const event of CHANGE_STREAM_EVENTS) {
@@ -946,6 +973,10 @@ export class ChangeStream<
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
+    if (changeStreamError instanceof MongoOperationTimeoutError) {
+      return; // FIXME: At least emit the error
+    }
+
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
 
@@ -975,7 +1006,10 @@ export class ChangeStream<
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+    if (
+      !isResumableError(changeStreamError, this.cursor.maxWireVersion) &&
+      !(changeStreamError instanceof MongoOperationTimeoutError)
+    ) {
       try {
         await this.close();
       } catch (error) {
@@ -1000,6 +1034,8 @@ export class ChangeStream<
       await this.close();
       throw changeStreamError;
     }
+
+    if (changeStreamError instanceof MongoOperationTimeoutError) throw changeStreamError;
   }
 }
 

@@ -13,6 +13,7 @@ import { AggregateOperation } from '../operations/aggregate';
 import type { CollationOptions } from '../operations/command';
 import { executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   AbstractCursor,
@@ -53,10 +54,13 @@ export class ChangeStreamCursor<
     client: MongoClient,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
-    options: ChangeStreamCursorOptions = {}
+    options: ChangeStreamCursorOptions = {},
+    timeoutContext?: TimeoutContext
   ) {
-    super(client, namespace, options);
+    super(client, namespace, { ...options, tailable: true, awaitData: true });
+    this.timeoutContext = timeoutContext;
 
+    this.isChangeStreamCursor = true;
     this.pipeline = pipeline;
     this.changeStreamCursorOptions = options;
     this._resumeToken = null;
@@ -110,6 +114,7 @@ export class ChangeStreamCursor<
   }
 
   _processBatch(response: CursorResponse): void {
+    console.log(response.toObject());
     const { postBatchResumeToken } = response;
     if (postBatchResumeToken) {
       this.postBatchResumeToken = postBatchResumeToken;
@@ -130,6 +135,7 @@ export class ChangeStreamCursor<
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
       ...this.changeStreamCursorOptions,
+      omitMaxTimeMS: false,
       session
     });
 

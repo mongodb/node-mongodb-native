@@ -142,12 +142,11 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-    TSchema = any,
-    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-  >
+  TSchema = any,
+  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+>
   extends TypedEventEmitter<CursorEvents>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -172,6 +171,8 @@ export abstract class AbstractCursor<
   protected readonly cursorOptions: InternalAbstractCursorOptions;
   /** @internal */
   protected timeoutContext?: TimeoutContext;
+  /** @internal */
+  protected isChangeStreamCursor?: boolean;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -455,8 +456,9 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       return false;
     }
+    const shouldRefresh = !this.isChangeStreamCursor && this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
 
-    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+    if (shouldRefresh) {
       this.timeoutContext?.refresh();
     }
     try {
@@ -467,7 +469,7 @@ export abstract class AbstractCursor<
         await this.fetchBatch();
       } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (shouldRefresh) {
         this.timeoutContext?.clear();
       }
     }
@@ -480,7 +482,9 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
-    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+    const shouldRefresh = !this.isChangeStreamCursor && this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
+
+    if (shouldRefresh) {
       this.timeoutContext?.refresh();
     }
 
@@ -494,7 +498,7 @@ export abstract class AbstractCursor<
         await this.fetchBatch();
       } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (shouldRefresh) {
         this.timeoutContext?.clear();
       }
     }
@@ -510,7 +514,9 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+    const shouldRefresh = this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
+
+    if (shouldRefresh) {
       this.timeoutContext?.refresh();
     }
     try {
@@ -528,7 +534,7 @@ export abstract class AbstractCursor<
         return doc;
       }
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (shouldRefresh) {
         this.timeoutContext?.clear();
       }
     }
