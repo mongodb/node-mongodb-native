@@ -12,15 +12,14 @@ import {
 } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
+import { MongoOperationTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
+import { type CSOTTimeoutContext, Timeout, type TimeoutContext } from '../timeout';
 import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '../utils';
 import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders } from './providers';
-import { CSOTTimeoutContext, TimeoutContext } from '../timeout';
-import { timeLog } from 'console';
-import { RunCommandOptions } from '../operations/run_command';
 
 let socks: SocksLib | null = null;
 function loadSocks(): SocksLib {
@@ -185,7 +184,11 @@ export class StateMachine {
   /**
    * Executes the state machine according to the specification
    */
-  async execute(executor: StateMachineExecutable, context: MongoCryptContext, timeoutContext?: TimeoutContext): Promise<Uint8Array> {
+  async execute(
+    executor: StateMachineExecutable,
+    context: MongoCryptContext,
+    timeoutContext?: CSOTTimeoutContext
+  ): Promise<Uint8Array> {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
     const metaDataClient = executor._metaDataClient;
@@ -209,8 +212,8 @@ export class StateMachine {
             metaDataClient,
             context.ns,
             filter,
-            timeoutContext instanceof CSOTTimeoutContext ? timeoutContext?.remainingTimeMS : null
-          )
+            timeoutContext?.csotEnabled() ? timeoutContext.remainingTimeMS : null
+          );
           if (collInfo) {
             context.addMongoOperationResponse(collInfo);
           }
@@ -235,15 +238,15 @@ export class StateMachine {
                   mongocryptdClient,
                   context.ns,
                   command,
-                  timeoutContext instanceof CSOTTimeoutContext ? timeoutContext?.remainingTimeMS : null
+                  timeoutContext?.csotEnabled() ? timeoutContext.remainingTimeMS : null
                 )
               )
             : await this.markCommand(
-              mongocryptdClient,
-              context.ns,
-              command,
-              timeoutContext instanceof CSOTTimeoutContext ? timeoutContext?.remainingTimeMS : null
-            );
+                mongocryptdClient,
+                context.ns,
+                command,
+                timeoutContext?.csotEnabled() ? timeoutContext.remainingTimeMS : null
+              );
 
           context.addMongoOperationResponse(markedCommand);
           context.finishMongoOperation();
@@ -256,7 +259,7 @@ export class StateMachine {
             keyVaultClient,
             keyVaultNamespace,
             filter,
-            timeoutContext instanceof CSOTTimeoutContext ? timeoutContext?.remainingTimeMS : null
+            timeoutContext?.csotEnabled() ? timeoutContext.remainingTimeMS : null
           );
 
           if (keys.length === 0) {
@@ -279,9 +282,12 @@ export class StateMachine {
         }
 
         case MONGOCRYPT_CTX_NEED_KMS: {
-          const requests = Array.from(this.requests(context));
-          await Promise.all(requests);
-
+          await Promise.all(
+            this.requests(
+              context,
+              timeoutContext?.csotEnabled() ? timeoutContext.remainingTimeMS : null
+            )
+          );
           context.finishKMSRequests();
           break;
         }
@@ -323,7 +329,7 @@ export class StateMachine {
    * @param kmsContext - A C++ KMS context returned from the bindings
    * @returns A promise that resolves when the KMS reply has be fully parsed
    */
-  async kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
+  async kmsRequest(request: MongoCryptKMSRequest, timeoutMS?: number | null): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
     const socketOptions = autoSelectSocketOptions(this.options.socketOptions || {});
@@ -351,10 +357,6 @@ export class StateMachine {
           sock.destroy();
         }
       }
-    }
-
-    function ontimeout() {
-      return new MongoCryptError('KMS request timed out');
     }
 
     function onerror(cause: Error) {
@@ -388,7 +390,6 @@ export class StateMachine {
       resolve: resolveOnNetSocketConnect
     } = promiseWithResolvers<void>();
     netSocket
-      .once('timeout', () => rejectOnNetSocketError(ontimeout()))
       .once('error', err => rejectOnNetSocketError(onerror(err)))
       .once('close', () => rejectOnNetSocketError(onclose()))
       .once('connect', () => resolveOnNetSocketConnect());
@@ -434,8 +435,8 @@ export class StateMachine {
         reject: rejectOnTlsSocketError,
         resolve
       } = promiseWithResolvers<void>();
+
       socket
-        .once('timeout', () => rejectOnTlsSocketError(ontimeout()))
         .once('error', err => rejectOnTlsSocketError(onerror(err)))
         .once('close', () => rejectOnTlsSocketError(onclose()))
         .on('data', data => {
@@ -449,20 +450,26 @@ export class StateMachine {
             resolve();
           }
         });
-      await willResolveKmsRequest;
+
+      await (typeof timeoutMS === 'number'
+        ? Promise.all([willResolveKmsRequest, Timeout.expires(timeoutMS)])
+        : willResolveKmsRequest);
+    } catch (error) {
+      if (Timeout.is(error)) throw new MongoOperationTimeoutError('KMS request timed out');
+      throw error;
     } finally {
       // There's no need for any more activity on this socket at this point.
       destroySockets();
     }
   }
 
-  *requests(context: MongoCryptContext) {
+  *requests(context: MongoCryptContext, timeoutMS?: number | null) {
     for (
       let request = context.nextKMSRequest();
       request != null;
       request = context.nextKMSRequest()
     ) {
-      yield this.kmsRequest(request);
+      yield this.kmsRequest(request, timeoutMS);
     }
   }
 
@@ -532,7 +539,9 @@ export class StateMachine {
       .listCollections(filter, {
         promoteLongs: false,
         promoteValues: false,
-        timeoutMS 
+        ...(typeof timeoutMS === 'number'
+          ? { timeoutMS, timeoutMode: 'cursorLifetime' }
+          : undefined)
       })
       .toArray();
 
@@ -548,16 +557,20 @@ export class StateMachine {
    * @param command - The command to execute.
    * @param callback - Invoked with the serialized and marked bson command, or with an error
    */
-  async markCommand(client: MongoClient, ns: string, command: Uint8Array, timeoutMS?: number | null): Promise<Uint8Array> {
-    const options: RunCommandOptions = { promoteLongs: false, promoteValues: false };
-    if (timeoutMS != null) {
-      options.timeoutMS = timeoutMS;
-      options.omitMaxTimeMS = true;
-    }
+  async markCommand(
+    client: MongoClient,
+    ns: string,
+    command: Uint8Array,
+    timeoutMS?: number | null
+  ): Promise<Uint8Array> {
     const { db } = MongoDBCollectionNamespace.fromString(ns);
-    const rawCommand = deserialize(command, options);
+    const bsonOptions = { promoteLongs: false, promoteValues: false };
+    const rawCommand = deserialize(command, bsonOptions);
 
-    const response = await client.db(db).command(rawCommand, options);
+    const response = await client.db(db).command(rawCommand, {
+      ...bsonOptions,
+      ...(typeof timeoutMS === 'number' ? { timeoutMS, omitMaxTimeMS: true } : undefined)
+    });
 
     return serialize(response, this.bsonOptions);
   }
