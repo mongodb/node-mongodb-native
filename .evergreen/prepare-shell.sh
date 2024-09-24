@@ -31,7 +31,10 @@ export PATH="$MONGODB_BINARIES:$PATH"
 
 if [ ! -d "$DRIVERS_TOOLS" ]; then
   # Only clone driver tools if it does not exist
-  git clone --depth=1 "https://github.com/mongodb-labs/drivers-evergreen-tools.git" "${DRIVERS_TOOLS}"
+  git clone --depth=5 "https://github.com/mongodb-labs/drivers-evergreen-tools.git" "${DRIVERS_TOOLS}"
+  cd "${DRIVERS_TOOLS}"
+  git checkout 8e4f0db5de39305595274cb0a5f2ae196eb1bf94
+  cd -
 fi
 
 echo "installed DRIVERS_EVERGREEN_TOOLS from commit $(git -C $DRIVERS_EVERGREEN_TOOLS rev-parse HEAD)"
