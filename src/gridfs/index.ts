@@ -6,7 +6,7 @@ import { MongoOperationTimeoutError, MongoRuntimeError } from '../error';
 import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { CSOTTimeoutContext, Timeout, TimeoutError } from '../timeout';
+import { CSOTTimeoutContext } from '../timeout';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -111,7 +111,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     filename: string,
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
-    return new GridFSBucketWriteStream(this, filename, { timeoutMS: this.s.db.timeoutMS, ...options });
+    return new GridFSBucketWriteStream(this, filename, {
+      timeoutMS: this.s.db.timeoutMS,
+      ...options
+    });
   }
 
   /**
@@ -124,7 +127,11 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     filename: string,
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
-    return new GridFSBucketWriteStream(this, filename, { timeoutMS: this.s.db.timeoutMS, ...options, id });
+    return new GridFSBucketWriteStream(this, filename, {
+      timeoutMS: this.s.db.timeoutMS,
+      ...options,
+      id
+    });
   }
 
   /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
@@ -163,12 +170,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     );
 
     const remainingTimeMS = timeoutContext?.remainingTimeMS;
-    if (remainingTimeMS != null && remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
+    if (remainingTimeMS != null && remainingTimeMS <= 0)
+      throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
     // Delete orphaned chunks before returning FileNotFound
-    await this.s._chunksCollection.deleteMany(
-      { files_id: id },
-      { timeoutMS: remainingTimeMS }
-    );
+    await this.s._chunksCollection.deleteMany({ files_id: id }, { timeoutMS: remainingTimeMS });
 
     if (deletedCount === 0) {
       // TODO(NODE-3483): Replace with more appropriate error
@@ -240,9 +245,8 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     }
 
     if (timeoutContext) {
-      let remainingTimeMS: number;
       await this.s._filesCollection.drop({ timeoutMS: timeoutContext.remainingTimeMS });
-      remainingTimeMS = timeoutContext.remainingTimeMS;
+      const remainingTimeMS = timeoutContext.remainingTimeMS;
       if (remainingTimeMS <= 0)
         throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
       await this.s._chunksCollection.drop({ timeoutMS: remainingTimeMS });

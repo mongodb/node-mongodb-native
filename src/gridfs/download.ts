@@ -14,7 +14,7 @@ import {
 import type { FindOptions } from '../operations/find';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { CSOTTimeoutContext, type TimeoutContext } from '../timeout';
+import { CSOTTimeoutContext } from '../timeout';
 import type { Callback } from '../utils';
 import type { GridFSChunk } from './upload';
 
@@ -154,7 +154,10 @@ export class GridFSBucketReadStream extends Readable {
         ...options
       },
       readPreference,
-      timeoutContext: options?.timeoutMS != null ? new CSOTTimeoutContext({ timeoutMS: options.timeoutMS, serverSelectionTimeoutMS: 0 }) : undefined
+      timeoutContext:
+        options?.timeoutMS != null
+          ? new CSOTTimeoutContext({ timeoutMS: options.timeoutMS, serverSelectionTimeoutMS: 0 })
+          : undefined
     };
   }
 
@@ -361,7 +364,10 @@ function init(stream: GridFSBucketReadStream): void {
 
     if (stream.s.timeoutContext) {
       const remainingTimeMS = stream.s.timeoutContext.remainingTimeMS;
-      if (remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`GridFS stream timed out after ${stream.s.timeoutContext.timeoutMS}ms`);
+      if (remainingTimeMS <= 0)
+        throw new MongoOperationTimeoutError(
+          `GridFS stream timed out after ${stream.s.timeoutContext.timeoutMS}ms`
+        );
 
       stream.s.cursor = stream.s.chunks
         .find(filter, {
@@ -370,11 +376,8 @@ function init(stream: GridFSBucketReadStream): void {
         })
         .sort({ n: 1 });
     } else {
-      stream.s.cursor = stream.s.chunks
-        .find(filter)
-        .sort({ n: 1 });
+      stream.s.cursor = stream.s.chunks.find(filter).sort({ n: 1 });
     }
-
 
     if (stream.s.readPreference) {
       stream.s.cursor.withReadPreference(stream.s.readPreference);
@@ -395,7 +398,10 @@ function init(stream: GridFSBucketReadStream): void {
 
   if (stream.s.timeoutContext) {
     const remainingTimeMS = stream.s.timeoutContext.remainingTimeMS;
-    if (remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Download timed out after ${stream.s.timeoutContext.timeoutMS}ms`);
+    if (remainingTimeMS <= 0)
+      throw new MongoOperationTimeoutError(
+        `Download timed out after ${stream.s.timeoutContext.timeoutMS}ms`
+      );
 
     findOneOptions.timeoutMS = remainingTimeMS;
   }
