@@ -209,6 +209,11 @@ export interface ClientUpdateResult {
    * these two cases.
    */
   upsertedId?: any;
+
+  /**
+   * Determines if the upsert did include an _id, which includes the case of the _id being null.
+   */
+  didUpsert: boolean;
 }
 
 /** @public */

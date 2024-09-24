@@ -22,23 +22,21 @@ export class ClientBulkWriteResultsMerger {
    */
   constructor(options: ClientBulkWriteOptions) {
     this.options = options;
-    const baseResult = {
+    this.result = {
       insertedCount: 0,
       upsertedCount: 0,
       matchedCount: 0,
       modifiedCount: 0,
-      deletedCount: 0
+      deletedCount: 0,
+      insertResults: undefined,
+      updateResults: undefined,
+      deleteResults: undefined
     };
 
     if (options.verboseResults) {
-      this.result = {
-        ...baseResult,
-        insertResults: new Map<number, ClientInsertOneResult>(),
-        updateResults: new Map<number, ClientUpdateResult>(),
-        deleteResults: new Map<number, ClientDeleteResult>()
-      };
-    } else {
-      this.result = baseResult;
+      this.result.insertResults = new Map<number, ClientInsertOneResult>();
+      this.result.updateResults = new Map<number, ClientUpdateResult>();
+      this.result.deleteResults = new Map<number, ClientDeleteResult>();
     }
   }
 
@@ -75,7 +73,10 @@ export class ClientBulkWriteResultsMerger {
           if ('update' in operation) {
             const result: ClientUpdateResult = {
               matchedCount: document.n,
-              modifiedCount: document.nModified || 0
+              modifiedCount: document.nModified ?? 0,
+              // We do specifically want to check undefined here since a null _id is valid.
+              // eslint-disable-next-line no-restricted-syntax
+              didUpsert: document.upserted?._id !== undefined
             };
             if (document.upserted) {
               result.upsertedId = document.upserted._id;

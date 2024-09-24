@@ -18,7 +18,10 @@ describe('ClientBulkWriteResultsMerger', function () {
         upsertedCount: 0,
         matchedCount: 0,
         modifiedCount: 0,
-        deletedCount: 0
+        deletedCount: 0,
+        deleteResults: undefined,
+        insertResults: undefined,
+        updateResults: undefined
       });
     });
   });
@@ -99,7 +102,8 @@ describe('ClientBulkWriteResultsMerger', function () {
           it('sets the update results', function () {
             expect(result.updateResults.get(1)).to.deep.equal({
               matchedCount: 1,
-              modifiedCount: 1
+              modifiedCount: 1,
+              didUpsert: false
             });
           });
 
@@ -107,7 +111,8 @@ describe('ClientBulkWriteResultsMerger', function () {
             expect(result.updateResults.get(2)).to.deep.equal({
               matchedCount: 0,
               modifiedCount: 0,
-              upsertedId: 1
+              upsertedId: 1,
+              didUpsert: true
             });
           });
 
@@ -172,7 +177,7 @@ describe('ClientBulkWriteResultsMerger', function () {
           });
 
           it('sets no insert results', function () {
-            expect(result).to.not.have.property('insertResults');
+            expect(result.insertResults).to.equal(undefined);
           });
 
           it('merges the upserted count', function () {
@@ -188,7 +193,7 @@ describe('ClientBulkWriteResultsMerger', function () {
           });
 
           it('sets no update results', function () {
-            expect(result).to.not.have.property('updateResults');
+            expect(result.updateResults).to.equal(undefined);
           });
 
           it('merges the deleted count', function () {
@@ -196,7 +201,7 @@ describe('ClientBulkWriteResultsMerger', function () {
           });
 
           it('sets no delete results', function () {
-            expect(result).to.not.have.property('deleteResults');
+            expect(result.deleteResults).to.equal(undefined);
           });
         });
       });

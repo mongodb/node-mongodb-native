@@ -217,7 +217,7 @@ export function resultCheck(
       // to convert the expected keys from the string numbers to actual numbers since the key
       // values in the maps are actual numbers.
       const isActualMap = actual instanceof Map;
-      const mapKey = !Number.isNaN(key) ? Number(key) : key;
+      const mapKey = !Number.isNaN(Number(key)) ? Number(key) : key;
       resultCheck(
         isActualMap ? actual.get(mapKey) : actual[key],
         value,

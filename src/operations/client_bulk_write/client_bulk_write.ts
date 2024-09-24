@@ -9,7 +9,7 @@ import { Aspect, defineAspects } from '../operation';
 import { type ClientBulkWriteOptions } from './common';
 
 /**
- * Executes a single vlient bulk write operation within a potential batch.
+ * Executes a single client bulk write operation within a potential batch.
  * @internal
  */
 export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCursorResponse> {

@@ -14,6 +14,7 @@ import {
   type ClientReplaceOneModel,
   type ClientUpdateManyModel,
   type ClientUpdateOneModel,
+  DEFAULT_PK_FACTORY,
   DocumentSequence,
   ObjectId
 } from '../../../mongodb';
@@ -232,7 +233,7 @@ describe('ClientBulkWriteCommandBuilder', function () {
         namespace: 'test.coll',
         document: { name: 1 }
       };
-      const operation = buildInsertOneOperation(model, 5);
+      const operation = buildInsertOneOperation(model, 5, DEFAULT_PK_FACTORY);
 
       it('generates the insert operation with an _id', function () {
         expect(operation.insert).to.equal(5);
@@ -248,7 +249,7 @@ describe('ClientBulkWriteCommandBuilder', function () {
         namespace: 'test.coll',
         document: { _id: id, name: 1 }
       };
-      const operation = buildInsertOneOperation(model, 5);
+      const operation = buildInsertOneOperation(model, 5, DEFAULT_PK_FACTORY);
 
       it('generates the insert operation with an _id', function () {
         expect(operation).to.deep.equal({ insert: 5, document: { _id: id, name: 1 } });

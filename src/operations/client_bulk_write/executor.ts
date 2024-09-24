@@ -5,7 +5,7 @@ import { type MongoClient } from '../../mongo_client';
 import { WriteConcern } from '../../write_concern';
 import { executeOperation } from '../execute_operation';
 import { ClientBulkWriteOperation } from './client_bulk_write';
-import { ClientBulkWriteCommandBuilder } from './command_builder';
+import { type ClientBulkWriteCommand, ClientBulkWriteCommandBuilder } from './command_builder';
 import {
   type AnyClientBulkWriteModel,
   type ClientBulkWriteOptions,
@@ -51,8 +51,13 @@ export class ClientBulkWriteExecutor {
   async execute(): Promise<ClientBulkWriteResult | { ok: 1 }> {
     // The command builder will take the user provided models and potential split the batch
     // into multiple commands due to size.
-    const commmandBuilder = new ClientBulkWriteCommandBuilder(this.operations, this.options);
-    const commands = commmandBuilder.buildCommands();
+    const pkFactory = this.client.s.options.pkFactory;
+    const commandBuilder = new ClientBulkWriteCommandBuilder(
+      this.operations,
+      this.options,
+      pkFactory
+    );
+    const commands = commandBuilder.buildCommands();
     if (this.options.writeConcern?.w === 0) {
       return await executeUnacknowledged(this.client, this.options, commands);
     }
@@ -66,7 +71,7 @@ export class ClientBulkWriteExecutor {
 async function executeAcknowledged(
   client: MongoClient,
   options: ClientBulkWriteOptions,
-  commands: Document[]
+  commands: ClientBulkWriteCommand[]
 ): Promise<ClientBulkWriteResult> {
   const resultsMerger = new ClientBulkWriteResultsMerger(options);
   // For each command will will create and exhaust a cursor for the results.

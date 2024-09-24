@@ -1,6 +1,8 @@
-import { type Document, ObjectId } from '../../bson';
+import { type Document } from '../../bson';
 import { DocumentSequence } from '../../cmap/commands';
+import { type PkFactory } from '../../mongo_client';
 import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
+import { DEFAULT_PK_FACTORY } from '../../utils';
 import { type CollationOptions } from '../command';
 import { type Hint } from '../operation';
 import type {
@@ -30,14 +32,20 @@ export interface ClientBulkWriteCommand {
 export class ClientBulkWriteCommandBuilder {
   models: AnyClientBulkWriteModel[];
   options: ClientBulkWriteOptions;
+  pkFactory: PkFactory;
 
   /**
    * Create the command builder.
    * @param models - The client write models.
    */
-  constructor(models: AnyClientBulkWriteModel[], options: ClientBulkWriteOptions) {
+  constructor(
+    models: AnyClientBulkWriteModel[],
+    options: ClientBulkWriteOptions,
+    pkFactory?: PkFactory
+  ) {
     this.models = models;
     this.options = options;
+    this.pkFactory = pkFactory ?? DEFAULT_PK_FACTORY;
   }
 
   /**
@@ -63,10 +71,10 @@ export class ClientBulkWriteCommandBuilder {
       const ns = model.namespace;
       const index = namespaces.get(ns);
       if (index != null) {
-        operations.push(buildOperation(model, index));
+        operations.push(buildOperation(model, index, this.pkFactory));
       } else {
         namespaces.set(ns, currentNamespaceIndex);
-        operations.push(buildOperation(model, currentNamespaceIndex));
+        operations.push(buildOperation(model, currentNamespaceIndex, this.pkFactory));
         currentNamespaceIndex++;
       }
     }
@@ -90,7 +98,9 @@ export class ClientBulkWriteCommandBuilder {
       command.let = this.options.let;
     }
 
-    if (this.options.comment != null) {
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (this.options.comment !== undefined) {
       command.comment = this.options.comment;
     }
     return [command];
@@ -111,13 +121,14 @@ interface ClientInsertOperation {
  */
 export const buildInsertOneOperation = (
   model: ClientInsertOneModel,
-  index: number
+  index: number,
+  pkFactory: PkFactory
 ): ClientInsertOperation => {
   const document: ClientInsertOperation = {
     insert: index,
     document: model.document
   };
-  document.document._id = model.document._id ?? new ObjectId();
+  document.document._id = model.document._id ?? pkFactory.createPk();
   return document;
 };
 
@@ -279,10 +290,14 @@ export const buildReplaceOneOperation = (
 };
 
 /** @internal */
-export function buildOperation(model: AnyClientBulkWriteModel, index: number): Document {
+export function buildOperation(
+  model: AnyClientBulkWriteModel,
+  index: number,
+  pkFactory: PkFactory
+): Document {
   switch (model.name) {
     case 'insertOne':
-      return buildInsertOneOperation(model, index);
+      return buildInsertOneOperation(model, index, pkFactory);
     case 'deleteOne':
       return buildDeleteOneOperation(model, index);
     case 'deleteMany':
