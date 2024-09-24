@@ -8,14 +8,15 @@ import {
   MongoGridFSChunkError,
   MongoGridFSStreamError,
   MongoInvalidArgumentError,
+  MongoOperationTimeoutError,
   MongoRuntimeError
 } from '../error';
 import type { FindOptions } from '../operations/find';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
+import { CSOTTimeoutContext, type TimeoutContext } from '../timeout';
 import type { Callback } from '../utils';
 import type { GridFSChunk } from './upload';
-import { TimeoutContext } from '../timeout';
 
 /** @public */
 export interface GridFSBucketReadStreamOptions {
@@ -103,7 +104,7 @@ export interface GridFSBucketReadStreamPrivate {
     timeoutMS?: number;
   };
   readPreference?: ReadPreference;
-  timeoutContext?: TimeoutContext;
+  timeoutContext?: CSOTTimeoutContext;
 }
 
 /**
@@ -152,7 +153,8 @@ export class GridFSBucketReadStream extends Readable {
         end: 0,
         ...options
       },
-      readPreference
+      readPreference,
+      timeoutContext: options?.timeoutMS != null ? new CSOTTimeoutContext({ timeoutMS: options.timeoutMS, serverSelectionTimeoutMS: 0 }) : undefined
     };
   }
 
@@ -200,7 +202,7 @@ export class GridFSBucketReadStream extends Readable {
   async abort(): Promise<void> {
     this.push(null);
     this.destroy();
-    await this.s.cursor?.close();
+    await this.s.cursor?.close({ timeoutMS: this.s.options.timeoutMS });
   }
 }
 
@@ -356,7 +358,23 @@ function init(stream: GridFSBucketReadStream): void {
         filter['n'] = { $gte: skip };
       }
     }
-    stream.s.cursor = stream.s.chunks.find(filter, { timeoutMode: CursorTimeoutMode.LIFETIME, timeoutMS: stream.s.options.timeoutMS }).sort({ n: 1 });
+
+    if (stream.s.timeoutContext) {
+      const remainingTimeMS = stream.s.timeoutContext.remainingTimeMS;
+      if (remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`GridFS stream timed out after ${stream.s.timeoutContext.timeoutMS}ms`);
+
+      stream.s.cursor = stream.s.chunks
+        .find(filter, {
+          timeoutMode: stream.s.options.timeoutMS != null ? CursorTimeoutMode.LIFETIME : undefined,
+          timeoutMS: remainingTimeMS
+        })
+        .sort({ n: 1 });
+    } else {
+      stream.s.cursor = stream.s.chunks
+        .find(filter)
+        .sort({ n: 1 });
+    }
+
 
     if (stream.s.readPreference) {
       stream.s.cursor.withReadPreference(stream.s.readPreference);
@@ -374,6 +392,13 @@ function init(stream: GridFSBucketReadStream): void {
     stream.emit(GridFSBucketReadStream.FILE, doc);
     return;
   };
+
+  if (stream.s.timeoutContext) {
+    const remainingTimeMS = stream.s.timeoutContext.remainingTimeMS;
+    if (remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Download timed out after ${stream.s.timeoutContext.timeoutMS}ms`);
+
+    findOneOptions.timeoutMS = remainingTimeMS;
+  }
 
   stream.s.files.findOne(stream.s.filter, findOneOptions).then(handleReadResult, error => {
     if (stream.destroyed) return;

@@ -2,12 +2,14 @@ import { Writable } from 'stream';
 
 import { type Document, ObjectId } from '../bson';
 import type { Collection } from '../collection';
-import { MongoAPIError, MONGODB_ERROR_CODES, MongoError } from '../error';
+import { MongoAPIError, MONGODB_ERROR_CODES, MongoError, MongoOperationTimeoutError } from '../error';
 import { type Callback, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
 import type { GridFSFile } from './download';
 import type { GridFSBucket } from './index';
+import { CSOTTimeoutContext, TimeoutContext } from '../timeout';
+import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 
 /** @public */
 export interface GridFSChunk {
@@ -97,6 +99,8 @@ export class GridFSBucketWriteStream extends Writable {
    * ```
    */
   gridFSFile: GridFSFile | null = null;
+  /** @internal */
+  timeoutContext?: CSOTTimeoutContext;
 
   /**
    * @param bucket - Handle for this stream's corresponding bucket
@@ -131,14 +135,8 @@ export class GridFSBucketWriteStream extends Writable {
       aborted: false
     };
 
-    if (!this.bucket.s.calledOpenUploadStream) {
-      this.bucket.s.calledOpenUploadStream = true;
+    if (options.timeoutMS != null) this.timeoutContext = new CSOTTimeoutContext({ timeoutMS: options.timeoutMS, serverSelectionTimeoutMS: this.bucket.s.db.client.options.serverSelectionTimeoutMS });
 
-      checkIndexes(this).then(() => {
-        this.bucket.s.checkedIndexes = true;
-        this.bucket.emit('index');
-      }, squashError);
-    }
   }
 
   /**
@@ -147,6 +145,22 @@ export class GridFSBucketWriteStream extends Writable {
    * The stream is considered constructed when the indexes are done being created
    */
   override _construct(callback: (error?: Error | null) => void): void {
+    if (!this.bucket.s.calledOpenUploadStream) {
+      this.bucket.s.calledOpenUploadStream = true;
+
+      checkIndexes(this).then(() => {
+        this.bucket.s.checkedIndexes = true;
+        this.bucket.emit('index');
+      }, error => {
+        if (error instanceof MongoOperationTimeoutError) {
+          return handleError(this, error, callback);
+        } else {
+          squashError(error);
+        }
+      }
+      );
+    }
+
     if (this.bucket.s.checkedIndexes) {
       return process.nextTick(callback);
     }
@@ -194,7 +208,10 @@ export class GridFSBucketWriteStream extends Writable {
     }
 
     this.state.aborted = true;
-    await this.chunks.deleteMany({ files_id: this.id });
+    let remainingTimeMS;
+    remainingTimeMS = this.timeoutContext?.remainingTimeMS;
+    if (remainingTimeMS != null && remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Upload timed out after ${this.timeoutContext?.timeoutMS}ms`);
+    await this.chunks.deleteMany({ files_id: this.id, timeoutMS: remainingTimeMS });
   }
 }
 
@@ -219,9 +236,13 @@ function createChunkDoc(filesId: ObjectId, n: number, data: Buffer): GridFSChunk
 async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> {
   const index = { files_id: 1, n: 1 };
 
+  let remainingTimeMS;
+  remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
+  if (remainingTimeMS != null && remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+
   let indexes;
   try {
-    indexes = await stream.chunks.listIndexes().toArray();
+    indexes = await stream.chunks.listIndexes({ timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined, timeoutMS: remainingTimeMS }).toArray();
   } catch (error) {
     if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
       indexes = [];
@@ -239,10 +260,13 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   });
 
   if (!hasChunksIndex) {
+    remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
+    if (remainingTimeMS != null && remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
     await stream.chunks.createIndex(index, {
       ...stream.writeConcern,
       background: true,
-      unique: true
+      unique: true,
+      timeoutMS: remainingTimeMS
     });
   }
 }
@@ -270,7 +294,12 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
       return;
     }
 
-    stream.files.insertOne(gridFSFile, { writeConcern: stream.writeConcern }).then(
+    const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
+    if (remainingTimeMS != null && remainingTimeMS <= 0) {
+      return handleError(stream, new MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`), callback);
+    }
+
+    stream.files.insertOne(gridFSFile, { writeConcern: stream.writeConcern, timeoutMS: remainingTimeMS }).then(
       () => {
         stream.gridFSFile = gridFSFile;
         callback();
@@ -284,7 +313,9 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
 }
 
 async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
-  const doc = await stream.files.findOne({}, { projection: { _id: 1 } });
+  let remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
+  if (remainingTimeMS != null && remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+  const doc = await stream.files.findOne({}, { projection: { _id: 1 }, timeoutMS: remainingTimeMS, timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined });
   if (doc != null) {
     // If at least one document exists assume the collection has the required index
     return;
@@ -293,8 +324,14 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   const index = { filename: 1, uploadDate: 1 };
 
   let indexes;
+  remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
+  if (remainingTimeMS != null && remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+  const listIndexesOptions = {
+    timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined,
+    timeoutMS: remainingTimeMS
+  };
   try {
-    indexes = await stream.files.listIndexes().toArray();
+    indexes = await stream.files.listIndexes(listIndexesOptions).toArray();
   } catch (error) {
     if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
       indexes = [];
@@ -312,7 +349,10 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   });
 
   if (!hasFileIndex) {
-    await stream.files.createIndex(index, { background: false });
+    remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
+    if (remainingTimeMS != null && remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+
+    await stream.files.createIndex(index, { background: false, timeoutMS: remainingTimeMS });
   }
 
   await checkChunksIndex(stream);
@@ -386,14 +426,20 @@ function doWrite(
     let doc: GridFSChunk;
     if (spaceRemaining === 0) {
       doc = createChunkDoc(stream.id, stream.n, Buffer.from(stream.bufToStore));
-      ++stream.state.outstandingRequests;
-      ++outstandingRequests;
 
       if (isAborted(stream, callback)) {
         return;
       }
 
-      stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern }).then(
+      const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
+      if (remainingTimeMS != null && remainingTimeMS <= 0) {
+        return handleError(stream,
+          new MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`), callback);
+      }
+
+      ++stream.state.outstandingRequests;
+      ++outstandingRequests;
+      stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern, timeoutMS: remainingTimeMS }).then(
         () => {
           --stream.state.outstandingRequests;
           --outstandingRequests;
@@ -420,7 +466,6 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void
     return checkDone(stream, callback);
   }
 
-  ++stream.state.outstandingRequests;
 
   // Create a new buffer to make sure the buffer isn't bigger than it needs
   // to be.
@@ -433,7 +478,13 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void
     return;
   }
 
-  stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern }).then(
+  const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
+  if (remainingTimeMS != null && remainingTimeMS <= 0) {
+    return handleError(stream,
+      new MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`), callback);
+  }
+  ++stream.state.outstandingRequests;
+  stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern, timeoutMS: remainingTimeMS }).then(
     () => {
       --stream.state.outstandingRequests;
       checkDone(stream, callback);

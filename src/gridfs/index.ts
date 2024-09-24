@@ -2,10 +2,11 @@ import type { ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import type { FindCursor } from '../cursor/find_cursor';
 import type { Db } from '../db';
-import { MongoRuntimeError } from '../error';
+import { MongoOperationTimeoutError, MongoRuntimeError } from '../error';
 import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
+import { CSOTTimeoutContext, Timeout, TimeoutError } from '../timeout';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -93,7 +94,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       _chunksCollection: db.collection<GridFSChunk>(privateOptions.bucketName + '.chunks'),
       _filesCollection: db.collection<GridFSFile>(privateOptions.bucketName + '.files'),
       checkedIndexes: false,
-      calledOpenUploadStream: false,
+      calledOpenUploadStream: false
     };
   }
 
@@ -110,7 +111,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     filename: string,
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
-    return new GridFSBucketWriteStream(this, filename, options);
+    return new GridFSBucketWriteStream(this, filename, { timeoutMS: this.s.db.timeoutMS, ...options });
   }
 
   /**
@@ -123,7 +124,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     filename: string,
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
-    return new GridFSBucketWriteStream(this, filename, { ...options, id });
+    return new GridFSBucketWriteStream(this, filename, { timeoutMS: this.s.db.timeoutMS, ...options, id });
   }
 
   /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
@@ -136,7 +137,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       this.s._filesCollection,
       this.s.options.readPreference,
       { _id: id },
-      options
+      { timeoutMS: this.s.db.timeoutMS, ...options }
     );
   }
 
@@ -145,11 +146,29 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    *
    * @param id - The id of the file doc
    */
-  async delete(id: ObjectId): Promise<void> {
-    const { deletedCount } = await this.s._filesCollection.deleteOne({ _id: id });
+  async delete(id: ObjectId, options?: { timeoutMS: number }): Promise<void> {
+    const timeoutMS = options?.timeoutMS ?? this.s.db.timeoutMS;
+    let timeoutContext: CSOTTimeoutContext | undefined = undefined;
 
+    if (timeoutMS) {
+      timeoutContext = new CSOTTimeoutContext({
+        timeoutMS,
+        serverSelectionTimeoutMS: this.s.db.client.options.serverSelectionTimeoutMS
+      });
+    }
+
+    const { deletedCount } = await this.s._filesCollection.deleteOne(
+      { _id: id },
+      { timeoutMS: timeoutContext?.remainingTimeMS }
+    );
+
+    const remainingTimeMS = timeoutContext?.remainingTimeMS;
+    if (remainingTimeMS != null && remainingTimeMS <= 0) throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
     // Delete orphaned chunks before returning FileNotFound
-    await this.s._chunksCollection.deleteMany({ files_id: id });
+    await this.s._chunksCollection.deleteMany(
+      { files_id: id },
+      { timeoutMS: remainingTimeMS }
+    );
 
     if (deletedCount === 0) {
       // TODO(NODE-3483): Replace with more appropriate error
@@ -189,7 +208,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       this.s._filesCollection,
       this.s.options.readPreference,
       { filename },
-      { ...options, sort, skip }
+      { timeoutMS: this.s.db.timeoutMS, ...options, sort, skip }
     );
   }
 
@@ -199,18 +218,37 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param id - the id of the file to rename
    * @param filename - new name for the file
    */
-  async rename(id: ObjectId, filename: string): Promise<void> {
+  async rename(id: ObjectId, filename: string, options?: { timeoutMS: number }): Promise<void> {
     const filter = { _id: id };
     const update = { $set: { filename } };
-    const { matchedCount } = await this.s._filesCollection.updateOne(filter, update);
+    const { matchedCount } = await this.s._filesCollection.updateOne(filter, update, options);
     if (matchedCount === 0) {
       throw new MongoRuntimeError(`File with id ${id} not found`);
     }
   }
 
   /** Removes this bucket's files collection, followed by its chunks collection. */
-  async drop(): Promise<void> {
-    await this.s._filesCollection.drop();
-    await this.s._chunksCollection.drop();
+  async drop(options?: { timeoutMS: number }): Promise<void> {
+    const timeoutMS = options?.timeoutMS ?? this.s.db.timeoutMS;
+    let timeoutContext: CSOTTimeoutContext | undefined = undefined;
+
+    if (timeoutMS) {
+      timeoutContext = new CSOTTimeoutContext({
+        timeoutMS,
+        serverSelectionTimeoutMS: this.s.db.client.options.serverSelectionTimeoutMS
+      });
+    }
+
+    if (timeoutContext) {
+      let remainingTimeMS: number;
+      await this.s._filesCollection.drop({ timeoutMS: timeoutContext.remainingTimeMS });
+      remainingTimeMS = timeoutContext.remainingTimeMS;
+      if (remainingTimeMS <= 0)
+        throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
+      await this.s._chunksCollection.drop({ timeoutMS: remainingTimeMS });
+    } else {
+      await this.s._filesCollection.drop();
+      await this.s._chunksCollection.drop();
+    }
   }
 }
