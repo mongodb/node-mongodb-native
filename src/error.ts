@@ -617,7 +617,7 @@ export class MongoGCPError extends MongoOIDCError {
 }
 
 /**
- * An error generated when a ChangeStream operation fails to execute.
+ * An error indicating that an error occurred when processing bulk write results.
  *
  * @public
  * @category Error

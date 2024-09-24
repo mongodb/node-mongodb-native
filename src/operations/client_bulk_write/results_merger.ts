@@ -74,9 +74,8 @@ export class ClientBulkWriteResultsMerger {
             const result: ClientUpdateResult = {
               matchedCount: document.n,
               modifiedCount: document.nModified ?? 0,
-              // We do specifically want to check undefined here since a null _id is valid.
-              // eslint-disable-next-line no-restricted-syntax
-              didUpsert: document.upserted?._id !== undefined
+              // Check if the bulk did actually upsert.
+              didUpsert: document.upserted != null
             };
             if (document.upserted) {
               result.upsertedId = document.upserted._id;
