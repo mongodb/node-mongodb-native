@@ -189,7 +189,7 @@ tests:
               newDescription:
                 type: Unknown
           count: 1
-      - name: bulkWrite
+      - name: clientBulkWrite
         object: *client
         arguments:
           models:
