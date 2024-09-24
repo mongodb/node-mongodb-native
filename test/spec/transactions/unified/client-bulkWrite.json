@@ -1,6 +1,6 @@
 {
   "description": "client bulkWrite transactions",
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
       "minServerVersion": "8.0",
@@ -8,7 +8,8 @@
         "replicaset",
         "sharded",
         "load-balanced"
-      ]
+      ],
+      "serverless": "forbid"
     }
   ],
   "createEntities": [

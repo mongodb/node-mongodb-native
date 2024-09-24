@@ -431,7 +431,8 @@
       "description": "client bulkWrite appends declared API version",
       "runOnRequirements": [
         {
-          "minServerVersion": "8.0"
+          "minServerVersion": "8.0",
+          "serverless": "forbid"
         }
       ],
       "operations": [

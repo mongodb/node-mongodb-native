@@ -160,6 +160,7 @@ tests:
   - description: "client bulkWrite appends declared API version"
     runOnRequirements:
       - minServerVersion: "8.0" # `bulkWrite` added to server 8.0
+        serverless: forbid
     operations:
       - name: clientBulkWrite
         object: *client
