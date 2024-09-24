@@ -94,7 +94,7 @@ export interface CommandOptions extends BSONSerializeOptions {
 
   directConnection?: boolean;
 
-  // Triggers fire-and-forget protocol for commands that don't support WriteConcern
+  /** Triggers fire-and-forget protocol for commands that don't support WriteConcern */
   moreToCome?: boolean;
 }
 
