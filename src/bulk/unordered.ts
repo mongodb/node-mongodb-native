@@ -4,7 +4,6 @@ import type { Collection } from '../collection';
 import { MongoInvalidArgumentError } from '../error';
 import type { DeleteStatement } from '../operations/delete';
 import type { UpdateStatement } from '../operations/update';
-import { type Callback } from '../utils';
 import {
   Batch,
   BatchType,
@@ -20,12 +19,12 @@ export class UnorderedBulkOperation extends BulkOperationBase {
     super(collection, options, false);
   }
 
-  override handleWriteError(callback: Callback, writeResult: BulkWriteResult): boolean {
+  override handleWriteError(writeResult: BulkWriteResult): void {
     if (this.s.batches.length) {
-      return false;
+      return;
     }
 
-    return super.handleWriteError(callback, writeResult);
+    return super.handleWriteError(writeResult);
   }
 
   addToOperationsList(
