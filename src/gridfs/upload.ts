@@ -225,21 +225,12 @@ export class GridFSBucketWriteStream extends Writable {
 }
 
 function handleError(stream: GridFSBucketWriteStream, error: Error, callback: Callback): void {
-  const cb = (e?: Error) => {
-    console.log('calling handleError callback');
-    try {
-      callback(e);
-    } catch (e) {
-      console.log('callback threw:', e);
-      throw e;
-    }
-  };
   if (stream.state.errored) {
-    process.nextTick(cb);
+    process.nextTick(callback);
     return;
   }
   stream.state.errored = true;
-  process.nextTick(cb, error);
+  process.nextTick(callback, error);
 }
 
 function createChunkDoc(filesId: ObjectId, n: number, data: Buffer): GridFSChunk {
@@ -343,7 +334,6 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
           callback();
         },
         error => {
-          console.log("got error in checkDone's insertOne");
           return handleError(stream, error, callback);
         }
       );
@@ -484,9 +474,6 @@ function doWrite(
     if (spaceRemaining === 0) {
       doc = createChunkDoc(stream.id, stream.n, Buffer.from(stream.bufToStore));
 
-      if (isAborted(stream, callback)) {
-        return;
-      }
 
       const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
       if (remainingTimeMS != null && remainingTimeMS <= 0) {
@@ -501,6 +488,11 @@ function doWrite(
 
       ++stream.state.outstandingRequests;
       ++outstandingRequests;
+
+      if (isAborted(stream, callback)) {
+        return;
+      }
+
       stream.chunks
         .insertOne(doc, { writeConcern: stream.writeConcern, timeoutMS: remainingTimeMS })
         .then(
@@ -513,7 +505,6 @@ function doWrite(
             }
           },
           error => {
-            console.log(`Got error in doWrite's insertOne`);
             return handleError(stream, error, callback);
           }
         );
@@ -563,7 +554,6 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void
         checkDone(stream, callback);
       },
       error => {
-        console.log(`Got error in writeRemnant's insertOne`);
         return handleError(stream, error, callback);
       }
     );

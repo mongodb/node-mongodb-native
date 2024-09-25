@@ -481,6 +481,7 @@ describe('CSOT spec prose tests', function () {
       const data = Buffer.from('01020304', 'hex');
 
       const { promise: writePromise, resolve, reject } = promiseWithResolvers<void>();
+      uploadStream.on('error', error => uploadStream.destroy(error));
       uploadStream.write(data, error => {
         if (error) reject(error);
         else resolve();
