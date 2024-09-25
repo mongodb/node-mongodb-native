@@ -451,7 +451,6 @@ describe('Collection', function () {
     });
 
     afterEach(async function () {
-      await coll.drop();
       await client.close();
       sinon.restore();
     });
