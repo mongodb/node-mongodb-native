@@ -26,6 +26,8 @@ import {
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 import { once } from 'node:events';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
@@ -789,6 +791,24 @@ describe('CSOT driver tests', metadata, () => {
 
           const maybeError = await once(uploadStream, 'error');
           expect(maybeError[0]).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+
+        it('only emits index event once per bucket', async function() {
+          let numEventsSeen = 0;
+          bucket.on('index', () => numEventsSeen++);
+
+          const uploadStream0 = bucket
+            .openUploadStream('filename')
+            .on('error', error => uploadStream0.destroy(error));
+          const uploadStream1 = bucket
+            .openUploadStream('filename')
+            .on('error', error => uploadStream1.destroy(error));
+
+          const data = Buffer.from('test', 'utf-8');
+          await pipeline(Readable.from(data), uploadStream0);
+          await pipeline(Readable.from(data), uploadStream1);
+
+          expect(numEventsSeen).to.equal(1);
         });
       });
 
