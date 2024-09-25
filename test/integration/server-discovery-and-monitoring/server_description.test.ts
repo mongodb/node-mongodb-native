@@ -25,7 +25,7 @@ describe('class ServerDescription', function () {
       childProcess.kill('SIGKILL');
     });
 
-    it('iscryptd is set to true', async function () {
+    it('iscryptd is set to true ', async function () {
       const descriptions = [];
       client.on('serverDescriptionChanged', description => descriptions.push(description));
       const hello = await client.db().command({ hello: true });
@@ -45,7 +45,7 @@ describe('class ServerDescription', function () {
       await client?.close();
     });
 
-    it('iscryptd is set to false', async function () {
+    it('iscryptd is set to false ', async function () {
       const descriptions = [];
       client.on('serverDescriptionChanged', description => descriptions.push(description));
       const hello = await client.db().command({ hello: true });

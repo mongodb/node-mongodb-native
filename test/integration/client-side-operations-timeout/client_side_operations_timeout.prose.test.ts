@@ -578,7 +578,6 @@ describe('CSOT spec prose tests', function () {
           e => e
         );
       const end = now();
-
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     }).skipReason =

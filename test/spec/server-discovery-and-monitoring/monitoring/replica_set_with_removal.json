@@ -69,7 +69,7 @@
               "a:27017"
             ],
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ],
         [

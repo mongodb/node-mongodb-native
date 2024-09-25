@@ -1,6 +1,6 @@
 import type { Document } from '../bson';
 import { MongoAPIError } from '../error';
-import type { ExplainVerbosityLike } from '../explain';
+import type { ExplainCommandOptions, ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import { AggregateOperation, type AggregateOptions } from '../operations/aggregate';
 import { executeOperation } from '../operations/execute_operation';
@@ -77,7 +77,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** Execute the explain for the cursor */
-  async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
+  async explain(verbosity?: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document> {
     return (
       await executeOperation(
         this.client,

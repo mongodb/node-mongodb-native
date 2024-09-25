@@ -34,7 +34,7 @@ export interface OperationOptions extends BSONSerializeOptions {
   /** @internal Hint to `executeOperation` to omit maxTimeMS */
   omitMaxTimeMS?: boolean;
 
-  /** @public The time limit an operation will be permitted to run for */
+  /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }
 

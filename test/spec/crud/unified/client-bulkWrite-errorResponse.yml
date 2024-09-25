@@ -2,6 +2,7 @@ description: "client bulkWrite errorResponse"
 schemaVersion: "1.12"
 runOnRequirements:
   - minServerVersion: "8.0"
+    serverless: forbid
 
 createEntities:
   - client:

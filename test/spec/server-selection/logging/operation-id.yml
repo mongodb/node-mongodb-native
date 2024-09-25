@@ -30,6 +30,9 @@ createEntities:
   - client:
       id: &failPointClient failPointClient
 
+_yamlAnchors:
+  namespace: &namespace "logging-tests.server-selection"
+
 tests:
   - description: "Successful bulkWrite operation: log messages have operationIds"
     operations:
@@ -122,3 +125,97 @@ tests:
               operationId: { $$type: [int, long] }
               operation: insert
 
+  - description: "Successful client bulkWrite operation: log messages have operationIds"
+    runOnRequirements:
+      - minServerVersion: "8.0" # required for bulkWrite command
+    operations:
+      # ensure we've discovered the server so it is immediately available
+      # and no extra "waiting for suitable server" messages are emitted.
+      # expected topology events reflect initial server discovery and server connect event.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            topologyDescriptionChangedEvent: {}
+          count: 2
+      - name: clientBulkWrite
+        object: *client
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { x: 1 }
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: serverSelection
+            data:
+              message: "Server selection started"
+              operationId: { $$type: [int, long] }
+              operation: bulkWrite
+          - level: debug
+            component: serverSelection
+            data:
+              message: "Server selection succeeded"
+              operationId: { $$type: [int, long] }
+              operation: bulkWrite
+
+  - description: "Failed client bulkWrite operation: log messages have operationIds"
+    runOnRequirements:
+      - minServerVersion: "8.0" # required for bulkWrite command
+    operations:
+      # fail all hello/legacy hello commands for the main client.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: alwaysOn
+            data:
+              failCommands: ["hello", "ismaster"]
+              appName: *appName
+              closeConnection: true
+      # wait until we've marked the server unknown due
+      # to a failed heartbeat.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            serverDescriptionChangedEvent:
+              newDescription:
+                type: Unknown
+          count: 1
+      - name: clientBulkWrite
+        object: *client
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { x: 1 }
+        expectError:
+          isClientError: true # server selection timeout
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: serverSelection
+            data:
+              message: "Server selection started"
+              operationId: { $$type: [int, long] }
+              operation: bulkWrite
+          - level: info
+            component: serverSelection
+            data:
+              message: "Waiting for suitable server to become available"
+              operationId: { $$type: [int, long] }
+              operation: bulkWrite
+          - level: debug
+            component: serverSelection
+            data:
+              message: "Server selection failed"
+              operationId: { $$type: [int, long] }
+              operation: bulkWrite

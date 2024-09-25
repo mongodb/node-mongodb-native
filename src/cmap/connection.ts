@@ -454,7 +454,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         timeoutContext: options.timeoutContext
       });
 
-      if (options.noResponse) {
+      if (options.noResponse || message.moreToCome) {
         yield MongoDBResponse.empty;
         return;
       }
@@ -557,7 +557,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse ? undefined : (object ??= document.toObject(bsonOptions)),
+              options.noResponse
+                ? undefined
+                : message.moreToCome
+                  ? { ok: 1 }
+                  : (object ??= document.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )

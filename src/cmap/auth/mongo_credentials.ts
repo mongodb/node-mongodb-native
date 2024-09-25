@@ -20,15 +20,10 @@ function getDefaultAuthMechanism(hello: Document | null): AuthMechanism {
         ? AuthMechanism.MONGODB_SCRAM_SHA256
         : AuthMechanism.MONGODB_SCRAM_SHA1;
     }
-
-    // Fallback to legacy selection method. If wire version >= 3, use scram-sha-1
-    if (hello.maxWireVersion >= 3) {
-      return AuthMechanism.MONGODB_SCRAM_SHA1;
-    }
   }
 
-  // Default for wireprotocol < 3
-  return AuthMechanism.MONGODB_CR;
+  // Default auth mechanism for 4.0 and higher.
+  return AuthMechanism.MONGODB_SCRAM_SHA256;
 }
 
 const ALLOWED_ENVIRONMENT_NAMES: AuthMechanismProperties['ENVIRONMENT'][] = [
@@ -173,7 +168,6 @@ export class MongoCredentials {
   validate(): void {
     if (
       (this.mechanism === AuthMechanism.MONGODB_GSSAPI ||
-        this.mechanism === AuthMechanism.MONGODB_CR ||
         this.mechanism === AuthMechanism.MONGODB_PLAIN ||
         this.mechanism === AuthMechanism.MONGODB_SCRAM_SHA1 ||
         this.mechanism === AuthMechanism.MONGODB_SCRAM_SHA256) &&

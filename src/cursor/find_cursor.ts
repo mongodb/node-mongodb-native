@@ -1,7 +1,7 @@
 import { type Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
-import { type ExplainVerbosityLike } from '../explain';
+import { type ExplainCommandOptions, type ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, type CountOptions } from '../operations/count';
@@ -133,7 +133,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** Execute the explain for the cursor */
-  async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
+  async explain(verbosity?: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document> {
     return (
       await executeOperation(
         this.client,

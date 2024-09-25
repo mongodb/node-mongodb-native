@@ -363,3 +363,29 @@ export class ExplainedCursorResponse extends CursorResponse {
     return this.toObject(options);
   }
 }
+
+/**
+ * Client bulk writes have some extra metadata at the top level that needs to be
+ * included in the result returned to the user.
+ */
+export class ClientBulkWriteCursorResponse extends CursorResponse {
+  get insertedCount() {
+    return this.get('nInserted', BSONType.int, true);
+  }
+
+  get upsertedCount() {
+    return this.get('nUpserted', BSONType.int, true);
+  }
+
+  get matchedCount() {
+    return this.get('nMatched', BSONType.int, true);
+  }
+
+  get modifiedCount() {
+    return this.get('nModified', BSONType.int, true);
+  }
+
+  get deletedCount() {
+    return this.get('nDeleted', BSONType.int, true);
+  }
+}

@@ -164,47 +164,6 @@
       "valid": false
     },
     {
-      "description": "should recognize the mechanism (MONGODB-CR)",
-      "uri": "mongodb://user:password@localhost/?authMechanism=MONGODB-CR",
-      "valid": true,
-      "credential": {
-        "username": "user",
-        "password": "password",
-        "source": "admin",
-        "mechanism": "MONGODB-CR",
-        "mechanism_properties": null
-      }
-    },
-    {
-      "description": "should use the database when no authSource is specified (MONGODB-CR)",
-      "uri": "mongodb://user:password@localhost/foo?authMechanism=MONGODB-CR",
-      "valid": true,
-      "credential": {
-        "username": "user",
-        "password": "password",
-        "source": "foo",
-        "mechanism": "MONGODB-CR",
-        "mechanism_properties": null
-      }
-    },
-    {
-      "description": "should use the authSource when specified (MONGODB-CR)",
-      "uri": "mongodb://user:password@localhost/foo?authMechanism=MONGODB-CR&authSource=bar",
-      "valid": true,
-      "credential": {
-        "username": "user",
-        "password": "password",
-        "source": "bar",
-        "mechanism": "MONGODB-CR",
-        "mechanism_properties": null
-      }
-    },
-    {
-      "description": "should throw an exception if no username is supplied (MONGODB-CR)",
-      "uri": "mongodb://localhost/?authMechanism=MONGODB-CR",
-      "valid": false
-    },
-    {
       "description": "should recognize the mechanism (MONGODB-X509)",
       "uri": "mongodb://CN%3DmyName%2COU%3DmyOrgUnit%2CO%3DmyOrg%2CL%3DmyLocality%2CST%3DmyState%2CC%3DmyCountry@localhost/?authMechanism=MONGODB-X509",
       "valid": true,
@@ -517,7 +476,7 @@
     },
     {
       "description": "should throw an exception if username is specified for test (MONGODB-OIDC)",
-      "uri": "mongodb://principalName@localhost/?authMechanism=MONGODB-OIDC&ENVIRONMENT:test",
+      "uri": "mongodb://principalName@localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:test",
       "valid": false,
       "credential": null
     },
