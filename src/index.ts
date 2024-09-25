@@ -44,6 +44,7 @@ export {
   MongoAWSError,
   MongoAzureError,
   MongoBatchReExecutionError,
+  MongoBulkWriteCursorError,
   MongoChangeStreamError,
   MongoCompatibilityError,
   MongoCursorExhaustedError,
@@ -473,6 +474,21 @@ export type {
   AggregateOptions,
   DB_AGGREGATE_COLLECTION
 } from './operations/aggregate';
+export type {
+  AnyClientBulkWriteModel,
+  ClientBulkWriteOptions,
+  ClientBulkWriteResult,
+  ClientDeleteManyModel,
+  ClientDeleteOneModel,
+  ClientDeleteResult,
+  ClientInsertOneModel,
+  ClientInsertOneResult,
+  ClientReplaceOneModel,
+  ClientUpdateManyModel,
+  ClientUpdateOneModel,
+  ClientUpdateResult,
+  ClientWriteModel
+} from './operations/client_bulk_write/common';
 export type {
   CollationOptions,
   CommandOperation,

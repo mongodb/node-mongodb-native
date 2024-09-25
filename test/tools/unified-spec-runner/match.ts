@@ -213,7 +213,18 @@ export function resultCheck(
       }
       resultCheck(actual[key], value, entities, path, checkExtraKeys);
     } else {
-      resultCheck(actual[key], value, entities, path, checkExtraKeys);
+      // If our actual value is a map, such as in the client bulk write results, we need
+      // to convert the expected keys from the string numbers to actual numbers since the key
+      // values in the maps are actual numbers.
+      const isActualMap = actual instanceof Map;
+      const mapKey = !Number.isNaN(Number(key)) ? Number(key) : key;
+      resultCheck(
+        isActualMap ? actual.get(mapKey) : actual[key],
+        value,
+        entities,
+        path,
+        checkExtraKeys
+      );
     }
   }
 

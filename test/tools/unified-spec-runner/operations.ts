@@ -202,6 +202,16 @@ operations.set('bulkWrite', async ({ entities, operation }) => {
   return collection.bulkWrite(requests, opts);
 });
 
+operations.set('clientBulkWrite', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.object);
+  const { models, ...opts } = operation.arguments!;
+  const bulkWriteModels = models.map(model => {
+    const name = Object.keys(model)[0];
+    return { name: name, ...model[name] };
+  });
+  return client.bulkWrite(bulkWriteModels, opts);
+});
+
 // The entity exists for the name but can potentially have the wrong
 // type (stream/cursor) which will also throw an exception even when
 // telling getEntity() to ignore checking existence.
