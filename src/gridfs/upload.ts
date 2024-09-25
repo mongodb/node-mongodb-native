@@ -163,16 +163,13 @@ export class GridFSBucketWriteStream extends Writable {
         },
         error => {
           if (error instanceof MongoOperationTimeoutError) {
-            return handleError(this, error, callback);
+            handleError(this, error, callback);
           } else {
             squashError(error);
+            process.nextTick(callback);
           }
         }
       );
-    }
-
-    if (this.bucket.s.checkedIndexes) {
-      return process.nextTick(callback);
     }
     this.bucket.once('index', callback);
   }
@@ -228,12 +225,21 @@ export class GridFSBucketWriteStream extends Writable {
 }
 
 function handleError(stream: GridFSBucketWriteStream, error: Error, callback: Callback): void {
+  const cb = (e?: Error) => {
+    console.log('calling handleError callback');
+    try {
+      callback(e);
+    } catch (e) {
+      console.log('callback threw:', e);
+      throw e;
+    }
+  }
   if (stream.state.errored) {
-    process.nextTick(callback);
+    process.nextTick(cb);
     return;
   }
   stream.state.errored = true;
-  process.nextTick(callback, error);
+  process.nextTick(cb, error);
 }
 
 function createChunkDoc(filesId: ObjectId, n: number, data: Buffer): GridFSChunk {
@@ -319,13 +325,14 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
 
     const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
     if (remainingTimeMS != null && remainingTimeMS <= 0) {
-      return handleError(
+      handleError(
         stream,
         new MongoOperationTimeoutError(
           `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
         ),
         callback
       );
+      return;
     }
 
     stream.files
@@ -335,7 +342,10 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
           stream.gridFSFile = gridFSFile;
           callback();
         },
-        error => handleError(stream, error, callback)
+        error => {
+          console.log('got error in checkDone\'s insertOne');
+          return handleError(stream, error, callback);
+        }
       );
     return;
   }
@@ -502,7 +512,10 @@ function doWrite(
               checkDone(stream, callback);
             }
           },
-          error => handleError(stream, error, callback)
+          error => {
+            console.log(`Got error in doWrite's insertOne`);
+            return handleError(stream, error, callback);
+          }
         );
 
       spaceRemaining = stream.chunkSizeBytes;
@@ -549,7 +562,10 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void
         --stream.state.outstandingRequests;
         checkDone(stream, callback);
       },
-      error => handleError(stream, error, callback)
+      error => {
+        console.log(`Got error in writeRemnant's insertOne`);
+        return handleError(stream, error, callback);
+      }
     );
 }
 
