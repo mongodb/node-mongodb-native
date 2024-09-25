@@ -2,6 +2,7 @@ import { MongoClientBulkWriteExecutionError, ServerType } from '../../beta';
 import { ClientBulkWriteCursorResponse } from '../../cmap/wire_protocol/responses';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
+import { type TimeoutContext } from '../../timeout';
 import { MongoDBNamespace } from '../../utils';
 import { CommandOperation } from '../command';
 import { Aspect, defineAspects } from '../operation';
@@ -43,7 +44,8 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
    */
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<ClientBulkWriteCursorResponse> {
     let command;
 
@@ -93,7 +95,13 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
     if (!this.canRetryWrite) {
       this.options.willRetryWrite = false;
     }
-    return await super.executeCommand(server, session, command, ClientBulkWriteCursorResponse);
+    return await super.executeCommand(
+      server,
+      session,
+      command,
+      timeoutContext,
+      ClientBulkWriteCursorResponse
+    );
   }
 }
 
