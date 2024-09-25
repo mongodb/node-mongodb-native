@@ -1170,7 +1170,7 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
     ? normalizedSrvHost
     : `.${normalizedSrvHost.replace(allCharacterBeforeFirstDot, '')}`;
 
-  if (!srvIsLessThanThreeParts && !srvHostDomain.startsWith('.')) {
+  if (!srvHostDomain.startsWith('.')) {
     srvHostDomain = '.' + srvHostDomain;
   }
   if (
