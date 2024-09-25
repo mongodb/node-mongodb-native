@@ -3,6 +3,7 @@ import { type Document } from 'bson';
 import { ClientBulkWriteCursorResponse } from '../../cmap/wire_protocol/responses';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
+import { type TimeoutContext } from '../../timeout';
 import { MongoDBNamespace } from '../../utils';
 import { CommandOperation } from '../command';
 import { Aspect, defineAspects } from '../operation';
@@ -35,9 +36,16 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
    */
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<ClientBulkWriteCursorResponse> {
-    return await super.executeCommand(server, session, this.command, ClientBulkWriteCursorResponse);
+    return await super.executeCommand(
+      server,
+      session,
+      this.command,
+      timeoutContext,
+      ClientBulkWriteCursorResponse
+    );
   }
 }
 
