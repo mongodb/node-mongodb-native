@@ -14,7 +14,7 @@ import {
 import type { FindOptions } from '../operations/find';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { CSOTTimeoutContext } from '../timeout';
+import { CSOTTimeoutContext, getRemainingTimeMSOrThrow } from '../timeout';
 import type { Callback } from '../utils';
 import type { GridFSChunk } from './upload';
 
@@ -363,11 +363,8 @@ function init(stream: GridFSBucketReadStream): void {
     }
 
     if (stream.s.timeoutContext) {
-      const remainingTimeMS = stream.s.timeoutContext.remainingTimeMS;
-      if (remainingTimeMS <= 0)
-        throw new MongoOperationTimeoutError(
-          `GridFS stream timed out after ${stream.s.timeoutContext.timeoutMS}ms`
-        );
+      const remainingTimeMS = getRemainingTimeMSOrThrow(stream.s.timeoutContext,
+        `Download timed out after ${stream.s.timeoutContext.timeoutMS}ms`);
 
       stream.s.cursor = stream.s.chunks
         .find(filter, {
@@ -397,11 +394,8 @@ function init(stream: GridFSBucketReadStream): void {
   };
 
   if (stream.s.timeoutContext) {
-    const remainingTimeMS = stream.s.timeoutContext.remainingTimeMS;
-    if (remainingTimeMS <= 0)
-      throw new MongoOperationTimeoutError(
-        `Download timed out after ${stream.s.timeoutContext.timeoutMS}ms`
-      );
+    const remainingTimeMS = getRemainingTimeMSOrThrow(stream.s.timeoutContext,
+      `Download timed out after ${stream.s.timeoutContext.timeoutMS}ms`);
 
     findOneOptions.timeoutMS = remainingTimeMS;
   }

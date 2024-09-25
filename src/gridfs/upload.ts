@@ -9,7 +9,7 @@ import {
   MongoError,
   MongoOperationTimeoutError
 } from '../error';
-import { CSOTTimeoutContext } from '../timeout';
+import { CSOTTimeoutContext, getRemainingTimeMSOrThrow } from '../timeout';
 import { type Callback, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
@@ -215,11 +215,8 @@ export class GridFSBucketWriteStream extends Writable {
     }
 
     this.state.aborted = true;
-    const remainingTimeMS = this.timeoutContext?.remainingTimeMS;
-    if (remainingTimeMS != null && remainingTimeMS <= 0)
-      throw new MongoOperationTimeoutError(
-        `Upload timed out after ${this.timeoutContext?.timeoutMS}ms`
-      );
+    const remainingTimeMS = getRemainingTimeMSOrThrow(this.timeoutContext,
+      `Upload timed out after ${this.timeoutContext?.timeoutMS}ms`)
     await this.chunks.deleteMany({ files_id: this.id, timeoutMS: remainingTimeMS });
   }
 }
@@ -246,11 +243,8 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   const index = { files_id: 1, n: 1 };
 
   let remainingTimeMS;
-  remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
-  if (remainingTimeMS != null && remainingTimeMS <= 0)
-    throw new MongoOperationTimeoutError(
-      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
-    );
+  remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
+    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
 
   let indexes;
   try {
@@ -277,11 +271,8 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   });
 
   if (!hasChunksIndex) {
-    remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
-    if (remainingTimeMS != null && remainingTimeMS <= 0)
-      throw new MongoOperationTimeoutError(
-        `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
-      );
+    remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
+      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
     await stream.chunks.createIndex(index, {
       ...stream.writeConcern,
       background: true,
@@ -344,11 +335,8 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
 }
 
 async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
-  let remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
-  if (remainingTimeMS != null && remainingTimeMS <= 0)
-    throw new MongoOperationTimeoutError(
-      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
-    );
+  let remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
+    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
   const doc = await stream.files.findOne(
     {},
     {
@@ -365,11 +353,8 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   const index = { filename: 1, uploadDate: 1 };
 
   let indexes;
-  remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
-  if (remainingTimeMS != null && remainingTimeMS <= 0)
-    throw new MongoOperationTimeoutError(
-      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
-    );
+  remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
+    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
   const listIndexesOptions = {
     timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined,
     timeoutMS: remainingTimeMS
@@ -393,11 +378,8 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   });
 
   if (!hasFileIndex) {
-    remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
-    if (remainingTimeMS != null && remainingTimeMS <= 0)
-      throw new MongoOperationTimeoutError(
-        `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
-      );
+    remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
+      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
 
     await stream.files.createIndex(index, { background: false, timeoutMS: remainingTimeMS });
   }
