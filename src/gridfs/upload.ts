@@ -233,7 +233,7 @@ function handleError(stream: GridFSBucketWriteStream, error: Error, callback: Ca
       console.log('callback threw:', e);
       throw e;
     }
-  }
+  };
   if (stream.state.errored) {
     process.nextTick(cb);
     return;
@@ -343,7 +343,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
           callback();
         },
         error => {
-          console.log('got error in checkDone\'s insertOne');
+          console.log("got error in checkDone's insertOne");
           return handleError(stream, error, callback);
         }
       );

@@ -15,11 +15,14 @@ import {
   Connection,
   type Db,
   type FindCursor,
+  GridFSBucket,
   LEGACY_HELLO_COMMAND,
   type MongoClient,
   MongoInvalidArgumentError,
   MongoOperationTimeoutError,
-  MongoServerError
+  MongoServerError,
+  ObjectId,
+  promiseWithResolvers
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 
@@ -727,6 +730,168 @@ describe('CSOT driver tests', metadata, () => {
           }
         }
       );
+    });
+  });
+
+  describe.only('GridFSBucket', () => {
+    const blockTimeMS = 200;
+    let internalClient: MongoClient;
+    let client: MongoClient;
+    let bucket: GridFSBucket;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient(undefined, { timeoutMS: 1000 });
+      internalClient = this.configuration.newClient(undefined);
+    });
+
+    afterEach(async function () {
+      await client.close();
+      await internalClient.db().admin().command({ configureFailPoint: 'failCommand', mode: 'off' });
+      await internalClient.close();
+    });
+
+    context.only('upload', function () {
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['insert'],
+          blockConnection: true,
+          blockTimeMS
+        }
+      };
+
+      beforeEach(async function () {
+        await internalClient
+          .db('db')
+          .dropDatabase()
+          .catch(() => null);
+        await internalClient.db().admin().command(failpoint);
+
+        const db = client.db('db');
+        expect(db.timeoutMS).to.equal(1000);
+
+        bucket = new GridFSBucket(client.db('db'), { chunkSizeBytes: 2 });
+      });
+
+      describe('openUploadStream', function () {
+        it.only('can override db timeoutMS settings', async function () {
+          const data = Buffer.from('01020304', 'hex');
+          const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 175 });
+          const { promise: writePromise, resolve, reject } = promiseWithResolvers<void>();
+
+          uploadStream.write(data, error => {
+            console.log('hello world', error);
+            if (error) {
+              uploadStream.destroy(error);
+              reject(error);
+            } else {
+              uploadStream.destroy();
+              resolve();
+            }
+          });
+
+          const maybeError = await writePromise.then(
+            () => null,
+            e => e
+          );
+
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('openUploadStreamWithId', function () {
+        it('can override db timeoutMS settings', async function () {
+          const data = Buffer.from('01020304', 'hex');
+          const uploadStream = bucket.openUploadStreamWithId(new ObjectId(), 'filename', {
+            timeoutMS: 175
+          });
+          const { promise: writePromise, resolve, reject } = promiseWithResolvers<void>();
+
+          uploadStream.write(data, error => {
+            if (error) {
+              uploadStream.destroy(error);
+              reject(error);
+            } else {
+              uploadStream.destroy();
+              resolve();
+            }
+          });
+
+          const maybeError = await writePromise.then(
+            () => null,
+            e => e
+          );
+
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+    });
+
+    context('download', function () {
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['find'],
+          blockConnection: true,
+          blockTimeMS
+        }
+      };
+      const _id = new ObjectId('000000000000000000000005');
+
+      beforeEach(async function () {
+        await internalClient
+          .db('db')
+          .dropDatabase()
+          .catch(() => null);
+
+        const files = await internalClient.db('db').createCollection('files');
+        await files.insertOne({
+          _id,
+          length: 10,
+          chunkSize: 4,
+          uploadDate: {
+            $date: '1970-01-01T00:00:00.000Z'
+          },
+          md5: '57d83cd477bfb1ccd975ab33d827a92b',
+          filename: 'length-10',
+          contentType: 'application/octet-stream',
+          aliases: [],
+          metadata: {}
+        });
+
+        await internalClient.db().admin().command(failpoint);
+
+        const db = client.db('db');
+        expect(db.timeoutMS).to.equal(1000);
+
+        bucket = new GridFSBucket(db);
+      });
+
+      describe('openDownloadStream', function () {
+        it('can override db timeoutMS settings', async function () {
+          const downloadStream = bucket.openDownloadStream(_id, { timeoutMS: 80 });
+
+          const maybeError = await downloadStream.toArray().then(
+            () => null,
+            e => e
+          );
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('openDownloadStreamByName', function () {
+        it('can override db timeoutMS settings', async function () {
+          const downloadStream = bucket.openDownloadStreamByName('length-10', { timeoutMS: 80 });
+
+          const maybeError = await downloadStream.toArray().then(
+            () => null,
+            e => e
+          );
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
     });
   });
 });
