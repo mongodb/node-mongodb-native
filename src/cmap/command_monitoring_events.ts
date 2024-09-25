@@ -7,7 +7,12 @@ import {
   LEGACY_HELLO_COMMAND_CAMEL_CASE
 } from '../constants';
 import { calculateDurationInMs, deepCopy } from '../utils';
-import { OpMsgRequest, type OpQueryRequest, type WriteProtocolMessageType } from './commands';
+import {
+  DocumentSequence,
+  OpMsgRequest,
+  type OpQueryRequest,
+  type WriteProtocolMessageType
+} from './commands';
 import type { Connection } from './connection';
 
 /**
@@ -249,7 +254,16 @@ const OP_QUERY_KEYS = [
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof OpMsgRequest) {
-    return deepCopy(command.command);
+    const cmd = deepCopy(command.command);
+    // For OP_MSG with payload type 1 we need to pull the documents
+    // array out of the document sequence for monitoring.
+    if (cmd.ops instanceof DocumentSequence) {
+      cmd.ops = cmd.ops.documents;
+    }
+    if (cmd.nsInfo instanceof DocumentSequence) {
+      cmd.nsInfo = cmd.nsInfo.documents;
+    }
+    return cmd;
   }
 
   if (command.query?.$query) {

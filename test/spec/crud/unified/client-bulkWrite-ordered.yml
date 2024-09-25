@@ -1,7 +1,8 @@
 description: "client bulkWrite with ordered option"
-schemaVersion: "1.1"
+schemaVersion: "1.4" # To support `serverless: forbid`
 runOnRequirements:
   - minServerVersion: "8.0"
+    serverless: forbid
 
 createEntities:
   - client:
