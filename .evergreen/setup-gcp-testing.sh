@@ -17,7 +17,7 @@ export GCPKMS_DST=$GCPKMS_INSTANCENAME:
 
 # Box up the entire driver and it's node_modules
 echo "compressing node driver source ... begin"
-tar -czf $GCPKMS_SRC src
+tar -czf $GCPKMS_SRC src $DRIVERS_TOOLS
 echo "compressing node driver source ... end"
 
 echo "copying node driver tar ... begin"
