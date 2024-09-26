@@ -34,7 +34,7 @@ if [ ! -d "$DRIVERS_TOOLS" ]; then
   git clone --depth=1 "https://github.com/mongodb-labs/drivers-evergreen-tools.git" "${DRIVERS_TOOLS}"
 fi
 
-echo "installed DRIVERS_EVERGREEN_TOOLS from commit $(git -C "${DRIVERS_TOOLS}" rev-parse HEAD)"
+echo "installed DRIVERS_TOOLS from commit $(git -C "${DRIVERS_TOOLS}" rev-parse HEAD)"
 
 cat <<EOT > "$MONGO_ORCHESTRATION_HOME/orchestration.config"
 {
