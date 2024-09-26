@@ -8,7 +8,6 @@ import {
   MongoGridFSChunkError,
   MongoGridFSStreamError,
   MongoInvalidArgumentError,
-  MongoOperationTimeoutError,
   MongoRuntimeError
 } from '../error';
 import type { FindOptions } from '../operations/find';
@@ -205,7 +204,8 @@ export class GridFSBucketReadStream extends Readable {
   async abort(): Promise<void> {
     this.push(null);
     this.destroy();
-    await this.s.cursor?.close({ timeoutMS: this.s.options.timeoutMS });
+    const remainingTimeMS = getRemainingTimeMSOrThrow(this.s.timeoutContext);
+    await this.s.cursor?.close({ timeoutMS: remainingTimeMS });
   }
 }
 
@@ -362,19 +362,17 @@ function init(stream: GridFSBucketReadStream): void {
       }
     }
 
-    if (stream.s.timeoutContext) {
-      const remainingTimeMS = getRemainingTimeMSOrThrow(stream.s.timeoutContext,
-        `Download timed out after ${stream.s.timeoutContext.timeoutMS}ms`);
+    const remainingTimeMS = getRemainingTimeMSOrThrow(
+      stream.s.timeoutContext,
+      `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
+    );
 
-      stream.s.cursor = stream.s.chunks
-        .find(filter, {
-          timeoutMode: stream.s.options.timeoutMS != null ? CursorTimeoutMode.LIFETIME : undefined,
-          timeoutMS: remainingTimeMS
-        })
-        .sort({ n: 1 });
-    } else {
-      stream.s.cursor = stream.s.chunks.find(filter).sort({ n: 1 });
-    }
+    stream.s.cursor = stream.s.chunks
+      .find(filter, {
+        timeoutMode: stream.s.options.timeoutMS != null ? CursorTimeoutMode.LIFETIME : undefined,
+        timeoutMS: remainingTimeMS
+      })
+      .sort({ n: 1 });
 
     if (stream.s.readPreference) {
       stream.s.cursor.withReadPreference(stream.s.readPreference);
@@ -393,12 +391,11 @@ function init(stream: GridFSBucketReadStream): void {
     return;
   };
 
-  if (stream.s.timeoutContext) {
-    const remainingTimeMS = getRemainingTimeMSOrThrow(stream.s.timeoutContext,
-      `Download timed out after ${stream.s.timeoutContext.timeoutMS}ms`);
-
-    findOneOptions.timeoutMS = remainingTimeMS;
-  }
+  const remainingTimeMS = getRemainingTimeMSOrThrow(
+    stream.s.timeoutContext,
+    `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
+  );
+  findOneOptions.timeoutMS = remainingTimeMS;
 
   stream.s.files.findOne(stream.s.filter, findOneOptions).then(handleReadResult, error => {
     if (stream.destroyed) return;

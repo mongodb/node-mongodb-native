@@ -215,8 +215,10 @@ export class GridFSBucketWriteStream extends Writable {
     }
 
     this.state.aborted = true;
-    const remainingTimeMS = getRemainingTimeMSOrThrow(this.timeoutContext,
-      `Upload timed out after ${this.timeoutContext?.timeoutMS}ms`)
+    const remainingTimeMS = getRemainingTimeMSOrThrow(
+      this.timeoutContext,
+      `Upload timed out after ${this.timeoutContext?.timeoutMS}ms`
+    );
     await this.chunks.deleteMany({ files_id: this.id, timeoutMS: remainingTimeMS });
   }
 }
@@ -243,8 +245,10 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   const index = { files_id: 1, n: 1 };
 
   let remainingTimeMS;
-  remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
-    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+  remainingTimeMS = getRemainingTimeMSOrThrow(
+    stream.timeoutContext,
+    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
+  );
 
   let indexes;
   try {
@@ -271,8 +275,10 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   });
 
   if (!hasChunksIndex) {
-    remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
-      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+    remainingTimeMS = getRemainingTimeMSOrThrow(
+      stream.timeoutContext,
+      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
+    );
     await stream.chunks.createIndex(index, {
       ...stream.writeConcern,
       background: true,
@@ -335,8 +341,10 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
 }
 
 async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
-  let remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
-    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+  let remainingTimeMS = getRemainingTimeMSOrThrow(
+    stream.timeoutContext,
+    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
+  );
   const doc = await stream.files.findOne(
     {},
     {
@@ -353,8 +361,10 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   const index = { filename: 1, uploadDate: 1 };
 
   let indexes;
-  remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
-    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+  remainingTimeMS = getRemainingTimeMSOrThrow(
+    stream.timeoutContext,
+    `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
+  );
   const listIndexesOptions = {
     timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined,
     timeoutMS: remainingTimeMS
@@ -378,8 +388,10 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   });
 
   if (!hasFileIndex) {
-    remainingTimeMS = getRemainingTimeMSOrThrow(stream.timeoutContext,
-      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+    remainingTimeMS = getRemainingTimeMSOrThrow(
+      stream.timeoutContext,
+      `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
+    );
 
     await stream.files.createIndex(index, { background: false, timeoutMS: remainingTimeMS });
   }
@@ -455,7 +467,6 @@ function doWrite(
     let doc: GridFSChunk;
     if (spaceRemaining === 0) {
       doc = createChunkDoc(stream.id, stream.n, Buffer.from(stream.bufToStore));
-
 
       const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
       if (remainingTimeMS != null && remainingTimeMS <= 0) {

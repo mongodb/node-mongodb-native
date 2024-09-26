@@ -1,4 +1,7 @@
 /* Anything javascript specific relating to timeouts */
+import { once } from 'node:events';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
@@ -21,13 +24,9 @@ import {
   MongoInvalidArgumentError,
   MongoOperationTimeoutError,
   MongoServerError,
-  ObjectId,
-  promiseWithResolvers
+  ObjectId
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
-import { once } from 'node:events';
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
@@ -37,7 +36,7 @@ describe('CSOT driver tests', metadata, () => {
     let db: Db;
     let coll: Collection;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = this.configuration.newClient(undefined, { timeoutMS: 100 });
       db = client.db('test', { timeoutMS: 200 });
     });
@@ -114,7 +113,7 @@ describe('CSOT driver tests', metadata, () => {
   describe('autoconnect', () => {
     let client: MongoClient;
 
-    afterEach(async function() {
+    afterEach(async function () {
       await client?.close();
       client = undefined;
     });
@@ -122,7 +121,7 @@ describe('CSOT driver tests', metadata, () => {
     describe('when failing autoconnect with timeoutMS defined', () => {
       let configClient: MongoClient;
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         configClient = this.configuration.newClient();
         const result = await configClient
           .db()
@@ -139,7 +138,7 @@ describe('CSOT driver tests', metadata, () => {
         expect(result).to.have.property('ok', 1);
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         const result = await configClient
           .db()
           .admin()
@@ -158,7 +157,7 @@ describe('CSOT driver tests', metadata, () => {
 
       it('throws a MongoOperationTimeoutError', {
         metadata: { requires: { mongodb: '>=4.4', topology: '!load-balanced' } },
-        test: async function() {
+        test: async function () {
           const commandsStarted = [];
           client = this.configuration.newClient(undefined, { timeoutMS: 1, monitorCommands: true });
 
@@ -187,7 +186,7 @@ describe('CSOT driver tests', metadata, () => {
     let commandsSucceeded: CommandSucceededEvent[];
     let commandsFailed: CommandFailedEvent[];
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = this.configuration.newClient({ timeoutMS: 500_000, monitorCommands: true });
       commandsSucceeded = [];
       commandsFailed = [];
@@ -198,7 +197,7 @@ describe('CSOT driver tests', metadata, () => {
       client.on('commandFailed', event => commandsFailed.push(event));
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await client
         .db()
         .collection('a')
@@ -220,7 +219,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command(failpoint);
         else {
@@ -229,7 +228,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command({ ...failpoint, mode: 'off' });
       });
@@ -270,7 +269,7 @@ describe('CSOT driver tests', metadata, () => {
         const readManyStub = sinon
           // @ts-expect-error: readMany is private
           .stub(Connection.prototype, 'readMany')
-          .callsFake(async function*(...args) {
+          .callsFake(async function* (...args) {
             const realIterator = readManyStub.wrappedMethod.call(this, ...args);
             const cmd = commandSpy.lastCall.args.at(1);
             if ('giveMeWriteErrors' in cmd) {
@@ -313,7 +312,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command(failpoint);
         else {
@@ -322,7 +321,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4'))
           await client.db('admin').command({ ...failpoint, mode: 'off' });
       });
@@ -362,7 +361,7 @@ describe('CSOT driver tests', metadata, () => {
       }
     };
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       internalClient = this.configuration.newClient();
       await internalClient
         .db('db')
@@ -386,7 +385,7 @@ describe('CSOT driver tests', metadata, () => {
       client.on('commandSucceeded', ev => commandSucceeded.push(ev));
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await internalClient
         .db()
         .admin()
@@ -400,7 +399,7 @@ describe('CSOT driver tests', metadata, () => {
         it(
           'must apply the configured timeoutMS to the initial operation execution',
           metadata,
-          async function() {
+          async function () {
             const cursor = client
               .db('db')
               .collection('coll')
@@ -416,7 +415,7 @@ describe('CSOT driver tests', metadata, () => {
           }
         );
 
-        it('refreshes the timeout for any getMores', metadata, async function() {
+        it('refreshes the timeout for any getMores', metadata, async function () {
           const cursor = client
             .db('db')
             .collection('coll')
@@ -438,7 +437,7 @@ describe('CSOT driver tests', metadata, () => {
         it(
           'does not append a maxTimeMS to the original command or getMores',
           metadata,
-          async function() {
+          async function () {
             const cursor = client
               .db('db')
               .collection('coll')
@@ -476,7 +475,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         internalClient = this.configuration.newClient();
         await internalClient
           .db('db')
@@ -500,7 +499,7 @@ describe('CSOT driver tests', metadata, () => {
         client.on('commandSucceeded', ev => commandSucceeded.push(ev));
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         await internalClient
           .db()
           .admin()
@@ -512,7 +511,7 @@ describe('CSOT driver tests', metadata, () => {
         context(
           'when there are documents available from previously retrieved batch and timeout has expired',
           () => {
-            it('returns documents without error', metadata, async function() {
+            it('returns documents without error', metadata, async function () {
               const cursor = client
                 .db('db')
                 .collection('coll')
@@ -535,7 +534,7 @@ describe('CSOT driver tests', metadata, () => {
           }
         );
         context('when a getMore is required and the timeout has expired', () => {
-          it('throws a MongoOperationTimeoutError', metadata, async function() {
+          it('throws a MongoOperationTimeoutError', metadata, async function () {
             const cursor = client
               .db('db')
               .collection('coll')
@@ -558,7 +557,7 @@ describe('CSOT driver tests', metadata, () => {
           });
         });
 
-        it('does not apply maxTimeMS to a getMore', metadata, async function() {
+        it('does not apply maxTimeMS to a getMore', metadata, async function () {
           const cursor = client
             .db('db')
             .collection('coll')
@@ -596,11 +595,11 @@ describe('CSOT driver tests', metadata, () => {
       describe('passing a timeoutMS and a session with a timeoutContext', () => {
         let client: MongoClient;
 
-        beforeEach(async function() {
+        beforeEach(async function () {
           client = this.configuration.newClient({ timeoutMS: 123 });
         });
 
-        afterEach(async function() {
+        afterEach(async function () {
           await client.close();
         });
 
@@ -632,11 +631,11 @@ describe('CSOT driver tests', metadata, () => {
       describe('passing a timeoutMS and a session with an inherited timeoutMS', () => {
         let client: MongoClient;
 
-        beforeEach(async function() {
+        beforeEach(async function () {
           client = this.configuration.newClient({ timeoutMS: 123 });
         });
 
-        afterEach(async function() {
+        afterEach(async function () {
           await client.close();
         });
 
@@ -668,7 +667,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         if (!semver.satisfies(this.configuration.version, '>=4.4')) {
           this.skipReason = 'Requires server version 4.4+';
           this.skip();
@@ -685,7 +684,7 @@ describe('CSOT driver tests', metadata, () => {
 
       let client: MongoClient;
 
-      afterEach(async function() {
+      afterEach(async function () {
         if (semver.satisfies(this.configuration.version, '>=4.4')) {
           const internalClient = this.configuration.newClient();
           await internalClient
@@ -699,7 +698,7 @@ describe('CSOT driver tests', metadata, () => {
       it(
         'timeoutMS is refreshed for abortTransaction and the timeout error is thrown from the operation',
         metadata,
-        async function() {
+        async function () {
           const commandsFailed = [];
           const commandsStarted = [];
 
@@ -742,18 +741,18 @@ describe('CSOT driver tests', metadata, () => {
     let client: MongoClient;
     let bucket: GridFSBucket;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = this.configuration.newClient(undefined, { timeoutMS: 1000 });
       internalClient = this.configuration.newClient(undefined);
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await client.close();
       await internalClient.db().admin().command({ configureFailPoint: 'failCommand', mode: 'off' });
       await internalClient.close();
     });
 
-    context('upload', function() {
+    context('upload', function () {
       const failpoint: FailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
@@ -764,7 +763,7 @@ describe('CSOT driver tests', metadata, () => {
         }
       };
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         await internalClient
           .db('db')
           .dropDatabase()
@@ -777,11 +776,11 @@ describe('CSOT driver tests', metadata, () => {
         bucket = new GridFSBucket(client.db('db'), { chunkSizeBytes: 2 });
       });
 
-      describe('openUploadStream', function() {
-        it('can override db timeoutMS settings', async function() {
+      describe('openUploadStream', function () {
+        it('can override db timeoutMS settings', async function () {
           const data = Buffer.from('01020304', 'hex');
           const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 175 });
-          uploadStream.on('error', (error) => {
+          uploadStream.on('error', error => {
             uploadStream.destroy(error);
           });
 
@@ -793,7 +792,7 @@ describe('CSOT driver tests', metadata, () => {
           expect(maybeError[0]).to.be.instanceOf(MongoOperationTimeoutError);
         });
 
-        it('only emits index event once per bucket', async function() {
+        it('only emits index event once per bucket', async function () {
           let numEventsSeen = 0;
           bucket.on('index', () => numEventsSeen++);
 
@@ -812,13 +811,13 @@ describe('CSOT driver tests', metadata, () => {
         });
       });
 
-      describe('openUploadStreamWithId', function() {
-        it('can override db timeoutMS settings', async function() {
+      describe('openUploadStreamWithId', function () {
+        it('can override db timeoutMS settings', async function () {
           const data = Buffer.from('01020304', 'hex');
           const uploadStream = bucket.openUploadStreamWithId(new ObjectId(), 'filename', {
             timeoutMS: 175
           });
-          uploadStream.on('error', (error) => {
+          uploadStream.on('error', error => {
             uploadStream.destroy(error);
           });
 
@@ -832,7 +831,7 @@ describe('CSOT driver tests', metadata, () => {
       });
     });
 
-    context('download', function() {
+    context('download', function () {
       const failpoint: FailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
@@ -844,7 +843,7 @@ describe('CSOT driver tests', metadata, () => {
       };
       const _id = new ObjectId('000000000000000000000005');
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         await internalClient
           .db('db')
           .dropDatabase()
@@ -873,8 +872,8 @@ describe('CSOT driver tests', metadata, () => {
         bucket = new GridFSBucket(db);
       });
 
-      describe('openDownloadStream', function() {
-        it('can override db timeoutMS settings', async function() {
+      describe('openDownloadStream', function () {
+        it('can override db timeoutMS settings', async function () {
           const downloadStream = bucket.openDownloadStream(_id, { timeoutMS: 80 });
           const maybeError = await downloadStream.toArray().then(
             () => null,
@@ -885,8 +884,8 @@ describe('CSOT driver tests', metadata, () => {
         });
       });
 
-      describe('openDownloadStreamByName', function() {
-        it('can override db timeoutMS settings', async function() {
+      describe('openDownloadStreamByName', function () {
+        it('can override db timeoutMS settings', async function () {
           const downloadStream = bucket.openDownloadStreamByName('length-10', { timeoutMS: 80 });
           const maybeError = await downloadStream.toArray().then(
             () => null,

@@ -3,7 +3,7 @@
 import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
-import { once, Readable } from 'stream';
+import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 
 import { type CommandStartedEvent } from '../../../mongodb';
