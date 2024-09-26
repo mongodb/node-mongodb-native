@@ -14,7 +14,7 @@ import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
-import { type CSOTTimeoutContext, Timeout, type TimeoutContext } from '../timeout';
+import { type CSOTTimeoutContext, Timeout, TimeoutError } from '../timeout';
 import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '../utils';
 import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
@@ -455,7 +455,8 @@ export class StateMachine {
         ? Promise.all([willResolveKmsRequest, Timeout.expires(timeoutMS)])
         : willResolveKmsRequest);
     } catch (error) {
-      if (Timeout.is(error)) throw new MongoOperationTimeoutError('KMS request timed out');
+      if (error instanceof TimeoutError)
+        throw new MongoOperationTimeoutError('KMS request timed out');
       throw error;
     } finally {
       // There's no need for any more activity on this socket at this point.
@@ -595,7 +596,7 @@ export class StateMachine {
     return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
-      .find(deserialize(filter), { timeoutMS })
+      .find(deserialize(filter), { timeoutMS: timeoutMS != null ? timeoutMS : undefined })
       .toArray();
   }
 }

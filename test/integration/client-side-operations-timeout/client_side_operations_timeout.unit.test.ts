@@ -6,8 +6,19 @@
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { TLSSocket } from 'tls';
 
-import { ConnectionPool, type MongoClient, Timeout, TimeoutContext, Topology } from '../../mongodb';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
+import {
+  ConnectionPool,
+  type MongoClient,
+  MongoOperationTimeoutError,
+  Timeout,
+  TimeoutContext,
+  Topology
+} from '../../mongodb';
+import { sleep } from '../../tools/utils';
 
 // TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec unit tests', function () {
@@ -93,17 +104,35 @@ describe('CSOT spec unit tests', function () {
   }).skipReason =
     'TODO(NODE-5682): Add CSOT support for socket read/write at the connection layer for CRUD APIs';
 
-  context.skip('Client side encryption', function () {
-    context(
-      'The remaining timeoutMS value should apply to HTTP requests against KMS servers for CSFLE.',
-      () => {}
-    );
+  context('Client side encryption', function () {
+    it('The remaining timeoutMS value should apply to HTTP requests against KMS servers for CSFLE.', async function () {
+      const stateMachine = new StateMachine({} as any);
+      const request = {
+        addResponse: _response => {},
+        status: {
+          type: 1,
+          code: 1,
+          message: 'notARealStatus'
+        },
+        bytesNeeded: 500,
+        kmsProvider: 'notRealAgain',
+        endpoint: 'fake',
+        message: Buffer.from('foobar')
+      };
 
-    context(
-      'The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.',
-      () => {}
-    );
-  }).skipReason = 'TODO(NODE-5686): Add CSOT support to client side encryption';
+      const timeoutMS = 100;
+      sinon.stub(TLSSocket.prototype, 'connect').callsFake(async function (..._args) {
+        await sleep(200);
+        return {} as TLSSocket;
+      });
+      const err = await stateMachine.kmsRequest(request, timeoutMS).catch(e => e);
+      expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+      expect(err.errmsg).to.equal('KMS request timed out');
+    });
+
+    // TODO(NODE-6390): Add timeoutMS support to Auto Encryption
+    it.skip('The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.', () => {});
+  });
 
   context.skip('Background Connection Pooling', function () {
     context(

@@ -12,7 +12,8 @@ import {
   MongoClient,
   MongoOperationTimeoutError,
   MongoServerSelectionError,
-  now
+  now,
+  squashError
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 
@@ -59,7 +60,7 @@ describe('CSOT spec prose tests', function () {
      */
   });
 
-  context.skip(
+  context(
     '2. maxTimeMS is not set for commands sent to mongocryptd',
     { requires: { mongodb: '>=4.2' } },
     () => {
@@ -83,24 +84,31 @@ describe('CSOT spec prose tests', function () {
         });
 
         childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
-        client = new MongoClient(`mongodb://localhost:23000/?timeoutMS=1000`);
+        client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
+          monitorCommands: true
+        });
       });
 
       afterEach(async function () {
-        await client?.close();
+        await client.close();
         childProcess.kill('SIGKILL');
+        sinon.restore();
       });
 
       it('maxTimeMS is not set', async function () {
         const commandStarted = [];
         client.on('commandStarted', ev => commandStarted.push(ev));
-        await client.db('admin').command({ ping: 1 });
+        await client
+          .db('admin')
+          .command({ ping: 1 })
+          .catch(e => squashError(e));
         expect(commandStarted).to.have.lengthOf(1);
         expect(commandStarted[0].command).to.not.have.property('maxTimeMS');
       });
     }
   );
 
+  // TODO(NODE-6391): Add timeoutMS support to Explicit Encryption
   context.skip('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
