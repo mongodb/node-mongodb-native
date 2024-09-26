@@ -28,6 +28,7 @@ const metadata = { requires: { mongodb: '>=4.4' } };
 describe('CSOT driver tests', metadata, () => {
   const minPoolSize = 20;
 
+describe('CSOT driver tests', metadata, () => {
   describe('timeoutMS inheritance', () => {
     let client: MongoClient;
     let db: Db;

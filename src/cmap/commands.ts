@@ -74,6 +74,8 @@ export class OpQueryRequest {
   awaitData: boolean;
   exhaust: boolean;
   partial: boolean;
+  /** moreToCome is an OP_MSG only concept */
+  moreToCome = false;
 
   constructor(
     public databaseName: string,
@@ -407,13 +409,21 @@ const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
 /** @internal */
 export interface OpMsgOptions {
-  requestId: number;
-  serializeFunctions: boolean;
-  ignoreUndefined: boolean;
-  checkKeys: boolean;
-  maxBsonSize: number;
-  moreToCome: boolean;
-  exhaustAllowed: boolean;
+  socketTimeoutMS?: number;
+  session?: ClientSession;
+  numberToSkip?: number;
+  numberToReturn?: number;
+  returnFieldSelector?: Document;
+  pre32Limit?: number;
+  serializeFunctions?: boolean;
+  ignoreUndefined?: boolean;
+  maxBsonSize?: number;
+  checkKeys?: boolean;
+  secondaryOk?: boolean;
+
+  requestId?: number;
+  moreToCome?: boolean;
+  exhaustAllowed?: boolean;
   readPreference: ReadPreference;
 }
 
@@ -465,7 +475,7 @@ export class OpMsgRequest {
 
     // flags
     this.checksumPresent = false;
-    this.moreToCome = options.moreToCome || false;
+    this.moreToCome = options.moreToCome ?? command.writeConcern?.w === 0;
     this.exhaustAllowed =
       typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
@@ -534,10 +544,10 @@ export class OpMsgRequest {
     for (const [key, value] of Object.entries(document)) {
       if (value instanceof DocumentSequence) {
         // Document sequences starts with type 1 at the first byte.
-        const buffer = Buffer.allocUnsafe(1 + 4 + key.length);
+        const buffer = Buffer.allocUnsafe(1 + 4 + key.length + 1);
         buffer[0] = 1;
-        // Third part is the field name at offset 5.
-        encodeUTF8Into(buffer, key, 5);
+        // Third part is the field name at offset 5 with trailing null byte.
+        encodeUTF8Into(buffer, `${key}\0`, 5);
         chunks.push(buffer);
         // Fourth part are the documents' bytes.
         let docsLength = 0;
@@ -547,7 +557,7 @@ export class OpMsgRequest {
           chunks.push(docBson);
         }
         // Second part of the sequence is the length at offset 1;
-        buffer.writeInt32LE(key.length + docsLength, 1);
+        buffer.writeInt32LE(4 + key.length + 1 + docsLength, 1);
         // Why are we removing the field from the command? This is because it needs to be
         // removed in the OP_MSG request first section, and DocumentSequence is not a
         // BSON type and is specific to the MongoDB wire protocol so there's nothing

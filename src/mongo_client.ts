@@ -30,6 +30,12 @@ import {
   SeverityLevel
 } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
+import {
+  type AnyClientBulkWriteModel,
+  type ClientBulkWriteOptions,
+  type ClientBulkWriteResult
+} from './operations/client_bulk_write/common';
+import { ClientBulkWriteExecutor } from './operations/client_bulk_write/executor';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
@@ -480,6 +486,19 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /** @internal */
   get timeoutMS(): number | undefined {
     return this.options.timeoutMS;
+  }
+
+  /**
+   * Executes a client bulk write operation, available on server 8.0+.
+   * @param models - The client bulk write models.
+   * @param options - The client bulk write options.
+   * @returns A ClientBulkWriteResult for acknowledged writes and ok: 1 for unacknowledged writes.
+   */
+  async bulkWrite(
+    models: AnyClientBulkWriteModel[],
+    options?: ClientBulkWriteOptions
+  ): Promise<ClientBulkWriteResult | { ok: 1 }> {
+    return await new ClientBulkWriteExecutor(this, models, options).execute();
   }
 
   /**

@@ -16,7 +16,7 @@
               "b:27017"
             ],
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ],
         [
@@ -32,7 +32,7 @@
               "b:27017"
             ],
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],
@@ -59,7 +59,7 @@
           {
             "ok": 0,
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 21
           }
         ]
       ],

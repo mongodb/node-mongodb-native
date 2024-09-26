@@ -34,6 +34,7 @@ _yamlAnchors:
       apiVersion: "1"
       apiStrict: { $$unsetOrMatches: false }
       apiDeprecationErrors: true
+  namespace: &namespace "versioned-api-tests.test"
 
 initialData:
   - collectionName: *collectionName
@@ -154,6 +155,47 @@ tests:
                     u: { _id: 4, x: 44 }
                     multi: { $$unsetOrMatches: false }
                     upsert: true
+                <<: *expectedApiVersion
+  
+  - description: "client bulkWrite appends declared API version"
+    runOnRequirements:
+      - minServerVersion: "8.0" # `bulkWrite` added to server 8.0
+        serverless: forbid
+    operations:
+      - name: clientBulkWrite
+        object: *client
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 6, x: 6 }
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            0:
+              insertedId: 6
+          updateResults: {}
+          deleteResults: {}
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 6, x: 6 }
+                nsInfo:
+                  - { ns: *namespace }
                 <<: *expectedApiVersion
 
   - description: "countDocuments appends declared API version"

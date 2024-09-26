@@ -44,6 +44,7 @@ export {
   MongoAWSError,
   MongoAzureError,
   MongoBatchReExecutionError,
+  MongoBulkWriteCursorError,
   MongoChangeStreamError,
   MongoCompatibilityError,
   MongoCursorExhaustedError,
@@ -369,7 +370,12 @@ export type { RunCursorCommandOptions } from './cursor/run_command_cursor';
 export type { DbOptions, DbPrivate } from './db';
 export type { Encrypter, EncrypterOptions } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
-export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
+export type {
+  Explain,
+  ExplainCommandOptions,
+  ExplainOptions,
+  ExplainVerbosityLike
+} from './explain';
 export type {
   GridFSBucketReadStreamOptions,
   GridFSBucketReadStreamOptionsWithRevision,
@@ -469,6 +475,21 @@ export type {
   AggregateOptions,
   DB_AGGREGATE_COLLECTION
 } from './operations/aggregate';
+export type {
+  AnyClientBulkWriteModel,
+  ClientBulkWriteOptions,
+  ClientBulkWriteResult,
+  ClientDeleteManyModel,
+  ClientDeleteOneModel,
+  ClientDeleteResult,
+  ClientInsertOneModel,
+  ClientInsertOneResult,
+  ClientReplaceOneModel,
+  ClientUpdateManyModel,
+  ClientUpdateOneModel,
+  ClientUpdateResult,
+  ClientWriteModel
+} from './operations/client_bulk_write/common';
 export type {
   CollationOptions,
   CommandOperation,

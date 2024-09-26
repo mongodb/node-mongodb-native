@@ -41,7 +41,7 @@ describe('commands', function () {
 
           it('sets the length of the document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(buffers[3].readInt32LE(1)).to.equal(20);
+            expect(buffers[3].readInt32LE(1)).to.equal(25);
           });
 
           it('sets the name of the first field to be replaced', function () {
@@ -81,7 +81,7 @@ describe('commands', function () {
 
           it('sets the length of the first document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(buffers[3].readInt32LE(1)).to.equal(23);
+            expect(buffers[3].readInt32LE(1)).to.equal(28);
           });
 
           it('sets the name of the first field to be replaced', function () {
@@ -91,17 +91,17 @@ describe('commands', function () {
 
           it('sets the document sequence sections second type to 1', function () {
             // First byte is a one byte type.
-            expect(buffers[3][28]).to.equal(1);
+            expect(buffers[3][29]).to.equal(1);
           });
 
           it('sets the length of the second document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(buffers[3].readInt32LE(29)).to.equal(23);
+            expect(buffers[3].readInt32LE(30)).to.equal(28);
           });
 
           it('sets the name of the second field to be replaced', function () {
             // Bytes starting at index 33 is the field name.
-            expect(buffers[3].toString('utf8', 33, 41)).to.equal('fieldTwo');
+            expect(buffers[3].toString('utf8', 34, 42)).to.equal('fieldTwo');
           });
         });
       });
