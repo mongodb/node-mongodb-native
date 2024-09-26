@@ -38,7 +38,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
 
     afterEach(async function () {
       sinon.restore();
-      client.close();
+      await client.close();
     });
 
     it('does not error on an SRV because it has one domain level', async function () {
