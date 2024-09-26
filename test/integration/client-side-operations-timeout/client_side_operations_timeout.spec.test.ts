@@ -1,5 +1,4 @@
 import { join } from 'path';
-import * as semver from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
