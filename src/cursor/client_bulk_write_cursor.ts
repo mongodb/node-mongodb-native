@@ -1,5 +1,3 @@
-import { type Document } from 'bson';
-
 import { type ClientBulkWriteCursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoClientBulkWriteCursorError } from '../error';
 import type { MongoClient } from '../mongo_client';
@@ -53,13 +51,6 @@ export class ClientBulkWriteCursor extends AbstractCursor {
     throw new MongoClientBulkWriteCursorError(
       'No client bulk write cursor response returned from the server.'
     );
-  }
-
-  /**
-   * Get the last set of operations the cursor executed.
-   */
-  get operations(): Document[] {
-    return this.commandBuilder.lastOperations;
   }
 
   clone(): ClientBulkWriteCursor {

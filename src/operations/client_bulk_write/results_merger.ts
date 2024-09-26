@@ -1,11 +1,13 @@
 import { type Document } from '../../bson';
 import { type ClientBulkWriteCursorResponse } from '../../cmap/wire_protocol/responses';
 import {
+  type ClientBulkWriteError,
   type ClientBulkWriteOptions,
   type ClientBulkWriteResult,
   type ClientDeleteResult,
   type ClientInsertOneResult,
-  type ClientUpdateResult
+  type ClientUpdateResult,
+  MongoClientBulkWriteError
 } from './common';
 
 /**
@@ -15,6 +17,8 @@ import {
 export class ClientBulkWriteResultsMerger {
   result: ClientBulkWriteResult;
   options: ClientBulkWriteOptions;
+  writeConcernErrors: Document[];
+  writeErrors: Map<number, ClientBulkWriteError>;
 
   /**
    * Instantiate the merger.
@@ -22,6 +26,8 @@ export class ClientBulkWriteResultsMerger {
    */
   constructor(options: ClientBulkWriteOptions) {
     this.options = options;
+    this.writeConcernErrors = [];
+    this.writeErrors = new Map();
     this.result = {
       insertedCount: 0,
       upsertedCount: 0,
@@ -50,7 +56,7 @@ export class ClientBulkWriteResultsMerger {
   merge(
     currentBatchOffset: number,
     operations: Document[],
-    response: ClientBulkWriteCursorResponse,
+    response: ClientBulkWriteCursorResponse | Document,
     documents: Document[]
   ): ClientBulkWriteResult {
     // Update the counts from the cursor response.
@@ -60,38 +66,61 @@ export class ClientBulkWriteResultsMerger {
     this.result.modifiedCount += response.modifiedCount;
     this.result.deletedCount += response.deletedCount;
 
-    if (this.options.verboseResults) {
-      // Iterate all the documents in the cursor and update the result.
-      for (const document of documents) {
-        // Only add to maps if ok: 1
-        if (document.ok === 1) {
-          // Get the corresponding operation from the command.
-          const operation = operations[document.idx];
-          // Handle insert results.
-          if ('insert' in operation) {
-            this.result.insertResults?.set(document.idx + currentBatchOffset, {
-              insertedId: operation.document._id
-            });
+    if (response.writeConcernError) {
+      this.writeConcernErrors.push({
+        code: response.writeConcernError.code,
+        message: response.writeConcernError.errmsg
+      });
+    }
+    for (const document of documents) {
+      // Only add to maps if ok: 1
+      if (document.ok === 1 && this.options.verboseResults) {
+        // Get the corresponding operation from the command.
+        const operation = operations[document.idx];
+        // Handle insert results.
+        if ('insert' in operation) {
+          this.result.insertResults?.set(document.idx + currentBatchOffset, {
+            insertedId: operation.document._id
+          });
+        }
+        // Handle update results.
+        if ('update' in operation) {
+          const result: ClientUpdateResult = {
+            matchedCount: document.n,
+            modifiedCount: document.nModified ?? 0,
+            // Check if the bulk did actually upsert.
+            didUpsert: document.upserted != null
+          };
+          if (document.upserted) {
+            result.upsertedId = document.upserted._id;
           }
-          // Handle update results.
-          if ('update' in operation) {
-            const result: ClientUpdateResult = {
-              matchedCount: document.n,
-              modifiedCount: document.nModified ?? 0,
-              // Check if the bulk did actually upsert.
-              didUpsert: document.upserted != null
-            };
-            if (document.upserted) {
-              result.upsertedId = document.upserted._id;
-            }
-            this.result.updateResults?.set(document.idx + currentBatchOffset, result);
-          }
-          // Handle delete results.
-          if ('delete' in operation) {
-            this.result.deleteResults?.set(document.idx + currentBatchOffset, {
-              deletedCount: document.n
-            });
-          }
+          this.result.updateResults?.set(document.idx + currentBatchOffset, result);
+        }
+        // Handle delete results.
+        if ('delete' in operation) {
+          this.result.deleteResults?.set(document.idx + currentBatchOffset, {
+            deletedCount: document.n
+          });
+        }
+      } else {
+        // If an individual write error is encountered during an ordered bulk write, drivers MUST
+        // record the error in writeErrors and immediately throw the exception. Otherwise, drivers
+        // MUST continue to iterate the results cursor and execute any further bulkWrite batches.
+        if (this.options.ordered) {
+          const error = new MongoClientBulkWriteError({
+            message: 'Mongo client ordered bulk write encountered a write error.'
+          });
+          error.writeErrors.set(document.idx + currentBatchOffset, {
+            code: document.code,
+            message: document.errmsg
+          });
+          error.partialResult = this.result;
+          throw error;
+        } else {
+          this.writeErrors.set(document.idx + currentBatchOffset, {
+            code: document.code,
+            message: document.errmsg
+          });
         }
       }
     }

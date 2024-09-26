@@ -44,7 +44,8 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       const connection = await server.pool.checkOut();
       command = this.commandBuilder.buildBatch(
         connection.hello?.maxMessageSizeBytes,
-        connection.hello?.maxWriteBatchSize
+        connection.hello?.maxWriteBatchSize,
+        connection.hello?.maxBsonObjectSize
       );
       // Pin the connection to the session so it get used to execute the command and we do not
       // perform a double check-in/check-out.
@@ -55,7 +56,8 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       // We can use that to build the command.
       command = this.commandBuilder.buildBatch(
         server.description.maxMessageSizeBytes,
-        server.description.maxWriteBatchSize
+        server.description.maxWriteBatchSize,
+        server.description.maxBsonObjectSize
       );
     }
     return await super.executeCommand(server, session, command, ClientBulkWriteCursorResponse);

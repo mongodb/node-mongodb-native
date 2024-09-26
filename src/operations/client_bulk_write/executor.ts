@@ -1,4 +1,5 @@
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
+import { MongoClientBulkWriteExecutionError, MongoWriteConcernError } from '../../error';
 import { type MongoClient } from '../../mongo_client';
 import { WriteConcern } from '../../write_concern';
 import { executeOperation } from '../execute_operation';
@@ -7,7 +8,8 @@ import { ClientBulkWriteCommandBuilder } from './command_builder';
 import {
   type AnyClientBulkWriteModel,
   type ClientBulkWriteOptions,
-  type ClientBulkWriteResult
+  type ClientBulkWriteResult,
+  MongoClientBulkWriteError
 } from './common';
 import { ClientBulkWriteResultsMerger } from './results_merger';
 
@@ -31,9 +33,13 @@ export class ClientBulkWriteExecutor {
     operations: AnyClientBulkWriteModel[],
     options?: ClientBulkWriteOptions
   ) {
+    if (operations.length === 0) {
+      throw new MongoClientBulkWriteExecutionError('No client bulk write models were provided.');
+    }
+
     this.client = client;
     this.operations = operations;
-    this.options = { ...options };
+    this.options = { ordered: true, ...options };
 
     // If no write concern was provided, we inherit one from the client.
     if (!this.options.writeConcern) {
@@ -68,12 +74,56 @@ export class ClientBulkWriteExecutor {
       let currentBatchOffset = 0;
       while (commandBuilder.hasNextBatch()) {
         const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, this.options);
-        const docs = await cursor.toArray();
-        const operations = cursor.operations;
-        resultsMerger.merge(currentBatchOffset, operations, cursor.response, docs);
+        let docs = [];
+        let operations;
+        let writeConcernErrorResult;
+        try {
+          docs = await cursor.toArray();
+          operations = commandBuilder.lastOperations;
+        } catch (error) {
+          // Write concern errors are recorded in the writeConcernErrors field on MongoClientBulkWriteError.
+          // When a write concern error is encountered, it should not terminate execution of the bulk write
+          // for either ordered or unordered bulk writes. However, drivers MUST throw an exception at the end
+          // of execution if any write concern errors were observed.
+          if (error instanceof MongoWriteConcernError) {
+            const result = error.result;
+            writeConcernErrorResult = {
+              insertedCount: result.nInserted,
+              upsertedCount: result.nUpserted,
+              matchedCount: result.nMatched,
+              modifiedCount: result.nModified,
+              deletedCount: result.nDeleted,
+              writeConcernError: result.writeConcernError
+            };
+            docs = result.cursor.firstBatch;
+            operations = commandBuilder.lastOperations;
+          } else {
+            const bulkWriteError = new MongoClientBulkWriteError({
+              message: 'Mongo client bulk write encountered an error during execution'
+            });
+            bulkWriteError.error = error;
+            bulkWriteError.partialResult = resultsMerger.result;
+            throw bulkWriteError;
+          }
+        }
+        // Note if we have a write concern error there will be no cursor response present.
+        const response = writeConcernErrorResult ?? cursor.response;
+        resultsMerger.merge(currentBatchOffset, operations, response, docs);
         // Set the new batch index so we can back back to the index in the original models.
         currentBatchOffset += operations.length;
       }
+
+      // If we have write concern errors or unordered write errors at the end we throw.
+      if (resultsMerger.writeConcernErrors.length > 0 || resultsMerger.writeErrors.size > 0) {
+        const error = new MongoClientBulkWriteError({
+          message: 'Mongo client bulk write encountered errors during execution.'
+        });
+        error.writeConcernErrors = resultsMerger.writeConcernErrors;
+        error.writeErrors = resultsMerger.writeErrors;
+        error.partialResult = resultsMerger.result;
+        throw error;
+      }
+
       return resultsMerger.result;
     }
   }
