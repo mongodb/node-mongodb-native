@@ -464,7 +464,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
+          source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
           rm -rf ./node_modules/@aws-sdk/credential-providers
 
   "run atlas tests":

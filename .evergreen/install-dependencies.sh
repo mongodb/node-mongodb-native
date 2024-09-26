@@ -10,11 +10,11 @@ export NODE_LTS_VERSION=${NODE_LTS_VERSION:-16}
 # a version lower than latest to support EOL Node versions.
 export NPM_VERSION=${NPM_VERSION:-latest}
 
-source ./.drivers-tools/.evergreen/install-node.sh
+source $DRIVERS_TOOLS/.evergreen/install-node.sh
 
 npm install "${NPM_OPTIONS}"
 
 npm ls
 
 
-source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh

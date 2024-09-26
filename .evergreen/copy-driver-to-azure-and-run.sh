@@ -6,7 +6,7 @@ source "${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/secrets-export.sh"
 if [ -z ${AZUREKMS_RESOURCEGROUP+omitted} ]; then echo "AZUREKMS_RESOURCEGROUP is unset" && exit 1; fi
 if [ -z ${AZUREKMS_VMNAME+omitted} ]; then echo "AZUREKMS_VMNAME is unset" && exit 1; fi
 
-source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 export AZUREKMS_PUBLICKEYPATH=/tmp/testazurekms_publickey
 export AZUREKMS_PRIVATEKEYPATH=/tmp/testazurekms_privatekey

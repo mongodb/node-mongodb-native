@@ -5,7 +5,7 @@ set -o errexit
 pushd "src"
 PROJECT_DIRECTORY="$(pwd)"
 export PROJECT_DIRECTORY
-source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 set -o xtrace
 

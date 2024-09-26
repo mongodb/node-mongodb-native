@@ -1,6 +1,6 @@
 #! /bin/bash
 
-source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 export MONGODB_URI=$MONGODB_URI
 
