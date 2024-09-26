@@ -28,7 +28,6 @@ const metadata = { requires: { mongodb: '>=4.4' } };
 describe('CSOT driver tests', metadata, () => {
   const minPoolSize = 20;
 
-describe('CSOT driver tests', metadata, () => {
   describe('timeoutMS inheritance', () => {
     let client: MongoClient;
     let db: Db;
@@ -157,7 +156,10 @@ describe('CSOT driver tests', metadata, () => {
         metadata: { requires: { mongodb: '>=4.4', topology: '!load-balanced' } },
         test: async function () {
           const commandsStarted = [];
-          client = this.configuration.newClient(undefined, { timeoutMS: 1, monitorCommands: true });
+          client = this.configuration.newClient(undefined, {
+            timeoutMS: 1,
+            monitorCommands: true
+          });
 
           client.on('commandStarted', ev => commandsStarted.push(ev));
 
