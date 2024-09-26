@@ -474,7 +474,7 @@ export class DocumentSequence {
     this.chunks.push(buffer);
     // Write the new length.
     this.header?.writeInt32LE(4 + this.field.length + 1 + this.serializedDocumentsLength, 1);
-    return this.serializedDocumentsLength + (this.header?.length ?? 0);
+    return this.serializedDocumentsLength + this.header.length;
   }
 
   /**
