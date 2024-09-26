@@ -1,4 +1,5 @@
 import { type Document } from '../../bson';
+import { type ErrorDescription, type MongoRuntimeError, MongoServerError } from '../../error';
 import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
 import type { CollationOptions, CommandOperationOptions } from '../../operations/command';
 import type { Hint } from '../../operations/operation';
@@ -179,6 +180,55 @@ export interface ClientBulkWriteResult {
    * The results of each individual delete operation that was successfully performed.
    */
   deleteResults?: Map<number, ClientDeleteResult>;
+}
+
+export interface ClientBulkWriteError {
+  code: number;
+  message: string;
+}
+
+/**
+ * An error indicating that an error occurred when executing the bulk write.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoClientBulkWriteError extends MongoServerError {
+  /**
+   * A top-level error that occurred when attempting to communicate with the server or execute
+   * the bulk write. This value may not be populated if the exception was thrown due to errors
+   * occurring on individual writes.
+   */
+  error?: MongoRuntimeError;
+  /**
+   * Write concern errors that occurred while executing the bulk write. This list may have
+   * multiple items if more than one server command was required to execute the bulk write.
+   */
+  writeConcernErrors: Document[];
+  /**
+   * Errors that occurred during the execution of individual write operations. This map will
+   * contain at most one entry if the bulk write was ordered.
+   */
+  writeErrors: Map<number, ClientBulkWriteError>;
+  /**
+   * The results of any successful operations that were performed before the error was
+   * encountered.
+   */
+  partialResult?: ClientBulkWriteResult;
+
+  /**
+   * Initialize the client bulk write error.
+   * @param message - The error message.
+   */
+  constructor(message: ErrorDescription) {
+    super(message);
+    this.writeConcernErrors = [];
+    this.writeErrors = new Map();
+  }
+
+  override get name(): string {
+    return 'MongoClientBulkWriteError';
+  }
 }
 
 /** @public */
