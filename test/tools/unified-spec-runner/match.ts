@@ -240,7 +240,6 @@ export function resultCheck(
     }
 
     if (typeof actual !== 'object') {
-      console.log(expected, actual);
       expect.fail('Expected actual value to be an object');
     }
 
@@ -794,11 +793,7 @@ export function expectErrorCheck(
   }
 
   if (expected.expectResult != null) {
-    if ('partialResult' in error) {
-      resultCheck(error.partialResult, expected.expectResult as any, entities);
-    } else {
-      resultCheck(error, expected.expectResult as any, entities);
-    }
+    resultCheck(error, expected.expectResult as any, entities);
   }
 
   if (expected.errorResponse != null) {
