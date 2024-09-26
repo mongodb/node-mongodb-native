@@ -493,6 +493,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     models: AnyClientBulkWriteModel[],
     options?: ClientBulkWriteOptions
   ): Promise<ClientBulkWriteResult | { ok: 1 }> {
+    if (this.autoEncrypter) {
+      throw new MongoInvalidArgumentError(
+        'MongoClient bulkWrite does not currently support automatic encryption.'
+      );
+    }
     return await new ClientBulkWriteExecutor(this, models, options).execute();
   }
 

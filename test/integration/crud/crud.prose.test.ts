@@ -8,6 +8,8 @@ import {
   type Collection,
   MongoBulkWriteError,
   type MongoClient,
+  MongoClientBulkWriteError,
+  MongoInvalidArgumentError,
   MongoServerError
 } from '../../mongodb';
 import { filterForCommands } from '../shared';
@@ -283,6 +285,167 @@ describe('CRUD Prose Spec Tests', () => {
     });
   });
 
+  describe('5. MongoClient.bulkWrite collects WriteConcernErrors across batches', function () {
+    // Test that MongoClient.bulkWrite properly collects and reports writeConcernErrors returned in separate batches.
+    // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
+    // Construct a MongoClient (referred to as client) with retryWrites: false configured and command monitoring
+    // enabled to observe CommandStartedEvents. Perform a hello command using client and record the maxWriteBatchSize
+    // value contained in the response. Then, configure the following fail point with client:
+    // {
+    //   "configureFailPoint": "failCommand",
+    //   "mode": { "times": 2 },
+    //   "data": {
+    //     "failCommands": ["bulkWrite"],
+    //     "writeConcernError": {
+    //       "code": 91,
+    //       "errmsg": "Replication is being shut down"
+    //     }
+    //   }
+    // }
+    // Construct the following write model (referred to as model):
+    // InsertOne: {
+    //   "namespace": "db.coll",
+    //   "document": { "a": "b" }
+    // }
+    // Construct a list of write models (referred to as models) with model repeated maxWriteBatchSize + 1 times.
+    // Execute bulkWrite on client with models. Assert that the bulk write fails and returns a BulkWriteError (referred to as error).
+    // Assert that error.writeConcernErrors has a length of 2.
+    // Assert that error.partialResult is populated. Assert that error.partialResult.insertedCount is equal to maxWriteBatchSize + 1.
+    // Assert that two CommandStartedEvents were observed for the bulkWrite command.
+    let client: MongoClient;
+    let maxWriteBatchSize;
+    const models: AnyClientBulkWriteModel[] = [];
+    const commands: CommandStartedEvent[] = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true, retryWrites: false });
+      await client.connect();
+      await client.db('db').collection('coll').drop();
+      const hello = await client.db('admin').command({ hello: 1 });
+      await client.db('admin').command({
+        configureFailPoint: 'failCommand',
+        mode: { times: 2 },
+        data: {
+          failCommands: ['bulkWrite'],
+          writeConcernError: {
+            code: 91,
+            errmsg: 'Replication is being shut down'
+          }
+        }
+      });
+      maxWriteBatchSize = hello.maxWriteBatchSize;
+
+      client.on('commandStarted', filterForCommands('bulkWrite', commands));
+      commands.length = 0;
+
+      Array.from({ length: maxWriteBatchSize + 1 }, () => {
+        models.push({
+          namespace: 'db.coll',
+          name: 'insertOne',
+          document: { a: 'b' }
+        });
+      });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('splits the commands into 2 operations and handles the errors', {
+      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      async test() {
+        const error = await client.bulkWrite(models).catch(error => error);
+        expect(error).to.be.instanceOf(MongoClientBulkWriteError);
+        expect(error.writeConcernErrors.length).to.equal(2);
+        expect(error.partialResult.insertedCount).to.equal(maxWriteBatchSize + 1);
+        expect(commands.length).to.equal(2);
+      }
+    });
+  });
+
+  describe('6. MongoClient.bulkWrite handles individual WriteErrors across batches', function () {
+    // Test that MongoClient.bulkWrite handles individual write errors across batches for ordered and unordered bulk writes.
+    // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
+    // Construct a MongoClient (referred to as client) with command monitoring enabled to observe CommandStartedEvents.
+    // Perform a hello command using client and record the maxWriteBatchSize value contained in the response.
+    // Construct a MongoCollection (referred to as collection) with the namespace "db.coll" (referred to as namespace).
+    // Drop collection. Then, construct the following document (referred to as document):
+    // {
+    //   "_id": 1
+    // }
+    // Insert document into collection.
+    // Create the following write model (referred to as model):
+    // InsertOne {
+    //   "namespace": namespace,
+    //   "document": document
+    // }
+    // Construct a list of write models (referred to as models) with model repeated maxWriteBatchSize + 1 times.
+    let client: MongoClient;
+    let maxWriteBatchSize;
+    const models: AnyClientBulkWriteModel[] = [];
+    const commands: CommandStartedEvent[] = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true, retryWrites: false });
+      await client.connect();
+      await client.db('db').collection('coll').drop();
+      const hello = await client.db('admin').command({ hello: 1 });
+      await client.db('db').collection('coll').insertOne({ _id: 1 });
+      maxWriteBatchSize = hello.maxWriteBatchSize;
+
+      client.on('commandStarted', filterForCommands('bulkWrite', commands));
+      commands.length = 0;
+
+      Array.from({ length: maxWriteBatchSize + 1 }, () => {
+        models.push({
+          namespace: 'db.coll',
+          name: 'insertOne',
+          document: { _id: 1 }
+        });
+      });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    context('when the bulk write is unordered', function () {
+      // Unordered
+      // Test that an unordered bulk write collects WriteErrors across batches.
+      // Execute bulkWrite on client with models and ordered set to false. Assert that the bulk write fails
+      // and returns a BulkWriteError (referred to as unorderedError).
+      // Assert that unorderedError.writeErrors has a length of maxWriteBatchSize + 1.
+      // Assert that two CommandStartedEvents were observed for the bulkWrite command.
+      it('splits the commands into 2 operations and handles the errors', {
+        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        async test() {
+          const error = await client.bulkWrite(models, { ordered: false }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoClientBulkWriteError);
+          expect(error.writeErrors.size).to.equal(maxWriteBatchSize + 1);
+          expect(commands.length).to.equal(2);
+        }
+      });
+    });
+
+    context('when the bulk write is ordered', function () {
+      // Ordered
+      // Test that an ordered bulk write does not execute further batches when a WriteError occurs.
+      // Execute bulkWrite on client with models and ordered set to true. Assert that the bulk write fails
+      // and returns a BulkWriteError (referred to as orderedError).
+      // Assert that orderedError.writeErrors has a length of 1.
+      // Assert that one CommandStartedEvent was observed for the bulkWrite command.
+      it('splits the commands into 2 operations and halts on first error', {
+        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        async test() {
+          const error = await client.bulkWrite(models, { ordered: true }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoClientBulkWriteError);
+          expect(error.writeErrors.size).to.equal(1);
+          expect(commands.length).to.equal(1);
+        }
+      });
+    });
+  });
+
   describe('7. MongoClient.bulkWrite handles a cursor requiring a getMore', function () {
     // Test that MongoClient.bulkWrite properly iterates the results cursor when getMore is required.
     // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
@@ -430,6 +593,185 @@ describe('CRUD Prose Spec Tests', () => {
     });
   });
 
+  describe('9. MongoClient.bulkWrite handles a getMore error', function () {
+    // Test that MongoClient.bulkWrite properly handles a failure that occurs when attempting a getMore.
+    // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
+    // Construct a MongoClient (referred to as client) with command monitoring enabled to observe CommandStartedEvents.
+    // Perform a hello command using client and record the maxBsonObjectSize value from the response. Then,
+    // configure the following fail point with client:
+    // {
+    //   "configureFailPoint": "failCommand",
+    //   "mode": { "times": 1 },
+    //   "data": {
+    //     "failCommands": ["getMore"],
+    //     "errorCode": 8
+    //   }
+    // }
+    // Construct a MongoCollection (referred to as collection) with the namespace "db.coll" (referred to as namespace).
+    // Drop collection. Then create the following list of write models (referred to as models):
+    // UpdateOne {
+    //   "namespace": namespace,
+    //   "filter": { "_id": "a".repeat(maxBsonObjectSize / 2) },
+    //   "update": { "$set": { "x": 1 } },
+    //   "upsert": true
+    // },
+    // UpdateOne {
+    //   "namespace": namespace,
+    //   "filter": { "_id": "b".repeat(maxBsonObjectSize / 2) },
+    //   "update": { "$set": { "x": 1 } },
+    //   "upsert": true
+    // },
+    // Execute bulkWrite on client with models and verboseResults set to true. Assert that the bulk write
+    // fails and returns a BulkWriteError (referred to as bulkWriteError).
+    // Assert that bulkWriteError.error is populated with an error (referred to as topLevelError). Assert
+    // that topLevelError.errorCode is equal to 8.
+    // Assert that bulkWriteError.partialResult is populated with a result (referred to as partialResult).
+    // Assert that partialResult.upsertedCount is equal to 2. Assert that the length of
+    // partialResult.updateResults is equal to 1.
+    // Assert that a CommandStartedEvent was observed for the getMore command.
+    // Assert that a CommandStartedEvent was observed for the killCursors command.
+    let client: MongoClient;
+    let maxBsonObjectSize;
+    const models: AnyClientBulkWriteModel[] = [];
+    const getMoreCommands: CommandStartedEvent[] = [];
+    const killCursorsCommands: CommandStartedEvent[] = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      await client.connect();
+      await client.db('db').collection('coll').drop();
+      const hello = await client.db('admin').command({ hello: 1 });
+      maxBsonObjectSize = hello.maxBsonObjectSize;
+
+      await client.db('admin').command({
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['getMore'],
+          errorCode: 8
+        }
+      });
+
+      client.on('commandStarted', filterForCommands('getMore', getMoreCommands));
+      client.on('commandStarted', filterForCommands('killCursors', killCursorsCommands));
+      getMoreCommands.length = 0;
+      killCursorsCommands.length = 0;
+
+      models.push({
+        name: 'updateOne',
+        namespace: 'db.coll',
+        filter: { _id: 'a'.repeat(maxBsonObjectSize / 2) },
+        update: { $set: { x: 1 } },
+        upsert: true
+      });
+      models.push({
+        name: 'updateOne',
+        namespace: 'db.coll',
+        filter: { _id: 'b'.repeat(maxBsonObjectSize / 2) },
+        update: { $set: { x: 1 } },
+        upsert: true
+      });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('handles a getMore that errors', {
+      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      async test() {
+        const error = await client
+          .bulkWrite(models, { verboseResults: true })
+          .catch(error => error);
+        expect(error).to.be.instanceOf(MongoClientBulkWriteError);
+        expect(error.error.code).to.equal(8);
+        expect(error.partialResult).to.exist;
+        // TODO: Need to handle batches in cursor one at a time and not call toArray()
+        expect(error.partialResult.upsertedCount).to.equal(2);
+        expect(error.partialResult.updateResults.size).to.equal(1);
+        expect(getMoreCommands.length).to.equal(1);
+        expect(killCursorsCommands.length).to.equal(1);
+      }
+    });
+  });
+
+  describe('10. MongoClient.bulkWrite returns error for unacknowledged too-large insert', function () {
+    // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
+    // Construct a MongoClient (referred to as client).
+    // Perform a hello command using client and record the following values from the response: maxBsonObjectSize.
+    // Then, construct the following document (referred to as document):
+    // {
+    //   "a": "b".repeat(maxBsonObjectSize)
+    // }
+    let client: MongoClient;
+    let maxBsonObjectSize;
+    let document: Document;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      await client.connect();
+      await client.db('db').collection('coll').drop();
+      const hello = await client.db('admin').command({ hello: 1 });
+      maxBsonObjectSize = hello.maxBsonObjectSize;
+
+      document = {
+        a: 'b'.repeat(maxBsonObjectSize)
+      };
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    context('when performing inserts', function () {
+      // With insert
+      // Construct the following write model (referred to as model):
+      // InsertOne: {
+      //   "namespace": "db.coll",
+      //   "document": document
+      // }
+      // Construct as list of write models (referred to as models) with the one model.
+      // Call MongoClient.bulkWrite with models and BulkWriteOptions.writeConcern set to an unacknowledged write concern.
+      // Expect a client-side error due the size.
+      it('throws an error', {
+        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        async test() {
+          const error = await client
+            .bulkWrite([{ name: 'insertOne', namespace: 'db.coll', document: document }], {
+              writeConcern: { w: 0 }
+            })
+            .catch(error => error);
+          expect(error.message).to.include('Client bulk write operation ops of length');
+        }
+      });
+    });
+
+    context('when performing replacements', function () {
+      // With replace
+      // Construct the following write model (referred to as model):
+      // ReplaceOne: {
+      //   "namespace": "db.coll",
+      //   "filter": {},
+      //   "replacement": document
+      // }
+      // Construct as list of write models (referred to as models) with the one model.
+      // Call MongoClient.bulkWrite with models and BulkWriteOptions.writeConcern set to an unacknowledged write concern.
+      // Expect a client-side error due the size.
+      it('throws an error', {
+        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        async test() {
+          const error = await client
+            .bulkWrite(
+              [{ name: 'replaceOne', namespace: 'db.coll', filter: {}, replacement: document }],
+              { writeConcern: { w: 0 } }
+            )
+            .catch(error => error);
+          expect(error.message).to.include('Client bulk write operation ops of length');
+        }
+      });
+    });
+  });
+
   describe('11. MongoClient.bulkWrite batch splits when the addition of a new namespace exceeds the maximum message size', function () {
     // Test that MongoClient.bulkWrite batch splits a bulk write when the addition of a new namespace to nsInfo causes the size
     // of the message to exceed maxMessageSizeBytes - 1000.
@@ -570,6 +912,133 @@ describe('CRUD Prose Spec Tests', () => {
           expect(commands[1].command.nsInfo[0].ns).to.equal(namespace);
         }
       });
+    });
+  });
+
+  describe('12. MongoClient.bulkWrite returns an error if no operations can be added to ops', function () {
+    // Test that MongoClient.bulkWrite returns an error if an operation provided exceeds maxMessageSizeBytes
+    // such that an empty ops payload would be sent.
+    // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
+    // This test may be skipped by drivers that are not able to construct arbitrarily large documents.
+    // Construct a MongoClient (referred to as client). Perform a hello command using client and record
+    // the maxMessageSizeBytes value contained in the response.
+    let client: MongoClient;
+    let maxMessageSizeBytes;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({});
+      await client.connect();
+      await client.db('db').collection('coll').drop();
+      const hello = await client.db('admin').command({ hello: 1 });
+      maxMessageSizeBytes = hello.maxMessageSizeBytes;
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    context('when the document is too large', function () {
+      // Case 1: document too large
+      // Construct the following write model (referred to as largeDocumentModel):
+      // InsertOne {
+      //   "namespace": "db.coll",
+      //   "document": { "a": "b".repeat(maxMessageSizeBytes) }
+      // }
+      // Execute bulkWrite on client with largeDocumentModel. Assert that an error (referred to as error) is returned.
+      // Assert that error is a client error.
+      it('raises a client error', {
+        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        async test() {
+          const model: AnyClientBulkWriteModel = {
+            name: 'insertOne',
+            namespace: 'db.coll',
+            document: { a: 'b'.repeat(maxMessageSizeBytes) }
+          };
+          const error = await client.bulkWrite([model]).catch(error => error);
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+        }
+      });
+    });
+
+    context('when the namespace is too large', function () {
+      // Case 2: namespace too large
+      // Construct the following namespace (referred to as namespace):
+      // "db." + "c".repeat(maxMessageSizeBytes)
+      // Construct the following write model (referred to as largeNamespaceModel):
+      // InsertOne {
+      //   "namespace": namespace,
+      //   "document": { "a": "b" }
+      // }
+      // Execute bulkWrite on client with largeNamespaceModel. Assert that an error (referred to as error) is returned.
+      // Assert that error is a client error.
+      it('raises a client error', {
+        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        async test() {
+          const namespace = `db.${'c'.repeat(maxMessageSizeBytes)}`;
+          const model: AnyClientBulkWriteModel = {
+            name: 'insertOne',
+            namespace: namespace,
+            document: { a: 'b' }
+          };
+          const error = await client.bulkWrite([model]).catch(error => error);
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+        }
+      });
+    });
+  });
+
+  describe('13. MongoClient.bulkWrite returns an error if auto-encryption is configured', function () {
+    // This test is expected to be removed when DRIVERS-2888 is resolved.
+    // Test that MongoClient.bulkWrite returns an error if the client has auto-encryption configured.
+    // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
+    // Construct a MongoClient (referred to as client) configured with the following AutoEncryptionOpts:
+    // AutoEncryptionOpts {
+    //   "keyVaultNamespace": "db.coll",
+    //   "kmsProviders": {
+    //     "aws": {
+    //       "accessKeyId": "foo",
+    //       "secretAccessKey": "bar"
+    //     }
+    //   }
+    // }
+    // Construct the following write model (referred to as model):
+    // InsertOne {
+    //   "namespace": "db.coll",
+    //   "document": { "a": "b" }
+    // }
+    // Execute bulkWrite on client with model. Assert that an error (referred to as error) is returned.
+    // Assert that error is a client error containing the message: "bulkWrite does not currently support automatic encryption".
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient(
+        {},
+        {
+          autoEncryption: {
+            keyVaultNamespace: 'db.coll',
+            kmsProviders: {
+              aws: {
+                accessKeyId: 'foo',
+                secretAccessKey: 'bar'
+              }
+            }
+          }
+        }
+      );
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('raises a client side error', async function () {
+      const model: AnyClientBulkWriteModel = {
+        name: 'insertOne',
+        namespace: 'db.coll',
+        document: { a: 'b' }
+      };
+      const error = await client.bulkWrite([model]).catch(error => error);
+      expect(error.message).to.include('bulkWrite does not currently support automatic encryption');
     });
   });
 

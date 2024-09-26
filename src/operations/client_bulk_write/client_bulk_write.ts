@@ -48,7 +48,8 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
         session.pin(connection);
         command = this.commandBuilder.buildBatch(
           connection.hello?.maxMessageSizeBytes,
-          connection.hello?.maxWriteBatchSize
+          connection.hello?.maxWriteBatchSize,
+          connection.hello?.maxBsonObjectSize
         );
       } else {
         throw new MongoClientBulkWriteExecutionError(
@@ -59,14 +60,19 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       // At this point we have a server and the auto connect code has already
       // run in executeOperation, so the server description will be populated.
       // We can use that to build the command.
-      if (!server.description.maxWriteBatchSize || !server.description.maxMessageSizeBytes) {
+      if (
+        !server.description.maxWriteBatchSize ||
+        !server.description.maxMessageSizeBytes ||
+        !server.description.maxBsonObjectSize
+      ) {
         throw new MongoClientBulkWriteExecutionError(
-          'In order to execute a client bulk write, both maxWriteBatchSize and maxMessageSizeBytes must be provided by the servers hello response.'
+          'In order to execute a client bulk write, both maxWriteBatchSize, maxMessageSizeBytes and maxBsonObjectSize must be provided by the servers hello response.'
         );
       }
       command = this.commandBuilder.buildBatch(
         server.description.maxMessageSizeBytes,
-        server.description.maxWriteBatchSize
+        server.description.maxWriteBatchSize,
+        server.description.maxBsonObjectSize
       );
     }
     return await super.executeCommand(server, session, command, ClientBulkWriteCursorResponse);
