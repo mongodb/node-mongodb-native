@@ -160,6 +160,7 @@ describe('Connection', function () {
         const readSpy = sinon.spy(conn, 'readMany');
         await conn.command(ns('$admin.cmd'), { ping: 1 }, { moreToCome: true });
         expect(readSpy).to.not.have.been.called;
+        conn?.destroy();
       }
     });
   });
