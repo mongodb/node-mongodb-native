@@ -105,7 +105,7 @@ export class ClientBulkWriteCommandBuilder {
           currentCommandLength + operationBuffer.length < maxMessageSizeBytes &&
           currentCommand.ops.documents.length < maxWriteBatchSize
         ) {
-          // Pushing to the ops document sequence returns the bytes length added.
+          // Pushing to the ops document sequence returns the total byte length of the document sequence.
           currentCommandLength =
             MESSAGE_OVERHEAD_BYTES + this.addOperation(currentCommand, operation, operationBuffer);
         } else {
@@ -185,7 +185,7 @@ export class ClientBulkWriteCommandBuilder {
     operation: Document,
     operationBuffer: Uint8Array
   ): number {
-    // Pushing to the ops document sequence returns the bytes length added.
+    // Pushing to the ops document sequence returns the total byte length of the document sequence.
     return command.ops.push(operation, operationBuffer);
   }
 
@@ -196,7 +196,7 @@ export class ClientBulkWriteCommandBuilder {
     nsInfo: Document,
     nsInfoBuffer: Uint8Array
   ): number {
-    // Pushing to the nsInfo document sequence returns the bytes length added.
+    // Pushing to the nsInfo document sequence returns the total byte length of the document sequence.
     const nsInfoLength = command.nsInfo.push(nsInfo, nsInfoBuffer);
     const opsLength = this.addOperation(command, operation, operationBuffer);
     return nsInfoLength + opsLength;

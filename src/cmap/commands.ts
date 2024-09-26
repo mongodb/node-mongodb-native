@@ -433,7 +433,7 @@ export class DocumentSequence {
   documents: Document[];
   serializedDocumentsLength: number;
   private chunks: Uint8Array[];
-  private header?: Buffer;
+  private header: Buffer;
 
   /**
    * Create a new document sequence for the provided field.
@@ -444,7 +444,14 @@ export class DocumentSequence {
     this.documents = [];
     this.chunks = [];
     this.serializedDocumentsLength = 0;
-    this.init();
+    // Document sequences starts with type 1 at the first byte.
+    // Field strings must always be UTF-8.
+    const buffer = Buffer.allocUnsafe(1 + 4 + this.field.length + 1);
+    buffer[0] = 1;
+    // Third part is the field name at offset 5 with trailing null byte.
+    encodeUTF8Into(buffer, `${this.field}\0`, 5);
+    this.chunks.push(buffer);
+    this.header = buffer;
     if (documents) {
       for (const doc of documents) {
         this.push(doc, BSON.serialize(doc));
@@ -453,24 +460,11 @@ export class DocumentSequence {
   }
 
   /**
-   * Initialize the buffer chunks.
-   */
-  private init() {
-    // Document sequences starts with type 1 at the first byte.
-    const buffer = Buffer.allocUnsafe(1 + 4 + this.field.length + 1);
-    buffer[0] = 1;
-    // Third part is the field name at offset 5 with trailing null byte.
-    encodeUTF8Into(buffer, `${this.field}\0`, 5);
-    this.chunks.push(buffer);
-    this.header = buffer;
-  }
-
-  /**
    * Push a document to the document sequence. Will serialize the document
    * as well and return the current serialized length of all documents.
    * @param document - The document to add.
    * @param buffer - The serialized document in raw BSON.
-   * @returns The new totoal document sequence length.
+   * @returns The new total document sequence length.
    */
   push(document: Document, buffer: Uint8Array): number {
     this.serializedDocumentsLength += buffer.length;
