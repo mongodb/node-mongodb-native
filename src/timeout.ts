@@ -353,11 +353,12 @@ export class LegacyTimeoutContext extends TimeoutContext {
   }
 }
 
-/** @internal
+/**
+ * @internal
  * When `timeoutContext` is defined, throws a MongoOperationTimeoutError if the context has expired.
  * If the context has not expired, returns the `remainingTimeMS`
  * If the `timeoutContext` is not defined, returns undefined
- * */
+ **/
 export function getRemainingTimeMSOrThrow(
   timeoutContext?: CSOTTimeoutContext,
   message?: string

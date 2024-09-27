@@ -6,7 +6,7 @@ import { MongoOperationTimeoutError, MongoRuntimeError } from '../error';
 import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { CSOTTimeoutContext } from '../timeout';
+import { CSOTTimeoutContext, getRemainingTimeMSOrThrow } from '../timeout';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -49,6 +49,7 @@ export interface GridFSBucketPrivate {
     chunkSizeBytes: number;
     readPreference?: ReadPreference;
     writeConcern: WriteConcern | undefined;
+    timeoutMS?: number;
   };
   _chunksCollection: Collection<GridFSChunk>;
   _filesCollection: Collection<GridFSFile>;
@@ -112,7 +113,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
     return new GridFSBucketWriteStream(this, filename, {
-      timeoutMS: this.s.db.timeoutMS,
+      timeoutMS: this.s.options.timeoutMS,
       ...options
     });
   }
@@ -246,9 +247,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
 
     if (timeoutContext) {
       await this.s._filesCollection.drop({ timeoutMS: timeoutContext.remainingTimeMS });
-      const remainingTimeMS = timeoutContext.remainingTimeMS;
-      if (remainingTimeMS <= 0)
-        throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
+      const remainingTimeMS = getRemainingTimeMSOrThrow(
+        timeoutContext,
+        `Timed out after ${timeoutMS}ms`
+      );
       await this.s._chunksCollection.drop({ timeoutMS: remainingTimeMS });
     } else {
       await this.s._filesCollection.drop();

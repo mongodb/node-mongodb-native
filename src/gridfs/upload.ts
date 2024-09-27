@@ -160,18 +160,18 @@ export class GridFSBucketWriteStream extends Writable {
         () => {
           this.bucket.s.checkedIndexes = true;
           this.bucket.emit('index');
+          callback();
         },
         error => {
           if (error instanceof MongoOperationTimeoutError) {
             handleError(this, error, callback);
           } else {
             squashError(error);
-            process.nextTick(callback);
+            callback();
           }
         }
       );
     }
-    this.bucket.once('index', callback);
   }
 
   /**
@@ -313,14 +313,13 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
 
     const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
     if (remainingTimeMS != null && remainingTimeMS <= 0) {
-      handleError(
+      return handleError(
         stream,
         new MongoOperationTimeoutError(
           `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
         ),
         callback
       );
-      return;
     }
 
     stream.files
