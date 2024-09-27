@@ -854,9 +854,7 @@ describe('CSOT driver tests', metadata, () => {
           _id,
           length: 10,
           chunkSize: 4,
-          uploadDate: {
-            $date: '1970-01-01T00:00:00.000Z'
-          },
+          uploadDate: new Date('1970-01-01T00:00:00.000Z'),
           md5: '57d83cd477bfb1ccd975ab33d827a92b',
           filename: 'length-10',
           contentType: 'application/octet-stream',
