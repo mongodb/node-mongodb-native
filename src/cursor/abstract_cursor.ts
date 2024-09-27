@@ -787,14 +787,6 @@ export abstract class AbstractCursor<
       batchSize
     };
 
-    if (
-      this.cursorOptions.tailable &&
-      this.cursorOptions.awaitData &&
-      this.cursorOptions.maxAwaitTimeMS != null
-    ) {
-      getMoreOptions.maxTimeMS = this.cursorOptions.maxAwaitTimeMS;
-    }
-
     const getMoreOperation = new GetMoreOperation(
       this.cursorNamespace,
       this.cursorId,
