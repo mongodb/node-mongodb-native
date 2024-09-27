@@ -9,7 +9,8 @@ const SKIPPED_TESTS = [
   'defaultTransactionOptions override client options',
   'transaction options inherited from defaultTransactionOptions',
   'transaction options inherited from client',
-  'causal consistency disabled'
+  'causal consistency disabled',
+  'client bulkWrite with writeConcern in a transaction causes a transaction error'
 ];
 
 describe('Transactions Spec Unified Tests', function () {

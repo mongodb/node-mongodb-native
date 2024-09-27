@@ -676,6 +676,36 @@ tests:
       - *abortTransaction
     outcome: *outcome
 
+  - description: remain pinned after non-transient Interrupted error on clientBulkWrite bulkWrite
+    operations:
+      - *startTransaction
+      - *initialCommand
+      - name: targetedFailPoint
+        object: testRunner
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: {times: 1}
+            data:
+              failCommands: ["bulkWrite"]
+              errorCode: 11601
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          session: *session0
+          models:
+          - insertOne:
+              namespace: database0.collection0
+              document: { _id: 8, x: 88 }
+        expectError:
+          errorLabelsOmit: ["TransientTransactionError"]
+      - *assertSessionPinned
+      - *abortTransaction
+    outcome: *outcome
+    runOnRequirements:
+      - minServerVersion: "8.0" # `bulkWrite` added to server 8.0"
+
   - description: unpin after transient connection error on insertOne insert
     operations:
       - *startTransaction
@@ -1613,4 +1643,64 @@ tests:
       - *assertSessionUnpinned
       - *abortTransaction
     outcome: *outcome
+
+  - description: unpin after transient connection error on clientBulkWrite bulkWrite
+    operations:
+      - *startTransaction
+      - *initialCommand
+      - name: targetedFailPoint
+        object: testRunner
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: {times: 1}
+            data:
+              failCommands: ["bulkWrite"]
+              closeConnection: true
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          session: *session0
+          models:
+          - insertOne:
+              namespace: database0.collection0
+              document: { _id: 8, x: 88 }
+        expectError:
+          errorLabelsContain: ["TransientTransactionError"]
+      - *assertSessionUnpinned
+      - *abortTransaction
+    outcome: *outcome
+    runOnRequirements:
+      - minServerVersion: "8.0" # `bulkWrite` added to server 8.0"
+
+  - description: unpin after transient ShutdownInProgress error on clientBulkWrite bulkWrite
+    operations:
+      - *startTransaction
+      - *initialCommand
+      - name: targetedFailPoint
+        object: testRunner
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: {times: 1}
+            data:
+              failCommands: ["bulkWrite"]
+              errorCode: 91
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          session: *session0
+          models:
+          - insertOne:
+              namespace: database0.collection0
+              document: { _id: 8, x: 88 }
+        expectError:
+          errorLabelsContain: ["TransientTransactionError"]
+      - *assertSessionUnpinned
+      - *abortTransaction
+    outcome: *outcome
+    runOnRequirements:
+      - minServerVersion: "8.0" # `bulkWrite` added to server 8.0"
 

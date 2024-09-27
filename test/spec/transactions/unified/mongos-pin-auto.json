@@ -2005,6 +2005,104 @@
       ]
     },
     {
+      "description": "remain pinned after non-transient Interrupted error on clientBulkWrite bulkWrite",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "bulkWrite"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "clientBulkWrite",
+          "object": "client0",
+          "arguments": {
+            "session": "session0",
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "database0.collection0",
+                  "document": {
+                    "_id": 8,
+                    "x": 88
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ],
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0"
+        }
+      ]
+    },
+    {
       "description": "unpin after transient connection error on insertOne insert",
       "operations": [
         {
@@ -5173,6 +5271,202 @@
               "_id": 2
             }
           ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on clientBulkWrite bulkWrite",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "bulkWrite"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "clientBulkWrite",
+          "object": "client0",
+          "arguments": {
+            "session": "session0",
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "database0.collection0",
+                  "document": {
+                    "_id": 8,
+                    "x": 88
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ],
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0"
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on clientBulkWrite bulkWrite",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "bulkWrite"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "clientBulkWrite",
+          "object": "client0",
+          "arguments": {
+            "session": "session0",
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "database0.collection0",
+                  "document": {
+                    "_id": 8,
+                    "x": 88
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ],
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0"
         }
       ]
     }
