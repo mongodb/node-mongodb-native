@@ -363,6 +363,9 @@ describe('CSOT spec prose tests', function () {
   });
 
   context('6. GridFS - Upload', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
     let internalClient: MongoClient;
     let client: MongoClient;
 
@@ -394,7 +397,7 @@ describe('CSOT spec prose tests', function () {
     });
     /** Tests in this section MUST only be run against server versions 4.4 and higher. */
 
-    it('uploads via openUploadStream can be timed out', async function () {
+    it('uploads via openUploadStream can be timed out', metadata, async function () {
       /**
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
        * 1. Using `internalClient`, set the following fail point:
@@ -440,7 +443,7 @@ describe('CSOT spec prose tests', function () {
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
     });
 
-    it('Aborting an upload stream can be timed out', async function () {
+    it('Aborting an upload stream can be timed out', metadata, async function () {
       /**
        * This test only applies to drivers that provide an API to abort a GridFS upload stream.
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -504,6 +507,9 @@ describe('CSOT spec prose tests', function () {
   context('7. GridFS - Download', () => {
     let internalClient: MongoClient;
     let client: MongoClient;
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
 
     beforeEach(async function () {
       internalClient = this.configuration.newClient();
@@ -590,7 +596,7 @@ describe('CSOT spec prose tests', function () {
      *   - Expect this to fail with a timeout error.
      * 1. Verify that two `find` commands were executed during the read: one against `db.fs.files` and another against `db.fs.chunks`.
      */
-    it('download streams can be timed out', async function () {
+    it('download streams can be timed out', metadata, async function () {
       const bucket = new GridFSBucket(client.db('db'));
       const downloadStream = bucket.openDownloadStream(new ObjectId('000000000000000000000005'));
 

@@ -777,7 +777,7 @@ describe('CSOT driver tests', metadata, () => {
       });
 
       describe('openUploadStream', function () {
-        it('can override db timeoutMS settings', async function () {
+        it('can override db timeoutMS settings', metadata, async function () {
           const data = Buffer.from('01020304', 'hex');
           const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 175 });
           uploadStream.on('error', error => {
@@ -792,7 +792,7 @@ describe('CSOT driver tests', metadata, () => {
           expect(maybeError[0]).to.be.instanceOf(MongoOperationTimeoutError);
         });
 
-        it('only emits index event once per bucket', async function () {
+        it('only emits index event once per bucket', metadata, async function () {
           let numEventsSeen = 0;
           bucket.on('index', () => numEventsSeen++);
 
@@ -812,7 +812,7 @@ describe('CSOT driver tests', metadata, () => {
       });
 
       describe('openUploadStreamWithId', function () {
-        it('can override db timeoutMS settings', async function () {
+        it('can override db timeoutMS settings', metadata, async function () {
           const data = Buffer.from('01020304', 'hex');
           const uploadStream = bucket.openUploadStreamWithId(new ObjectId(), 'filename', {
             timeoutMS: 175
@@ -873,7 +873,7 @@ describe('CSOT driver tests', metadata, () => {
       });
 
       describe('openDownloadStream', function () {
-        it('can override db timeoutMS settings', async function () {
+        it('can override db timeoutMS settings', metadata, async function () {
           const downloadStream = bucket.openDownloadStream(_id, { timeoutMS: 80 });
           const maybeError = await downloadStream.toArray().then(
             () => null,
@@ -885,7 +885,7 @@ describe('CSOT driver tests', metadata, () => {
       });
 
       describe('openDownloadStreamByName', function () {
-        it('can override db timeoutMS settings', async function () {
+        it('can override db timeoutMS settings', metadata, async function () {
           const downloadStream = bucket.openDownloadStreamByName('length-10', { timeoutMS: 80 });
           const maybeError = await downloadStream.toArray().then(
             () => null,
