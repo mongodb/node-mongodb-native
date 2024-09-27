@@ -297,8 +297,8 @@ describe('Connection', function () {
         });
 
         afterEach(async function () {
-          await client.close();
           mockServer.destroy();
+          await client.close();
           sinon.restore();
         });
 
