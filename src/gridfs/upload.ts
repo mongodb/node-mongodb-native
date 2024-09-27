@@ -164,13 +164,14 @@ export class GridFSBucketWriteStream extends Writable {
         },
         error => {
           if (error instanceof MongoOperationTimeoutError) {
-            handleError(this, error, callback);
-          } else {
-            squashError(error);
-            callback();
+            return handleError(this, error, callback);
           }
+          squashError(error);
+          callback();
         }
       );
+    } else {
+      callback();
     }
   }
 
