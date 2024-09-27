@@ -26,6 +26,9 @@ import { type FailPoint } from '../../tools/utils';
 const metadata = { requires: { mongodb: '>=4.4' } };
 
 describe('CSOT driver tests', metadata, () => {
+  // NOTE: minPoolSize here is set to ensure that connections are available when testing timeout
+  // behaviour. This reduces flakiness in our tests since operations will not spend time
+  // establishing connections, more closely mirroring long-running application behaviour
   const minPoolSize = 20;
 
   describe('timeoutMS inheritance', () => {
@@ -651,6 +654,11 @@ describe('CSOT driver tests', metadata, () => {
             e => e
           );
           expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+
+          const finds = commandStarted.filter(x => x.commandName === 'find');
+          const getMores = commandStarted.filter(x => x.commandName === 'getMore');
+          expect(finds).to.have.lengthOf(1);
+          expect(getMores).to.have.lengthOf(0);
         });
 
         it('refreshes the timeout for subsequent getMores', async function () {
@@ -730,6 +738,11 @@ describe('CSOT driver tests', metadata, () => {
             e => e
           );
           expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+
+          const finds = commandStarted.filter(x => x.commandName === 'find');
+          const getMores = commandStarted.filter(x => x.commandName === 'getMore');
+          expect(finds).to.have.lengthOf(1);
+          expect(getMores).to.have.lengthOf(0);
         });
 
         it('refreshes the timeout for subsequent getMores', metadata, async function () {

@@ -201,11 +201,11 @@ export abstract class AbstractCursor<
         options.readPreference && options.readPreference instanceof ReadPreference
           ? options.readPreference
           : ReadPreference.primary,
-      ...pluckBSONSerializeOptions(options)
+      ...pluckBSONSerializeOptions(options),
+      timeoutMS: options.timeoutMS,
+      tailable: options.tailable,
+      awaitData: options.awaitData
     };
-    this.cursorOptions.timeoutMS = options.timeoutMS;
-    this.cursorOptions.tailable = options.tailable;
-    this.cursorOptions.awaitData = options.awaitData;
     if (this.cursorOptions.timeoutMS != null) {
       if (options.timeoutMode == null) {
         if (options.tailable) {
@@ -784,8 +784,7 @@ export abstract class AbstractCursor<
     const getMoreOptions = {
       ...this.cursorOptions,
       session: this.cursorSession,
-      batchSize,
-      omitMaxTimeMS: this.cursorOptions.omitMaxTimeMS
+      batchSize
     };
 
     if (
@@ -822,6 +821,8 @@ export abstract class AbstractCursor<
     }
     try {
       const state = await this._initialize(this.cursorSession);
+      // Set omitMaxTimeMS to the value needed for subsequent getMore calls
+      this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
       const response = state.response;
       this.selectedServer = state.server;
       this.cursorId = response.id;
@@ -865,7 +866,6 @@ export abstract class AbstractCursor<
 
     // otherwise need to call getMore
     const batchSize = this.cursorOptions.batchSize || 1000;
-    this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
     try {
       const response = await this.getMore(batchSize);
       this.cursorId = response.id;

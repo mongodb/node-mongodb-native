@@ -1,7 +1,6 @@
 import { type EventEmitter } from 'events';
 
-import { MongoOperationTimeoutError } from '../../error';
-import { type TimeoutContext, TimeoutError } from '../../timeout';
+import { type TimeoutContext } from '../../timeout';
 import { List, promiseWithResolvers } from '../../utils';
 
 /**
@@ -24,12 +23,6 @@ export function onData(
   emitter: EventEmitter,
   { timeoutContext }: { timeoutContext?: TimeoutContext }
 ) {
-  // NOTE: Uncomment the block below to capture stack traces for debugging purposes
-  // const capture: { stack?: string; name?: string; message?: string } = Object.create(null);
-  // capture.name = 'MongoOperationTimeoutError';
-  // capture.message = 'Timed out during socket read';
-  // Error.captureStackTrace(capture);
-
   // Setup pending events and pending promise lists
   /**
    * When the caller has not yet called .next(), we store the
@@ -112,15 +105,9 @@ export function onData(
 
   function errorHandler(err: Error) {
     const promise = unconsumedPromises.shift();
-    const timeoutError = TimeoutError.is(err)
-      ? new MongoOperationTimeoutError('Timed out during socket read')
-      : undefined;
 
-    // NOTE: Uncomment this for debugging purposes
-    // if (timeoutError instanceof MongoOperationTimeoutError && capture) timeoutError.stack = capture.stack;
-
-    if (promise != null) promise.reject(timeoutError ?? err);
-    else error = timeoutError ?? err;
+    if (promise != null) promise.reject(err);
+    else error = err;
     void closeHandler();
   }
 
