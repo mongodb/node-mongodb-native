@@ -241,7 +241,10 @@ describe('CSOT spec prose tests', function () {
 
     beforeEach(async function () {
       internalClient = this.configuration.newClient();
-      await internalClient.db('db').dropCollection('coll');
+      await internalClient
+        .db('db')
+        .dropCollection('coll')
+        .catch(() => null);
       // Creating capped collection to be able to create tailable find cursor
       const coll = await internalClient
         .db('db')
