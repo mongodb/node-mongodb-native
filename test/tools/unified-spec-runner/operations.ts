@@ -11,6 +11,7 @@ import {
   CommandStartedEvent,
   Db,
   type Document,
+  GridFSBucket,
   type MongoClient,
   MongoError,
   ReadConcern,
@@ -833,16 +834,23 @@ operations.set('updateOne', async ({ entities, operation }) => {
 });
 
 operations.set('rename', async ({ entities, operation }) => {
-  try {
-    const collection = entities.getEntity('collection', operation.object);
+  let entity: GridFSBucket | Collection | undefined = entities.getEntity(
+    'collection',
+    operation.object,
+    { assertExists: false }
+  );
+  if (entity instanceof Collection) {
     const { to, ...options } = operation.arguments!;
-    return collection.rename(to, options);
-  } catch {
-    // Ignore
+    return entity.rename(to, options);
   }
-  const bucket = entities.getEntity('bucket', operation.object);
-  const { id, newFilename, ...opts } = operation.arguments;
-  return bucket.rename(id, newFilename, opts);
+
+  entity = entities.getEntity('bucket', operation.object, { assertExists: false });
+  if (entity instanceof GridFSBucket) {
+    const { id, newFilename, ...opts } = operation.arguments!;
+    return entity.rename(id, newFilename, opts as any);
+  }
+
+  expect.fail(`No collection or bucket with name '${operation.object}' found`);
 });
 
 operations.set('createDataKey', async ({ entities, operation }) => {
