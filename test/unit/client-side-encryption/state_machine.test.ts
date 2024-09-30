@@ -16,40 +16,40 @@ import { Db } from '../../../src/db';
 import { MongoClient } from '../../../src/mongo_client';
 import { Int32, Long, serialize } from '../../mongodb';
 
-class MockRequest implements MongoCryptKMSRequest {
-  _bytesNeeded: number;
-  endpoint = 'some.fake.host.com';
-  _kmsProvider = 'aws';
-
-  constructor(
-    public _message: Buffer,
-    bytesNeeded
-  ) {
-    this._bytesNeeded = typeof bytesNeeded === 'number' ? bytesNeeded : 1024;
-  }
-
-  get message() {
-    return this._message;
-  }
-
-  get bytesNeeded() {
-    return this._bytesNeeded;
-  }
-
-  get kmsProvider() {
-    return this._kmsProvider;
-  }
-
-  get status() {
-    return { type: 1, code: 2, message: 'something went wrong' };
-  }
-
-  addResponse(buffer) {
-    this._bytesNeeded -= buffer.length;
-  }
-}
-
 describe('StateMachine', function () {
+  class MockRequest implements MongoCryptKMSRequest {
+    _bytesNeeded: number;
+    endpoint = 'some.fake.host.com';
+    _kmsProvider = 'aws';
+
+    constructor(
+      public _message: Buffer,
+      bytesNeeded
+    ) {
+      this._bytesNeeded = typeof bytesNeeded === 'number' ? bytesNeeded : 1024;
+    }
+
+    get message() {
+      return this._message;
+    }
+
+    get bytesNeeded() {
+      return this._bytesNeeded;
+    }
+
+    get kmsProvider() {
+      return this._kmsProvider;
+    }
+
+    get status() {
+      return { type: 1, code: 2, message: 'something went wrong' };
+    }
+
+    addResponse(buffer) {
+      this._bytesNeeded -= buffer.length;
+    }
+  }
+
   describe('#markCommand', function () {
     let runCommandStub;
     let dbStub;
