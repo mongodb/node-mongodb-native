@@ -1,6 +1,8 @@
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
 import { type MongoClient } from '../../mongo_client';
 import { WriteConcern } from '../../write_concern';
+import { executeOperation } from '../execute_operation';
+import { ClientBulkWriteOperation } from './client_bulk_write';
 import { ClientBulkWriteCommandBuilder } from './command_builder';
 import {
   type AnyClientBulkWriteModel,
@@ -53,19 +55,26 @@ export class ClientBulkWriteExecutor {
       this.options,
       pkFactory
     );
-    // const commands = commandBuilder.buildCommands(maxMessageSizeBytes, maxWriteBatchSize);
-    // if (this.options.writeConcern?.w === 0) {
-    const resultsMerger = new ClientBulkWriteResultsMerger(this.options);
-    // For each command will will create and exhaust a cursor for the results.
-    let currentBatchOffset = 0;
-    while (commandBuilder.hasNextBatch()) {
-      const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, this.options);
-      const docs = await cursor.toArray();
-      const operations = cursor.operations;
-      resultsMerger.merge(currentBatchOffset, operations, cursor.response, docs);
-      // Set the new batch index so we can back back to the index in the original models.
-      currentBatchOffset += operations.length;
+    // Unacknowledged writes need to execute all batches and return { ok: 1}
+    if (this.options.writeConcern?.w === 0) {
+      while (commandBuilder.hasNextBatch()) {
+        const operation = new ClientBulkWriteOperation(commandBuilder, this.options);
+        await executeOperation(this.client, operation);
+      }
+      return { ok: 1 };
+    } else {
+      const resultsMerger = new ClientBulkWriteResultsMerger(this.options);
+      // For each command will will create and exhaust a cursor for the results.
+      let currentBatchOffset = 0;
+      while (commandBuilder.hasNextBatch()) {
+        const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, this.options);
+        const docs = await cursor.toArray();
+        const operations = cursor.operations;
+        resultsMerger.merge(currentBatchOffset, operations, cursor.response, docs);
+        // Set the new batch index so we can back back to the index in the original models.
+        currentBatchOffset += operations.length;
+      }
+      return resultsMerger.result;
     }
-    return resultsMerger.result;
   }
 }
