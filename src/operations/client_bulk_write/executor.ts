@@ -1,3 +1,5 @@
+import { type Document } from 'bson';
+
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
 import {
   MongoClientBulkWriteError,
@@ -22,9 +24,9 @@ import { ClientBulkWriteResultsMerger } from './results_merger';
  * @internal
  */
 export class ClientBulkWriteExecutor {
-  client: MongoClient;
-  options: ClientBulkWriteOptions;
-  operations: AnyClientBulkWriteModel[];
+  private readonly client: MongoClient;
+  private readonly options: ClientBulkWriteOptions;
+  private readonly operations: ReadonlyArray<AnyClientBulkWriteModel<Document>>;
 
   /**
    * Instantiate the executor.
@@ -34,7 +36,7 @@ export class ClientBulkWriteExecutor {
    */
   constructor(
     client: MongoClient,
-    operations: AnyClientBulkWriteModel[],
+    operations: ReadonlyArray<AnyClientBulkWriteModel<Document>>,
     options?: ClientBulkWriteOptions
   ) {
     if (operations.length === 0) {
