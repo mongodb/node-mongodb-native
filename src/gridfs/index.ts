@@ -6,7 +6,7 @@ import { MongoOperationTimeoutError, MongoRuntimeError } from '../error';
 import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { CSOTTimeoutContext, getRemainingTimeMSOrThrow } from '../timeout';
+import { CSOTTimeoutContext } from '../timeout';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -247,8 +247,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
 
     if (timeoutContext) {
       await this.s._filesCollection.drop({ timeoutMS: timeoutContext.remainingTimeMS });
-      const remainingTimeMS = getRemainingTimeMSOrThrow(
-        timeoutContext,
+      const remainingTimeMS = timeoutContext.getRemainingTimeMSOrThrow(
         `Timed out after ${timeoutMS}ms`
       );
       await this.s._chunksCollection.drop({ timeoutMS: remainingTimeMS });

@@ -9,7 +9,7 @@ import {
   MongoError,
   MongoOperationTimeoutError
 } from '../error';
-import { CSOTTimeoutContext, getRemainingTimeMSOrThrow } from '../timeout';
+import { CSOTTimeoutContext } from '../timeout';
 import { type Callback, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
@@ -216,8 +216,7 @@ export class GridFSBucketWriteStream extends Writable {
     }
 
     this.state.aborted = true;
-    const remainingTimeMS = getRemainingTimeMSOrThrow(
-      this.timeoutContext,
+    const remainingTimeMS = this.timeoutContext?.getRemainingTimeMSOrThrow(
       `Upload timed out after ${this.timeoutContext?.timeoutMS}ms`
     );
     await this.chunks.deleteMany({ files_id: this.id, timeoutMS: remainingTimeMS });
@@ -246,8 +245,7 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   const index = { files_id: 1, n: 1 };
 
   let remainingTimeMS;
-  remainingTimeMS = getRemainingTimeMSOrThrow(
-    stream.timeoutContext,
+  remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
     `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
   );
 
@@ -276,8 +274,7 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   });
 
   if (!hasChunksIndex) {
-    remainingTimeMS = getRemainingTimeMSOrThrow(
-      stream.timeoutContext,
+    remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
       `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
     );
     await stream.chunks.createIndex(index, {
@@ -341,8 +338,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
 }
 
 async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
-  let remainingTimeMS = getRemainingTimeMSOrThrow(
-    stream.timeoutContext,
+  let remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
     `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
   );
   const doc = await stream.files.findOne(
@@ -361,8 +357,7 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   const index = { filename: 1, uploadDate: 1 };
 
   let indexes;
-  remainingTimeMS = getRemainingTimeMSOrThrow(
-    stream.timeoutContext,
+  remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
     `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
   );
   const listIndexesOptions = {
@@ -388,8 +383,7 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   });
 
   if (!hasFileIndex) {
-    remainingTimeMS = getRemainingTimeMSOrThrow(
-      stream.timeoutContext,
+    remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
       `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
     );
 

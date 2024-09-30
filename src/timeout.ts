@@ -305,6 +305,18 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this._serverSelectionTimeout?.clear();
     this._connectionCheckoutTimeout?.clear();
   }
+
+  /**
+   * @internal
+   * Throws a MongoOperationTimeoutError if the context has expired.
+   * If the context has not expired, returns the `remainingTimeMS`
+   **/
+  getRemainingTimeMSOrThrow(message?: string): number {
+    const { remainingTimeMS } = this;
+    if (remainingTimeMS <= 0)
+      throw new MongoOperationTimeoutError(message ?? `Expired after ${this.timeoutMS}ms`);
+    return remainingTimeMS;
+  }
 }
 
 /** @internal */
@@ -351,22 +363,4 @@ export class LegacyTimeoutContext extends TimeoutContext {
   clear(): void {
     return;
   }
-}
-
-/**
- * @internal
- * When `timeoutContext` is defined, throws a MongoOperationTimeoutError if the context has expired.
- * If the context has not expired, returns the `remainingTimeMS`
- * If the `timeoutContext` is not defined, returns undefined
- **/
-export function getRemainingTimeMSOrThrow(
-  timeoutContext?: CSOTTimeoutContext,
-  message?: string
-): number | undefined {
-  if (!timeoutContext) return undefined;
-
-  const { remainingTimeMS } = timeoutContext;
-  if (remainingTimeMS != null && remainingTimeMS <= 0)
-    throw new MongoOperationTimeoutError(message ?? `Expired after ${timeoutContext.timeoutMS}ms`);
-  return remainingTimeMS;
 }

@@ -13,7 +13,7 @@ import {
 import type { FindOptions } from '../operations/find';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { CSOTTimeoutContext, getRemainingTimeMSOrThrow } from '../timeout';
+import { CSOTTimeoutContext } from '../timeout';
 import type { Callback } from '../utils';
 import type { GridFSChunk } from './upload';
 
@@ -204,7 +204,7 @@ export class GridFSBucketReadStream extends Readable {
   async abort(): Promise<void> {
     this.push(null);
     this.destroy();
-    const remainingTimeMS = getRemainingTimeMSOrThrow(this.s.timeoutContext);
+    const remainingTimeMS = this.s.timeoutContext?.getRemainingTimeMSOrThrow();
     await this.s.cursor?.close({ timeoutMS: remainingTimeMS });
   }
 }
@@ -362,8 +362,7 @@ function init(stream: GridFSBucketReadStream): void {
       }
     }
 
-    const remainingTimeMS = getRemainingTimeMSOrThrow(
-      stream.s.timeoutContext,
+    const remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(
       `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
     );
 
@@ -391,8 +390,7 @@ function init(stream: GridFSBucketReadStream): void {
     return;
   };
 
-  const remainingTimeMS = getRemainingTimeMSOrThrow(
-    stream.s.timeoutContext,
+  const remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(
     `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
   );
   findOneOptions.timeoutMS = remainingTimeMS;
