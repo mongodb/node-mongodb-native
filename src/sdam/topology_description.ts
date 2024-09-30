@@ -43,9 +43,6 @@ export class TopologyDescription {
   heartbeatFrequencyMS: number;
   localThresholdMS: number;
   commonWireVersion: number;
-  maxMessageSizeBytes?: number;
-  maxWriteBatchSize?: number;
-
   /**
    * Create a TopologyDescription
    */
@@ -73,25 +70,6 @@ export class TopologyDescription {
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
-      // Find the lowest maxMessageSizeBytes from all the servers.
-      if (this.maxMessageSizeBytes == null) {
-        this.maxMessageSizeBytes = serverDescription.maxMessageSizeBytes;
-      } else {
-        this.maxMessageSizeBytes = Math.min(
-          this.maxMessageSizeBytes,
-          serverDescription.maxMessageSizeBytes
-        );
-      }
-
-      // Find the lowest maxWriteBatchSize from all the servers.
-      if (this.maxWriteBatchSize == null) {
-        this.maxWriteBatchSize = serverDescription.maxWriteBatchSize;
-      } else {
-        this.maxWriteBatchSize = Math.min(
-          this.maxWriteBatchSize,
-          serverDescription.maxWriteBatchSize
-        );
-      }
       // Load balancer mode is always compatible.
       if (
         serverDescription.type === ServerType.Unknown ||

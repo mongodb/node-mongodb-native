@@ -1,8 +1,10 @@
-import type { Document } from '../bson';
+import { type Document } from 'bson';
+
 import { type ClientBulkWriteCursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoClientBulkWriteCursorError } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ClientBulkWriteOperation } from '../operations/client_bulk_write/client_bulk_write';
+import { type ClientBulkWriteCommandBuilder } from '../operations/client_bulk_write/command_builder';
 import { type ClientBulkWriteOptions } from '../operations/client_bulk_write/common';
 import { executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
@@ -24,17 +26,21 @@ export interface ClientBulkWriteCursorOptions
  * @internal
  */
 export class ClientBulkWriteCursor extends AbstractCursor {
-  public readonly command: Document;
+  commandBuilder: ClientBulkWriteCommandBuilder;
   /** @internal */
   private cursorResponse?: ClientBulkWriteCursorResponse;
   /** @internal */
   private clientBulkWriteOptions: ClientBulkWriteOptions;
 
   /** @internal */
-  constructor(client: MongoClient, command: Document, options: ClientBulkWriteOptions = {}) {
+  constructor(
+    client: MongoClient,
+    commandBuilder: ClientBulkWriteCommandBuilder,
+    options: ClientBulkWriteOptions = {}
+  ) {
     super(client, new MongoDBNamespace('admin', '$cmd'), options);
 
-    this.command = command;
+    this.commandBuilder = commandBuilder;
     this.clientBulkWriteOptions = options;
   }
 
@@ -49,17 +55,24 @@ export class ClientBulkWriteCursor extends AbstractCursor {
     );
   }
 
+  /**
+   * Get the last set of operations the cursor executed.
+   */
+  get operations(): Document[] {
+    return this.commandBuilder.lastOperations;
+  }
+
   clone(): ClientBulkWriteCursor {
     const clonedOptions = mergeOptions({}, this.clientBulkWriteOptions);
     delete clonedOptions.session;
-    return new ClientBulkWriteCursor(this.client, this.command, {
+    return new ClientBulkWriteCursor(this.client, this.commandBuilder, {
       ...clonedOptions
     });
   }
 
   /** @internal */
   async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
-    const clientBulkWriteOperation = new ClientBulkWriteOperation(this.command, {
+    const clientBulkWriteOperation = new ClientBulkWriteOperation(this.commandBuilder, {
       ...this.clientBulkWriteOptions,
       ...this.cursorOptions,
       session

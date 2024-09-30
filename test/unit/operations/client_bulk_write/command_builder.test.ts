@@ -20,7 +20,7 @@ import {
 } from '../../../mongodb';
 
 describe('ClientBulkWriteCommandBuilder', function () {
-  describe('#buildCommand', function () {
+  describe('#buildBatch', function () {
     context('when custom options are provided', function () {
       const id = new ObjectId();
       const model: ClientInsertOneModel = {
@@ -34,39 +34,39 @@ describe('ClientBulkWriteCommandBuilder', function () {
         ordered: false,
         comment: { bulk: 'write' }
       });
-      const commands = builder.buildCommands(48000000, 100000);
+      const command = builder.buildBatch(48000000, 100000);
 
       it('sets the bulkWrite command', function () {
-        expect(commands[0].bulkWrite).to.equal(1);
+        expect(command.bulkWrite).to.equal(1);
       });
 
       it('sets the errorsOnly field to the inverse of verboseResults', function () {
-        expect(commands[0].errorsOnly).to.be.false;
+        expect(command.errorsOnly).to.be.false;
       });
 
       it('sets the ordered field', function () {
-        expect(commands[0].ordered).to.be.false;
+        expect(command.ordered).to.be.false;
       });
 
       it('sets the bypassDocumentValidation field', function () {
-        expect(commands[0].bypassDocumentValidation).to.be.true;
+        expect(command.bypassDocumentValidation).to.be.true;
       });
 
       it('sets the ops document sequence', function () {
-        expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-        expect(commands[0].ops.documents[0]).to.deep.equal({
+        expect(command.ops).to.be.instanceOf(DocumentSequence);
+        expect(command.ops.documents[0]).to.deep.equal({
           insert: 0,
           document: { _id: id, name: 1 }
         });
       });
 
       it('sets the nsInfo document sequence', function () {
-        expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-        expect(commands[0].nsInfo.documents[0]).to.deep.equal({ ns: 'test.coll' });
+        expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+        expect(command.nsInfo.documents[0]).to.deep.equal({ ns: 'test.coll' });
       });
 
       it('passes comment options into the commands', function () {
-        expect(commands[0].comment).to.deep.equal({ bulk: 'write' });
+        expect(command.comment).to.deep.equal({ bulk: 'write' });
       });
     });
 
@@ -79,31 +79,31 @@ describe('ClientBulkWriteCommandBuilder', function () {
           document: { _id: id, name: 1 }
         };
         const builder = new ClientBulkWriteCommandBuilder([model], {});
-        const commands = builder.buildCommands(48000000, 100000);
+        const command = builder.buildBatch(48000000, 100000);
 
         it('sets the bulkWrite command', function () {
-          expect(commands[0].bulkWrite).to.equal(1);
+          expect(command.bulkWrite).to.equal(1);
         });
 
         it('sets the default errorsOnly field', function () {
-          expect(commands[0].errorsOnly).to.be.true;
+          expect(command.errorsOnly).to.be.true;
         });
 
         it('sets the default ordered field', function () {
-          expect(commands[0].ordered).to.be.true;
+          expect(command.ordered).to.be.true;
         });
 
         it('sets the ops document sequence', function () {
-          expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-          expect(commands[0].ops.documents[0]).to.deep.equal({
+          expect(command.ops).to.be.instanceOf(DocumentSequence);
+          expect(command.ops.documents[0]).to.deep.equal({
             insert: 0,
             document: { _id: id, name: 1 }
           });
         });
 
         it('sets the nsInfo document sequence', function () {
-          expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-          expect(commands[0].nsInfo.documents[0]).to.deep.equal({ ns: 'test.coll' });
+          expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+          expect(command.nsInfo.documents[0]).to.deep.equal({ ns: 'test.coll' });
         });
       });
 
@@ -122,14 +122,14 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const commands = builder.buildCommands(48000000, 1);
+          const commandOne = builder.buildBatch(48000000, 1);
+          const commandTwo = builder.buildBatch(48000000, 1);
 
           it('splits the operations into multiple commands', function () {
-            expect(commands.length).to.equal(2);
-            expect(commands[0].ops.documents).to.deep.equal([
+            expect(commandOne.ops.documents).to.deep.equal([
               { insert: 0, document: { _id: idOne, name: 1 } }
             ]);
-            expect(commands[1].ops.documents).to.deep.equal([
+            expect(commandTwo.ops.documents).to.deep.equal([
               { insert: 0, document: { _id: idTwo, name: 2 } }
             ]);
           });
@@ -149,14 +149,14 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const commands = builder.buildCommands(1090, 100000);
+          const commandOne = builder.buildBatch(1090, 100000);
+          const commandTwo = builder.buildBatch(1090, 100000);
 
           it('splits the operations into multiple commands', function () {
-            expect(commands.length).to.equal(2);
-            expect(commands[0].ops.documents).to.deep.equal([
+            expect(commandOne.ops.documents).to.deep.equal([
               { insert: 0, document: { _id: idOne, name: 1 } }
             ]);
-            expect(commands[1].ops.documents).to.deep.equal([
+            expect(commandTwo.ops.documents).to.deep.equal([
               { insert: 0, document: { _id: idTwo, name: 2 } }
             ]);
           });
@@ -176,23 +176,23 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const commands = builder.buildCommands(48000000, 100000);
+          const command = builder.buildBatch(48000000, 100000);
 
           it('sets the bulkWrite command', function () {
-            expect(commands[0].bulkWrite).to.equal(1);
+            expect(command.bulkWrite).to.equal(1);
           });
 
           it('sets the ops document sequence', function () {
-            expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].ops.documents).to.deep.equal([
+            expect(command.ops).to.be.instanceOf(DocumentSequence);
+            expect(command.ops.documents).to.deep.equal([
               { insert: 0, document: { _id: idOne, name: 1 } },
               { insert: 0, document: { _id: idTwo, name: 2 } }
             ]);
           });
 
           it('sets the nsInfo document sequence', function () {
-            expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].nsInfo.documents).to.deep.equal([{ ns: 'test.coll' }]);
+            expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+            expect(command.nsInfo.documents).to.deep.equal([{ ns: 'test.coll' }]);
           });
         });
 
@@ -210,23 +210,23 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const commands = builder.buildCommands(48000000, 100000);
+          const command = builder.buildBatch(48000000, 100000);
 
           it('sets the bulkWrite command', function () {
-            expect(commands[0].bulkWrite).to.equal(1);
+            expect(command.bulkWrite).to.equal(1);
           });
 
           it('sets the ops document sequence', function () {
-            expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].ops.documents).to.deep.equal([
+            expect(command.ops).to.be.instanceOf(DocumentSequence);
+            expect(command.ops.documents).to.deep.equal([
               { insert: 0, document: { _id: idOne, name: 1 } },
               { insert: 1, document: { _id: idTwo, name: 2 } }
             ]);
           });
 
           it('sets the nsInfo document sequence', function () {
-            expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].nsInfo.documents).to.deep.equal([
+            expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+            expect(command.nsInfo.documents).to.deep.equal([
               { ns: 'test.coll' },
               { ns: 'test.coll2' }
             ]);
@@ -253,15 +253,15 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idThree, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo, modelThree], {});
-          const commands = builder.buildCommands(48000000, 100000);
+          const command = builder.buildBatch(48000000, 100000);
 
           it('sets the bulkWrite command', function () {
-            expect(commands[0].bulkWrite).to.equal(1);
+            expect(command.bulkWrite).to.equal(1);
           });
 
           it('sets the ops document sequence', function () {
-            expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].ops.documents).to.deep.equal([
+            expect(command.ops).to.be.instanceOf(DocumentSequence);
+            expect(command.ops.documents).to.deep.equal([
               { insert: 0, document: { _id: idOne, name: 1 } },
               { insert: 1, document: { _id: idTwo, name: 2 } },
               { insert: 0, document: { _id: idThree, name: 2 } }
@@ -269,8 +269,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
           });
 
           it('sets the nsInfo document sequence', function () {
-            expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].nsInfo.documents).to.deep.equal([
+            expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+            expect(command.nsInfo.documents).to.deep.equal([
               { ns: 'test.coll' },
               { ns: 'test.coll2' }
             ]);
