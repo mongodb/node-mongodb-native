@@ -661,7 +661,7 @@ describe('CSOT driver tests', metadata, () => {
           expect(getMores).to.have.lengthOf(0);
         });
 
-        it('refreshes the timeout for subsequent getMores', async function () {
+        it('refreshes the timeout for subsequent getMores', metadata, async function () {
           cursor = client
             .db('db')
             .collection('coll')
