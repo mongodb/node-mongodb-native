@@ -111,8 +111,7 @@ export class ClientBulkWriteCommandBuilder {
           this.currentModelIndex++;
         } else {
           // The operation cannot fit in the current command and will need to
-          // go in the next batch. Exit the loop and set the last ops.
-          this.lastOperations = command.ops.documents;
+          // go in the next batch. Exit the loop.
           break;
         }
       } else {
@@ -143,12 +142,13 @@ export class ClientBulkWriteCommandBuilder {
           this.currentModelIndex++;
         } else {
           // The operation cannot fit in the current command and will need to
-          // go in the next batch. Exit the loop and set the last ops.
-          this.lastOperations = command.ops.documents;
+          // go in the next batch. Exit the loop.
           break;
         }
       }
     }
+    // Set the last operations and return the command.
+    this.lastOperations = command.ops.documents;
     return command;
   }
 
