@@ -1,4 +1,5 @@
 'use strict';
+const semver = require('semver');
 const { assert: test, ignoreNsNotFound, setupDatabase } = require('../shared');
 const { format: f } = require('util');
 const { expect } = require('chai');
@@ -1680,6 +1681,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
+        if (semver.satisfies(process.versions.node, '22.7.0')) {
+          this.skipReason = 'Node.js 22.7.0 has a UTF-8 encoding bug';
+          this.skip();
+        }
+
         var regexp = /foobaré/;
 
         var configuration = this.configuration;
