@@ -18,9 +18,9 @@ import { ClientBulkWriteResultsMerger } from './results_merger';
  * @internal
  */
 export class ClientBulkWriteExecutor {
-  client: MongoClient;
-  options: ClientBulkWriteOptions;
-  operations: AnyClientBulkWriteModel[];
+  private readonly client: MongoClient;
+  private readonly options: ClientBulkWriteOptions;
+  private readonly operations: ReadonlyArray<AnyClientBulkWriteModel<Document>>;
 
   /**
    * Instantiate the executor.
@@ -30,7 +30,7 @@ export class ClientBulkWriteExecutor {
    */
   constructor(
     client: MongoClient,
-    operations: AnyClientBulkWriteModel[],
+    operations: ReadonlyArray<AnyClientBulkWriteModel<Document>>,
     options?: ClientBulkWriteOptions
   ) {
     this.client = client;

@@ -32,20 +32,20 @@ export interface ClientWriteModel {
 }
 
 /** @public */
-export interface ClientInsertOneModel extends ClientWriteModel {
+export interface ClientInsertOneModel<TSchema> extends ClientWriteModel {
   name: 'insertOne';
   /** The document to insert. */
-  document: OptionalId<Document>;
+  document: OptionalId<TSchema>;
 }
 
 /** @public */
-export interface ClientDeleteOneModel extends ClientWriteModel {
+export interface ClientDeleteOneModel<TSchema> extends ClientWriteModel {
   name: 'deleteOne';
   /**
    * The filter used to determine if a document should be deleted.
    * For a deleteOne operation, the first match is removed.
    */
-  filter: Filter<Document>;
+  filter: Filter<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -53,13 +53,13 @@ export interface ClientDeleteOneModel extends ClientWriteModel {
 }
 
 /** @public */
-export interface ClientDeleteManyModel extends ClientWriteModel {
+export interface ClientDeleteManyModel<TSchema> extends ClientWriteModel {
   name: 'deleteMany';
   /**
    * The filter used to determine if a document should be deleted.
    * For a deleteMany operation, all matches are removed.
    */
-  filter: Filter<Document>;
+  filter: Filter<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -67,15 +67,15 @@ export interface ClientDeleteManyModel extends ClientWriteModel {
 }
 
 /** @public */
-export interface ClientReplaceOneModel extends ClientWriteModel {
+export interface ClientReplaceOneModel<TSchema> extends ClientWriteModel {
   name: 'replaceOne';
   /**
    * The filter used to determine if a document should be replaced.
    * For a replaceOne operation, the first match is replaced.
    */
-  filter: Filter<Document>;
+  filter: Filter<TSchema>;
   /** The document with which to replace the matched document. */
-  replacement: WithoutId<Document>;
+  replacement: WithoutId<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
@@ -85,19 +85,19 @@ export interface ClientReplaceOneModel extends ClientWriteModel {
 }
 
 /** @public */
-export interface ClientUpdateOneModel extends ClientWriteModel {
+export interface ClientUpdateOneModel<TSchema> extends ClientWriteModel {
   name: 'updateOne';
   /**
    * The filter used to determine if a document should be updated.
    * For an updateOne operation, the first match is updated.
    */
-  filter: Filter<Document>;
+  filter: Filter<TSchema>;
   /**
    * The modifications to apply. The value can be either:
    * UpdateFilter<Document> - A document that contains update operator expressions,
    * Document[] - an aggregation pipeline.
    */
-  update: UpdateFilter<Document> | Document[];
+  update: UpdateFilter<TSchema> | Document[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -109,19 +109,19 @@ export interface ClientUpdateOneModel extends ClientWriteModel {
 }
 
 /** @public */
-export interface ClientUpdateManyModel extends ClientWriteModel {
+export interface ClientUpdateManyModel<TSchema> extends ClientWriteModel {
   name: 'updateMany';
   /**
    * The filter used to determine if a document should be updated.
    * For an updateMany operation, all matches are updated.
    */
-  filter: Filter<Document>;
+  filter: Filter<TSchema>;
   /**
    * The modifications to apply. The value can be either:
    * UpdateFilter<Document> - A document that contains update operator expressions,
    * Document[] - an aggregation pipeline.
    */
-  update: UpdateFilter<Document> | Document[];
+  update: UpdateFilter<TSchema> | Document[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -137,13 +137,42 @@ export interface ClientUpdateManyModel extends ClientWriteModel {
  * to MongoClient#bulkWrite.
  * @public
  */
-export type AnyClientBulkWriteModel =
-  | ClientInsertOneModel
-  | ClientReplaceOneModel
-  | ClientUpdateOneModel
-  | ClientUpdateManyModel
-  | ClientDeleteOneModel
-  | ClientDeleteManyModel;
+export type AnyClientBulkWriteModel<TSchema extends Document> =
+  | ClientInsertOneModel<TSchema>
+  | ClientReplaceOneModel<TSchema>
+  | ClientUpdateOneModel<TSchema>
+  | ClientUpdateManyModel<TSchema>
+  | ClientDeleteOneModel<TSchema>
+  | ClientDeleteManyModel<TSchema>;
+
+/**
+ * Take a Typescript type that maps namespaces to schema types.
+ * @public
+ *
+ * @example
+ * ```ts
+ * type MongoDBSchemas = {
+ *   'db.books': Book;
+ *   'db.authors': Author;
+ * }
+ *
+ * const model: ClientBulkWriteModel<MongoDBSchemas> = {
+ *   namespace: 'db.books'
+ *   name: 'insertOne',
+ *   document: { title: 'Practical MongoDB Aggregations', authorName: 3 } // error `authorName` cannot be number
+ * };
+ * ```
+ *
+ * The type of the `namespace` field narrows other parts of the BulkWriteModel to use the correct schema for type assertions.
+ *
+ */
+export type ClientBulkWriteModel<
+  SchemaMap extends Record<string, Document> = Record<string, Document>
+> = {
+  [Namespace in keyof SchemaMap]: AnyClientBulkWriteModel<SchemaMap[Namespace]> & {
+    namespace: Namespace;
+  };
+}[keyof SchemaMap];
 
 /** @public */
 export interface ClientBulkWriteResult {

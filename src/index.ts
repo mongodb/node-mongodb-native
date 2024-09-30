@@ -476,6 +476,7 @@ export type {
 } from './operations/aggregate';
 export type {
   AnyClientBulkWriteModel,
+  ClientBulkWriteModel,
   ClientBulkWriteOptions,
   ClientBulkWriteResult,
   ClientDeleteManyModel,
