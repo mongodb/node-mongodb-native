@@ -834,17 +834,24 @@ operations.set('updateOne', async ({ entities, operation }) => {
 });
 
 operations.set('rename', async ({ entities, operation }) => {
-  let entity: GridFSBucket | Collection | undefined = entities.getEntity(
-    'collection',
-    operation.object,
-    { assertExists: false }
-  );
+  let entity: GridFSBucket | Collection | undefined;
+  try {
+    entity = entities.getEntity('collection', operation.object, false);
+  } catch {
+    // Ignore wrong type error
+  }
+
   if (entity instanceof Collection) {
     const { to, ...options } = operation.arguments!;
     return entity.rename(to, options);
   }
 
-  entity = entities.getEntity('bucket', operation.object, { assertExists: false });
+  try {
+    entity = entities.getEntity('bucket', operation.object, false);
+  } catch {
+    // Ignore wrong type error
+  }
+
   if (entity instanceof GridFSBucket) {
     const { id, newFilename, ...opts } = operation.arguments!;
     return entity.rename(id, newFilename, opts as any);
