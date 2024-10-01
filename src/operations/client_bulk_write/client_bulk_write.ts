@@ -59,6 +59,11 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       // At this point we have a server and the auto connect code has already
       // run in executeOperation, so the server description will be populated.
       // We can use that to build the command.
+      if (!server.description.maxWriteBatchSize || !server.description.maxMessageSizeBytes) {
+        throw new MongoClientBulkWriteExecutionError(
+          'In order to execute a client bulk write, both maxWriteBatchSize and maxMessageSizeBytes must be provided by the servers hello response.'
+        );
+      }
       command = this.commandBuilder.buildBatch(
         server.description.maxMessageSizeBytes,
         server.description.maxWriteBatchSize
