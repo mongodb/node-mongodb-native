@@ -362,9 +362,14 @@ function init(stream: GridFSBucketReadStream): void {
       }
     }
 
-    const remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(
-      `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
-    );
+    let remainingTimeMS: number | undefined;
+    try {
+      remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(
+        `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
+      );
+    } catch (error) {
+      return stream.destroy(error);
+    }
 
     stream.s.cursor = stream.s.chunks
       .find(filter, {
@@ -390,9 +395,17 @@ function init(stream: GridFSBucketReadStream): void {
     return;
   };
 
-  const remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(
-    `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
-  );
+  let remainingTimeMS: number | undefined;
+  try {
+    remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(
+      `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
+    );
+  } catch (error) {
+    if (!stream.destroyed)
+      stream.destroy(error);
+    return;
+  }
+
   findOneOptions.timeoutMS = remainingTimeMS;
 
   stream.s.files.findOne(stream.s.filter, findOneOptions).then(handleReadResult, error => {

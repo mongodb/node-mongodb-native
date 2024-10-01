@@ -171,7 +171,7 @@ export class GridFSBucketWriteStream extends Writable {
         }
       );
     } else {
-      callback();
+      return process.nextTick(callback);
     }
   }
 
