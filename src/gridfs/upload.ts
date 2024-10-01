@@ -345,8 +345,7 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
     {},
     {
       projection: { _id: 1 },
-      timeoutMS: remainingTimeMS,
-      timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined
+      timeoutMS: remainingTimeMS
     }
   );
   if (doc != null) {

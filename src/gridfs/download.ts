@@ -401,8 +401,7 @@ function init(stream: GridFSBucketReadStream): void {
       `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
     );
   } catch (error) {
-    if (!stream.destroyed)
-      stream.destroy(error);
+    if (!stream.destroyed) stream.destroy(error);
     return;
   }
 

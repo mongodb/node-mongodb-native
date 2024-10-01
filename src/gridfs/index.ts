@@ -7,6 +7,7 @@ import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
 import { CSOTTimeoutContext } from '../timeout';
+import { resolveOptions } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -155,7 +156,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param id - The id of the file doc
    */
   async delete(id: ObjectId, options?: { timeoutMS: number }): Promise<void> {
-    const timeoutMS = options?.timeoutMS ?? this.s.db.timeoutMS;
+    const { timeoutMS } = resolveOptions(this.s.db, options);
     let timeoutContext: CSOTTimeoutContext | undefined = undefined;
 
     if (timeoutMS) {
@@ -235,7 +236,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
 
   /** Removes this bucket's files collection, followed by its chunks collection. */
   async drop(options?: { timeoutMS: number }): Promise<void> {
-    const timeoutMS = options?.timeoutMS ?? this.s.db.timeoutMS;
+    const { timeoutMS } = resolveOptions(this.s.db, options);
     let timeoutContext: CSOTTimeoutContext | undefined = undefined;
 
     if (timeoutMS) {
