@@ -82,12 +82,10 @@ describe('StateMachine', function () {
     const options = { promoteLongs: false, promoteValues: false };
     const serializedCommand = serialize(command);
     const stateMachine = new StateMachine({} as any);
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const callback = () => {};
 
     context('when executing the command', function () {
       it('does not promote values', function () {
-        stateMachine.markCommand(clientStub, 'test.coll', serializedCommand, callback);
+        stateMachine.markCommand(clientStub, 'test.coll', serializedCommand);
         expect(runCommandStub.calledWith(command, options)).to.be.true;
       });
     });

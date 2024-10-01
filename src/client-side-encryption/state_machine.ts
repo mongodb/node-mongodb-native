@@ -175,6 +175,7 @@ export type StateMachineOptions = {
  * An internal class that executes across a MongoCryptContext until either
  * a finishing state or an error is reached. Do not instantiate directly.
  */
+// TODO(DRIVERS-2671): clarify CSOT behavior for FLE APIs
 export class StateMachine {
   constructor(
     private options: StateMachineOptions,
@@ -552,7 +553,9 @@ export class StateMachine {
 
     const response = await client.db(db).command(rawCommand, {
       ...bsonOptions,
-      timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
+      ...(timeoutContext?.csotEnabled()
+        ? { timeoutMS: timeoutContext?.remainingTimeMS }
+        : undefined)
     });
 
     return serialize(response, this.bsonOptions);
@@ -578,7 +581,7 @@ export class StateMachine {
     return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
-      .find(deserialize(filter, { allowObjectSmallerThanBufferSize: true }), {
+      .find(deserialize(filter), {
         timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
       })
       .toArray();
