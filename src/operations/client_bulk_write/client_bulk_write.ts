@@ -1,4 +1,4 @@
-import { ServerType } from '../../beta';
+import { MongoClientBulkWriteExecutionError, ServerType } from '../../beta';
 import { ClientBulkWriteCursorResponse } from '../../cmap/wire_protocol/responses';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
@@ -40,15 +40,21 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
     let command;
 
     if (server.description.type === ServerType.LoadBalancer) {
-      // Checkout a connection to build the command.
-      const connection = await server.pool.checkOut();
-      command = this.commandBuilder.buildBatch(
-        connection.hello?.maxMessageSizeBytes,
-        connection.hello?.maxWriteBatchSize
-      );
-      // Pin the connection to the session so it get used to execute the command and we do not
-      // perform a double check-in/check-out.
-      session?.pin(connection);
+      if (session) {
+        // Checkout a connection to build the command.
+        const connection = await server.pool.checkOut();
+        // Pin the connection to the session so it get used to execute the command and we do not
+        // perform a double check-in/check-out.
+        session.pin(connection);
+        command = this.commandBuilder.buildBatch(
+          connection.hello?.maxMessageSizeBytes,
+          connection.hello?.maxWriteBatchSize
+        );
+      } else {
+        throw new MongoClientBulkWriteExecutionError(
+          'Session provided to the client bulk write operation must be present.'
+        );
+      }
     } else {
       // At this point we have a server and the auto connect code has already
       // run in executeOperation, so the server description will be populated.
