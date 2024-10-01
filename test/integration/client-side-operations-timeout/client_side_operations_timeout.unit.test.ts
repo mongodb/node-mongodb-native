@@ -12,6 +12,7 @@ import { TLSSocket } from 'tls';
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import {
   ConnectionPool,
+  CSOTTimeoutContext,
   type MongoClient,
   MongoOperationTimeoutError,
   Timeout,
@@ -104,8 +105,8 @@ describe('CSOT spec unit tests', function () {
   }).skipReason =
     'TODO(NODE-5682): Add CSOT support for socket read/write at the connection layer for CRUD APIs';
 
-  context('Client side encryption', function () {
-    it('The remaining timeoutMS value should apply to HTTP requests against KMS servers for CSFLE.', async function () {
+  describe('Client side encryption', function () {
+    describe('KMS requests', function () {
       const stateMachine = new StateMachine({} as any);
       const request = {
         addResponse: _response => {},
@@ -120,14 +121,52 @@ describe('CSOT spec unit tests', function () {
         message: Buffer.from('foobar')
       };
 
-      const timeoutMS = 100;
-      sinon.stub(TLSSocket.prototype, 'connect').callsFake(async function (..._args) {
-        await sleep(200);
-        return {} as TLSSocket;
+      context('when StateMachine.kmsRequest() is passed a `CSOTimeoutContext`', function () {
+        beforeEach(async function () {
+          sinon.stub(TLSSocket.prototype, 'connect').callsFake(async function (..._args) {
+            await sleep(200);
+            return {} as TLSSocket;
+          });
+        });
+
+        afterEach(async function () {
+          sinon.restore();
+        });
+
+        it('the kms request times out through remainingTimeMS', async function () {
+          const timeoutContext = new CSOTTimeoutContext({
+            timeoutMS: 500,
+            serverSelectionTimeoutMS: 30000
+          });
+          sleep(300);
+          const err = await stateMachine.kmsRequest(request, timeoutContext).catch(e => e);
+          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(err.errmsg).to.equal('KMS request timed out');
+        });
       });
-      const err = await stateMachine.kmsRequest(request, timeoutMS).catch(e => e);
-      expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-      expect(err.errmsg).to.equal('KMS request timed out');
+
+      context('when StateMachine.kmsRequest() is not passed a `CSOTimeoutContext`', function () {
+        beforeEach(async function () {
+          sinon.stub(TLSSocket.prototype, 'connect').callsFake(async function (..._args) {
+            return {} as TLSSocket;
+          });
+        });
+
+        afterEach(async function () {
+          sinon.restore();
+        });
+
+        it('the kms request does not timeout within 30 seconds', async function () {
+          const sleepingFn = async () => {
+            await sleep(55000);
+            throw Error('Slept for 30s');
+          };
+          const err = await Promise.all([stateMachine.kmsRequest(request), sleepingFn()]).catch(
+            e => e
+          );
+          expect(err.message).to.equal('Slept for 30s');
+        });
+      });
     });
 
     // TODO(NODE-6390): Add timeoutMS support to Auto Encryption

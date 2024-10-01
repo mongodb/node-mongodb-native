@@ -12,9 +12,17 @@ import * as tls from 'tls';
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { Db } from '../../../src/db';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { MongoClient } from '../../../src/mongo_client';
-import { Int32, Long, serialize } from '../../mongodb';
+import {
+  BSON,
+  Collection,
+  CSOTTimeoutContext,
+  Int32,
+  Long,
+  MongoClient,
+  serialize,
+  squashError
+} from '../../mongodb';
+import { sleep } from '../../tools/utils';
 
 describe('StateMachine', function () {
   class MockRequest implements MongoCryptKMSRequest {
@@ -459,6 +467,131 @@ describe('StateMachine', function () {
         return;
       }
       expect.fail('missed exception');
+    });
+  });
+
+  describe('CSOT', function () {
+    describe('#fetchKeys', function () {
+      const stateMachine = new StateMachine({} as any);
+      const client = new MongoClient('mongodb://localhost:27017');
+      let findSpy;
+
+      beforeEach(async function () {
+        findSpy = sinon.spy(Collection.prototype, 'find');
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+        await client.close();
+      });
+
+      context('when StateMachine.fetchKeys() is passed a `CSOTimeoutContext`', function () {
+        it('collection.find runs with its timeoutMS property set to remainingTimeMS', async function () {
+          const timeoutContext = new CSOTTimeoutContext({
+            timeoutMS: 500,
+            serverSelectionTimeoutMS: 30000
+          });
+          await sleep(300);
+          await stateMachine
+            .fetchKeys(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
+            .catch(e => squashError(e));
+          expect(findSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
+          expect(findSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(200);
+        });
+      });
+
+      context('when StateMachine.fetchKeys() is not passed a `CSOTimeoutContext`', function () {
+        it('collection.find runs with an undefined timeoutMS property', async function () {
+          await stateMachine
+            .fetchKeys(client, 'keyVault', BSON.serialize({ a: 1 }))
+            .catch(e => squashError(e));
+          expect(findSpy.getCalls()[0].args[1].timeoutMS).to.be.undefined;
+        });
+      });
+    });
+
+    describe('#markCommand', function () {
+      const stateMachine = new StateMachine({} as any);
+      const client = new MongoClient('mongodb://localhost:27017');
+      let dbCommandSpy;
+
+      beforeEach(async function () {
+        dbCommandSpy = sinon.spy(Db.prototype, 'command');
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+        await client.close();
+      });
+
+      context('when StateMachine.markCommand() is passed a `CSOTimeoutContext`', function () {
+        it('db.command runs with its timeoutMS property set to remainingTimeMS', async function () {
+          const timeoutContext = new CSOTTimeoutContext({
+            timeoutMS: 500,
+            serverSelectionTimeoutMS: 30000
+          });
+          await sleep(300);
+          await stateMachine
+            .markCommand(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
+            .catch(e => squashError(e));
+          expect(dbCommandSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
+          expect(dbCommandSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(200);
+        });
+      });
+
+      context('when StateMachine.markCommand() is not passed a `CSOTimeoutContext`', function () {
+        it('db.command runs with an undefined timeoutMS property', async function () {
+          await stateMachine
+            .markCommand(client, 'keyVault', BSON.serialize({ a: 1 }))
+            .catch(e => squashError(e));
+          expect(dbCommandSpy.getCalls()[0].args[1].timeoutMS).to.be.undefined;
+        });
+      });
+    });
+
+    describe('#fetchCollectionInfo', function () {
+      const stateMachine = new StateMachine({} as any);
+      const client = new MongoClient('mongodb://localhost:27017');
+      let listCollectionsSpy;
+
+      beforeEach(async function () {
+        listCollectionsSpy = sinon.spy(Db.prototype, 'listCollections');
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+        await client.close();
+      });
+
+      context(
+        'when StateMachine.fetchCollectionInfo() is passed a `CSOTimeoutContext`',
+        function () {
+          it('listCollections runs with its timeoutMS property set to remainingTimeMS', async function () {
+            const timeoutContext = new CSOTTimeoutContext({
+              timeoutMS: 500,
+              serverSelectionTimeoutMS: 30000
+            });
+            await sleep(300);
+            await stateMachine
+              .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
+              .catch(e => squashError(e));
+            expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
+            expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(200);
+          });
+        }
+      );
+
+      context(
+        'when StateMachine.fetchCollectionInfo() is not passed a `CSOTimeoutContext`',
+        function () {
+          it('listCollections runs with an undefined timeoutMS property', async function () {
+            await stateMachine
+              .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }))
+              .catch(e => squashError(e));
+            expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.be.undefined;
+          });
+        }
+      );
     });
   });
 });
