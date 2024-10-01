@@ -69,6 +69,13 @@ export class ServerDescription {
   setVersion: number | null;
   electionId: ObjectId | null;
   logicalSessionTimeoutMinutes: number | null;
+  /** The max message size in bytes for the server. */
+  maxMessageSizeBytes: number | null;
+  /** The max number of writes in a bulk write command. */
+  maxWriteBatchSize: number | null;
+  /** The max bson object size. */
+  maxBsonObjectSize: number | null;
+
   /** Indicates server is a mongocryptd instance. */
   iscryptd: boolean;
 
@@ -113,6 +120,9 @@ export class ServerDescription {
     this.setVersion = hello?.setVersion ?? null;
     this.electionId = hello?.electionId ?? null;
     this.logicalSessionTimeoutMinutes = hello?.logicalSessionTimeoutMinutes ?? null;
+    this.maxMessageSizeBytes = hello?.maxMessageSizeBytes ?? null;
+    this.maxWriteBatchSize = hello?.maxWriteBatchSize ?? null;
+    this.maxBsonObjectSize = hello?.maxBsonObjectSize ?? null;
     this.primary = hello?.primary ?? null;
     this.me = hello?.me?.toLowerCase() ?? null;
     this.$clusterTime = hello?.$clusterTime ?? null;

@@ -524,7 +524,8 @@ function isPinnableCommand(cmd: Document, session?: ClientSession): boolean {
       'find' in cmd ||
       'getMore' in cmd ||
       'listCollections' in cmd ||
-      'listIndexes' in cmd
+      'listIndexes' in cmd ||
+      'bulkWrite' in cmd
     );
   }
 

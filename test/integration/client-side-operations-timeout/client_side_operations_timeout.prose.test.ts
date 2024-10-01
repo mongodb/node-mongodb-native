@@ -109,6 +109,7 @@ describe('CSOT spec prose tests', function () {
   );
 
   // TODO(NODE-6391): Add timeoutMS support to Explicit Encryption
+
   context.skip('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
@@ -586,6 +587,49 @@ describe('CSOT spec prose tests', function () {
           e => e
         );
       const end = now();
+
+    it.skip("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async function () {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+      client = new MongoClient('mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20');
+      const start = now();
+
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .ping()
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
+    }).skipReason =
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
+
+    it.skip("serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS", async function () {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+      client = new MongoClient('mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10');
+      const start = now();
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .ping()
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     }).skipReason =
