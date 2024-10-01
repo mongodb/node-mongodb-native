@@ -142,11 +142,12 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-  TSchema = any,
-  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
->
+    TSchema = any,
+    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+  >
   extends TypedEventEmitter<CursorEvents>
-  implements AsyncDisposable {
+  implements AsyncDisposable
+{
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -171,8 +172,6 @@ export abstract class AbstractCursor<
   protected readonly cursorOptions: InternalAbstractCursorOptions;
   /** @internal */
   protected timeoutContext?: TimeoutContext;
-  /** @internal */
-  protected isChangeStreamCursor?: boolean;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -456,7 +455,8 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       return false;
     }
-    const shouldRefresh = !this.isChangeStreamCursor && this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
+    const shouldRefresh =
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
 
     if (shouldRefresh) {
       this.timeoutContext?.refresh();
@@ -482,7 +482,8 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
-    const shouldRefresh = !this.isChangeStreamCursor && this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
+    const shouldRefresh =
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
 
     if (shouldRefresh) {
       this.timeoutContext?.refresh();
@@ -514,7 +515,8 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    const shouldRefresh = this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
+    const shouldRefresh =
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
 
     if (shouldRefresh) {
       this.timeoutContext?.refresh();
@@ -812,7 +814,7 @@ export abstract class AbstractCursor<
    */
   private async cursorInit(): Promise<void> {
     if (this.cursorOptions.timeoutMS != null) {
-      this.timeoutContext = TimeoutContext.create({
+      this.timeoutContext ??= TimeoutContext.create({
         serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
         timeoutMS: this.cursorOptions.timeoutMS
       });

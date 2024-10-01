@@ -11,7 +11,7 @@ import {
   isResumableError,
   MongoAPIError,
   MongoChangeStreamError,
-  MongoOperationTimeoutError,
+  MongoError,
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
@@ -21,8 +21,8 @@ import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerSessionId } from './sessions';
-import { TimeoutContext } from './timeout';
 import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
+import { TimeoutContext } from './timeout';
 
 /** @internal */
 const kCursorStream = Symbol('cursorStream');
@@ -162,7 +162,7 @@ export interface ChangeStreamDocumentKey<TSchema extends Document = Document> {
    * For unsharded collections this contains a single field `_id`.
    * For sharded collections, this will contain all the components of the shard key
    */
-  documentKey: { _id: InferIdType<TSchema>; [shardKey: string]: any };
+  documentKey: { _id: InferIdType<TSchema>;[shardKey: string]: any };
 }
 
 /** @public */
@@ -245,8 +245,8 @@ export interface ChangeStreamDocumentOperationDescription {
  */
 export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentKey<TSchema>,
-    ChangeStreamDocumentCollectionUUID {
+  ChangeStreamDocumentKey<TSchema>,
+  ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'insert';
   /** This key will contain the document being inserted */
@@ -261,8 +261,8 @@ export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
  */
 export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentKey<TSchema>,
-    ChangeStreamDocumentCollectionUUID {
+  ChangeStreamDocumentKey<TSchema>,
+  ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'update';
   /**
@@ -292,7 +292,7 @@ export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
  */
 export interface ChangeStreamReplaceDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentKey<TSchema> {
+  ChangeStreamDocumentKey<TSchema> {
   /** Describes the type of operation represented in this change notification */
   operationType: 'replace';
   /** The fullDocument of a replace event represents the document after the insert of the replacement document */
@@ -315,8 +315,8 @@ export interface ChangeStreamReplaceDocument<TSchema extends Document = Document
  */
 export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentKey<TSchema>,
-    ChangeStreamDocumentCollectionUUID {
+  ChangeStreamDocumentKey<TSchema>,
+  ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'delete';
   /** Namespace the delete event occurred on */
@@ -337,7 +337,7 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
  */
 export interface ChangeStreamDropDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID {
+  ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'drop';
   /** Namespace the drop event occurred on */
@@ -350,7 +350,7 @@ export interface ChangeStreamDropDocument
  */
 export interface ChangeStreamRenameDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID {
+  ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'rename';
   /** The new name for the `ns.coll` collection */
@@ -386,8 +386,8 @@ export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentComm
  */
 export interface ChangeStreamCreateIndexDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID,
-    ChangeStreamDocumentOperationDescription {
+  ChangeStreamDocumentCollectionUUID,
+  ChangeStreamDocumentOperationDescription {
   /** Describes the type of operation represented in this change notification */
   operationType: 'createIndexes';
 }
@@ -399,8 +399,8 @@ export interface ChangeStreamCreateIndexDocument
  */
 export interface ChangeStreamDropIndexDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID,
-    ChangeStreamDocumentOperationDescription {
+  ChangeStreamDocumentCollectionUUID,
+  ChangeStreamDocumentOperationDescription {
   /** Describes the type of operation represented in this change notification */
   operationType: 'dropIndexes';
 }
@@ -412,7 +412,7 @@ export interface ChangeStreamDropIndexDocument
  */
 export interface ChangeStreamCollModDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID {
+  ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'modify';
 }
@@ -423,7 +423,7 @@ export interface ChangeStreamCollModDocument
  */
 export interface ChangeStreamCreateDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID {
+  ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'create';
 }
@@ -434,8 +434,8 @@ export interface ChangeStreamCreateDocument
  */
 export interface ChangeStreamShardCollectionDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID,
-    ChangeStreamDocumentOperationDescription {
+  ChangeStreamDocumentCollectionUUID,
+  ChangeStreamDocumentOperationDescription {
   /** Describes the type of operation represented in this change notification */
   operationType: 'shardCollection';
 }
@@ -446,8 +446,8 @@ export interface ChangeStreamShardCollectionDocument
  */
 export interface ChangeStreamReshardCollectionDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID,
-    ChangeStreamDocumentOperationDescription {
+  ChangeStreamDocumentCollectionUUID,
+  ChangeStreamDocumentOperationDescription {
   /** Describes the type of operation represented in this change notification */
   operationType: 'reshardCollection';
 }
@@ -458,8 +458,8 @@ export interface ChangeStreamReshardCollectionDocument
  */
 export interface ChangeStreamRefineCollectionShardKeyDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID,
-    ChangeStreamDocumentOperationDescription {
+  ChangeStreamDocumentCollectionUUID,
+  ChangeStreamDocumentOperationDescription {
   /** Describes the type of operation represented in this change notification */
   operationType: 'refineCollectionShardKey';
 }
@@ -547,12 +547,11 @@ export type ChangeStreamEvents<
  * @public
  */
 export class ChangeStream<
-    TSchema extends Document = Document,
-    TChange extends Document = ChangeStreamDocument<TSchema>
-  >
+  TSchema extends Document = Document,
+  TChange extends Document = ChangeStreamDocument<TSchema>
+>
   extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /**
    * @beta
    * @experimental
@@ -586,8 +585,6 @@ export class ChangeStream<
   /** @internal */
   [kMode]: false | 'iterator' | 'emitter';
 
-  private timeoutContext?: TimeoutContext;
-
   /** @event */
   static readonly RESPONSE = RESPONSE;
   /** @event */
@@ -613,6 +610,8 @@ export class ChangeStream<
    */
   static readonly RESUME_TOKEN_CHANGED = RESUME_TOKEN_CHANGED;
 
+  private timeoutContext?: TimeoutContext;
+  private needsResume?: boolean;
   /**
    * @internal
    *
@@ -693,9 +692,6 @@ export class ChangeStream<
         try {
           await this._processErrorIteratorMode(error);
         } catch (error) {
-          if (error instanceof MongoOperationTimeoutError) {
-            throw error;
-          }
           try {
             await this.close();
           } catch (error) {
@@ -712,33 +708,26 @@ export class ChangeStream<
     this._setIsIterator();
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
-    // fails or until a timeout error is encountered
-    this.timeoutContext?.refresh();
+    // fails.
+    //await this._resume();
 
-    try {
-      while (true) {
+    while (true) {
+      try {
+        const change = await this.cursor.next();
+        const processedChange = this._processChange(change ?? null);
+        return processedChange;
+      } catch (error) {
         try {
-          const change = await this.cursor.next();
-          const processedChange = this._processChange(change ?? null);
-          return processedChange;
+          await this._processErrorIteratorMode(error);
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error);
+            await this.close();
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError) {
-              throw error; // Don't close the change stream, but throw the timeout error
-            }
-            try {
-              await this.close();
-            } catch (error) {
-              squashError(error);
-            }
-            throw error;
+            squashError(error);
           }
+          throw error;
         }
       }
-    } finally {
-      this.timeoutContext?.clear();
     }
   }
 
@@ -750,6 +739,7 @@ export class ChangeStream<
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
+    // await this._resume();
 
     while (true) {
       try {
@@ -759,9 +749,6 @@ export class ChangeStream<
         try {
           await this._processErrorIteratorMode(error);
         } catch (error) {
-          if (error instanceof MongoOperationTimeoutError) {
-            throw error; // throw the error without closing the change stream
-          }
           try {
             await this.close();
           } catch (error) {
@@ -880,20 +867,11 @@ export class ChangeStream<
       );
     }
 
-    if (this.options.timeoutMS != null) {
-      this.timeoutContext ??= TimeoutContext.create({
-        timeoutMS: this.options.timeoutMS,
-        serverSelectionTimeoutMS: client.options.serverSelectionTimeoutMS
-      });
-      delete this.options.timeoutMS;
-    }
-
     const changeStreamCursor = new ChangeStreamCursor<TSchema, TChange>(
       client,
       this.namespace,
       pipeline,
-      options,
-      this.timeoutContext
+      options
     );
 
     for (const event of CHANGE_STREAM_EVENTS) {
@@ -973,10 +951,6 @@ export class ChangeStream<
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
-    if (changeStreamError instanceof MongoOperationTimeoutError) {
-      return; // FIXME: At least emit the error
-    }
-
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
 
@@ -1006,10 +980,7 @@ export class ChangeStream<
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    if (
-      !isResumableError(changeStreamError, this.cursor.maxWireVersion) &&
-      !(changeStreamError instanceof MongoOperationTimeoutError)
-    ) {
+    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       try {
         await this.close();
       } catch (error) {
@@ -1034,8 +1005,49 @@ export class ChangeStream<
       await this.close();
       throw changeStreamError;
     }
+  }
 
-    if (changeStreamError instanceof MongoOperationTimeoutError) throw changeStreamError;
+  /** @internal */
+  private async _processErrorIteratorModeNew(changeStreamError: AnyError) {
+    if (this[kClosed]) {
+      // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
+      throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
+    }
+
+    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+      try {
+        await this.close();
+      } catch (error) {
+        squashError(error);
+      }
+      throw changeStreamError;
+    }
+
+    try {
+      await this.cursor.close();
+    } catch (error) {
+      squashError(error);
+    } finally {
+      this.needsResume = true;
+    }
+  }
+
+  private async _resume(error?: MongoError) {
+    if (!this.needsResume) return;
+
+    console.log('resuming');
+    this.needsResume = false;
+    const topology = getTopology(this.parent);
+    try {
+      await topology.selectServer(this.cursor.readPreference, {
+        operationName: 'reconnect topology in change stream'
+      });
+      this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
+    } catch {
+      // if the topology can't reconnect, close the stream
+      await this.close();
+      if (error) throw error;
+    }
   }
 }
 

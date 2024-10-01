@@ -60,7 +60,6 @@ export class ChangeStreamCursor<
     super(client, namespace, { ...options, tailable: true, awaitData: true });
     this.timeoutContext = timeoutContext;
 
-    this.isChangeStreamCursor = true;
     this.pipeline = pipeline;
     this.changeStreamCursorOptions = options;
     this._resumeToken = null;
@@ -114,7 +113,6 @@ export class ChangeStreamCursor<
   }
 
   _processBatch(response: CursorResponse): void {
-    console.log(response.toObject());
     const { postBatchResumeToken } = response;
     if (postBatchResumeToken) {
       this.postBatchResumeToken = postBatchResumeToken;
