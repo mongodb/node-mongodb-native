@@ -8,6 +8,7 @@ import {
   MongoCursorExhaustedError,
   MongoCursorInUseError,
   MongoInvalidArgumentError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoTailableCursorError
 } from '../error';
@@ -23,6 +24,7 @@ import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { type MongoDBNamespace, squashError } from '../utils';
+import { ChangeStreamCursor } from './change_stream_cursor';
 
 /**
  * @internal
@@ -142,12 +144,11 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-    TSchema = any,
-    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-  >
+  TSchema = any,
+  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+>
   extends TypedEventEmitter<CursorEvents>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -872,7 +873,8 @@ export abstract class AbstractCursor<
       this.documents = response;
     } catch (error) {
       try {
-        await this.cleanup(undefined, error);
+        if (!(error instanceof MongoOperationTimeoutError))
+          await this.cleanup(undefined, error);
       } catch (cleanupError) {
         // `cleanupCursor` should never throw, squash and throw the original error
         squashError(cleanupError);

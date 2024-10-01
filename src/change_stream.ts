@@ -12,6 +12,7 @@ import {
   MongoAPIError,
   MongoChangeStreamError,
   MongoError,
+  MongoOperationTimeoutError,
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
@@ -710,24 +711,30 @@ export class ChangeStream<
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
     //await this._resume();
+    this.timeoutContext?.refresh();
 
-    while (true) {
-      try {
-        const change = await this.cursor.next();
-        const processedChange = this._processChange(change ?? null);
-        return processedChange;
-      } catch (error) {
+    try {
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
+          const change = await this.cursor.next();
+          const processedChange = this._processChange(change ?? null);
+          return processedChange;
         } catch (error) {
           try {
-            await this.close();
+            await this._processErrorIteratorMode(error);
           } catch (error) {
-            squashError(error);
+            if (error instanceof MongoOperationTimeoutError) throw error;
+            try {
+              await this.close();
+            } catch (error) {
+              squashError(error);
+            }
+            throw error;
           }
-          throw error;
         }
       }
+    } finally {
+      this.timeoutContext?.clear();
     }
   }
 
@@ -740,23 +747,29 @@ export class ChangeStream<
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
     // await this._resume();
+    this.timeoutContext?.refresh();
 
-    while (true) {
-      try {
-        const change = await this.cursor.tryNext();
-        return change ?? null;
-      } catch (error) {
+    try {
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
+          const change = await this.cursor.tryNext();
+          return change ?? null;
         } catch (error) {
           try {
-            await this.close();
+            await this._processErrorIteratorMode(error);
           } catch (error) {
-            squashError(error);
+            if (error instanceof MongoOperationTimeoutError) throw error;
+            try {
+              await this.close();
+            } catch (error) {
+              squashError(error);
+            }
+            throw error;
           }
-          throw error;
         }
       }
+    } finally {
+      this.timeoutContext?.clear();
     }
   }
 
@@ -871,7 +884,7 @@ export class ChangeStream<
       client,
       this.namespace,
       pipeline,
-      options
+      { ...options, timeoutMS: this.options.timeoutMS }
     );
 
     for (const event of CHANGE_STREAM_EVENTS) {
@@ -980,7 +993,7 @@ export class ChangeStream<
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion) && !(changeStreamError instanceof MongoOperationTimeoutError)) {
       try {
         await this.close();
       } catch (error) {
@@ -994,10 +1007,13 @@ export class ChangeStream<
     } catch (error) {
       squashError(error);
     }
+
+    this.timeoutContext?.refresh();
     const topology = getTopology(this.parent);
     try {
       await topology.selectServer(this.cursor.readPreference, {
-        operationName: 'reconnect topology in change stream'
+        operationName: 'reconnect topology in change stream',
+        timeoutContext: this.timeoutContext
       });
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
     } catch {
