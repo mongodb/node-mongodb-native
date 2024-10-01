@@ -42,11 +42,13 @@ export class ClientBulkWriteResultsMerger {
 
   /**
    * Merge the results in the cursor to the existing result.
+   * @param currentBatchOffset - The offset index to the original models.
    * @param response - The cursor response.
    * @param documents - The documents in the cursor.
    * @returns The current result.
    */
   merge(
+    currentBatchOffset: number,
     operations: Document[],
     response: ClientBulkWriteCursorResponse,
     documents: Document[]
@@ -67,7 +69,9 @@ export class ClientBulkWriteResultsMerger {
           const operation = operations[document.idx];
           // Handle insert results.
           if ('insert' in operation) {
-            this.result.insertResults?.set(document.idx, { insertedId: operation.document._id });
+            this.result.insertResults?.set(document.idx + currentBatchOffset, {
+              insertedId: operation.document._id
+            });
           }
           // Handle update results.
           if ('update' in operation) {
@@ -80,11 +84,13 @@ export class ClientBulkWriteResultsMerger {
             if (document.upserted) {
               result.upsertedId = document.upserted._id;
             }
-            this.result.updateResults?.set(document.idx, result);
+            this.result.updateResults?.set(document.idx + currentBatchOffset, result);
           }
           // Handle delete results.
           if ('delete' in operation) {
-            this.result.deleteResults?.set(document.idx, { deletedCount: document.n });
+            this.result.deleteResults?.set(document.idx + currentBatchOffset, {
+              deletedCount: document.n
+            });
           }
         }
       }
