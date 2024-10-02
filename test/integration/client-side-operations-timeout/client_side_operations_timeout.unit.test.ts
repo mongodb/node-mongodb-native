@@ -158,7 +158,7 @@ describe('CSOT spec unit tests', function () {
 
         it('the kms request does not timeout within 30 seconds', async function () {
           const sleepingFn = async () => {
-            await sleep(55000);
+            await sleep(30000);
             throw Error('Slept for 30s');
           };
           const err = await Promise.all([stateMachine.kmsRequest(request), sleepingFn()]).catch(

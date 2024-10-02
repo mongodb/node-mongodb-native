@@ -523,18 +523,13 @@ export class StateMachine {
   ): Promise<Uint8Array | null> {
     const { db } = MongoDBCollectionNamespace.fromString(ns);
 
-    if (timeoutContext?.csotEnabled() && timeoutContext?.remainingTimeMS <= 0) {
-      throw new MongoOperationTimeoutError(
-        'Timed out before call to mongocryptd listCollections operation.'
-      );
-    }
-
     const collections = await client
       .db(db)
       .listCollections(filter, {
         promoteLongs: false,
         promoteValues: false,
-        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
+        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined,
+        timeoutMode: 'cursorLifetime'
       })
       .toArray();
 
@@ -560,11 +555,6 @@ export class StateMachine {
     const bsonOptions = { promoteLongs: false, promoteValues: false };
     const rawCommand = deserialize(command, bsonOptions);
 
-    if (timeoutContext?.csotEnabled() && timeoutContext?.remainingTimeMS <= 0) {
-      throw new MongoOperationTimeoutError(
-        'Timed out before call to mongocryptd markings request.'
-      );
-    }
     const response = await client.db(db).command(rawCommand, {
       ...bsonOptions,
       ...(timeoutContext?.csotEnabled()
@@ -592,14 +582,12 @@ export class StateMachine {
     const { db: dbName, collection: collectionName } =
       MongoDBCollectionNamespace.fromString(keyVaultNamespace);
 
-    if (timeoutContext?.csotEnabled() && timeoutContext?.remainingTimeMS <= 0) {
-      throw new MongoOperationTimeoutError('Timed out before dataKey fetched.');
-    }
     return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
       .find(deserialize(filter), {
-        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
+        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined,
+        timeoutMode: 'cursorLifetime'
       })
       .toArray();
   }
