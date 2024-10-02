@@ -858,6 +858,8 @@ export abstract class AbstractCursor<
 
     // otherwise need to call getMore
     const batchSize = this.cursorOptions.batchSize || 1000;
+    this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
+
     try {
       const response = await this.getMore(batchSize);
       this.cursorId = response.id;
