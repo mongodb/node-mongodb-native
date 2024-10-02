@@ -215,7 +215,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       this.s._filesCollection,
       this.s.options.readPreference,
       { filename },
-      { timeoutMS: this.s.db.timeoutMS, ...options, sort, skip }
+      { timeoutMS: this.s.options.timeoutMS, ...options, sort, skip }
     );
   }
 
