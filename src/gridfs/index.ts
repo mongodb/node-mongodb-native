@@ -84,12 +84,11 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   constructor(db: Db, options?: GridFSBucketOptions) {
     super();
     this.setMaxListeners(0);
-    const privateOptions = {
-      timeoutMS: db.timeoutMS,
+    const privateOptions = resolveOptions(db, {
       ...DEFAULT_GRIDFS_BUCKET_OPTIONS,
       ...options,
       writeConcern: WriteConcern.fromOptions(options)
-    };
+    });
     this.s = {
       db,
       options: privateOptions,
@@ -130,7 +129,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
     return new GridFSBucketWriteStream(this, filename, {
-      timeoutMS: this.s.db.timeoutMS,
+      timeoutMS: this.s.options.timeoutMS,
       ...options,
       id
     });
@@ -146,7 +145,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       this.s._filesCollection,
       this.s.options.readPreference,
       { _id: id },
-      { timeoutMS: this.s.db.timeoutMS, ...options }
+      { timeoutMS: this.s.options.timeoutMS, ...options }
     );
   }
 
