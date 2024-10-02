@@ -75,7 +75,6 @@ export class ServerDescription {
   maxWriteBatchSize: number | null;
   /** The max bson object size. */
   maxBsonObjectSize: number | null;
-
   /** Indicates server is a mongocryptd instance. */
   iscryptd: boolean;
 
