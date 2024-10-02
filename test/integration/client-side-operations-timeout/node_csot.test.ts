@@ -31,7 +31,6 @@ describe('CSOT driver tests', metadata, () => {
   // establishing connections, more closely mirroring long-running application behaviour
   const minPoolSize = 20;
 
-describe('CSOT driver tests', metadata, () => {
   describe('timeoutMS inheritance', () => {
     let client: MongoClient;
     let db: Db;
