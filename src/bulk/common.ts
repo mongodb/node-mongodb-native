@@ -501,7 +501,7 @@ export function mergeBatchResults(
 
 async function executeCommands(
   bulkOperation: BulkOperationBase,
-  options: BulkWriteOptions
+  options: BulkWriteOptions & { timeoutContext?: TimeoutContext | null }
 ): Promise<BulkWriteResult> {
   if (bulkOperation.s.batches.length === 0) {
     return new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered);
@@ -552,7 +552,11 @@ async function executeCommands(
     let thrownError = null;
     let result;
     try {
-      result = await executeOperation(bulkOperation.s.collection.client, operation);
+      result = await executeOperation(
+        bulkOperation.s.collection.client,
+        operation,
+        finalOptions.timeoutContext
+      );
     } catch (error) {
       thrownError = error;
     }
@@ -866,7 +870,11 @@ export class BulkWriteShimOperation extends AbstractOperation {
     return 'bulkWrite' as const;
   }
 
-  async execute(_server: Server, session: ClientSession | undefined): Promise<any> {
+  async execute(
+    _server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<any> {
     if (this.options.session == null) {
       // An implicit session could have been created by 'executeOperation'
       // So if we stick it on finalOptions here, each bulk operation
@@ -874,7 +882,7 @@ export class BulkWriteShimOperation extends AbstractOperation {
       // an explicit session would be
       this.options.session = session;
     }
-    return await executeCommands(this.bulkOperation, this.options);
+    return await executeCommands(this.bulkOperation, { ...this.options, timeoutContext });
   }
 }
 
@@ -1203,7 +1211,7 @@ export abstract class BulkOperationBase {
     const finalOptions = { ...this.s.options, ...options };
     const operation = new BulkWriteShimOperation(this, finalOptions);
 
-    return await executeOperation(this.s.collection.client, operation);
+    return await executeOperation(this.s.collection.client, operation, finalOptions.timeoutContext);
   }
 
   /**
