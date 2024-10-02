@@ -11,6 +11,7 @@ import { TLSSocket } from 'tls';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import {
+  BSON,
   ConnectionPool,
   CSOTTimeoutContext,
   type MongoClient,
@@ -19,6 +20,8 @@ import {
   TimeoutContext,
   Topology
 } from '../../mongodb';
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';
 import { sleep } from '../../tools/utils';
 
 // TODO(NODE-5824): Implement CSOT prose tests
@@ -169,8 +172,40 @@ describe('CSOT spec unit tests', function () {
       });
     });
 
+    describe('CryptoConnection', function () {
+        let autoEncrypter;
+        beforeEach(async function () {
+          autoEncrypter = new AutoEncrypter(client, {
+            keyVaultNamespace: 'admin.datakeys',
+            kmsProviders: {
+              aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+              local: { key: Buffer.alloc(96) }
+            }
+          });
+          await autoEncrypter.init();
+        });
+
+        afterEach(async function () {
+
+        });
+        describe('#command', function () {
+          context('when encrypt is provided a timeoutContext', function () {
+            it('should respect remainingTimeMS', function () {
+
+            });
+          });
+          context('when encrypt is not provided a timeoutContext', function () {
+            it('should not timeout within 30 seconds', function () {
+
+            });
+          });
+        });
+    });
+
     // TODO(NODE-6390): Add timeoutMS support to Auto Encryption
-    it.skip('The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.', () => {});
+    it.skip('The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.', () => {
+
+    });
   });
 
   context.skip('Background Connection Pooling', function () {
