@@ -114,8 +114,8 @@ export interface ProxyOptions {
 /** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
-    StreamDescriptionOptions,
-    ProxyOptions {
+  StreamDescriptionOptions,
+  ProxyOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -498,7 +498,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     responseType?: MongoDBResponseConstructor
   ) {
     const message = this.prepareCommand(ns.db, command, options);
-
     let started = 0;
     if (this.shouldEmitAndLogCommand) {
       started = now();
@@ -517,10 +516,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options.documentsReturnedIn == null || !options.raw
         ? options
         : {
-            ...options,
-            raw: false,
-            fieldsAsRaw: { [options.documentsReturnedIn]: true }
-          };
+          ...options,
+          raw: false,
+          fieldsAsRaw: { [options.documentsReturnedIn]: true }
+        };
 
     /** MongoDBResponse instance or subclass */
     let document: MongoDBResponse | undefined = undefined;
@@ -685,9 +684,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
         ? command
         : new OpCompressedRequest(command, {
-            agreedCompressor: options.agreedCompressor ?? 'none',
-            zlibCompressionLevel: options.zlibCompressionLevel ?? 0
-          });
+          agreedCompressor: options.agreedCompressor ?? 'none',
+          zlibCompressionLevel: options.zlibCompressionLevel ?? 0
+        });
 
     const buffer = Buffer.concat(await finalCommand.toBin());
 
@@ -710,10 +709,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       try {
         return await Promise.race([drainEvent, timeout]);
       } catch (error) {
+        let err = error;
         if (TimeoutError.is(error)) {
-          throw new MongoOperationTimeoutError('Timed out at socket write');
+          err = new MongoOperationTimeoutError('Timed out at socket write');
         }
-        throw error;
+        this.cleanup(error);
+        throw err;
       }
     }
     return await drainEvent;
@@ -743,12 +744,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
       }
     } catch (readError) {
+      let err = readError;
       if (TimeoutError.is(readError)) {
-        throw new MongoOperationTimeoutError(
+        err = new MongoOperationTimeoutError(
           `Timed out during socket read (${readError.duration}ms)`
         );
       }
-      throw readError;
+      this.cleanup(err);
+      throw err;
     } finally {
       this.dataEvents = null;
       this.throwIfAborted();

@@ -613,6 +613,7 @@ export class ChangeStream<
 
   private timeoutContext?: TimeoutContext;
   private needsResume?: boolean;
+  private lastError?: Error;
   /**
    * @internal
    *
@@ -685,33 +686,40 @@ export class ChangeStream<
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
 
-    while (true) {
-      try {
-        const hasNext = await this.cursor.hasNext();
-        return hasNext;
-      } catch (error) {
+    this.timeoutContext?.refresh();
+    await this._resume();
+    try {
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
+          const hasNext = await this.cursor.hasNext();
+          return hasNext;
         } catch (error) {
           try {
-            await this.close();
+            await this._processErrorIteratorMode(error);
           } catch (error) {
-            squashError(error);
+            try {
+              await this.close();
+            } catch (error) {
+              squashError(error);
+            }
+            throw error;
           }
-          throw error;
         }
       }
+    } finally {
+      this.timeoutContext?.clear();
     }
   }
 
   /** Get the next available document from the Change Stream. */
   async next(): Promise<TChange> {
+    console.log('entering cs.next');
     this._setIsIterator();
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
-    //await this._resume();
     this.timeoutContext?.refresh();
+    await this._resume();
 
     try {
       while (true) {
@@ -723,7 +731,9 @@ export class ChangeStream<
           try {
             await this._processErrorIteratorMode(error);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError) throw error;
+            if (error instanceof MongoOperationTimeoutError) {
+              throw error;
+            }
             try {
               await this.close();
             } catch (error) {
@@ -742,12 +752,14 @@ export class ChangeStream<
    * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
    */
   async tryNext(): Promise<TChange | null> {
+    console.log('entering cs.tryNext');
     this._setIsIterator();
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
     // await this._resume();
     this.timeoutContext?.refresh();
+    await this._resume();
 
     try {
       while (true) {
@@ -993,7 +1005,10 @@ export class ChangeStream<
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion) && !(changeStreamError instanceof MongoOperationTimeoutError)) {
+    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion) &&
+      !(changeStreamError instanceof MongoOperationTimeoutError)) {
+      this.needsResume = false;
+      this.lastError = undefined;
       try {
         await this.close();
       } catch (error) {
@@ -1002,14 +1017,23 @@ export class ChangeStream<
       throw changeStreamError;
     }
 
+    this.lastError = changeStreamError;
+    this.needsResume = true;
     try {
       await this.cursor.close();
     } catch (error) {
       squashError(error);
     }
 
-    this.timeoutContext?.refresh();
+
+    if (changeStreamError instanceof MongoOperationTimeoutError) throw changeStreamError;
+  }
+
+  private async _resume() {
+    if (!this.needsResume || this.lastError == undefined) return;
     const topology = getTopology(this.parent);
+    console.log('resuming');
+    this.needsResume = false;
     try {
       await topology.selectServer(this.cursor.readPreference, {
         operationName: 'reconnect topology in change stream',
@@ -1019,50 +1043,7 @@ export class ChangeStream<
     } catch {
       // if the topology can't reconnect, close the stream
       await this.close();
-      throw changeStreamError;
-    }
-  }
-
-  /** @internal */
-  private async _processErrorIteratorModeNew(changeStreamError: AnyError) {
-    if (this[kClosed]) {
-      // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
-    }
-
-    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
-      try {
-        await this.close();
-      } catch (error) {
-        squashError(error);
-      }
-      throw changeStreamError;
-    }
-
-    try {
-      await this.cursor.close();
-    } catch (error) {
-      squashError(error);
-    } finally {
-      this.needsResume = true;
-    }
-  }
-
-  private async _resume(error?: MongoError) {
-    if (!this.needsResume) return;
-
-    console.log('resuming');
-    this.needsResume = false;
-    const topology = getTopology(this.parent);
-    try {
-      await topology.selectServer(this.cursor.readPreference, {
-        operationName: 'reconnect topology in change stream'
-      });
-      this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-    } catch {
-      // if the topology can't reconnect, close the stream
-      await this.close();
-      if (error) throw error;
+      throw this.lastError;
     }
   }
 }

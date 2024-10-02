@@ -113,7 +113,6 @@ export class ChangeStreamCursor<
   }
 
   _processBatch(response: CursorResponse): void {
-    console.log(response.toObject());
     const { postBatchResumeToken } = response;
     if (postBatchResumeToken) {
       this.postBatchResumeToken = postBatchResumeToken;
@@ -138,8 +137,6 @@ export class ChangeStreamCursor<
       session
     });
 
-    console.log(`Executing aggregate operation`, aggregateOperation.pipeline[0]);
-    console.log('Aggregate options', {...this.cursorOptions, ...this.changeStreamCursorOptions});
     const response = await executeOperation(
       session.client,
       aggregateOperation,
