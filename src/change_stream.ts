@@ -686,9 +686,7 @@ export class ChangeStream<
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
 
-    if (this.timeoutContext) {
-      await this._resume();
-    }
+    this.timeoutContext?.refresh();
     try {
       while (true) {
         try {
@@ -720,7 +718,6 @@ export class ChangeStream<
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
     this.timeoutContext?.refresh();
-    await this._resume();
 
     try {
       while (true) {
@@ -753,14 +750,11 @@ export class ChangeStream<
    * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
    */
   async tryNext(): Promise<TChange | null> {
-    console.log('entering cs.tryNext');
     this._setIsIterator();
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
-    // await this._resume();
     this.timeoutContext?.refresh();
-    await this._resume();
 
     try {
       while (true) {
@@ -1026,14 +1020,13 @@ export class ChangeStream<
       squashError(error);
     }
 
-    if (this.options.timeoutMS != null) await this._resume();
+    this.timeoutContext?.refresh();
+    await this._resume(changeStreamError);
 
     if (changeStreamError instanceof MongoOperationTimeoutError) throw changeStreamError;
   }
 
-  private async _resume() {
-    if (this.options.timeoutMS != null &&
-        (!this.needsResume || this.lastError == undefined)) return;
+  private async _resume(changeStreamError: AnyError) {
     const topology = getTopology(this.parent);
     this.needsResume = false;
     try {
@@ -1045,7 +1038,7 @@ export class ChangeStream<
     } catch {
       // if the topology can't reconnect, close the stream
       await this.close();
-      throw this.lastError;
+      throw changeStreamError;
     }
   }
 }
