@@ -686,8 +686,9 @@ export class ChangeStream<
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
 
-    this.timeoutContext?.refresh();
-    await this._resume();
+    if (this.timeoutContext) {
+      await this._resume();
+    }
     try {
       while (true) {
         try {
@@ -1025,14 +1026,15 @@ export class ChangeStream<
       squashError(error);
     }
 
+    if (this.options.timeoutMS != null) await this._resume();
 
     if (changeStreamError instanceof MongoOperationTimeoutError) throw changeStreamError;
   }
 
   private async _resume() {
-    if (!this.needsResume || this.lastError == undefined) return;
+    if (this.options.timeoutMS != null &&
+        (!this.needsResume || this.lastError == undefined)) return;
     const topology = getTopology(this.parent);
-    console.log('resuming');
     this.needsResume = false;
     try {
       await topology.selectServer(this.cursor.readPreference, {
