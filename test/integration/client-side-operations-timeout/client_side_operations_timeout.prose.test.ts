@@ -7,6 +7,7 @@ import * as sinon from 'sinon';
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
   type CommandSucceededEvent,
+  MongoBulkWriteError,
   MongoClient,
   MongoOperationTimeoutError,
   MongoServerSelectionError,
@@ -28,7 +29,7 @@ describe('CSOT spec prose tests', function () {
     await client?.close();
   });
 
-  context.skip('1. Multi-batch writes', () => {
+  describe('1. Multi-batch writes', { requires: { topology: 'single', mongodb: '>=4.4' } }, () => {
     /**
      * This test MUST only run against standalones on server versions 4.4 and higher.
      * The `insertMany` call takes an exceedingly long time on replicasets and sharded
@@ -55,6 +56,46 @@ describe('CSOT spec prose tests', function () {
      *   - Expect this to fail with a timeout error.
      * 1. Verify that two `insert` commands were executed against `db.coll` as part of the `insertMany` call.
      */
+
+    const failpoint: FailPoint = {
+      configureFailPoint: 'failCommand',
+      mode: {
+        times: 2
+      },
+      data: {
+        failCommands: ['insert'],
+        blockConnection: true,
+        blockTimeMS: 1010
+      }
+    };
+
+    beforeEach(async function () {
+      await internalClient
+        .db('db')
+        .collection('coll')
+        .drop()
+        .catch(() => null);
+      await internalClient.db('admin').command(failpoint);
+
+      client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
+    });
+
+    it('performs two inserts which fail to complete before 2000 ms', async () => {
+      const inserts = [];
+      client.on('commandStarted', ev => inserts.push(ev));
+
+      const a = new Uint8Array(1000000 - 22);
+      const oneMBDocs = Array.from({ length: 50 }, (_, _id) => ({ _id, a }));
+      const error = await client
+        .db('db')
+        .collection<{ _id: number; a: Uint8Array }>('coll')
+        .insertMany(oneMBDocs)
+        .catch(error => error);
+
+      expect(error).to.be.instanceOf(MongoBulkWriteError);
+      expect(error.errorResponse).to.be.instanceOf(MongoOperationTimeoutError);
+      expect(inserts.map(ev => ev.commandName)).to.deep.equal(['insert', 'insert']);
+    });
   });
 
   context.skip('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
@@ -914,4 +955,103 @@ describe('CSOT spec prose tests', function () {
       });
     });
   });
+
+  describe.skip(
+    '11. Multi-batch bulkWrites',
+    { requires: { mongodb: '>=8.0', serverless: 'forbid' } },
+    function () {
+      /**
+       * ### 11. Multi-batch bulkWrites
+       *
+       * This test MUST only run against server versions 8.0+. This test must be skipped on Atlas Serverless.
+       *
+       * 1. Using `internalClient`, drop the `db.coll` collection.
+       *
+       * 2. Using `internalClient`, set the following fail point:
+       *
+       * @example
+       * ```javascript
+       *    {
+       *        configureFailPoint: "failCommand",
+       *        mode: {
+       *            times: 2
+       *        },
+       *        data: {
+       *            failCommands: ["bulkWrite"],
+       *            blockConnection: true,
+       *            blockTimeMS: 1010
+       *        }
+       *    }
+       * ```
+       *
+       * 3. Using `internalClient`, perform a `hello` command and record the `maxBsonObjectSize` and `maxMessageSizeBytes` values
+       *    in the response.
+       *
+       * 4. Create a new MongoClient (referred to as `client`) with `timeoutMS=2000`.
+       *
+       * 5. Create a list of write models (referred to as `models`) with the following write model repeated
+       *    (`maxMessageSizeBytes / maxBsonObjectSize + 1`) times:
+       *
+       * @example
+       * ```json
+       *    InsertOne {
+       *       "namespace": "db.coll",
+       *       "document": { "a": "b".repeat(maxBsonObjectSize - 500) }
+       *    }
+       * ```
+       *
+       * 6. Call `bulkWrite` on `client` with `models`.
+       *
+       *    - Expect this to fail with a timeout error.
+       *
+       * 7. Verify that two `bulkWrite` commands were executed as part of the `MongoClient.bulkWrite` call.
+       */
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: {
+          times: 2
+        },
+        data: {
+          failCommands: ['bulkWrite'],
+          blockConnection: true,
+          blockTimeMS: 1010
+        }
+      };
+
+      let maxBsonObjectSize: number;
+      let maxMessageSizeBytes: number;
+
+      beforeEach(async function () {
+        await internalClient
+          .db('db')
+          .collection('coll')
+          .drop()
+          .catch(() => null);
+        await internalClient.db('admin').command(failpoint);
+
+        const hello = await internalClient.db('admin').command({ hello: 1 });
+        maxBsonObjectSize = hello.maxBsonObjectSize;
+        maxMessageSizeBytes = hello.maxMessageSizeBytes;
+
+        client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
+      });
+
+      it.skip('performs two bulkWrites which fail to complete before 2000 ms', async function () {
+        const writes = [];
+        client.on('commandStarted', ev => writes.push(ev));
+
+        const length = maxMessageSizeBytes / maxBsonObjectSize + 1;
+        const models = Array.from({ length }, () => ({
+          namespace: 'db.coll',
+          name: 'insertOne' as const,
+          document: { a: 'b'.repeat(maxBsonObjectSize - 500) }
+        }));
+
+        const error = await client.bulkWrite(models).catch(error => error);
+
+        expect(error, error.stack).to.be.instanceOf(MongoOperationTimeoutError);
+        expect(writes.map(ev => ev.commandName)).to.deep.equal(['bulkWrite', 'bulkWrite']);
+      }).skipReason = 'TODO(NODE-6403): client.bulkWrite is implemented in a follow up';
+    }
+  );
 });
