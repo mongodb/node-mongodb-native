@@ -514,13 +514,13 @@ describe('CSOT spec prose tests', function () {
         data: {
           failCommands: ['delete'],
           blockConnection: true,
-          blockTimeMS: 150
+          blockTimeMS: 200
         }
       };
 
       await internalClient.db().admin().command(failpoint);
       const bucket = new GridFSBucket(client.db('db'), { chunkSizeBytes: 2 });
-      const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 100 });
+      const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 300 });
 
       const data = Buffer.from('01020304', 'hex');
 
