@@ -193,7 +193,7 @@ describe('CSOT spec unit tests', function () {
       });
     });
 
-    describe('CryptoConnection.command()', function () {
+    describe.only('CryptoConnection.command()', function () {
       let conn;
 
       beforeEach(async function () {
@@ -245,17 +245,40 @@ describe('CSOT spec unit tests', function () {
         });
       });
 
-      context('when not provided a timeoutContext', function () {
-        it.only('should not timeout within 30 seconds', async function () {
-          const client = this.configuration.newClient();
-          client.connect();
+      context('when StateMachine.kmsRequest() is not passed a `CSOTimeoutContext`', function () {
+        let clock: sinon.SinonFakeTimers;
+        let timerSandbox: sinon.SinonSandbox;
+
+        let sleep;
+
+        beforeEach(async function () {
+          sinon.stub(TLSSocket.prototype, 'connect').callsFake(function (..._args) {
+            clock.tick(30000);
+          });
+          timerSandbox = createTimerSandbox();
+          clock = sinon.useFakeTimers();
+          sleep = promisify(setTimeout);
+        });
+
+        afterEach(async function () {
+          if (clock) {
+            timerSandbox.restore();
+            clock.restore();
+            clock = undefined;
+          }
+          sinon.restore();
+        });
+
+        it('the kms request does not timeout within 30 seconds', async function () {
           const sleepingFn = async () => {
-          await sleep(30000);
-          throw Error('Slept for 30s');
-        };
-        const err = await Promise.all([conn.command('test.test', { find: 'test', filter: {} }), sleepingFn()])
-          .catch(e => e);
-        expect(err.message).to.equal('Slept for 30s');
+            await sleep(30000);
+            throw Error('Slept for 30s');
+          };
+
+          const err$ = Promise.all([conn.command('test.test', { find: 'test', filter: {} }), sleepingFn()]).catch(e => e);
+          clock.tick(30000);
+          const err = await err$;
+          expect(err.message).to.equal('Slept for 30s');
         });
       });
     });
