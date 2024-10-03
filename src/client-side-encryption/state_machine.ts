@@ -435,10 +435,6 @@ export class StateMachine {
             resolve();
           }
         });
-
-      if (timeoutContext?.csotEnabled() && timeoutContext?.remainingTimeMS <= 0) {
-        throw new MongoOperationTimeoutError('Timed out before KMS request.');
-      }
       await (timeoutContext?.csotEnabled()
         ? Promise.all([willResolveKmsRequest, Timeout.expires(timeoutContext?.remainingTimeMS)])
         : willResolveKmsRequest);

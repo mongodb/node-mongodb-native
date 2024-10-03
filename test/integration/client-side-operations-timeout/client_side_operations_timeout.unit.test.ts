@@ -6,7 +6,9 @@
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { setTimeout } from 'timers';
 import { TLSSocket } from 'tls';
+import { promisify } from 'util';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
@@ -19,7 +21,7 @@ import {
   TimeoutContext,
   Topology
 } from '../../mongodb';
-import { sleep } from '../../tools/utils';
+import { createTimerSandbox } from '../../unit/timer_sandbox';
 
 // TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec unit tests', function () {
@@ -123,10 +125,7 @@ describe('CSOT spec unit tests', function () {
 
       context('when StateMachine.kmsRequest() is passed a `CSOTimeoutContext`', function () {
         beforeEach(async function () {
-          sinon.stub(TLSSocket.prototype, 'connect').callsFake(async function (..._args) {
-            await sleep(200);
-            return {} as TLSSocket;
-          });
+          sinon.stub(TLSSocket.prototype, 'connect').callsFake(function (..._args) {});
         });
 
         afterEach(async function () {
@@ -138,7 +137,6 @@ describe('CSOT spec unit tests', function () {
             timeoutMS: 500,
             serverSelectionTimeoutMS: 30000
           });
-          sleep(300);
           const err = await stateMachine.kmsRequest(request, timeoutContext).catch(e => e);
           expect(err).to.be.instanceOf(MongoOperationTimeoutError);
           expect(err.errmsg).to.equal('KMS request timed out');
@@ -146,13 +144,26 @@ describe('CSOT spec unit tests', function () {
       });
 
       context('when StateMachine.kmsRequest() is not passed a `CSOTimeoutContext`', function () {
+        let clock: sinon.SinonFakeTimers;
+        let timerSandbox: sinon.SinonSandbox;
+
+        let sleep;
+
         beforeEach(async function () {
-          sinon.stub(TLSSocket.prototype, 'connect').callsFake(async function (..._args) {
-            return {} as TLSSocket;
+          sinon.stub(TLSSocket.prototype, 'connect').callsFake(function (..._args) {
+            clock.tick(30000);
           });
+          timerSandbox = createTimerSandbox();
+          clock = sinon.useFakeTimers();
+          sleep = promisify(setTimeout);
         });
 
         afterEach(async function () {
+          if (clock) {
+            timerSandbox.restore();
+            clock.restore();
+            clock = undefined;
+          }
           sinon.restore();
         });
 
@@ -161,9 +172,10 @@ describe('CSOT spec unit tests', function () {
             await sleep(30000);
             throw Error('Slept for 30s');
           };
-          const err = await Promise.all([stateMachine.kmsRequest(request), sleepingFn()]).catch(
-            e => e
-          );
+
+          const err$ = Promise.all([stateMachine.kmsRequest(request), sleepingFn()]).catch(e => e);
+          clock.tick(30000);
+          const err = await err$;
           expect(err.message).to.equal('Slept for 30s');
         });
       });
