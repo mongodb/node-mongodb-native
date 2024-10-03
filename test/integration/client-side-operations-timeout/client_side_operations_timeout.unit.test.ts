@@ -11,10 +11,18 @@ import { TLSSocket } from 'tls';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import {
+  addContainerMetadata,
   BSON,
+  connect,
+  Connection,
+  ConnectionOptions,
   ConnectionPool,
+  CryptoConnection,
   CSOTTimeoutContext,
+  HostAddress,
+  makeClientMetadata,
   type MongoClient,
+  MongoClientAuthProviders,
   MongoOperationTimeoutError,
   Timeout,
   TimeoutContext,
@@ -172,34 +180,71 @@ describe('CSOT spec unit tests', function () {
       });
     });
 
-    describe('CryptoConnection', function () {
-        let autoEncrypter;
-        beforeEach(async function () {
-          autoEncrypter = new AutoEncrypter(client, {
+    describe('CryptoConnection.command()', function () {
+      let conn;
+
+      beforeEach(async function () {
+        const commonConnectOptions = {
+          id: 1,
+          generation: 1,
+          monitorCommands: false,
+          tls: false,
+          loadBalanced: false,
+          // Will be overridden by configuration options
+          hostAddress: HostAddress.fromString('127.0.0.1:1'),
+          authProviders: new MongoClientAuthProviders()
+        };
+
+        const autoEncrypter = new AutoEncrypter(
+          this.configuration.newClient(),
+          {
             keyVaultNamespace: 'admin.datakeys',
             kmsProviders: {
               aws: { accessKeyId: 'example', secretAccessKey: 'example' },
               local: { key: Buffer.alloc(96) }
             }
+          }
+        );
+        let connectOptions: ConnectionOptions = {
+            ...commonConnectOptions,
+            autoEncrypter,
+            connectionType: CryptoConnection,
+            ...this.configuration.options,
+            metadata: makeClientMetadata({ driverInfo: {} }),
+            extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+        };
+        conn = await connect(connectOptions);
+      });
+
+      afterEach(async function () {
+        conn?.destroy();
+      });
+
+      context('when provided a timeoutContext', function () {
+        it('should respect remainingTimeMS', async function () {
+          const timeoutContext = new CSOTTimeoutContext({
+            timeoutMS: 500,
+            serverSelectionTimeoutMS: 30000
           });
-          await autoEncrypter.init();
+          const err = await conn.command('test.test', { find: 'test', filter: {} }, { timeoutContext }).catch(e => e);
+          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(err.errmsg).to.equal('KMS request timed out');
         });
+      });
 
-        afterEach(async function () {
-
+      context('when not provided a timeoutContext', function () {
+        it.only('should not timeout within 30 seconds', async function () {
+          const client = this.configuration.newClient();
+          client.connect();
+          const sleepingFn = async () => {
+          await sleep(30000);
+          throw Error('Slept for 30s');
+        };
+        const err = await Promise.all([conn.command('test.test', { find: 'test', filter: {} }), sleepingFn()])
+          .catch(e => e);
+        expect(err.message).to.equal('Slept for 30s');
         });
-        describe('#command', function () {
-          context('when encrypt is provided a timeoutContext', function () {
-            it('should respect remainingTimeMS', function () {
-
-            });
-          });
-          context('when encrypt is not provided a timeoutContext', function () {
-            it('should not timeout within 30 seconds', function () {
-
-            });
-          });
-        });
+      });
     });
 
     // TODO(NODE-6390): Add timeoutMS support to Auto Encryption

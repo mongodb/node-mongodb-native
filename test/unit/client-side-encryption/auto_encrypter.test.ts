@@ -39,7 +39,7 @@ const MOCK_MONGOCRYPTD_RESPONSE = readExtendedJsonToBuffer(
 const MOCK_KEYDOCUMENT_RESPONSE = readExtendedJsonToBuffer(`${__dirname}/data/key-document.json`);
 const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(`${__dirname}/data/kms-decrypt-reply.txt`);
 
-export class MockClient {
+class MockClient {
   options: any;
 
   constructor(options?: any) {
