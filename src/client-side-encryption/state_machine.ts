@@ -528,8 +528,9 @@ export class StateMachine {
       .listCollections(filter, {
         promoteLongs: false,
         promoteValues: false,
-        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined,
-        timeoutMode: 'cursorLifetime'
+        ...(timeoutContext?.csotEnabled()
+          ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
+          : {})
       })
       .toArray();
 
@@ -585,10 +586,12 @@ export class StateMachine {
     return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
-      .find(deserialize(filter), {
-        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined,
-        timeoutMode: 'cursorLifetime'
-      })
+      .find(
+        deserialize(filter),
+        timeoutContext?.csotEnabled()
+          ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
+          : {}
+      )
       .toArray();
   }
 }
