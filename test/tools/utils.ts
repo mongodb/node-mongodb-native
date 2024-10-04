@@ -1,5 +1,5 @@
 import * as child_process from 'node:child_process';
-import { once } from 'node:events';
+import { on, once } from 'node:events';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -567,4 +567,34 @@ export async function itInNodeProcess(
       await fs.unlink(scriptName);
     }
   });
+}
+
+/**
+ * Connects the client and waits until `client` has emitted `count` connectionCreated events.
+ *
+ * **This will hang if the client does not have a maxPoolSizeSet!**
+ *
+ * This is useful when you want to ensure that the client has pools that are full of connections.
+ *
+ * This does not guarantee that all pools that the client has are completely full unless
+ * count = number of servers to which the client is connected * maxPoolSize.  But it can
+ * serve as a way to ensure that some connections have been established and are in the pools.
+ */
+export async function waitUntilPoolsFilled(
+  client: MongoClient,
+  signal: AbortSignal,
+  count: number = client.s.options.maxPoolSize
+): Promise<void> {
+  let connectionCount = 0;
+
+  async function wait$() {
+    for await (const _event of on(client, 'connectionCreated', { signal })) {
+      connectionCount++;
+      if (connectionCount >= count) {
+        break;
+      }
+    }
+  }
+
+  await Promise.all([wait$(), client.connect()]);
 }
