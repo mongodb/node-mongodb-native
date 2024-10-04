@@ -13,26 +13,16 @@ import { promisify } from 'util';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import {
-  addContainerMetadata,
-  BSON,
-  connect,
-  Connection,
-  ConnectionOptions,
   ConnectionPool,
   CryptoConnection,
   CSOTTimeoutContext,
-  HostAddress,
-  makeClientMetadata,
   type MongoClient,
-  MongoClientAuthProviders,
   MongoOperationTimeoutError,
+  squashError,
   Timeout,
   TimeoutContext,
   Topology
 } from '../../mongodb';
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';
-import { sleep } from '../../tools/utils';
 import { createTimerSandbox } from '../../unit/timer_sandbox';
 
 // TODO(NODE-5824): Implement CSOT prose tests
@@ -193,100 +183,67 @@ describe('CSOT spec unit tests', function () {
       });
     });
 
-    describe.only('CryptoConnection.command()', function () {
-      let conn;
+    describe('Auto Encryption', function () {
+      let client;
+      let spy;
 
       beforeEach(async function () {
-        const commonConnectOptions = {
-          id: 1,
-          generation: 1,
-          monitorCommands: false,
-          tls: false,
-          loadBalanced: false,
-          // Will be overridden by configuration options
-          hostAddress: HostAddress.fromString('127.0.0.1:1'),
-          authProviders: new MongoClientAuthProviders()
-        };
-
-        const autoEncrypter = new AutoEncrypter(
-          this.configuration.newClient(),
-          {
-            keyVaultNamespace: 'admin.datakeys',
-            kmsProviders: {
-              aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-              local: { key: Buffer.alloc(96) }
-            }
-          }
-        );
-        let connectOptions: ConnectionOptions = {
-            ...commonConnectOptions,
-            autoEncrypter,
-            connectionType: CryptoConnection,
-            ...this.configuration.options,
-            metadata: makeClientMetadata({ driverInfo: {} }),
-            extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
-        };
-        conn = await connect(connectOptions);
+        spy = sinon.spy(CryptoConnection.prototype, 'command');
       });
 
       afterEach(async function () {
-        conn?.destroy();
+        await client?.close();
+        sinon.restore();
       });
 
-      context('when provided a timeoutContext', function () {
-        it('should respect remainingTimeMS', async function () {
-          const timeoutContext = new CSOTTimeoutContext({
-            timeoutMS: 500,
-            serverSelectionTimeoutMS: 30000
-          });
-          const err = await conn.command('test.test', { find: 'test', filter: {} }, { timeoutContext }).catch(e => e);
-          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-          expect(err.errmsg).to.equal('KMS request timed out');
+      context('when client is provided timeoutMS', function () {
+        it('should pass timeoutMS into commands sent to mongocryptd', async function () {
+          client = this.configuration.newClient(
+            {},
+            {
+              autoEncryption: {
+                keyVaultNamespace: 'admin.datakeys',
+                kmsProviders: {
+                  aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+                  local: { key: Buffer.alloc(96) }
+                }
+              },
+              timeoutMS: 10000
+            }
+          );
+          await client
+            .db()
+            .command({ ping: 1 })
+            .catch(e => squashError(e));
+          expect(spy.getCalls()[2].args[2].timeoutMS).to.exist;
         });
       });
 
-      context('when StateMachine.kmsRequest() is not passed a `CSOTimeoutContext`', function () {
-        let clock: sinon.SinonFakeTimers;
-        let timerSandbox: sinon.SinonSandbox;
-
-        let sleep;
-
-        beforeEach(async function () {
-          sinon.stub(TLSSocket.prototype, 'connect').callsFake(function (..._args) {
-            clock.tick(30000);
-          });
-          timerSandbox = createTimerSandbox();
-          clock = sinon.useFakeTimers();
-          sleep = promisify(setTimeout);
-        });
-
-        afterEach(async function () {
-          if (clock) {
-            timerSandbox.restore();
-            clock.restore();
-            clock = undefined;
-          }
-          sinon.restore();
-        });
-
-        it('the kms request does not timeout within 30 seconds', async function () {
-          const sleepingFn = async () => {
-            await sleep(30000);
-            throw Error('Slept for 30s');
-          };
-
-          const err$ = Promise.all([conn.command('test.test', { find: 'test', filter: {} }), sleepingFn()]).catch(e => e);
-          clock.tick(30000);
-          const err = await err$;
-          expect(err.message).to.equal('Slept for 30s');
+      context('when client is not provided timeoutMS`', function () {
+        it('should pass timeoutMS into commands sent to mongocryptd', async function () {
+          client = this.configuration.newClient(
+            {},
+            {
+              autoEncryption: {
+                keyVaultNamespace: 'admin.datakeys',
+                kmsProviders: {
+                  aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+                  local: { key: Buffer.alloc(96) }
+                }
+              }
+            }
+          );
+          await client
+            .db()
+            .command({ ping: 1 })
+            .catch(e => squashError(e));
+          expect(spy.getCalls()[2].args[2].timeoutMS).to.not.exist;
         });
       });
     });
 
     // TODO(NODE-6390): Add timeoutMS support to Auto Encryption
-    it.skip('The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.', () => {
-
-    });
+    it.skip('The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.', () => {});
   });
 
   context.skip('Background Connection Pooling', function () {

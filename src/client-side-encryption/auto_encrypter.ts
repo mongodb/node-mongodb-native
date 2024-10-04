@@ -399,7 +399,8 @@ export class AutoEncrypter {
       await stateMachine.execute(
         this,
         context,
-        options.timeoutContext?.csotEnabled() ? options.timeoutContext : undefined),
+        options.timeoutContext?.csotEnabled() ? options.timeoutContext : undefined
+      ),
       {
         promoteValues: false,
         promoteLongs: false

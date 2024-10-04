@@ -12,8 +12,8 @@ import { StateMachine } from '../../../src/client-side-encryption/state_machine'
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoClient } from '../../../src/mongo_client';
 import { BSON, CSOTTimeoutContext, type DataKey } from '../../mongodb';
-import * as requirements from './requirements.helper';
 import { sleep } from '../../tools/utils';
+import * as requirements from './requirements.helper';
 
 const bson = BSON;
 const { EJSON } = BSON;
@@ -376,7 +376,7 @@ describe('AutoEncrypter', function () {
     expect(AutoEncrypter.libmongocryptVersion).to.be.a('string');
   });
 
-  describe.only('CSOT', function () {
+  describe('CSOT', function () {
     let autoEncrypter: AutoEncrypter;
     let stateMachineSpy;
     let client;
@@ -399,7 +399,7 @@ describe('AutoEncrypter', function () {
     });
 
     describe('#encrypt', function () {
-      context('when encrypt is provided a timeoutContext', async function () {
+      context('when encrypt is provided a timeoutContext', function () {
         it('should call stateMachine.execute with a timeoutMS', async function () {
           const timeoutContext = new CSOTTimeoutContext({
             timeoutMS: 500,
