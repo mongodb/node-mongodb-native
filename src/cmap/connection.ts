@@ -427,9 +427,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       ...options
     };
 
-    if (!options.omitMaxTimeMS && options.timeoutContext?.csotEnabled()) {
-      const { maxTimeMS } = options.timeoutContext;
-      if (maxTimeMS > 0 && Number.isFinite(maxTimeMS)) cmd.maxTimeMS = maxTimeMS;
+    if (!options.omitMaxTimeMS) {
+      const maxTimeMS = options.timeoutContext?.maxTimeMS;
+      if (maxTimeMS && maxTimeMS > 0 && Number.isFinite(maxTimeMS)) cmd.maxTimeMS = maxTimeMS;
     }
 
     const message = this.supportsOpMsg
