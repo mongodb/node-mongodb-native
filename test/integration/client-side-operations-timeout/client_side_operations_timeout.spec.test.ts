@@ -8,12 +8,8 @@ const skippedSpecs = {
   'change-streams': 'TODO(NODE-6035)',
   'convenient-transactions': 'TODO(NODE-5687)',
   'deprecated-options': 'TODO(NODE-5689)',
-  'gridfs-advanced': 'TODO(NODE-6275)',
-  'gridfs-delete': 'TODO(NODE-6275)',
-  'gridfs-download': 'TODO(NODE-6275)',
-  'gridfs-find': 'TODO(NODE-6275)',
-  'gridfs-upload': 'TODO(NODE-6275)',
-  'change-streams': 'TODO(NODE-6387)'
+  'tailable-awaitData': 'TODO(NODE-6035)',
+  'tailable-non-awaitData': 'TODO(NODE-6035)'
 };
 
 const skippedTests = {
