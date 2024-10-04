@@ -5,15 +5,21 @@ import { type ChildProcess, spawn } from 'node:child_process';
 import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
+import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
   type CommandSucceededEvent,
+  GridFSBucket,
+  MongoBulkWriteError,
   MongoClient,
   MongoOperationTimeoutError,
   MongoServerSelectionError,
   now,
   squashError
+  ObjectId,
+  promiseWithResolvers
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 
@@ -31,7 +37,7 @@ describe('CSOT spec prose tests', function () {
     await client?.close();
   });
 
-  context.skip('1. Multi-batch writes', () => {
+  describe('1. Multi-batch writes', { requires: { topology: 'single', mongodb: '>=4.4' } }, () => {
     /**
      * This test MUST only run against standalones on server versions 4.4 and higher.
      * The `insertMany` call takes an exceedingly long time on replicasets and sharded
@@ -58,6 +64,46 @@ describe('CSOT spec prose tests', function () {
      *   - Expect this to fail with a timeout error.
      * 1. Verify that two `insert` commands were executed against `db.coll` as part of the `insertMany` call.
      */
+
+    const failpoint: FailPoint = {
+      configureFailPoint: 'failCommand',
+      mode: {
+        times: 2
+      },
+      data: {
+        failCommands: ['insert'],
+        blockConnection: true,
+        blockTimeMS: 1010
+      }
+    };
+
+    beforeEach(async function () {
+      await internalClient
+        .db('db')
+        .collection('coll')
+        .drop()
+        .catch(() => null);
+      await internalClient.db('admin').command(failpoint);
+
+      client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
+    });
+
+    it('performs two inserts which fail to complete before 2000 ms', async () => {
+      const inserts = [];
+      client.on('commandStarted', ev => inserts.push(ev));
+
+      const a = new Uint8Array(1000000 - 22);
+      const oneMBDocs = Array.from({ length: 50 }, (_, _id) => ({ _id, a }));
+      const error = await client
+        .db('db')
+        .collection<{ _id: number; a: Uint8Array }>('coll')
+        .insertMany(oneMBDocs)
+        .catch(error => error);
+
+      expect(error).to.be.instanceOf(MongoBulkWriteError);
+      expect(error.errorResponse).to.be.instanceOf(MongoOperationTimeoutError);
+      expect(inserts.map(ev => ev.commandName)).to.deep.equal(['insert', 'insert']);
+    });
   });
 
   context(
@@ -398,10 +444,42 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
-  context.skip('6. GridFS - Upload', () => {
+  context('6. GridFS - Upload', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
+    let internalClient: MongoClient;
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient();
+      await internalClient
+        .db('db')
+        .dropCollection('files')
+        .catch(() => null);
+      await internalClient
+        .db('db')
+        .dropCollection('chunks')
+        .catch(() => null);
+
+      client = this.configuration.newClient(undefined, { timeoutMS: 100 });
+    });
+
+    afterEach(async function () {
+      if (internalClient) {
+        await internalClient
+          .db()
+          .admin()
+          .command({ configureFailPoint: 'failCommand', mode: 'off' });
+        await internalClient.close();
+      }
+      if (client) {
+        await client.close();
+      }
+    });
     /** Tests in this section MUST only be run against server versions 4.4 and higher. */
 
-    context('uploads via openUploadStream can be timed out', () => {
+    it('uploads via openUploadStream can be timed out', metadata, async function () {
       /**
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
        * 1. Using `internalClient`, set the following fail point:
@@ -424,9 +502,30 @@ describe('CSOT spec prose tests', function () {
        * 1. Call `uploadStream.close()` to flush the stream and insert chunks.
        *    - Expect this to fail with a timeout error.
        */
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['insert'],
+          blockConnection: true,
+          blockTimeMS: 150
+        }
+      };
+      await internalClient.db().admin().command(failpoint);
+
+      const bucket = new GridFSBucket(client.db('db'));
+      const stream = bucket.openUploadStream('filename');
+      const data = Buffer.from('13', 'hex');
+
+      const fileStream = Readable.from(data);
+      const maybeError = await pipeline(fileStream, stream).then(
+        () => null,
+        error => error
+      );
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
     });
 
-    context('Aborting an upload stream can be timed out', () => {
+    it('Aborting an upload stream can be timed out', metadata, async function () {
       /**
        * This test only applies to drivers that provide an API to abort a GridFS upload stream.
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -450,10 +549,92 @@ describe('CSOT spec prose tests', function () {
        * 1. Call `uploadStream.abort()`.
        *   - Expect this to fail with a timeout error.
        */
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['delete'],
+          blockConnection: true,
+          blockTimeMS: 200
+        }
+      };
+
+      await internalClient.db().admin().command(failpoint);
+      const bucket = new GridFSBucket(client.db('db'), { chunkSizeBytes: 2 });
+      const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 300 });
+
+      const data = Buffer.from('01020304', 'hex');
+
+      const { promise: writePromise, resolve, reject } = promiseWithResolvers<void>();
+      uploadStream.on('error', error => uploadStream.destroy(error));
+      uploadStream.write(data, error => {
+        if (error) reject(error);
+        else resolve();
+      });
+      let maybeError = await writePromise.then(
+        () => null,
+        e => e
+      );
+      expect(maybeError).to.be.null;
+
+      maybeError = await uploadStream.abort().then(
+        () => null,
+        error => error
+      );
+      expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+      uploadStream.destroy();
     });
   });
 
-  context.skip('7. GridFS - Download', () => {
+  context('7. GridFS - Download', () => {
+    let internalClient: MongoClient;
+    let client: MongoClient;
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient();
+      await internalClient
+        .db('db')
+        .dropCollection('files')
+        .catch(() => null);
+      await internalClient
+        .db('db')
+        .dropCollection('chunks')
+        .catch(() => null);
+
+      const files = await internalClient.db('db').createCollection('files');
+
+      await files.insertOne({
+        _id: new ObjectId('000000000000000000000005'),
+        length: 10,
+        chunkSize: 4,
+        uploadDate: new Date('1970-01-01T00:00:00.000Z'),
+        md5: '57d83cd477bfb1ccd975ab33d827a92b',
+        filename: 'length-10',
+        contentType: 'application/octet-stream',
+        aliases: [],
+        metadata: {}
+      });
+
+      client = this.configuration.newClient(undefined, { timeoutMS: 100 });
+    });
+
+    afterEach(async function () {
+      if (internalClient) {
+        await internalClient
+          .db()
+          .admin()
+          .command({ configureFailPoint: 'failCommand', mode: 'off' });
+        await internalClient.close();
+      }
+
+      if (client) {
+        await client.close();
+      }
+    });
+
     /**
      * This test MUST only be run against server versions 4.4 and higher.
      * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -495,6 +676,27 @@ describe('CSOT spec prose tests', function () {
      *   - Expect this to fail with a timeout error.
      * 1. Verify that two `find` commands were executed during the read: one against `db.fs.files` and another against `db.fs.chunks`.
      */
+    it('download streams can be timed out', metadata, async function () {
+      const bucket = new GridFSBucket(client.db('db'));
+      const downloadStream = bucket.openDownloadStream(new ObjectId('000000000000000000000005'));
+
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['find'],
+          blockConnection: true,
+          blockTimeMS: 150
+        }
+      };
+      await internalClient.db().admin().command(failpoint);
+
+      const maybeError = await downloadStream.toArray().then(
+        () => null,
+        e => e
+      );
+      expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+    });
   });
 
   context('8. Server Selection', () => {
@@ -966,4 +1168,103 @@ describe('CSOT spec prose tests', function () {
       });
     });
   });
+
+  describe.skip(
+    '11. Multi-batch bulkWrites',
+    { requires: { mongodb: '>=8.0', serverless: 'forbid' } },
+    function () {
+      /**
+       * ### 11. Multi-batch bulkWrites
+       *
+       * This test MUST only run against server versions 8.0+. This test must be skipped on Atlas Serverless.
+       *
+       * 1. Using `internalClient`, drop the `db.coll` collection.
+       *
+       * 2. Using `internalClient`, set the following fail point:
+       *
+       * @example
+       * ```javascript
+       *    {
+       *        configureFailPoint: "failCommand",
+       *        mode: {
+       *            times: 2
+       *        },
+       *        data: {
+       *            failCommands: ["bulkWrite"],
+       *            blockConnection: true,
+       *            blockTimeMS: 1010
+       *        }
+       *    }
+       * ```
+       *
+       * 3. Using `internalClient`, perform a `hello` command and record the `maxBsonObjectSize` and `maxMessageSizeBytes` values
+       *    in the response.
+       *
+       * 4. Create a new MongoClient (referred to as `client`) with `timeoutMS=2000`.
+       *
+       * 5. Create a list of write models (referred to as `models`) with the following write model repeated
+       *    (`maxMessageSizeBytes / maxBsonObjectSize + 1`) times:
+       *
+       * @example
+       * ```json
+       *    InsertOne {
+       *       "namespace": "db.coll",
+       *       "document": { "a": "b".repeat(maxBsonObjectSize - 500) }
+       *    }
+       * ```
+       *
+       * 6. Call `bulkWrite` on `client` with `models`.
+       *
+       *    - Expect this to fail with a timeout error.
+       *
+       * 7. Verify that two `bulkWrite` commands were executed as part of the `MongoClient.bulkWrite` call.
+       */
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: {
+          times: 2
+        },
+        data: {
+          failCommands: ['bulkWrite'],
+          blockConnection: true,
+          blockTimeMS: 1010
+        }
+      };
+
+      let maxBsonObjectSize: number;
+      let maxMessageSizeBytes: number;
+
+      beforeEach(async function () {
+        await internalClient
+          .db('db')
+          .collection('coll')
+          .drop()
+          .catch(() => null);
+        await internalClient.db('admin').command(failpoint);
+
+        const hello = await internalClient.db('admin').command({ hello: 1 });
+        maxBsonObjectSize = hello.maxBsonObjectSize;
+        maxMessageSizeBytes = hello.maxMessageSizeBytes;
+
+        client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
+      });
+
+      it.skip('performs two bulkWrites which fail to complete before 2000 ms', async function () {
+        const writes = [];
+        client.on('commandStarted', ev => writes.push(ev));
+
+        const length = maxMessageSizeBytes / maxBsonObjectSize + 1;
+        const models = Array.from({ length }, () => ({
+          namespace: 'db.coll',
+          name: 'insertOne' as const,
+          document: { a: 'b'.repeat(maxBsonObjectSize - 500) }
+        }));
+
+        const error = await client.bulkWrite(models).catch(error => error);
+
+        expect(error, error.stack).to.be.instanceOf(MongoOperationTimeoutError);
+        expect(writes.map(ev => ev.commandName)).to.deep.equal(['bulkWrite', 'bulkWrite']);
+      }).skipReason = 'TODO(NODE-6403): client.bulkWrite is implemented in a follow up';
+    }
+  );
 });

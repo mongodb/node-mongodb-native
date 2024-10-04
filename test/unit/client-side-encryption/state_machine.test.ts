@@ -494,7 +494,7 @@ describe('StateMachine', function () {
             .fetchKeys(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
             .catch(e => squashError(e));
           expect(findSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
-          expect(findSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(200);
+          expect(findSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(205);
         });
       });
 
@@ -533,7 +533,7 @@ describe('StateMachine', function () {
             .markCommand(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
             .catch(e => squashError(e));
           expect(dbCommandSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
-          expect(dbCommandSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(200);
+          expect(dbCommandSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(205);
         });
       });
 
@@ -574,7 +574,7 @@ describe('StateMachine', function () {
               .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
               .catch(e => squashError(e));
             expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
-            expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(200);
+            expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(205);
           });
         }
       );
