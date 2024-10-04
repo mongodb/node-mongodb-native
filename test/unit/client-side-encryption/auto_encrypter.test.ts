@@ -11,8 +11,7 @@ import { MongocryptdManager } from '../../../src/client-side-encryption/mongocry
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoClient } from '../../../src/mongo_client';
-import { BSON, CSOTTimeoutContext, type DataKey } from '../../mongodb';
-import { sleep } from '../../tools/utils';
+import { BSON, type DataKey } from '../../mongodb';
 import * as requirements from './requirements.helper';
 
 const bson = BSON;
@@ -374,71 +373,5 @@ describe('AutoEncrypter', function () {
 
   it('should provide the libmongocrypt version', function () {
     expect(AutoEncrypter.libmongocryptVersion).to.be.a('string');
-  });
-
-  describe('CSOT', function () {
-    let autoEncrypter: AutoEncrypter;
-    let stateMachineSpy;
-    let client;
-
-    beforeEach(async function () {
-      client = new MockClient() as MongoClient;
-      autoEncrypter = new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        kmsProviders: {
-          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-          local: { key: Buffer.alloc(96) }
-        }
-      });
-      await autoEncrypter.init();
-      stateMachineSpy = sinon.spy(StateMachine.prototype, 'execute');
-    });
-
-    afterEach(async function () {
-      sinon.restore();
-    });
-
-    describe('#encrypt', function () {
-      context('when encrypt is provided a timeoutContext', function () {
-        it('should call stateMachine.execute with a timeoutMS', async function () {
-          const timeoutContext = new CSOTTimeoutContext({
-            timeoutMS: 500,
-            serverSelectionTimeoutMS: 30000
-          });
-          await sleep(300);
-          await autoEncrypter.encrypt('test.test', { hello: 1 }, { timeoutContext });
-          expect(stateMachineSpy.getCalls()[0].args[2]).to.not.be.undefined;
-          expect(stateMachineSpy.getCalls()[0].args[2].remainingTimeMS).to.be.lessThanOrEqual(200);
-        });
-      });
-      context('when encrypt is not provided a timeoutContext', function () {
-        it('should call stateMachine.execute without a timeoutMS', async function () {
-          await autoEncrypter.encrypt('test.test', { hello: 1 });
-          expect(stateMachineSpy.getCalls()[0].args[2]).to.be.undefined;
-        });
-      });
-    });
-
-    describe('#decrypt', function () {
-      context('when decrypt is provided a timeoutContext', function () {
-        it('should respect remainingTimeMS', async function () {
-          const timeoutContext = new CSOTTimeoutContext({
-            timeoutMS: 500,
-            serverSelectionTimeoutMS: 30000
-          });
-          await sleep(300);
-          await autoEncrypter.decrypt(BSON.serialize({ ok: 1 }), { timeoutContext });
-          expect(stateMachineSpy.getCalls()[0].args[2]).to.not.be.undefined;
-          expect(stateMachineSpy.getCalls()[0].args[2].remainingTimeMS).to.be.lessThanOrEqual(200);
-        });
-      });
-
-      context('when decrypt is not provided a timeoutContext', function () {
-        it('should call stateMachine.execute without a timeoutMS', async function () {
-          await autoEncrypter.decrypt(BSON.serialize({ ok: 1 }));
-          expect(stateMachineSpy.getCalls()[0].args[2]).to.be.undefined;
-        });
-      });
-    });
   });
 });

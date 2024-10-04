@@ -219,7 +219,7 @@ describe('CSOT spec unit tests', function () {
         });
       });
 
-      context('when client is not provided timeoutMS`', function () {
+      context('when client is not provided timeoutMS', function () {
         it('should pass timeoutMS into commands sent to mongocryptd', async function () {
           client = this.configuration.newClient(
             {},
@@ -241,9 +241,6 @@ describe('CSOT spec unit tests', function () {
         });
       });
     });
-
-    // TODO(NODE-6390): Add timeoutMS support to Auto Encryption
-    it.skip('The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.', () => {});
   });
 
   context.skip('Background Connection Pooling', function () {
