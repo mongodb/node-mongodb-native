@@ -26,7 +26,7 @@ import {
   MongoServerError,
   ObjectId
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
@@ -362,7 +362,7 @@ describe('CSOT driver tests', metadata, () => {
     };
 
     beforeEach(async function () {
-      internalClient = this.configuration.newClient();
+      internalClient = this.configuration.newClient({});
       await internalClient
         .db('db')
         .dropCollection('coll')
@@ -378,7 +378,11 @@ describe('CSOT driver tests', metadata, () => {
 
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { monitorCommands: true });
+      client = this.configuration.newClient(undefined, { monitorCommands: true, minPoolSize: 10 });
+
+      // wait for a handful of connections to have been established
+      await waitUntilPoolsFilled(client, AbortSignal.timeout(30_000), 5);
+
       commandStarted = [];
       commandSucceeded = [];
       client.on('commandStarted', ev => commandStarted.push(ev));
@@ -492,7 +496,13 @@ describe('CSOT driver tests', metadata, () => {
 
         await internalClient.db().admin().command(failpoint);
 
-        client = this.configuration.newClient(undefined, { monitorCommands: true });
+        client = this.configuration.newClient(undefined, {
+          monitorCommands: true,
+          minPoolSize: 10
+        });
+        // wait for a handful of connections to have been established
+        await waitUntilPoolsFilled(client, AbortSignal.timeout(30_000), 5);
+
         commandStarted = [];
         commandSucceeded = [];
         client.on('commandStarted', ev => commandStarted.push(ev));

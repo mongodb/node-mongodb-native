@@ -359,6 +359,7 @@ export type {
   CursorStreamOptions
 } from './cursor/abstract_cursor';
 export type {
+  CursorTimeoutContext,
   InitialCursorResponse,
   InternalAbstractCursorOptions
 } from './cursor/abstract_cursor';
