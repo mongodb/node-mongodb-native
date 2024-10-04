@@ -789,6 +789,11 @@ describe('CSOT driver tests', metadata, () => {
           expect(getMores).to.have.lengthOf(1);
           expect(getMores[0].command.getMore).to.exist;
           expect(getMores[0].command.getMore.maxTimeMS).to.not.exist;
+        });
+      });
+    });
+  });
+
   describe('GridFSBucket', () => {
     const blockTimeMS = 200;
     let internalClient: MongoClient;
