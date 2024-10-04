@@ -46,6 +46,7 @@ export {
   MongoBatchReExecutionError,
   MongoChangeStreamError,
   MongoClientBulkWriteCursorError,
+  MongoClientBulkWriteError,
   MongoClientBulkWriteExecutionError,
   MongoCompatibilityError,
   MongoCursorExhaustedError,
