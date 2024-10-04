@@ -66,7 +66,6 @@ export interface FindOptions<TSchema extends Document = Document>
    */
   oplogReplay?: boolean;
 
-  /** @internal*/
   timeoutMode?: CursorTimeoutMode;
 }
 
