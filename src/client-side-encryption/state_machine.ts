@@ -435,7 +435,6 @@ export class StateMachine {
             resolve();
           }
         });
-
       await (timeoutContext?.csotEnabled()
         ? Promise.all([willResolveKmsRequest, Timeout.expires(timeoutContext?.remainingTimeMS)])
         : willResolveKmsRequest);
@@ -525,7 +524,9 @@ export class StateMachine {
       .listCollections(filter, {
         promoteLongs: false,
         promoteValues: false,
-        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
+        ...(timeoutContext?.csotEnabled()
+          ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
+          : {})
       })
       .toArray();
 
@@ -581,9 +582,12 @@ export class StateMachine {
     return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
-      .find(deserialize(filter), {
-        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
-      })
+      .find(
+        deserialize(filter),
+        timeoutContext?.csotEnabled()
+          ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
+          : {}
+      )
       .toArray();
   }
 }
