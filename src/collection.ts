@@ -501,12 +501,18 @@ export class Collection<TSchema extends Document = Document> {
    */
   async findOne(): Promise<WithId<TSchema> | null>;
   async findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
-  async findOne(filter: Filter<TSchema>, options: FindOptions): Promise<WithId<TSchema> | null>;
+  async findOne(
+    filter: Filter<TSchema>,
+    options: Omit<FindOptions, 'timeoutMode'>
+  ): Promise<WithId<TSchema> | null>;
 
   // allow an override of the schema.
   async findOne<T = TSchema>(): Promise<T | null>;
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
-  async findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | null>;
+  async findOne<T = TSchema>(
+    filter: Filter<TSchema>,
+    options?: Omit<FindOptions, 'timeoutMode'>
+  ): Promise<T | null>;
 
   async findOne(
     filter: Filter<TSchema> = {},
