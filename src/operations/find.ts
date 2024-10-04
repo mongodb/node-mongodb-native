@@ -1,6 +1,6 @@
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
-import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
+import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import { type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
@@ -18,7 +18,8 @@ import { Aspect, defineAspects, type Hint } from './operation';
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface FindOptions<TSchema extends Document = Document>
-  extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'> {
+  extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'>,
+    AbstractCursorOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
