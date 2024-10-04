@@ -767,7 +767,7 @@ export function expectErrorCheck(
 
   if (expected.errorCode != null) {
     if (error instanceof MongoClientBulkWriteError) {
-      expect(error.error).to.have.property('code', expected.errorCode);
+      expect(error.cause).to.have.property('code', expected.errorCode);
     } else {
       expect(error, expectMessage).to.have.property('code', expected.errorCode);
     }
@@ -810,7 +810,7 @@ export function expectErrorCheck(
 
   if (expected.errorResponse != null) {
     if (error instanceof MongoClientBulkWriteError) {
-      resultCheck(error.error, expected.errorResponse, entities);
+      resultCheck(error.cause, expected.errorResponse, entities);
     } else {
       resultCheck(error, expected.errorResponse, entities);
     }

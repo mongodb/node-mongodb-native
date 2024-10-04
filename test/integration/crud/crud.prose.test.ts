@@ -684,7 +684,7 @@ describe('CRUD Prose Spec Tests', () => {
           .bulkWrite(models, { verboseResults: true })
           .catch(error => error);
         expect(error).to.be.instanceOf(MongoClientBulkWriteError);
-        expect(error.error.code).to.equal(8);
+        expect(error.cause.code).to.equal(8);
         expect(error.partialResult).to.exist;
         // TODO: Need to handle batches in cursor one at a time and not call toArray()
         expect(error.partialResult.upsertedCount).to.equal(2);

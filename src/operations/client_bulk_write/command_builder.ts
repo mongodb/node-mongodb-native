@@ -1,9 +1,9 @@
 import { BSON, type Document } from '../../bson';
 import { DocumentSequence } from '../../cmap/commands';
-import { MongoClientBulkWriteUpdateError, MongoInvalidArgumentError } from '../../error';
+import { MongoAPIError, MongoInvalidArgumentError } from '../../error';
 import { type PkFactory } from '../../mongo_client';
 import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
-import { DEFAULT_PK_FACTORY } from '../../utils';
+import { DEFAULT_PK_FACTORY, hasAtomicOperators } from '../../utils';
 import { type CollationOptions } from '../command';
 import { type Hint } from '../operation';
 import type {
@@ -342,13 +342,9 @@ export const buildUpdateManyOperation = (
  * @param update - The update document.
  */
 function validateUpdate(update: Document) {
-  const keys = Object.keys(update);
-  if (keys.length === 0) {
-    throw new MongoClientBulkWriteUpdateError('Client bulk write update models may not be empty.');
-  }
-  if (!keys[0].startsWith('$')) {
-    throw new MongoClientBulkWriteUpdateError(
-      'Client bulk write update models must only contain atomic modifiers (start with $).'
+  if (!hasAtomicOperators(update)) {
+    throw new MongoAPIError(
+      'Client bulk write update models must only contain atomic modifiers (start with $) and must not be empty.'
     );
   }
 }
@@ -367,9 +363,7 @@ function createUpdateOperation(
   // document's first key does not start with "$".
   if (Array.isArray(model.update)) {
     if (model.update.length === 0) {
-      throw new MongoClientBulkWriteUpdateError(
-        'Client bulk write update model pipelines may not be empty.'
-      );
+      throw new MongoAPIError('Client bulk write update model pipelines may not be empty.');
     }
     for (const update of model.update) {
       validateUpdate(update);
@@ -419,13 +413,9 @@ export const buildReplaceOneOperation = (
   model: ClientReplaceOneModel,
   index: number
 ): ClientReplaceOneOperation => {
-  const keys = Object.keys(model.replacement);
-  if (keys.length === 0) {
-    throw new MongoClientBulkWriteUpdateError('Client bulk write replace models may not be empty.');
-  }
-  if (keys[0].startsWith('$')) {
-    throw new MongoClientBulkWriteUpdateError(
-      'Client bulk write replace models must not contain atomic modifiers (start with $).'
+  if (hasAtomicOperators(model.replacement)) {
+    throw new MongoAPIError(
+      'Client bulk write replace models must not contain atomic modifiers (start with $) and must not be empty.'
     );
   }
 

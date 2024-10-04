@@ -1,14 +1,14 @@
 import { MongoWriteConcernError } from '../..';
 import { type Document } from '../../bson';
 import { type ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
+import { MongoClientBulkWriteError } from '../../error';
 import {
   type ClientBulkWriteError,
   type ClientBulkWriteOptions,
   type ClientBulkWriteResult,
   type ClientDeleteResult,
   type ClientInsertOneResult,
-  type ClientUpdateResult,
-  MongoClientBulkWriteError
+  type ClientUpdateResult
 } from './common';
 
 /**
@@ -61,33 +61,35 @@ export class ClientBulkWriteResultsMerger {
     try {
       for await (const document of cursor) {
         // Only add to maps if ok: 1
-        if (document.ok === 1 && this.options.verboseResults) {
-          // Get the corresponding operation from the command.
-          const operation = cursor.operations[document.idx];
-          // Handle insert results.
-          if ('insert' in operation) {
-            this.result.insertResults?.set(document.idx + this.currentBatchOffset, {
-              insertedId: operation.document._id
-            });
-          }
-          // Handle update results.
-          if ('update' in operation) {
-            const result: ClientUpdateResult = {
-              matchedCount: document.n,
-              modifiedCount: document.nModified ?? 0,
-              // Check if the bulk did actually upsert.
-              didUpsert: document.upserted != null
-            };
-            if (document.upserted) {
-              result.upsertedId = document.upserted._id;
+        if (document.ok === 1) {
+          if (this.options.verboseResults) {
+            // Get the corresponding operation from the command.
+            const operation = cursor.operations[document.idx];
+            // Handle insert results.
+            if ('insert' in operation) {
+              this.result.insertResults?.set(document.idx + this.currentBatchOffset, {
+                insertedId: operation.document._id
+              });
             }
-            this.result.updateResults?.set(document.idx + this.currentBatchOffset, result);
-          }
-          // Handle delete results.
-          if ('delete' in operation) {
-            this.result.deleteResults?.set(document.idx + this.currentBatchOffset, {
-              deletedCount: document.n
-            });
+            // Handle update results.
+            if ('update' in operation) {
+              const result: ClientUpdateResult = {
+                matchedCount: document.n,
+                modifiedCount: document.nModified ?? 0,
+                // Check if the bulk did actually upsert.
+                didUpsert: document.upserted != null
+              };
+              if (document.upserted) {
+                result.upsertedId = document.upserted._id;
+              }
+              this.result.updateResults?.set(document.idx + this.currentBatchOffset, result);
+            }
+            // Handle delete results.
+            if ('delete' in operation) {
+              this.result.deleteResults?.set(document.idx + this.currentBatchOffset, {
+                deletedCount: document.n
+              });
+            }
           }
         } else {
           // If an individual write error is encountered during an ordered bulk write, drivers MUST

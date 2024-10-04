@@ -1,5 +1,9 @@
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
-import { MongoClientBulkWriteExecutionError, MongoServerError } from '../../error';
+import {
+  MongoClientBulkWriteError,
+  MongoClientBulkWriteExecutionError,
+  MongoServerError
+} from '../../error';
 import { type MongoClient } from '../../mongo_client';
 import { WriteConcern } from '../../write_concern';
 import { executeOperation } from '../execute_operation';
@@ -8,8 +12,7 @@ import { ClientBulkWriteCommandBuilder } from './command_builder';
 import {
   type AnyClientBulkWriteModel,
   type ClientBulkWriteOptions,
-  type ClientBulkWriteResult,
-  MongoClientBulkWriteError
+  type ClientBulkWriteResult
 } from './common';
 import { ClientBulkWriteResultsMerger } from './results_merger';
 
@@ -39,7 +42,12 @@ export class ClientBulkWriteExecutor {
 
     this.client = client;
     this.operations = operations;
-    this.options = { ordered: true, ...options };
+    this.options = {
+      ordered: true,
+      bypassDocumentValidation: false,
+      verboseResults: false,
+      ...options
+    };
 
     // If no write concern was provided, we inherit one from the client.
     if (!this.options.writeConcern) {
@@ -86,7 +94,7 @@ export class ClientBulkWriteExecutor {
             const bulkWriteError = new MongoClientBulkWriteError({
               message: 'Mongo client bulk write encountered an error during execution'
             });
-            bulkWriteError.error = error;
+            bulkWriteError.cause = error;
             bulkWriteError.partialResult = resultsMerger.result;
             throw bulkWriteError;
           } else {
