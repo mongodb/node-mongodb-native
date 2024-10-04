@@ -3,15 +3,20 @@
 import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
+import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
   type CommandSucceededEvent,
+  GridFSBucket,
   MongoBulkWriteError,
   MongoClient,
   MongoOperationTimeoutError,
   MongoServerSelectionError,
-  now
+  now,
+  ObjectId,
+  promiseWithResolvers
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 
@@ -398,10 +403,42 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
-  context.skip('6. GridFS - Upload', () => {
+  context('6. GridFS - Upload', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
+    let internalClient: MongoClient;
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient();
+      await internalClient
+        .db('db')
+        .dropCollection('files')
+        .catch(() => null);
+      await internalClient
+        .db('db')
+        .dropCollection('chunks')
+        .catch(() => null);
+
+      client = this.configuration.newClient(undefined, { timeoutMS: 100 });
+    });
+
+    afterEach(async function () {
+      if (internalClient) {
+        await internalClient
+          .db()
+          .admin()
+          .command({ configureFailPoint: 'failCommand', mode: 'off' });
+        await internalClient.close();
+      }
+      if (client) {
+        await client.close();
+      }
+    });
     /** Tests in this section MUST only be run against server versions 4.4 and higher. */
 
-    context('uploads via openUploadStream can be timed out', () => {
+    it('uploads via openUploadStream can be timed out', metadata, async function () {
       /**
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
        * 1. Using `internalClient`, set the following fail point:
@@ -424,9 +461,30 @@ describe('CSOT spec prose tests', function () {
        * 1. Call `uploadStream.close()` to flush the stream and insert chunks.
        *    - Expect this to fail with a timeout error.
        */
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['insert'],
+          blockConnection: true,
+          blockTimeMS: 150
+        }
+      };
+      await internalClient.db().admin().command(failpoint);
+
+      const bucket = new GridFSBucket(client.db('db'));
+      const stream = bucket.openUploadStream('filename');
+      const data = Buffer.from('13', 'hex');
+
+      const fileStream = Readable.from(data);
+      const maybeError = await pipeline(fileStream, stream).then(
+        () => null,
+        error => error
+      );
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
     });
 
-    context('Aborting an upload stream can be timed out', () => {
+    it('Aborting an upload stream can be timed out', metadata, async function () {
       /**
        * This test only applies to drivers that provide an API to abort a GridFS upload stream.
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -450,10 +508,92 @@ describe('CSOT spec prose tests', function () {
        * 1. Call `uploadStream.abort()`.
        *   - Expect this to fail with a timeout error.
        */
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['delete'],
+          blockConnection: true,
+          blockTimeMS: 200
+        }
+      };
+
+      await internalClient.db().admin().command(failpoint);
+      const bucket = new GridFSBucket(client.db('db'), { chunkSizeBytes: 2 });
+      const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 300 });
+
+      const data = Buffer.from('01020304', 'hex');
+
+      const { promise: writePromise, resolve, reject } = promiseWithResolvers<void>();
+      uploadStream.on('error', error => uploadStream.destroy(error));
+      uploadStream.write(data, error => {
+        if (error) reject(error);
+        else resolve();
+      });
+      let maybeError = await writePromise.then(
+        () => null,
+        e => e
+      );
+      expect(maybeError).to.be.null;
+
+      maybeError = await uploadStream.abort().then(
+        () => null,
+        error => error
+      );
+      expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+      uploadStream.destroy();
     });
   });
 
-  context.skip('7. GridFS - Download', () => {
+  context('7. GridFS - Download', () => {
+    let internalClient: MongoClient;
+    let client: MongoClient;
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient();
+      await internalClient
+        .db('db')
+        .dropCollection('files')
+        .catch(() => null);
+      await internalClient
+        .db('db')
+        .dropCollection('chunks')
+        .catch(() => null);
+
+      const files = await internalClient.db('db').createCollection('files');
+
+      await files.insertOne({
+        _id: new ObjectId('000000000000000000000005'),
+        length: 10,
+        chunkSize: 4,
+        uploadDate: new Date('1970-01-01T00:00:00.000Z'),
+        md5: '57d83cd477bfb1ccd975ab33d827a92b',
+        filename: 'length-10',
+        contentType: 'application/octet-stream',
+        aliases: [],
+        metadata: {}
+      });
+
+      client = this.configuration.newClient(undefined, { timeoutMS: 100 });
+    });
+
+    afterEach(async function () {
+      if (internalClient) {
+        await internalClient
+          .db()
+          .admin()
+          .command({ configureFailPoint: 'failCommand', mode: 'off' });
+        await internalClient.close();
+      }
+
+      if (client) {
+        await client.close();
+      }
+    });
+
     /**
      * This test MUST only be run against server versions 4.4 and higher.
      * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -495,6 +635,27 @@ describe('CSOT spec prose tests', function () {
      *   - Expect this to fail with a timeout error.
      * 1. Verify that two `find` commands were executed during the read: one against `db.fs.files` and another against `db.fs.chunks`.
      */
+    it('download streams can be timed out', metadata, async function () {
+      const bucket = new GridFSBucket(client.db('db'));
+      const downloadStream = bucket.openDownloadStream(new ObjectId('000000000000000000000005'));
+
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['find'],
+          blockConnection: true,
+          blockTimeMS: 150
+        }
+      };
+      await internalClient.db().admin().command(failpoint);
+
+      const maybeError = await downloadStream.toArray().then(
+        () => null,
+        e => e
+      );
+      expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+    });
   });
 
   context('8. Server Selection', () => {
