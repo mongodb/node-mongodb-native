@@ -83,5 +83,6 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
 defineAspects(ClientBulkWriteOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.SKIP_COLLATION,
-  Aspect.CURSOR_CREATING
+  Aspect.CURSOR_CREATING,
+  Aspect.RETRYABLE
 ]);
