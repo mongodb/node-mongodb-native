@@ -17,6 +17,7 @@ import { Aspect, defineAspects } from './operation';
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
   'wtimeout',
+  'timeoutMS',
   'j',
   'fsync',
   'autoIndexId',

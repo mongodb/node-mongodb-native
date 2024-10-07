@@ -209,12 +209,35 @@ export abstract class AbstractCursor<
         options.readPreference && options.readPreference instanceof ReadPreference
           ? options.readPreference
           : ReadPreference.primary,
-      ...pluckBSONSerializeOptions(options)
+      ...pluckBSONSerializeOptions(options),
+      timeoutMS: options.timeoutMS,
+      tailable: options.tailable,
+      awaitData: options.awaitData
     };
-    this.cursorOptions.timeoutMS = options.timeoutMS;
     if (this.cursorOptions.timeoutMS != null) {
-      if (options.tailable && this.cursorOptions.timeoutMode === CursorTimeoutMode.LIFETIME) {
-        throw new MongoInvalidArgumentError("Cannot set tailable cursor's timeoutMode to LIFETIME");
+      if (options.timeoutMode == null) {
+        if (options.tailable) {
+          this.cursorOptions.timeoutMode = CursorTimeoutMode.ITERATION;
+
+          if (options.awaitData) {
+            if (
+              options.maxAwaitTimeMS != null &&
+              options.maxAwaitTimeMS >= this.cursorOptions.timeoutMS
+            )
+              throw new MongoInvalidArgumentError(
+                'Cannot specify maxAwaitTimeMS >= timeoutMS for a tailable awaitData cursor'
+              );
+          }
+        } else {
+          this.cursorOptions.timeoutMode = CursorTimeoutMode.LIFETIME;
+        }
+      } else {
+        if (options.tailable && this.cursorOptions.timeoutMode === CursorTimeoutMode.LIFETIME) {
+          throw new MongoInvalidArgumentError(
+            "Cannot set tailable cursor's timeoutMode to LIFETIME"
+          );
+        }
+        this.cursorOptions.timeoutMode = options.timeoutMode;
       }
       this.cursorOptions.timeoutMode =
         options.timeoutMode ??
@@ -223,6 +246,8 @@ export abstract class AbstractCursor<
       if (options.timeoutMode != null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
+
+    // Set for initial command
     this.cursorOptions.omitMaxTimeMS =
       this.cursorOptions.timeoutMS != null &&
       ((this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
@@ -781,15 +806,17 @@ export abstract class AbstractCursor<
         'Unexpected null selectedServer. A cursor creating command should have set this'
       );
     }
+    const getMoreOptions = {
+      ...this.cursorOptions,
+      session: this.cursorSession,
+      batchSize
+    };
+
     const getMoreOperation = new GetMoreOperation(
       this.cursorNamespace,
       this.cursorId,
       this.selectedServer,
-      {
-        ...this.cursorOptions,
-        session: this.cursorSession,
-        batchSize
-      }
+      getMoreOptions
     );
 
     return await executeOperation(this.cursorClient, getMoreOperation, this.timeoutContext);
@@ -814,6 +841,8 @@ export abstract class AbstractCursor<
     }
     try {
       const state = await this._initialize(this.cursorSession);
+      // Set omitMaxTimeMS to the value needed for subsequent getMore calls
+      this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
       const response = state.response;
       this.selectedServer = state.server;
       this.cursorId = response.id;
@@ -866,9 +895,9 @@ export abstract class AbstractCursor<
     } catch (error) {
       try {
         await this.cleanup(undefined, error);
-      } catch (error) {
+      } catch (cleanupError) {
         // `cleanupCursor` should never throw, squash and throw the original error
-        squashError(error);
+        squashError(cleanupError);
       }
       throw error;
     }
