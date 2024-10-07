@@ -27,6 +27,10 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
+  override resetBatch(): boolean {
+    return this.commandBuilder.resetBatch();
+  }
+
   /**
    * Execute the command. Superclass will handle write concern, etc.
    * @param server - The server.
@@ -84,5 +88,6 @@ defineAspects(ClientBulkWriteOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.SKIP_COLLATION,
   Aspect.CURSOR_CREATING,
-  Aspect.RETRYABLE
+  Aspect.RETRYABLE,
+  Aspect.COMMAND_BATCHING
 ]);

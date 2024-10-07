@@ -40,6 +40,7 @@ export class ClientBulkWriteCommandBuilder {
   options: ClientBulkWriteOptions;
   pkFactory: PkFactory;
   currentModelIndex: number;
+  previousModelIndex: number;
   lastOperations: Document[];
 
   /**
@@ -55,6 +56,7 @@ export class ClientBulkWriteCommandBuilder {
     this.options = options;
     this.pkFactory = pkFactory ?? DEFAULT_PK_FACTORY;
     this.currentModelIndex = 0;
+    this.previousModelIndex = 0;
     this.lastOperations = [];
   }
 
@@ -78,6 +80,15 @@ export class ClientBulkWriteCommandBuilder {
   }
 
   /**
+   * When we need to retry a command we need to set the current
+   * model index back to its previous value.
+   */
+  resetBatch(): boolean {
+    this.currentModelIndex = this.previousModelIndex;
+    return true;
+  }
+
+  /**
    * Build a single batch of a client bulk write command.
    * @param maxMessageSizeBytes - The max message size in bytes.
    * @param maxWriteBatchSize - The max write batch size.
@@ -92,6 +103,8 @@ export class ClientBulkWriteCommandBuilder {
     let currentNamespaceIndex = 0;
     const command: ClientBulkWriteCommand = this.baseCommand();
     const namespaces = new Map<string, number>();
+    // In the case of retries we need to mark where we started this batch.
+    this.previousModelIndex = this.currentModelIndex;
 
     while (this.currentModelIndex < this.models.length) {
       const model = this.models[this.currentModelIndex];

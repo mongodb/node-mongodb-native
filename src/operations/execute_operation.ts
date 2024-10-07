@@ -260,6 +260,10 @@ async function tryOperation<
     }
 
     try {
+      // If tries > 0 and we are command batching we need to reset the batch.
+      if (tries > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
+        operation.resetBatch();
+      }
       return await operation.execute(server, session);
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;

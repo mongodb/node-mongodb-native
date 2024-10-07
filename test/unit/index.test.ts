@@ -27,7 +27,6 @@ const EXPECTED_EXPORTS = [
   'CancellationToken',
   'ChangeStream',
   'ChangeStreamCursor',
-  'ClientBulkWriteError',
   'ClientEncryption',
   'ClientSession',
   'Code',

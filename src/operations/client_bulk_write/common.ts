@@ -181,6 +181,7 @@ export interface ClientBulkWriteResult {
   deleteResults?: Map<number, ClientDeleteResult>;
 }
 
+/** @public */
 export interface ClientBulkWriteError {
   code: number;
   message: string;
