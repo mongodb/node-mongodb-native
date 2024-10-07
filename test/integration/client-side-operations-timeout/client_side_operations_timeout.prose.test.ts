@@ -17,9 +17,9 @@ import {
   MongoOperationTimeoutError,
   MongoServerSelectionError,
   now,
-  squashError
   ObjectId,
-  promiseWithResolvers
+  promiseWithResolvers,
+  squashError
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 
