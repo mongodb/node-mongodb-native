@@ -13,11 +13,11 @@ import { AggregateOperation } from '../operations/aggregate';
 import type { CollationOptions } from '../operations/command';
 import { executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   AbstractCursor,
   type AbstractCursorOptions,
+  type CursorTimeoutContext,
   type InitialCursorResponse
 } from './abstract_cursor';
 
@@ -55,7 +55,7 @@ export class ChangeStreamCursor<
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
     options: ChangeStreamCursorOptions = {},
-    timeoutContext?: TimeoutContext
+    timeoutContext?: CursorTimeoutContext
   ) {
     super(client, namespace, { ...options, tailable: true, awaitData: true });
     this.timeoutContext = timeoutContext;

@@ -981,8 +981,13 @@ export class ChangeStream<
 
       this.cursor
         .close()
-        .then(undefined, squashError)
-        .finally(() => this._resume(changeStreamError))
+        .then(
+          () => this._resume(changeStreamError),
+          e => {
+            squashError(e);
+            return this._resume(changeStreamError);
+          }
+        )
         .then(
           () => {
             if (changeStreamError instanceof MongoOperationTimeoutError)
@@ -1020,13 +1025,13 @@ export class ChangeStream<
       squashError(error);
     }
 
-    this.timeoutContext?.refresh();
     await this._resume(changeStreamError);
 
     if (changeStreamError instanceof MongoOperationTimeoutError) throw changeStreamError;
   }
 
   private async _resume(changeStreamError: AnyError) {
+    this.timeoutContext?.refresh();
     const topology = getTopology(this.parent);
     try {
       await topology.selectServer(this.cursor.readPreference, {

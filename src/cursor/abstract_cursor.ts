@@ -8,7 +8,6 @@ import {
   MongoCursorExhaustedError,
   MongoCursorInUseError,
   MongoInvalidArgumentError,
-  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoTailableCursorError
 } from '../error';
@@ -24,7 +23,6 @@ import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type CSOTTimeoutContext, type Timeout, TimeoutContext } from '../timeout';
 import { type MongoDBNamespace, squashError } from '../utils';
-import { ChangeStreamCursor } from './change_stream_cursor';
 
 /**
  * @internal
