@@ -493,9 +493,7 @@ describe('Collection', function () {
           .command({
             configureFailPoint: 'failCommand',
             mode: 'off',
-            data: {
-              failCommands: ['aggregate']
-            }
+            data: { failCommands: ['aggregate'] }
           } as FailPoint);
       });
 
