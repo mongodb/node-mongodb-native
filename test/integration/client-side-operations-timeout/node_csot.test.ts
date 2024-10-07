@@ -1,4 +1,6 @@
 /* Anything javascript specific relating to timeouts */
+import { once } from 'node:events';
+import { setInterval } from 'node:timers';
 import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
@@ -7,6 +9,7 @@ import * as sinon from 'sinon';
 
 import {
   BSON,
+  type ChangeStream,
   type ClientSession,
   type Collection,
   type CommandFailedEvent,
@@ -785,6 +788,98 @@ describe('CSOT driver tests', metadata, () => {
           expect(getMores[0].command.getMore).to.exist;
           expect(getMores[0].command.getMore.maxTimeMS).to.not.exist;
         });
+      });
+    });
+  });
+
+  describe('Change Streams', function () {
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', topology: '!single' } };
+    let internalClient: MongoClient;
+    let client: MongoClient;
+    let commandsStarted: CommandStartedEvent[];
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient();
+      await internalClient
+        .db('db')
+        .dropCollection('coll')
+        .catch(() => null);
+      await internalClient.db('db').collection('coll').insertOne({ x: 0 });
+      commandsStarted = [];
+
+      client = this.configuration.newClient(undefined, { monitorCommands: true });
+      client.on('commandStarted', ev => commandsStarted.push(ev));
+    });
+
+    afterEach(async function () {
+      await internalClient
+        .db()
+        .admin()
+        ?.command({ configureFailPoint: 'failCommand', mode: 'off' });
+      await internalClient?.close();
+      await client?.close();
+    });
+
+    context('when in stream mode', function () {
+      context.only('when the initial aggregate times out', function () {
+        let data: any[];
+        let cs: ChangeStream;
+        let errorPromise: Promise<any[]>;
+        let changePromise: Promise<any[]>;
+
+        beforeEach(async function () {
+          data = [];
+          const failpoint: FailPoint = {
+            configureFailPoint: 'failCommand',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['aggregate'],
+              blockConnection: true,
+              blockTimeMS: 130
+            }
+          };
+
+          await internalClient.db().admin().command(failpoint);
+          cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
+          errorPromise = once(cs, 'error');
+          cs.on('change', console.log);
+          //changePromise = once(cs, 'change');
+        });
+
+        it('emits an error event', metadata, async function () {
+          const err = (await errorPromise)[0];
+
+          expect(data).to.have.lengthOf(0);
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+        });
+
+        it('does not close the change stream', metadata, async function () {
+          const err = (await errorPromise)[0];
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+          expect(cs.closed).to.be.false;
+        });
+
+        it('continues emitting change events', metadata, async function () {
+          const [err] = await errorPromise;
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+          expect(data).to.have.lengthOf(0);
+
+          await client.db('db').collection('coll').insertOne({ x: 1 });
+          await setTimeout(1000);
+
+          //expect(change).to.have.property('operationType', 'insert');
+        });
+      });
+
+      context('when the getMore times out', function () {
+        it('emits an error event');
+        it('continues publishing data events');
+        it('does not close the change stream');
+      });
+
+      context('when the resume attempt times out', function () {
+        it('emits an error event');
+        it('closes the change stream');
       });
     });
   });
