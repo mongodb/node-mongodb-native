@@ -26,18 +26,23 @@ import {
   MongoServerError,
   ObjectId
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
 describe('CSOT driver tests', metadata, () => {
+  // NOTE: minPoolSize here is set to ensure that connections are available when testing timeout
+  // behaviour. This reduces flakiness in our tests since operations will not spend time
+  // establishing connections, more closely mirroring long-running application behaviour
+  const minPoolSize = 20;
+
   describe('timeoutMS inheritance', () => {
     let client: MongoClient;
     let db: Db;
     let coll: Collection;
 
     beforeEach(async function () {
-      client = this.configuration.newClient(undefined, { timeoutMS: 100 });
+      client = this.configuration.newClient(undefined, { timeoutMS: 100, minPoolSize });
       db = client.db('test', { timeoutMS: 200 });
     });
 
@@ -159,7 +164,10 @@ describe('CSOT driver tests', metadata, () => {
         metadata: { requires: { mongodb: '>=4.4', topology: '!load-balanced' } },
         test: async function () {
           const commandsStarted = [];
-          client = this.configuration.newClient(undefined, { timeoutMS: 1, monitorCommands: true });
+          client = this.configuration.newClient(undefined, {
+            timeoutMS: 1,
+            monitorCommands: true
+          });
 
           client.on('commandStarted', ev => commandsStarted.push(ev));
 
@@ -362,7 +370,7 @@ describe('CSOT driver tests', metadata, () => {
     };
 
     beforeEach(async function () {
-      internalClient = this.configuration.newClient();
+      internalClient = this.configuration.newClient({});
       await internalClient
         .db('db')
         .dropCollection('coll')
@@ -378,7 +386,11 @@ describe('CSOT driver tests', metadata, () => {
 
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { monitorCommands: true });
+      client = this.configuration.newClient(undefined, { monitorCommands: true, minPoolSize: 10 });
+
+      // wait for a handful of connections to have been established
+      await waitUntilPoolsFilled(client, AbortSignal.timeout(30_000), 5);
+
       commandStarted = [];
       commandSucceeded = [];
       client.on('commandStarted', ev => commandStarted.push(ev));
@@ -492,7 +504,13 @@ describe('CSOT driver tests', metadata, () => {
 
         await internalClient.db().admin().command(failpoint);
 
-        client = this.configuration.newClient(undefined, { monitorCommands: true });
+        client = this.configuration.newClient(undefined, {
+          monitorCommands: true,
+          minPoolSize: 10
+        });
+        // wait for a handful of connections to have been established
+        await waitUntilPoolsFilled(client, AbortSignal.timeout(30_000), 5);
+
         commandStarted = [];
         commandSucceeded = [];
         client.on('commandStarted', ev => commandStarted.push(ev));
@@ -576,6 +594,211 @@ describe('CSOT driver tests', metadata, () => {
           for (const getMore of getMores) {
             expect(getMore.maxTimeMS).to.not.exist;
           }
+        });
+      });
+    });
+  });
+
+  describe('Tailable cursors', function () {
+    let client: MongoClient;
+    let internalClient: MongoClient;
+    let commandStarted: CommandStartedEvent[];
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
+
+    const failpoint: FailPoint = {
+      configureFailPoint: 'failCommand',
+      mode: 'alwaysOn',
+      data: {
+        failCommands: ['aggregate', 'find', 'getMore'],
+        blockConnection: true,
+        blockTimeMS: 100
+      }
+    };
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient();
+      await internalClient
+        .db('db')
+        .dropCollection('coll')
+        .catch(() => null);
+
+      await internalClient.db('db').createCollection('coll', { capped: true, size: 1_000_000 });
+
+      await internalClient
+        .db('db')
+        .collection('coll')
+        .insertMany(
+          Array.from({ length: 100 }, () => {
+            return { x: 1 };
+          })
+        );
+
+      await internalClient.db().admin().command(failpoint);
+
+      client = this.configuration.newClient(undefined, { monitorCommands: true, minPoolSize });
+      commandStarted = [];
+      client.on('commandStarted', ev => commandStarted.push(ev));
+      await client.connect();
+    });
+
+    afterEach(async function () {
+      await internalClient
+        .db()
+        .admin()
+        .command({ ...failpoint, mode: 'off' });
+      await internalClient.close();
+      await client.close();
+    });
+
+    context('when in ITERATION mode', function () {
+      context('awaitData cursors', function () {
+        let cursor: FindCursor;
+        afterEach(async function () {
+          if (cursor) await cursor.close();
+        });
+
+        it('applies timeoutMS to initial command', metadata, async function () {
+          cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { timeoutMS: 50, tailable: true, awaitData: true, batchSize: 1 });
+          const maybeError = await cursor.next().then(
+            () => null,
+            e => e
+          );
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+
+          const finds = commandStarted.filter(x => x.commandName === 'find');
+          const getMores = commandStarted.filter(x => x.commandName === 'getMore');
+          expect(finds).to.have.lengthOf(1);
+          expect(getMores).to.have.lengthOf(0);
+        });
+
+        it('refreshes the timeout for subsequent getMores', metadata, async function () {
+          cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { timeoutMS: 150, tailable: true, awaitData: true, batchSize: 1 });
+          for (let i = 0; i < 5; i++) {
+            // Iterate cursor 5 times (server would have blocked for 500ms overall, but client
+            // should not throw
+            await cursor.next();
+          }
+        });
+
+        it('does not use timeoutMS to compute maxTimeMS for getMores', metadata, async function () {
+          cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { timeoutMS: 10_000, tailable: true, awaitData: true, batchSize: 1 });
+          await cursor.next();
+          await cursor.next();
+
+          const getMores = commandStarted
+            .filter(x => x.command.getMore != null)
+            .map(x => x.command);
+          expect(getMores).to.have.lengthOf(1);
+
+          const [getMore] = getMores;
+          expect(getMore).to.not.haveOwnProperty('maxTimeMS');
+        });
+
+        context('when maxAwaitTimeMS is specified', function () {
+          it(
+            'sets maxTimeMS to the configured maxAwaitTimeMS value on getMores',
+            metadata,
+            async function () {
+              cursor = client.db('db').collection('coll').find(
+                {},
+                {
+                  timeoutMS: 10_000,
+                  tailable: true,
+                  awaitData: true,
+                  batchSize: 1,
+                  maxAwaitTimeMS: 100
+                }
+              );
+              await cursor.next();
+              await cursor.next();
+
+              const getMores = commandStarted
+                .filter(x => x.command.getMore != null)
+                .map(x => x.command);
+              expect(getMores).to.have.lengthOf(1);
+
+              const [getMore] = getMores;
+              expect(getMore).to.haveOwnProperty('maxTimeMS');
+              expect(getMore.maxTimeMS).to.equal(100);
+            }
+          );
+        });
+      });
+
+      context('non-awaitData cursors', function () {
+        let cursor: FindCursor;
+
+        afterEach(async function () {
+          if (cursor) await cursor.close();
+        });
+
+        it('applies timeoutMS to initial command', metadata, async function () {
+          cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { timeoutMS: 50, tailable: true, batchSize: 1 });
+          const maybeError = await cursor.next().then(
+            () => null,
+            e => e
+          );
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+
+          const finds = commandStarted.filter(x => x.commandName === 'find');
+          const getMores = commandStarted.filter(x => x.commandName === 'getMore');
+          expect(finds).to.have.lengthOf(1);
+          expect(getMores).to.have.lengthOf(0);
+        });
+
+        it('refreshes the timeout for subsequent getMores', metadata, async function () {
+          cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { timeoutMS: 150, tailable: true, batchSize: 1 });
+          for (let i = 0; i < 5; i++) {
+            // Iterate cursor 5 times (server would have blocked for 500ms overall, but client
+            // should not throw
+            await cursor.next();
+          }
+        });
+
+        it('does not append a maxTimeMS field to original command', metadata, async function () {
+          cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { timeoutMS: 2000, tailable: true, batchSize: 1 });
+
+          await cursor.next();
+
+          const finds = commandStarted.filter(x => x.command.find != null);
+          expect(finds).to.have.lengthOf(1);
+          expect(finds[0].command.find).to.exist;
+          expect(finds[0].command.maxTimeMS).to.not.exist;
+        });
+        it('does not append a maxTimeMS field to subsequent getMores', metadata, async function () {
+          cursor = client
+            .db('db')
+            .collection('coll')
+            .find({}, { timeoutMS: 2000, tailable: true, batchSize: 1 });
+
+          await cursor.next();
+          await cursor.next();
+
+          const getMores = commandStarted.filter(x => x.command.getMore != null);
+
+          expect(getMores).to.have.lengthOf(1);
+          expect(getMores[0].command.getMore).to.exist;
+          expect(getMores[0].command.getMore.maxTimeMS).to.not.exist;
         });
       });
     });
@@ -788,6 +1011,10 @@ describe('CSOT driver tests', metadata, () => {
 
         beforeEach(async function () {
           client = this.configuration.newClient({ timeoutMS: 123 });
+          await client
+            .db('db')
+            .dropCollection('coll')
+            .catch(() => null);
         });
 
         afterEach(async function () {
