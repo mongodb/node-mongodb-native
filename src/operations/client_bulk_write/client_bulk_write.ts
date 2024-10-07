@@ -53,7 +53,9 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
         const connection = await server.pool.checkOut();
         // Pin the connection to the session so it get used to execute the command and we do not
         // perform a double check-in/check-out.
-        session.pin(connection);
+        if (!session.pinnedConnection) {
+          session.pin(connection);
+        }
         command = this.commandBuilder.buildBatch(
           connection.hello?.maxMessageSizeBytes,
           connection.hello?.maxWriteBatchSize,
