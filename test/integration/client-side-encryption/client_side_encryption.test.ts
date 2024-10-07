@@ -1,97 +1,106 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
-import { setTimeout } from 'timers';
-import { TLSSocket } from 'tls';
-import { promisify } from 'util';
 
-import { MongoClient } from '../../mongodb';
-import { getEncryptExtraOptions } from '../../tools/utils';
-import { createTimerSandbox } from '../../unit/timer_sandbox';
+import { MongoOperationTimeoutError, MongoServerError } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 describe('Auto Encryption (Integration)', function () {
-  describe.skip('CSOT', function () {
-    let client;
-    let clock;
-    let timerSandbox;
-    let sleep;
+  describe('CSOT', function () {
+    let setupClient;
 
-    const getKmsProviders = () => {
-      const my_key = Buffer.from(
-        'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-        'base64'
-      );
-      return { local: { key: my_key } };
-    };
-    const keyVaultNamespace = 'keyvault.datakeys';
+    beforeEach(async function () {
+      setupClient = this.configuration.newClient();
+      await setupClient
+        .db()
+        .admin()
+        .command({
+          configureFailPoint: 'failCommand',
+          mode: 'alwaysOn',
+          data: {
+            failCommands: ['aggregate'],
+            errorCode: 89
+          }
+        } as FailPoint);
+    });
 
     afterEach(async function () {
-      await client?.close();
+      await setupClient
+        .db()
+        .admin()
+        .command({
+          configureFailPoint: 'failCommand',
+          mode: 'off',
+          data: {
+            failCommands: ['aggregate'],
+            errorCode: 89
+          }
+        } as FailPoint);
+      await setupClient.close();
     });
 
-    context('when client is provided timeoutContext', function () {
-      it('should time out command sent through after timeoutMS', async function () {
-        client = new MongoClient('mongodb://localhost:27017', {
-          autoEncryption: {
-            keyVaultNamespace,
-            kmsProviders: getKmsProviders(),
-            extraOptions: getEncryptExtraOptions()
-          },
-          timeoutMS: 10000
-        });
-        await client.connect();
+    context('when client is provided timeoutMS and command hangs', function () {
+      let encryptedClient;
 
-        const err$ = await client
-          .db('test')
-          .command({ ping: 1 })
-          .catch(e => e);
-        const err = err$;
-        console.log(err);
-      });
-    });
-
-    context('when client is not provided timeoutContext', function () {
       beforeEach(async function () {
-        sinon.stub(TLSSocket.prototype, 'connect').callsFake(function (..._args) {
-          clock.tick(30000);
-        });
-        timerSandbox = createTimerSandbox();
-        clock = sinon.useFakeTimers();
-        sleep = promisify(setTimeout);
-      });
-
-      afterEach(async function () {
-        if (clock) {
-          timerSandbox.restore();
-          clock.restore();
-          clock = undefined;
-        }
-        sinon.restore();
-      });
-
-      it('should not timeout the command sent through autoEncryption after timeoutMS', async function () {
-        client = this.configuration.newClient(
+        encryptedClient = this.configuration.newClient(
           {},
           {
             autoEncryption: {
-              keyVaultNamespace,
-              kmsProviders: getKmsProviders(),
-              extraOptions: getEncryptExtraOptions()
+              keyVaultNamespace: 'admin.datakeys',
+              kmsProviders: {
+                aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+                local: { key: Buffer.alloc(96) }
+              }
+            },
+            timeoutMS: 1000
+          }
+        );
+        await encryptedClient.connect();
+      });
+
+      afterEach(async function () {
+        await encryptedClient.close();
+      });
+
+      it('the command should fail due to a timeout error', async function () {
+        const err = await encryptedClient
+          .db('test')
+          .collection('test')
+          .aggregate([])
+          .toArray()
+          .catch(e => e);
+        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+      });
+    });
+
+    context('when client is not provided timeoutMS and command hangs', function () {
+      let encryptedClient;
+      beforeEach(async function () {
+        encryptedClient = this.configuration.newClient(
+          {},
+          {
+            autoEncryption: {
+              keyVaultNamespace: 'admin.datakeys',
+              kmsProviders: {
+                aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+                local: { key: Buffer.alloc(96) }
+              }
             }
           }
         );
+      });
 
-        const sleepingFn = async () => {
-          await sleep(30000);
-          throw Error('Slept for 30s');
-        };
+      afterEach(async function () {
+        encryptedClient.close();
+      });
 
-        const err$ = Promise.all([
-          client.db('test').collection('test').insert({ a: 1 }),
-          sleepingFn()
-        ]).catch(e => e);
-        clock.tick(30000);
-        const err = await err$;
-        expect(err.message).to.equal('Slept for 30s');
+      it('the command should fail due to a server error', async function () {
+        const err = await encryptedClient
+          .db('test')
+          .collection('test')
+          .aggregate([])
+          .toArray()
+          .catch(e => e);
+        expect(err).to.be.instanceOf(MongoServerError);
       });
     });
   });

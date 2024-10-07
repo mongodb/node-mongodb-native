@@ -140,7 +140,7 @@ const leakCheckerAfterEach = async function () {
   }
 };
 
-const TRACE_SOCKETS = true; // process.env.TRACE_SOCKETS === 'true' ? true : false;
+const TRACE_SOCKETS = process.env.TRACE_SOCKETS === 'true' ? true : false;
 const kSocketId = Symbol('socketId');
 const originalCreateConnection = net.createConnection;
 let socketCounter = 0n;
