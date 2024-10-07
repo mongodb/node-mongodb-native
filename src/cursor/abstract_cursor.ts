@@ -144,11 +144,12 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-  TSchema = any,
-  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
->
+    TSchema = any,
+    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+  >
   extends TypedEventEmitter<CursorEvents>
-  implements AsyncDisposable {
+  implements AsyncDisposable
+{
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -873,8 +874,7 @@ export abstract class AbstractCursor<
       this.documents = response;
     } catch (error) {
       try {
-        if (!(error instanceof MongoOperationTimeoutError))
-          await this.cleanup(undefined, error);
+        if (!(error instanceof MongoOperationTimeoutError)) await this.cleanup(undefined, error);
       } catch (cleanupError) {
         // `cleanupCursor` should never throw, squash and throw the original error
         squashError(cleanupError);
