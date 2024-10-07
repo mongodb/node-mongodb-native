@@ -151,6 +151,8 @@ export abstract class AbstractCursor<
   /** @internal */
   private isClosed: boolean;
   /** @internal */
+  private isForceClosed: boolean;
+  /** @internal */
   private isKilled: boolean;
   /** @internal */
   protected readonly cursorOptions: InternalAbstractCursorOptions;
@@ -177,6 +179,7 @@ export abstract class AbstractCursor<
     this.cursorId = null;
     this.initialized = false;
     this.isClosed = false;
+    this.isForceClosed = false;
     this.isKilled = false;
     this.cursorOptions = {
       readPreference:
@@ -396,7 +399,7 @@ export abstract class AbstractCursor<
   }
 
   async hasNext(): Promise<boolean> {
-    if (this.cursorId === Long.ZERO) {
+    if (this.cursorId === Long.ZERO || this.isForceClosed) {
       return false;
     }
 
@@ -412,7 +415,7 @@ export abstract class AbstractCursor<
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
   async next(): Promise<TSchema | null> {
-    if (this.cursorId === Long.ZERO) {
+    if (this.cursorId === Long.ZERO || this.isForceClosed) {
       throw new MongoCursorExhaustedError();
     }
 
@@ -432,7 +435,7 @@ export abstract class AbstractCursor<
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
   async tryNext(): Promise<TSchema | null> {
-    if (this.cursorId === Long.ZERO) {
+    if (this.cursorId === Long.ZERO || this.isForceClosed) {
       throw new MongoCursorExhaustedError();
     }
 
@@ -477,6 +480,12 @@ export abstract class AbstractCursor<
    * Frees any client-side resources used by the cursor.
    */
   async close(): Promise<void> {
+    // We flag that an explicit call to close the cursor has happened, so no matter
+    // what the current state is it can no longer be used. This is do to areas in the
+    // cursor that are setting the isClosed flag or cursor id to zero without going
+    // through this path.
+    this.isForceClosed = true;
+    this.documents?.clear();
     await this.cleanup();
   }
 
