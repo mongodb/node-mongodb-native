@@ -494,8 +494,7 @@ describe('Collection', function () {
             configureFailPoint: 'failCommand',
             mode: 'off',
             data: {
-              failCommands: ['aggregate'],
-              blockTimeMS: 10000
+              failCommands: ['aggregate']
             }
           } as FailPoint);
       });
