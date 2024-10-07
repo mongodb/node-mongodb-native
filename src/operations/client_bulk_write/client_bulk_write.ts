@@ -85,7 +85,21 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
         server.description.maxBsonObjectSize
       );
     }
-    return await super.executeCommand(server, session, command, ClientBulkWriteCursorResponse);
+    const result = await super.executeCommand(
+      server,
+      session,
+      command,
+      ClientBulkWriteCursorResponse
+    );
+
+    if (server.description.type === ServerType.LoadBalancer) {
+      // Unpin the connection if there are no more batches.
+      if (session?.pinnedConnection && !this.commandBuilder.hasNextBatch()) {
+        session?.unpin({ force: true });
+      }
+    }
+
+    return result;
   }
 }
 
