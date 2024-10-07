@@ -23,6 +23,8 @@ export type RunCursorCommandOptions = {
   timeoutMS?: number;
   /** @internal */
   timeoutMode?: CursorTimeoutMode;
+  tailable?: boolean;
+  awaitData?: boolean;
 } & BSONSerializeOptions;
 
 /** @public */
