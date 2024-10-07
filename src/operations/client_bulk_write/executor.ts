@@ -1,11 +1,9 @@
-import { type Document } from 'bson';
-
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
 import { type MongoClient } from '../../mongo_client';
 import { WriteConcern } from '../../write_concern';
 import { executeOperation } from '../execute_operation';
 import { ClientBulkWriteOperation } from './client_bulk_write';
-import { type ClientBulkWriteCommand, ClientBulkWriteCommandBuilder } from './command_builder';
+import { ClientBulkWriteCommandBuilder } from './command_builder';
 import {
   type AnyClientBulkWriteModel,
   type ClientBulkWriteOptions,
@@ -57,43 +55,26 @@ export class ClientBulkWriteExecutor {
       this.options,
       pkFactory
     );
-    const commands = commandBuilder.buildCommands();
+    // Unacknowledged writes need to execute all batches and return { ok: 1}
     if (this.options.writeConcern?.w === 0) {
-      return await executeUnacknowledged(this.client, this.options, commands);
+      while (commandBuilder.hasNextBatch()) {
+        const operation = new ClientBulkWriteOperation(commandBuilder, this.options);
+        await executeOperation(this.client, operation);
+      }
+      return { ok: 1 };
+    } else {
+      const resultsMerger = new ClientBulkWriteResultsMerger(this.options);
+      // For each command will will create and exhaust a cursor for the results.
+      let currentBatchOffset = 0;
+      while (commandBuilder.hasNextBatch()) {
+        const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, this.options);
+        const docs = await cursor.toArray();
+        const operations = cursor.operations;
+        resultsMerger.merge(currentBatchOffset, operations, cursor.response, docs);
+        // Set the new batch index so we can back back to the index in the original models.
+        currentBatchOffset += operations.length;
+      }
+      return resultsMerger.result;
     }
-    return await executeAcknowledged(this.client, this.options, commands);
   }
-}
-
-/**
- * Execute an acknowledged bulk write.
- */
-async function executeAcknowledged(
-  client: MongoClient,
-  options: ClientBulkWriteOptions,
-  commands: ClientBulkWriteCommand[]
-): Promise<ClientBulkWriteResult> {
-  const resultsMerger = new ClientBulkWriteResultsMerger(options);
-  // For each command will will create and exhaust a cursor for the results.
-  for (const command of commands) {
-    const cursor = new ClientBulkWriteCursor(client, command, options);
-    const docs = await cursor.toArray();
-    resultsMerger.merge(command.ops.documents, cursor.response, docs);
-  }
-  return resultsMerger.result;
-}
-
-/**
- * Execute an unacknowledged bulk write.
- */
-async function executeUnacknowledged(
-  client: MongoClient,
-  options: ClientBulkWriteOptions,
-  commands: Document[]
-): Promise<{ ok: 1 }> {
-  for (const command of commands) {
-    const operation = new ClientBulkWriteOperation(command, options);
-    await executeOperation(client, operation);
-  }
-  return { ok: 1 };
 }

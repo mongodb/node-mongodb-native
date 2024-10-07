@@ -11,6 +11,7 @@ import {
   CommandStartedEvent,
   Db,
   type Document,
+  GridFSBucket,
   type MongoClient,
   MongoError,
   ReadConcern,
@@ -322,7 +323,7 @@ operations.set('dropCollection', async ({ entities, operation }) => {
 
 operations.set('drop', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
-  return bucket.drop();
+  return bucket.drop(operation.arguments);
 });
 
 operations.set('dropIndexes', async ({ entities, operation }) => {
@@ -551,7 +552,8 @@ operations.set('targetedFailPoint', async ({ entities, operation }) => {
 
 operations.set('delete', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
-  return bucket.delete(operation.arguments!.id);
+  const { id, ...opts } = operation.arguments;
+  return bucket.delete(id, opts);
 });
 
 operations.set('download', async ({ entities, operation }) => {
@@ -559,7 +561,8 @@ operations.set('download', async ({ entities, operation }) => {
 
   const { id, ...options } = operation.arguments ?? {};
   const stream = bucket.openDownloadStream(id, options);
-  return Buffer.concat(await stream.toArray());
+  const data = Buffer.concat(await stream.toArray());
+  return data;
 });
 
 operations.set('downloadByName', async ({ entities, operation }) => {
@@ -574,7 +577,6 @@ operations.set('downloadByName', async ({ entities, operation }) => {
 operations.set('upload', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
   const { filename, source, ...options } = operation.arguments ?? {};
-
   const stream = bucket.openUploadStream(filename, options);
   const fileStream = Readable.from(Buffer.from(source.$$hexBytes, 'hex'));
 
@@ -869,9 +871,30 @@ operations.set('updateOne', async ({ entities, operation }) => {
 });
 
 operations.set('rename', async ({ entities, operation }) => {
-  const collection = entities.getEntity('collection', operation.object);
-  const { to, ...options } = operation.arguments!;
-  return collection.rename(to, options);
+  let entity: GridFSBucket | Collection | undefined;
+  try {
+    entity = entities.getEntity('collection', operation.object, false);
+  } catch {
+    // Ignore wrong type error
+  }
+
+  if (entity instanceof Collection) {
+    const { to, ...options } = operation.arguments!;
+    return entity.rename(to, options);
+  }
+
+  try {
+    entity = entities.getEntity('bucket', operation.object, false);
+  } catch {
+    // Ignore wrong type error
+  }
+
+  if (entity instanceof GridFSBucket) {
+    const { id, newFilename, ...opts } = operation.arguments!;
+    return entity.rename(id, newFilename, opts as any);
+  }
+
+  expect.fail(`No collection or bucket with name '${operation.object}' found`);
 });
 
 operations.set('createDataKey', async ({ entities, operation }) => {

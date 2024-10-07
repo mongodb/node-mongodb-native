@@ -15,7 +15,7 @@ describe('commands', function () {
         context('when there is one document sequence', function () {
           const command = {
             test: 1,
-            field: new DocumentSequence([{ test: 1 }])
+            field: new DocumentSequence('field', [{ test: 1 }])
           };
           const msg = new OpMsgRequest('admin', command, {});
           const buffers = msg.toBin();
@@ -53,8 +53,8 @@ describe('commands', function () {
         context('when there are multiple document sequences', function () {
           const command = {
             test: 1,
-            fieldOne: new DocumentSequence([{ test: 1 }]),
-            fieldTwo: new DocumentSequence([{ test: 1 }])
+            fieldOne: new DocumentSequence('fieldOne', [{ test: 1 }]),
+            fieldTwo: new DocumentSequence('fieldTwo', [{ test: 1 }])
           };
           const msg = new OpMsgRequest('admin', command, {});
           const buffers = msg.toBin();

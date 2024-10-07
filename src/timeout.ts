@@ -178,6 +178,8 @@ export abstract class TimeoutContext {
     else throw new MongoRuntimeError('Unrecognized options');
   }
 
+  abstract get maxTimeMS(): number | null;
+
   abstract get serverSelectionTimeout(): Timeout | null;
 
   abstract get connectionCheckoutTimeout(): Timeout | null;
@@ -195,6 +197,9 @@ export abstract class TimeoutContext {
   abstract refresh(): void;
 
   abstract clear(): void;
+
+  /** Returns a new instance of the TimeoutContext, with all timeouts refreshed and restarted. */
+  abstract refreshed(): TimeoutContext;
 }
 
 /** @internal */
@@ -305,6 +310,22 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this._serverSelectionTimeout?.clear();
     this._connectionCheckoutTimeout?.clear();
   }
+
+  /**
+   * @internal
+   * Throws a MongoOperationTimeoutError if the context has expired.
+   * If the context has not expired, returns the `remainingTimeMS`
+   **/
+  getRemainingTimeMSOrThrow(message?: string): number {
+    const { remainingTimeMS } = this;
+    if (remainingTimeMS <= 0)
+      throw new MongoOperationTimeoutError(message ?? `Expired after ${this.timeoutMS}ms`);
+    return remainingTimeMS;
+  }
+
+  override refreshed(): CSOTTimeoutContext {
+    return new CSOTTimeoutContext(this);
+  }
 }
 
 /** @internal */
@@ -350,5 +371,13 @@ export class LegacyTimeoutContext extends TimeoutContext {
 
   clear(): void {
     return;
+  }
+
+  get maxTimeMS() {
+    return null;
+  }
+
+  override refreshed(): LegacyTimeoutContext {
+    return new LegacyTimeoutContext(this.options);
   }
 }

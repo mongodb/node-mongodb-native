@@ -503,7 +503,7 @@ export function mergeBatchResults(
 
 function executeCommands(
   bulkOperation: BulkOperationBase,
-  options: BulkWriteOptions,
+  options: BulkWriteOptions & { timeoutContext?: TimeoutContext | null },
   callback: Callback<BulkWriteResult>
 ) {
   if (bulkOperation.s.batches.length === 0) {
@@ -590,7 +590,11 @@ function executeCommands(
           : null;
 
     if (operation != null) {
-      executeOperation(bulkOperation.s.collection.client, operation).then(
+      executeOperation(
+        bulkOperation.s.collection.client,
+        operation,
+        finalOptions.timeoutContext
+      ).then(
         result => resultHandler(undefined, result),
         error => resultHandler(error)
       );
@@ -899,7 +903,11 @@ export class BulkWriteShimOperation extends AbstractOperation {
     return 'bulkWrite' as const;
   }
 
-  execute(_server: Server, session: ClientSession | undefined): Promise<any> {
+  async execute(
+    _server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<any> {
     if (this.options.session == null) {
       // An implicit session could have been created by 'executeOperation'
       // So if we stick it on finalOptions here, each bulk operation
@@ -907,7 +915,7 @@ export class BulkWriteShimOperation extends AbstractOperation {
       // an explicit session would be
       this.options.session = session;
     }
-    return executeCommandsAsync(this.bulkOperation, this.options);
+    return await executeCommandsAsync(this.bulkOperation, { ...this.options, timeoutContext });
   }
 }
 
@@ -1236,7 +1244,7 @@ export abstract class BulkOperationBase {
     const finalOptions = { ...this.s.options, ...options };
     const operation = new BulkWriteShimOperation(this, finalOptions);
 
-    return await executeOperation(this.s.collection.client, operation);
+    return await executeOperation(this.s.collection.client, operation, finalOptions.timeoutContext);
   }
 
   /**

@@ -244,6 +244,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       .on('error', this.onError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
+
+    this.messageStream.pause();
   }
 
   public get hello() {
@@ -420,9 +422,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       ...options
     };
 
-    if (!options.omitMaxTimeMS && options.timeoutContext?.csotEnabled()) {
-      const { maxTimeMS } = options.timeoutContext;
-      if (maxTimeMS > 0 && Number.isFinite(maxTimeMS)) cmd.maxTimeMS = maxTimeMS;
+    if (!options.omitMaxTimeMS) {
+      const maxTimeMS = options.timeoutContext?.maxTimeMS;
+      if (maxTimeMS && maxTimeMS > 0 && Number.isFinite(maxTimeMS)) cmd.maxTimeMS = maxTimeMS;
     }
 
     const message = this.supportsOpMsg
@@ -734,6 +736,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }): AsyncGenerator<OpMsgResponse | OpReply> {
     try {
       this.dataEvents = onData(this.messageStream, options);
+      this.messageStream.resume();
 
       for await (const message of this.dataEvents) {
         const response = await decompressResponse(message);
@@ -754,6 +757,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       throw err;
     } finally {
       this.dataEvents = null;
+      this.messageStream.pause();
       this.throwIfAborted();
     }
   }

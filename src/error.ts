@@ -625,7 +625,7 @@ export class MongoGCPError extends MongoOIDCError {
  * @public
  * @category Error
  */
-export class MongoBulkWriteCursorError extends MongoRuntimeError {
+export class MongoClientBulkWriteCursorError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
    *
@@ -642,7 +642,34 @@ export class MongoBulkWriteCursorError extends MongoRuntimeError {
   }
 
   override get name(): string {
-    return 'MongoBulkWriteCursorError';
+    return 'MongoClientBulkWriteCursorError';
+  }
+}
+
+/**
+ * An error indicating that an error occurred on the client when executing a client bulk write.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoClientBulkWriteExecutionError extends MongoRuntimeError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message: string) {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoClientBulkWriteExecutionError';
   }
 }
 

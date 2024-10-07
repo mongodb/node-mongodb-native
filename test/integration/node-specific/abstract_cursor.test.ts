@@ -7,12 +7,17 @@ import { inspect } from 'util';
 import {
   AbstractCursor,
   type Collection,
+  CursorTimeoutContext,
+  CursorTimeoutMode,
   type FindCursor,
   MongoAPIError,
   type MongoClient,
   MongoCursorExhaustedError,
-  MongoServerError
+  MongoOperationTimeoutError,
+  MongoServerError,
+  TimeoutContext
 } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 describe('class AbstractCursor', function () {
   describe('regression tests NODE-5372', function () {
@@ -393,6 +398,116 @@ describe('class AbstractCursor', function () {
       expect(nextSpy.callCount).to.equal(numBatches + 1);
       const numDocuments = numBatches * batchSize;
       expect(nextSpy.callCount).to.be.lessThan(numDocuments);
+    });
+  });
+
+  describe('externally provided timeout contexts', function () {
+    let client: MongoClient;
+    let collection: Collection;
+    let context: CursorTimeoutContext;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+
+      collection = client.db('abstract_cursor_integration').collection('test');
+
+      context = new CursorTimeoutContext(
+        TimeoutContext.create({ timeoutMS: 1000, serverSelectionTimeoutMS: 2000 }),
+        Symbol()
+      );
+
+      await collection.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
+    });
+
+    afterEach(async function () {
+      await collection.deleteMany({});
+      await client.close();
+    });
+
+    describe('when timeoutMode != LIFETIME', function () {
+      it('an error is thrown', function () {
+        expect(() =>
+          collection.find(
+            {},
+            { timeoutContext: context, timeoutMS: 1000, timeoutMode: CursorTimeoutMode.ITERATION }
+          )
+        ).to.throw(
+          `cannot create a cursor with an externally provided timeout context that doesn't use timeoutMode=CURSOR_LIFETIME`
+        );
+      });
+    });
+
+    describe('when timeoutMode is omitted', function () {
+      it('stores timeoutContext as the timeoutContext on the cursor', function () {
+        const cursor = collection.find({}, { timeoutContext: context, timeoutMS: 1000 });
+
+        // @ts-expect-error Private access.
+        expect(cursor.timeoutContext).to.equal(context);
+      });
+    });
+
+    describe('when timeoutMode is LIFETIME', function () {
+      it('stores timeoutContext as the timeoutContext on the cursor', function () {
+        const cursor = collection.find(
+          {},
+          { timeoutContext: context, timeoutMS: 1000, timeoutMode: CursorTimeoutMode.LIFETIME }
+        );
+
+        // @ts-expect-error Private access.
+        expect(cursor.timeoutContext).to.equal(context);
+      });
+    });
+
+    describe('when the cursor is initialized', function () {
+      it('the provided timeoutContext is not overwritten', async function () {
+        const cursor = collection.find(
+          {},
+          { timeoutContext: context, timeoutMS: 1000, timeoutMode: CursorTimeoutMode.LIFETIME }
+        );
+
+        await cursor.toArray();
+
+        // @ts-expect-error Private access.
+        expect(cursor.timeoutContext).to.equal(context);
+      });
+    });
+
+    describe('when the cursor refreshes the timeout for killCursors', function () {
+      it(
+        'the provided timeoutContext is not modified',
+        {
+          requires: {
+            mongodb: '>=4.4'
+          }
+        },
+        async function () {
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              blockConnection: true,
+              blockTimeMS: 5000
+            }
+          } as FailPoint);
+
+          const cursor = collection.find(
+            {},
+            {
+              timeoutContext: context,
+              timeoutMS: 1000,
+              timeoutMode: CursorTimeoutMode.LIFETIME,
+              batchSize: 1
+            }
+          );
+
+          const error = await cursor.toArray().catch(e => e);
+
+          expect(error).to.be.instanceof(MongoOperationTimeoutError);
+          // @ts-expect-error We know we have a CSOT timeout context but TS does not.
+          expect(context.timeoutContext.remainingTimeMS).to.be.lessThan(0);
+        }
+      );
     });
   });
 });

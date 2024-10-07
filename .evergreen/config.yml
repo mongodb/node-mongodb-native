@@ -4708,7 +4708,7 @@ buildvariants:
     display_name: rhel8 Node Latest
     run_on: rhel80-large
     expansions:
-      NODE_LTS_VERSION: 20
+      NODE_LTS_VERSION: latest
       CLIENT_ENCRYPTION: true
     tasks:
       - test-latest-server
@@ -4749,9 +4749,10 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
-      - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0

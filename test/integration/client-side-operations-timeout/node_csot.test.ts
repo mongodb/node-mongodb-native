@@ -1,6 +1,7 @@
 /* Anything javascript specific relating to timeouts */
 import { once } from 'node:events';
-import { setInterval } from 'node:timers';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
@@ -18,13 +19,15 @@ import {
   Connection,
   type Db,
   type FindCursor,
+  GridFSBucket,
   LEGACY_HELLO_COMMAND,
   type MongoClient,
   MongoInvalidArgumentError,
   MongoOperationTimeoutError,
-  MongoServerError
+  MongoServerError,
+  ObjectId
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
@@ -368,7 +371,7 @@ describe('CSOT driver tests', metadata, () => {
     };
 
     beforeEach(async function () {
-      internalClient = this.configuration.newClient();
+      internalClient = this.configuration.newClient({});
       await internalClient
         .db('db')
         .dropCollection('coll')
@@ -384,7 +387,11 @@ describe('CSOT driver tests', metadata, () => {
 
       await internalClient.db().admin().command(failpoint);
 
-      client = this.configuration.newClient(undefined, { monitorCommands: true });
+      client = this.configuration.newClient(undefined, { monitorCommands: true, minPoolSize: 10 });
+
+      // wait for a handful of connections to have been established
+      await waitUntilPoolsFilled(client, AbortSignal.timeout(30_000), 5);
+
       commandStarted = [];
       commandSucceeded = [];
       client.on('commandStarted', ev => commandStarted.push(ev));
@@ -498,7 +505,13 @@ describe('CSOT driver tests', metadata, () => {
 
         await internalClient.db().admin().command(failpoint);
 
-        client = this.configuration.newClient(undefined, { monitorCommands: true });
+        client = this.configuration.newClient(undefined, {
+          monitorCommands: true,
+          minPoolSize: 10
+        });
+        // wait for a handful of connections to have been established
+        await waitUntilPoolsFilled(client, AbortSignal.timeout(30_000), 5);
+
         commandStarted = [];
         commandSucceeded = [];
         client.on('commandStarted', ev => commandStarted.push(ev));
@@ -664,7 +677,7 @@ describe('CSOT driver tests', metadata, () => {
           expect(getMores).to.have.lengthOf(0);
         });
 
-        it('refreshes the timeout for subsequent getMores', async function () {
+        it('refreshes the timeout for subsequent getMores', metadata, async function () {
           cursor = client
             .db('db')
             .collection('coll')
@@ -880,6 +893,162 @@ describe('CSOT driver tests', metadata, () => {
       context('when the resume attempt times out', function () {
         it('emits an error event');
         it('closes the change stream');
+  describe('GridFSBucket', () => {
+    const blockTimeMS = 200;
+    let internalClient: MongoClient;
+    let client: MongoClient;
+    let bucket: GridFSBucket;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient(undefined, { timeoutMS: 1000 });
+      internalClient = this.configuration.newClient(undefined);
+    });
+
+    afterEach(async function () {
+      await client.close();
+      await internalClient.db().admin().command({ configureFailPoint: 'failCommand', mode: 'off' });
+      await internalClient.close();
+    });
+
+    context('upload', function () {
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['insert'],
+          blockConnection: true,
+          blockTimeMS
+        }
+      };
+
+      beforeEach(async function () {
+        await internalClient
+          .db('db')
+          .dropDatabase()
+          .catch(() => null);
+        await internalClient.db().admin().command(failpoint);
+
+        const db = client.db('db');
+        expect(db.timeoutMS).to.equal(1000);
+
+        bucket = new GridFSBucket(client.db('db'), { chunkSizeBytes: 2 });
+      });
+
+      describe('openUploadStream', function () {
+        it('can override db timeoutMS settings', metadata, async function () {
+          const data = Buffer.from('01020304', 'hex');
+          const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 175 });
+          uploadStream.on('error', error => {
+            uploadStream.destroy(error);
+          });
+
+          uploadStream.write(data, error => {
+            uploadStream.destroy(error);
+          });
+
+          const maybeError = await once(uploadStream, 'error');
+          expect(maybeError[0]).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+
+        it('only emits index event once per bucket', metadata, async function () {
+          let numEventsSeen = 0;
+          bucket.on('index', () => numEventsSeen++);
+
+          const uploadStream0 = bucket
+            .openUploadStream('filename')
+            .on('error', error => uploadStream0.destroy(error));
+          const uploadStream1 = bucket
+            .openUploadStream('filename')
+            .on('error', error => uploadStream1.destroy(error));
+
+          const data = Buffer.from('test', 'utf-8');
+          await pipeline(Readable.from(data), uploadStream0);
+          await pipeline(Readable.from(data), uploadStream1);
+
+          expect(numEventsSeen).to.equal(1);
+        });
+      });
+
+      describe('openUploadStreamWithId', function () {
+        it('can override db timeoutMS settings', metadata, async function () {
+          const data = Buffer.from('01020304', 'hex');
+          const uploadStream = bucket.openUploadStreamWithId(new ObjectId(), 'filename', {
+            timeoutMS: 175
+          });
+          uploadStream.on('error', error => {
+            uploadStream.destroy(error);
+          });
+
+          uploadStream.write(data, error => {
+            uploadStream.destroy(error);
+          });
+
+          const maybeError = await once(uploadStream, 'error');
+          expect(maybeError[0]).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+    });
+
+    context('download', function () {
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['find'],
+          blockConnection: true,
+          blockTimeMS
+        }
+      };
+      const _id = new ObjectId('000000000000000000000005');
+
+      beforeEach(async function () {
+        await internalClient
+          .db('db')
+          .dropDatabase()
+          .catch(() => null);
+
+        const files = await internalClient.db('db').createCollection('files');
+        await files.insertOne({
+          _id,
+          length: 10,
+          chunkSize: 4,
+          uploadDate: new Date('1970-01-01T00:00:00.000Z'),
+          md5: '57d83cd477bfb1ccd975ab33d827a92b',
+          filename: 'length-10',
+          contentType: 'application/octet-stream',
+          aliases: [],
+          metadata: {}
+        });
+
+        await internalClient.db().admin().command(failpoint);
+
+        const db = client.db('db');
+        expect(db.timeoutMS).to.equal(1000);
+
+        bucket = new GridFSBucket(db);
+      });
+
+      describe('openDownloadStream', function () {
+        it('can override db timeoutMS settings', metadata, async function () {
+          const downloadStream = bucket.openDownloadStream(_id, { timeoutMS: 80 });
+          const maybeError = await downloadStream.toArray().then(
+            () => null,
+            e => e
+          );
+
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('openDownloadStreamByName', function () {
+        it('can override db timeoutMS settings', metadata, async function () {
+          const downloadStream = bucket.openDownloadStreamByName('length-10', { timeoutMS: 80 });
+          const maybeError = await downloadStream.toArray().then(
+            () => null,
+            e => e
+          );
+          expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+        });
       });
     });
   });

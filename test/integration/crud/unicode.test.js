@@ -1,4 +1,5 @@
 'use strict';
+const semver = require('semver');
 const { assert: test, setupDatabase } = require('../shared');
 const { expect } = require('chai');
 
@@ -13,6 +14,11 @@ describe('Unicode', function () {
     },
 
     test: function (done) {
+      if (semver.satisfies(process.versions.node, '22.7.0')) {
+        this.skipReason = 'Node.js 22.7.0 has a UTF-8 encoding bug';
+        this.skip();
+      }
+
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {

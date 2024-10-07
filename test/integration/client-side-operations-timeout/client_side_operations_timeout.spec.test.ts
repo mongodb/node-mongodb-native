@@ -1,26 +1,15 @@
 import { join } from 'path';
+import * as semver from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const skippedSpecs = {
-  bulkWrite: 'TODO(NODE-6274)',
   'convenient-transactions': 'TODO(NODE-5687)',
-  'deprecated-options': 'TODO(NODE-5689)',
-  'gridfs-advanced': 'TODO(NODE-6275)',
-  'gridfs-delete': 'TODO(NODE-6275)',
-  'gridfs-download': 'TODO(NODE-6275)',
-  'gridfs-find': 'TODO(NODE-6275)',
-  'gridfs-upload': 'TODO(NODE-6275)'
+  'deprecated-options': 'TODO(NODE-5689)'
 };
 
 const skippedTests = {
-  'timeoutMS can be configured on a MongoClient - insertMany on collection': 'TODO(NODE-6274)',
-  'timeoutMS can be configured on a MongoClient - bulkWrite on collection': 'TODO(NODE-6274)',
-  'timeoutMS applies to whole operation, not individual attempts - insertMany on collection':
-    'TODO(NODE-6274)',
-  'timeoutMS applies to whole operation, not individual attempts - bulkWrite on collection':
-    'TODO(NODE-6274)',
   'command is not sent if RTT is greater than timeoutMS': 'TODO(DRIVERS-2965)',
   'Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure':
     'TODO(DRIVERS-2965)',
@@ -48,7 +37,17 @@ describe('CSOT spec tests', function () {
     }
   }
 
-  runUnifiedSuite(specs);
+  runUnifiedSuite(specs, (test, configuration) => {
+    const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
+    if (
+      sessionCSOTTests.includes(test.description) &&
+      configuration.topologyType === 'ReplicaSetWithPrimary' &&
+      semver.satisfies(configuration.version, '<=4.4')
+    ) {
+      return '4.4 replicaset fail point does not blockConnection for requested time';
+    }
+    return false;
+  });
 });
 
 describe('CSOT modified spec tests', function () {

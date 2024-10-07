@@ -43,7 +43,6 @@ export class TopologyDescription {
   heartbeatFrequencyMS: number;
   localThresholdMS: number;
   commonWireVersion: number;
-
   /**
    * Create a TopologyDescription
    */
