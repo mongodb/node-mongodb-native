@@ -63,33 +63,7 @@ export class ClientBulkWriteResultsMerger {
         // Only add to maps if ok: 1
         if (document.ok === 1) {
           if (this.options.verboseResults) {
-            // Get the corresponding operation from the command.
-            const operation = cursor.operations[document.idx];
-            // Handle insert results.
-            if ('insert' in operation) {
-              this.result.insertResults?.set(document.idx + this.currentBatchOffset, {
-                insertedId: operation.document._id
-              });
-            }
-            // Handle update results.
-            if ('update' in operation) {
-              const result: ClientUpdateResult = {
-                matchedCount: document.n,
-                modifiedCount: document.nModified ?? 0,
-                // Check if the bulk did actually upsert.
-                didUpsert: document.upserted != null
-              };
-              if (document.upserted) {
-                result.upsertedId = document.upserted._id;
-              }
-              this.result.updateResults?.set(document.idx + this.currentBatchOffset, result);
-            }
-            // Handle delete results.
-            if ('delete' in operation) {
-              this.result.deleteResults?.set(document.idx + this.currentBatchOffset, {
-                deletedCount: document.n
-              });
-            }
+            this.processDocument(cursor, document);
           }
         } else {
           // If an individual write error is encountered during an ordered bulk write, drivers MUST
@@ -124,7 +98,13 @@ export class ClientBulkWriteResultsMerger {
           deletedCount: result.nDeleted,
           writeConcernError: result.writeConcernError
         };
-        // docs = result.cursor.firstBatch;
+        if (this.options.verboseResults && result.cursor.firstBatch) {
+          for (const document of result.cursor.firstBatch) {
+            if (document.ok === 1) {
+              this.processDocument(cursor, document);
+            }
+          }
+        }
       } else {
         throw error;
       }
@@ -150,6 +130,41 @@ export class ClientBulkWriteResultsMerger {
     }
 
     return this.result;
+  }
+
+  /**
+   * Process an invididual document in the results.
+   * @param cursor - The cursor.
+   * @param document - The document to process.
+   */
+  private processDocument(cursor: ClientBulkWriteCursor, document: Document) {
+    // Get the corresponding operation from the command.
+    const operation = cursor.operations[document.idx];
+    // Handle insert results.
+    if ('insert' in operation) {
+      this.result.insertResults?.set(document.idx + this.currentBatchOffset, {
+        insertedId: operation.document._id
+      });
+    }
+    // Handle update results.
+    if ('update' in operation) {
+      const result: ClientUpdateResult = {
+        matchedCount: document.n,
+        modifiedCount: document.nModified ?? 0,
+        // Check if the bulk did actually upsert.
+        didUpsert: document.upserted != null
+      };
+      if (document.upserted) {
+        result.upsertedId = document.upserted._id;
+      }
+      this.result.updateResults?.set(document.idx + this.currentBatchOffset, result);
+    }
+    // Handle delete results.
+    if ('delete' in operation) {
+      this.result.deleteResults?.set(document.idx + this.currentBatchOffset, {
+        deletedCount: document.n
+      });
+    }
   }
 
   /**
