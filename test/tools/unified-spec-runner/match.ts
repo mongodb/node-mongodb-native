@@ -780,7 +780,7 @@ export function expectErrorCheck(
   if (expected.errorLabelsContain != null) {
     let mongoError = error as MongoError;
     if (error instanceof MongoClientBulkWriteError) {
-      mongoError = error.error;
+      mongoError = error.cause as MongoError;
     }
     console.log(error, mongoError);
     for (const errorLabel of expected.errorLabelsContain) {
