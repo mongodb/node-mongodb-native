@@ -268,7 +268,18 @@ operations.set('createCollection', async ({ entities, operation }) => {
 
 operations.set('createFindCursor', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments!;
+  const { filter, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
+    case 'tailableAwait':
+      opts.tailable = true;
+      opts.awaitData = true;
+      break;
+    case 'tailable':
+      opts.tailable = true;
+      break;
+    default:
+      break;
+  }
   const cursor = collection.find(filter, opts);
   // The spec dictates that we create the cursor and force the find command
   // to execute, but don't move the cursor forward. hasNext() accomplishes
@@ -332,7 +343,18 @@ operations.set('find', async ({ entities, operation }) => {
   } else {
     queryable = entities.getEntity('collection', operation.object);
   }
-  const { filter, ...opts } = operation.arguments!;
+  const { filter, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
+    case 'tailableAwait':
+      opts.tailable = true;
+      opts.awaitData = true;
+      break;
+    case 'tailable':
+      opts.tailable = true;
+      break;
+    default:
+      break;
+  }
   return queryable.find(filter, opts).toArray();
 });
 
@@ -804,10 +826,25 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
 
 operations.set('createCommandCursor', async ({ entities, operation }: OperationFunctionParams) => {
   const collection = entities.getEntity('db', operation.object);
-  const { command, ...opts } = operation.arguments!;
+  const { command, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
+    case 'tailableAwait':
+      opts.tailable = true;
+      opts.awaitData = true;
+      break;
+    case 'tailable':
+      opts.tailable = true;
+      break;
+    default:
+      break;
+  }
   const cursor = collection.runCursorCommand(command, {
     readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
-    session: opts.session
+    session: opts.session,
+    tailable: opts.tailable,
+    awaitData: opts.awaitData,
+    timeoutMode: opts.timeoutMode,
+    timeoutMS: opts.timeoutMS
   });
 
   if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);
