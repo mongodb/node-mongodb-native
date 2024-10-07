@@ -42,6 +42,7 @@ export class ClientBulkWriteCommandBuilder {
   currentModelIndex: number;
   previousModelIndex: number;
   lastOperations: Document[];
+  isRetryable: boolean;
 
   /**
    * Create the command builder.
@@ -58,6 +59,10 @@ export class ClientBulkWriteCommandBuilder {
     this.currentModelIndex = 0;
     this.previousModelIndex = 0;
     this.lastOperations = [];
+    // Multi updates are not retryable.
+    this.isRetryable = !models.some(model => {
+      return model.name === 'deleteMany' || model.name === 'updateMany';
+    });
   }
 
   /**

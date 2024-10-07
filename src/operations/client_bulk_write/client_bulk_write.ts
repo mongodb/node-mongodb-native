@@ -31,6 +31,10 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
     return this.commandBuilder.resetBatch();
   }
 
+  override get canRetryWrite(): boolean {
+    return this.commandBuilder.isRetryable && super.canRetryWrite;
+  }
+
   /**
    * Execute the command. Superclass will handle write concern, etc.
    * @param server - The server.
