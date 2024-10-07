@@ -482,6 +482,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     return this.s.bsonOptions;
   }
 
+  /** @internal */
+  get timeoutMS(): number | undefined {
+    return this.options.timeoutMS;
+  }
+
   /**
    * Executes a client bulk write operation, available on server 8.0+.
    * @param models - The client bulk write models.
