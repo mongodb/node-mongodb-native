@@ -1,7 +1,5 @@
 /* Specification prose tests */
 
-import { setTimeout } from 'node:timers/promises';
-
 import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
@@ -79,16 +77,12 @@ describe('CSOT spec prose tests', function () {
     beforeEach(async function () {
       await internalClient
         .db('db')
-        .collection('coll')
+        .collection('bulkWriteTest')
         .drop()
         .catch(() => null);
       await internalClient.db('admin').command(failpoint);
 
       client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
-    });
-
-    afterEach(async function () {
-      await setTimeout(5000);
     });
 
     it('performs two inserts which fail to complete before 2000 ms', async () => {
@@ -99,7 +93,7 @@ describe('CSOT spec prose tests', function () {
       const oneMBDocs = Array.from({ length: 50 }, (_, _id) => ({ _id, a }));
       const error = await client
         .db('db')
-        .collection<{ _id: number; a: Uint8Array }>('coll')
+        .collection<{ _id: number; a: Uint8Array }>('bulkWriteTest')
         .insertMany(oneMBDocs)
         .catch(error => error);
 
