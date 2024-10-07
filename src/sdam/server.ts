@@ -311,6 +311,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       delete finalOptions.readPreference;
     }
 
+    if (this.description.iscryptd) {
+      finalOptions.omitMaxTimeMS = true;
+    }
+
     const session = finalOptions.session;
     let conn = session?.pinnedConnection;
 
