@@ -70,6 +70,7 @@ export class ClientBulkWriteResultsMerger {
           // record the error in writeErrors and immediately throw the exception. Otherwise, drivers
           // MUST continue to iterate the results cursor and execute any further bulkWrite batches.
           if (this.options.ordered) {
+            console.log(document);
             const error = new MongoClientBulkWriteError({
               message: 'Mongo client ordered bulk write encountered a write error.'
             });
