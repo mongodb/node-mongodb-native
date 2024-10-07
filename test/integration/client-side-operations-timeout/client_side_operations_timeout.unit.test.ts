@@ -6,8 +6,22 @@
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { setTimeout } from 'timers';
+import { TLSSocket } from 'tls';
+import { promisify } from 'util';
 
-import { ConnectionPool, type MongoClient, Timeout, TimeoutContext, Topology } from '../../mongodb';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
+import {
+  ConnectionPool,
+  CSOTTimeoutContext,
+  type MongoClient,
+  MongoOperationTimeoutError,
+  Timeout,
+  TimeoutContext,
+  Topology
+} from '../../mongodb';
+import { createTimerSandbox } from '../../unit/timer_sandbox';
 
 // TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec unit tests', function () {
@@ -93,17 +107,83 @@ describe('CSOT spec unit tests', function () {
   }).skipReason =
     'TODO(NODE-5682): Add CSOT support for socket read/write at the connection layer for CRUD APIs';
 
-  context.skip('Client side encryption', function () {
-    context(
-      'The remaining timeoutMS value should apply to HTTP requests against KMS servers for CSFLE.',
-      () => {}
-    );
+  describe('Client side encryption', function () {
+    describe('KMS requests', function () {
+      const stateMachine = new StateMachine({} as any);
+      const request = {
+        addResponse: _response => {},
+        status: {
+          type: 1,
+          code: 1,
+          message: 'notARealStatus'
+        },
+        bytesNeeded: 500,
+        kmsProvider: 'notRealAgain',
+        endpoint: 'fake',
+        message: Buffer.from('foobar')
+      };
 
-    context(
-      'The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.',
-      () => {}
-    );
-  }).skipReason = 'TODO(NODE-5686): Add CSOT support to client side encryption';
+      context('when StateMachine.kmsRequest() is passed a `CSOTimeoutContext`', function () {
+        beforeEach(async function () {
+          sinon.stub(TLSSocket.prototype, 'connect').callsFake(function (..._args) {});
+        });
+
+        afterEach(async function () {
+          sinon.restore();
+        });
+
+        it('the kms request times out through remainingTimeMS', async function () {
+          const timeoutContext = new CSOTTimeoutContext({
+            timeoutMS: 500,
+            serverSelectionTimeoutMS: 30000
+          });
+          const err = await stateMachine.kmsRequest(request, timeoutContext).catch(e => e);
+          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(err.errmsg).to.equal('KMS request timed out');
+        });
+      });
+
+      context('when StateMachine.kmsRequest() is not passed a `CSOTimeoutContext`', function () {
+        let clock: sinon.SinonFakeTimers;
+        let timerSandbox: sinon.SinonSandbox;
+
+        let sleep;
+
+        beforeEach(async function () {
+          sinon.stub(TLSSocket.prototype, 'connect').callsFake(function (..._args) {
+            clock.tick(30000);
+          });
+          timerSandbox = createTimerSandbox();
+          clock = sinon.useFakeTimers();
+          sleep = promisify(setTimeout);
+        });
+
+        afterEach(async function () {
+          if (clock) {
+            timerSandbox.restore();
+            clock.restore();
+            clock = undefined;
+          }
+          sinon.restore();
+        });
+
+        it('the kms request does not timeout within 30 seconds', async function () {
+          const sleepingFn = async () => {
+            await sleep(30000);
+            throw Error('Slept for 30s');
+          };
+
+          const err$ = Promise.all([stateMachine.kmsRequest(request), sleepingFn()]).catch(e => e);
+          clock.tick(30000);
+          const err = await err$;
+          expect(err.message).to.equal('Slept for 30s');
+        });
+      });
+    });
+
+    // TODO(NODE-6390): Add timeoutMS support to Auto Encryption
+    it.skip('The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.', () => {});
+  });
 
   context.skip('Background Connection Pooling', function () {
     context(
