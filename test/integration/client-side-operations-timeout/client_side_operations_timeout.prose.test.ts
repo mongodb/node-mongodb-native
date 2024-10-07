@@ -1,5 +1,7 @@
 /* Specification prose tests */
 
+import { setTimeout } from 'node:timers/promises';
+
 import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
@@ -83,6 +85,10 @@ describe('CSOT spec prose tests', function () {
       await internalClient.db('admin').command(failpoint);
 
       client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
+    });
+
+    afterEach(async function () {
+      await setTimeout(5000);
     });
 
     it('performs two inserts which fail to complete before 2000 ms', async () => {
@@ -289,7 +295,8 @@ describe('CSOT spec prose tests', function () {
       internalClient = this.configuration.newClient();
       await internalClient
         .db('db')
-        .dropCollection('coll')
+        .collection('coll')
+        .drop()
         .catch(() => null);
       // Creating capped collection to be able to create tailable find cursor
       const coll = await internalClient
