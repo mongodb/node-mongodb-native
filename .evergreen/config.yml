@@ -832,7 +832,13 @@ functions:
 
           cp $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh $ECS_SRC_DIR/.evergreen
 
-          tar -czf $ECS_SRC_DIR/src.tgz -C $PROJECT_DIRECTORY . $DRIVERS_TOOLS
+
+          cd ..
+
+          tar -czf src.tgz src drivers-tools
+
+          mv src.tgz $ECS_SRC_DIR/src.tgz
+
 
 
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
@@ -957,6 +963,7 @@ functions:
         env:
           MONGODB_URI: ${MONGODB_URI}
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-lambda-tests.sh
