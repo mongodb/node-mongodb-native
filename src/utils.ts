@@ -1177,7 +1177,9 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
     srvIsLessThanThreeParts &&
     normalizedAddress.split('.').length <= normalizedSrvHost.split('.').length
   ) {
-    throw new MongoAPIError('Server record does not have at least one more domain level than parent URI');
+    throw new MongoAPIError(
+      'Server record does not have at least one more domain level than parent URI'
+    );
   }
   if (!addressDomain.endsWith(srvHostDomain)) {
     throw new MongoAPIError('Server record does not share hostname with parent URI');

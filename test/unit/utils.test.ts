@@ -940,13 +940,32 @@ describe('driver utils', function () {
   });
 
   describe('checkParentDomainMatch()', () => {
-
     const exampleSrvName = ['i-love-js', 'i-love-js.mongodb', 'i-love-javascript.mongodb.io'];
-    const exampleSrvNameWithDot = ['i-love-js.', 'i-love-js.mongodb.', 'i-love-javascript.mongodb.io.'];
-    const exampleHostNameWithoutDot = ['js-00.i-love-js', 'js-00.i-love-js.mongodb', 'i-love-javascript-00.mongodb.io'];
-    const exampleHostNamesWithDot = ['js-00.i-love-js.', 'js-00.i-love-js.mongodb.', 'i-love-javascript-00.mongodb.io.'];
-    const exampleHostNameThatDoNotMatchParent = ['js-00.i-love-js-a-little','js-00.i-love-js-a-little.mongodb', 'i-love-javascript-00.evil-mongodb.io'];
-    const exampleHostNameThatDoNotMatchParentWithDot = ['i-love-js','', 'i-love-javascript-00.evil-mongodb.io.'];
+    const exampleSrvNameWithDot = [
+      'i-love-js.',
+      'i-love-js.mongodb.',
+      'i-love-javascript.mongodb.io.'
+    ];
+    const exampleHostNameWithoutDot = [
+      'js-00.i-love-js',
+      'js-00.i-love-js.mongodb',
+      'i-love-javascript-00.mongodb.io'
+    ];
+    const exampleHostNamesWithDot = [
+      'js-00.i-love-js.',
+      'js-00.i-love-js.mongodb.',
+      'i-love-javascript-00.mongodb.io.'
+    ];
+    const exampleHostNameThatDoNotMatchParent = [
+      'js-00.i-love-js-a-little',
+      'js-00.i-love-js-a-little.mongodb',
+      'i-love-javascript-00.evil-mongodb.io'
+    ];
+    const exampleHostNameThatDoNotMatchParentWithDot = [
+      'i-love-js',
+      '',
+      'i-love-javascript-00.evil-mongodb.io.'
+    ];
 
     for (let num = 0; num < 3; num += 1) {
       context(`when srvName has ${num + 1} part${num !== 0 ? 's' : ''}`, () => {
@@ -959,7 +978,10 @@ describe('driver utils', function () {
 
           it('with a trailing dot throws', () => {
             expect(() =>
-              checkParentDomainMatch(exampleHostNameThatDoNotMatchParentWithDot[num], exampleSrvName[num])
+              checkParentDomainMatch(
+                exampleHostNameThatDoNotMatchParentWithDot[num],
+                exampleSrvName[num]
+              )
             ).to.throw();
           });
         });
@@ -989,7 +1011,9 @@ describe('driver utils', function () {
             it('does not accept address if it does not contain an extra domain level', () => {
               expect(() =>
                 checkParentDomainMatch(exampleSrvNameWithDot[num], exampleSrvNameWithDot[num])
-              ).to.throw('Server record does not have at least one more domain level than parent URI');
+              ).to.throw(
+                'Server record does not have at least one more domain level than parent URI'
+              );
             });
           }
         });
