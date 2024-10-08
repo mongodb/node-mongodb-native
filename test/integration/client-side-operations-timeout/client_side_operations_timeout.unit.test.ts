@@ -13,6 +13,7 @@ import { promisify } from 'util';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import {
+  Connection,
   ConnectionPool,
   CSOTTimeoutContext,
   type MongoClient,
@@ -21,6 +22,7 @@ import {
   TimeoutContext,
   Topology
 } from '../../mongodb';
+import { sleep } from '../../tools/utils';
 import { createTimerSandbox } from '../../unit/timer_sandbox';
 
 // TODO(NODE-5824): Implement CSOT prose tests
@@ -181,8 +183,113 @@ describe('CSOT spec unit tests', function () {
       });
     });
 
-    // TODO(NODE-6390): Add timeoutMS support to Auto Encryption
-    it.skip('The remaining timeoutMS value should apply to commands sent to mongocryptd as part of automatic encryption.', () => {});
+    describe('Auto Encryption', function () {
+      context('when provided timeoutMS and command hangs', function () {
+        let encryptedClient;
+
+        beforeEach(async function () {
+          encryptedClient = this.configuration.newClient(
+            {},
+            {
+              autoEncryption: {
+                extraOptions: {
+                  mongocryptdBypassSpawn: true,
+                  mongocryptdURI: 'mongodb://localhost:27017/db?serverSelectionTimeoutMS=1000',
+                  mongocryptdSpawnArgs: [
+                    '--pidfilepath=bypass-spawning-mongocryptd.pid',
+                    '--port=27017'
+                  ]
+                },
+                keyVaultNamespace: 'admin.datakeys',
+                kmsProviders: {
+                  aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+                  local: { key: Buffer.alloc(96) }
+                }
+              },
+              timeoutMS: 500
+            }
+          );
+          await encryptedClient.connect();
+
+          const stub = sinon
+            // @ts-expect-error accessing private method
+            .stub(Connection.prototype, 'sendCommand')
+            .callsFake(async function* (...args) {
+              await sleep(1000);
+              yield* stub.wrappedMethod.call(this, ...args);
+            });
+        });
+
+        afterEach(async function () {
+          await encryptedClient?.close();
+          sinon.restore();
+        });
+
+        it('the command should fail due to a timeout error', async function () {
+          const err = await encryptedClient
+            .db()
+            .command({ ping: 1 })
+            .catch(e => e);
+          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      context('when not provided timeoutMS and command hangs', function () {
+        let encryptedClient;
+        let clock: sinon.SinonFakeTimers;
+        let timerSandbox: sinon.SinonSandbox;
+        let sleep;
+
+        beforeEach(async function () {
+          encryptedClient = this.configuration.newClient(
+            {},
+            {
+              autoEncryption: {
+                keyVaultNamespace: 'admin.datakeys',
+                kmsProviders: {
+                  aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+                  local: { key: Buffer.alloc(96) }
+                }
+              }
+            }
+          );
+          await encryptedClient.connect();
+          timerSandbox = createTimerSandbox();
+          clock = sinon.useFakeTimers();
+          sleep = promisify(setTimeout);
+          const stub = sinon
+            // @ts-expect-error accessing private method
+            .stub(Connection.prototype, 'sendCommand')
+            .callsFake(async function* (...args) {
+              await sleep(1000);
+              yield* stub.wrappedMethod.call(this, ...args);
+            });
+        });
+
+        afterEach(async function () {
+          if (clock) {
+            timerSandbox.restore();
+            clock.restore();
+            clock = undefined;
+          }
+          await encryptedClient?.close();
+        });
+
+        it('the command should not fail due to a timeout error within 30 seconds', async function () {
+          const sleepingFn = async () => {
+            await sleep(30000);
+            throw Error('Slept for 30s');
+          };
+
+          const err$ = Promise.all([encryptedClient.db().command({ ping: 1 }), sleepingFn()]).catch(
+            e => e
+          );
+          clock.tick(30000);
+          const err = await err$;
+          expect(err.message).to.equal('Slept for 30s');
+        });
+      });
+    });
   });
 
   context.skip('Background Connection Pooling', function () {
