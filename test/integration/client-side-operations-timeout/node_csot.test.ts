@@ -993,7 +993,8 @@ describe('CSOT driver tests', metadata, () => {
           await internalClient.db().admin().command(failpoint);
         });
 
-        it('closes the change stream');
+        it('closes the change stream', async function() {
+        });
       });
     });
   });
