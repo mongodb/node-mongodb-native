@@ -2061,6 +2061,34 @@ describe('ChangeStream resumability', function () {
           }
         );
       });
+
+      context('when the error occurs on the aggregate command', function () {
+        it(
+          'does not resume',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            const resumableErrorCode = 7; // Host not found
+            await client.db('admin').command({
+              configureFailPoint: 'failCommand',
+              mode: { times: 2 }, // Fail twice to account for retry attempt in executeOperation which is separate from the change stream's resume attempt
+              data: {
+                failCommands: ['aggregate'],
+                errorCode: resumableErrorCode
+              }
+            } as FailPoint);
+
+            changeStream = collection.watch([]);
+
+            await collection.insertOne({ name: 'bailey' });
+
+            const maybeError = await changeStream.next().catch(e => e);
+
+            expect(maybeError).to.be.instanceof(MongoServerError);
+            expect(aggregateEvents).to.have.lengthOf(2);
+            expect(changeStream.closed).to.be.true;
+          }
+        );
+      });
     });
 
     context('#hasNext', function () {
@@ -2222,6 +2250,34 @@ describe('ChangeStream resumability', function () {
 
             expect(error).to.be.instanceOf(MongoServerError);
             expect(aggregateEvents).to.have.lengthOf(1);
+          }
+        );
+      });
+
+      context('when the error occurs on the aggregate command', function () {
+        it(
+          'does not resume',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            const resumableErrorCode = 7; // Host not found
+            await client.db('admin').command({
+              configureFailPoint: 'failCommand',
+              mode: { times: 2 }, // Fail twice to account for retry attempt in executeOperation which is separate from the change stream's resume attempt
+              data: {
+                failCommands: ['aggregate'],
+                errorCode: resumableErrorCode
+              }
+            } as FailPoint);
+
+            changeStream = collection.watch([]);
+
+            await collection.insertOne({ name: 'bailey' });
+
+            const maybeError = await changeStream.hasNext().catch(e => e);
+
+            expect(maybeError).to.be.instanceof(MongoServerError);
+            expect(aggregateEvents).to.have.lengthOf(2);
+            expect(changeStream.closed).to.be.true;
           }
         );
       });
@@ -2401,6 +2457,34 @@ describe('ChangeStream resumability', function () {
           }
         );
       });
+
+      context('when the error occurs on the aggregate command', function () {
+        it(
+          'does not resume',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            const resumableErrorCode = 7; // Host not found
+            await client.db('admin').command({
+              configureFailPoint: 'failCommand',
+              mode: { times: 2 }, // Fail twice to account for retry attempt in executeOperation which is separate from the change stream's resume attempt
+              data: {
+                failCommands: ['aggregate'],
+                errorCode: resumableErrorCode
+              }
+            } as FailPoint);
+
+            changeStream = collection.watch([]);
+
+            await collection.insertOne({ name: 'bailey' });
+
+            const maybeError = await changeStream.tryNext().catch(e => e);
+
+            expect(maybeError).to.be.instanceof(MongoServerError);
+            expect(aggregateEvents).to.have.lengthOf(2);
+            expect(changeStream.closed).to.be.true;
+          }
+        );
+      });
     });
 
     context('#asyncIterator', function () {
@@ -2547,6 +2631,40 @@ describe('ChangeStream resumability', function () {
             } catch (error) {
               expect(error).to.be.instanceOf(MongoServerError);
               expect(aggregateEvents).to.have.lengthOf(1);
+            }
+          }
+        );
+      });
+
+      context('when the error occurs on the aggregate command', function () {
+        it(
+          'does not resume',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+
+            const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+            await collection.insertMany(docs);
+
+            const resumableErrorCode = 7;
+            await client.db('admin').command({
+              configureFailPoint: 'failCommand',
+              mode: { times: 2 }, // Account for retry in executeOperation which is separate from change stream's resume
+              data: {
+                failCommands: ['aggregate'],
+                errorCode: resumableErrorCode
+              }
+            } as FailPoint);
+
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              for await (const change of changeStream) {
+                expect.fail('Change stream produced events on an unresumable error');
+              }
+            } catch (error) {
+              expect(error).to.be.instanceOf(MongoServerError);
+              expect(aggregateEvents).to.have.lengthOf(2);
+              expect(changeStream.closed).to.be.true;
             }
           }
         );
@@ -2718,6 +2836,35 @@ describe('ChangeStream resumability', function () {
 
           expect(error).to.be.instanceOf(MongoServerError);
           expect(aggregateEvents).to.have.lengthOf(1);
+        }
+      );
+    });
+
+    context('when the error occurred on the aggregate', function () {
+      it(
+        'does not resume',
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
+        async function () {
+          changeStream = collection.watch([]);
+
+          const resumableErrorCode = 7;
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: { times: 2 }, // account for retry attempt in executeOperation which is separate from change stream's retry
+            data: {
+              failCommands: ['aggregate'],
+              errorCode: resumableErrorCode
+            }
+          } as FailPoint);
+
+          const willBeError = once(changeStream, 'change').catch(error => error);
+          await collection.insertOne({ name: 'bailey' });
+
+          const error = await willBeError;
+
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(aggregateEvents).to.have.lengthOf(2);
+          expect(changeStream.closed).to.be.true;
         }
       );
     });
