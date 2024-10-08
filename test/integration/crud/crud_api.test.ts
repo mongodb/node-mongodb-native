@@ -7,6 +7,7 @@ import {
   Collection,
   CommandFailedEvent,
   CommandSucceededEvent,
+  MongoBulkWriteError,
   type MongoClient,
   MongoError,
   MongoServerError,
@@ -1093,24 +1094,30 @@ describe('CRUD API', function () {
     }
   });
 
-  it('should correctly throw error on illegal callback when unordered bulkWrite encounters error', async function () {
-    const ops = [];
-    // Create a set of operations that go over the 1000 limit causing two messages
-    let i = 0;
-    for (; i < 1005; i++) {
-      ops.push({ insertOne: { _id: i, a: i } });
-    }
+  describe('when performing a multi-batch unordered bulk write that has a duplicate key', function () {
+    it('throws a MongoBulkWriteError indicating the duplicate key document failed', async function () {
+      const ops = [];
+      // Create a set of operations that go over the 1000 limit causing two messages
+      let i = 0;
+      for (; i < 1005; i++) {
+        ops.push({ insertOne: { _id: i, a: i } });
+      }
 
-    ops.push({ insertOne: { _id: 0, a: i } });
+      ops[500] = { insertOne: { _id: 0, a: i } };
 
-    const db = client.db();
+      const db = client.db();
 
-    const error = await db
-      .collection('t20_1')
-      .bulkWrite(ops, { ordered: false, writeConcern: { w: 1 } })
-      .catch(error => error);
+      const error = await db
+        .collection('t20_1')
+        .bulkWrite(ops, { ordered: false, writeConcern: { w: 1 } })
+        .catch(error => error);
 
-    expect(error).to.be.instanceOf(MongoError);
+      expect(error).to.be.instanceOf(MongoBulkWriteError);
+      // 1004 because one of them is duplicate key
+      // but since it is unordered we continued to write
+      expect(error).to.have.property('insertedCount', 1004);
+      expect(error.writeErrors[0]).to.have.nested.property('err.index', 500);
+    });
   });
 
   it('should correctly throw error on illegal callback when ordered bulkWrite encounters error', {

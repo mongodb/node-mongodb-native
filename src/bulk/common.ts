@@ -557,20 +557,25 @@ async function executeCommands(
     }
 
     if (thrownError != null) {
-      if (!(thrownError instanceof MongoWriteConcernError)) {
+      if (thrownError instanceof MongoWriteConcernError) {
+        mergeBatchResults(batch, bulkOperation.s.bulkResult, thrownError, result);
+        const writeResult = new BulkWriteResult(
+          bulkOperation.s.bulkResult,
+          bulkOperation.isOrdered
+        );
+
+        throw new MongoBulkWriteError(
+          {
+            message: thrownError.result.writeConcernError.errmsg,
+            code: thrownError.result.writeConcernError.code
+          },
+          writeResult
+        );
+      } else {
         // Error is a driver related error not a bulk op error, return early
         throw new MongoBulkWriteError(
           thrownError,
           new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered)
-        );
-      }
-
-      if (thrownError instanceof MongoWriteConcernError) {
-        handleMongoWriteConcernError(
-          batch,
-          bulkOperation.s.bulkResult,
-          bulkOperation.isOrdered,
-          thrownError
         );
       }
     }
@@ -585,23 +590,6 @@ async function executeCommands(
   const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered);
   bulkOperation.handleWriteError(writeResult);
   return writeResult;
-}
-
-function handleMongoWriteConcernError(
-  batch: Batch,
-  bulkResult: BulkResult,
-  isOrdered: boolean,
-  err: MongoWriteConcernError
-): never {
-  mergeBatchResults(batch, bulkResult, undefined, err.result);
-
-  throw new MongoBulkWriteError(
-    {
-      message: err.result.writeConcernError.errmsg,
-      code: err.result.writeConcernError.code
-    },
-    new BulkWriteResult(bulkResult, isOrdered)
-  );
 }
 
 /**
