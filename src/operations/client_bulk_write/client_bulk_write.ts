@@ -54,7 +54,6 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
         // Pin the connection to the session so it get used to execute the command and we do not
         // perform a double check-in/check-out.
         if (!session.pinnedConnection) {
-          console.log('pinning');
           session.pin(connection);
         }
         command = this.commandBuilder.buildBatch(
@@ -93,7 +92,6 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       if (server.description.type === ServerType.LoadBalancer) {
         // Unpin the connection if there are no more batches.
         if (session?.pinnedConnection && !this.commandBuilder.hasNextBatch()) {
-          console.log('unpinning finally');
           session?.unpin({ force: true });
         }
       }
