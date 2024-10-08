@@ -837,7 +837,7 @@ export abstract class AbstractCursor<
    * operation.  We cannot refactor to use the abstract _initialize method without
    * a significant refactor.
    */
-  async cursorInit(): Promise<void> {
+  private async cursorInit(): Promise<void> {
     if (this.cursorOptions.timeoutMS != null) {
       this.timeoutContext ??= new CursorTimeoutContext(
         TimeoutContext.create({

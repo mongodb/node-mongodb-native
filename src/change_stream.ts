@@ -974,8 +974,9 @@ export class ChangeStream<
     if (this[kClosed]) return;
 
     if (
-      isResumableError(changeStreamError, this.cursor.maxWireVersion) ||
-      changeStreamError instanceof MongoOperationTimeoutError
+      (isResumableError(changeStreamError, this.cursor.maxWireVersion) ||
+        changeStreamError instanceof MongoOperationTimeoutError) &&
+      this.cursor.id != null
     ) {
       this._endStream();
 
@@ -1008,8 +1009,9 @@ export class ChangeStream<
     }
 
     if (
-      !isResumableError(changeStreamError, this.cursor.maxWireVersion) &&
-      !(changeStreamError instanceof MongoOperationTimeoutError)
+      (!isResumableError(changeStreamError, this.cursor.maxWireVersion) &&
+        !(changeStreamError instanceof MongoOperationTimeoutError)) ||
+      this.cursor.id == null
     ) {
       try {
         await this.close();
@@ -1039,7 +1041,6 @@ export class ChangeStream<
         timeoutContext: this.timeoutContext
       });
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-      await this.cursor.cursorInit();
     } catch {
       // if the topology can't reconnect, close the stream
       await this.close();
