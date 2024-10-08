@@ -154,7 +154,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
           .catch(e => e);
         expect(err).to.be.instanceOf(MongoAPIError);
         expect(err.message).to.equal(
-          'Server record does not have least one more domain than parent URI'
+          'Server record does not have at least one more domain level than parent URI'
         );
       });
 
@@ -175,7 +175,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
           .catch(e => e);
         expect(err).to.be.instanceOf(MongoAPIError);
         expect(err.message).to.equal(
-          'Server record does not have least one more domain than parent URI'
+          'Server record does not have at least one more domain level than parent URI'
         );
       });
     }

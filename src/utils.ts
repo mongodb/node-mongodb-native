@@ -1160,7 +1160,7 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
   const normalizedSrvHost = srvHost.endsWith('.') ? srvHost.slice(0, srvHost.length - 1) : srvHost;
 
   const allCharacterBeforeFirstDot = /^.*?\./;
-  const srvIsLessThanThreeParts = srvHost.split('.').length < 3;
+  const srvIsLessThanThreeParts = normalizedSrvHost.split('.').length < 3;
   // Remove all characters before first dot
   // Add leading dot back to string so
   //   an srvHostDomain = '.trusted.site'
@@ -1177,11 +1177,9 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
     srvIsLessThanThreeParts &&
     normalizedAddress.split('.').length <= normalizedSrvHost.split('.').length
   ) {
-    // TODO(NODE-3484): Replace with MongoConnectionStringError
-    throw new MongoAPIError('Server record does not have least one more domain than parent URI');
+    throw new MongoAPIError('Server record does not have at least one more domain level than parent URI');
   }
   if (!addressDomain.endsWith(srvHostDomain)) {
-    // TODO(NODE-3484): Replace with MongoConnectionStringError
     throw new MongoAPIError('Server record does not share hostname with parent URI');
   }
 }
