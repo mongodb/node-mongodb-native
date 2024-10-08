@@ -93,7 +93,7 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       if (server.description.type === ServerType.LoadBalancer) {
         // Unpin the connection if there are no more batches.
         if (session?.pinnedConnection && !this.commandBuilder.hasNextBatch()) {
-          console.log('unpinning');
+          console.log('unpinning finally');
           session?.unpin({ force: true });
         }
       }
