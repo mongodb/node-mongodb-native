@@ -441,8 +441,12 @@ function failOnMismatchedCount(
   actual: CommandEvent[] | CmapEvent[] | SdamEvent[],
   expected: (ExpectedCommandEvent & ExpectedCmapEvent & ExpectedSdamEvent)[]
 ) {
-  const actualNames = actual.map(a => a.constructor.name);
-  const expectedNames = expected.map(e => Object.keys(e)[0]);
+  const actualNames = actual.map((a: CommandEvent | CmapEvent | SdamEvent) =>
+    'commandName' in a ? `${a.name}(${a.commandName})` : a.constructor.name
+  );
+  const expectedNames = expected.map(e =>
+    'commandName' in e ? `${Object.keys(e)[0]}(${e.commandName})` : Object.keys(e)[0]
+  );
   expect.fail(
     `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
       actualNames

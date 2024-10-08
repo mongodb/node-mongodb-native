@@ -1117,7 +1117,7 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe('Connection after timeout', () => {
+  describe('Connection after timeout', { requires: { mongodb: '>=4.4' } }, () => {
     let client: MongoClient;
 
     beforeEach(async function () {
