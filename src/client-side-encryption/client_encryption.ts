@@ -41,6 +41,7 @@ import {
   type CSFLEKMSTlsOptions,
   StateMachine
 } from './state_machine';
+import { CSOTTimeoutContext } from '../timeout';
 
 /**
  * @public
@@ -74,6 +75,8 @@ export class ClientEncryption {
   _tlsOptions: CSFLEKMSTlsOptions;
   /** @internal */
   _kmsProviders: KMSProviders;
+  /** @internal */
+  _timeoutMS?: number;
 
   /** @internal */
   _mongoCrypt: MongoCrypt;
@@ -120,6 +123,7 @@ export class ClientEncryption {
     this._proxyOptions = options.proxyOptions ?? {};
     this._tlsOptions = options.tlsOptions ?? {};
     this._kmsProviders = options.kmsProviders || {};
+    this._timeoutMS = options.timeoutMS;
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -541,6 +545,8 @@ export class ClientEncryption {
       }
     } = options;
 
+    createCollectionOptions.timeoutMS = this._timeoutMS;
+
     if (Array.isArray(encryptedFields.fields)) {
       const createDataKeyPromises = encryptedFields.fields.map(async field =>
         field == null || typeof field !== 'object' || field.keyId != null
@@ -653,7 +659,13 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const { v } = deserialize(await stateMachine.execute(this, context));
+    const timeoutContext = this._timeoutMS 
+      ? new CSOTTimeoutContext({
+          timeoutMS: this._timeoutMS,
+          serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
+        })
+      : undefined;
+    const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
 
     return v;
   }
@@ -733,7 +745,13 @@ export class ClientEncryption {
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
-    const { v } = deserialize(await stateMachine.execute(this, context));
+    const timeoutContext = this._timeoutMS 
+      ? new CSOTTimeoutContext({
+          timeoutMS: this._timeoutMS,
+          serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
+        })
+      : undefined;
+    const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
     return v;
   }
 }
@@ -818,6 +836,9 @@ export interface ClientEncryptionOptions {
    * TLS options for kms providers to use.
    */
   tlsOptions?: CSFLEKMSTlsOptions;
+
+  /** @internal TODO(NODE-5688): make this public */
+  timeoutMS?: number;
 }
 
 /**
