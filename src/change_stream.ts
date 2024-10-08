@@ -1039,6 +1039,7 @@ export class ChangeStream<
         timeoutContext: this.timeoutContext
       });
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
+      await this.cursor.cursorInit();
     } catch {
       // if the topology can't reconnect, close the stream
       await this.close();
