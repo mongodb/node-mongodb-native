@@ -32,7 +32,7 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
   }
 
   override get canRetryWrite(): boolean {
-    return this.commandBuilder.isRetryable && super.canRetryWrite;
+    return this.commandBuilder.isBatchRetryable;
   }
 
   /**
@@ -49,12 +49,15 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
 
     if (server.description.type === ServerType.LoadBalancer) {
       if (session) {
-        // Checkout a connection to build the command.
-        const connection = await server.pool.checkOut();
-        // Pin the connection to the session so it get used to execute the command and we do not
-        // perform a double check-in/check-out.
+        let connection;
         if (!session.pinnedConnection) {
+          // Checkout a connection to build the command.
+          connection = await server.pool.checkOut();
+          // Pin the connection to the session so it get used to execute the command and we do not
+          // perform a double check-in/check-out.
           session.pin(connection);
+        } else {
+          connection = session.pinnedConnection;
         }
         command = this.commandBuilder.buildBatch(
           connection.hello?.maxMessageSizeBytes,
@@ -86,16 +89,7 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       );
     }
 
-    try {
-      return await super.executeCommand(server, session, command, ClientBulkWriteCursorResponse);
-    } finally {
-      if (server.description.type === ServerType.LoadBalancer) {
-        // Unpin the connection if there are no more batches.
-        if (session?.pinnedConnection && !this.commandBuilder.hasNextBatch()) {
-          session?.unpin({ force: true });
-        }
-      }
-    }
+    return await super.executeCommand(server, session, command, ClientBulkWriteCursorResponse);
   }
 }
 

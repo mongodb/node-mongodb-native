@@ -39,10 +39,14 @@ export class ClientBulkWriteCommandBuilder {
   models: AnyClientBulkWriteModel[];
   options: ClientBulkWriteOptions;
   pkFactory: PkFactory;
+  /** The current index in the models array that is being processed. */
   currentModelIndex: number;
+  /** The model index that the builder was on when it finished the previous batch. Used for resets when retrying. */
   previousModelIndex: number;
+  /** The last array of operations that were created. Used by the results merger for indexing results. */
   lastOperations: Document[];
-  isRetryable: boolean;
+  /** Returns true if the current batch being created has no multi-updates. */
+  isBatchRetryable: boolean;
 
   /**
    * Create the command builder.
@@ -59,10 +63,7 @@ export class ClientBulkWriteCommandBuilder {
     this.currentModelIndex = 0;
     this.previousModelIndex = 0;
     this.lastOperations = [];
-    // Multi updates are not retryable.
-    this.isRetryable = !models.some(model => {
-      return model.name === 'deleteMany' || model.name === 'updateMany';
-    });
+    this.isBatchRetryable = true;
   }
 
   /**
@@ -104,6 +105,9 @@ export class ClientBulkWriteCommandBuilder {
     maxWriteBatchSize: number,
     maxBsonObjectSize: number
   ): ClientBulkWriteCommand {
+    // We start by assuming the batch has no multi-updates, so it is retryable
+    // until we find them.
+    this.isBatchRetryable = true;
     let commandLength = 0;
     let currentNamespaceIndex = 0;
     const command: ClientBulkWriteCommand = this.baseCommand();
@@ -115,6 +119,11 @@ export class ClientBulkWriteCommandBuilder {
       const model = this.models[this.currentModelIndex];
       const ns = model.namespace;
       const nsIndex = namespaces.get(ns);
+
+      // Multi updates are not retryable.
+      if (model.name === 'deleteMany' || model.name === 'updateMany') {
+        this.isBatchRetryable = false;
+      }
 
       if (nsIndex != null) {
         // Build the operation and serialize it to get the bytes buffer.
@@ -379,16 +388,7 @@ function createUpdateOperation(
   // required only to contain atomic modifiers (i.e. keys that start with "$").
   // Drivers MUST throw an error if an update document is empty or if the
   // document's first key does not start with "$".
-  if (Array.isArray(model.update)) {
-    if (model.update.length === 0) {
-      throw new MongoAPIError('Client bulk write update model pipelines may not be empty.');
-    }
-    for (const update of model.update) {
-      validateUpdate(update);
-    }
-  } else {
-    validateUpdate(model.update);
-  }
+  validateUpdate(model.update);
   const document: ClientUpdateOperation = {
     update: index,
     multi: multi,
