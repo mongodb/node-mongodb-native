@@ -6,6 +6,7 @@ import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AzureMachineWorkflow } from './mongodb_oidc/azure_machine_workflow';
 import { GCPMachineWorkflow } from './mongodb_oidc/gcp_machine_workflow';
+import { K8SMachineWorkflow } from './mongodb_oidc/k8s_machine_workflow';
 import { TokenCache } from './mongodb_oidc/token_cache';
 import { TokenMachineWorkflow } from './mongodb_oidc/token_machine_workflow';
 
@@ -88,7 +89,7 @@ export type OIDCCallbackFunction = (params: OIDCCallbackParams) => Promise<OIDCR
 /** The current version of OIDC implementation. */
 export const OIDC_VERSION = 1;
 
-type EnvironmentName = 'test' | 'azure' | 'gcp' | undefined;
+type EnvironmentName = 'test' | 'azure' | 'gcp' | 'k8s' | undefined;
 
 /** @internal */
 export interface Workflow {
@@ -118,6 +119,7 @@ export const OIDC_WORKFLOWS: Map<EnvironmentName, () => Workflow> = new Map();
 OIDC_WORKFLOWS.set('test', () => new TokenMachineWorkflow(new TokenCache()));
 OIDC_WORKFLOWS.set('azure', () => new AzureMachineWorkflow(new TokenCache()));
 OIDC_WORKFLOWS.set('gcp', () => new GCPMachineWorkflow(new TokenCache()));
+OIDC_WORKFLOWS.set('k8s', () => new K8SMachineWorkflow(new TokenCache()));
 
 /**
  * OIDC auth provider.

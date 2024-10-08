@@ -721,7 +721,8 @@ BUILD_VARIANTS.push({
   tasks: [
     'testtestoidc_task_group',
     'testazureoidc_task_group',
-    'testgcpoidc_task_group'
+    'testgcpoidc_task_group',
+    'testk8soidc_task_group'
   ]
 });
 

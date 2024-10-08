@@ -454,3 +454,18 @@ tests:
   uri: mongodb://user:pass@localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:gcp
   valid: false
   credential: null
+- description: should recognise the mechanism with k8s provider (MONGODB-OIDC)
+  uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:k8s
+  valid: true
+  credential:
+    username: null
+    password: null
+    source: $external
+    mechanism: MONGODB-OIDC
+    mechanism_properties:
+      ENVIRONMENT: k8s
+- description: should throw an error for a username and password with k8s provider
+    (MONGODB-OIDC)
+  uri: mongodb://user:pass@localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:k8s
+  valid: false
+  credential: null
