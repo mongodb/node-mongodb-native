@@ -18,7 +18,7 @@ import { createTimerSandbox } from '../../unit/timer_sandbox';
 
 describe('Client-Side Encryption (Integration)', function () {
   describe('CSOT', function () {
-    describe('Auto encryption', function () {
+    describe('Auto encryption', { requires: { mongodb: '>=4.2' } }, function () {
       let setupClient;
 
       beforeEach(async function () {

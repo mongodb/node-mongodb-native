@@ -33,7 +33,7 @@ const skippedTests = {
     'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs' // Skipping for both tailable awaitData and tailable non-awaitData cursors
 };
 
-describe('CSOT spec tests', function () {
+describe.only('CSOT spec tests', function () {
   const specs = loadSpecTests('client-side-operations-timeout');
   for (const spec of specs) {
     for (const test of spec.tests) {
