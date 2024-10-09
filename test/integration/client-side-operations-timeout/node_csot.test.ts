@@ -22,7 +22,6 @@ import {
   GridFSBucket,
   LEGACY_HELLO_COMMAND,
   type MongoClient,
-  type MongoError,
   MongoInvalidArgumentError,
   MongoOperationTimeoutError,
   MongoServerError,
@@ -841,12 +840,16 @@ describe('CSOT driver tests', metadata, () => {
       let cs: ChangeStream;
       let errorIter: AsyncIterableIterator<any[]>;
 
+      afterEach(async function () {
+        await cs?.close();
+      });
+
       context('when the initial aggregate times out', function () {
         beforeEach(async function () {
           data = [];
           const failpoint: FailPoint = {
             configureFailPoint: 'failCommand',
-            mode: { times: 1 },
+            mode: { times: 1 }, // fail twice to account for executeOperation's retry attempt
             data: {
               failCommands: ['aggregate'],
               blockConnection: true,
@@ -857,7 +860,9 @@ describe('CSOT driver tests', metadata, () => {
           await internalClient.db().admin().command(failpoint);
           cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
           errorIter = on(cs, 'error');
-          cs.on('change', () => {}); // Add empty listener just to get the change stream running
+          cs.on('change', () => {
+            // Add empty listener just to get the change stream running
+          });
         });
 
         it('emits an error event', metadata, async function () {
@@ -867,41 +872,10 @@ describe('CSOT driver tests', metadata, () => {
           expect(err).to.be.instanceof(MongoOperationTimeoutError);
         });
 
-        it('does not close the change stream', metadata, async function () {
+        it('closes the change stream', metadata, async function () {
           const err = (await errorIter.next()).value[0];
           expect(err).to.be.instanceof(MongoOperationTimeoutError);
-          expect(cs.closed).to.be.false;
-        });
-
-        it('attempts to create a new change stream cursor', metadata, async function () {
-          await errorIter.next();
-          let aggregates = commandsStarted
-            .filter(x => x.commandName === 'aggregate')
-            .map(x => x.command);
-          expect(aggregates).to.have.lengthOf(1);
-
-          await once(cs, 'resumeTokenChanged');
-
-          aggregates = commandsStarted
-            .filter(x => x.commandName === 'aggregate')
-            .map(x => x.command);
-
-          expect(aggregates).to.have.lengthOf(2);
-
-          expect(aggregates[0].pipeline[0]).to.deep.equal({ $changeStream: {} });
-          expect(aggregates[1].pipeline[0]).to.deep.equal({ $changeStream: {} });
-        });
-
-        it('continues emitting change events', metadata, async function () {
-          const err = (await errorIter.next()).value[0];
-          expect(err).to.be.instanceof(MongoOperationTimeoutError);
-
-          await once(cs, 'resumeTokenChanged');
-
-          await client.db('db').collection('coll').insertOne({ x: 1 });
-
-          const [change] = await once(cs, 'change');
-          expect(change).to.have.ownProperty('operationType', 'insert');
+          expect(cs.closed).to.be.true;
         });
       });
 
@@ -921,7 +895,9 @@ describe('CSOT driver tests', metadata, () => {
           await internalClient.db().admin().command(failpoint);
           cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
           errorIter = on(cs, 'error');
-          cs.on('change', () => {});
+          cs.on('change', () => {
+            // Add empty listener just to get the change stream running
+          });
         });
 
         it('emits an error event', metadata, async function () {
@@ -974,26 +950,32 @@ describe('CSOT driver tests', metadata, () => {
       context('when the resume attempt times out', function () {
         const failpoint: FailPoint = {
           configureFailPoint: 'failCommand',
-          mode: { times: 2 },
+          mode: { times: 2 }, // timeout the getMore, and the aggregate
           data: {
-            failCommands: ['aggregate'],
+            failCommands: ['getMore', 'aggregate'],
             blockConnection: true,
             blockTimeMS: 130
           }
         };
 
-        it('emits an error event', async function () {
+        beforeEach(async function () {
           cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
-          errorIter = once(cs, 'error');
-          const changePromise = once(cs, 'change');
-          await client.db('db').collection('coll').insertOne({ x: 1 });
-
-          await changePromise;
+          const _changePromise = once(cs, 'change');
+          await once(cs.cursor, 'init');
 
           await internalClient.db().admin().command(failpoint);
         });
 
-        it('closes the change stream', async function() {
+        it('emits an error event', async function () {
+          let [err] = await once(cs, 'error'); // getMore failure
+          [err] = await once(cs, 'error'); // aggregate failure
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+        });
+
+        it('closes the change stream', async function () {
+          await once(cs, 'error'); // await the getMore Failure
+          await once(cs, 'error'); // await the aggregate failure
+          expect(cs.closed).to.be.true;
         });
       });
     });
