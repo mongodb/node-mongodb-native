@@ -974,9 +974,9 @@ export class ChangeStream<
     if (this[kClosed]) return;
 
     if (
+      this.cursor.id != null &&
       (isResumableError(changeStreamError, this.cursor.maxWireVersion) ||
-        changeStreamError instanceof MongoOperationTimeoutError) &&
-      this.cursor.id != null
+        changeStreamError instanceof MongoOperationTimeoutError)
     ) {
       this._endStream();
 
@@ -1009,9 +1009,9 @@ export class ChangeStream<
     }
 
     if (
+      this.cursor.id == null ||
       (!isResumableError(changeStreamError, this.cursor.maxWireVersion) &&
-        !(changeStreamError instanceof MongoOperationTimeoutError)) ||
-      this.cursor.id == null
+        !(changeStreamError instanceof MongoOperationTimeoutError))
     ) {
       try {
         await this.close();
