@@ -891,6 +891,49 @@ describe('Change Streams', function () {
       'This test only worked because of timing, changeStream.close does not remove the change listener';
   });
 
+  describe('when the aggregate fails due to a retryable error', function () {
+    let internalClient: MongoClient;
+    let client: MongoClient;
+    let changeStream: ChangeStream;
+    let aggregates: CommandStartedEvent[];
+    const failpoint: FailPoint = {
+      configureFailPoint: 'failCommand',
+      mode: { times: 1 },
+      data: {
+        failCommands: ['aggregate'],
+        errorCode: 7 // Host Not Found
+      }
+    };
+
+    beforeEach(async function () {
+      aggregates = [];
+      internalClient = this.configuration.newClient();
+      await internalClient.db().admin().command(failpoint);
+      client = this.configuration.newClient(undefined, { monitorCommands: true });
+      client.on('commandStarted', ev => {
+        console.log(ev);
+        if (ev.commandName === 'aggregate') aggregates.push(ev);
+      });
+    });
+
+    afterEach(async function () {
+      await internalClient.db().admin().command({ configureFailPoint: 'failCommand', mode: 'off' });
+      await internalClient.close();
+
+      await changeStream.close();
+      await client.close();
+    });
+
+    it.only('should not retry the aggregate command', async function () {
+      changeStream = client.db('test').collection('test').watch();
+      console.log('waiting for next');
+      const maybeError = await changeStream.next().catch(e => e);
+      expect(maybeError).to.be.instanceof(MongoServerError);
+
+      expect(aggregates).to.have.lengthOf(1);
+    });
+  });
+
   describe('iterator api', function () {
     describe('#tryNext()', function () {
       it('should return null on single iteration of empty cursor', {

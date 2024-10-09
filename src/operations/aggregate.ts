@@ -43,6 +43,7 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
+  hasChangeStreamStage: boolean;
 
   constructor(ns: MongoDBNamespace, pipeline: Document[], options?: AggregateOptions) {
     super(undefined, { ...options, dbName: ns.db });
@@ -72,6 +73,14 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
       delete this.options.writeConcern;
     }
 
+    this.hasChangeStreamStage = false;
+    if (pipeline.length > 0) {
+      const firstStage = pipeline[0];
+      if (firstStage.$changeStream) {
+        this.hasChangeStreamStage = true;
+      }
+    }
+
     if (this.explain && this.writeConcern) {
       throw new MongoInvalidArgumentError(
         'Option "explain" cannot be used on an aggregate call with writeConcern'
@@ -88,11 +97,7 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
   }
 
   override get canRetryRead(): boolean {
-    return !this.hasWriteStage;
-  }
-
-  addToPipeline(stage: Document): void {
-    this.pipeline.push(stage);
+    return !this.hasWriteStage && !this.hasChangeStreamStage;
   }
 
   override async execute(
