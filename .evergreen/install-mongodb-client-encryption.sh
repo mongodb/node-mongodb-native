@@ -13,6 +13,9 @@ rm -rf mongodb-client-encryption
 git clone https://github.com/mongodb-js/mongodb-client-encryption.git
 pushd mongodb-client-encryption
 
+node --version
+npm --version
+
 if [ -n "${LIBMONGOCRYPT_VERSION}" ]; then
 	# nightly tests test with `latest` to test against the laster FLE build.
     npm run install:libmongocrypt -- --build --libVersion $LIBMONGOCRYPT_VERSION
