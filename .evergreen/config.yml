@@ -1087,6 +1087,7 @@ functions:
         env:
           INSTALL_DIR: mongodb-client-encryption
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
