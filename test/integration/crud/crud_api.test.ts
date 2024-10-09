@@ -7,8 +7,8 @@ import {
   Collection,
   CommandFailedEvent,
   CommandSucceededEvent,
+  MongoBulkWriteError,
   type MongoClient,
-  MongoError,
   MongoServerError,
   ObjectId,
   ReturnDocument
@@ -1093,14 +1093,8 @@ describe('CRUD API', function () {
     }
   });
 
-  it('should correctly throw error on illegal callback when unordered bulkWrite encounters error', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: async function () {
+  describe('when performing a multi-batch unordered bulk write that has a duplicate key', function () {
+    it('throws a MongoBulkWriteError indicating the duplicate key document failed', async function () {
       const ops = [];
       // Create a set of operations that go over the 1000 limit causing two messages
       let i = 0;
@@ -1108,7 +1102,7 @@ describe('CRUD API', function () {
         ops.push({ insertOne: { _id: i, a: i } });
       }
 
-      ops.push({ insertOne: { _id: 0, a: i } });
+      ops[500] = { insertOne: { _id: 0, a: i } };
 
       const db = client.db();
 
@@ -1117,8 +1111,12 @@ describe('CRUD API', function () {
         .bulkWrite(ops, { ordered: false, writeConcern: { w: 1 } })
         .catch(error => error);
 
-      expect(error).to.be.instanceOf(MongoError);
-    }
+      expect(error).to.be.instanceOf(MongoBulkWriteError);
+      // 1004 because one of them is duplicate key
+      // but since it is unordered we continued to write
+      expect(error).to.have.property('insertedCount', 1004);
+      expect(error.writeErrors[0]).to.have.nested.property('err.index', 500);
+    });
   });
 
   it('should correctly throw error on illegal callback when ordered bulkWrite encounters error', {
