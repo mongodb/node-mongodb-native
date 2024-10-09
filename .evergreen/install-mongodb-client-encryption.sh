@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 set +o xtrace
+set +o errexit
 
 # Initial checks for running these tests
 if [ -z ${PROJECT_DIRECTORY+omitted} ]; then echo "PROJECT_DIRECTORY is unset" && exit 1; fi
