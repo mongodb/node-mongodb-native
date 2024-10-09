@@ -168,12 +168,13 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       explain =
         typeof verbosity !== 'object'
           ? verbosity
-          : 'timeoutMS' in verbosity
-            ? undefined
-            : (verbosity as ExplainCommandOptions);
+          : 'verbosity' in verbosity
+            ? verbosity
+            : undefined;
       timeout = typeof verbosity === 'object' && 'timeoutMS' in verbosity ? verbosity : undefined;
     } else {
-      explain = verbosity as ExplainCommandOptions;
+      // @ts-expect-error TS isn't smart enough to determine that if both options are provided, the first is explain options
+      explain = verbosity;
       timeout = options;
     }
 
