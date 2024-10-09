@@ -10,4 +10,5 @@ export ENVIRONMENT=$ENVIRONMENT
 printenv
 export AWS_WEB_IDENTITY_TOKEN_FILE=$OIDC_TOKEN_FILE
 ls -la $OIDC_TOKEN_DIR
+ls .
 bash ./.evergreen/${SCRIPT}
