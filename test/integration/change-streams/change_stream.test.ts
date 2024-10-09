@@ -2661,6 +2661,7 @@ describe('ChangeStream resumability', function () {
               for await (const change of changeStream) {
                 expect.fail('Change stream produced events on an unresumable error');
               }
+              expect.fail('Change stream did not iterate and did not throw an error');
             } catch (error) {
               expect(error).to.be.instanceOf(MongoServerError);
               expect(aggregateEvents).to.have.lengthOf(2);
