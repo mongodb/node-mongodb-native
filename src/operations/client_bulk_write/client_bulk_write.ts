@@ -89,6 +89,10 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       );
     }
 
+    // Check after the batch is built if we cannot retry it and override the option.
+    if (!this.canRetryWrite) {
+      this.options.willRetryWrite = false;
+    }
     return await super.executeCommand(server, session, command, ClientBulkWriteCursorResponse);
   }
 }
