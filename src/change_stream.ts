@@ -718,6 +718,7 @@ export class ChangeStream<
 
     try {
       while (true) {
+        const cursorInitialized = this.cursor.id != null;
         try {
           const change = await this.cursor.next();
           const processedChange = this._processChange(change ?? null);
@@ -726,7 +727,7 @@ export class ChangeStream<
           try {
             await this._processErrorIteratorMode(error);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError) {
+            if (error instanceof MongoOperationTimeoutError && cursorInitialized) {
               throw error;
             }
             try {
