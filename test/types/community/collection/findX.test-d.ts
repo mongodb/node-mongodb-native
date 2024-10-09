@@ -388,7 +388,3 @@ expectType<WithId<{ a: number; b: string }> | null>(
     }
   )
 );
-
-{
-  coll.find({}, { explain});
-}
