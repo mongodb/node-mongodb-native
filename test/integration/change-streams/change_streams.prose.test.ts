@@ -1,3 +1,5 @@
+import { promisify } from 'node:util';
+
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
@@ -5,6 +7,7 @@ import { setTimeout } from 'timers';
 
 import {
   type ChangeStream,
+  type Collection,
   type CommandFailedEvent,
   type CommandStartedEvent,
   type CommandSucceededEvent,
@@ -12,6 +15,7 @@ import {
   isHello,
   LEGACY_HELLO_COMMAND,
   Long,
+  type MongoClient,
   MongoNetworkError,
   ObjectId,
   Timestamp
@@ -840,8 +844,8 @@ describe('Change Stream prose tests', function () {
   // 15 - 16 removed by spec
 
   describe('Change Stream prose 17-18', function () {
-    let client;
-    let coll;
+    let client: MongoClient;
+    let coll: Collection;
     let startAfter;
 
     function recordEvent(events, e) {
@@ -886,31 +890,36 @@ describe('Change Stream prose tests', function () {
     // when resuming a change stream.
     it('$changeStream without results must include startAfter and not resumeAfter', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
-      test: function (done) {
+      test: async function () {
         const events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
-        this.defer(() => changeStream.close());
 
-        changeStream.once('change', change => {
-          expect(change).to.containSubset({
-            operationType: 'insert',
-            fullDocument: { x: 2 }
-          });
-
-          expect(events).to.be.an('array').with.lengthOf(3);
-          expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
-          expect(events[1]).to.equal('error');
-          expect(events[2]).nested.property('$changeStream.startAfter').to.exist;
-          done();
+        changeStream.on('error', async e => {
+          await changeStream.close(e);
         });
 
-        waitForStarted(changeStream, () => {
-          triggerResumableError(changeStream, () => {
-            events.push('error');
-            coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } });
-          });
+        const changePromise = once(changeStream, 'change');
+        await once(changeStream.cursor, 'init');
+
+        const stub = sinon.stub(changeStream.cursor, 'close');
+
+        stub.callsFake(async function () {
+          stub.wrappedMethod.call(this);
+          stub.restore();
+          events.push('error');
+          await coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } });
         });
+
+        changeStream.cursorStream.emit('error', new MongoNetworkError('error triggered from test'));
+
+        const [change] = await changePromise;
+        expect(change).to.containSubset({ operationType: 'insert', fullDocument: { x: 2 } });
+        expect(events).to.be.an('array').with.lengthOf(3);
+
+        expect(events[0]).nested.property('$changeStream.startAfter').to.exist;
+        expect(events[1]).to.equal('error');
+        expect(events[2]).nested.property('$changeStream.startAfter').to.exist;
       }
     });
 
