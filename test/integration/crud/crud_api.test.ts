@@ -9,7 +9,6 @@ import {
   CommandSucceededEvent,
   MongoBulkWriteError,
   type MongoClient,
-  MongoError,
   MongoServerError,
   ObjectId,
   ReturnDocument
