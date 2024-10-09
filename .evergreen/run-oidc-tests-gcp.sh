@@ -6,7 +6,7 @@ export GCPOIDC_DRIVERS_TAR_FILE=/tmp/node-mongodb-native.tgz
 cd ..
 tar -czf $GCPOIDC_DRIVERS_TAR_FILE src drivers-tools
 cd -
-export GCPOIDC_TEST_CMD="cd src && source ./secrets-export.sh drivers/gcpoidc && ENVIRONMENT=gcp ./.evergreen/${SCRIPT}"
+export GCPOIDC_TEST_CMD="source ./secrets-export.sh drivers/gcpoidc && cd src && ENVIRONMENT=gcp ./.evergreen/${SCRIPT}"
 export PROJECT_DIRECTORY=$PROJECT_DIRECTORY
 export ENVIRONMENT=$ENVIRONMENT
 bash $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/run-driver-test.sh

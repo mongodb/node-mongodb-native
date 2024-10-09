@@ -2,7 +2,8 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 set -o xtrace   # Write all commands first to stderr
 
-cd src
+[[ -d "src/.evergreen" ]] && cd src # when on azure or gcp we are above the src directory
+
 source ./.evergreen/prepare-shell.sh
 
 ENVIRONMENT=${ENVIRONMENT:-"test"}

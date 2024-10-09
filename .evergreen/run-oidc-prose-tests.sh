@@ -2,9 +2,7 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 set -o xtrace   # Write all commands first to stderr
 
-if [[ -d "src/.evergreen" ]]; then
-  cd src # when on azure or gcp we're above the src directory
-fi
+[[ -d "src/.evergreen" ]] && cd src # when on azure or gcp we are above the src directory
 
 source ./.evergreen/prepare-shell.sh
 
