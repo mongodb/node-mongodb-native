@@ -911,7 +911,6 @@ describe('Change Streams', function () {
       await internalClient.db().admin().command(failpoint);
       client = this.configuration.newClient(undefined, { monitorCommands: true });
       client.on('commandStarted', ev => {
-        console.log(ev);
         if (ev.commandName === 'aggregate') aggregates.push(ev);
       });
     });
@@ -924,9 +923,8 @@ describe('Change Streams', function () {
       await client.close();
     });
 
-    it.only('should not retry the aggregate command', async function () {
+    it('should not retry the aggregate command', async function () {
       changeStream = client.db('test').collection('test').watch();
-      console.log('waiting for next');
       const maybeError = await changeStream.next().catch(e => e);
       expect(maybeError).to.be.instanceof(MongoServerError);
 
