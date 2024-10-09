@@ -8,7 +8,13 @@ set -o errexit  # Exit the script with error if any of the commands fail
 export NODE_LTS_VERSION=${NODE_LTS_VERSION:-16}
 # npm version can be defined in the environment for cases where we need to install
 # a version lower than latest to support EOL Node versions.
-export NPM_VERSION=${NPM_VERSION:-latest}
+
+# If NODE_LTS_VERSION is numeric and less than 18, default to 9. Do not override if it is already set.
+if [[ "$NODE_LTS_VERSION" =~ ^[0-9]+$ && "$NODE_LTS_VERSION" -lt 18 ]]; then
+    export NPM_VERSION=${NPM_VERSION:-9}
+else
+    export NPM_VERSION=${NPM_VERSION:-latest}
+fi
 
 source $DRIVERS_TOOLS/.evergreen/install-node.sh
 
