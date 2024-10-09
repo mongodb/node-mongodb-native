@@ -137,7 +137,7 @@ export class ClientBulkWriteCommandBuilder {
           );
         }
 
-        validateBufferSize('ops', operationBuffer, maxBsonObjectSize, maxMessageSizeBytes);
+        validateBufferSize('ops', operationBuffer, maxBsonObjectSize);
 
         // Check if the operation buffer can fit in the command. If it can,
         // then add the operation to the document sequence and increment the
@@ -172,8 +172,8 @@ export class ClientBulkWriteCommandBuilder {
           );
         }
 
-        validateBufferSize('nsInfo', nsInfoBuffer, maxBsonObjectSize, maxMessageSizeBytes);
-        validateBufferSize('ops', operationBuffer, maxBsonObjectSize, maxMessageSizeBytes);
+        validateBufferSize('nsInfo', nsInfoBuffer, maxBsonObjectSize);
+        validateBufferSize('ops', operationBuffer, maxBsonObjectSize);
 
         // Check if the operation and nsInfo buffers can fit in the command. If they
         // can, then add the operation and nsInfo to their respective document
@@ -231,21 +231,10 @@ export class ClientBulkWriteCommandBuilder {
   }
 }
 
-function validateBufferSize(
-  name: string,
-  buffer: Uint8Array,
-  maxBsonObjectSize: number,
-  maxMessageSizeBytes: number
-) {
+function validateBufferSize(name: string, buffer: Uint8Array, maxBsonObjectSize: number) {
   if (buffer.length > maxBsonObjectSize) {
     throw new MongoInvalidArgumentError(
       `Client bulk write operation ${name} of length ${buffer.length} exceeds the max bson object size of ${maxBsonObjectSize}`
-    );
-  }
-
-  if (buffer.length > maxMessageSizeBytes) {
-    throw new MongoInvalidArgumentError(
-      `Client bulk write operation ${name} of length ${buffer.length} exceeds the max message size size of ${maxMessageSizeBytes}`
     );
   }
 }
