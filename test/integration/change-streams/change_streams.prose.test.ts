@@ -1,5 +1,3 @@
-import { promisify } from 'node:util';
-
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
