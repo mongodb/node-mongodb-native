@@ -7,6 +7,8 @@ PROJECT_DIRECTORY="$(pwd)"
 export PROJECT_DIRECTORY
 source "$PROJECT_DIRECTORY/.evergreen/prepare-shell.sh"
 
+bash "$PROJECT_DIRECTORY/.evergreen/install-dependencies.sh"
+
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 set -o xtrace
