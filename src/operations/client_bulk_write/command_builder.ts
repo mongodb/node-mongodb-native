@@ -122,7 +122,6 @@ export class ClientBulkWriteCommandBuilder {
 
       // Multi updates are not retryable.
       if (model.name === 'deleteMany' || model.name === 'updateMany') {
-        console.log('Batch is not retryable');
         this.isBatchRetryable = false;
       }
 

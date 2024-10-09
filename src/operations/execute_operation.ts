@@ -230,6 +230,10 @@ async function tryOperation<
         });
       }
 
+      if (operation.hasAspect(Aspect.COMMAND_BATCHING) && !operation.canRetryWrite) {
+        throw previousOperationError;
+      }
+
       if (hasWriteAspect && !isRetryableWriteError(previousOperationError))
         throw previousOperationError;
 

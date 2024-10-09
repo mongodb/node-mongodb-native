@@ -166,7 +166,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       cmd = decorateWithExplain(cmd, this.explain);
     }
 
-    console.log(options);
     return await server.command(this.ns, cmd, options, responseType);
   }
 }
