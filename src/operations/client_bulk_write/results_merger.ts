@@ -133,7 +133,7 @@ export class ClientBulkWriteResultsMerger {
   }
 
   /**
-   * Process an invididual document in the results.
+   * Process an individual document in the results.
    * @param cursor - The cursor.
    * @param document - The document to process.
    */
