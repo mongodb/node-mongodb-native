@@ -5,9 +5,12 @@ import {
   type Collection,
   type CommandStartedEvent,
   type Db,
+  type Document,
   type MongoClient,
+  MongoOperationTimeoutError,
   MongoServerError
 } from '../../mongodb';
+import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
@@ -295,6 +298,273 @@ describe('CRUD API explain option', function () {
         expect(explain).not.to.have.property('maxTimeMS');
       };
     }
+  });
+
+  describe('explain with timeoutMS', function () {
+    let client: MongoClient;
+    type ExplainStartedEvent = CommandStartedEvent & {
+      command: { explain: Document & { maxTimeMS?: number }; maxTimeMS?: number };
+    };
+    const commands: ExplainStartedEvent[] = [];
+
+    function test(description: string, f: () => Promise<void>) {
+      return it(description, { requires: { mongodb: '>=4.4' } }, f);
+    }
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      client.on('commandStarted', filterForCommands('explain', commands));
+
+      await configureFailPoint(this.configuration, {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['explain'],
+          blockConnection: true,
+          blockTimeMS: 1000
+        }
+      });
+    });
+
+    afterEach(async function () {
+      await clearFailPoint(this.configuration);
+      await client?.close();
+      commands.length = 0;
+    });
+
+    describe('when a cursor api is being explained', function () {
+      describe('when timeoutMS is provided', function () {
+        test('the explain command respects timeoutMS', async function () {
+          const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
+          const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+
+        test('the explain command has the calculated maxTimeMS value attached', async function () {
+          const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
+          const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+
+          const [
+            {
+              command: { maxTimeMS }
+            }
+          ] = commands;
+
+          expect(maxTimeMS).to.be.a('number');
+        });
+
+        test('the explained command does not have a maxTimeMS value attached', async function () {
+          const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
+          const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+
+          const [
+            {
+              command: {
+                explain: { maxTimeMS }
+              }
+            }
+          ] = commands;
+
+          expect(maxTimeMS).not.to.exist;
+        });
+      });
+
+      describe('when timeoutMS and maxTimeMS are both provided', function () {
+        test('an error is thrown indicating incompatibility of those options', async function () {
+          const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
+          const error = await cursor
+            .explain({ verbosity: 'queryPlanner', maxTimeMS: 1000 })
+            .catch(e => e);
+          expect(error).to.match(/Cannot use maxTimeMS with timeoutMS for explain commands/);
+        });
+      });
+    });
+
+    describe('when a non-cursor api is being explained', function () {
+      describe('when timeoutMS is provided', function () {
+        test('the explain command respects timeoutMS', async function () {
+          const timeout = await client
+            .db('foo')
+            .collection('bar')
+            .deleteMany(
+              {},
+              {
+                timeoutMS: 1000,
+                explain: { verbosity: 'queryPlanner' }
+              }
+            )
+            .catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+
+        test('the explain command has the calculated maxTimeMS value attached', async function () {
+          const timeout = await client
+            .db('foo')
+            .collection('bar')
+            .deleteMany(
+              {},
+              {
+                timeoutMS: 1000,
+                explain: { verbosity: 'queryPlanner' }
+              }
+            )
+            .catch(e => e);
+
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+
+          const [
+            {
+              command: { maxTimeMS }
+            }
+          ] = commands;
+
+          expect(maxTimeMS).to.be.a('number');
+        });
+
+        test('the explained command does not have a maxTimeMS value attached', async function () {
+          const timeout = await client
+            .db('foo')
+            .collection('bar')
+            .deleteMany(
+              {},
+              {
+                timeoutMS: 1000,
+                explain: { verbosity: 'queryPlanner' }
+              }
+            )
+            .catch(e => e);
+
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+
+          const [
+            {
+              command: {
+                explain: { maxTimeMS }
+              }
+            }
+          ] = commands;
+
+          expect(maxTimeMS).not.to.exist;
+        });
+      });
+
+      describe('when timeoutMS and maxTimeMS are both provided', function () {
+        test('an error is thrown indicating incompatibility of those options', async function () {
+          const error = await client
+            .db('foo')
+            .collection('bar')
+            .deleteMany(
+              {},
+              {
+                timeoutMS: 1000,
+                explain: { verbosity: 'queryPlanner', maxTimeMS: 1000 }
+              }
+            )
+            .catch(e => e);
+
+          expect(error).to.match(/Cannot use maxTimeMS with timeoutMS for explain commands/);
+        });
+      });
+    });
+
+    describe('when find({}, { explain: ...}) is used with timeoutMS', function () {
+      test('an error is thrown indicating that explain is not supported with timeoutMS for this API', async function () {
+        const error = await client
+          .db('foo')
+          .collection('bar')
+          .find(
+            {},
+            {
+              timeoutMS: 1000,
+              explain: { verbosity: 'queryPlanner', maxTimeMS: 1000 }
+            }
+          )
+          .toArray()
+          .catch(e => e);
+
+        expect(error).to.match(
+          /timeoutMS cannot be used with explain when explain is specified in findOptions/
+        );
+      });
+    });
+
+    describe('when aggregate({}, { explain: ...}) is used with timeoutMS', function () {
+      test('an error is thrown indicating that explain is not supported with timeoutMS for this API', async function () {
+        const error = await client
+          .db('foo')
+          .collection('bar')
+          .aggregate([], {
+            timeoutMS: 1000,
+            explain: { verbosity: 'queryPlanner', maxTimeMS: 1000 }
+          })
+          .toArray()
+          .catch(e => e);
+
+        expect(error).to.match(
+          /timeoutMS cannot be used with explain when explain is specified in aggregateOptions/
+        );
+      });
+    });
+
+    describe('fluent api timeoutMS precedence and inheritance', function () {
+      describe('find({}, { timeoutMS }).explain()', function () {
+        test('respects the timeoutMS from the find options', async function () {
+          const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
+          const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('find().explain({}, { timeoutMS })', function () {
+        test('respects the timeoutMS from the explain helper', async function () {
+          const cursor = client.db('foo').collection('bar').find();
+          const timeout = await cursor
+            .explain({ verbosity: 'queryPlanner' }, { timeoutMS: 1000 })
+            .catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('find({}, { timeoutMS} ).explain({}, { timeoutMS })', function () {
+        test('the timeoutMS from the explain helper has precedence', async function () {
+          const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 2000 });
+          const timeout = await cursor
+            .explain({ verbosity: 'queryPlanner' }, { timeoutMS: 1000 })
+            .catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('aggregate([], { timeoutMS }).explain()', function () {
+        test('respects the timeoutMS from the find options', async function () {
+          const cursor = client.db('foo').collection('bar').aggregate([], { timeoutMS: 1000 });
+          const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('aggregate([], { timeoutMS })', function () {
+        test('respects the timeoutMS from the explain helper', async function () {
+          const cursor = client.db('foo').collection('bar').aggregate();
+          const timeout = await cursor
+            .explain({ verbosity: 'queryPlanner' }, { timeoutMS: 1000 })
+            .catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+
+      describe('aggregate([], { timeoutMS} ).explain({}, { timeoutMS })', function () {
+        test('the timeoutMS from the explain helper has precedence', async function () {
+          const cursor = client.db('foo').collection('bar').aggregate([], { timeoutMS: 2000 });
+          const timeout = await cursor
+            .explain({ verbosity: 'queryPlanner' }, { timeoutMS: 1000 })
+            .catch(e => e);
+          expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
+        });
+      });
+    });
   });
 });
 

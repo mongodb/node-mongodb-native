@@ -1,7 +1,12 @@
 import { type Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
-import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
-import { type ExplainCommandOptions, type ExplainVerbosityLike } from '../explain';
+import { MongoAPIError, MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
+import {
+  Explain,
+  type ExplainCommandOptions,
+  type ExplainVerbosityLike,
+  validateExplainTimeoutOptions
+} from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, type CountOptions } from '../operations/count';
@@ -63,11 +68,21 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
-    const findOperation = new FindOperation(this.namespace, this.cursorFilter, {
+    const options = {
       ...this.findOptions, // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
       session
-    });
+    };
+
+    try {
+      validateExplainTimeoutOptions(options, Explain.fromOptions(options));
+    } catch {
+      throw new MongoAPIError(
+        'timeoutMS cannot be used with explain when explain is specified in findOptions'
+      );
+    }
+
+    const findOperation = new FindOperation(this.namespace, this.cursorFilter, options);
 
     const response = await executeOperation(this.client, findOperation, this.timeoutContext);
 
@@ -133,14 +148,44 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** Execute the explain for the cursor */
-  async explain(verbosity?: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document> {
+  async explain(): Promise<Document>;
+  async explain(verbosity: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document>;
+  async explain(options: { timeoutMS?: number }): Promise<Document>;
+  async explain(
+    verbosity: ExplainVerbosityLike | ExplainCommandOptions,
+    options: { timeoutMS?: number }
+  ): Promise<Document>;
+  async explain(
+    verbosity?: ExplainVerbosityLike | ExplainCommandOptions | { timeoutMS?: number },
+    options?: { timeoutMS?: number }
+  ): Promise<Document> {
+    let explain: ExplainVerbosityLike | ExplainCommandOptions | undefined;
+    let timeout: { timeoutMS?: number } | undefined;
+    if (verbosity == null && options == null) {
+      explain = true;
+      timeout = undefined;
+    } else if (verbosity != null && options == null) {
+      explain =
+        typeof verbosity !== 'object'
+          ? verbosity
+          : 'verbosity' in verbosity
+            ? verbosity
+            : undefined;
+      timeout = typeof verbosity === 'object' && 'timeoutMS' in verbosity ? verbosity : undefined;
+    } else {
+      // @ts-expect-error TS isn't smart enough to determine that if both options are provided, the first is explain options
+      explain = verbosity;
+      timeout = options;
+    }
+
     return (
       await executeOperation(
         this.client,
         new FindOperation(this.namespace, this.cursorFilter, {
           ...this.findOptions, // NOTE: order matters here, we may need to refine this
           ...this.cursorOptions,
-          explain: verbosity ?? true
+          ...timeout,
+          explain: explain ?? true
         })
       )
     ).shift(this.deserializationOptions);

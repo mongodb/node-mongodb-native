@@ -18,6 +18,7 @@ import {
   Topology,
   type TopologyOptions
 } from '../mongodb';
+import { type TestConfiguration } from './runner/config';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   type CollectionData,
@@ -597,4 +598,29 @@ export async function waitUntilPoolsFilled(
   }
 
   await Promise.all([wait$(), client.connect()]);
+}
+
+export async function configureFailPoint(configuration: TestConfiguration, failPoint: FailPoint) {
+  const utilClient = configuration.newClient();
+  await utilClient.connect();
+
+  try {
+    await utilClient.db('admin').command(failPoint);
+  } finally {
+    await utilClient.close();
+  }
+}
+
+export async function clearFailPoint(configuration: TestConfiguration) {
+  const utilClient = configuration.newClient();
+  await utilClient.connect();
+
+  try {
+    await utilClient.db('admin').command(<FailPoint>{
+      configureFailPoint: 'failCommand',
+      mode: 'off'
+    });
+  } finally {
+    await utilClient.close();
+  }
 }
