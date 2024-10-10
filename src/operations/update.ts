@@ -4,6 +4,7 @@ import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } 
 import type { InferIdType, TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { hasAtomicOperators, type MongoDBNamespace } from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -91,7 +92,11 @@ export class UpdateOperation extends CommandOperation<Document> {
     return this.statements.every(op => op.multi == null || op.multi === false);
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Document> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -122,7 +127,7 @@ export class UpdateOperation extends CommandOperation<Document> {
       }
     }
 
-    const res = await super.executeCommand(server, session, command);
+    const res = await super.executeCommand(server, session, command, timeoutContext);
     return res;
   }
 }
@@ -143,9 +148,10 @@ export class UpdateOneOperation extends UpdateOperation {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<UpdateResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session);
+    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
     if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
@@ -177,9 +183,10 @@ export class UpdateManyOperation extends UpdateOperation {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<UpdateResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session);
+    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
     if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
@@ -230,9 +237,10 @@ export class ReplaceOneOperation extends UpdateOperation {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<UpdateResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session);
+    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
     if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);

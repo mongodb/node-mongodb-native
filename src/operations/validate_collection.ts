@@ -3,6 +3,7 @@ import type { Document } from '../bson';
 import { MongoUnexpectedServerResponseError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
@@ -37,10 +38,14 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
     return 'validate' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<Document> {
     const collectionName = this.collectionName;
 
-    const doc = await super.executeCommand(server, session, this.command);
+    const doc = await super.executeCommand(server, session, this.command, timeoutContext);
     if (doc.result != null && typeof doc.result !== 'string')
       throw new MongoUnexpectedServerResponseError('Error with validation data');
     if (doc.result != null && doc.result.match(/exception|corrupt/) != null)

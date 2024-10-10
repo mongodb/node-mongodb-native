@@ -12,7 +12,7 @@ createEntities:
   - client:
       id: &client client
       uriOptions:
-        timeoutMS: 10
+        timeoutMS: 200
       useMultipleMongoses: false
       observeEvents:
         - commandStartedEvent
@@ -59,7 +59,7 @@ tests:
             data:
               failCommands: ["find"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 250
       - name: find
         object: *collection
         arguments:
@@ -96,13 +96,13 @@ tests:
             data:
               failCommands: ["find", "getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 150
       - name: createFindCursor
         object: *collection
         arguments:
           filter: {}
           cursorType: tailable
-          timeoutMS: 20
+          timeoutMS: 200
           batchSize: 1
         saveResultAsEntity: &tailableCursor tailableCursor
       # Iterate the cursor twice: the first iteration will return the document from the batch in the find and the
@@ -131,7 +131,7 @@ tests:
                 maxTimeMS: { $$exists: false }
 
   # The timeoutMS option should apply separately to the initial "find" and each getMore. This is a failure test. The
-  # find inherits timeoutMS=10 from the collection and the getMore command blocks for 15ms, causing iteration to fail
+  # find inherits timeoutMS=200 from the collection and the getMore command blocks for 250ms, causing iteration to fail
   # with a timeout error.
   - description: "timeoutMS is refreshed for getMore - failure"
     operations:
@@ -145,7 +145,7 @@ tests:
             data:
               failCommands: ["getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 250
       - name: createFindCursor
         object: *collection
         arguments:

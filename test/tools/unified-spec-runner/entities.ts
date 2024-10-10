@@ -44,7 +44,7 @@ import {
   type TopologyOpeningEvent,
   WriteConcern
 } from '../../mongodb';
-import { ejson, getEnvironmentalOptions } from '../../tools/utils';
+import { getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';
 import { trace } from './runner';
@@ -590,7 +590,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           new EntityEventRegistry(client, entity.client, map).register();
           await client.connect();
         } catch (error) {
-          console.error(ejson`failed to connect entity ${entity}`);
+          console.error('failed to connect entity', entity);
           // In the case where multiple clients are defined in the test and any one of them failed
           // to connect, but others did succeed, we need to ensure all open clients are closed.
           const clients = map.mapOf('client');
@@ -618,6 +618,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const client = map.getEntity('client', entity.session.client);
 
         const options = Object.create(null);
+
+        if (entity.session.sessionOptions?.defaultTimeoutMS != null) {
+          options.defaultTimeoutMS = entity.session.sessionOptions?.defaultTimeoutMS;
+        }
 
         if (entity.session.sessionOptions?.causalConsistency) {
           options.causalConsistency = entity.session.sessionOptions?.causalConsistency;
