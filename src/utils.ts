@@ -18,6 +18,7 @@ import type { FindCursor } from './cursor/find_cursor';
 import type { Db } from './db';
 import {
   type AnyError,
+  MongoAPIError,
   MongoCompatibilityError,
   MongoInvalidArgumentError,
   MongoNetworkTimeoutError,
@@ -1142,29 +1143,47 @@ export function parseUnsignedInteger(value: unknown): number | null {
 }
 
 /**
- * Determines whether a provided address matches the provided parent domain.
+ * This function throws a MongoAPIError in the event that either of the following is true:
+ * * If the provided address domain does not match the provided parent domain
+ * * If the parent domain contains less than three `.` separated parts and the provided address does not contain at least one more domain level than its parent
  *
  * If a DNS server were to become compromised SRV records would still need to
  * advertise addresses that are under the same domain as the srvHost.
  *
  * @param address - The address to check against a domain
  * @param srvHost - The domain to check the provided address against
- * @returns Whether the provided address matches the parent domain
+ * @returns void
  */
-export function matchesParentDomain(address: string, srvHost: string): boolean {
+export function checkParentDomainMatch(address: string, srvHost: string): void {
   // Remove trailing dot if exists on either the resolved address or the srv hostname
   const normalizedAddress = address.endsWith('.') ? address.slice(0, address.length - 1) : address;
   const normalizedSrvHost = srvHost.endsWith('.') ? srvHost.slice(0, srvHost.length - 1) : srvHost;
 
   const allCharacterBeforeFirstDot = /^.*?\./;
+  const srvIsLessThanThreeParts = normalizedSrvHost.split('.').length < 3;
   // Remove all characters before first dot
   // Add leading dot back to string so
   //   an srvHostDomain = '.trusted.site'
   //   will not satisfy an addressDomain that endsWith '.fake-trusted.site'
   const addressDomain = `.${normalizedAddress.replace(allCharacterBeforeFirstDot, '')}`;
-  const srvHostDomain = `.${normalizedSrvHost.replace(allCharacterBeforeFirstDot, '')}`;
+  let srvHostDomain = srvIsLessThanThreeParts
+    ? normalizedSrvHost
+    : `.${normalizedSrvHost.replace(allCharacterBeforeFirstDot, '')}`;
 
-  return addressDomain.endsWith(srvHostDomain);
+  if (!srvHostDomain.startsWith('.')) {
+    srvHostDomain = '.' + srvHostDomain;
+  }
+  if (
+    srvIsLessThanThreeParts &&
+    normalizedAddress.split('.').length <= normalizedSrvHost.split('.').length
+  ) {
+    throw new MongoAPIError(
+      'Server record does not have at least one more domain level than parent URI'
+    );
+  }
+  if (!addressDomain.endsWith(srvHostDomain)) {
+    throw new MongoAPIError('Server record does not share hostname with parent URI');
+  }
 }
 
 interface RequestOptions {

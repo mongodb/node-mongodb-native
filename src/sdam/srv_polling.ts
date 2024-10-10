@@ -3,7 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoRuntimeError } from '../error';
 import { TypedEventEmitter } from '../mongo_types';
-import { HostAddress, matchesParentDomain, squashError } from '../utils';
+import { checkParentDomainMatch, HostAddress, squashError } from '../utils';
 
 /**
  * @internal
@@ -127,8 +127,11 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
 
     const finalAddresses: dns.SrvRecord[] = [];
     for (const record of srvRecords) {
-      if (matchesParentDomain(record.name, this.srvHost)) {
+      try {
+        checkParentDomainMatch(record.name, this.srvHost);
         finalAddresses.push(record);
+      } catch (error) {
+        squashError(error);
       }
     }
 
