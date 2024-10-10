@@ -4,6 +4,7 @@ import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
 import type { AbstractCursorEvents, CursorStreamOptions } from './cursor/abstract_cursor';
+import { CursorTimeoutContext } from './cursor/abstract_cursor';
 import { ChangeStreamCursor, type ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 import { Db } from './db';
 import {
@@ -612,6 +613,7 @@ export class ChangeStream<
   static readonly RESUME_TOKEN_CHANGED = RESUME_TOKEN_CHANGED;
 
   private timeoutContext?: TimeoutContext;
+  private symbol: symbol;
   /**
    * @internal
    *
@@ -641,6 +643,7 @@ export class ChangeStream<
       );
     }
 
+    this.symbol = Symbol();
     this.parent = parent;
     this.namespace = parent.s.namespace;
     if (!this.options.readPreference && parent.readPreference) {
@@ -891,7 +894,12 @@ export class ChangeStream<
       client,
       this.namespace,
       pipeline,
-      { ...options, timeoutMS: this.options.timeoutMS }
+      {
+        ...options,
+        timeoutContext: this.timeoutContext
+          ? new CursorTimeoutContext(this.timeoutContext, this.symbol)
+          : undefined
+      }
     );
 
     for (const event of CHANGE_STREAM_EVENTS) {
