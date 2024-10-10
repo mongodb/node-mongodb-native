@@ -49,6 +49,12 @@ describe('CSOT spec tests', function () {
   runUnifiedSuite(specs, (test, configuration) => {
     const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
     if (
+      configuration.topologyType === 'LoadBalanced' &&
+      test.description === 'timeoutMS is refreshed for close'
+    ) {
+      return 'LoadBalanced cannot refresh timeoutMS and run expected killCursors because pinned connection has been closed by the timeout';
+    }
+    if (
       sessionCSOTTests.includes(test.description) &&
       configuration.topologyType === 'ReplicaSetWithPrimary' &&
       semver.satisfies(configuration.version, '<=4.4')
