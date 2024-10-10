@@ -54,7 +54,7 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
         let connection;
         if (!session.pinnedConnection) {
           // Checkout a connection to build the command.
-          connection = await server.pool.checkOut();
+          connection = await server.pool.checkOut({ timeoutContext });
           // Pin the connection to the session so it get used to execute the command and we do not
           // perform a double check-in/check-out.
           session.pin(connection);
