@@ -131,10 +131,8 @@ export class ClientBulkWriteCommandBuilder {
         let operationBuffer;
         try {
           operationBuffer = BSON.serialize(operation);
-        } catch (error) {
-          throw new MongoInvalidArgumentError(
-            `Could not serialize operation to BSON: ${error.message}.`
-          );
+        } catch (cause) {
+          throw new MongoInvalidArgumentError(`Could not serialize operation to BSON`, { cause });
         }
 
         validateBufferSize('ops', operationBuffer, maxBsonObjectSize);
@@ -166,10 +164,8 @@ export class ClientBulkWriteCommandBuilder {
         try {
           nsInfoBuffer = BSON.serialize(nsInfo);
           operationBuffer = BSON.serialize(operation);
-        } catch (error) {
-          throw new MongoInvalidArgumentError(
-            `Could not serialize ns info and operation to BSON: ${error.message}.`
-          );
+        } catch (cause) {
+          throw new MongoInvalidArgumentError(`Could not serialize ns info to BSON`, { cause });
         }
 
         validateBufferSize('nsInfo', nsInfoBuffer, maxBsonObjectSize);
