@@ -97,7 +97,7 @@
     "mocha": "^10.4.0",
     "mocha-sinon": "^2.1.2",
     "mongodb-client-encryption": "^6.1.0",
-    "mongodb-legacy": "https://github.com/mongodb-js/nodejs-mongodb-legacy.git#4143a75e3ea212a3effcb55edc92f1daf588fd59",
+    "mongodb-legacy": "https://github.com/mongodb-js/nodejs-mongodb-legacy.git#b27f44a1f0f977acbba6fc0dd745700961b57b55",
     "nyc": "^15.1.0",
     "prettier": "^3.3.3",
     "semver": "^7.6.3",
