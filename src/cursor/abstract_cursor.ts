@@ -170,7 +170,9 @@ export abstract class AbstractCursor<
   private cursorClient: MongoClient;
   /** @internal */
   private transform?: (doc: TSchema) => any;
-  /** @internal */
+  /** @internal
+   * This is true whether or not the first command fails. It only indicates whether or not the first
+   * command has been run. */
   private initialized: boolean;
   /** @internal */
   private isClosed: boolean;
@@ -477,8 +479,10 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       return false;
     }
+    const shouldRefresh =
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
 
-    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+    if (shouldRefresh) {
       this.timeoutContext?.refresh();
     }
     try {
@@ -489,7 +493,7 @@ export abstract class AbstractCursor<
         await this.fetchBatch();
       } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (shouldRefresh) {
         this.timeoutContext?.clear();
       }
     }
@@ -502,7 +506,10 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
-    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+    const shouldRefresh =
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
+
+    if (shouldRefresh) {
       this.timeoutContext?.refresh();
     }
 
@@ -516,7 +523,7 @@ export abstract class AbstractCursor<
         await this.fetchBatch();
       } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (shouldRefresh) {
         this.timeoutContext?.clear();
       }
     }
@@ -532,7 +539,10 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+    const shouldRefresh =
+      this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null;
+
+    if (shouldRefresh) {
       this.timeoutContext?.refresh();
     }
     try {
@@ -550,7 +560,7 @@ export abstract class AbstractCursor<
         return doc;
       }
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (shouldRefresh) {
         this.timeoutContext?.clear();
       }
     }
