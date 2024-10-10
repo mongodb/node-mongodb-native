@@ -6,7 +6,6 @@ import {
   type Connection,
   type ConnectionPool,
   type MongoClient,
-  MongoError,
   MongoOperationTimeoutError,
   now,
   TimeoutContext
@@ -58,7 +57,7 @@ describe('Client Bulk Write', function () {
           ])
           .catch(e => e);
         const end = now();
-        expect(timeoutError).to.be.instanceOf(MongoError);
+        expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(300 - 100, 300 + 100);
       });
     });
@@ -91,7 +90,7 @@ describe('Client Bulk Write', function () {
           )
           .catch(e => e);
         const end = now();
-        expect(timeoutError).to.be.instanceOf(MongoError);
+        expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(300 - 100, 300 + 100);
       });
     });
@@ -124,7 +123,7 @@ describe('Client Bulk Write', function () {
           )
           .catch(e => e);
         const end = now();
-        expect(timeoutError).to.be.instanceOf(MongoError);
+        expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(300 - 100, 300 + 100);
       });
     });
@@ -183,7 +182,7 @@ describe('Client Bulk Write', function () {
 
           await setTimeout(250);
 
-          expect(await timeoutError).to.be.instanceOf(MongoError);
+          expect(await timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
           expect(end - start).to.be.within(200 - 100, 200 + 100);
         });
 
@@ -222,7 +221,7 @@ describe('Client Bulk Write', function () {
 
             await setTimeout(210);
 
-            expect(await timeoutError).to.be.instanceOf(MongoError);
+            expect(await timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
             expect(end - start).to.be.within(400 - 100, 400 + 100);
           }
         );
@@ -258,7 +257,7 @@ describe('Client Bulk Write', function () {
             )
             .catch(e => e);
           const end = now();
-          expect(timeoutError).to.be.instanceOf(MongoError);
+          expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
           expect(end - start).to.be.within(300 - 100, 300 + 100);
         });
       });
@@ -289,7 +288,7 @@ describe('Client Bulk Write', function () {
             .catch(e => e);
 
           const end = now();
-          expect(timeoutError).to.be.instanceOf(MongoError);
+          expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
 
           // DRIVERS-3005 - killCursors causes cursor cleanup to extend past timeoutMS.
           expect(end - start).to.be.within(2000 - 100, 2000 + 100);
@@ -372,7 +371,7 @@ describe('Client Bulk Write', function () {
               .catch(e => e);
 
             const end = now();
-            expect(timeoutError).to.be.instanceOf(MongoError);
+            expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
             expect(end - start).to.be.within(2000 - 100, 2000 + 100);
             expect(commands.length, 'Test must execute two batches.').to.equal(2);
           }

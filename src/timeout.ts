@@ -171,7 +171,7 @@ function isCSOTTimeoutContextOptions(v: unknown): v is CSOTTimeoutContextOptions
 
 /** @internal */
 export abstract class TimeoutContext {
-  static create(options: Partial<TimeoutContextOptions>): TimeoutContext {
+  static create(options: TimeoutContextOptions): TimeoutContext {
     if (options.session?.timeoutContext != null) return options.session?.timeoutContext;
     if (isCSOTTimeoutContextOptions(options)) return new CSOTTimeoutContext(options);
     else if (isLegacyTimeoutContextOptions(options)) return new LegacyTimeoutContext(options);
