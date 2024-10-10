@@ -116,6 +116,7 @@ export function onData(
     emitter.off('data', eventHandler);
     emitter.off('error', errorHandler);
     finished = true;
+    timeoutForSocketRead?.clear();
     const doneResult = { value: undefined, done: finished } as const;
 
     for (const promise of unconsumedPromises) {
