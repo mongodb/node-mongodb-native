@@ -652,7 +652,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
             this,
             new RunAdminCommandOperation(
               { endSessions },
-              { readPreference: ReadPreference.primaryPreferred, noResponse: true }
+              { readPreference: ReadPreference.primaryPreferred, moreToCome: true }
             )
           );
         } catch (error) {

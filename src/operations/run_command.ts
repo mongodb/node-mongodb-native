@@ -51,7 +51,7 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
   constructor(
     public command: Document,
     public override options: RunCommandOptions & {
-      noResponse?: boolean;
+      moreToCome?: boolean;
       bypassPinningCheck?: boolean;
     }
   ) {
