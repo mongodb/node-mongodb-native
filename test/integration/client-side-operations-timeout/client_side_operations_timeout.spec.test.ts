@@ -5,7 +5,6 @@ import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const skippedSpecs = {
-  'convenient-transactions': 'TODO(NODE-5687)',
   'deprecated-options': 'TODO(NODE-5689)'
 };
 
