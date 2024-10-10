@@ -1,7 +1,8 @@
 #! /usr/bin/env bash
 
-set -o xtrace
-set -o errexit
+# Only set errexit and xtrace if shell is NOT interactive
+[[ $- == *i* ]] || set -o xtrace
+[[ $- == *i* ]] || set -o errexit
 
 # This script prepares a shell to run the remaining scripts in this folder
 # It MUST be kept idempotent! It will overwrite the orchestration config and expansion.yml file upon every run
