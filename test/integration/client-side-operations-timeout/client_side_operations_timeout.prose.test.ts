@@ -106,17 +106,6 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
-  context.skip('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
-    /**
-     * This test MUST only be run against enterprise server versions 4.2 and higher.
-     *
-     * 1. Launch a mongocryptd process on 23000.
-     * 1. Create a MongoClient (referred to as `client`) using the URI `mongodb://localhost:23000/?timeoutMS=1000`.
-     * 1. Using `client`, execute the `{ ping: 1 }` command against the `admin` database.
-     * 1. Verify via command monitoring that the `ping` command sent did not contain a `maxTimeMS` field.
-     */
-  });
-
 
     const failpoint: FailPoint = {
       configureFailPoint: 'failCommand',
@@ -813,6 +802,30 @@ describe('CSOT spec prose tests', function () {
       }).skipReason =
         'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
     });
+
+    it.skip("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async function () {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+      client = new MongoClient('mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20');
+      const start = now();
+
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .ping()
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
+    }).skipReason =
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
 
     it.skip("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async function () {
       /**
