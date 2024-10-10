@@ -243,7 +243,7 @@ export abstract class AbstractCursor<
         options.timeoutMode ??
         (options.tailable ? CursorTimeoutMode.ITERATION : CursorTimeoutMode.LIFETIME);
     } else {
-      if (options.timeoutMode != null)
+      if (options.timeoutMode != null && options.timeoutContext == null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
 

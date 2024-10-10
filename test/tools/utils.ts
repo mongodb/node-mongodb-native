@@ -11,6 +11,7 @@ import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
 import {
+  type AnyClientBulkWriteModel,
   type Document,
   type HostAddress,
   MongoClient,
@@ -18,6 +19,7 @@ import {
   Topology,
   type TopologyOptions
 } from '../mongodb';
+import { type TestConfiguration } from './runner/config';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   type CollectionData,
@@ -597,4 +599,69 @@ export async function waitUntilPoolsFilled(
   }
 
   await Promise.all([wait$(), client.connect()]);
+}
+
+export async function configureFailPoint(configuration: TestConfiguration, failPoint: FailPoint) {
+  const utilClient = configuration.newClient();
+  await utilClient.connect();
+
+  try {
+    await utilClient.db('admin').command(failPoint);
+  } finally {
+    await utilClient.close();
+  }
+}
+
+export async function clearFailPoint(configuration: TestConfiguration) {
+  const utilClient = configuration.newClient();
+  await utilClient.connect();
+
+  try {
+    await utilClient.db('admin').command(<FailPoint>{
+      configureFailPoint: 'failCommand',
+      mode: 'off'
+    });
+  } finally {
+    await utilClient.close();
+  }
+}
+
+export async function makeMultiBatchWrite(
+  configuration: TestConfiguration
+): Promise<AnyClientBulkWriteModel[]> {
+  const { maxBsonObjectSize, maxMessageSizeBytes } = await configuration.hello();
+
+  const length = maxMessageSizeBytes / maxBsonObjectSize + 1;
+  const models = Array.from({ length }, () => ({
+    namespace: 'db.coll',
+    name: 'insertOne' as const,
+    document: { a: 'b'.repeat(maxBsonObjectSize - 500) }
+  }));
+
+  return models;
+}
+
+export async function makeMultiResponseBatchModelArray(
+  configuration: TestConfiguration
+): Promise<AnyClientBulkWriteModel[]> {
+  const { maxBsonObjectSize } = await configuration.hello();
+  const namespace = `foo.${new BSON.ObjectId().toHexString()}`;
+  const models: AnyClientBulkWriteModel[] = [
+    {
+      name: 'updateOne',
+      namespace,
+      update: { $set: { age: 1 } },
+      upsert: true,
+      filter: { _id: 'a'.repeat(maxBsonObjectSize / 2) }
+    },
+    {
+      name: 'updateOne',
+      namespace,
+      update: { $set: { age: 1 } },
+      upsert: true,
+      filter: { _id: 'b'.repeat(maxBsonObjectSize / 2) }
+    }
+  ];
+
+  return models;
 }
