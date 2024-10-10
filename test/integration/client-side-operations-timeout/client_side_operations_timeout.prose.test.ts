@@ -1,5 +1,7 @@
 /* Specification prose tests */
 
+import { type ChildProcess, spawn } from 'node:child_process';
+
 import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
@@ -16,7 +18,8 @@ import {
   MongoServerSelectionError,
   now,
   ObjectId,
-  promiseWithResolvers
+  promiseWithResolvers,
+  squashError
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 
@@ -114,6 +117,97 @@ describe('CSOT spec prose tests', function () {
      */
   });
 
+
+    const failpoint: FailPoint = {
+      configureFailPoint: 'failCommand',
+      mode: {
+        times: 2
+      },
+      data: {
+        failCommands: ['insert'],
+        blockConnection: true,
+        blockTimeMS: 1010
+      }
+    };
+
+    beforeEach(async function () {
+      await internalClient
+        .db('db')
+        .collection('bulkWriteTest')
+        .drop()
+        .catch(() => null);
+      await internalClient.db('admin').command(failpoint);
+
+      client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
+    });
+
+    it('performs two inserts which fail to complete before 2000 ms', async () => {
+      const inserts = [];
+      client.on('commandStarted', ev => inserts.push(ev));
+
+      const a = new Uint8Array(1000000 - 22);
+      const oneMBDocs = Array.from({ length: 50 }, (_, _id) => ({ _id, a }));
+      const error = await client
+        .db('db')
+        .collection<{ _id: number; a: Uint8Array }>('bulkWriteTest')
+        .insertMany(oneMBDocs)
+        .catch(error => error);
+
+      expect(error).to.be.instanceOf(MongoBulkWriteError);
+      expect(error.errorResponse).to.be.instanceOf(MongoOperationTimeoutError);
+      expect(inserts.map(ev => ev.commandName)).to.deep.equal(['insert', 'insert']);
+    });
+  });
+
+  context(
+    '2. maxTimeMS is not set for commands sent to mongocryptd',
+    { requires: { mongodb: '>=4.2' } },
+    () => {
+      /**
+       * This test MUST only be run against enterprise server versions 4.2 and higher.
+       *
+       * 1. Launch a mongocryptd process on 23000.
+       * 1. Create a MongoClient (referred to as `client`) using the URI `mongodb://localhost:23000/?timeoutMS=1000`.
+       * 1. Using `client`, execute the `{ ping: 1 }` command against the `admin` database.
+       * 1. Verify via command monitoring that the `ping` command sent did not contain a `maxTimeMS` field.
+       */
+
+      let client: MongoClient;
+      const mongocryptdTestPort = '23000';
+      let childProcess: ChildProcess;
+
+      beforeEach(async function () {
+        childProcess = spawn('mongocryptd', ['--port', mongocryptdTestPort, '--ipv6'], {
+          stdio: 'ignore',
+          detached: true
+        });
+
+        childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
+        client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
+          monitorCommands: true
+        });
+      });
+
+      afterEach(async function () {
+        await client.close();
+        childProcess.kill('SIGKILL');
+        sinon.restore();
+      });
+
+      it('maxTimeMS is not set', async function () {
+        const commandStarted = [];
+        client.on('commandStarted', ev => commandStarted.push(ev));
+        await client
+          .db('admin')
+          .command({ ping: 1 })
+          .catch(e => squashError(e));
+        expect(commandStarted).to.have.lengthOf(1);
+        expect(commandStarted[0].command).to.not.have.property('maxTimeMS');
+      });
+    }
+  );
+
+  // TODO(NODE-6391): Add timeoutMS support to Explicit Encryption
   context.skip('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,

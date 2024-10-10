@@ -2,7 +2,7 @@
 
 if [ -z ${TASK_ID+omitted} ]; then echo "TASK_ID is unset" && exit 1; fi
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 MONGOSH_DIRECTORY="/tmp/$TASK_ID"
 git clone --depth=10 https://github.com/mongodb-js/mongosh.git $MONGOSH_DIRECTORY

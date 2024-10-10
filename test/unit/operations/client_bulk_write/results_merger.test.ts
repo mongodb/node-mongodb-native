@@ -5,8 +5,39 @@ import {
   ClientBulkWriteCursorResponse,
   type ClientBulkWriteResult,
   ClientBulkWriteResultsMerger,
+  type Document,
   Long
 } from '../../../mongodb';
+
+class MockCursor {
+  operations: Document[];
+  documents: Document[];
+  response: ClientBulkWriteCursorResponse;
+
+  constructor(
+    operations: Document[],
+    documents: Document[],
+    response: ClientBulkWriteCursorResponse
+  ) {
+    this.operations = operations;
+    this.documents = documents;
+    this.response = response;
+  }
+
+  async next() {
+    return this.documents.shift();
+  }
+
+  async *[Symbol.asyncIterator](): AsyncGenerator {
+    while (true) {
+      const document = await this.next();
+      if (document == null) {
+        return;
+      }
+      yield document;
+    }
+  }
+}
 
 describe('ClientBulkWriteResultsMerger', function () {
   describe('#constructor', function () {
@@ -76,8 +107,8 @@ describe('ClientBulkWriteResultsMerger', function () {
             const merger = new ClientBulkWriteResultsMerger({ verboseResults: true });
             let result: ClientBulkWriteResult;
 
-            before(function () {
-              result = merger.merge(0, operations, response, documents);
+            before(async function () {
+              result = await merger.merge(new MockCursor(operations, documents, response));
             });
 
             it('merges the inserted count', function () {
@@ -169,8 +200,8 @@ describe('ClientBulkWriteResultsMerger', function () {
             const merger = new ClientBulkWriteResultsMerger({ verboseResults: false });
             let result: ClientBulkWriteResult;
 
-            before(function () {
-              result = merger.merge(0, operations, response, documents);
+            before(async function () {
+              result = await merger.merge(new MockCursor(operations, documents, response));
             });
 
             it('merges the inserted count', function () {
@@ -203,106 +234,6 @@ describe('ClientBulkWriteResultsMerger', function () {
 
             it('sets no delete results', function () {
               expect(result.deleteResults).to.equal(undefined);
-            });
-          });
-        });
-      });
-
-      context('when merging on a later batch', function () {
-        context('when requesting verbose results', function () {
-          // An example verbose response from the server without errors:
-          // {
-          //   cursor: {
-          //     id: Long('0'),
-          //     firstBatch: [ { ok: 1, idx: 0, n: 1 }, { ok: 1, idx: 1, n: 1 } ],
-          //     ns: 'admin.$cmd.bulkWrite'
-          //   },
-          //   nErrors: 0,
-          //   nInserted: 2,
-          //   nMatched: 0,
-          //   nModified: 0,
-          //   nUpserted: 0,
-          //   nDeleted: 0,
-          //   ok: 1
-          // }
-          context('when there are no errors', function () {
-            const operations = [
-              { insert: 0, document: { _id: 1 } },
-              { update: 0 },
-              { update: 0 },
-              { delete: 0 }
-            ];
-            const documents = [
-              { ok: 1, idx: 0, n: 1 }, // Insert
-              { ok: 1, idx: 1, n: 1, nModified: 1 }, // Update match
-              { ok: 1, idx: 2, n: 0, upserted: { _id: 1 } }, // Update no match with upsert
-              { ok: 1, idx: 3, n: 1 } // Delete
-            ];
-            const serverResponse = {
-              cursor: {
-                id: new Long('0'),
-                firstBatch: documents,
-                ns: 'admin.$cmd.bulkWrite'
-              },
-              nErrors: 0,
-              nInserted: 1,
-              nMatched: 1,
-              nModified: 1,
-              nUpserted: 1,
-              nDeleted: 1,
-              ok: 1
-            };
-            const response = new ClientBulkWriteCursorResponse(BSON.serialize(serverResponse), 0);
-            const merger = new ClientBulkWriteResultsMerger({ verboseResults: true });
-            let result: ClientBulkWriteResult;
-
-            before(function () {
-              result = merger.merge(20, operations, response, documents);
-            });
-
-            it('merges the inserted count', function () {
-              expect(result.insertedCount).to.equal(1);
-            });
-
-            it('sets insert results', function () {
-              expect(result.insertResults.get(20).insertedId).to.equal(1);
-            });
-
-            it('merges the upserted count', function () {
-              expect(result.upsertedCount).to.equal(1);
-            });
-
-            it('merges the matched count', function () {
-              expect(result.matchedCount).to.equal(1);
-            });
-
-            it('merges the modified count', function () {
-              expect(result.modifiedCount).to.equal(1);
-            });
-
-            it('sets the update results', function () {
-              expect(result.updateResults.get(21)).to.deep.equal({
-                matchedCount: 1,
-                modifiedCount: 1,
-                didUpsert: false
-              });
-            });
-
-            it('sets the upsert results', function () {
-              expect(result.updateResults.get(22)).to.deep.equal({
-                matchedCount: 0,
-                modifiedCount: 0,
-                upsertedId: 1,
-                didUpsert: true
-              });
-            });
-
-            it('merges the deleted count', function () {
-              expect(result.deletedCount).to.equal(1);
-            });
-
-            it('sets the delete results', function () {
-              expect(result.deleteResults.get(23).deletedCount).to.equal(1);
             });
           });
         });

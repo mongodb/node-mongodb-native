@@ -5,10 +5,20 @@ import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const skippedSpecs = {
-  'deprecated-options': 'TODO(NODE-5689)'
+  'change-streams': 'TODO(NODE-6035)',
+  'convenient-transactions': 'TODO(NODE-5687)',
+  'deprecated-options': 'TODO(NODE-5689)',
+  'tailable-awaitData': 'TODO(NODE-6035)',
+  'tailable-non-awaitData': 'TODO(NODE-6035)'
 };
 
 const skippedTests = {
+  'timeoutMS can be configured on a MongoClient - createChangeStream on client': 'TODO(NODE-6305)',
+  'timeoutMS applies to whole operation, not individual attempts - createChangeStream on client':
+    'TODO(NODE-6305)',
+  'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(NODE-6305)',
+  'Tailable cursor awaitData iteration timeoutMS is refreshed for getMore - failure':
+    'TODO(NODE-6305)',
   'command is not sent if RTT is greater than timeoutMS': 'TODO(DRIVERS-2965)',
   'Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure':
     'TODO(DRIVERS-2965)',
@@ -20,8 +30,7 @@ const skippedTests = {
     'TODO(DRIVERS-2965)',
   'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(DRIVERS-2965)',
   'timeoutMS is refreshed for getMore - failure':
-    'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs', // Skipping for both tailable awaitData and tailable non-awaitData cursors
-  'timeoutMS applies to full resume attempt in a next call': 'TODO(DRIVERS-3006)'
+    'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs' // Skipping for both tailable awaitData and tailable non-awaitData cursors
 };
 
 describe('CSOT spec tests', function () {

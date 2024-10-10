@@ -182,6 +182,12 @@ export interface ClientBulkWriteResult {
 }
 
 /** @public */
+export interface ClientBulkWriteError {
+  code: number;
+  message: string;
+}
+
+/** @public */
 export interface ClientInsertOneResult {
   /**
    * The _id of the inserted document.

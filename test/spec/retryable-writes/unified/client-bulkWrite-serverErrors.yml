@@ -6,6 +6,7 @@ runOnRequirements:
       - replicaset
       - sharded
       - load-balanced
+    serverless: forbid
 
 createEntities:
   - client:

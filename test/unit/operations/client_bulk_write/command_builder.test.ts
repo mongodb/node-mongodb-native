@@ -34,7 +34,7 @@ describe('ClientBulkWriteCommandBuilder', function () {
         ordered: false,
         comment: { bulk: 'write' }
       });
-      const command = builder.buildBatch(48000000, 100000);
+      const command = builder.buildBatch(48000000, 100000, 16777216);
 
       it('sets the bulkWrite command', function () {
         expect(command.bulkWrite).to.equal(1);
@@ -79,7 +79,7 @@ describe('ClientBulkWriteCommandBuilder', function () {
           document: { _id: id, name: 1 }
         };
         const builder = new ClientBulkWriteCommandBuilder([model], {});
-        const command = builder.buildBatch(48000000, 100000);
+        const command = builder.buildBatch(48000000, 100000, 16777216);
 
         it('sets the bulkWrite command', function () {
           expect(command.bulkWrite).to.equal(1);
@@ -122,8 +122,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const commandOne = builder.buildBatch(48000000, 1);
-          const commandTwo = builder.buildBatch(48000000, 1);
+          const commandOne = builder.buildBatch(48000000, 1, 16777216);
+          const commandTwo = builder.buildBatch(48000000, 1, 16777216);
 
           it('splits the operations into multiple commands', function () {
             expect(commandOne.ops.documents).to.deep.equal([
@@ -149,8 +149,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const commandOne = builder.buildBatch(1090, 100000);
-          const commandTwo = builder.buildBatch(1090, 100000);
+          const commandOne = builder.buildBatch(1090, 100000, 16777216);
+          const commandTwo = builder.buildBatch(1090, 100000, 16777216);
 
           it('splits the operations into multiple commands', function () {
             expect(commandOne.ops.documents).to.deep.equal([
@@ -176,7 +176,7 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const command = builder.buildBatch(48000000, 100000);
+          const command = builder.buildBatch(48000000, 100000, 16777216);
 
           it('sets the bulkWrite command', function () {
             expect(command.bulkWrite).to.equal(1);
@@ -210,7 +210,7 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const command = builder.buildBatch(48000000, 100000);
+          const command = builder.buildBatch(48000000, 100000, 16777216);
 
           it('sets the bulkWrite command', function () {
             expect(command.bulkWrite).to.equal(1);
@@ -253,7 +253,7 @@ describe('ClientBulkWriteCommandBuilder', function () {
             document: { _id: idThree, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo, modelThree], {});
-          const command = builder.buildBatch(48000000, 100000);
+          const command = builder.buildBatch(48000000, 100000, 16777216);
 
           it('sets the bulkWrite command', function () {
             expect(command.bulkWrite).to.equal(1);

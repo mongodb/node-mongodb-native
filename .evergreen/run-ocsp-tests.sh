@@ -3,7 +3,7 @@ set -o xtrace
 set -o errexit
 
 # load node.js environment
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 # $PYTHON_BINARY -m virtualenv --never-download --no-wheel ocsptest
 #     . ocsptest/bin/activate
