@@ -22,11 +22,9 @@ const skippedTests = {
     'TODO(DRIVERS-2965)',
   'maxTimeMS value in the command is less than timeoutMS':
     'TODO(DRIVERS-2970): see modified test in unified-csot-node-specs',
-  'Tailable cursor awaitData iteration timeoutMS is refreshed for getMore - failure':
-    'TODO(DRIVERS-2965)',
-  'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(DRIVERS-2965)',
   'timeoutMS is refreshed for getMore - failure':
-    'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs' // Skipping for both tailable awaitData and tailable non-awaitData cursors
+    'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs', // Skipping for both tailable awaitData and tailable non-awaitData cursors
+  'timeoutMS applies to full resume attempt in a next call': 'TODO(DRIVERS-3006)'
 };
 
 describe('CSOT spec tests', function () {

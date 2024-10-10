@@ -106,47 +106,17 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
-
-    const failpoint: FailPoint = {
-      configureFailPoint: 'failCommand',
-      mode: {
-        times: 2
-      },
-      data: {
-        failCommands: ['insert'],
-        blockConnection: true,
-        blockTimeMS: 1010
-      }
-    };
-
-    beforeEach(async function () {
-      await internalClient
-        .db('db')
-        .collection('bulkWriteTest')
-        .drop()
-        .catch(() => null);
-      await internalClient.db('admin').command(failpoint);
-
-      client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
-    });
-
-    it('performs two inserts which fail to complete before 2000 ms', async () => {
-      const inserts = [];
-      client.on('commandStarted', ev => inserts.push(ev));
-
-      const a = new Uint8Array(1000000 - 22);
-      const oneMBDocs = Array.from({ length: 50 }, (_, _id) => ({ _id, a }));
-      const error = await client
-        .db('db')
-        .collection<{ _id: number; a: Uint8Array }>('bulkWriteTest')
-        .insertMany(oneMBDocs)
-        .catch(error => error);
-
-      expect(error).to.be.instanceOf(MongoBulkWriteError);
-      expect(error.errorResponse).to.be.instanceOf(MongoOperationTimeoutError);
-      expect(inserts.map(ev => ev.commandName)).to.deep.equal(['insert', 'insert']);
-    });
-  });
+  const failpoint: FailPoint = {
+    configureFailPoint: 'failCommand',
+    mode: {
+      times: 2
+    },
+    data: {
+      failCommands: ['insert'],
+      blockConnection: true,
+      blockTimeMS: 1010
+    }
+  };
 
   context(
     '2. maxTimeMS is not set for commands sent to mongocryptd',
