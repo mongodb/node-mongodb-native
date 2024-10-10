@@ -35,7 +35,7 @@ const MESSAGE_OVERHEAD_BYTES = 1000;
 
 /** @internal */
 export class ClientBulkWriteCommandBuilder {
-  models: AnyClientBulkWriteModel[];
+  models: ReadonlyArray<AnyClientBulkWriteModel<Document>>;
   options: ClientBulkWriteOptions;
   pkFactory: PkFactory;
   currentModelIndex: number;
@@ -46,7 +46,7 @@ export class ClientBulkWriteCommandBuilder {
    * @param models - The client write models.
    */
   constructor(
-    models: AnyClientBulkWriteModel[],
+    models: ReadonlyArray<AnyClientBulkWriteModel<Document>>,
     options: ClientBulkWriteOptions,
     pkFactory?: PkFactory
   ) {
@@ -192,7 +192,7 @@ interface ClientInsertOperation {
  * @returns the operation.
  */
 export const buildInsertOneOperation = (
-  model: ClientInsertOneModel,
+  model: ClientInsertOneModel<Document>,
   index: number,
   pkFactory: PkFactory
 ): ClientInsertOperation => {
@@ -219,7 +219,10 @@ export interface ClientDeleteOperation {
  * @param index - The namespace index.
  * @returns the operation.
  */
-export const buildDeleteOneOperation = (model: ClientDeleteOneModel, index: number): Document => {
+export const buildDeleteOneOperation = (
+  model: ClientDeleteOneModel<Document>,
+  index: number
+): Document => {
   return createDeleteOperation(model, index, false);
 };
 
@@ -229,7 +232,10 @@ export const buildDeleteOneOperation = (model: ClientDeleteOneModel, index: numb
  * @param index - The namespace index.
  * @returns the operation.
  */
-export const buildDeleteManyOperation = (model: ClientDeleteManyModel, index: number): Document => {
+export const buildDeleteManyOperation = (
+  model: ClientDeleteManyModel<Document>,
+  index: number
+): Document => {
   return createDeleteOperation(model, index, true);
 };
 
@@ -237,7 +243,7 @@ export const buildDeleteManyOperation = (model: ClientDeleteManyModel, index: nu
  * Creates a delete operation based on the parameters.
  */
 function createDeleteOperation(
-  model: ClientDeleteOneModel | ClientDeleteManyModel,
+  model: ClientDeleteOneModel<Document> | ClientDeleteManyModel<Document>,
   index: number,
   multi: boolean
 ): ClientDeleteOperation {
@@ -274,7 +280,7 @@ export interface ClientUpdateOperation {
  * @returns the operation.
  */
 export const buildUpdateOneOperation = (
-  model: ClientUpdateOneModel,
+  model: ClientUpdateOneModel<Document>,
   index: number
 ): ClientUpdateOperation => {
   return createUpdateOperation(model, index, false);
@@ -287,7 +293,7 @@ export const buildUpdateOneOperation = (
  * @returns the operation.
  */
 export const buildUpdateManyOperation = (
-  model: ClientUpdateManyModel,
+  model: ClientUpdateManyModel<Document>,
   index: number
 ): ClientUpdateOperation => {
   return createUpdateOperation(model, index, true);
@@ -297,7 +303,7 @@ export const buildUpdateManyOperation = (
  * Creates a delete operation based on the parameters.
  */
 function createUpdateOperation(
-  model: ClientUpdateOneModel | ClientUpdateManyModel,
+  model: ClientUpdateOneModel<Document> | ClientUpdateManyModel<Document>,
   index: number,
   multi: boolean
 ): ClientUpdateOperation {
@@ -340,7 +346,7 @@ export interface ClientReplaceOneOperation {
  * @returns the operation.
  */
 export const buildReplaceOneOperation = (
-  model: ClientReplaceOneModel,
+  model: ClientReplaceOneModel<Document>,
   index: number
 ): ClientReplaceOneOperation => {
   const document: ClientReplaceOneOperation = {
@@ -363,7 +369,7 @@ export const buildReplaceOneOperation = (
 
 /** @internal */
 export function buildOperation(
-  model: AnyClientBulkWriteModel,
+  model: AnyClientBulkWriteModel<Document>,
   index: number,
   pkFactory: PkFactory
 ): Document {
