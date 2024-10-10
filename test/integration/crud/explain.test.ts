@@ -307,6 +307,10 @@ describe('CRUD API explain option', function () {
     };
     const commands: ExplainStartedEvent[] = [];
 
+    function test(description: string, f: () => Promise<void>) {
+      return it(description, { requires: { mongodb: '>=4.4' } }, f);
+    }
+
     beforeEach(async function () {
       client = this.configuration.newClient({}, { monitorCommands: true });
       client.on('commandStarted', filterForCommands('explain', commands));
@@ -330,13 +334,13 @@ describe('CRUD API explain option', function () {
 
     describe('when a cursor api is being explained', function () {
       describe('when timeoutMS is provided', function () {
-        it('the explain command respects timeoutMS', async function () {
+        test('the explain command respects timeoutMS', async function () {
           const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
           const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
           expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
         });
 
-        it('the explain command has the calculated maxTimeMS value attached', async function () {
+        test('the explain command has the calculated maxTimeMS value attached', async function () {
           const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
           const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
           expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
@@ -350,7 +354,7 @@ describe('CRUD API explain option', function () {
           expect(maxTimeMS).to.be.a('number');
         });
 
-        it('the explained command does not have a maxTimeMS value attached', async function () {
+        test('the explained command does not have a maxTimeMS value attached', async function () {
           const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
           const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
           expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
@@ -368,7 +372,7 @@ describe('CRUD API explain option', function () {
       });
 
       describe('when timeoutMS and maxTimeMS are both provided', function () {
-        it('an error is thrown indicating incompatibility of those options', async function () {
+        test('an error is thrown indicating incompatibility of those options', async function () {
           const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
           const error = await cursor
             .explain({ verbosity: 'queryPlanner', maxTimeMS: 1000 })
@@ -380,7 +384,7 @@ describe('CRUD API explain option', function () {
 
     describe('when a non-cursor api is being explained', function () {
       describe('when timeoutMS is provided', function () {
-        it('the explain command respects timeoutMS', async function () {
+        test('the explain command respects timeoutMS', async function () {
           const timeout = await client
             .db('foo')
             .collection('bar')
@@ -395,7 +399,7 @@ describe('CRUD API explain option', function () {
           expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
         });
 
-        it('the explain command has the calculated maxTimeMS value attached', async function () {
+        test('the explain command has the calculated maxTimeMS value attached', async function () {
           const timeout = await client
             .db('foo')
             .collection('bar')
@@ -419,7 +423,7 @@ describe('CRUD API explain option', function () {
           expect(maxTimeMS).to.be.a('number');
         });
 
-        it('the explained command does not have a maxTimeMS value attached', async function () {
+        test('the explained command does not have a maxTimeMS value attached', async function () {
           const timeout = await client
             .db('foo')
             .collection('bar')
@@ -447,7 +451,7 @@ describe('CRUD API explain option', function () {
       });
 
       describe('when timeoutMS and maxTimeMS are both provided', function () {
-        it('an error is thrown indicating incompatibility of those options', async function () {
+        test('an error is thrown indicating incompatibility of those options', async function () {
           const error = await client
             .db('foo')
             .collection('bar')
@@ -466,7 +470,7 @@ describe('CRUD API explain option', function () {
     });
 
     describe('when find({}, { explain: ...}) is used with timeoutMS', function () {
-      it('an error is thrown indicating that explain is not supported with timeoutMS for this API', async function () {
+      test('an error is thrown indicating that explain is not supported with timeoutMS for this API', async function () {
         const error = await client
           .db('foo')
           .collection('bar')
@@ -487,7 +491,7 @@ describe('CRUD API explain option', function () {
     });
 
     describe('when aggregate({}, { explain: ...}) is used with timeoutMS', function () {
-      it('an error is thrown indicating that explain is not supported with timeoutMS for this API', async function () {
+      test('an error is thrown indicating that explain is not supported with timeoutMS for this API', async function () {
         const error = await client
           .db('foo')
           .collection('bar')
@@ -506,7 +510,7 @@ describe('CRUD API explain option', function () {
 
     describe('fluent api timeoutMS precedence and inheritance', function () {
       describe('find({}, { timeoutMS }).explain()', function () {
-        it('respects the timeoutMS from the find options', async function () {
+        test('respects the timeoutMS from the find options', async function () {
           const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 1000 });
           const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
           expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
@@ -514,7 +518,7 @@ describe('CRUD API explain option', function () {
       });
 
       describe('find().explain({}, { timeoutMS })', function () {
-        it('respects the timeoutMS from the explain helper', async function () {
+        test('respects the timeoutMS from the explain helper', async function () {
           const cursor = client.db('foo').collection('bar').find();
           const timeout = await cursor
             .explain({ verbosity: 'queryPlanner' }, { timeoutMS: 1000 })
@@ -524,7 +528,7 @@ describe('CRUD API explain option', function () {
       });
 
       describe('find({}, { timeoutMS} ).explain({}, { timeoutMS })', function () {
-        it('the timeoutMS from the explain helper has precedence', async function () {
+        test('the timeoutMS from the explain helper has precedence', async function () {
           const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 2000 });
           const timeout = await cursor
             .explain({ verbosity: 'queryPlanner' }, { timeoutMS: 1000 })
@@ -534,7 +538,7 @@ describe('CRUD API explain option', function () {
       });
 
       describe('aggregate([], { timeoutMS }).explain()', function () {
-        it('respects the timeoutMS from the find options', async function () {
+        test('respects the timeoutMS from the find options', async function () {
           const cursor = client.db('foo').collection('bar').aggregate([], { timeoutMS: 1000 });
           const timeout = await cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e);
           expect(timeout).to.be.instanceOf(MongoOperationTimeoutError);
@@ -542,7 +546,7 @@ describe('CRUD API explain option', function () {
       });
 
       describe('aggregate([], { timeoutMS })', function () {
-        it('respects the timeoutMS from the explain helper', async function () {
+        test('respects the timeoutMS from the explain helper', async function () {
           const cursor = client.db('foo').collection('bar').aggregate();
           const timeout = await cursor
             .explain({ verbosity: 'queryPlanner' }, { timeoutMS: 1000 })
@@ -552,7 +556,7 @@ describe('CRUD API explain option', function () {
       });
 
       describe('aggregate([], { timeoutMS} ).explain({}, { timeoutMS })', function () {
-        it('the timeoutMS from the explain helper has precedence', async function () {
+        test('the timeoutMS from the explain helper has precedence', async function () {
           const cursor = client.db('foo').collection('bar').aggregate([], { timeoutMS: 2000 });
           const timeout = await cursor
             .explain({ verbosity: 'queryPlanner' }, { timeoutMS: 1000 })
