@@ -3,8 +3,11 @@ import type { Readable } from 'stream';
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
-import type { AbstractCursorEvents, CursorStreamOptions } from './cursor/abstract_cursor';
-import { CursorTimeoutContext } from './cursor/abstract_cursor';
+import {
+  type AbstractCursorEvents,
+  type CursorStreamOptions,
+  CursorTimeoutContext
+} from './cursor/abstract_cursor';
 import { ChangeStreamCursor, type ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 import { Db } from './db';
 import {
