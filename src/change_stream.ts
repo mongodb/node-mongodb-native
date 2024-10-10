@@ -693,13 +693,17 @@ export class ChangeStream<
     this.timeoutContext?.refresh();
     try {
       while (true) {
+        const cursorInitialized = this.cursor.id != null;
         try {
           const hasNext = await this.cursor.hasNext();
           return hasNext;
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error);
+            await this._processErrorIteratorMode(error, cursorInitialized);
           } catch (error) {
+            if (error instanceof MongoOperationTimeoutError && cursorInitialized) {
+              throw error;
+            }
             try {
               await this.close();
             } catch (error) {
@@ -731,7 +735,7 @@ export class ChangeStream<
           return processedChange;
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error);
+            await this._processErrorIteratorMode(error, cursorInitialized);
           } catch (error) {
             if (error instanceof MongoOperationTimeoutError && cursorInitialized) {
               throw error;
@@ -762,14 +766,15 @@ export class ChangeStream<
 
     try {
       while (true) {
+        const cursorInitialized = this.cursor.id != null;
         try {
           const change = await this.cursor.tryNext();
           return change ?? null;
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error);
+            await this._processErrorIteratorMode(error, cursorInitialized);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError) throw error;
+            if (error instanceof MongoOperationTimeoutError && cursorInitialized) throw error;
             try {
               await this.close();
             } catch (error) {
@@ -939,7 +944,7 @@ export class ChangeStream<
         this.timeoutContext?.clear();
       }
     });
-    stream.on('error', error => this._processErrorStreamMode(error));
+    stream.on('error', error => this._processErrorStreamMode(error, this.cursor.id != null));
   }
 
   /** @internal */
@@ -981,12 +986,12 @@ export class ChangeStream<
   }
 
   /** @internal */
-  private _processErrorStreamMode(changeStreamError: AnyError) {
+  private _processErrorStreamMode(changeStreamError: AnyError, cursorInitialized: boolean) {
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
     if (
-      this.cursor.id != null &&
+      cursorInitialized &&
       (isResumableError(changeStreamError, this.cursor.maxWireVersion) ||
         changeStreamError instanceof MongoOperationTimeoutError)
     ) {
@@ -1014,14 +1019,14 @@ export class ChangeStream<
   }
 
   /** @internal */
-  private async _processErrorIteratorMode(changeStreamError: AnyError) {
+  private async _processErrorIteratorMode(changeStreamError: AnyError, cursorInitialized: boolean) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
     if (
-      this.cursor.id == null ||
+      !cursorInitialized ||
       (!isResumableError(changeStreamError, this.cursor.maxWireVersion) &&
         !(changeStreamError instanceof MongoOperationTimeoutError))
     ) {

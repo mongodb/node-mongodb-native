@@ -17,7 +17,6 @@ import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   AbstractCursor,
   type AbstractCursorOptions,
-  type CursorTimeoutContext,
   type InitialCursorResponse
 } from './abstract_cursor';
 
@@ -54,11 +53,9 @@ export class ChangeStreamCursor<
     client: MongoClient,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
-    options: ChangeStreamCursorOptions = {},
-    timeoutContext?: CursorTimeoutContext
+    options: ChangeStreamCursorOptions = {}
   ) {
     super(client, namespace, { ...options, tailable: true, awaitData: true });
-    this.timeoutContext = timeoutContext;
 
     this.pipeline = pipeline;
     this.changeStreamCursorOptions = options;

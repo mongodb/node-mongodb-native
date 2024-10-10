@@ -106,18 +106,6 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
-  const failpoint: FailPoint = {
-    configureFailPoint: 'failCommand',
-    mode: {
-      times: 2
-    },
-    data: {
-      failCommands: ['insert'],
-      blockConnection: true,
-      blockTimeMS: 1010
-    }
-  };
-
   context(
     '2. maxTimeMS is not set for commands sent to mongocryptd',
     { requires: { mongodb: '>=4.2' } },
