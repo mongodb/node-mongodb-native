@@ -167,7 +167,7 @@ describe('TimeoutContext', function () {
             serverSelectionTimeoutMS: 0
           });
 
-          expect(ctx.serverSelectionTimeout).to.be.null;
+          expect(ctx.timeoutForServerSelection).to.be.null;
         });
       });
 
@@ -178,7 +178,7 @@ describe('TimeoutContext', function () {
             serverSelectionTimeoutMS: 10
           });
 
-          timeout = ctx.serverSelectionTimeout;
+          timeout = ctx.timeoutForServerSelection;
           expect(timeout).to.be.instanceOf(Timeout);
 
           expect(timeout.duration).to.equal(ctx.serverSelectionTimeoutMS);
@@ -194,7 +194,7 @@ describe('TimeoutContext', function () {
               serverSelectionTimeoutMS: 10
             });
 
-            timeout = ctx.serverSelectionTimeout;
+            timeout = ctx.timeoutForServerSelection;
             expect(timeout).to.exist;
             expect(timeout).to.be.instanceOf(Timeout);
             expect(timeout.duration).to.equal(ctx.serverSelectionTimeoutMS);
@@ -211,7 +211,7 @@ describe('TimeoutContext', function () {
               serverSelectionTimeoutMS: 15
             });
 
-            timeout = ctx.serverSelectionTimeout;
+            timeout = ctx.timeoutForServerSelection;
             expect(timeout).to.exist;
             expect(timeout).to.be.instanceOf(Timeout);
             expect(timeout.duration).to.equal(ctx.timeoutMS);
@@ -228,7 +228,7 @@ describe('TimeoutContext', function () {
             serverSelectionTimeoutMS: 15
           });
 
-          expect(() => ctx.connectionCheckoutTimeout).to.throw(MongoRuntimeError);
+          expect(() => ctx.timeoutForConnectionCheckout).to.throw(MongoRuntimeError);
         });
       });
 
@@ -246,8 +246,8 @@ describe('TimeoutContext', function () {
             timeoutMS: 100,
             serverSelectionTimeoutMS: 86
           });
-          serverSelectionTimeout = ctx.serverSelectionTimeout;
-          connectionCheckoutTimeout = ctx.connectionCheckoutTimeout;
+          serverSelectionTimeout = ctx.timeoutForServerSelection;
+          connectionCheckoutTimeout = ctx.timeoutForConnectionCheckout;
 
           expect(connectionCheckoutTimeout).to.exist;
           expect(connectionCheckoutTimeout).to.equal(serverSelectionTimeout);
@@ -271,7 +271,7 @@ describe('TimeoutContext', function () {
             waitQueueTimeoutMS: 10
           });
 
-          timeout = ctx.serverSelectionTimeout;
+          timeout = ctx.timeoutForServerSelection;
           expect(timeout).to.be.instanceOf(Timeout);
           expect(timeout.duration).to.equal(ctx.options.serverSelectionTimeoutMS);
         });
@@ -284,7 +284,7 @@ describe('TimeoutContext', function () {
             waitQueueTimeoutMS: 10
           });
 
-          timeout = ctx.serverSelectionTimeout;
+          timeout = ctx.timeoutForServerSelection;
           expect(timeout).to.be.null;
         });
       });
@@ -297,7 +297,7 @@ describe('TimeoutContext', function () {
             serverSelectionTimeoutMS: 10,
             waitQueueTimeoutMS: 20
           });
-          timeout = ctx.connectionCheckoutTimeout;
+          timeout = ctx.timeoutForConnectionCheckout;
 
           expect(timeout).to.be.instanceOf(Timeout);
           expect(timeout.duration).to.equal(ctx.options.waitQueueTimeoutMS);
@@ -311,7 +311,7 @@ describe('TimeoutContext', function () {
             waitQueueTimeoutMS: 0
           });
 
-          expect(ctx.connectionCheckoutTimeout).to.be.null;
+          expect(ctx.timeoutForConnectionCheckout).to.be.null;
         });
       });
     });

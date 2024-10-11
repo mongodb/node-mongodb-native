@@ -27,7 +27,7 @@ import {
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { type TimeoutContext, TimeoutError } from '../timeout';
+import { isCSOTTimeoutContext, type TimeoutContext, TimeoutError } from '../timeout';
 import { type Callback, List, makeCounter, now, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
@@ -364,7 +364,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
 
-    const timeout = options.timeoutContext.connectionCheckoutTimeout;
+    const timeout = options.timeoutContext.timeoutForConnectionCheckout;
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
@@ -393,7 +393,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             : 'Timed out while checking out a connection from connection pool',
           this.address
         );
-        if (options.timeoutContext.csotEnabled()) {
+        if (isCSOTTimeoutContext(options.timeoutContext)) {
           throw new MongoOperationTimeoutError('Timed out during connection checkout', {
             cause: timeoutError
           });

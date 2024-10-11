@@ -32,7 +32,7 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
-import { type TimeoutContext, TimeoutError } from '../timeout';
+import { isCSOTTimeoutContext, type TimeoutContext, TimeoutError } from '../timeout';
 import {
   BufferPool,
   calculateDurationInMs,
@@ -441,7 +441,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
 
-    if (options.timeoutContext?.csotEnabled()) {
+    if (isCSOTTimeoutContext(options?.timeoutContext)) {
       this.socket.setTimeout(0);
     } else if (typeof options.socketTimeoutMS === 'number') {
       this.socket.setTimeout(options.socketTimeoutMS);
@@ -464,7 +464,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       this.throwIfAborted();
 
       if (
-        options.timeoutContext?.csotEnabled() &&
+        isCSOTTimeoutContext(options?.timeoutContext) &&
         options.timeoutContext.minRoundTripTime != null &&
         options.timeoutContext.remainingTimeMS < options.timeoutContext.minRoundTripTime
       ) {
@@ -542,7 +542,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
 
         if (document.ok === 0) {
-          if (options.timeoutContext?.csotEnabled() && document.isMaxTimeExpiredError) {
+          if (isCSOTTimeoutContext(options?.timeoutContext) && document.isMaxTimeExpiredError) {
             throw new MongoOperationTimeoutError('Server reported a timeout error', {
               cause: new MongoServerError((object ??= document.toObject(bsonOptions)))
             });
@@ -620,7 +620,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): Promise<Document> {
     this.throwIfAborted();
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
-      if (options.timeoutContext?.csotEnabled()) {
+      if (isCSOTTimeoutContext(options?.timeoutContext)) {
         if (MongoDBResponse.is(document)) {
           if (document.isMaxTimeExpiredError) {
             throw new MongoOperationTimeoutError('Server reported a timeout error', {
@@ -693,7 +693,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const buffer = Buffer.concat(await finalCommand.toBin());
 
-    if (options.timeoutContext?.csotEnabled()) {
+    if (isCSOTTimeoutContext(options?.timeoutContext)) {
       if (
         options.timeoutContext.minRoundTripTime != null &&
         options.timeoutContext.remainingTimeMS < options.timeoutContext.minRoundTripTime

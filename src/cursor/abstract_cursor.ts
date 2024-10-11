@@ -831,7 +831,7 @@ export abstract class AbstractCursor<
    */
   private async cursorInit(): Promise<void> {
     if (this.cursorOptions.timeoutMS != null) {
-      this.timeoutContext ??= new CursorTimeoutContext(
+      this.timeoutContext ??= CursorTimeoutContext(
         TimeoutContext.create({
           serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
           timeoutMS: this.cursorOptions.timeoutMS
@@ -918,10 +918,10 @@ export abstract class AbstractCursor<
   private async cleanup(timeoutMS?: number, error?: Error) {
     this.isClosed = true;
     const session = this.cursorSession;
-    const timeoutContextForKillCursors = (): CursorTimeoutContext | undefined => {
+    const timeoutContextForKillCursors = (): TimeoutContext | undefined => {
       if (timeoutMS != null) {
         this.timeoutContext?.clear();
-        return new CursorTimeoutContext(
+        return CursorTimeoutContext(
           TimeoutContext.create({
             serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
             timeoutMS
@@ -1101,42 +1101,19 @@ configureResourceManagement(AbstractCursor.prototype);
  *
  * All timeout behavior is exactly the same as the wrapped timeout context's.
  */
-export class CursorTimeoutContext extends TimeoutContext {
-  constructor(
-    public timeoutContext: TimeoutContext,
-    public owner: symbol | AbstractCursor
-  ) {
-    super();
-  }
-  override get serverSelectionTimeout(): Timeout | null {
-    return this.timeoutContext.serverSelectionTimeout;
-  }
-  override get connectionCheckoutTimeout(): Timeout | null {
-    return this.timeoutContext.connectionCheckoutTimeout;
-  }
-  override get clearServerSelectionTimeout(): boolean {
-    return this.timeoutContext.clearServerSelectionTimeout;
-  }
-  override get timeoutForSocketWrite(): Timeout | null {
-    return this.timeoutContext.timeoutForSocketWrite;
-  }
-  override get timeoutForSocketRead(): Timeout | null {
-    return this.timeoutContext.timeoutForSocketRead;
-  }
-  override csotEnabled(): this is CSOTTimeoutContext {
-    return this.timeoutContext.csotEnabled();
-  }
-  override refresh(): void {
-    return this.timeoutContext.refresh();
-  }
-  override clear(): void {
-    return this.timeoutContext.clear();
-  }
-  override get maxTimeMS(): number | null {
-    return this.timeoutContext.maxTimeMS;
-  }
-
-  override refreshed(): CursorTimeoutContext {
-    return new CursorTimeoutContext(this.timeoutContext.refreshed(), this.owner);
-  }
+export function CursorTimeoutContext(
+  context: TimeoutContext,
+  owner: symbol | AbstractCursor
+): TimeoutContext & { owner: symbol | AbstractCursor } {
+  return Object.create(context, {
+    owner: { value: owner },
+    refreshed: {
+      value: function refreshed(): TimeoutContext {
+        const parent = <TimeoutContext>Object.getPrototypeOf(this);
+        return CursorTimeoutContext(parent.refreshed(), owner);
+      }
+    }
+  });
 }
+
+export type CursorTimeoutContext = ReturnType<typeof CursorTimeoutContext>;

@@ -14,7 +14,7 @@ import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
-import { Timeout, type TimeoutContext, TimeoutError } from '../timeout';
+import { isCSOTTimeoutContext, Timeout, type TimeoutContext, TimeoutError } from '../timeout';
 import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '../utils';
 import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
@@ -435,7 +435,7 @@ export class StateMachine {
             resolve();
           }
         });
-      await (timeoutContext?.csotEnabled()
+      await (isCSOTTimeoutContext(timeoutContext)
         ? Promise.all([willResolveKmsRequest, Timeout.expires(timeoutContext?.remainingTimeMS)])
         : willResolveKmsRequest);
     } catch (error) {
@@ -524,7 +524,7 @@ export class StateMachine {
       .listCollections(filter, {
         promoteLongs: false,
         promoteValues: false,
-        ...(timeoutContext?.csotEnabled()
+        ...(isCSOTTimeoutContext(timeoutContext)
           ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
           : {})
       })
@@ -554,7 +554,7 @@ export class StateMachine {
 
     const response = await client.db(db).command(rawCommand, {
       ...bsonOptions,
-      ...(timeoutContext?.csotEnabled()
+      ...(isCSOTTimeoutContext(timeoutContext)
         ? { timeoutMS: timeoutContext?.remainingTimeMS }
         : undefined)
     });
@@ -584,7 +584,7 @@ export class StateMachine {
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
       .find(
         deserialize(filter),
-        timeoutContext?.csotEnabled()
+        isCSOTTimeoutContext(timeoutContext)
           ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
           : {}
       )

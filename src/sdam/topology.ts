@@ -34,7 +34,7 @@ import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mong
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { Timeout, TimeoutContext, TimeoutError } from '../timeout';
+import { isCSOTTimeoutContext, Timeout, TimeoutContext, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
@@ -572,7 +572,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       );
     }
     let timeout;
-    if (options.timeoutContext) timeout = options.timeoutContext.serverSelectionTimeout;
+    if (options.timeoutContext) timeout = options.timeoutContext.timeoutForServerSelection;
     else {
       timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
     }
@@ -598,7 +598,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
+      timeout?.clear();
       return transaction.server;
     }
 
@@ -623,7 +623,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     try {
       timeout?.throwIfExpired();
       const server = await (timeout ? Promise.race([serverPromise, timeout]) : serverPromise);
-      if (options.timeoutContext?.csotEnabled() && server.description.minRoundTripTime !== 0) {
+      if (
+        isCSOTTimeoutContext(options.timeoutContext) &&
+        server.description.minRoundTripTime !== 0
+      ) {
         options.timeoutContext.minRoundTripTime = server.description.minRoundTripTime;
       }
       return server;
@@ -652,7 +655,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           );
         }
 
-        if (options.timeoutContext?.csotEnabled()) {
+        if (isCSOTTimeoutContext(options.timeoutContext)) {
           throw new MongoOperationTimeoutError('Timed out during server selection', {
             cause: timeoutError
           });
@@ -662,7 +665,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       // Other server selection error
       throw error;
     } finally {
-      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
+      timeout?.clear();
     }
   }
   /**
