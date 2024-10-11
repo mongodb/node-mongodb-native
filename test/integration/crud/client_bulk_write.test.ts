@@ -292,8 +292,8 @@ describe('Client Bulk Write', function () {
 
           // DRIVERS-3005 - killCursors causes cursor cleanup to extend past timeoutMS.
           // The amount of time killCursors takes is wildly variable and can take up to almost
-          // 500ms sometimes.
-          expect(end - start).to.be.within(1500, 1500 + 600);
+          // 600-700ms sometimes.
+          expect(end - start).to.be.within(1500, 1500 + 800);
           expect(commands).to.have.lengthOf(1);
         });
       });
