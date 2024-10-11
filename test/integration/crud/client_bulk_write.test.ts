@@ -14,7 +14,8 @@ import {
   clearFailPoint,
   configureFailPoint,
   makeMultiBatchWrite,
-  makeMultiResponseBatchModelArray
+  makeMultiResponseBatchModelArray,
+  waitUntilPoolsFilled
 } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
@@ -266,7 +267,7 @@ describe('Client Bulk Write', function () {
         const commands: CommandStartedEvent[] = [];
 
         beforeEach(async function () {
-          client = this.configuration.newClient({}, { monitorCommands: true });
+          client = this.configuration.newClient({}, { monitorCommands: true, minPoolSize: 5 });
           client.on('commandStarted', filterForCommands(['getMore'], commands));
           await client.connect();
 
@@ -291,7 +292,9 @@ describe('Client Bulk Write', function () {
           expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
 
           // DRIVERS-3005 - killCursors causes cursor cleanup to extend past timeoutMS.
-          expect(end - start).to.be.within(2000 - 100, 2000 + 100);
+          // The amount of time killCursors takes is wildly variable and can take up to almost
+          // 500ms sometimes.
+          expect(end - start).to.be.within(1500, 1500 + 600);
           expect(commands).to.have.lengthOf(1);
         });
       });
