@@ -376,3 +376,38 @@ export class LegacyTimeoutContext extends TimeoutContext {
     return new LegacyTimeoutContext(this.options);
   }
 }
+
+/**
+ * @internal
+ * The owned timeout context is a wrapper around a timeout context
+ * that keeps track of the "owner" of the context.  This is used when
+ * a timeout context must be passed into another driver API / across APIs
+ * (for example - cursors).
+ *
+ * All timeout behavior is exactly the same as the wrapped timeout context's.
+ */
+export function makeOwnedTimeoutContext<T>(
+  context: TimeoutContext,
+  owner: symbol | T
+): TimeoutContext & { owner: symbol | T } {
+  return Object.create(context, {
+    owner: { value: owner },
+    refreshed: {
+      value: function refreshed(): TimeoutContext {
+        const parent = <TimeoutContext>Object.getPrototypeOf(this);
+        return makeOwnedTimeoutContext(parent.refreshed(), owner);
+      }
+    }
+  });
+}
+
+/**
+ * @internal
+ * The owned timeout context is a wrapper around a timeout context
+ * that keeps track of the "owner" of the context.  This is used when
+ * a timeout context must be passed into another driver API / across APIs
+ * (for example - cursors).
+ *
+ * All timeout behavior is exactly the same as the wrapped timeout context's.
+ */
+export type OwnedTimeoutContext<T> = ReturnType<typeof makeOwnedTimeoutContext<T>>;

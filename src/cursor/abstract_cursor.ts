@@ -21,7 +21,7 @@ import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { type AsyncDisposable, configureResourceManagement } from '../resource_management';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { type CSOTTimeoutContext, type Timeout, TimeoutContext } from '../timeout';
+import { makeOwnedTimeoutContext, type OwnedTimeoutContext, TimeoutContext } from '../timeout';
 import { type MongoDBNamespace, squashError } from '../utils';
 
 /**
@@ -126,7 +126,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    * A timeout context to govern the total time the cursor can live.  If provided, the cursor
    * cannot be used in ITERATION mode.
    */
-  timeoutContext?: CursorTimeoutContext;
+  timeoutContext?: OwnedTimeoutContext<symbol | AbstractCursor>;
 }
 
 /** @internal */
@@ -179,7 +179,7 @@ export abstract class AbstractCursor<
   /** @internal */
   protected readonly cursorOptions: InternalAbstractCursorOptions;
   /** @internal */
-  protected timeoutContext?: CursorTimeoutContext;
+  protected timeoutContext?: OwnedTimeoutContext<AbstractCursor | symbol>;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -831,7 +831,7 @@ export abstract class AbstractCursor<
    */
   private async cursorInit(): Promise<void> {
     if (this.cursorOptions.timeoutMS != null) {
-      this.timeoutContext ??= CursorTimeoutContext(
+      this.timeoutContext ??= makeOwnedTimeoutContext(
         TimeoutContext.create({
           serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
           timeoutMS: this.cursorOptions.timeoutMS
@@ -921,7 +921,7 @@ export abstract class AbstractCursor<
     const timeoutContextForKillCursors = (): TimeoutContext | undefined => {
       if (timeoutMS != null) {
         this.timeoutContext?.clear();
-        return CursorTimeoutContext(
+        return makeOwnedTimeoutContext(
           TimeoutContext.create({
             serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
             timeoutMS
@@ -1092,28 +1092,3 @@ class ReadableCursorStream extends Readable {
 }
 
 configureResourceManagement(AbstractCursor.prototype);
-
-/**
- * @internal
- * The cursor timeout context is a wrapper around a timeout context
- * that keeps track of the "owner" of the cursor.  For timeout contexts
- * instantiated inside a cursor, the owner will be the cursor.
- *
- * All timeout behavior is exactly the same as the wrapped timeout context's.
- */
-export function CursorTimeoutContext(
-  context: TimeoutContext,
-  owner: symbol | AbstractCursor
-): TimeoutContext & { owner: symbol | AbstractCursor } {
-  return Object.create(context, {
-    owner: { value: owner },
-    refreshed: {
-      value: function refreshed(): TimeoutContext {
-        const parent = <TimeoutContext>Object.getPrototypeOf(this);
-        return CursorTimeoutContext(parent.refreshed(), owner);
-      }
-    }
-  });
-}
-
-export type CursorTimeoutContext = ReturnType<typeof CursorTimeoutContext>;

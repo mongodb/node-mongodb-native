@@ -7,14 +7,15 @@ import { inspect } from 'util';
 import {
   AbstractCursor,
   type Collection,
-  CursorTimeoutContext,
   CursorTimeoutMode,
   type FindCursor,
+  makeOwnedTimeoutContext,
   MongoAPIError,
   type MongoClient,
   MongoCursorExhaustedError,
   MongoOperationTimeoutError,
   MongoServerError,
+  type OwnedTimeoutContext,
   TimeoutContext
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
@@ -404,14 +405,14 @@ describe('class AbstractCursor', function () {
   describe('externally provided timeout contexts', function () {
     let client: MongoClient;
     let collection: Collection;
-    let context: CursorTimeoutContext;
+    let context: OwnedTimeoutContext<symbol | AbstractCursor>;
 
     beforeEach(async function () {
       client = this.configuration.newClient();
 
       collection = client.db('abstract_cursor_integration').collection('test');
 
-      context = new CursorTimeoutContext(
+      context = makeOwnedTimeoutContext(
         TimeoutContext.create({ timeoutMS: 1000, serverSelectionTimeoutMS: 2000 }),
         Symbol()
       );
@@ -505,7 +506,7 @@ describe('class AbstractCursor', function () {
 
           expect(error).to.be.instanceof(MongoOperationTimeoutError);
           // @ts-expect-error We know we have a CSOT timeout context but TS does not.
-          expect(context.timeoutContext.remainingTimeMS).to.be.lessThan(0);
+          expect(context.remainingTimeMS).to.be.lessThan(0);
         }
       );
     });
