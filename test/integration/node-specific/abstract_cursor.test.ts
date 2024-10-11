@@ -8,6 +8,7 @@ import {
   AbstractCursor,
   type Collection,
   type CommandStartedEvent,
+  CSOTTimeoutContext,
   CursorTimeoutContext,
   CursorTimeoutMode,
   type FindCursor,
@@ -408,37 +409,58 @@ describe('class AbstractCursor', function () {
     let collection: Collection;
     let context: CursorTimeoutContext;
     const commands: CommandStartedEvent[] = [];
+    let internalContext: TimeoutContext;
 
     beforeEach(async function () {
       client = this.configuration.newClient({}, { monitorCommands: true });
       client.on('commandStarted', filterForCommands('killCursors', commands));
 
       collection = client.db('abstract_cursor_integration').collection('test');
+      internalContext = TimeoutContext.create({ timeoutMS: 1000, serverSelectionTimeoutMS: 2000 });
 
-      context = new CursorTimeoutContext(
-        TimeoutContext.create({ timeoutMS: 1000, serverSelectionTimeoutMS: 2000 }),
-        Symbol()
-      );
+      context = new CursorTimeoutContext(internalContext, Symbol());
 
       await collection.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
     });
 
     afterEach(async function () {
+      sinon.restore();
       await collection.deleteMany({});
       await client.close();
     });
 
-    describe('when timeoutMode != LIFETIME', function () {
-      it('an error is thrown', function () {
-        expect(() =>
-          collection.find(
-            {},
-            { timeoutContext: context, timeoutMS: 1000, timeoutMode: CursorTimeoutMode.ITERATION }
-          )
-        ).to.throw(
-          `cannot create a cursor with an externally provided timeout context that doesn't use timeoutMode=CURSOR_LIFETIME`
-        );
-      });
+    it('CursorTimeoutMode.refresh is a no-op', async function () {
+      const cursorTimeoutRefreshSpy = sinon.spy(CursorTimeoutContext.prototype, 'refresh');
+      const csotTimeoutContextRefreshSpy = sinon.spy(CSOTTimeoutContext.prototype, 'refresh');
+      const abstractCursorGetMoreSpy = sinon.spy(AbstractCursor.prototype, 'getMore');
+
+      const cursor = collection.find(
+        {},
+        { timeoutMode: CursorTimeoutMode.ITERATION, timeoutContext: context, batchSize: 1 }
+      );
+      await cursor.toArray();
+
+      expect(abstractCursorGetMoreSpy).to.have.been.calledThrice;
+
+      expect(cursorTimeoutRefreshSpy.getCalls()).to.have.length(3);
+      expect(csotTimeoutContextRefreshSpy).to.not.have.been.called;
+    });
+
+    it('CursorTimeoutMode.clear is a no-op', async function () {
+      const cursorTimeoutClearSpy = sinon.spy(CursorTimeoutContext.prototype, 'clear');
+      const csotTimeoutContextRefreshSpy = sinon.spy(CSOTTimeoutContext.prototype, 'clear');
+      const abstractCursorGetMoreSpy = sinon.spy(AbstractCursor.prototype, 'getMore');
+
+      const cursor = collection.find(
+        {},
+        { timeoutMode: CursorTimeoutMode.ITERATION, timeoutContext: context, batchSize: 1 }
+      );
+      await cursor.toArray();
+
+      expect(abstractCursorGetMoreSpy).to.have.been.calledThrice;
+
+      expect(cursorTimeoutClearSpy.getCalls()).to.have.length(4);
+      expect(csotTimeoutContextRefreshSpy).to.not.have.been.called;
     });
 
     describe('when timeoutMode is omitted', function () {

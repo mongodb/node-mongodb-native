@@ -444,11 +444,17 @@ describe('CSOT spec prose tests', function () {
        *    - Expect this to fail with a timeout error.
        * 1. Verify that an `aggregate` command and two `getMore` commands were executed against the `db.coll` collection during the test.
        */
-      it.skip('sends correct number of aggregate and getMores', metadata, async function () {
+      it('sends correct number of aggregate and getMores', metadata, async function () {
+        // NOTE: we don't check for a non-zero ID since we lazily send the initial aggregate to the
+        // server. See ChangeStreamCursor._initialize
         const changeStream = client
           .db('db')
           .collection('coll')
-          .watch([], { timeoutMS: 20, maxAwaitTimeMS: 19 });
+          .watch([], { timeoutMS: 120, maxAwaitTimeMS: 10 });
+
+        // @ts-expect-error private method
+        await changeStream.cursor.cursorInit();
+
         const maybeError = await changeStream.next().then(
           () => null,
           e => e
@@ -463,7 +469,7 @@ describe('CSOT spec prose tests', function () {
         expect(aggregates).to.have.lengthOf(1);
         // Expect 2 getMores
         expect(getMores).to.have.lengthOf(2);
-      }).skipReason = 'TODO(NODE-6387)';
+      });
     });
   });
 
