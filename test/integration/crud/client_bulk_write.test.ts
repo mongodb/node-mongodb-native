@@ -14,8 +14,7 @@ import {
   clearFailPoint,
   configureFailPoint,
   makeMultiBatchWrite,
-  makeMultiResponseBatchModelArray,
-  waitUntilPoolsFilled
+  makeMultiResponseBatchModelArray
 } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
