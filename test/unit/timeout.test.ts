@@ -250,7 +250,8 @@ describe('TimeoutContext', function () {
           connectionCheckoutTimeout = ctx.timeoutForConnectionCheckout;
 
           expect(connectionCheckoutTimeout).to.exist;
-          expect(connectionCheckoutTimeout).to.equal(serverSelectionTimeout);
+
+          expect(connectionCheckoutTimeout).to.equal(Object.getPrototypeOf(serverSelectionTimeout));
         });
       });
     });
