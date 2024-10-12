@@ -29,7 +29,7 @@ import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
-import { TimeoutContext } from './timeout';
+import { isCSOTTimeoutContext, TimeoutContext } from './timeout';
 import {
   isTransactionCommand,
   Transaction,
@@ -619,7 +619,7 @@ export class ClientSession
     const timeoutMS =
       typeof options?.timeoutMS === 'number'
         ? options.timeoutMS
-        : this.timeoutContext?.csotEnabled()
+        : isCSOTTimeoutContext(this.timeoutContext)
           ? this.timeoutContext.timeoutMS // refresh timeoutMS for abort operation
           : typeof this.timeoutMS === 'number'
             ? this.timeoutMS
@@ -732,7 +732,7 @@ export class ClientSession
           })
         : null;
 
-    const startTime = this.timeoutContext?.csotEnabled() ? this.timeoutContext.start : now();
+    const startTime = isCSOTTimeoutContext(this.timeoutContext) ? this.timeoutContext.start : now();
 
     let committed = false;
     let result: any;

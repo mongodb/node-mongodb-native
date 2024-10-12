@@ -359,7 +359,6 @@ export type {
   CursorStreamOptions
 } from './cursor/abstract_cursor';
 export type {
-  CursorTimeoutContext,
   InitialCursorResponse,
   InternalAbstractCursorOptions
 } from './cursor/abstract_cursor';
@@ -613,6 +612,8 @@ export type {
   TimeoutContext,
   TimeoutContextOptions
 } from './timeout';
+export type { OwnedTimeoutContext } from './timeout';
+export { makeOwnedTimeoutContext } from './timeout';
 export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,

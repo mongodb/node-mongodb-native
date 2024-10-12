@@ -180,19 +180,13 @@ export abstract class TimeoutContext {
 
   abstract get maxTimeMS(): number | null;
 
-  abstract get serverSelectionTimeout(): Timeout | null;
+  abstract get timeoutForServerSelection(): Timeout | null;
 
-  abstract get connectionCheckoutTimeout(): Timeout | null;
-
-  abstract get clearServerSelectionTimeout(): boolean;
-
-  abstract get clearConnectionCheckoutTimeout(): boolean;
+  abstract get timeoutForConnectionCheckout(): Timeout | null;
 
   abstract get timeoutForSocketWrite(): Timeout | null;
 
   abstract get timeoutForSocketRead(): Timeout | null;
-
-  abstract csotEnabled(): this is CSOTTimeoutContext;
 
   abstract refresh(): void;
 
@@ -202,14 +196,28 @@ export abstract class TimeoutContext {
   abstract refreshed(): TimeoutContext;
 }
 
+function preventClear(timeout: Timeout | null): Timeout | null {
+  if (timeout == null) return null;
+  return Object.create(timeout, {
+    clear: {
+      value: function clear() {
+        // do nothing
+      }
+    }
+  });
+}
+
+export function isCSOTTimeoutContext(
+  timeoutContext?: TimeoutContext | null
+): timeoutContext is CSOTTimeoutContext {
+  return timeoutContext != null && 'timeoutMS' in timeoutContext;
+}
+
 /** @internal */
 export class CSOTTimeoutContext extends TimeoutContext {
   timeoutMS: number;
   serverSelectionTimeoutMS: number;
   socketTimeoutMS?: number;
-
-  clearConnectionCheckoutTimeout: boolean;
-  clearServerSelectionTimeout: boolean;
 
   private _serverSelectionTimeout?: Timeout | null;
   private _connectionCheckoutTimeout?: Timeout | null;
@@ -225,9 +233,6 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
 
     this.socketTimeoutMS = options.socketTimeoutMS;
-
-    this.clearServerSelectionTimeout = false;
-    this.clearConnectionCheckoutTimeout = true;
   }
 
   get maxTimeMS(): number {
@@ -239,11 +244,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
     return this.timeoutMS <= 0 ? Infinity : this.timeoutMS - timePassed;
   }
 
-  csotEnabled(): this is CSOTTimeoutContext {
-    return true;
-  }
-
-  get serverSelectionTimeout(): Timeout | null {
+  get timeoutForServerSelection(): Timeout | null {
     // check for undefined
     if (typeof this._serverSelectionTimeout !== 'object' || this._serverSelectionTimeout?.cleared) {
       const { remainingTimeMS, serverSelectionTimeoutMS } = this;
@@ -265,10 +266,12 @@ export class CSOTTimeoutContext extends TimeoutContext {
       }
     }
 
-    return this._serverSelectionTimeout;
+    // When CSOT is enabled, the timeout applies to both server selection and connection
+    // checkout.  So we do not clear the server selection timeout.
+    return preventClear(this._serverSelectionTimeout);
   }
 
-  get connectionCheckoutTimeout(): Timeout | null {
+  get timeoutForConnectionCheckout(): Timeout | null {
     if (
       typeof this._connectionCheckoutTimeout !== 'object' ||
       this._connectionCheckoutTimeout?.cleared
@@ -331,27 +334,19 @@ export class CSOTTimeoutContext extends TimeoutContext {
 /** @internal */
 export class LegacyTimeoutContext extends TimeoutContext {
   options: LegacyTimeoutContextOptions;
-  clearServerSelectionTimeout: boolean;
-  clearConnectionCheckoutTimeout: boolean;
 
   constructor(options: LegacyTimeoutContextOptions) {
     super();
     this.options = options;
-    this.clearServerSelectionTimeout = true;
-    this.clearConnectionCheckoutTimeout = true;
   }
 
-  csotEnabled(): this is CSOTTimeoutContext {
-    return false;
-  }
-
-  get serverSelectionTimeout(): Timeout | null {
+  get timeoutForServerSelection(): Timeout | null {
     if (this.options.serverSelectionTimeoutMS != null && this.options.serverSelectionTimeoutMS > 0)
       return Timeout.expires(this.options.serverSelectionTimeoutMS);
     return null;
   }
 
-  get connectionCheckoutTimeout(): Timeout | null {
+  get timeoutForConnectionCheckout(): Timeout | null {
     if (this.options.waitQueueTimeoutMS != null && this.options.waitQueueTimeoutMS > 0)
       return Timeout.expires(this.options.waitQueueTimeoutMS);
     return null;
@@ -381,3 +376,38 @@ export class LegacyTimeoutContext extends TimeoutContext {
     return new LegacyTimeoutContext(this.options);
   }
 }
+
+/**
+ * @internal
+ * The owned timeout context is a wrapper around a timeout context
+ * that keeps track of the "owner" of the context.  This is used when
+ * a timeout context must be passed into another driver API / across APIs
+ * (for example - cursors).
+ *
+ * All timeout behavior is exactly the same as the wrapped timeout context's.
+ */
+export function makeOwnedTimeoutContext<T>(
+  context: TimeoutContext,
+  owner: symbol | T
+): TimeoutContext & { owner: symbol | T } {
+  return Object.create(context, {
+    owner: { value: owner },
+    refreshed: {
+      value: function refreshed(): TimeoutContext {
+        const parent = <TimeoutContext>Object.getPrototypeOf(this);
+        return makeOwnedTimeoutContext(parent.refreshed(), owner);
+      }
+    }
+  });
+}
+
+/**
+ * @internal
+ * The owned timeout context is a wrapper around a timeout context
+ * that keeps track of the "owner" of the context.  This is used when
+ * a timeout context must be passed into another driver API / across APIs
+ * (for example - cursors).
+ *
+ * All timeout behavior is exactly the same as the wrapped timeout context's.
+ */
+export type OwnedTimeoutContext<T> = ReturnType<typeof makeOwnedTimeoutContext<T>>;

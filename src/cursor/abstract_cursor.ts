@@ -21,7 +21,7 @@ import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { type AsyncDisposable, configureResourceManagement } from '../resource_management';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { type CSOTTimeoutContext, type Timeout, TimeoutContext } from '../timeout';
+import { makeOwnedTimeoutContext, type OwnedTimeoutContext, TimeoutContext } from '../timeout';
 import { type MongoDBNamespace, squashError } from '../utils';
 
 /**
@@ -126,7 +126,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    * A timeout context to govern the total time the cursor can live.  If provided, the cursor
    * cannot be used in ITERATION mode.
    */
-  timeoutContext?: CursorTimeoutContext;
+  timeoutContext?: OwnedTimeoutContext<symbol | AbstractCursor>;
 }
 
 /** @internal */
@@ -179,7 +179,7 @@ export abstract class AbstractCursor<
   /** @internal */
   protected readonly cursorOptions: InternalAbstractCursorOptions;
   /** @internal */
-  protected timeoutContext?: CursorTimeoutContext;
+  protected timeoutContext?: OwnedTimeoutContext<AbstractCursor | symbol>;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -831,7 +831,7 @@ export abstract class AbstractCursor<
    */
   private async cursorInit(): Promise<void> {
     if (this.cursorOptions.timeoutMS != null) {
-      this.timeoutContext ??= new CursorTimeoutContext(
+      this.timeoutContext ??= makeOwnedTimeoutContext(
         TimeoutContext.create({
           serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
           timeoutMS: this.cursorOptions.timeoutMS
@@ -918,10 +918,10 @@ export abstract class AbstractCursor<
   private async cleanup(timeoutMS?: number, error?: Error) {
     this.isClosed = true;
     const session = this.cursorSession;
-    const timeoutContextForKillCursors = (): CursorTimeoutContext | undefined => {
+    const timeoutContextForKillCursors = (): TimeoutContext | undefined => {
       if (timeoutMS != null) {
         this.timeoutContext?.clear();
-        return new CursorTimeoutContext(
+        return makeOwnedTimeoutContext(
           TimeoutContext.create({
             serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
             timeoutMS
@@ -1092,54 +1092,3 @@ class ReadableCursorStream extends Readable {
 }
 
 configureResourceManagement(AbstractCursor.prototype);
-
-/**
- * @internal
- * The cursor timeout context is a wrapper around a timeout context
- * that keeps track of the "owner" of the cursor.  For timeout contexts
- * instantiated inside a cursor, the owner will be the cursor.
- *
- * All timeout behavior is exactly the same as the wrapped timeout context's.
- */
-export class CursorTimeoutContext extends TimeoutContext {
-  constructor(
-    public timeoutContext: TimeoutContext,
-    public owner: symbol | AbstractCursor
-  ) {
-    super();
-  }
-  override get serverSelectionTimeout(): Timeout | null {
-    return this.timeoutContext.serverSelectionTimeout;
-  }
-  override get connectionCheckoutTimeout(): Timeout | null {
-    return this.timeoutContext.connectionCheckoutTimeout;
-  }
-  override get clearServerSelectionTimeout(): boolean {
-    return this.timeoutContext.clearServerSelectionTimeout;
-  }
-  override get clearConnectionCheckoutTimeout(): boolean {
-    return this.timeoutContext.clearConnectionCheckoutTimeout;
-  }
-  override get timeoutForSocketWrite(): Timeout | null {
-    return this.timeoutContext.timeoutForSocketWrite;
-  }
-  override get timeoutForSocketRead(): Timeout | null {
-    return this.timeoutContext.timeoutForSocketRead;
-  }
-  override csotEnabled(): this is CSOTTimeoutContext {
-    return this.timeoutContext.csotEnabled();
-  }
-  override refresh(): void {
-    return this.timeoutContext.refresh();
-  }
-  override clear(): void {
-    return this.timeoutContext.clear();
-  }
-  override get maxTimeMS(): number | null {
-    return this.timeoutContext.maxTimeMS;
-  }
-
-  override refreshed(): CursorTimeoutContext {
-    return new CursorTimeoutContext(this.timeoutContext.refreshed(), this.owner);
-  }
-}

@@ -24,7 +24,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { TimeoutContext } from '../timeout';
+import { isCSOTTimeoutContext, TimeoutContext } from '../timeout';
 import { supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
@@ -223,7 +223,7 @@ async function tryOperation<
     session.incrementTransactionNumber();
   }
 
-  const maxTries = willRetry ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
+  const maxTries = willRetry ? (isCSOTTimeoutContext(timeoutContext) ? Infinity : 2) : 1;
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 

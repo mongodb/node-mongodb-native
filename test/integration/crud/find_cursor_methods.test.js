@@ -4,9 +4,9 @@ const { filterForCommands } = require('../shared');
 const {
   promiseWithResolvers,
   MongoCursorExhaustedError,
-  CursorTimeoutContext,
   TimeoutContext,
-  MongoAPIError
+  MongoAPIError,
+  makeOwnedTimeoutContext
 } = require('../../mongodb');
 
 describe('Find Cursor', function () {
@@ -273,7 +273,7 @@ describe('Find Cursor', function () {
       const cursor = coll.find(
         {},
         {
-          timeoutContext: new CursorTimeoutContext(
+          timeoutContext: makeOwnedTimeoutContext(
             TimeoutContext.create({
               timeoutMS: 1000,
               serverSelectionTimeoutMS: 1000
