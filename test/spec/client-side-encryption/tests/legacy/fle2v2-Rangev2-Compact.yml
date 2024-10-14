@@ -3,7 +3,6 @@ runOn:
   - minServerVersion: "8.0.0" # Require range v2 support on server.
     # FLE 2 Encrypted collections are not supported on standalone.
     topology: [ "replicaset", "sharded", "load-balanced" ]
-    serverless: forbid # Skip on serverless until CLOUDP-267864 is resolved.
 database_name: "default"
 collection_name: &collection_name "default"
 data: []
