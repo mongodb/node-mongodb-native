@@ -1113,7 +1113,7 @@ describe('CRUD Prose Spec Tests', () => {
     let maxBsonObjectSize;
     let maxMessageSizeBytes;
     let numModels;
-    const models: AnyClientBulkWriteModel[] = [];
+    let models: AnyClientBulkWriteModel[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -1122,20 +1122,24 @@ describe('CRUD Prose Spec Tests', () => {
       });
       client = this.configuration.newClient(uri, { monitorCommands: true });
       await client.connect();
-      await client.db('db').collection('coll').drop();
+      await client
+        .db('db')
+        .collection('coll')
+        .drop()
+        .catch(() => null);
       await client.db('db').createCollection('coll');
       const hello = await client.db('admin').command({ hello: 1 });
       maxBsonObjectSize = hello.maxBsonObjectSize;
       maxMessageSizeBytes = hello.maxMessageSizeBytes;
       numModels = Math.floor(maxMessageSizeBytes / maxBsonObjectSize) + 1;
-      Array.from({ length: numModels }, () => {
-        models.push({
+      models = Array.from({ length: numModels }, () => {
+        return {
           name: 'insertOne',
           namespace: 'db.coll',
           document: {
             a: 'b'.repeat(maxBsonObjectSize - 500)
           }
-        });
+        };
       });
 
       client.on('commandStarted', filterForCommands('bulkWrite', commands));
@@ -1157,7 +1161,7 @@ describe('CRUD Prose Spec Tests', () => {
         expect(commands[1].command.ops.length).to.equal(1);
         expect(commands[1].command.writeConcern.w).to.equal(0);
         const count = await client.db('db').collection('coll').countDocuments();
-        expect(count).to.equal(3);
+        expect(count).to.equal(numModels);
       }
     });
   });
