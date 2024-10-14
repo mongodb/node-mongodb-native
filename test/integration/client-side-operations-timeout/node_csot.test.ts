@@ -279,12 +279,16 @@ describe('CSOT driver tests', metadata, () => {
           .stub(Connection.prototype, 'readMany')
           .callsFake(async function* (...args) {
             const realIterator = readManyStub.wrappedMethod.call(this, ...args);
-            const cmd = commandSpy.lastCall.args.at(1);
-            if ('giveMeWriteErrors' in cmd) {
-              await realIterator.next().catch(() => null); // dismiss response
-              yield { parse: () => writeErrorsReply };
-            } else {
-              yield (await realIterator.next()).value;
+            try {
+              const cmd = commandSpy.lastCall.args.at(1);
+              if ('giveMeWriteErrors' in cmd) {
+                await realIterator.next().catch(() => null); // dismiss response
+                yield { parse: () => writeErrorsReply };
+              } else {
+                yield (await realIterator.next()).value;
+              }
+            } finally {
+              realIterator.return();
             }
           });
       });
