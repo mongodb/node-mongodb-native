@@ -8,10 +8,12 @@ import {
   type Collection,
   type MongoClient,
   MongoNotConnectedError,
+  MongoOperationTimeoutError,
   ProfilingLevel,
   Topology,
   TopologyType
 } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 describe('When executing an operation for the first time', () => {
   let client: MongoClient;
@@ -819,6 +821,61 @@ describe('When executing an operation for the first time', () => {
         });
         expect(client).to.not.have.property('topology'); // withSession won't connect, that's expected
       });
+    });
+  });
+
+  describe.only('and CSOT is enabled', function () {
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ timeoutMS: 1000 });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    describe('and nothing is wrong', function () {
+      it('should connect the client', async function () {
+        await client.connect();
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+      });
+    });
+
+    describe('and the server requires auth and ping is delayed', function () {
+      beforeEach(async function () {
+        // set failpoint to delay ping
+        // create new util client to avoid affecting the test client
+        const utilClient = this.configuration.newClient();
+        await utilClient.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: { failCommands: ['ping'], blockConnection: true, blockTimeMS: 2000 }
+        } as FailPoint);
+        await utilClient.close();
+      });
+
+      it(
+        'should throw an MongoOperationTimeoutError error from connect',
+        { requires: { auth: 'enabled' } },
+        async function () {
+          const start = performance.now();
+          const error = await client.connect().catch(error => error);
+          const end = performance.now();
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(end - start).to.be.within(1000, 1500);
+        }
+      );
+
+      it(
+        'still have a pending connect promise',
+        { requires: { auth: 'enabled' } },
+        async function () {
+          const error = await client.connect().catch(error => error);
+          expect(client).to.have.property('connectionLock').that.is.instanceOf(Promise);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+        }
+      );
     });
   });
 });
