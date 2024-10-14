@@ -762,7 +762,6 @@ describe('CSOT spec prose tests', function () {
         'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
     });
 
-
     it.skip("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async function () {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
@@ -810,8 +809,6 @@ describe('CSOT spec prose tests', function () {
       expect(end - start).to.be.lte(15);
     }).skipReason =
       'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
-
-
 
     it.skip("serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS", async function () {
       /**
