@@ -7,6 +7,7 @@ import {
   type AuthMechanism,
   HostAddress,
   MongoClient,
+  type MongoClientOptions,
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
@@ -82,7 +83,7 @@ export class TestConfiguration {
     auth?: { username: string; password: string; authSource?: string };
     proxyURIParams?: ProxyParams;
   };
-  serverApi: ServerApi;
+  serverApi?: ServerApi;
   activeResources: number;
   isSrv: boolean;
   serverlessCredentials: { username: string | undefined; password: string | undefined };
@@ -171,13 +172,34 @@ export class TestConfiguration {
     return this.options.replicaSet;
   }
 
+  /**
+   * Returns a `hello`, executed against `uri`.
+   */
+  async hello(uri = this.uri) {
+    const client = this.newClient(uri);
+    try {
+      await client.connect();
+      const { maxBsonObjectSize, maxMessageSizeBytes, maxWriteBatchSize, ...rest } = await client
+        .db('admin')
+        .command({ hello: 1 });
+      return {
+        maxBsonObjectSize,
+        maxMessageSizeBytes,
+        maxWriteBatchSize,
+        ...rest
+      };
+    } finally {
+      await client.close();
+    }
+  }
+
   isOIDC(uri: string, env: string): boolean {
     if (!uri) return false;
     return uri.indexOf('MONGODB-OIDC') > -1 && uri.indexOf(`ENVIRONMENT:${env}`) > -1;
   }
 
-  newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: Record<string, any>) {
-    serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
+  newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
+    serverOptions = Object.assign(<MongoClientOptions>{}, getEnvironmentalOptions(), serverOptions);
 
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {
