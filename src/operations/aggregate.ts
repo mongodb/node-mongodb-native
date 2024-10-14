@@ -45,7 +45,6 @@ export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain
    * or `db.aggregate().explain()`.
    */
   explain?: ExplainOptions['explain'];
-
   /** @internal */
   timeoutMode?: CursorTimeoutMode;
 }
