@@ -738,7 +738,8 @@ describe('CRUD Prose Spec Tests', () => {
         async test() {
           const error = await client
             .bulkWrite([{ name: 'insertOne', namespace: 'db.coll', document: document }], {
-              writeConcern: { w: 0 }
+              writeConcern: { w: 0 },
+              ordered: false
             })
             .catch(error => error);
           expect(error.message).to.include('Client bulk write operation ops of length');
@@ -763,7 +764,7 @@ describe('CRUD Prose Spec Tests', () => {
           const error = await client
             .bulkWrite(
               [{ name: 'replaceOne', namespace: 'db.coll', filter: {}, replacement: document }],
-              { writeConcern: { w: 0 } }
+              { writeConcern: { w: 0 }, ordered: false }
             )
             .catch(error => error);
           expect(error.message).to.include('Client bulk write operation ops of length');
@@ -1077,6 +1078,91 @@ describe('CRUD Prose Spec Tests', () => {
 
       const [{ command }] = commands;
       expect(command).to.have.property('maxTimeMS', 2000);
+    });
+  });
+
+  describe('15. `MongoClient.bulkWrite` with unacknowledged write concern uses `w:0` for all batches', function () {
+    // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
+    // If testing with a sharded cluster, only connect to one mongos. This is intended to ensure the `countDocuments` operation
+    // uses the same connection as the `bulkWrite` to get the correct connection count. (See
+    // [DRIVERS-2921](https://jira.mongodb.org/browse/DRIVERS-2921)).
+    // Construct a `MongoClient` (referred to as `client`) with
+    // [command monitoring](../../command-logging-and-monitoring/command-logging-and-monitoring.md) enabled to observe
+    // CommandStartedEvents. Perform a `hello` command using `client` and record the `maxBsonObjectSize` and
+    // `maxMessageSizeBytes` values in the response.
+    // Construct a `MongoCollection` (referred to as `coll`) for the collection "db.coll". Drop `coll`.
+    // Use the `create` command to create "db.coll" to workaround [SERVER-95537](https://jira.mongodb.org/browse/SERVER-95537).
+    // Construct the following write model (referred to as `model`):
+    // InsertOne: {
+    //   "namespace": "db.coll",
+    //   "document": { "a": "b".repeat(maxBsonObjectSize - 500) }
+    // }
+    // Construct a list of write models (referred to as `models`) with `model` repeated
+    // `maxMessageSizeBytes / maxBsonObjectSize + 1` times.
+    // Call `client.bulkWrite` with `models`. Pass `BulkWriteOptions` with `ordered` set to `false` and `writeConcern` set to
+    // an unacknowledged write concern. Assert no error occurred. Assert the result indicates the write was unacknowledged.
+    // Assert that two CommandStartedEvents (referred to as `firstEvent` and `secondEvent`) were observed for the `bulkWrite`
+    // command. Assert that the length of `firstEvent.command.ops` is `maxMessageSizeBytes / maxBsonObjectSize`. Assert that
+    // the length of `secondEvent.command.ops` is 1. If the driver exposes `operationId`s in its CommandStartedEvents, assert
+    // that `firstEvent.operationId` is equal to `secondEvent.operationId`. Assert both commands include
+    // `writeConcern: {w: 0}`.
+    // To force completion of the `w:0` writes, execute `coll.countDocuments` and expect the returned count is
+    // `maxMessageSizeBytes / maxBsonObjectSize + 1`. This is intended to avoid incomplete writes interfering with other tests
+    // that may use this collection.
+    let client: MongoClient;
+    let maxBsonObjectSize;
+    let maxMessageSizeBytes;
+    let numModels;
+    let models: AnyClientBulkWriteModel[] = [];
+    const commands: CommandStartedEvent[] = [];
+
+    beforeEach(async function () {
+      const uri = this.configuration.url({
+        useMultipleMongoses: false
+      });
+      client = this.configuration.newClient(uri, { monitorCommands: true });
+      await client.connect();
+      await client
+        .db('db')
+        .collection('coll')
+        .drop()
+        .catch(() => null);
+      await client.db('db').createCollection('coll');
+      const hello = await client.db('admin').command({ hello: 1 });
+      maxBsonObjectSize = hello.maxBsonObjectSize;
+      maxMessageSizeBytes = hello.maxMessageSizeBytes;
+      numModels = Math.floor(maxMessageSizeBytes / maxBsonObjectSize) + 1;
+      models = Array.from({ length: numModels }, () => {
+        return {
+          name: 'insertOne',
+          namespace: 'db.coll',
+          document: {
+            a: 'b'.repeat(maxBsonObjectSize - 500)
+          }
+        };
+      });
+
+      client.on('commandStarted', filterForCommands('bulkWrite', commands));
+      commands.length = 0;
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('performs all writes unacknowledged', {
+      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      async test() {
+        const result = await client.bulkWrite(models, { ordered: false, writeConcern: { w: 0 } });
+        expect(result).to.deep.equal({ ok: 1 });
+        expect(commands.length).to.equal(2);
+        expect(commands[0].command.ops.length).to.equal(numModels - 1);
+        expect(commands[0].command.writeConcern.w).to.equal(0);
+        expect(commands[1].command.ops.length).to.equal(1);
+        expect(commands[1].command.writeConcern.w).to.equal(0);
+        const count = await client.db('db').collection('coll').countDocuments();
+        expect(count).to.equal(numModels);
+      }
     });
   });
 });
