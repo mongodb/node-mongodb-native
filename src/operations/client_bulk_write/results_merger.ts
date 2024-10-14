@@ -12,6 +12,21 @@ import {
 } from './common';
 
 /**
+ * Unacknowledged bulk writes are always the same.
+ */
+const UNACKNOWLEDGED = {
+  acknowledged: true,
+  insertedCount: 0,
+  upsertedCount: 0,
+  matchedCount: 0,
+  modifiedCount: 0,
+  deletedCount: 0,
+  insertResults: undefined,
+  updateResults: undefined,
+  deleteResults: undefined
+};
+
+/**
  * Merges client bulk write cursor responses together into a single result.
  * @internal
  */
@@ -23,6 +38,13 @@ export class ClientBulkWriteResultsMerger {
   writeErrors: Map<number, ClientBulkWriteError>;
 
   /**
+   * @returns The standard unacknowledged bulk write result.
+   */
+  static unacknowledged(): ClientBulkWriteResult {
+    return UNACKNOWLEDGED;
+  }
+
+  /**
    * Instantiate the merger.
    * @param options - The options.
    */
@@ -32,6 +54,7 @@ export class ClientBulkWriteResultsMerger {
     this.writeConcernErrors = [];
     this.writeErrors = new Map();
     this.result = {
+      acknowledged: true,
       insertedCount: 0,
       upsertedCount: 0,
       matchedCount: 0,

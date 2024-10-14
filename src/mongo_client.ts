@@ -491,14 +491,18 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   async bulkWrite<SchemaMap extends Record<string, Document> = Record<string, Document>>(
     models: ReadonlyArray<ClientBulkWriteModel<SchemaMap>>,
     options?: ClientBulkWriteOptions
-  ): Promise<ClientBulkWriteResult | { ok: 1 }> {
+  ): Promise<ClientBulkWriteResult> {
     if (this.autoEncrypter) {
       throw new MongoInvalidArgumentError(
         'MongoClient bulkWrite does not currently support automatic encryption.'
       );
     }
     // We do not need schema type information past this point ("as any" is fine)
-    return await new ClientBulkWriteExecutor(this, models as any, options).execute();
+    return await new ClientBulkWriteExecutor(
+      this,
+      models as any,
+      resolveOptions(this, options)
+    ).execute();
   }
 
   /**

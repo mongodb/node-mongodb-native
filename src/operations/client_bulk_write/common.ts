@@ -177,6 +177,10 @@ export type ClientBulkWriteModel<
 /** @public */
 export interface ClientBulkWriteResult {
   /**
+   * Whether the bulk write was acknowledged.
+   */
+  acknowledged: boolean;
+  /**
    * The total number of documents inserted across all insert operations.
    */
   insertedCount: number;
