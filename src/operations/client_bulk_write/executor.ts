@@ -2,6 +2,7 @@ import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
 import {
   MongoClientBulkWriteError,
   MongoClientBulkWriteExecutionError,
+  MongoInvalidArgumentError,
   MongoServerError
 } from '../../error';
 import { type MongoClient } from '../../mongo_client';
@@ -52,6 +53,20 @@ export class ClientBulkWriteExecutor {
     // If no write concern was provided, we inherit one from the client.
     if (!this.options.writeConcern) {
       this.options.writeConcern = WriteConcern.fromOptions(this.client.options);
+    }
+
+    if (this.options.writeConcern?.w === 0) {
+      if (this.options.verboseResults) {
+        throw new MongoInvalidArgumentError(
+          'Cannot request unacknowledged write concern and verbose results'
+        );
+      }
+
+      if (this.options.ordered) {
+        throw new MongoInvalidArgumentError(
+          'Cannot request unacknowledged write concern and ordered writes'
+        );
+      }
     }
   }
 

@@ -450,6 +450,64 @@
           }
         }
       ]
+    },
+    {
+      "description": "Requesting unacknowledged write with verboseResults is a client-side error",
+      "operations": [
+        {
+          "name": "clientBulkWrite",
+          "object": "client0",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "crud-tests.coll0",
+                  "document": {
+                    "_id": 10
+                  }
+                }
+              }
+            ],
+            "verboseResults": true,
+            "ordered": false,
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "expectError": {
+            "isClientError": true,
+            "errorContains": "Cannot request unacknowledged write concern and verbose results"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Requesting unacknowledged write with ordered is a client-side error",
+      "operations": [
+        {
+          "name": "clientBulkWrite",
+          "object": "client0",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "crud-tests.coll0",
+                  "document": {
+                    "_id": 10
+                  }
+                }
+              }
+            ],
+            "writeConcern": {
+              "w": 0
+            }
+          },
+          "expectError": {
+            "isClientError": true,
+            "errorContains": "Cannot request unacknowledged write concern and ordered writes"
+          }
+        }
+      ]
     }
   ]
 }
