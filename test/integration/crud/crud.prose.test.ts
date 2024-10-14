@@ -315,7 +315,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Assert that two CommandStartedEvents were observed for the bulkWrite command.
     let client: MongoClient;
     let maxWriteBatchSize;
-    let models: ClientBulkWriteModel<Document>[] = [];
+    let models: ClientBulkWriteModel[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
