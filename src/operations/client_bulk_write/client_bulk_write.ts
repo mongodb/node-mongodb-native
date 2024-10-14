@@ -90,6 +90,7 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
         server.description.maxBsonObjectSize
       );
     }
+
     // Check after the batch is built if we cannot retry it and override the option.
     if (!this.canRetryWrite) {
       this.options.willRetryWrite = false;

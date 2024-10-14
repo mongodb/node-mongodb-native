@@ -68,7 +68,6 @@ export interface FindOptions<TSchema extends Document = Document>
    */
   oplogReplay?: boolean;
 
-
   /**
    * Specifies the verbosity mode for the explain output.
    * @deprecated This API is deprecated in favor of `collection.find().explain()`.
