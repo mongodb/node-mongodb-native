@@ -125,14 +125,20 @@ describe('CSOT spec prose tests', function () {
       let childProcess: ChildProcess;
 
       beforeEach(async function () {
-        childProcess = spawn('mongocryptd', ['--port', mongocryptdTestPort, '--ipv6'], {
-          stdio: 'ignore',
-          detached: true
-        });
+        childProcess = spawn(
+          'mongocryptd',
+          ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', new ObjectId().toHexString()],
+          {
+            stdio: 'ignore',
+            detached: true
+          }
+        );
 
         childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
         client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
-          monitorCommands: true
+          family: 6,
+          monitorCommands: true,
+          serverSelectionTimeoutMS: 2000
         });
       });
 
@@ -145,6 +151,7 @@ describe('CSOT spec prose tests', function () {
       it('maxTimeMS is not set', async function () {
         const commandStarted = [];
         client.on('commandStarted', ev => commandStarted.push(ev));
+        await client.connect();
         await client
           .db('admin')
           .command({ ping: 1 })

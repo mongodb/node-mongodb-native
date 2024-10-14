@@ -183,7 +183,7 @@ describe('CSOT spec unit tests', function () {
       });
     });
 
-    describe('Auto Encryption', function () {
+    describe('Auto Encryption', { requires: { mongodb: '>=4.2' } }, function () {
       context('when provided timeoutMS and command hangs', function () {
         let encryptedClient;
 
