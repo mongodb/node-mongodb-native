@@ -106,7 +106,7 @@ export type ServerEvents = {
   EventEmitterWithState;
 
 /** @internal */
-export type ServerCommandOptions = Omit<CommandOptions, 'timeoutContext'> & {
+export type ServerCommandOptions = Omit<CommandOptions, 'timeoutContext' | 'socketTimeoutMS'> & {
   timeoutContext: TimeoutContext;
 };
 
