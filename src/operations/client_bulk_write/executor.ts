@@ -112,7 +112,7 @@ export class ClientBulkWriteExecutor {
               message: 'Mongo client bulk write encountered an error during execution'
             });
             bulkWriteError.cause = error;
-            bulkWriteError.partialResult = resultsMerger.result;
+            bulkWriteError.partialResult = resultsMerger.bulkWriteResult;
             throw bulkWriteError;
           } else {
             // Client side errors are just thrown.
@@ -128,11 +128,11 @@ export class ClientBulkWriteExecutor {
         });
         error.writeConcernErrors = resultsMerger.writeConcernErrors;
         error.writeErrors = resultsMerger.writeErrors;
-        error.partialResult = resultsMerger.result;
+        error.partialResult = resultsMerger.bulkWriteResult;
         throw error;
       }
 
-      return resultsMerger.result;
+      return resultsMerger.bulkWriteResult;
     }
   }
 }

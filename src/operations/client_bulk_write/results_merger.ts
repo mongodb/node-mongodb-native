@@ -26,14 +26,53 @@ const UNACKNOWLEDGED = {
   deleteResults: undefined
 };
 
+interface InternalResult {
+  /**
+   * Whether the bulk write was acknowledged.
+   */
+  acknowledged: boolean;
+  /**
+   * The total number of documents inserted across all insert operations.
+   */
+  insertedCount: number;
+  /**
+   * The total number of documents upserted across all update operations.
+   */
+  upsertedCount: number;
+  /**
+   * The total number of documents matched across all update operations.
+   */
+  matchedCount: number;
+  /**
+   * The total number of documents modified across all update operations.
+   */
+  modifiedCount: number;
+  /**
+   * The total number of documents deleted across all delete operations.
+   */
+  deletedCount: number;
+  /**
+   * The results of each individual insert operation that was successfully performed.
+   */
+  insertResults?: Map<number, ClientInsertOneResult>;
+  /**
+   * The results of each individual update operation that was successfully performed.
+   */
+  updateResults?: Map<number, ClientUpdateResult>;
+  /**
+   * The results of each individual delete operation that was successfully performed.
+   */
+  deleteResults?: Map<number, ClientDeleteResult>;
+}
+
 /**
  * Merges client bulk write cursor responses together into a single result.
  * @internal
  */
 export class ClientBulkWriteResultsMerger {
-  result: ClientBulkWriteResult;
-  options: ClientBulkWriteOptions;
-  currentBatchOffset: number;
+  private result: InternalResult;
+  private options: ClientBulkWriteOptions;
+  private currentBatchOffset: number;
   writeConcernErrors: Document[];
   writeErrors: Map<number, ClientBulkWriteError>;
 
@@ -70,6 +109,23 @@ export class ClientBulkWriteResultsMerger {
       this.result.updateResults = new Map<number, ClientUpdateResult>();
       this.result.deleteResults = new Map<number, ClientDeleteResult>();
     }
+  }
+
+  /**
+   * Get the bulk write result object.
+   */
+  get bulkWriteResult(): ClientBulkWriteResult {
+    return {
+      acknowledged: this.result.acknowledged,
+      insertedCount: this.result.insertedCount,
+      upsertedCount: this.result.upsertedCount,
+      matchedCount: this.result.matchedCount,
+      modifiedCount: this.result.modifiedCount,
+      deletedCount: this.result.deletedCount,
+      insertResults: this.result.insertResults,
+      updateResults: this.result.updateResults,
+      deleteResults: this.result.deleteResults
+    };
   }
 
   /**

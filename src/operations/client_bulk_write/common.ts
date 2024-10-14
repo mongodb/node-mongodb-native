@@ -179,39 +179,39 @@ export interface ClientBulkWriteResult {
   /**
    * Whether the bulk write was acknowledged.
    */
-  acknowledged: boolean;
+  readonly acknowledged: boolean;
   /**
    * The total number of documents inserted across all insert operations.
    */
-  insertedCount: number;
+  readonly insertedCount: number;
   /**
    * The total number of documents upserted across all update operations.
    */
-  upsertedCount: number;
+  readonly upsertedCount: number;
   /**
    * The total number of documents matched across all update operations.
    */
-  matchedCount: number;
+  readonly matchedCount: number;
   /**
    * The total number of documents modified across all update operations.
    */
-  modifiedCount: number;
+  readonly modifiedCount: number;
   /**
    * The total number of documents deleted across all delete operations.
    */
-  deletedCount: number;
+  readonly deletedCount: number;
   /**
    * The results of each individual insert operation that was successfully performed.
    */
-  insertResults?: Map<number, ClientInsertOneResult>;
+  readonly insertResults?: ReadonlyMap<number, ClientInsertOneResult>;
   /**
    * The results of each individual update operation that was successfully performed.
    */
-  updateResults?: Map<number, ClientUpdateResult>;
+  readonly updateResults?: ReadonlyMap<number, ClientUpdateResult>;
   /**
    * The results of each individual delete operation that was successfully performed.
    */
-  deleteResults?: Map<number, ClientDeleteResult>;
+  readonly deleteResults?: ReadonlyMap<number, ClientDeleteResult>;
 }
 
 /** @public */
