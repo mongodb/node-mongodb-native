@@ -476,7 +476,7 @@ describe('class AbstractCursor', function () {
       });
     });
 
-    describe('when the cursor refreshes the timeout for killCursors' + i, function () {
+    describe('when the cursor refreshes the timeout for killCursors', function () {
       let uri: string;
 
       before(function () {
@@ -505,7 +505,7 @@ describe('class AbstractCursor', function () {
       });
 
       it(
-        'the provided timeoutContext is not modified' + i,
+        'the provided timeoutContext is not modified',
         {
           requires: {
             mongodb: '>=4.4',
