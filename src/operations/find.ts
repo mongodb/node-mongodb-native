@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
+import { type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -17,7 +18,7 @@ import { Aspect, defineAspects, type Hint } from './operation';
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface FindOptions<TSchema extends Document = Document>
-  extends Omit<CommandOperationOptions, 'writeConcern'>,
+  extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'>,
     AbstractCursorOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
@@ -67,6 +68,13 @@ export interface FindOptions<TSchema extends Document = Document>
    */
   oplogReplay?: boolean;
 
+
+  /**
+   * Specifies the verbosity mode for the explain output.
+   * @deprecated This API is deprecated in favor of `collection.find().explain()`.
+   */
+  explain?: ExplainOptions['explain'];
+  /** @internal*/
   timeoutMode?: CursorTimeoutMode;
 }
 
