@@ -3,7 +3,7 @@ import { once } from 'events';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
-  type AnyClientBulkWriteModel,
+  type ClientBulkWriteModel,
   type ClientSession,
   type Collection,
   type Document,
@@ -176,7 +176,7 @@ describe('CRUD Prose Spec Tests', () => {
     // firstEvent.operationId is equal to secondEvent.operationId.
     let client: MongoClient;
     let maxWriteBatchSize;
-    let models: AnyClientBulkWriteModel<Document>[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -244,7 +244,7 @@ describe('CRUD Prose Spec Tests', () => {
     let maxBsonObjectSize;
     let maxMessageSizeBytes;
     let numModels;
-    let models: AnyClientBulkWriteModel<Document>[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -315,7 +315,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Assert that two CommandStartedEvents were observed for the bulkWrite command.
     let client: MongoClient;
     let maxWriteBatchSize;
-    let models: AnyClientBulkWriteModel<Document>[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -383,7 +383,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Construct a list of write models (referred to as models) with model repeated maxWriteBatchSize + 1 times.
     let client: MongoClient;
     let maxWriteBatchSize;
-    let models: AnyClientBulkWriteModel<Document>[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -391,7 +391,7 @@ describe('CRUD Prose Spec Tests', () => {
       await client.connect();
       await client.db('db').collection('coll').drop();
       const hello = await client.db('admin').command({ hello: 1 });
-      await client.db('db').collection('coll').insertOne({ _id: 1 });
+      await client.db('db').collection<{ _id?: number }>('coll').insertOne({ _id: 1 });
       maxWriteBatchSize = hello.maxWriteBatchSize;
 
       client.on('commandStarted', filterForCommands('bulkWrite', commands));
@@ -472,7 +472,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Assert that a CommandStartedEvent was observed for the getMore command.
     let client: MongoClient;
     let maxBsonObjectSize;
-    const models: AnyClientBulkWriteModel<Document>[] = [];
+    const models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -546,7 +546,7 @@ describe('CRUD Prose Spec Tests', () => {
     let client: MongoClient;
     let session: ClientSession;
     let maxBsonObjectSize;
-    const models: AnyClientBulkWriteModel<Document>[] = [];
+    const models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -633,7 +633,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Assert that a CommandStartedEvent was observed for the killCursors command.
     let client: MongoClient;
     let maxBsonObjectSize;
-    const models: AnyClientBulkWriteModel<Document>[] = [];
+    const models: ClientBulkWriteModel<Document>[] = [];
     const getMoreCommands: CommandStartedEvent[] = [];
     const killCursorsCommands: CommandStartedEvent[] = [];
 
@@ -804,7 +804,7 @@ describe('CRUD Prose Spec Tests', () => {
     let opsBytes;
     let numModels;
     let remainderBytes;
-    let models: AnyClientBulkWriteModel<Document>[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -860,7 +860,7 @@ describe('CRUD Prose Spec Tests', () => {
       it('executes in a single batch', {
         metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
         async test() {
-          const sameNamespaceModel: AnyClientBulkWriteModel<Document> = {
+          const sameNamespaceModel: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
             namespace: 'db.coll',
             document: { a: 'b' }
@@ -897,7 +897,7 @@ describe('CRUD Prose Spec Tests', () => {
         metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
         async test() {
           const namespace = `db.${'c'.repeat(200)}`;
-          const newNamespaceModel: AnyClientBulkWriteModel<Document> = {
+          const newNamespaceModel: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
             namespace: namespace,
             document: { a: 'b' }
@@ -951,7 +951,7 @@ describe('CRUD Prose Spec Tests', () => {
       it('raises a client error', {
         metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
         async test() {
-          const model: AnyClientBulkWriteModel<Document> = {
+          const model: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
             namespace: 'db.coll',
             document: { a: 'b'.repeat(maxMessageSizeBytes) }
@@ -977,7 +977,7 @@ describe('CRUD Prose Spec Tests', () => {
         metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
         async test() {
           const namespace = `db.${'c'.repeat(maxMessageSizeBytes)}`;
-          const model: AnyClientBulkWriteModel<Document> = {
+          const model: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
             namespace: namespace,
             document: { a: 'b' }
@@ -1034,7 +1034,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('raises a client side error', async function () {
-      const model: AnyClientBulkWriteModel<Document> = {
+      const model: ClientBulkWriteModel<Document> = {
         name: 'insertOne',
         namespace: 'db.coll',
         document: { a: 'b' }
@@ -1114,7 +1114,7 @@ describe('CRUD Prose Spec Tests', () => {
     let maxBsonObjectSize;
     let maxMessageSizeBytes;
     let numModels;
-    let models: AnyClientBulkWriteModel<Document>[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
