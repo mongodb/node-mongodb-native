@@ -12,7 +12,7 @@ export CSFLE_KMS_PROVIDERS=${CSFLE_KMS_PROVIDERS}
 export CRYPT_SHARED_LIB_PATH=${CRYPT_SHARED_LIB_PATH}
 echo "csfle CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail

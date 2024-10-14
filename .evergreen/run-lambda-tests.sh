@@ -8,6 +8,6 @@ MONGODB_URI=${MONGODB_URI:-}
 set +x
 
 # load node.js environment
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 npm run check:lambda
