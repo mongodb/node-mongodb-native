@@ -23,6 +23,7 @@ import {
   type Document,
   Long,
   MongoBulkWriteError,
+  MongoClientBulkWriteError,
   MongoError,
   MongoOperationTimeoutError,
   MongoServerError,
@@ -801,7 +802,11 @@ export function expectErrorCheck(
   }
 
   if (expected.errorCode != null) {
-    expect(error, expectMessage).to.have.property('code', expected.errorCode);
+    if (error instanceof MongoClientBulkWriteError) {
+      expect(error.cause).to.have.property('code', expected.errorCode);
+    } else {
+      expect(error, expectMessage).to.have.property('code', expected.errorCode);
+    }
   }
 
   if (expected.errorCodeName != null) {
@@ -809,7 +814,10 @@ export function expectErrorCheck(
   }
 
   if (expected.errorLabelsContain != null) {
-    const mongoError = error as MongoError;
+    let mongoError = error as MongoError;
+    if (error instanceof MongoClientBulkWriteError) {
+      mongoError = error.cause as MongoError;
+    }
     for (const errorLabel of expected.errorLabelsContain) {
       expect(
         mongoError.hasErrorLabel(errorLabel),
@@ -829,10 +837,18 @@ export function expectErrorCheck(
   }
 
   if (expected.expectResult != null) {
-    resultCheck(error, expected.expectResult as any, entities);
+    if ('partialResult' in error) {
+      resultCheck(error.partialResult, expected.expectResult as any, entities);
+    } else {
+      resultCheck(error, expected.expectResult as any, entities);
+    }
   }
 
   if (expected.errorResponse != null) {
-    resultCheck(error, expected.errorResponse, entities);
+    if (error instanceof MongoClientBulkWriteError) {
+      resultCheck(error.cause, expected.errorResponse, entities);
+    } else {
+      resultCheck(error, expected.errorResponse, entities);
+    }
   }
 }

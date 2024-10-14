@@ -1,4 +1,8 @@
 import type { Document } from './bson';
+import {
+  type ClientBulkWriteError,
+  type ClientBulkWriteResult
+} from './operations/client_bulk_write/common';
 import type { ServerType } from './sdam/common';
 import type { TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
@@ -620,6 +624,44 @@ export class MongoGCPError extends MongoOIDCError {
 }
 
 /**
+ * An error indicating that an error occurred when executing the bulk write.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoClientBulkWriteError extends MongoServerError {
+  /**
+   * Write concern errors that occurred while executing the bulk write. This list may have
+   * multiple items if more than one server command was required to execute the bulk write.
+   */
+  writeConcernErrors: Document[];
+  /**
+   * Errors that occurred during the execution of individual write operations. This map will
+   * contain at most one entry if the bulk write was ordered.
+   */
+  writeErrors: Map<number, ClientBulkWriteError>;
+  /**
+   * The results of any successful operations that were performed before the error was
+   * encountered.
+   */
+  partialResult?: ClientBulkWriteResult;
+
+  /**
+   * Initialize the client bulk write error.
+   * @param message - The error message.
+   */
+  constructor(message: ErrorDescription) {
+    super(message);
+    this.writeConcernErrors = [];
+    this.writeErrors = new Map();
+  }
+
+  override get name(): string {
+    return 'MongoClientBulkWriteError';
+  }
+}
+
+/**
  * An error indicating that an error occurred when processing bulk write results.
  *
  * @public
@@ -1074,8 +1116,8 @@ export class MongoInvalidArgumentError extends MongoAPIError {
    *
    * @public
    **/
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
   }
 
   override get name(): string {

@@ -78,11 +78,6 @@
           "x": 33
         }
       ]
-    },
-    {
-      "collectionName": "coll1",
-      "databaseName": "db0",
-      "documents": []
     }
   ],
   "tests": [
@@ -159,22 +154,6 @@
             }
           ]
         }
-      ],
-      "outcome": [
-        {
-          "collectionName": "coll1",
-          "databaseName": "db0",
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            }
-          ]
-        }
       ]
     },
     {
@@ -247,22 +226,6 @@
                   }
                 }
               }
-            }
-          ]
-        }
-      ],
-      "outcome": [
-        {
-          "collectionName": "coll1",
-          "databaseName": "db0",
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
             }
           ]
         }
@@ -344,22 +307,6 @@
             }
           ]
         }
-      ],
-      "outcome": [
-        {
-          "collectionName": "coll1",
-          "databaseName": "db0",
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            }
-          ]
-        }
       ]
     },
     {
@@ -435,22 +382,6 @@
                   }
                 }
               }
-            }
-          ]
-        }
-      ],
-      "outcome": [
-        {
-          "collectionName": "coll1",
-          "databaseName": "db0",
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
             }
           ]
         }

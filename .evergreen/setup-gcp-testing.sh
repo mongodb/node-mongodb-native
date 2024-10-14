@@ -10,14 +10,14 @@ if [ -z ${GCPKMS_INSTANCENAME+omitted} ]; then echo "GCPKMS_INSTANCENAME is unse
 
 set -o errexit
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 export GCPKMS_SRC=node-driver-source.tgz
 export GCPKMS_DST=$GCPKMS_INSTANCENAME:
 
 # Box up the entire driver and it's node_modules
 echo "compressing node driver source ... begin"
-tar -czf $GCPKMS_SRC src
+tar -czf $GCPKMS_SRC src $DRIVERS_TOOLS
 echo "compressing node driver source ... end"
 
 echo "copying node driver tar ... begin"

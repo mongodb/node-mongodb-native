@@ -28,6 +28,14 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
+  override resetBatch(): boolean {
+    return this.commandBuilder.resetBatch();
+  }
+
+  override get canRetryWrite(): boolean {
+    return this.commandBuilder.isBatchRetryable;
+  }
+
   /**
    * Execute the command. Superclass will handle write concern, etc.
    * @param server - The server.
@@ -43,14 +51,20 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
 
     if (server.description.type === ServerType.LoadBalancer) {
       if (session) {
-        // Checkout a connection to build the command.
-        const connection = await server.pool.checkOut({ timeoutContext });
-        // Pin the connection to the session so it get used to execute the command and we do not
-        // perform a double check-in/check-out.
-        session.pin(connection);
+        let connection;
+        if (!session.pinnedConnection) {
+          // Checkout a connection to build the command.
+          connection = await server.pool.checkOut({ timeoutContext });
+          // Pin the connection to the session so it get used to execute the command and we do not
+          // perform a double check-in/check-out.
+          session.pin(connection);
+        } else {
+          connection = session.pinnedConnection;
+        }
         command = this.commandBuilder.buildBatch(
           connection.hello?.maxMessageSizeBytes,
-          connection.hello?.maxWriteBatchSize
+          connection.hello?.maxWriteBatchSize,
+          connection.hello?.maxBsonObjectSize
         );
       } else {
         throw new MongoClientBulkWriteExecutionError(
@@ -61,15 +75,24 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
       // At this point we have a server and the auto connect code has already
       // run in executeOperation, so the server description will be populated.
       // We can use that to build the command.
-      if (!server.description.maxWriteBatchSize || !server.description.maxMessageSizeBytes) {
+      if (
+        !server.description.maxWriteBatchSize ||
+        !server.description.maxMessageSizeBytes ||
+        !server.description.maxBsonObjectSize
+      ) {
         throw new MongoClientBulkWriteExecutionError(
-          'In order to execute a client bulk write, both maxWriteBatchSize and maxMessageSizeBytes must be provided by the servers hello response.'
+          'In order to execute a client bulk write, both maxWriteBatchSize, maxMessageSizeBytes and maxBsonObjectSize must be provided by the servers hello response.'
         );
       }
       command = this.commandBuilder.buildBatch(
         server.description.maxMessageSizeBytes,
-        server.description.maxWriteBatchSize
+        server.description.maxWriteBatchSize,
+        server.description.maxBsonObjectSize
       );
+    }
+    // Check after the batch is built if we cannot retry it and override the option.
+    if (!this.canRetryWrite) {
+      this.options.willRetryWrite = false;
     }
     return await super.executeCommand(
       server,
@@ -85,5 +108,7 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
 defineAspects(ClientBulkWriteOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.SKIP_COLLATION,
-  Aspect.CURSOR_CREATING
+  Aspect.CURSOR_CREATING,
+  Aspect.RETRYABLE,
+  Aspect.COMMAND_BATCHING
 ]);

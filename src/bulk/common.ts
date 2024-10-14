@@ -1,5 +1,3 @@
-import { promisify } from 'util';
-
 import { type BSONSerializeOptions, type Document, EJSON, resolveBSONOptions } from '../bson';
 import type { Collection } from '../collection';
 import {
@@ -7,6 +5,7 @@ import {
   MongoBatchReExecutionError,
   MONGODB_ERROR_CODES,
   MongoInvalidArgumentError,
+  MongoRuntimeError,
   MongoServerError,
   MongoWriteConcernError
 } from '../error';
@@ -23,7 +22,6 @@ import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import {
   applyRetryableWrites,
-  type Callback,
   getTopology,
   hasAtomicOperators,
   maybeAddIdToDocuments,
@@ -501,86 +499,46 @@ export function mergeBatchResults(
   }
 }
 
-function executeCommands(
+async function executeCommands(
   bulkOperation: BulkOperationBase,
-  options: BulkWriteOptions & { timeoutContext?: TimeoutContext | null },
-  callback: Callback<BulkWriteResult>
-) {
+  options: BulkWriteOptions & { timeoutContext?: TimeoutContext | null }
+): Promise<BulkWriteResult> {
   if (bulkOperation.s.batches.length === 0) {
-    return callback(
-      undefined,
-      new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered)
-    );
+    return new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered);
   }
 
-  const batch = bulkOperation.s.batches.shift() as Batch;
+  for (const batch of bulkOperation.s.batches) {
+    const finalOptions = resolveOptions(bulkOperation, {
+      ...options,
+      ordered: bulkOperation.isOrdered
+    });
 
-  function resultHandler(err?: AnyError, result?: Document) {
-    // Error is a driver related error not a bulk op error, return early
-    if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
-      return callback(
-        new MongoBulkWriteError(
-          err,
-          new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered)
-        )
-      );
+    if (finalOptions.bypassDocumentValidation !== true) {
+      delete finalOptions.bypassDocumentValidation;
     }
 
-    if (err instanceof MongoWriteConcernError) {
-      return handleMongoWriteConcernError(
-        batch,
-        bulkOperation.s.bulkResult,
-        bulkOperation.isOrdered,
-        err,
-        callback
-      );
+    // Is the bypassDocumentValidation options specific
+    if (bulkOperation.s.bypassDocumentValidation === true) {
+      finalOptions.bypassDocumentValidation = true;
     }
 
-    // Merge the results together
-    mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
-    const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered);
-    if (bulkOperation.handleWriteError(callback, writeResult)) return;
-
-    // Execute the next command in line
-    executeCommands(bulkOperation, options, callback);
-  }
-
-  const finalOptions = resolveOptions(bulkOperation, {
-    ...options,
-    ordered: bulkOperation.isOrdered
-  });
-
-  if (finalOptions.bypassDocumentValidation !== true) {
-    delete finalOptions.bypassDocumentValidation;
-  }
-
-  // Set an operationIf if provided
-  if (bulkOperation.operationId) {
-    resultHandler.operationId = bulkOperation.operationId;
-  }
-
-  // Is the bypassDocumentValidation options specific
-  if (bulkOperation.s.bypassDocumentValidation === true) {
-    finalOptions.bypassDocumentValidation = true;
-  }
-
-  // Is the checkKeys option disabled
-  if (bulkOperation.s.checkKeys === false) {
-    finalOptions.checkKeys = false;
-  }
-
-  if (finalOptions.retryWrites) {
-    if (isUpdateBatch(batch)) {
-      finalOptions.retryWrites = finalOptions.retryWrites && !batch.operations.some(op => op.multi);
+    // Is the checkKeys option disabled
+    if (bulkOperation.s.checkKeys === false) {
+      finalOptions.checkKeys = false;
     }
 
-    if (isDeleteBatch(batch)) {
-      finalOptions.retryWrites =
-        finalOptions.retryWrites && !batch.operations.some(op => op.limit === 0);
-    }
-  }
+    if (finalOptions.retryWrites) {
+      if (isUpdateBatch(batch)) {
+        finalOptions.retryWrites =
+          finalOptions.retryWrites && !batch.operations.some(op => op.multi);
+      }
 
-  try {
+      if (isDeleteBatch(batch)) {
+        finalOptions.retryWrites =
+          finalOptions.retryWrites && !batch.operations.some(op => op.limit === 0);
+      }
+    }
+
     const operation = isInsertBatch(batch)
       ? new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
       : isUpdateBatch(batch)
@@ -589,43 +547,54 @@ function executeCommands(
           ? new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
           : null;
 
-    if (operation != null) {
-      executeOperation(
+    if (operation == null) throw new MongoRuntimeError(`Unknown batchType: ${batch.batchType}`);
+
+    let thrownError = null;
+    let result;
+    try {
+      result = await executeOperation(
         bulkOperation.s.collection.client,
         operation,
         finalOptions.timeoutContext
-      ).then(
-        result => resultHandler(undefined, result),
-        error => resultHandler(error)
       );
+    } catch (error) {
+      thrownError = error;
     }
-  } catch (err) {
-    // Force top level error
-    err.ok = 0;
-    // Merge top level error and return
-    mergeBatchResults(batch, bulkOperation.s.bulkResult, err, undefined);
-    callback();
+
+    if (thrownError != null) {
+      if (thrownError instanceof MongoWriteConcernError) {
+        mergeBatchResults(batch, bulkOperation.s.bulkResult, thrownError, result);
+        const writeResult = new BulkWriteResult(
+          bulkOperation.s.bulkResult,
+          bulkOperation.isOrdered
+        );
+
+        throw new MongoBulkWriteError(
+          {
+            message: thrownError.result.writeConcernError.errmsg,
+            code: thrownError.result.writeConcernError.code
+          },
+          writeResult
+        );
+      } else {
+        // Error is a driver related error not a bulk op error, return early
+        throw new MongoBulkWriteError(
+          thrownError,
+          new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered)
+        );
+      }
+    }
+
+    mergeBatchResults(batch, bulkOperation.s.bulkResult, thrownError, result);
+    const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered);
+    bulkOperation.handleWriteError(writeResult);
   }
-}
 
-function handleMongoWriteConcernError(
-  batch: Batch,
-  bulkResult: BulkResult,
-  isOrdered: boolean,
-  err: MongoWriteConcernError,
-  callback: Callback<BulkWriteResult>
-) {
-  mergeBatchResults(batch, bulkResult, undefined, err.result);
+  bulkOperation.s.batches.length = 0;
 
-  callback(
-    new MongoBulkWriteError(
-      {
-        message: err.result.writeConcernError.errmsg,
-        code: err.result.writeConcernError.code
-      },
-      new BulkWriteResult(bulkResult, isOrdered)
-    )
-  );
+  const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered);
+  bulkOperation.handleWriteError(writeResult);
+  return writeResult;
 }
 
 /**
@@ -883,8 +852,6 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   timeoutContext?: TimeoutContext;
 }
 
-const executeCommandsAsync = promisify(executeCommands);
-
 /**
  * TODO(NODE-4063)
  * BulkWrites merge complexity is implemented in executeCommands
@@ -915,7 +882,7 @@ export class BulkWriteShimOperation extends AbstractOperation {
       // an explicit session would be
       this.options.session = session;
     }
-    return await executeCommandsAsync(this.bulkOperation, { ...this.options, timeoutContext });
+    return await executeCommands(this.bulkOperation, { ...this.options, timeoutContext });
   }
 }
 
@@ -1251,33 +1218,26 @@ export abstract class BulkOperationBase {
    * Handles the write error before executing commands
    * @internal
    */
-  handleWriteError(callback: Callback<BulkWriteResult>, writeResult: BulkWriteResult): boolean {
+  handleWriteError(writeResult: BulkWriteResult): void {
     if (this.s.bulkResult.writeErrors.length > 0) {
       const msg = this.s.bulkResult.writeErrors[0].errmsg
         ? this.s.bulkResult.writeErrors[0].errmsg
         : 'write operation failed';
 
-      callback(
-        new MongoBulkWriteError(
-          {
-            message: msg,
-            code: this.s.bulkResult.writeErrors[0].code,
-            writeErrors: this.s.bulkResult.writeErrors
-          },
-          writeResult
-        )
+      throw new MongoBulkWriteError(
+        {
+          message: msg,
+          code: this.s.bulkResult.writeErrors[0].code,
+          writeErrors: this.s.bulkResult.writeErrors
+        },
+        writeResult
       );
-
-      return true;
     }
 
     const writeConcernError = writeResult.getWriteConcernError();
     if (writeConcernError) {
-      callback(new MongoBulkWriteError(writeConcernError, writeResult));
-      return true;
+      throw new MongoBulkWriteError(writeConcernError, writeResult);
     }
-
-    return false;
   }
 
   abstract addToOperationsList(
