@@ -21,7 +21,7 @@ import {
   promiseWithResolvers,
   squashError
 } from '../../mongodb';
-import { type FailPoint, makeMultiBatchWrite } from '../../tools/utils';
+import { type FailPoint, makeMultiBatchWrite, waitUntilPoolsFilled } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 // TODO(NODE-5824): Implement CSOT prose tests
@@ -343,7 +343,7 @@ describe('CSOT spec prose tests', function () {
 
       client = this.configuration.newClient(undefined, {
         monitorCommands: true,
-        timeoutMS: 100,
+        timeoutMS: 150,
         minPoolSize: 20
       });
       await client.connect();

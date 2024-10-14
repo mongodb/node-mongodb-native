@@ -7,6 +7,7 @@ import { inspect } from 'util';
 import {
   AbstractCursor,
   type Collection,
+  type CommandStartedEvent,
   CursorTimeoutContext,
   CursorTimeoutMode,
   type FindCursor,
@@ -17,7 +18,8 @@ import {
   MongoServerError,
   TimeoutContext
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { clearFailPoint, configureFailPoint } from '../../tools/utils';
+import { filterForCommands } from '../shared';
 
 describe('class AbstractCursor', function () {
   describe('regression tests NODE-5372', function () {
@@ -405,9 +407,11 @@ describe('class AbstractCursor', function () {
     let client: MongoClient;
     let collection: Collection;
     let context: CursorTimeoutContext;
+    const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
-      client = this.configuration.newClient();
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      client.on('commandStarted', filterForCommands('killCursors', commands));
 
       collection = client.db('abstract_cursor_integration').collection('test');
 
@@ -472,16 +476,18 @@ describe('class AbstractCursor', function () {
       });
     });
 
-    describe('when the cursor refreshes the timeout for killCursors', function () {
-      it(
-        'the provided timeoutContext is not modified',
-        {
-          requires: {
-            mongodb: '>=4.4'
-          }
-        },
-        async function () {
-          await client.db('admin').command({
+    describe('when the cursor refreshes the timeout for killCursors' + i, function () {
+      let uri: string;
+
+      before(function () {
+        uri = this.configuration.url({ useMultipleMongoses: false });
+      });
+
+      beforeEach(async function () {
+        commands.length = 0;
+        await configureFailPoint(
+          this.configuration,
+          {
             configureFailPoint: 'failCommand',
             mode: { times: 1 },
             data: {
@@ -489,13 +495,29 @@ describe('class AbstractCursor', function () {
               blockConnection: true,
               blockTimeMS: 5000
             }
-          } as FailPoint);
+          },
+          uri
+        );
+      });
 
+      afterEach(async function () {
+        await clearFailPoint(this.configuration, uri);
+      });
+
+      it(
+        'the provided timeoutContext is not modified' + i,
+        {
+          requires: {
+            mongodb: '>=4.4',
+            topology: '!load-balanced'
+          }
+        },
+        async function () {
           const cursor = collection.find(
             {},
             {
               timeoutContext: context,
-              timeoutMS: 1000,
+              timeoutMS: 150,
               timeoutMode: CursorTimeoutMode.LIFETIME,
               batchSize: 1
             }
@@ -504,7 +526,6 @@ describe('class AbstractCursor', function () {
           const error = await cursor.toArray().catch(e => e);
 
           expect(error).to.be.instanceof(MongoOperationTimeoutError);
-          // @ts-expect-error We know we have a CSOT timeout context but TS does not.
           expect(context.timeoutContext.remainingTimeMS).to.be.lessThan(0);
         }
       );
