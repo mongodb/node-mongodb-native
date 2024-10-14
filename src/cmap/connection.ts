@@ -721,6 +721,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           throw new MongoOperationTimeoutError('Timed out at socket write');
         }
         throw error;
+      } finally {
+        timeout.clear();
       }
     }
     return await drainEvent;
