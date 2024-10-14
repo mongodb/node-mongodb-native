@@ -36,6 +36,7 @@ import { ServerType } from './sdam/common';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
 import type { ClientSession } from './sessions';
+import { type TimeoutContextOptions } from './timeout';
 import { WriteConcern } from './write_concern';
 
 /**
@@ -515,6 +516,18 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
   return keys.length > 0 && keys[0][0] === '$';
 }
 
+export function resolveTimeoutOptions<T extends Partial<TimeoutContextOptions>>(
+  client: MongoClient,
+  options: T
+): T &
+  Pick<
+    MongoClient['s']['options'],
+    'timeoutMS' | 'serverSelectionTimeoutMS' | 'waitQueueTimeoutMS' | 'socketTimeoutMS'
+  > {
+  const { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS, timeoutMS } =
+    client.s.options;
+  return { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS, timeoutMS, ...options };
+}
 /**
  * Merge inherited properties from parent into options, prioritizing values from options,
  * then values from parent.
