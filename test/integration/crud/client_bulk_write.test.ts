@@ -298,7 +298,7 @@ describe('Client Bulk Write', function () {
         });
       });
 
-      describe('if the cursor encounters and error and a killCursors is sent', function () {
+      describe('if the cursor encounters an error and a killCursors is sent', function () {
         const commands: CommandStartedEvent[] = [];
 
         beforeEach(async function () {
