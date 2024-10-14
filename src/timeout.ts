@@ -126,6 +126,12 @@ export class Timeout extends Promise<never> {
   static override reject(rejection?: Error): Timeout {
     return new Timeout(undefined, { duration: 0, unref: true, rejection });
   }
+
+  static convertError(this: void, cause: unknown): never {
+    if (TimeoutError.is(cause)) throw new MongoOperationTimeoutError('Timed out');
+    if (cause instanceof Error) throw cause;
+    throw new MongoRuntimeError('Unknown error', { cause: cause as any });
+  }
 }
 
 /** @internal */
