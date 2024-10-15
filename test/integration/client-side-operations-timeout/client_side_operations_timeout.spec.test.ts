@@ -7,7 +7,6 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 const skippedSpecs = {
   'change-streams': 'TODO(NODE-6035)',
   'convenient-transactions': 'TODO(NODE-5687)',
-  'deprecated-options': 'TODO(NODE-5689)',
   'tailable-awaitData': 'TODO(NODE-6035)',
   'tailable-non-awaitData': 'TODO(NODE-6035)'
 };
