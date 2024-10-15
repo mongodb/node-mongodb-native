@@ -24,7 +24,8 @@ export type ExplainVerbosityLike = ExplainVerbosity | boolean;
 export interface ExplainCommandOptions {
   /** The explain verbosity for the command. */
   verbosity: ExplainVerbosity;
-  /** The maxTimeMS setting for the command. */
+  /** The maxTimeMS setting for the command.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead.*/
   maxTimeMS?: number;
 }
 

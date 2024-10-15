@@ -333,6 +333,7 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
    * Set a maxTimeMS on the cursor query, allowing for hard timeout limits on queries (Only supported on MongoDB 2.6 or higher)
    *
    * @param value - Number of milliseconds to wait before aborting the query.
+   *@deprecated Will be removed in the next major version. Please use timeoutMS instead.
    */
   override maxTimeMS(value: number): this {
     this.throwIfInitialized();

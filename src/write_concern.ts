@@ -15,7 +15,8 @@ export interface WriteConcernOptions {
 export interface WriteConcernSettings {
   /** The write concern */
   w?: W;
-  /** The write concern timeout */
+  /** The write concern timeout
+   * @deprecated Will be removed in the next major version. Please use timeoutMS */
   wtimeoutMS?: number;
   /** The journal write concern */
   journal?: boolean;
@@ -65,7 +66,8 @@ export class WriteConcern {
   readonly w?: W;
   /** Request acknowledgment that the write operation has been written to the on-disk journal */
   readonly journal?: boolean;
-  /** Specify a time limit to prevent write operations from blocking indefinitely */
+  /** Specify a time limit to prevent write operations from blocking indefinitely
+   * @deprecated Will be removed in the next major version. Please use timeoutMS */
   readonly wtimeoutMS?: number;
   /**
    * Specify a time limit to prevent write operations from blocking indefinitely.
