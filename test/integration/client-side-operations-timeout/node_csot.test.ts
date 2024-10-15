@@ -461,16 +461,21 @@ describe('CSOT driver tests', metadata, () => {
               .project({ _id: 0 });
             await cursor.toArray();
 
-            expect(commandStarted).to.have.length.gte(3); // Find and 2 getMores
+            const commands = commandStarted.filter(c =>
+              ['find', 'getMore'].includes(c.commandName)
+            );
+            expect(commands).to.have.lengthOf(4); // Find and 2 getMores
 
-            expect(
-              commandStarted.filter(ev => {
-                return (
-                  (ev.command.find != null && ev.command.maxTimeMS != null) ||
-                  (ev.command.getMore != null && ev.command.maxTimeMS != null)
-                );
-              })
-            ).to.have.lengthOf(0);
+            const [
+              { command: aggregate },
+              { command: getMore1 },
+              { command: getMore2 },
+              { command: getMore3 }
+            ] = commands;
+            expect(aggregate).not.to.have.property('maxTimeMS');
+            expect(getMore1).not.to.have.property('maxTimeMS');
+            expect(getMore2).not.to.have.property('maxTimeMS');
+            expect(getMore3).not.to.have.property('maxTimeMS');
           }
         );
       });
