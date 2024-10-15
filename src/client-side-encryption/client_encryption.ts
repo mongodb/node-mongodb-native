@@ -177,7 +177,9 @@ export class ClientEncryption {
    */
   async createDataKey(
     provider: ClientEncryptionDataKeyProvider,
-    options: ClientEncryptionCreateDataKeyProviderOptions = {}
+    options: ClientEncryptionCreateDataKeyProviderOptions = {},
+    /** @private */
+    timeoutContext?: TimeoutContext
   ): Promise<UUID> {
     if (options.keyAltNames && !Array.isArray(options.keyAltNames)) {
       throw new MongoCryptInvalidArgumentError(
@@ -219,7 +221,7 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const timeoutContext = this._timeoutMS
+    timeoutContext ??= this._timeoutMS
       ? new CSOTTimeoutContext({
           timeoutMS: this._timeoutMS,
           serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
@@ -566,13 +568,20 @@ export class ClientEncryption {
 
     createCollectionOptions.timeoutMS = this._timeoutMS;
 
+    const timeoutContext = this._timeoutMS
+      ? new CSOTTimeoutContext({
+          timeoutMS: this._timeoutMS,
+          serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
+        })
+      : undefined;
+
     if (Array.isArray(encryptedFields.fields)) {
       const createDataKeyPromises = encryptedFields.fields.map(async field =>
         field == null || typeof field !== 'object' || field.keyId != null
           ? field
           : {
               ...field,
-              keyId: await this.createDataKey(provider, { masterKey })
+              keyId: await this.createDataKey(provider, { masterKey }, timeoutContext)
             }
       );
 
@@ -593,7 +602,8 @@ export class ClientEncryption {
     try {
       const collection = await db.createCollection<TSchema>(name, {
         ...createCollectionOptions,
-        encryptedFields
+        encryptedFields,
+        timeoutMS: timeoutContext?.remainingTimeMS
       });
       return { collection, encryptedFields };
     } catch (cause) {
