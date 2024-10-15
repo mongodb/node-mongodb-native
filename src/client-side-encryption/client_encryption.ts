@@ -219,7 +219,15 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const dataKey = deserialize(await stateMachine.execute(this, context)) as DataKey;
+    const timeoutContext = this._timeoutMS
+      ? new CSOTTimeoutContext({
+          timeoutMS: this._timeoutMS,
+          serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
+        })
+      : undefined;
+    const dataKey = deserialize(
+      await stateMachine.execute(this, context, timeoutContext)
+    ) as DataKey;
 
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
       this._keyVaultNamespace
@@ -228,7 +236,10 @@ export class ClientEncryption {
     const { insertedId } = await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .insertOne(dataKey, { writeConcern: { w: 'majority' } });
+      .insertOne(dataKey, {
+        writeConcern: { w: 'majority' },
+        timeoutMS: timeoutContext?.remainingTimeMS
+      });
 
     return insertedId;
   }
@@ -277,7 +288,13 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context));
+    const timeoutContext = this._timeoutMS
+      ? new CSOTTimeoutContext({
+          timeoutMS: this._timeoutMS,
+          serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
+        })
+      : undefined;
+    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context, timeoutContext));
     if (dataKeys.length === 0) {
       return {};
     }
@@ -307,7 +324,8 @@ export class ClientEncryption {
       .db(dbName)
       .collection<DataKey>(collectionName)
       .bulkWrite(replacements, {
-        writeConcern: { w: 'majority' }
+        writeConcern: { w: 'majority' },
+        timeoutMS: timeoutContext?.remainingTimeMS
       });
 
     return { bulkWriteResult: result };
@@ -502,6 +520,7 @@ export class ClientEncryption {
         }
       }
     ];
+
     const value = await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
