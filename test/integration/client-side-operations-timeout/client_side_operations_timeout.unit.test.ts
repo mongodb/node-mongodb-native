@@ -183,7 +183,7 @@ describe('CSOT spec unit tests', function () {
       });
     });
 
-    describe('Auto Encryption', { requires: { mongodb: '>=4.2' } }, function () {
+    describe('Auto Encryption', function () {
       context('when provided timeoutMS and command hangs', function () {
         let encryptedClient;
 
@@ -225,13 +225,17 @@ describe('CSOT spec unit tests', function () {
           sinon.restore();
         });
 
-        it('the command should fail due to a timeout error', async function () {
-          const err = await encryptedClient
-            .db()
-            .command({ ping: 1 })
-            .catch(e => e);
-          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-        });
+        it(
+          'the command should fail due to a timeout error',
+          { requires: { mongodb: '>=4.2' } },
+          async function () {
+            const err = await encryptedClient
+              .db()
+              .command({ ping: 1 })
+              .catch(e => e);
+            expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+          }
+        );
       });
     });
   });
