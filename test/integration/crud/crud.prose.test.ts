@@ -1155,7 +1155,7 @@ describe('CRUD Prose Spec Tests', () => {
       metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
       async test() {
         const result = await client.bulkWrite(models, { ordered: false, writeConcern: { w: 0 } });
-        expect(result).to.deep.equal({ ok: 1 });
+        expect(result.acknowledged).to.be.false;
         expect(commands.length).to.equal(2);
         expect(commands[0].command.ops.length).to.equal(numModels - 1);
         expect(commands[0].command.writeConcern.w).to.equal(0);

@@ -15,7 +15,7 @@ import {
  * Unacknowledged bulk writes are always the same.
  */
 const UNACKNOWLEDGED = {
-  acknowledged: true,
+  acknowledged: false,
   insertedCount: 0,
   upsertedCount: 0,
   matchedCount: 0,
