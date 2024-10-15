@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
+import { type ExplainOptions } from '../explain';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
@@ -16,7 +17,7 @@ export const DB_AGGREGATE_COLLECTION = 1 as const;
 const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
 
 /** @public */
-export interface AggregateOptions extends CommandOperationOptions {
+export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain'> {
   /** allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 \>). */
   allowDiskUse?: boolean;
   /** The number of documents to return per batch. See [aggregation documentation](https://www.mongodb.com/docs/manual/reference/command/aggregate). */
@@ -38,6 +39,12 @@ export interface AggregateOptions extends CommandOperationOptions {
 
   out?: string;
 
+  /**
+   * Specifies the verbosity mode for the explain output.
+   * @deprecated This API is deprecated in favor of `collection.aggregate().explain()`
+   * or `db.aggregate().explain()`.
+   */
+  explain?: ExplainOptions['explain'];
   /** @internal */
   timeoutMode?: CursorTimeoutMode;
 }

@@ -23,7 +23,8 @@ import {
   promiseWithResolvers,
   squashError
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailPoint, makeMultiBatchWrite } from '../../tools/utils';
+import { filterForCommands } from '../shared';
 
 // TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec prose tests', function () {
@@ -1302,9 +1303,9 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
-  describe.skip(
+  describe(
     '11. Multi-batch bulkWrites',
-    { requires: { mongodb: '>=8.0', serverless: 'forbid' } },
+    { requires: { mongodb: '>=8.0', serverless: 'forbid', topology: 'single' } },
     function () {
       /**
        * ### 11. Multi-batch bulkWrites
@@ -1364,9 +1365,6 @@ describe('CSOT spec prose tests', function () {
         }
       };
 
-      let maxBsonObjectSize: number;
-      let maxMessageSizeBytes: number;
-
       beforeEach(async function () {
         await internalClient
           .db('db')
@@ -1375,29 +1373,20 @@ describe('CSOT spec prose tests', function () {
           .catch(() => null);
         await internalClient.db('admin').command(failpoint);
 
-        const hello = await internalClient.db('admin').command({ hello: 1 });
-        maxBsonObjectSize = hello.maxBsonObjectSize;
-        maxMessageSizeBytes = hello.maxMessageSizeBytes;
-
         client = this.configuration.newClient({ timeoutMS: 2000, monitorCommands: true });
       });
 
-      it.skip('performs two bulkWrites which fail to complete before 2000 ms', async function () {
+      it('performs two bulkWrites which fail to complete before 2000 ms', async function () {
         const writes = [];
-        client.on('commandStarted', ev => writes.push(ev));
+        client.on('commandStarted', filterForCommands('bulkWrite', writes));
 
-        const length = maxMessageSizeBytes / maxBsonObjectSize + 1;
-        const models = Array.from({ length }, () => ({
-          namespace: 'db.coll',
-          name: 'insertOne' as const,
-          document: { a: 'b'.repeat(maxBsonObjectSize - 500) }
-        }));
+        const models = await makeMultiBatchWrite(this.configuration);
 
         const error = await client.bulkWrite(models).catch(error => error);
 
         expect(error, error.stack).to.be.instanceOf(MongoOperationTimeoutError);
-        expect(writes.map(ev => ev.commandName)).to.deep.equal(['bulkWrite', 'bulkWrite']);
-      }).skipReason = 'TODO(NODE-6403): client.bulkWrite is implemented in a follow up';
+        expect(writes).to.have.lengthOf(2);
+      });
     }
   );
 });

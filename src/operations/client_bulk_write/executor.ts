@@ -1,5 +1,13 @@
+import { CursorTimeoutContext, CursorTimeoutMode } from '../../cursor/abstract_cursor';
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
+import {
+  MongoClientBulkWriteError,
+  MongoClientBulkWriteExecutionError,
+  MongoServerError
+} from '../../error';
 import { type MongoClient } from '../../mongo_client';
+import { TimeoutContext } from '../../timeout';
+import { resolveTimeoutOptions } from '../../utils';
 import { WriteConcern } from '../../write_concern';
 import { executeOperation } from '../execute_operation';
 import { ClientBulkWriteOperation } from './client_bulk_write';
@@ -31,9 +39,18 @@ export class ClientBulkWriteExecutor {
     operations: AnyClientBulkWriteModel[],
     options?: ClientBulkWriteOptions
   ) {
+    if (operations.length === 0) {
+      throw new MongoClientBulkWriteExecutionError('No client bulk write models were provided.');
+    }
+
     this.client = client;
     this.operations = operations;
-    this.options = { ...options };
+    this.options = {
+      ordered: true,
+      bypassDocumentValidation: false,
+      verboseResults: false,
+      ...options
+    };
 
     // If no write concern was provided, we inherit one from the client.
     if (!this.options.writeConcern) {
@@ -56,24 +73,60 @@ export class ClientBulkWriteExecutor {
       pkFactory
     );
     // Unacknowledged writes need to execute all batches and return { ok: 1}
+    const resolvedOptions = resolveTimeoutOptions(this.client, this.options);
+    const context = TimeoutContext.create(resolvedOptions);
+
     if (this.options.writeConcern?.w === 0) {
       while (commandBuilder.hasNextBatch()) {
         const operation = new ClientBulkWriteOperation(commandBuilder, this.options);
-        await executeOperation(this.client, operation);
+        await executeOperation(this.client, operation, context);
       }
       return { ok: 1 };
     } else {
       const resultsMerger = new ClientBulkWriteResultsMerger(this.options);
       // For each command will will create and exhaust a cursor for the results.
-      let currentBatchOffset = 0;
       while (commandBuilder.hasNextBatch()) {
-        const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, this.options);
-        const docs = await cursor.toArray();
-        const operations = cursor.operations;
-        resultsMerger.merge(currentBatchOffset, operations, cursor.response, docs);
-        // Set the new batch index so we can back back to the index in the original models.
-        currentBatchOffset += operations.length;
+        const cursorContext = new CursorTimeoutContext(context, Symbol());
+        const options = {
+          ...this.options,
+          timeoutContext: cursorContext,
+          ...(resolvedOptions.timeoutMS != null && { timeoutMode: CursorTimeoutMode.LIFETIME })
+        };
+        const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, options);
+        try {
+          await resultsMerger.merge(cursor);
+        } catch (error) {
+          // Write concern errors are recorded in the writeConcernErrors field on MongoClientBulkWriteError.
+          // When a write concern error is encountered, it should not terminate execution of the bulk write
+          // for either ordered or unordered bulk writes. However, drivers MUST throw an exception at the end
+          // of execution if any write concern errors were observed.
+          if (error instanceof MongoServerError && !(error instanceof MongoClientBulkWriteError)) {
+            // Server side errors need to be wrapped inside a MongoClientBulkWriteError, where the root
+            // cause is the error property and a partial result is to be included.
+            const bulkWriteError = new MongoClientBulkWriteError({
+              message: 'Mongo client bulk write encountered an error during execution'
+            });
+            bulkWriteError.cause = error;
+            bulkWriteError.partialResult = resultsMerger.result;
+            throw bulkWriteError;
+          } else {
+            // Client side errors are just thrown.
+            throw error;
+          }
+        }
       }
+
+      // If we have write concern errors or unordered write errors at the end we throw.
+      if (resultsMerger.writeConcernErrors.length > 0 || resultsMerger.writeErrors.size > 0) {
+        const error = new MongoClientBulkWriteError({
+          message: 'Mongo client bulk write encountered errors during execution.'
+        });
+        error.writeConcernErrors = resultsMerger.writeConcernErrors;
+        error.writeErrors = resultsMerger.writeErrors;
+        error.partialResult = resultsMerger.result;
+        throw error;
+      }
+
       return resultsMerger.result;
     }
   }

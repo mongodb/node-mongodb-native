@@ -279,12 +279,16 @@ describe('CSOT driver tests', metadata, () => {
           .stub(Connection.prototype, 'readMany')
           .callsFake(async function* (...args) {
             const realIterator = readManyStub.wrappedMethod.call(this, ...args);
-            const cmd = commandSpy.lastCall.args.at(1);
-            if ('giveMeWriteErrors' in cmd) {
-              await realIterator.next().catch(() => null); // dismiss response
-              yield { parse: () => writeErrorsReply };
-            } else {
-              yield (await realIterator.next()).value;
+            try {
+              const cmd = commandSpy.lastCall.args.at(1);
+              if ('giveMeWriteErrors' in cmd) {
+                await realIterator.next().catch(() => null); // dismiss response
+                yield { parse: () => writeErrorsReply };
+              } else {
+                yield (await realIterator.next()).value;
+              }
+            } finally {
+              realIterator.return();
             }
           });
       });
@@ -1114,6 +1118,52 @@ describe('CSOT driver tests', metadata, () => {
           }
         }
       );
+    });
+  });
+
+  describe('Connection after timeout', { requires: { mongodb: '>=4.4' } }, function () {
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ timeoutMS: 500 });
+
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: {
+          times: 1
+        },
+        data: {
+          failCommands: ['insert'],
+          blockConnection: true,
+          blockTimeMS: 700
+        }
+      };
+
+      await client.db('admin').command(failpoint);
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('closes so pending messages are not read by another operation', async function () {
+      const cmap = [];
+      client.on('connectionCheckedOut', ev => cmap.push(ev));
+      client.on('connectionClosed', ev => cmap.push(ev));
+
+      const error = await client
+        .db('socket')
+        .collection('closes')
+        .insertOne({})
+        .catch(error => error);
+
+      expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+      expect(cmap).to.have.lengthOf(2);
+
+      const [checkedOut, closed] = cmap;
+      expect(checkedOut).to.have.property('name', 'connectionCheckedOut');
+      expect(closed).to.have.property('name', 'connectionClosed');
+      expect(checkedOut).to.have.property('connectionId', closed.connectionId);
     });
   });
 });

@@ -1,7 +1,6 @@
 import { type Document } from 'bson';
 
 import { type ClientBulkWriteCursorResponse } from '../cmap/wire_protocol/responses';
-import { MongoClientBulkWriteCursorError } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ClientBulkWriteOperation } from '../operations/client_bulk_write/client_bulk_write';
 import { type ClientBulkWriteCommandBuilder } from '../operations/client_bulk_write/command_builder';
@@ -36,7 +35,7 @@ export class ClientBulkWriteCursor extends AbstractCursor {
   constructor(
     client: MongoClient,
     commandBuilder: ClientBulkWriteCommandBuilder,
-    options: ClientBulkWriteOptions = {}
+    options: ClientBulkWriteCursorOptions = {}
   ) {
     super(client, new MongoDBNamespace('admin', '$cmd'), options);
 
@@ -48,16 +47,11 @@ export class ClientBulkWriteCursor extends AbstractCursor {
    * We need a way to get the top level cursor response fields for
    * generating the bulk write result, so we expose this here.
    */
-  get response(): ClientBulkWriteCursorResponse {
+  get response(): ClientBulkWriteCursorResponse | null {
     if (this.cursorResponse) return this.cursorResponse;
-    throw new MongoClientBulkWriteCursorError(
-      'No client bulk write cursor response returned from the server.'
-    );
+    return null;
   }
 
-  /**
-   * Get the last set of operations the cursor executed.
-   */
   get operations(): Document[] {
     return this.commandBuilder.lastOperations;
   }
@@ -78,7 +72,11 @@ export class ClientBulkWriteCursor extends AbstractCursor {
       session
     });
 
-    const response = await executeOperation(this.client, clientBulkWriteOperation);
+    const response = await executeOperation(
+      this.client,
+      clientBulkWriteOperation,
+      this.timeoutContext
+    );
     this.cursorResponse = response;
 
     return { server: clientBulkWriteOperation.server, session, response };
