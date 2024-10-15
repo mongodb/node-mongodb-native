@@ -361,7 +361,7 @@ describe('CSOT driver tests', metadata, () => {
   describe('Non-Tailable cursors', () => {
     let client: MongoClient;
     let internalClient: MongoClient;
-    let commandStarted: CommandStartedEvent[];
+    let commandStarted: (CommandStartedEvent & { command: { maxTimeMS?: number } })[];
     let commandSucceeded: CommandSucceededEvent[];
     const failpoint: FailPoint = {
       configureFailPoint: 'failCommand',
@@ -369,7 +369,7 @@ describe('CSOT driver tests', metadata, () => {
       data: {
         failCommands: ['find', 'getMore'],
         blockConnection: true,
-        blockTimeMS: 50
+        blockTimeMS: 150
       }
     };
 
@@ -435,7 +435,7 @@ describe('CSOT driver tests', metadata, () => {
           const cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 100 })
+            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 200 })
             .project({ _id: 0 });
 
           // Iterating over 3 documents in the collection, each artificially taking ~50 ms due to failpoint. If timeoutMS is not refreshed, then we'd expect to error
@@ -457,17 +457,17 @@ describe('CSOT driver tests', metadata, () => {
             const cursor = client
               .db('db')
               .collection('coll')
-              .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 100 })
+              .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 200 })
               .project({ _id: 0 });
             await cursor.toArray();
 
             expect(commandStarted).to.have.length.gte(3); // Find and 2 getMores
+
             expect(
               commandStarted.filter(ev => {
                 return (
-                  ev.command.find != null &&
-                  ev.command.getMore != null &&
-                  ev.command.maxTimeMS != null
+                  (ev.command.find != null && ev.command.maxTimeMS != null) ||
+                  (ev.command.getMore != null && ev.command.maxTimeMS != null)
                 );
               })
             ).to.have.lengthOf(0);
