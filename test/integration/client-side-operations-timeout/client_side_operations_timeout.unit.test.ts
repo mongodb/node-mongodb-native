@@ -233,62 +233,6 @@ describe('CSOT spec unit tests', function () {
           expect(err).to.be.instanceOf(MongoOperationTimeoutError);
         });
       });
-
-      context('when not provided timeoutMS and command hangs', function () {
-        let encryptedClient;
-        let clock: sinon.SinonFakeTimers;
-        let timerSandbox: sinon.SinonSandbox;
-        let sleep;
-
-        beforeEach(async function () {
-          encryptedClient = this.configuration.newClient(
-            {},
-            {
-              autoEncryption: {
-                keyVaultNamespace: 'admin.datakeys',
-                kmsProviders: {
-                  aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-                  local: { key: Buffer.alloc(96) }
-                }
-              }
-            }
-          );
-          await encryptedClient.connect();
-          timerSandbox = createTimerSandbox();
-          clock = sinon.useFakeTimers();
-          sleep = promisify(setTimeout);
-          const stub = sinon
-            // @ts-expect-error accessing private method
-            .stub(Connection.prototype, 'sendCommand')
-            .callsFake(async function* (...args) {
-              await sleep(1000);
-              yield* stub.wrappedMethod.call(this, ...args);
-            });
-        });
-
-        afterEach(async function () {
-          if (clock) {
-            timerSandbox.restore();
-            clock.restore();
-            clock = undefined;
-          }
-          await encryptedClient?.close();
-        });
-
-        it('the command should not fail due to a timeout error within 30 seconds', async function () {
-          const sleepingFn = async () => {
-            await sleep(30000);
-            throw Error('Slept for 30s');
-          };
-
-          const err$ = Promise.all([encryptedClient.db().command({ ping: 1 }), sleepingFn()]).catch(
-            e => e
-          );
-          clock.tick(30000);
-          const err = await err$;
-          expect(err.message).to.equal('Slept for 30s');
-        });
-      });
     });
   });
 

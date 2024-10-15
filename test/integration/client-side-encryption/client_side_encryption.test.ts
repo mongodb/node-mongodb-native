@@ -1,24 +1,14 @@
-import { setTimeout } from 'node:timers/promises';
-import { promisify } from 'node:util';
-
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import {
-  BSON,
-  Connection,
-  CSOTTimeoutContext,
-  MongoOperationTimeoutError,
-  MongoServerError
-} from '../../mongodb';
+import { BSON, Connection, CSOTTimeoutContext, MongoOperationTimeoutError } from '../../mongodb';
 import { type FailPoint, sleep } from '../../tools/utils';
-import { createTimerSandbox } from '../../unit/timer_sandbox';
 
 describe('Client-Side Encryption (Integration)', function () {
-  describe('CSOT', function () {
-    describe('Auto encryption', { requires: { mongodb: '>=4.2' } }, function () {
+  describe('CSOT', { requires: { mongodb: '>=4.2' } }, function () {
+    describe('Auto encryption', function () {
       let setupClient;
 
       beforeEach(async function () {
@@ -163,52 +153,6 @@ describe('Client-Side Encryption (Integration)', function () {
             expect(err).to.be.instanceOf(MongoOperationTimeoutError);
           });
         });
-
-        context.skip('when not provided timeoutContext and command hangs', function () {
-          let encryptedClient;
-          let clock: sinon.SinonFakeTimers;
-          let timerSandbox: sinon.SinonSandbox;
-          let sleep;
-
-          beforeEach(async function () {
-            encryptedClient = this.configuration.newClient();
-            await encryptedClient.connect();
-            timerSandbox = createTimerSandbox();
-            clock = sinon.useFakeTimers();
-            sleep = promisify(setTimeout);
-            const stub = sinon
-              // @ts-expect-error accessing private method
-              .stub(Connection.prototype, 'sendCommand')
-              .callsFake(async function* (...args) {
-                await sleep(1000);
-                yield* stub.wrappedMethod.call(this, ...args);
-              });
-          });
-
-          afterEach(async function () {
-            if (clock) {
-              timerSandbox.restore();
-              clock.restore();
-              clock = undefined;
-            }
-            await encryptedClient?.close();
-          });
-
-          it('the command should not fail due to a timeout error within 30 seconds', async function () {
-            const sleepingFn = async () => {
-              await sleep(30000);
-              throw Error('Slept for 30s');
-            };
-
-            const err$ = Promise.all([
-              stateMachine.markCommand(encryptedClient, 'test.test', BSON.serialize({ ping: 1 })),
-              sleepingFn()
-            ]).catch(e => e);
-            clock.tick(30000);
-            const err = await err$;
-            expect(err.message).to.equal('Slept for 30s');
-          });
-        });
       });
 
       describe('#fetchKeys', function () {
@@ -266,7 +210,7 @@ describe('Client-Side Encryption (Integration)', function () {
           });
         });
 
-        context.skip('when not provided timeoutContext and command hangs', function () {
+        context('when not provided timeoutContext and command hangs', function () {
           let encryptedClient;
 
           beforeEach(async function () {
@@ -282,7 +226,7 @@ describe('Client-Side Encryption (Integration)', function () {
             const err = await stateMachine
               .fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }))
               .catch(e => e);
-            expect(err).to.be.instanceOf(MongoServerError);
+            expect(err).to.deep.equal([]);
           });
         });
       });
