@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
+import * as sinon from 'sinon';
 
 import {
   BSONType,
@@ -8,12 +9,11 @@ import {
   type Collection,
   type MongoClient,
   MongoNotConnectedError,
-  MongoOperationTimeoutError,
   ProfilingLevel,
   Topology,
   TopologyType
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailPoint, sleep } from '../../tools/utils';
 
 describe('When executing an operation for the first time', () => {
   let client: MongoClient;
@@ -824,7 +824,7 @@ describe('When executing an operation for the first time', () => {
     });
   });
 
-  describe.only('and CSOT is enabled', function () {
+  describe('and CSOT is enabled', function () {
     let client: MongoClient;
 
     beforeEach(async function () {
@@ -836,7 +836,7 @@ describe('When executing an operation for the first time', () => {
     });
 
     describe('and nothing is wrong', function () {
-      it('should connect the client', async function () {
+      it('connects the client', async function () {
         await client.connect();
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       });
@@ -856,24 +856,45 @@ describe('When executing an operation for the first time', () => {
       });
 
       it(
-        'should throw an MongoOperationTimeoutError error from connect',
+        'takes as long as ping is delayed for and does not throw a timeout error',
         { requires: { auth: 'enabled' } },
         async function () {
           const start = performance.now();
-          const error = await client.connect().catch(error => error);
+          const returnedClient = await client.connect();
           const end = performance.now();
-          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-          expect(end - start).to.be.within(1000, 1500);
+          expect(returnedClient).to.equal(client);
+          expect(end - start).to.be.within(2000, 2500); // timeoutMS is 1000, did not apply.
         }
       );
+    });
+
+    describe('when server selection takes longer than the timeout', function () {
+      beforeEach(async function () {
+        const selectServerStub = sinon
+          .stub(Topology.prototype, 'selectServer')
+          .callsFake(async function (selector, options) {
+            await sleep(2000);
+            const result = selectServerStub.wrappedMethod.call(this, selector, options);
+            sinon.restore(); // restore after connect selection
+            return result;
+          });
+      });
+
+      // restore sinon stub after test
+      afterEach(() => {
+        sinon.restore();
+      });
 
       it(
-        'still have a pending connect promise',
+        'takes as long as selectServer is delayed for and does not throw a timeout error',
         { requires: { auth: 'enabled' } },
         async function () {
-          const error = await client.connect().catch(error => error);
-          expect(client).to.have.property('connectionLock').that.is.instanceOf(Promise);
-          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          const start = performance.now();
+          expect(client.topology).to.not.exist; // make sure not connected.
+          const res = await client.db().collection('test').insertOne({ a: 1 }, { timeoutMS: 1000 }); // auto-connect
+          const end = performance.now();
+          expect(res).to.have.property('acknowledged', true);
+          expect(end - start).to.be.within(2000, 2500); // timeoutMS is 1000, did not apply.
         }
       );
     });

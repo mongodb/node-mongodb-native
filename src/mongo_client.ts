@@ -47,7 +47,6 @@ import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, type TopologyEvents } from './sdam/topology';
 import { ClientSession, type ClientSessionOptions, ServerSessionPool } from './sessions';
-import { Timeout } from './timeout';
 import {
   COSMOS_DB_CHECK,
   COSMOS_DB_MSG,
@@ -528,19 +527,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       return await this.connectionLock;
     }
 
-    const timeoutMS = this[kOptions].timeoutMS;
-
-    this.connectionLock = this._connect().finally(() => {
-      // Clear the lock only when this promise finishes:
+    try {
+      this.connectionLock = this._connect();
+      await this.connectionLock;
+    } finally {
+      // release
       this.connectionLock = undefined;
-    });
-
-    await (timeoutMS == null
-      ? this.connectionLock
-      : Promise.race([
-          this.connectionLock,
-          Timeout.expires(timeoutMS).catch(Timeout.convertError)
-        ]));
+    }
 
     return this;
   }
