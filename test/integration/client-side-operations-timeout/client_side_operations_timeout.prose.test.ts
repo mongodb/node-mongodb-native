@@ -10,6 +10,7 @@ import { pipeline } from 'stream/promises';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
+  ClientEncryption,
   type CommandSucceededEvent,
   GridFSBucket,
   MongoBulkWriteError,
@@ -24,7 +25,7 @@ import {
 import { type FailPoint } from '../../tools/utils';
 
 // TODO(NODE-5824): Implement CSOT prose tests
-describe('CSOT spec prose tests', function () {
+describe.only('CSOT spec prose tests', function () {
   let internalClient: MongoClient;
   let client: MongoClient;
 
@@ -155,7 +156,7 @@ describe('CSOT spec prose tests', function () {
   );
 
   // TODO(NODE-6391): Add timeoutMS support to Explicit Encryption
-  context.skip('3. ClientEncryption', () => {
+  context.only('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
      * `LOCAL_MASTERKEY` refers to the following base64:
@@ -171,6 +172,26 @@ describe('CSOT spec prose tests', function () {
      * { local: { key: <base64 decoding of LOCAL_MASTERKEY> } }
      * ```
      */
+    let keyVaultClient: MongoClient;
+    let clientEncryption: ClientEncryption;
+
+    beforeEach(async function () {
+      internalClient.db('keyvault').collection('datakeys').drop();
+      internalClient.db('keyvault').createCollection('datakeys');
+      keyVaultClient = this.configuration.newClient({}, { timeoutMS: 10, monitorCommands: true });
+      const LOCAL_MASTERKEY = Buffer.from(
+        'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk'
+      );
+      clientEncryption = new ClientEncryption(keyVaultClient, {
+        keyVaultNamespace: 'keyvault.datakeys',
+        kmsProviders: { local: { key: LOCAL_MASTERKEY } }
+      });
+    });
+
+    afterEach(async function () {
+      await keyVaultClient.close();
+    });
+
     context('createDataKey', () => {
       /**
        * 1. Using `internalClient`, set the following fail point:
@@ -191,6 +212,28 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that an `insert` command was executed against to `keyvault.datakeys` as part of the `createDataKey` call.
        */
+
+      it('times out due to timeoutMS', async function () {
+        await internalClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              failCommands: ['insert'],
+              blockConnection: true,
+              blockTimeMS: 15
+            }
+          } as FailPoint);
+        const commandStarted: CommandStartedEvent[] = [];
+        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
+        const err = await clientEncryption.createDataKey('local').catch(e => e);
+        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        expect(commandStarted[0]).to.containSubset({ commandName: 'insert' });
+      });
     });
 
     context('encrypt', () => {

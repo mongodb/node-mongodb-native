@@ -24,6 +24,7 @@ import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Filter, type WithId } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
+import { CSOTTimeoutContext } from '../timeout';
 import { MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import {
@@ -41,7 +42,6 @@ import {
   type CSFLEKMSTlsOptions,
   StateMachine
 } from './state_machine';
-import { CSOTTimeoutContext } from '../timeout';
 
 /**
  * @public
@@ -659,7 +659,7 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const timeoutContext = this._timeoutMS 
+    const timeoutContext = this._timeoutMS
       ? new CSOTTimeoutContext({
           timeoutMS: this._timeoutMS,
           serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
@@ -745,7 +745,7 @@ export class ClientEncryption {
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
-    const timeoutContext = this._timeoutMS 
+    const timeoutContext = this._timeoutMS
       ? new CSOTTimeoutContext({
           timeoutMS: this._timeoutMS,
           serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
