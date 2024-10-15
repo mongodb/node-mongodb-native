@@ -6,7 +6,7 @@ import { StateMachine } from '../../../src/client-side-encryption/state_machine'
 import { BSON, Connection, CSOTTimeoutContext, MongoOperationTimeoutError } from '../../mongodb';
 import { type FailPoint, sleep } from '../../tools/utils';
 
-describe.only('Client-Side Encryption (Integration)', function () {
+describe('Client-Side Encryption (Integration)', function () {
   describe('CSOT', function () {
     describe('Auto encryption', function () {
       let setupClient;
@@ -145,17 +145,21 @@ describe.only('Client-Side Encryption (Integration)', function () {
             sinon.restore();
           });
 
-          it('the command should fail due to a timeout error', async function () {
-            const err = await stateMachine
-              .markCommand(
-                encryptedClient,
-                'test.test',
-                BSON.serialize({ ping: 1 }),
-                timeoutContext()
-              )
-              .catch(e => e);
-            expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-          });
+          it(
+            'the command should fail due to a timeout error',
+            { requires: { mongodb: '>=4.2.0' } },
+            async function () {
+              const err = await stateMachine
+                .markCommand(
+                  encryptedClient,
+                  'test.test',
+                  BSON.serialize({ ping: 1 }),
+                  timeoutContext()
+                )
+                .catch(e => e);
+              expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+            }
+          );
         });
       });
 
@@ -206,12 +210,16 @@ describe.only('Client-Side Encryption (Integration)', function () {
             await encryptedClient?.close();
           });
 
-          it('the command should fail due to a timeout error', async function () {
-            const err = await stateMachine
-              .fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }), timeoutContext())
-              .catch(e => e);
-            expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-          });
+          it(
+            'the command should fail due to a timeout error',
+            { requires: { mongodb: '>=4.2.0' } },
+            async function () {
+              const err = await stateMachine
+                .fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }), timeoutContext())
+                .catch(e => e);
+              expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+            }
+          );
         });
 
         context('when not provided timeoutContext and command hangs', function () {
@@ -226,12 +234,16 @@ describe.only('Client-Side Encryption (Integration)', function () {
             await encryptedClient?.close();
           });
 
-          it('the command should fail due to a server error', async function () {
-            const err = await stateMachine
-              .fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }))
-              .catch(e => e);
-            expect(err).to.deep.equal([]);
-          });
+          it(
+            'the command should fail due to a server error',
+            { requires: { mongodb: '>=4.2.0' } },
+            async function () {
+              const err = await stateMachine
+                .fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }))
+                .catch(e => e);
+              expect(err).to.deep.equal([]);
+            }
+          );
         });
       });
     });
