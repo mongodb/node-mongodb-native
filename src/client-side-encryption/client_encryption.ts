@@ -123,7 +123,7 @@ export class ClientEncryption {
     this._proxyOptions = options.proxyOptions ?? {};
     this._tlsOptions = options.tlsOptions ?? {};
     this._kmsProviders = options.kmsProviders || {};
-    this._timeoutMS = options.timeoutMS;
+    this._timeoutMS = options.timeoutMS ?? client.options.timeoutMS;
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');

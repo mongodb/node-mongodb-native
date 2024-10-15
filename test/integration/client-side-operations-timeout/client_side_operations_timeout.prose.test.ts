@@ -183,7 +183,7 @@ describe('CSOT spec prose tests', function () {
     beforeEach(async function () {
       internalClient.db('keyvault').collection('datakeys').drop();
       internalClient.db('keyvault').createCollection('datakeys');
-      keyVaultClient = this.configuration.newClient({}, { timeoutMS: 10, monitorCommands: true });
+      keyVaultClient = this.configuration.newClient({}, { timeoutMS: 100, monitorCommands: true });
       clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: { local: { key: LOCAL_MASTERKEY } }
@@ -234,13 +234,12 @@ describe('CSOT spec prose tests', function () {
             data: {
               failCommands: ['insert'],
               blockConnection: true,
-              blockTimeMS: 15
+              blockTimeMS: 150
             }
           } as FailPoint);
         const commandStarted: CommandStartedEvent[] = [];
-        internalClient.on('commandStarted', ev => commandStarted.push(ev));
+        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
         const err = await clientEncryption.createDataKey('local').catch(e => e);
-        console.log(err);
         expect(err).to.be.instanceOf(MongoOperationTimeoutError);
         expect(commandStarted[0]).to.containSubset({ commandName: 'insert' });
       });
@@ -271,7 +270,7 @@ describe('CSOT spec prose tests', function () {
       it('times out due to timeoutMS', async function () {
         const datakeyId = await clientEncryption.createDataKey('local');
         expect(datakeyId).to.be.instanceOf(Binary);
-        expect(datakeyId.sub_type).to.be.instanceOf(Binary.SUBTYPE_UUID);
+        expect(datakeyId.sub_type).to.equal(Binary.SUBTYPE_UUID);
 
         await internalClient
           .db()
@@ -284,12 +283,12 @@ describe('CSOT spec prose tests', function () {
             data: {
               failCommands: ['find'],
               blockConnection: true,
-              blockTimeMS: 15
+              blockTimeMS: 150
             }
           } as FailPoint);
 
         const commandStarted: CommandStartedEvent[] = [];
-        internalClient.on('commandStarted', ev => commandStarted.push(ev));
+        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
 
         const err = await clientEncryption
           .encrypt('hello', {
@@ -338,7 +337,7 @@ describe('CSOT spec prose tests', function () {
           keyId: datakeyId
         });
         expect(encrypted).to.be.instanceOf(Binary);
-        expect(encrypted.sub_type).to.be.instanceOf(Binary.SUBTYPE_ENCRYPTED);
+        expect(encrypted.sub_type).to.equal(Binary.SUBTYPE_ENCRYPTED);
 
         await internalClient
           .db()
@@ -351,14 +350,14 @@ describe('CSOT spec prose tests', function () {
             data: {
               failCommands: ['find'],
               blockConnection: true,
-              blockTimeMS: 15
+              blockTimeMS: 150
             }
           } as FailPoint);
 
         const commandStarted: CommandStartedEvent[] = [];
-        internalClient.on('commandStarted', ev => commandStarted.push(ev));
+        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
 
-        const err = clientEncryption.decrypt(encrypted).catch(e => e);
+        const err = await clientEncryption.decrypt(encrypted).catch(e => e);
         expect(err).to.be.instanceOf(MongoOperationTimeoutError);
         expect(commandStarted[0]).to.containSubset({ commandName: 'find' });
       });

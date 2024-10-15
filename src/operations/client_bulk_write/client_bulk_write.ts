@@ -51,7 +51,6 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
 
     if (server.description.type === ServerType.LoadBalancer) {
       if (session) {
-
         let connection;
         if (!session.pinnedConnection) {
           // Checkout a connection to build the command.
