@@ -523,10 +523,15 @@ describe('class AbstractCursor', function () {
             }
           );
 
+          const refresh = sinon.spy(context, 'refresh');
+          const clear = sinon.spy(context, 'clear');
+          const refreshed = sinon.spy(context, 'refreshed');
           const error = await cursor.toArray().catch(e => e);
 
           expect(error).to.be.instanceof(MongoOperationTimeoutError);
-          expect(context.timeoutContext.remainingTimeMS).to.be.lessThan(0);
+          expect(refresh.called).to.be.false;
+          expect(clear.called).to.be.false;
+          expect(refreshed.called).to.be.true;
         }
       );
     });
