@@ -7,7 +7,7 @@ import { BSON, Connection, CSOTTimeoutContext, MongoOperationTimeoutError } from
 import { type FailPoint, sleep } from '../../tools/utils';
 
 describe('Client-Side Encryption (Integration)', function () {
-  describe('CSOT', { requires: { mongodb: '>=4.2' } }, function () {
+  describe('CSOT', function () {
     describe('Auto encryption', function () {
       let setupClient;
 
@@ -38,39 +38,47 @@ describe('Client-Side Encryption (Integration)', function () {
         await setupClient.close();
       });
 
-      context('when client is provided timeoutMS and command hangs', function () {
-        let encryptedClient;
+      context(
+        'when client is provided timeoutMS and command hangs',
+        { requires: { mongodb: '>=4.2' } },
+        function () {
+          let encryptedClient;
 
-        beforeEach(async function () {
-          encryptedClient = this.configuration.newClient(
-            {},
-            {
-              autoEncryption: {
-                keyVaultNamespace: 'data.datakeys',
-                kmsProviders: {
-                  local: { key: Buffer.alloc(96) }
-                }
-              },
-              timeoutMS: 1000
+          beforeEach(async function () {
+            encryptedClient = this.configuration.newClient(
+              {},
+              {
+                autoEncryption: {
+                  keyVaultNamespace: 'data.datakeys',
+                  kmsProviders: {
+                    local: { key: Buffer.alloc(96) }
+                  }
+                },
+                timeoutMS: 1000
+              }
+            );
+            await encryptedClient.connect();
+          });
+
+          afterEach(async function () {
+            await encryptedClient.close();
+          });
+
+          it(
+            'the command should fail due to a timeout error',
+            { requires: { mongodb: '>=4.2' } },
+            async function () {
+              const err = await encryptedClient
+                .db('test')
+                .collection('test')
+                .aggregate([])
+                .toArray()
+                .catch(e => e);
+              expect(err).to.be.instanceOf(MongoOperationTimeoutError);
             }
           );
-          await encryptedClient.connect();
-        });
-
-        afterEach(async function () {
-          await encryptedClient.close();
-        });
-
-        it('the command should fail due to a timeout error', async function () {
-          const err = await encryptedClient
-            .db('test')
-            .collection('test')
-            .aggregate([])
-            .toArray()
-            .catch(e => e);
-          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-        });
-      });
+        }
+      );
 
       context('when client is not provided timeoutMS and command hangs', function () {
         let encryptedClient;
