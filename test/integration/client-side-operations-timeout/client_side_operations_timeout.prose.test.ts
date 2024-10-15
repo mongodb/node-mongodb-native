@@ -21,7 +21,7 @@ import {
   promiseWithResolvers,
   squashError
 } from '../../mongodb';
-import { type FailPoint, makeMultiBatchWrite, waitUntilPoolsFilled } from '../../tools/utils';
+import { type FailPoint, makeMultiBatchWrite } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 // TODO(NODE-5824): Implement CSOT prose tests
