@@ -27,7 +27,14 @@ export interface ClientBulkWriteOptions extends CommandOperationOptions {
 
 /** @public */
 export interface ClientWriteModel {
-  /** The namespace for the write. */
+  /**
+   * The namespace for the write.
+   *
+   * A namespace is a combination of the database name and the name of the collection: `<database-name>.<collection>`.
+   * All documents belong to a namespace.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/limits/#std-label-faq-dev-namespace
+   */
   namespace: string;
 }
 
