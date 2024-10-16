@@ -74,6 +74,8 @@ export class ClientEncryption {
   _tlsOptions: CSFLEKMSTlsOptions;
   /** @internal */
   _kmsProviders: KMSProviders;
+  /** @internal */
+  _timeoutMS?: number;
 
   /** @internal */
   _mongoCrypt: MongoCrypt;
@@ -120,6 +122,7 @@ export class ClientEncryption {
     this._proxyOptions = options.proxyOptions ?? {};
     this._tlsOptions = options.tlsOptions ?? {};
     this._kmsProviders = options.kmsProviders || {};
+    this._timeoutMS = options.timeoutMS ?? client.options.timeoutMS;
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -303,7 +306,8 @@ export class ClientEncryption {
       .db(dbName)
       .collection<DataKey>(collectionName)
       .bulkWrite(replacements, {
-        writeConcern: { w: 'majority' }
+        writeConcern: { w: 'majority' },
+        timeoutMS: this._timeoutMS
       });
 
     return { bulkWriteResult: result };
@@ -332,7 +336,7 @@ export class ClientEncryption {
     return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .deleteOne({ _id }, { writeConcern: { w: 'majority' } });
+      .deleteOne({ _id }, { writeConcern: { w: 'majority' }, timeoutMS: this._timeoutMS });
   }
 
   /**
@@ -355,7 +359,7 @@ export class ClientEncryption {
     return this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .find({}, { readConcern: { level: 'majority' } });
+      .find({}, { readConcern: { level: 'majority' }, timeoutMS: this._timeoutMS });
   }
 
   /**
@@ -381,7 +385,7 @@ export class ClientEncryption {
     return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .findOne({ _id }, { readConcern: { level: 'majority' } });
+      .findOne({ _id }, { readConcern: { level: 'majority' }, timeoutMS: this._timeoutMS });
   }
 
   /**
@@ -408,7 +412,10 @@ export class ClientEncryption {
     return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .findOne({ keyAltNames: keyAltName }, { readConcern: { level: 'majority' } });
+      .findOne(
+        { keyAltNames: keyAltName },
+        { readConcern: { level: 'majority' }, timeoutMS: this._timeoutMS }
+      );
   }
 
   /**
@@ -442,7 +449,7 @@ export class ClientEncryption {
       .findOneAndUpdate(
         { _id },
         { $addToSet: { keyAltNames: keyAltName } },
-        { writeConcern: { w: 'majority' }, returnDocument: 'before' }
+        { writeConcern: { w: 'majority' }, returnDocument: 'before', timeoutMS: this._timeoutMS }
       );
 
     return value;
@@ -503,7 +510,8 @@ export class ClientEncryption {
       .collection<DataKey>(collectionName)
       .findOneAndUpdate({ _id }, pipeline, {
         writeConcern: { w: 'majority' },
-        returnDocument: 'before'
+        returnDocument: 'before',
+        timeoutMS: this._timeoutMS
       });
 
     return value;
@@ -818,6 +826,11 @@ export interface ClientEncryptionOptions {
    * TLS options for kms providers to use.
    */
   tlsOptions?: CSFLEKMSTlsOptions;
+
+  /**
+   * The timeout setting to be used for all the operations on ClientEncryption.
+   */
+  timeoutMS?: number;
 }
 
 /**
