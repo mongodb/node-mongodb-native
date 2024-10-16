@@ -26,7 +26,7 @@ const UNACKNOWLEDGED = {
   deleteResults: undefined
 };
 
-interface InternalResult {
+interface ClientBulkWriteResultAccumulation {
   /**
    * Whether the bulk write was acknowledged.
    */
@@ -70,7 +70,7 @@ interface InternalResult {
  * @internal
  */
 export class ClientBulkWriteResultsMerger {
-  private result: InternalResult;
+  private result: ClientBulkWriteResultAccumulation;
   private options: ClientBulkWriteOptions;
   private currentBatchOffset: number;
   writeConcernErrors: Document[];
