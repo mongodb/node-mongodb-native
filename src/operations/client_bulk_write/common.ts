@@ -153,7 +153,7 @@ export type AnyClientBulkWriteModel<TSchema extends Document> =
   | ClientDeleteManyModel<TSchema>;
 
 /**
- * Take a Typescript type that maps namespaces to schema types.
+ * A mapping of namespace strings to collections schemas.
  * @public
  *
  * @example
