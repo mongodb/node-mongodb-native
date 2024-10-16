@@ -395,17 +395,10 @@ export class AutoEncrypter {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    return deserialize(
-      await stateMachine.execute(
-        this,
-        context,
-        options.timeoutContext?.csotEnabled() ? options.timeoutContext : undefined
-      ),
-      {
-        promoteValues: false,
-        promoteLongs: false
-      }
-    );
+    return deserialize(await stateMachine.execute(this, context, options.timeoutContext), {
+      promoteValues: false,
+      promoteLongs: false
+    });
   }
 
   /**
