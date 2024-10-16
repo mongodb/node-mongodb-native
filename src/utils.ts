@@ -1097,8 +1097,11 @@ export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
   return limit % items.length === 0 ? items : items.slice(lowerBound);
 }
 
-// TODO(NODE-4936): read concern eligibility for commands should be codified in command construction
-// @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern
+/**
+ * TODO(NODE-4936): read concern eligibility for commands should be codified in command construction
+ * @internal
+ * @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.md#read-concern
+ */
 export function commandSupportsReadConcern(command: Document): boolean {
   if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
     return true;

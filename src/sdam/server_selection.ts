@@ -75,7 +75,9 @@ export function secondaryWritableServerSelector(
 
 /**
  * Reduces the passed in array of servers by the rules of the "Max Staleness" specification
- * found here: https://github.com/mongodb/specifications/blob/master/source/max-staleness/max-staleness.rst
+ * found here:
+ *
+ * @see https://github.com/mongodb/specifications/blob/master/source/max-staleness/max-staleness.md
  *
  * @param readPreference - The read preference providing max staleness guidance
  * @param topologyDescription - The topology description
@@ -212,7 +214,8 @@ function tagSetReducer(
 /**
  * Reduces a list of servers to ensure they fall within an acceptable latency window. This is
  * further specified in the "Server Selection" specification, found here:
- * https://github.com/mongodb/specifications/blob/master/source/server-selection/server-selection.rst
+ *
+ * @see https://github.com/mongodb/specifications/blob/master/source/server-selection/server-selection.md
  *
  * @param topologyDescription - The topology description
  * @param servers - The list of servers to reduce
