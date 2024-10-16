@@ -1,19 +1,32 @@
 import { EJSON, UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
+import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { StateMachine } from '../../../lib/client-side-encryption/state_machine';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
-import * as BSON from '../../mongodb';
-import { getEncryptExtraOptions } from '../../tools/utils';
+import {
+  BSON,
+  type Collection,
+  type CommandStartedEvent,
+  type MongoClient,
+  MongoOperationTimeoutError
+} from '../../mongodb';
+import { type FailPoint, getEncryptExtraOptions } from '../../tools/utils';
 
-const metadata = {
+const metadata: MongoDBMetadataUI = {
   requires: {
     mongodb: '>=4.2.0',
     clientSideEncryption: true
   }
 };
+
+const LOCAL_KEY = Buffer.from(
+  'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+  'base64'
+);
 
 describe('Client Side Encryption Functional', function () {
   const dataDbName = 'db';
@@ -401,6 +414,154 @@ describe('Client Side Encryption Functional', function () {
       });
     }
   );
+
+  describe.only('CSOT on ClientEncryption', function () {
+    function makeBlockingFailFor(command: string, blockTimeMS: number) {
+      beforeEach(async function () {
+        const utilClient = this.configuration.newClient();
+        await utilClient.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 2 },
+          data: {
+            failCommands: [command],
+            blockConnection: true,
+            blockTimeMS,
+            appName: 'clientEncryption'
+          }
+        } as FailPoint);
+        await utilClient.close();
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+        const utilClient = this.configuration.newClient();
+        utilClient
+          .db('admin')
+          .command({ configureFailPoint: 'failCommand', mode: 'off' } as FailPoint);
+        await utilClient.close();
+      });
+    }
+
+    async function expectCSOTTimeout(fn: () => Promise<void>) {
+      const start = performance.now();
+      const error = await fn().then(
+        () => null,
+        error => error
+      );
+      const end = performance.now();
+      if (error?.name === 'MongoBulkWriteError') {
+        expect(error)
+          .to.have.property('errorResponse')
+          .that.is.instanceOf(MongoOperationTimeoutError);
+      } else {
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+      }
+      expect(end - start).to.be.within(500, 1000);
+    }
+
+    let client;
+    let clientEncryption: ClientEncryption;
+
+    beforeEach(async function () {
+      if (!this.configuration.clientSideEncryption.enabled) {
+        this.skip();
+      }
+
+      client = this.configuration.newClient({}, { appName: 'clientEncryption' });
+      await client.connect();
+      clientEncryption = new ClientEncryption(client, {
+        kmsProviders: { local: { key: LOCAL_KEY } },
+        keyVaultNamespace,
+        keyVaultClient: null,
+        timeoutMS: 500,
+        ...getEncryptExtraOptions()
+      });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    describe('rewrapManyDataKey', function () {
+      makeBlockingFailFor('update', 2000);
+
+      beforeEach(async function () {
+        sinon.stub(StateMachine.prototype, 'execute').callsFake(async function () {
+          return BSON.serialize({ v: [{ _id: new UUID() }] });
+        });
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+      });
+
+      it('throws a timeout error if the bulk operation takes too long', async function () {
+        await expectCSOTTimeout(async () => {
+          await clientEncryption.rewrapManyDataKey({ _id: new UUID() }, { provider: 'local' });
+        });
+      });
+    });
+
+    describe('deleteKey', function () {
+      makeBlockingFailFor('delete', 2000);
+
+      it('throws a timeout error if the delete operation takes too long', async function () {
+        await expectCSOTTimeout(async () => {
+          await clientEncryption.deleteKey(new UUID());
+        });
+      });
+    });
+
+    describe('getKey', function () {
+      makeBlockingFailFor('find', 2000);
+
+      it('throws a timeout error if the bulk operation takes too long', async function () {
+        await expectCSOTTimeout(async () => {
+          await clientEncryption.getKey(new UUID());
+        });
+      });
+    });
+
+    describe('getKeys', function () {
+      makeBlockingFailFor('find', 2000);
+
+      it('throws a timeout error if the find operation takes too long', async function () {
+        await expectCSOTTimeout(async () => {
+          await clientEncryption.getKeys().toArray();
+        });
+      });
+    });
+
+    describe('removeKeyAltName', function () {
+      makeBlockingFailFor('findAndModify', 2000);
+
+      it('throws a timeout error if the findAndModify operation takes too long', async function () {
+        await expectCSOTTimeout(async () => {
+          await clientEncryption.removeKeyAltName(new UUID(), 'blah');
+        });
+      });
+    });
+
+    describe('addKeyAltName', function () {
+      makeBlockingFailFor('findAndModify', 2000);
+
+      it('throws a timeout error if the findAndModify operation takes too long', async function () {
+        await expectCSOTTimeout(async () => {
+          await clientEncryption.addKeyAltName(new UUID(), 'blah');
+        });
+      });
+    });
+
+    describe('getKeyByAltName', function () {
+      makeBlockingFailFor('find', 2000);
+
+      it('throws a timeout error if the find operation takes too long', async function () {
+        await expectCSOTTimeout(async () => {
+          await clientEncryption.getKeyByAltName('blah');
+        });
+      });
+    });
+  });
 });
 
 describe('Range Explicit Encryption with JS native types', function () {
