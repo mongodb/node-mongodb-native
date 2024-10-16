@@ -11,7 +11,7 @@ const NODE_DRIVER_VERSION = require('../../../package.json').version;
 
 /**
  * @public
- * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.rst#hello-command
+ * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#hello-command
  */
 export interface ClientMetadata {
   driver: {
