@@ -824,7 +824,7 @@ describe('When executing an operation for the first time', () => {
     });
   });
 
-  describe('and CSOT is enabled', function () {
+  describe('when CSOT is enabled', function () {
     let client: MongoClient;
 
     beforeEach(async function () {
@@ -835,14 +835,14 @@ describe('When executing an operation for the first time', () => {
       await client.close();
     });
 
-    describe('and nothing is wrong', function () {
+    describe('when nothing is wrong', function () {
       it('connects the client', async function () {
         await client.connect();
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       });
     });
 
-    describe('and the server requires auth and ping is delayed', function () {
+    describe('when the server requires auth and ping is delayed', function () {
       beforeEach(async function () {
         // set failpoint to delay ping
         // create new util client to avoid affecting the test client
@@ -856,7 +856,7 @@ describe('When executing an operation for the first time', () => {
       });
 
       it(
-        'takes as long as ping is delayed for and does not throw a timeout error',
+        'client.connect() takes as long as ping is delayed for and does not throw a timeout error',
         { requires: { auth: 'enabled' } },
         async function () {
           const start = performance.now();
@@ -886,7 +886,7 @@ describe('When executing an operation for the first time', () => {
       });
 
       it(
-        'takes as long as selectServer is delayed for and does not throw a timeout error',
+        'client.connect() 'takes as long as selectServer is delayed for and does not throw a timeout error',
         { requires: { auth: 'enabled' } },
         async function () {
           const start = performance.now();
