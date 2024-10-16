@@ -177,9 +177,7 @@ export class ClientEncryption {
    */
   async createDataKey(
     provider: ClientEncryptionDataKeyProvider,
-    options: ClientEncryptionCreateDataKeyProviderOptions = {},
-    /** @private */
-    timeoutContext?: TimeoutContext
+    options: ClientEncryptionCreateDataKeyProviderOptions = {}
   ): Promise<UUID> {
     if (options.keyAltNames && !Array.isArray(options.keyAltNames)) {
       throw new MongoCryptInvalidArgumentError(
@@ -221,12 +219,14 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    timeoutContext ??= this._timeoutMS
-      ? new CSOTTimeoutContext({
-          timeoutMS: this._timeoutMS,
-          serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
-        })
-      : undefined;
+    const timeoutContext = options?.timeoutContext
+      ? options?.timeoutContext
+      : this._timeoutMS
+        ? new CSOTTimeoutContext({
+            timeoutMS: this._timeoutMS,
+            serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
+          })
+        : undefined;
     const dataKey = deserialize(
       await stateMachine.execute(this, context, timeoutContext)
     ) as DataKey;
@@ -240,7 +240,7 @@ export class ClientEncryption {
       .collection<DataKey>(collectionName)
       .insertOne(dataKey, {
         writeConcern: { w: 'majority' },
-        timeoutMS: timeoutContext?.remainingTimeMS
+        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
       });
 
     return insertedId;
@@ -290,13 +290,7 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const timeoutContext = this._timeoutMS
-      ? new CSOTTimeoutContext({
-          timeoutMS: this._timeoutMS,
-          serverSelectionTimeoutMS: this._client.options.serverSelectionTimeoutMS
-        })
-      : undefined;
-    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context, timeoutContext));
+    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context));
     if (dataKeys.length === 0) {
       return {};
     }
@@ -326,8 +320,7 @@ export class ClientEncryption {
       .db(dbName)
       .collection<DataKey>(collectionName)
       .bulkWrite(replacements, {
-        writeConcern: { w: 'majority' },
-        timeoutMS: timeoutContext?.remainingTimeMS
+        writeConcern: { w: 'majority' }
       });
 
     return { bulkWriteResult: result };
@@ -566,8 +559,6 @@ export class ClientEncryption {
       }
     } = options;
 
-    createCollectionOptions.timeoutMS = this._timeoutMS;
-
     const timeoutContext = this._timeoutMS
       ? new CSOTTimeoutContext({
           timeoutMS: this._timeoutMS,
@@ -581,7 +572,7 @@ export class ClientEncryption {
           ? field
           : {
               ...field,
-              keyId: await this.createDataKey(provider, { masterKey }, timeoutContext)
+              keyId: await this.createDataKey(provider, { masterKey, timeoutContext })
             }
       );
 
@@ -589,7 +580,7 @@ export class ClientEncryption {
 
       encryptedFields.fields = createDataKeyResolutions.map((resolution, index) =>
         resolution.status === 'fulfilled' ? resolution.value : encryptedFields.fields[index]
-      );
+      );k
 
       const rejection = createDataKeyResolutions.find(
         (result): result is PromiseRejectedResult => result.status === 'rejected'
@@ -996,6 +987,9 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
 
   /** @experimental */
   keyMaterial?: Buffer | Binary;
+
+  /** @internal */
+  timeoutContext?: CSOTTimeoutContext;
 }
 
 /**

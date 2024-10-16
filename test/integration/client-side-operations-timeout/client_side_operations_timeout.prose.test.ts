@@ -158,6 +158,13 @@ describe('CSOT spec prose tests', function () {
   );
 
   context('3. ClientEncryption', () => {
+    const clientEncryptionMetadata: MongoDBMetadataUI = {
+      requires: {
+        clientSideEncryption: true,
+        mongodb: '>=7.0.0',
+        topology: '!single'
+      }
+    } as const;
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
      * `LOCAL_MASTERKEY` refers to the following base64:
@@ -181,8 +188,8 @@ describe('CSOT spec prose tests', function () {
     );
 
     beforeEach(async function () {
-      internalClient.db('keyvault').collection('datakeys').drop();
-      internalClient.db('keyvault').createCollection('datakeys');
+      await internalClient.db('keyvault').collection('datakeys').drop();
+      await internalClient.db('keyvault').createCollection('datakeys');
       keyVaultClient = this.configuration.newClient({}, { timeoutMS: 100, monitorCommands: true });
       clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
@@ -222,7 +229,7 @@ describe('CSOT spec prose tests', function () {
        * 1. Verify that an `insert` command was executed against to `keyvault.datakeys` as part of the `createDataKey` call.
        */
 
-      it('times out due to timeoutMS', async function () {
+      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
         await internalClient
           .db()
           .admin()
@@ -267,7 +274,7 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `encrypt` call.
        */
-      it('times out due to timeoutMS', async function () {
+      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
         const datakeyId = await clientEncryption.createDataKey('local');
         expect(datakeyId).to.be.instanceOf(Binary);
         expect(datakeyId.sub_type).to.equal(Binary.SUBTYPE_UUID);
@@ -327,15 +334,17 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `decrypt` call.
        */
-      it('times out due to timeoutMS', async function () {
+      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
         const datakeyId = await clientEncryption.createDataKey('local');
         expect(datakeyId).to.be.instanceOf(Binary);
         expect(datakeyId.sub_type).to.equal(Binary.SUBTYPE_UUID);
 
-        const encrypted = await clientEncryption.encrypt('hello', {
-          algorithm: `AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic`,
-          keyId: datakeyId
-        });
+        // storing the encrypted value rather than computing it through ClientEncryption.encrypt forces the 'find' to run
+        // otherwise, the stateMachine stores the dataKey and no find is run
+        const encrypted = Binary.createFromBase64(
+          'Af6ie/LRP0uoisAZthHPUs0CKzTBFIkJr8kxmOk1pV1C/6K54otT8QvNJgNTNG2CNpThhfdXaObuOMMReNlTgwapqPYCb/HJRQ1Nfma6uA3cTg==',
+          6
+        );
         expect(encrypted).to.be.instanceOf(Binary);
         expect(encrypted.sub_type).to.equal(Binary.SUBTYPE_ENCRYPTED);
 
@@ -358,8 +367,8 @@ describe('CSOT spec prose tests', function () {
         keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
 
         const err = await clientEncryption.decrypt(encrypted).catch(e => e);
-        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
         expect(commandStarted[0]).to.containSubset({ commandName: 'find' });
+        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
       });
     });
   });
