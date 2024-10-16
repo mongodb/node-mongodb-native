@@ -886,7 +886,7 @@ describe('When executing an operation for the first time', () => {
       });
 
       it(
-        'client.connect() 'takes as long as selectServer is delayed for and does not throw a timeout error',
+        'client.connect() takes as long as selectServer is delayed for and does not throw a timeout error',
         { requires: { auth: 'enabled' } },
         async function () {
           const start = performance.now();
