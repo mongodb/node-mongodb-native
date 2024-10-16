@@ -726,11 +726,7 @@ describe('CSOT', function () {
           'the command should not fail due to a server error',
           { requires: { mongodb: '>=4.2.0' } },
           async function () {
-            await stateMachine.fetchKeys(
-              encryptedClient,
-              'test.test',
-              BSON.serialize({ a: 1 })
-            );
+            await stateMachine.fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }));
           }
         );
       });
