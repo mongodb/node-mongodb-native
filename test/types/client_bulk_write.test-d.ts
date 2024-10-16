@@ -1,4 +1,4 @@
-import { expectError, expectType } from 'tsd';
+import { expectAssignable, expectError, expectNotAssignable, expectType } from 'tsd';
 
 import {
   type ClientBulkWriteModel,
@@ -23,23 +23,26 @@ type Author = { name: string; published: number };
 type Store = { _id: UUID };
 
 // Baseline check that schema modifies the following fields for each type.
-expectType<ClientInsertOneModel<Book>['document']>(null as unknown as OptionalId<Book>);
+declare const clientInsertOneModel: ClientInsertOneModel<Book>;
+expectType<OptionalId<Book>>(clientInsertOneModel.document);
 
-expectType<ClientReplaceOneModel<Book>['filter']>(null as unknown as Filter<Book>);
-expectType<ClientReplaceOneModel<Book>['replacement']>(null as unknown as WithoutId<Book>);
+declare const clientReplaceOneModel: ClientReplaceOneModel<Book>;
+expectType<Filter<Book>>(clientReplaceOneModel.filter);
+expectType<WithoutId<Book>>(clientReplaceOneModel.replacement);
 
-expectType<ClientUpdateOneModel<Book>['filter']>(null as unknown as Filter<Book>);
-expectType<ClientUpdateOneModel<Book>['update']>(
-  null as unknown as UpdateFilter<Book> | Document[]
-);
+declare const clientUpdateOneModel: ClientUpdateOneModel<Book>;
+expectType<Filter<Book>>(clientUpdateOneModel.filter);
+expectType<UpdateFilter<Book> | Document[]>(clientUpdateOneModel.update);
 
-expectType<ClientUpdateManyModel<Book>['filter']>(null as unknown as Filter<Book>);
-expectType<ClientUpdateManyModel<Book>['update']>(
-  null as unknown as UpdateFilter<Book> | Document[]
-);
+declare const clientUpdateManyModel: ClientUpdateManyModel<Book>;
+expectType<Filter<Book>>(clientUpdateManyModel.filter);
+expectType<UpdateFilter<Book> | Document[]>(clientUpdateManyModel.update);
 
-expectType<ClientDeleteOneModel<Book>['filter']>(null as unknown as Filter<Book>);
-expectType<ClientDeleteManyModel<Book>['filter']>(null as unknown as Filter<Book>);
+declare const clientDeleteOneModel: ClientDeleteOneModel<Book>;
+expectType<Filter<Book>>(clientDeleteOneModel.filter);
+
+declare const clientDeleteManyModel: ClientDeleteManyModel<Book>;
+expectType<Filter<Book>>(clientDeleteManyModel.filter);
 
 client.bulkWrite([]); // empty should always work
 
@@ -72,7 +75,7 @@ client.bulkWrite([
   { namespace: 'db.authors', name: 'deleteMany', filter: {} }
 ]);
 
-// No schemas - incorrect use - random namespaces, no type checking
+// No schemas - random namespaces, no type checking
 client.bulkWrite([
   {
     namespace: 'db.whatever',
@@ -168,27 +171,40 @@ expectError(
       namespace: 'db.authors',
       name: 'insertOne',
       document: { name: 'bob', published: '' } // wrong type
-    },
+    }
+  ])
+);
+
+expectError(
+  client.bulkWrite<MongoDBSchemas>([
     {
       namespace: 'db.authors',
       name: 'replaceOne',
       filter: { name: 'bob' },
       replacement: { name: 'ann', publish: 2 } // key typo
-    },
+    }
+  ])
+);
+
+expectError(
+  client.bulkWrite<MongoDBSchemas>([
     {
       namespace: 'db.blah', // unknown namespace
       name: 'updateOne',
       filter: { name: 'bob', published: 2 },
       update: {}
-    },
+    }
+  ])
+);
+
+expectError(
+  client.bulkWrite<MongoDBSchemas>([
     {
       namespace: 'db.authors',
       name: 'updateManyy', // unknown operation
       filter: { name: 'bob', published: 2 },
       update: {}
-    },
-    { namespace: 'db.authors', name: 'deleteOne', filter: {} },
-    { namespace: 'db.authors', name: 'deleteMany', filter: {} }
+    }
   ])
 );
 
