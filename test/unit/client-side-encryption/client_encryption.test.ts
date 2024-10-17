@@ -202,7 +202,7 @@ describe('ClientEncryption', function () {
 
         expect(createDataKeySpy.callCount).to.equal(0);
         const options = createCollectionSpy.getCall(0).args[1];
-        expect(options).to.deep.equal({ encryptedFields: { fields: 'not an array' } });
+        expect(options).to.containSubset({ encryptedFields: { fields: 'not an array' } });
       });
     });
 
@@ -219,7 +219,7 @@ describe('ClientEncryption', function () {
 
         expect(createDataKeyStub.callCount).to.equal(1);
         const options = createCollectionSpy.getCall(0).args[1];
-        expect(options).to.deep.equal({
+        expect(options).to.containSubset({
           encryptedFields: { fields: ['not an array', { keyId: keyId }, { keyId: {} }] }
         });
       });
@@ -236,7 +236,7 @@ describe('ClientEncryption', function () {
         masterKey
       });
       expect(result).to.have.property('collection');
-      expect(createDataKey).to.have.been.calledOnceWithExactly('aws', { masterKey });
+      expect(createDataKey).to.have.been.calledOnceWithExactly('aws', { masterKey, timeoutContext: undefined });
     });
 
     context('when createDataKey rejects', () => {

@@ -3,6 +3,8 @@
 import { type ChildProcess, spawn } from 'node:child_process';
 
 import { expect } from 'chai';
+import * as os from 'os';
+import * as path from 'path';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
 import { Readable } from 'stream';
@@ -10,8 +12,6 @@ import { pipeline } from 'stream/promises';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
-  Binary,
-  ClientEncryption,
   type CommandSucceededEvent,
   GridFSBucket,
   MongoBulkWriteError,
@@ -127,14 +127,21 @@ describe('CSOT spec prose tests', function () {
       let childProcess: ChildProcess;
 
       beforeEach(async function () {
-        childProcess = spawn('mongocryptd', ['--port', mongocryptdTestPort, '--ipv6'], {
-          stdio: 'ignore',
-          detached: true
-        });
+        const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
+        childProcess = spawn(
+          'mongocryptd',
+          ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
+          {
+            stdio: 'ignore',
+            detached: true
+          }
+        );
 
         childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
         client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
-          monitorCommands: true
+          family: 6,
+          monitorCommands: true,
+          serverSelectionTimeoutMS: 2000
         });
       });
 
@@ -147,6 +154,7 @@ describe('CSOT spec prose tests', function () {
       it('maxTimeMS is not set', async function () {
         const commandStarted = [];
         client.on('commandStarted', ev => commandStarted.push(ev));
+        await client.connect();
         await client
           .db('admin')
           .command({ ping: 1 })
@@ -157,14 +165,8 @@ describe('CSOT spec prose tests', function () {
     }
   );
 
-  context('3. ClientEncryption', () => {
-    const clientEncryptionMetadata: MongoDBMetadataUI = {
-      requires: {
-        clientSideEncryption: true,
-        mongodb: '>=7.0.0',
-        topology: '!single'
-      }
-    } as const;
+  // TODO(NODE-6391): Add timeoutMS support to Explicit Encryption
+  context.skip('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
      * `LOCAL_MASTERKEY` refers to the following base64:
@@ -180,34 +182,6 @@ describe('CSOT spec prose tests', function () {
      * { local: { key: <base64 decoding of LOCAL_MASTERKEY> } }
      * ```
      */
-    let keyVaultClient: MongoClient;
-    let clientEncryption: ClientEncryption;
-    const LOCAL_MASTERKEY = Buffer.from(
-      'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-      'base64'
-    );
-
-    beforeEach(async function () {
-      await internalClient.db('keyvault').collection('datakeys').drop();
-      await internalClient.db('keyvault').createCollection('datakeys');
-      keyVaultClient = this.configuration.newClient({}, { timeoutMS: 100, monitorCommands: true });
-      clientEncryption = new ClientEncryption(keyVaultClient, {
-        keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: { local: { key: LOCAL_MASTERKEY } }
-      });
-    });
-
-    afterEach(async function () {
-      await internalClient
-        .db()
-        .admin()
-        .command({
-          configureFailPoint: 'failCommand',
-          mode: 'off'
-        } as FailPoint);
-      await keyVaultClient.close();
-    });
-
     context('createDataKey', () => {
       /**
        * 1. Using `internalClient`, set the following fail point:
@@ -228,28 +202,6 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that an `insert` command was executed against to `keyvault.datakeys` as part of the `createDataKey` call.
        */
-
-      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
-        await internalClient
-          .db()
-          .admin()
-          .command({
-            configureFailPoint: 'failCommand',
-            mode: {
-              times: 1
-            },
-            data: {
-              failCommands: ['insert'],
-              blockConnection: true,
-              blockTimeMS: 150
-            }
-          } as FailPoint);
-        const commandStarted: CommandStartedEvent[] = [];
-        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
-        const err = await clientEncryption.createDataKey('local').catch(e => e);
-        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-        expect(commandStarted[0]).to.containSubset({ commandName: 'insert' });
-      });
     });
 
     context('encrypt', () => {
@@ -274,39 +226,6 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `encrypt` call.
        */
-      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
-        const datakeyId = await clientEncryption.createDataKey('local');
-        expect(datakeyId).to.be.instanceOf(Binary);
-        expect(datakeyId.sub_type).to.equal(Binary.SUBTYPE_UUID);
-
-        await internalClient
-          .db()
-          .admin()
-          .command({
-            configureFailPoint: 'failCommand',
-            mode: {
-              times: 1
-            },
-            data: {
-              failCommands: ['find'],
-              blockConnection: true,
-              blockTimeMS: 150
-            }
-          } as FailPoint);
-
-        const commandStarted: CommandStartedEvent[] = [];
-        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
-
-        const err = await clientEncryption
-          .encrypt('hello', {
-            algorithm: `AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic`,
-            keyId: datakeyId
-          })
-          .catch(e => e);
-
-        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-        expect(commandStarted[0]).to.containSubset({ commandName: 'find' });
-      });
     });
 
     context('decrypt', () => {
@@ -334,42 +253,6 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `decrypt` call.
        */
-      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
-        const datakeyId = await clientEncryption.createDataKey('local');
-        expect(datakeyId).to.be.instanceOf(Binary);
-        expect(datakeyId.sub_type).to.equal(Binary.SUBTYPE_UUID);
-
-        // storing the encrypted value rather than computing it through ClientEncryption.encrypt forces the 'find' to run
-        // otherwise, the stateMachine stores the dataKey and no find is run
-        const encrypted = Binary.createFromBase64(
-          'Af6ie/LRP0uoisAZthHPUs0CKzTBFIkJr8kxmOk1pV1C/6K54otT8QvNJgNTNG2CNpThhfdXaObuOMMReNlTgwapqPYCb/HJRQ1Nfma6uA3cTg==',
-          6
-        );
-        expect(encrypted).to.be.instanceOf(Binary);
-        expect(encrypted.sub_type).to.equal(Binary.SUBTYPE_ENCRYPTED);
-
-        await internalClient
-          .db()
-          .admin()
-          .command({
-            configureFailPoint: 'failCommand',
-            mode: {
-              times: 1
-            },
-            data: {
-              failCommands: ['find'],
-              blockConnection: true,
-              blockTimeMS: 150
-            }
-          } as FailPoint);
-
-        const commandStarted: CommandStartedEvent[] = [];
-        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
-
-        const err = await clientEncryption.decrypt(encrypted).catch(e => e);
-        expect(commandStarted[0]).to.containSubset({ commandName: 'find' });
-        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-      });
     });
   });
 

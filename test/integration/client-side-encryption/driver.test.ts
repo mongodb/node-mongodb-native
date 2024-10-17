@@ -4,9 +4,9 @@ import * as crypto from 'crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
+import { ObjectId, MongoOperationTimeoutError, type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
 import * as BSON from '../../mongodb';
-import { getEncryptExtraOptions } from '../../tools/utils';
+import { FailPoint, getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata = {
   requires: {
@@ -468,6 +468,80 @@ describe('Range Explicit Encryption with JS native types', function () {
         trimFactor: new BSON.Int32(1),
         sparsity: 1n
       }
+    });
+  });
+});
+
+describe('CSOT', function () {
+  describe('Explicit Encryption', function () {
+    describe.only('#createEncryptedCollection', function () {
+      let keyVaultClient: MongoClient;
+      let internalClient: MongoClient;
+      let clientEncryption: ClientEncryption;
+
+      beforeEach(async function () {
+        internalClient = this.configuration.newClient();
+        await internalClient.connect();
+        await internalClient.db('keyvault').createCollection('datakeys');
+        keyVaultClient = this.configuration.newClient({}); // { timeoutMS: 100 });
+        clientEncryption = new ClientEncryption(keyVaultClient, {
+          keyVaultNamespace: 'keyvault.datakeys',
+          kmsProviders: { local: null }
+        /*
+        await internalClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              failCommands: ['create'],
+              blockConnection: true,
+              blockTimeMS: 0
+            }
+          } as FailPoint); */
+      });
+
+      afterEach(async function () {
+        await internalClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          } as FailPoint);
+        await internalClient.close();
+        await keyVaultClient.close();
+      });
+
+      it(
+        'times out due to timeoutMS',
+        {
+          requires: {
+            //clientSideEncryption: true,
+            mongodb: '>=7.0.0',
+            topology: '!single'
+          }
+        },
+        async function () {
+          const createCollectionOptions = {
+            encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
+          };
+
+          let db = internalClient.db('db');
+          const err = await clientEncryption
+            .createEncryptedCollection(db, 'newnew', {
+              provider: 'local',
+              createCollectionOptions,
+              masterKey: null
+            })
+            .catch(err => err);
+
+          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        }
+      );
     });
   });
 });

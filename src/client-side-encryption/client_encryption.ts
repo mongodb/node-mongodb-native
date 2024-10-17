@@ -580,7 +580,7 @@ export class ClientEncryption {
 
       encryptedFields.fields = createDataKeyResolutions.map((resolution, index) =>
         resolution.status === 'fulfilled' ? resolution.value : encryptedFields.fields[index]
-      );k
+      );
 
       const rejection = createDataKeyResolutions.find(
         (result): result is PromiseRejectedResult => result.status === 'rejected'
