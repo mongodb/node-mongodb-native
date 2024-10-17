@@ -237,7 +237,6 @@ describe('Transactions', function () {
       client = this.configuration.newClient(undefined, { monitorCommands: true });
       commandsStarted = [];
       client.on('commandStarted', ev => {
-        console.log(ev);
         commandsStarted.push(ev);
       });
     });
