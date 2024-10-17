@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import {
   ClientSession,
   type Collection,
+  type CommandStartedEvent,
   type MongoClient,
   MongoInvalidArgumentError,
   MongoNetworkError,
@@ -231,8 +232,14 @@ describe('Transactions', function () {
 
   context('when completing a transaction', () => {
     let client: MongoClient;
+    let commandsStarted: CommandStartedEvent[];
     beforeEach(async function () {
-      client = this.configuration.newClient();
+      client = this.configuration.newClient(undefined, { monitorCommands: true });
+      commandsStarted = [];
+      client.on('commandStarted', ev => {
+        console.log(ev);
+        commandsStarted.push(ev);
+      });
     });
 
     afterEach(async function () {
@@ -259,6 +266,25 @@ describe('Transactions', function () {
             expect(await session.abortTransaction()).to.be.undefined;
           })
         )
+    );
+
+    it(
+      'commitTransaction does not override write concern on initial attempt',
+      { requires: { mongodb: '>=4.2.0', topology: '!single' } },
+      async function () {
+        const session = client.startSession({
+          defaultTransactionOptions: { writeConcern: { w: 1 } }
+        });
+        session.startTransaction();
+        await client.db('test').collection('test').insertOne({ x: 1 }, { session });
+        await session.commitTransaction();
+
+        const commitTransactions = commandsStarted.filter(
+          x => x.commandName === 'commitTransaction'
+        );
+        expect(commitTransactions).to.have.lengthOf(1);
+        expect(commitTransactions[0].command).to.have.nested.property('writeConcern.w', 1);
+      }
     );
   });
 
