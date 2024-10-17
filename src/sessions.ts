@@ -124,6 +124,9 @@ export class ClientSession
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
+  /** @internal
+   * Keeps track of whether or not the current transaction has attempted to be committed. Is
+   * initially undefined. Gets set to false when startTransaction is called. When commitTransaction is sent to server, if the commitTransaction succeeds, it is then set to undefined, otherwise, set to true */
   commitAttempted?: boolean;
   /** @internal */
   [kServerSession]: ServerSession | null;
