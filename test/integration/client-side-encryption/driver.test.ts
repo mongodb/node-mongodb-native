@@ -487,7 +487,7 @@ describe('CSOT', function () {
         clientEncryption = new ClientEncryption(keyVaultClient, {
           keyVaultNamespace: 'keyvault.datakeys',
           kmsProviders: { local: null }
-        };
+        });
         /*
         await internalClient
           .db()
