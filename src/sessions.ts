@@ -130,6 +130,7 @@ export class ClientSession
   /** @internal */
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
+  commitAttempted?: boolean;
   transaction: Transaction;
   /** @internal */
   [kServerSession]: ServerSession | null;
@@ -428,6 +429,7 @@ export class ClientSession
       );
     }
 
+    this.commitAttempted = false;
     // increment txnNumber
     this.incrementTransactionNumber();
     // create transaction state
@@ -487,7 +489,7 @@ export class ClientSession
       WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
     }
 
-    if (this.transaction.state === TxnState.TRANSACTION_COMMITTED) {
+    if (this.transaction.state === TxnState.TRANSACTION_COMMITTED || this.commitAttempted) {
       WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
     }
 
@@ -499,7 +501,7 @@ export class ClientSession
       command.recoveryToken = this.transaction.recoveryToken;
     }
 
-    const operation = new RunAdminCommandOperation(command, {
+    let operation = new RunAdminCommandOperation(command, {
       session: this,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
@@ -524,11 +526,18 @@ export class ClientSession
 
     try {
       await executeOperation(this.client, operation, timeoutContext);
+      this.commitAttempted = undefined;
       return;
     } catch (firstCommitError) {
+      this.commitAttempted = true;
       if (firstCommitError instanceof MongoError && isRetryableWriteError(firstCommitError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
+        operation = new RunAdminCommandOperation(command, {
+          session: this,
+          readPreference: ReadPreference.primary,
+          bypassPinningCheck: true
+        });
         // per txns spec, must unpin session in this case
         this.unpin({ force: true });
 
