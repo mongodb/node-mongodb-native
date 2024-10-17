@@ -24,6 +24,7 @@ import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Filter, type WithId } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
+import { CSOTTimeoutContext } from '../timeout';
 import { MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import {
@@ -276,7 +277,16 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context));
+    const timeoutContext: CSOTTimeoutContext | undefined =
+      typeof this._timeoutMS === 'number'
+        ? (CSOTTimeoutContext.create({
+            serverSelectionTimeoutMS: this._client.s.options.serverSelectionTimeoutMS,
+            waitQueueTimeoutMS: this._client.s.options.waitQueueTimeoutMS,
+            timeoutMS: this._timeoutMS
+          }) as CSOTTimeoutContext)
+        : undefined;
+
+    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context, timeoutContext));
     if (dataKeys.length === 0) {
       return {};
     }
@@ -307,7 +317,7 @@ export class ClientEncryption {
       .collection<DataKey>(collectionName)
       .bulkWrite(replacements, {
         writeConcern: { w: 'majority' },
-        timeoutMS: this._timeoutMS
+        timeoutMS: timeoutContext?.remainingTimeMS
       });
 
     return { bulkWriteResult: result };
