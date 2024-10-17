@@ -509,6 +509,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /**
    * Connect to MongoDB using a url
    *
+   * @remarks
+   * Calling `connect` is optional since the first operation you perform will call `connect` if it's needed.
+   * `timeoutMS` specified at the client-level will bound the time any operation can take before throwing a timeout error.
+   * However, when the operation being run is automatically connecting your `MongoClient` the `timeoutMS` will only be used for the operation portion of task.
+   * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
+   * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
+   *
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   async connect(): Promise<this> {
@@ -704,6 +711,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /**
    * Connect to MongoDB using a url
+   *
+   * @remarks
+   * Calling `connect` is optional since the first operation you perform will call `connect` if it's needed.
+   * `timeoutMS` specified at the client-level will bound the time any operation can take before throwing a timeout error.
+   * However, when the operation being run is automatically connecting your `MongoClient` the `timeoutMS` will only be used for the operation portion of task.
+   * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
+   * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
    *
    * @remarks
    * The programmatically provided options take precedence over the URI options.
