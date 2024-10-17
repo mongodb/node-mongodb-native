@@ -1,6 +1,11 @@
 import type { Document } from '../bson';
 import { MongoAPIError } from '../error';
-import type { ExplainCommandOptions, ExplainVerbosityLike } from '../explain';
+import {
+  Explain,
+  type ExplainCommandOptions,
+  type ExplainVerbosityLike,
+  validateExplainTimeoutOptions
+} from '../explain';
 import type { MongoClient } from '../mongo_client';
 import { AggregateOperation, type AggregateOptions } from '../operations/aggregate';
 import { executeOperation } from '../operations/execute_operation';
@@ -65,11 +70,20 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
-    const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
+    const options = {
       ...this.aggregateOptions,
       ...this.cursorOptions,
       session
-    });
+    };
+    try {
+      validateExplainTimeoutOptions(options, Explain.fromOptions(options));
+    } catch {
+      throw new MongoAPIError(
+        'timeoutMS cannot be used with explain when explain is specified in aggregateOptions'
+      );
+    }
+
+    const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, options);
 
     const response = await executeOperation(this.client, aggregateOperation, this.timeoutContext);
 
@@ -77,14 +91,45 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** Execute the explain for the cursor */
-  async explain(verbosity?: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document> {
+  async explain(): Promise<Document>;
+  async explain(verbosity: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document>;
+  async explain(options: { timeoutMS?: number }): Promise<Document>;
+  async explain(
+    verbosity: ExplainVerbosityLike | ExplainCommandOptions,
+    options: { timeoutMS?: number }
+  ): Promise<Document>;
+  async explain(
+    verbosity?: ExplainVerbosityLike | ExplainCommandOptions | { timeoutMS?: number },
+    options?: { timeoutMS?: number }
+  ): Promise<Document> {
+    let explain: ExplainVerbosityLike | ExplainCommandOptions | undefined;
+    let timeout: { timeoutMS?: number } | undefined;
+    if (verbosity == null && options == null) {
+      explain = true;
+      timeout = undefined;
+    } else if (verbosity != null && options == null) {
+      explain =
+        typeof verbosity !== 'object'
+          ? verbosity
+          : 'verbosity' in verbosity
+            ? verbosity
+            : undefined;
+
+      timeout = typeof verbosity === 'object' && 'timeoutMS' in verbosity ? verbosity : undefined;
+    } else {
+      // @ts-expect-error TS isn't smart enough to determine that if both options are provided, the first is explain options
+      explain = verbosity;
+      timeout = options;
+    }
+
     return (
       await executeOperation(
         this.client,
         new AggregateOperation(this.namespace, this.pipeline, {
           ...this.aggregateOptions, // NOTE: order matters here, we may need to refine this
           ...this.cursorOptions,
-          explain: verbosity ?? true
+          ...timeout,
+          explain: explain ?? true
         })
       )
     ).shift(this.deserializationOptions);

@@ -1,3 +1,7 @@
+import { type Document } from 'bson';
+
+import { MongoAPIError } from './error';
+
 /** @public */
 export const ExplainVerbosity = Object.freeze({
   queryPlanner: 'queryPlanner',
@@ -85,4 +89,37 @@ export class Explain {
     const { verbosity, maxTimeMS } = explain;
     return new Explain(verbosity, maxTimeMS);
   }
+}
+
+export function validateExplainTimeoutOptions(options: Document, explain?: Explain) {
+  const { maxTimeMS, timeoutMS } = options;
+  if (timeoutMS != null && (maxTimeMS != null || explain?.maxTimeMS != null)) {
+    throw new MongoAPIError('Cannot use maxTimeMS with timeoutMS for explain commands.');
+  }
+}
+
+/**
+ * Applies an explain to a given command.
+ * @internal
+ *
+ * @param command - the command on which to apply the explain
+ * @param options - the options containing the explain verbosity
+ */
+export function decorateWithExplain(
+  command: Document,
+  explain: Explain
+): {
+  explain: Document;
+  verbosity: ExplainVerbosity;
+  maxTimeMS?: number;
+} {
+  type ExplainCommand = ReturnType<typeof decorateWithExplain>;
+  const { verbosity, maxTimeMS } = explain;
+  const baseCommand: ExplainCommand = { explain: command, verbosity };
+
+  if (typeof maxTimeMS === 'number') {
+    baseCommand.maxTimeMS = maxTimeMS;
+  }
+
+  return baseCommand;
 }

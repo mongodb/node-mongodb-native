@@ -199,7 +199,7 @@ export class TestConfiguration {
   }
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
-    serverOptions = Object.assign(<MongoClientOptions>{}, getEnvironmentalOptions(), serverOptions);
+    serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
 
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {
@@ -294,7 +294,23 @@ export class TestConfiguration {
    *
    * @param options - overrides and settings for URI generation
    */
-  url(options?: UrlOptions) {
+  url(
+    options?: UrlOptions & {
+      useMultipleMongoses?: boolean;
+      db?: string;
+      replicaSet?: string;
+      proxyURIParams?: ProxyParams;
+      username?: string;
+      password?: string;
+      auth?: {
+        username?: string;
+        password?: string;
+      };
+      authSource?: string;
+      authMechanism?: string;
+      authMechanismProperties?: Record<string, any>;
+    }
+  ) {
     options = {
       db: this.options.db,
       replicaSet: this.options.replicaSet,
