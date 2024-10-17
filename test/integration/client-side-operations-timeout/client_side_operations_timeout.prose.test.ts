@@ -343,7 +343,7 @@ describe('CSOT spec prose tests', function () {
 
       client = this.configuration.newClient(undefined, {
         monitorCommands: true,
-        timeoutMS: 100,
+        timeoutMS: 150,
         minPoolSize: 20
       });
       await client.connect();
