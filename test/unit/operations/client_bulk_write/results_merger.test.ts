@@ -45,6 +45,7 @@ describe('ClientBulkWriteResultsMerger', function () {
 
     it('initializes the result', function () {
       expect(resultsMerger.result).to.deep.equal({
+        acknowledged: true,
         insertedCount: 0,
         upsertedCount: 0,
         matchedCount: 0,
