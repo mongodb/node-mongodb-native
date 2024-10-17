@@ -415,7 +415,7 @@ describe('Client Side Encryption Functional', function () {
     }
   );
 
-  describe.only('CSOT on ClientEncryption', function () {
+  describe('CSOT on ClientEncryption', function () {
     function makeBlockingFailFor(command: string, blockTimeMS: number) {
       beforeEach(async function () {
         const utilClient = this.configuration.newClient();
