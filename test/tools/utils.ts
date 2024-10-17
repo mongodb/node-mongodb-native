@@ -601,8 +601,12 @@ export async function waitUntilPoolsFilled(
   await Promise.all([wait$(), client.connect()]);
 }
 
-export async function configureFailPoint(configuration: TestConfiguration, failPoint: FailPoint) {
-  const utilClient = configuration.newClient();
+export async function configureFailPoint(
+  configuration: TestConfiguration,
+  failPoint: FailPoint,
+  uri = configuration.url()
+) {
+  const utilClient = configuration.newClient(uri);
   await utilClient.connect();
 
   try {
@@ -612,8 +616,8 @@ export async function configureFailPoint(configuration: TestConfiguration, failP
   }
 }
 
-export async function clearFailPoint(configuration: TestConfiguration) {
-  const utilClient = configuration.newClient();
+export async function clearFailPoint(configuration: TestConfiguration, uri = configuration.url()) {
+  const utilClient = configuration.newClient(uri);
   await utilClient.connect();
 
   try {
