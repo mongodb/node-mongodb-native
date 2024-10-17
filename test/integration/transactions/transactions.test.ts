@@ -272,11 +272,12 @@ describe('Transactions', function () {
       'commitTransaction does not override write concern on initial attempt',
       { requires: { mongodb: '>=4.2.0', topology: '!single' } },
       async function () {
+        const collection = await client.db('test').createCollection('test');
         const session = client.startSession({
           defaultTransactionOptions: { writeConcern: { w: 1 } }
         });
         session.startTransaction();
-        await client.db('test').collection('test').insertOne({ x: 1 }, { session });
+        await collection.insertOne({ x: 1 }, { session });
         await session.commitTransaction();
 
         const commitTransactions = commandsStarted.filter(
