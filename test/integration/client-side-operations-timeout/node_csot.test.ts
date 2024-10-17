@@ -649,7 +649,7 @@ describe('CSOT driver tests', metadata, () => {
       client = this.configuration.newClient(undefined, { monitorCommands: true, minPoolSize });
       commandStarted = [];
       client.on('commandStarted', ev => commandStarted.push(ev));
-      await client.connect();
+      await waitUntilPoolsFilled(client, AbortSignal.timeout(30_000), minPoolSize);
     });
 
     afterEach(async function () {
@@ -690,11 +690,13 @@ describe('CSOT driver tests', metadata, () => {
             .db('db')
             .collection('coll')
             .find({}, { timeoutMS: 150, tailable: true, awaitData: true, batchSize: 1 });
-          for (let i = 0; i < 5; i++) {
-            // Iterate cursor 5 times (server would have blocked for 500ms overall, but client
-            // should not throw
-            await cursor.next();
-          }
+          // Iterate cursor 5 times (server would have blocked for 500ms overall, but client
+          // should not throw
+          await cursor.next();
+          await cursor.next();
+          await cursor.next();
+          await cursor.next();
+          await cursor.next();
         });
 
         it('does not use timeoutMS to compute maxTimeMS for getMores', metadata, async function () {
