@@ -1,5 +1,6 @@
 import { type EventEmitter } from 'events';
 
+import { type TimeoutContext } from '../../timeout';
 import { List, promiseWithResolvers } from '../../utils';
 
 /**
@@ -18,7 +19,10 @@ type PendingPromises = Omit<
  * Returns an AsyncIterator that iterates each 'data' event emitted from emitter.
  * It will reject upon an error event.
  */
-export function onData(emitter: EventEmitter) {
+export function onData(
+  emitter: EventEmitter,
+  { timeoutContext }: { timeoutContext?: TimeoutContext }
+) {
   // Setup pending events and pending promise lists
   /**
    * When the caller has not yet called .next(), we store the
@@ -87,6 +91,10 @@ export function onData(emitter: EventEmitter) {
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
 
+  const timeoutForSocketRead = timeoutContext?.timeoutForSocketRead;
+  timeoutForSocketRead?.throwIfExpired();
+  timeoutForSocketRead?.then(undefined, errorHandler);
+
   return iterator;
 
   function eventHandler(value: Buffer) {
@@ -97,6 +105,7 @@ export function onData(emitter: EventEmitter) {
 
   function errorHandler(err: Error) {
     const promise = unconsumedPromises.shift();
+
     if (promise != null) promise.reject(err);
     else error = err;
     void closeHandler();
@@ -107,6 +116,7 @@ export function onData(emitter: EventEmitter) {
     emitter.off('data', eventHandler);
     emitter.off('error', errorHandler);
     finished = true;
+    timeoutForSocketRead?.clear();
     const doneResult = { value: undefined, done: finished } as const;
 
     for (const promise of unconsumedPromises) {

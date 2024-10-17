@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -42,7 +43,11 @@ export class DistinctOperation extends CommandOperation<any[]> {
     return 'distinct' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<any[]> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<any[]> {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
@@ -72,7 +77,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
     // Have we specified collation
     decorateWithCollation(cmd, coll, options);
 
-    const result = await super.executeCommand(server, session, cmd);
+    const result = await super.executeCommand(server, session, cmd, timeoutContext);
 
     return this.explain ? result : result.values;
   }

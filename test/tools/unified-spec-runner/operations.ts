@@ -11,6 +11,7 @@ import {
   CommandStartedEvent,
   Db,
   type Document,
+  GridFSBucket,
   type MongoClient,
   MongoError,
   ReadConcern,
@@ -19,6 +20,7 @@ import {
   ServerType,
   type TopologyDescription,
   type TopologyType,
+  type TransactionOptions,
   WriteConcern
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
@@ -47,11 +49,6 @@ operations.set('createEntities', async ({ entities, operation, testConfig }) => 
     throw new AssertionError('encountered createEntities operation without entities argument');
   }
   await EntitiesMap.createEntities(testConfig, null, operation.arguments.entities!, entities);
-});
-
-operations.set('abortTransaction', async ({ entities, operation }) => {
-  const session = entities.getEntity('session', operation.object);
-  return session.abortTransaction();
 });
 
 operations.set('aggregate', async ({ entities, operation }) => {
@@ -219,7 +216,8 @@ operations.set('close', async ({ entities, operation }) => {
   /* eslint-disable no-empty */
   try {
     const cursor = entities.getEntity('cursor', operation.object);
-    await cursor.close();
+    const timeoutMS = operation.arguments?.timeoutMS;
+    await cursor.close({ timeoutMS });
     return;
   } catch {}
 
@@ -241,7 +239,12 @@ operations.set('close', async ({ entities, operation }) => {
 
 operations.set('commitTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
-  return session.commitTransaction();
+  return await session.commitTransaction({ timeoutMS: operation.arguments?.timeoutMS });
+});
+
+operations.set('abortTransaction', async ({ entities, operation }) => {
+  const session = entities.getEntity('session', operation.object);
+  return await session.abortTransaction({ timeoutMS: operation.arguments?.timeoutMS });
 });
 
 operations.set('createChangeStream', async ({ entities, operation }) => {
@@ -265,7 +268,18 @@ operations.set('createCollection', async ({ entities, operation }) => {
 
 operations.set('createFindCursor', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments!;
+  const { filter, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
+    case 'tailableAwait':
+      opts.tailable = true;
+      opts.awaitData = true;
+      break;
+    case 'tailable':
+      opts.tailable = true;
+      break;
+    default:
+      break;
+  }
   const cursor = collection.find(filter, opts);
   // The spec dictates that we create the cursor and force the find command
   // to execute, but don't move the cursor forward. hasNext() accomplishes
@@ -303,17 +317,18 @@ operations.set('dropCollection', async ({ entities, operation }) => {
     if (!/ns not found/.test(err.message)) {
       throw err;
     }
+    return false;
   }
 });
 
 operations.set('drop', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
-  return bucket.drop();
+  return bucket.drop(operation.arguments);
 });
 
 operations.set('dropIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.dropIndexes();
+  return collection.dropIndexes(operation.arguments);
 });
 
 operations.set('endSession', async ({ entities, operation }) => {
@@ -328,7 +343,18 @@ operations.set('find', async ({ entities, operation }) => {
   } else {
     queryable = entities.getEntity('collection', operation.object);
   }
-  const { filter, ...opts } = operation.arguments!;
+  const { filter, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
+    case 'tailableAwait':
+      opts.tailable = true;
+      opts.awaitData = true;
+      break;
+    case 'tailable':
+      opts.tailable = true;
+      break;
+    default:
+      break;
+  }
   return queryable.find(filter, opts).toArray();
 });
 
@@ -370,7 +396,7 @@ operations.set('insertOne', async ({ entities, operation }) => {
   // Looping exposes the fact that we can generate _ids for inserted
   // documents and we don't want the original operation to get modified
   // and use the same _id for each insert.
-  return collection.insertOne({ ...document }, opts);
+  return await collection.insertOne({ ...document }, opts);
 });
 
 operations.set('insertMany', async ({ entities, operation }) => {
@@ -526,7 +552,8 @@ operations.set('targetedFailPoint', async ({ entities, operation }) => {
 
 operations.set('delete', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
-  return bucket.delete(operation.arguments!.id);
+  const { id, ...opts } = operation.arguments;
+  return bucket.delete(id, opts);
 });
 
 operations.set('download', async ({ entities, operation }) => {
@@ -534,7 +561,8 @@ operations.set('download', async ({ entities, operation }) => {
 
   const { id, ...options } = operation.arguments ?? {};
   const stream = bucket.openDownloadStream(id, options);
-  return Buffer.concat(await stream.toArray());
+  const data = Buffer.concat(await stream.toArray());
+  return data;
 });
 
 operations.set('downloadByName', async ({ entities, operation }) => {
@@ -549,7 +577,6 @@ operations.set('downloadByName', async ({ entities, operation }) => {
 operations.set('upload', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
   const { filename, source, ...options } = operation.arguments ?? {};
-
   const stream = bucket.openUploadStream(filename, options);
   const fileStream = Readable.from(Buffer.from(source.$$hexBytes, 'hex'));
 
@@ -717,12 +744,16 @@ operations.set('waitForThread', async ({ entities, operation }) => {
 operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {
   const session = entities.getEntity('session', operation.object);
 
-  const options = {
+  const options: TransactionOptions = {
     readConcern: ReadConcern.fromOptions(operation.arguments),
     writeConcern: WriteConcern.fromOptions(operation.arguments),
     readPreference: ReadPreference.fromOptions(operation.arguments),
-    maxCommitTimeMS: operation.arguments!.maxCommitTimeMS
+    maxCommitTimeMS: operation.arguments?.maxCommitTimeMS
   };
+
+  if (typeof operation.arguments?.timeoutMS === 'number') {
+    options.timeoutMS = operation.arguments.timeoutMS;
+  }
 
   await session.withTransaction(async () => {
     for (const callbackOperation of operation.arguments!.callback) {
@@ -767,11 +798,10 @@ operations.set('runCommand', async ({ entities, operation }: OperationFunctionPa
     throw new AssertionError('runCommand requires a command');
   const { command } = operation.arguments;
 
-  if (operation.arguments.timeoutMS != null) throw new AssertionError('timeoutMS not supported');
-
   const options = {
     readPreference: operation.arguments.readPreference,
-    session: operation.arguments.session
+    session: operation.arguments.session,
+    timeoutMS: operation.arguments.timeoutMS
   };
 
   return db.command(command, options);
@@ -782,7 +812,9 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
   const { command, ...opts } = operation.arguments!;
   const cursor = db.runCursorCommand(command, {
     readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
-    session: opts.session
+    session: opts.session,
+    timeoutMode: opts.timeoutMode,
+    timeoutMS: opts.timeoutMS
   });
 
   if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);
@@ -794,10 +826,25 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
 
 operations.set('createCommandCursor', async ({ entities, operation }: OperationFunctionParams) => {
   const collection = entities.getEntity('db', operation.object);
-  const { command, ...opts } = operation.arguments!;
+  const { command, cursorType, ...opts } = operation.arguments!;
+  switch (cursorType) {
+    case 'tailableAwait':
+      opts.tailable = true;
+      opts.awaitData = true;
+      break;
+    case 'tailable':
+      opts.tailable = true;
+      break;
+    default:
+      break;
+  }
   const cursor = collection.runCursorCommand(command, {
     readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
-    session: opts.session
+    session: opts.session,
+    tailable: opts.tailable,
+    awaitData: opts.awaitData,
+    timeoutMode: opts.timeoutMode,
+    timeoutMS: opts.timeoutMS
   });
 
   if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);
@@ -824,9 +871,30 @@ operations.set('updateOne', async ({ entities, operation }) => {
 });
 
 operations.set('rename', async ({ entities, operation }) => {
-  const collection = entities.getEntity('collection', operation.object);
-  const { to, ...options } = operation.arguments!;
-  return collection.rename(to, options);
+  let entity: GridFSBucket | Collection | undefined;
+  try {
+    entity = entities.getEntity('collection', operation.object, false);
+  } catch {
+    // Ignore wrong type error
+  }
+
+  if (entity instanceof Collection) {
+    const { to, ...options } = operation.arguments!;
+    return entity.rename(to, options);
+  }
+
+  try {
+    entity = entities.getEntity('bucket', operation.object, false);
+  } catch {
+    // Ignore wrong type error
+  }
+
+  if (entity instanceof GridFSBucket) {
+    const { id, newFilename, ...opts } = operation.arguments!;
+    return entity.rename(id, newFilename, opts as any);
+  }
+
+  expect.fail(`No collection or bucket with name '${operation.object}' found`);
 });
 
 operations.set('createDataKey', async ({ entities, operation }) => {
@@ -945,7 +1013,7 @@ export async function executeOperationAndCheck(
   rethrow = false
 ): Promise<void> {
   const opFunc = operations.get(operation.name);
-  expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
+  if (opFunc == null) expect.fail(`Unknown operation: ${operation.name}`);
 
   if (operation.arguments && operation.arguments.session) {
     // The session could need to be either pulled from the entity map or in the case where
@@ -959,7 +1027,7 @@ export async function executeOperationAndCheck(
   let result;
 
   try {
-    result = await opFunc!({ entities, operation, client, testConfig });
+    result = await opFunc({ entities, operation, client, testConfig });
   } catch (error) {
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);

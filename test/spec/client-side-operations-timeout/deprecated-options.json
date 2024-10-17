@@ -1,5 +1,5 @@
 {
-  "description": "operations ignore deprected timeout options if timeoutMS is set",
+  "description": "operations ignore deprecated timeout options if timeoutMS is set",
   "schemaVersion": "1.9",
   "runOnRequirements": [
     {

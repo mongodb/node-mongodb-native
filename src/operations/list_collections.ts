@@ -1,8 +1,10 @@
 import type { Binary, Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -15,6 +17,8 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
   authorizedCollections?: boolean;
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
+  /** @internal */
+  timeoutMode?: CursorTimeoutMode;
 }
 
 /** @internal */
@@ -54,12 +58,14 @@ export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<CursorResponse> {
     return await super.executeCommand(
       server,
       session,
       this.generateCommand(maxWireVersion(server)),
+      timeoutContext,
       CursorResponse
     );
   }

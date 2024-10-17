@@ -21,7 +21,7 @@
       "client": {
         "id": "client",
         "uriOptions": {
-          "timeoutMS": 50
+          "timeoutMS": 500
         },
         "useMultipleMongoses": false,
         "observeEvents": [
@@ -81,6 +81,9 @@
                 }
               }
             ]
+          },
+          "expectError": {
+            "isClientError": true
           }
         }
       ],
@@ -109,7 +112,7 @@
                   "insert"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 30
+                "blockTimeMS": 300
               }
             }
           }
@@ -174,6 +177,21 @@
                 "databaseName": "test",
                 "command": {
                   "insert": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction",
+                "databaseName": "admin",
+                "command": {
+                  "abortTransaction": 1,
                   "maxTimeMS": {
                     "$$type": [
                       "int",

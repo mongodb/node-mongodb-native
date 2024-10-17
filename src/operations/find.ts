@@ -1,11 +1,13 @@
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
+import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import { type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort } from '../sort';
+import { type TimeoutContext } from '../timeout';
 import { decorateWithExplain, type MongoDBNamespace, normalizeHintField } from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -16,7 +18,8 @@ import { Aspect, defineAspects, type Hint } from './operation';
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface FindOptions<TSchema extends Document = Document>
-  extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'> {
+  extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'>,
+    AbstractCursorOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
@@ -70,6 +73,8 @@ export interface FindOptions<TSchema extends Document = Document>
    * @deprecated This API is deprecated in favor of `collection.find().explain()`.
    */
   explain?: ExplainOptions['explain'];
+  /** @internal*/
+  timeoutMode?: CursorTimeoutMode;
 }
 
 /** @internal */
@@ -105,7 +110,8 @@ export class FindOperation extends CommandOperation<CursorResponse> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<CursorResponse> {
     this.server = server;
 
@@ -123,7 +129,8 @@ export class FindOperation extends CommandOperation<CursorResponse> {
         ...this.options,
         ...this.bsonOptions,
         documentsReturnedIn: 'firstBatch',
-        session
+        session,
+        timeoutContext
       },
       this.explain ? ExplainedCursorResponse : CursorResponse
     );

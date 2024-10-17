@@ -3,6 +3,7 @@ import type { Db } from '../db';
 import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -41,7 +42,8 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<ListDatabasesResult> {
     const cmd: Document = { listDatabases: 1 };
 
@@ -63,7 +65,12 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
       cmd.comment = this.options.comment;
     }
 
-    return await (super.executeCommand(server, session, cmd) as Promise<TODO_NODE_3286>);
+    return await (super.executeCommand(
+      server,
+      session,
+      cmd,
+      timeoutContext
+    ) as Promise<TODO_NODE_3286>);
   }
 }
 

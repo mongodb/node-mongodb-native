@@ -1,5 +1,5 @@
 import * as child_process from 'node:child_process';
-import { once } from 'node:events';
+import { on, once } from 'node:events';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -11,6 +11,7 @@ import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
 import {
+  type AnyClientBulkWriteModel,
   type Document,
   type HostAddress,
   MongoClient,
@@ -18,6 +19,7 @@ import {
   Topology,
   type TopologyOptions
 } from '../mongodb';
+import { type TestConfiguration } from './runner/config';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   type CollectionData,
@@ -567,4 +569,103 @@ export async function itInNodeProcess(
       await fs.unlink(scriptName);
     }
   });
+}
+
+/**
+ * Connects the client and waits until `client` has emitted `count` connectionCreated events.
+ *
+ * **This will hang if the client does not have a maxPoolSizeSet!**
+ *
+ * This is useful when you want to ensure that the client has pools that are full of connections.
+ *
+ * This does not guarantee that all pools that the client has are completely full unless
+ * count = number of servers to which the client is connected * maxPoolSize.  But it can
+ * serve as a way to ensure that some connections have been established and are in the pools.
+ */
+export async function waitUntilPoolsFilled(
+  client: MongoClient,
+  signal: AbortSignal,
+  count: number = client.s.options.maxPoolSize
+): Promise<void> {
+  let connectionCount = 0;
+
+  async function wait$() {
+    for await (const _event of on(client, 'connectionCreated', { signal })) {
+      connectionCount++;
+      if (connectionCount >= count) {
+        break;
+      }
+    }
+  }
+
+  await Promise.all([wait$(), client.connect()]);
+}
+
+export async function configureFailPoint(
+  configuration: TestConfiguration,
+  failPoint: FailPoint,
+  uri = configuration.url()
+) {
+  const utilClient = configuration.newClient(uri);
+  await utilClient.connect();
+
+  try {
+    await utilClient.db('admin').command(failPoint);
+  } finally {
+    await utilClient.close();
+  }
+}
+
+export async function clearFailPoint(configuration: TestConfiguration, uri = configuration.url()) {
+  const utilClient = configuration.newClient(uri);
+  await utilClient.connect();
+
+  try {
+    await utilClient.db('admin').command(<FailPoint>{
+      configureFailPoint: 'failCommand',
+      mode: 'off'
+    });
+  } finally {
+    await utilClient.close();
+  }
+}
+
+export async function makeMultiBatchWrite(
+  configuration: TestConfiguration
+): Promise<AnyClientBulkWriteModel[]> {
+  const { maxBsonObjectSize, maxMessageSizeBytes } = await configuration.hello();
+
+  const length = maxMessageSizeBytes / maxBsonObjectSize + 1;
+  const models = Array.from({ length }, () => ({
+    namespace: 'db.coll',
+    name: 'insertOne' as const,
+    document: { a: 'b'.repeat(maxBsonObjectSize - 500) }
+  }));
+
+  return models;
+}
+
+export async function makeMultiResponseBatchModelArray(
+  configuration: TestConfiguration
+): Promise<AnyClientBulkWriteModel[]> {
+  const { maxBsonObjectSize } = await configuration.hello();
+  const namespace = `foo.${new BSON.ObjectId().toHexString()}`;
+  const models: AnyClientBulkWriteModel[] = [
+    {
+      name: 'updateOne',
+      namespace,
+      update: { $set: { age: 1 } },
+      upsert: true,
+      filter: { _id: 'a'.repeat(maxBsonObjectSize / 2) }
+    },
+    {
+      name: 'updateOne',
+      namespace,
+      update: { $set: { age: 1 } },
+      upsert: true,
+      filter: { _id: 'b'.repeat(maxBsonObjectSize / 2) }
+    }
+  ];
+
+  return models;
 }

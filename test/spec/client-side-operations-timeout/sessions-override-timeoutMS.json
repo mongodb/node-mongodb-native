@@ -47,7 +47,7 @@
         "id": "session",
         "client": "client",
         "sessionOptions": {
-          "defaultTimeoutMS": 50
+          "defaultTimeoutMS": 500
         }
       }
     }
@@ -78,7 +78,7 @@
                   "commitTransaction"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 60
+                "blockTimeMS": 600
               }
             }
           }
@@ -165,7 +165,7 @@
                   "abortTransaction"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 60
+                "blockTimeMS": 600
               }
             }
           }
@@ -249,7 +249,7 @@
                   "insert"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 60
+                "blockTimeMS": 600
               }
             }
           }
@@ -301,6 +301,26 @@
             {
               "commandFailedEvent": {
                 "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction",
+                "databaseName": "admin",
+                "command": {
+                  "abortTransaction": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "abortTransaction"
               }
             }
           ]
