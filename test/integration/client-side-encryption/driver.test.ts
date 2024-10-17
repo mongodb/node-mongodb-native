@@ -513,6 +513,7 @@ describe('CSOT', function () {
     });
 
     afterEach(async function () {
+      await keyVaultClient.db('keyvault').collection('datakeys').drop();
       await keyVaultClient.close();
       await setupClient
         .db()
