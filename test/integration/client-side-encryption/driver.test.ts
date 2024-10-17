@@ -505,7 +505,7 @@ describe('CSOT', function () {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
           data: {
-            failCommands: ['listCollections'],
+            failCommands: ['find'],
             blockConnection: true,
             blockTimeMS: 2000
           }
@@ -528,6 +528,7 @@ describe('CSOT', function () {
       const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
         local: unknown;
       };
+
       return { local: result.local };
     };
 
@@ -548,7 +549,10 @@ describe('CSOT', function () {
             autoEncryption: {
               keyVaultClient,
               keyVaultNamespace: 'keyvault.datakeys',
-              kmsProviders: getKmsProviders()
+              kmsProviders: getKmsProviders(),
+              schemaMap: {
+                'test.test': {}
+              }
             },
             timeoutMS: 1000
           }
@@ -564,8 +568,7 @@ describe('CSOT', function () {
         const err = await encryptedClient
           .db('test')
           .collection('test')
-          .aggregate([])
-          .toArray()
+          .insertOne({ a: 1 })
           .catch(e => e);
         expect(err).to.be.instanceOf(MongoOperationTimeoutError);
       });
