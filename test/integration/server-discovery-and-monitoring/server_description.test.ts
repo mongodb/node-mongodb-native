@@ -1,8 +1,10 @@
 import { type ChildProcess, spawn } from 'node:child_process';
 
 import { expect } from 'chai';
+import * as os from 'os';
+import * as path from 'path';
 
-import { MongoClient } from '../../mongodb';
+import { MongoClient, ObjectId } from '../../mongodb';
 
 describe('class ServerDescription', function () {
   describe('when connecting to mongocryptd', { requires: { mongodb: '>=4.4' } }, function () {
@@ -11,10 +13,15 @@ describe('class ServerDescription', function () {
     let childProcess: ChildProcess;
 
     beforeEach(async function () {
-      childProcess = spawn('mongocryptd', ['--port', mongocryptdTestPort, '--ipv6'], {
-        stdio: 'ignore',
-        detached: true
-      });
+      const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
+      childProcess = spawn(
+        'mongocryptd',
+        ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
+        {
+          stdio: 'ignore',
+          detached: true
+        }
+      );
 
       childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
       client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`);
