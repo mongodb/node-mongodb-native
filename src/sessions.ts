@@ -124,6 +124,7 @@ export class ClientSession
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
+  commitAttempted?: boolean;
   /** @internal */
   [kServerSession]: ServerSession | null;
   /** @internal */
@@ -417,6 +418,7 @@ export class ClientSession
       );
     }
 
+    this.commitAttempted = false;
     // increment txnNumber
     this.incrementTransactionNumber();
     // create transaction state
@@ -474,7 +476,7 @@ export class ClientSession
       WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
     }
 
-    if (this.transaction.state === TxnState.TRANSACTION_COMMITTED) {
+    if (this.transaction.state === TxnState.TRANSACTION_COMMITTED || this.commitAttempted) {
       WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
     }
 
@@ -494,8 +496,10 @@ export class ClientSession
 
     try {
       await executeOperation(this.client, operation);
+      this.commitAttempted = undefined;
       return;
     } catch (firstCommitError) {
+      this.commitAttempted = true;
       if (firstCommitError instanceof MongoError && isRetryableWriteError(firstCommitError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
@@ -503,7 +507,14 @@ export class ClientSession
         this.unpin({ force: true });
 
         try {
-          await executeOperation(this.client, operation);
+          await executeOperation(
+            this.client,
+            new RunAdminCommandOperation(command, {
+              session: this,
+              readPreference: ReadPreference.primary,
+              bypassPinningCheck: true
+            })
+          );
           return;
         } catch (retryCommitError) {
           // If the retry failed, we process that error instead of the original
