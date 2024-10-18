@@ -24,8 +24,8 @@ import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Filter, type WithId } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
-import { CSOTTimeoutContext } from '../timeout';
-import { MongoDBCollectionNamespace } from '../utils';
+import { CSOTTimeoutContext, TimeoutContext } from '../timeout';
+import { MongoDBCollectionNamespace, resolveTimeoutOptions } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import {
   MongoCryptCreateDataKeyError,
@@ -123,7 +123,8 @@ export class ClientEncryption {
     this._proxyOptions = options.proxyOptions ?? {};
     this._tlsOptions = options.tlsOptions ?? {};
     this._kmsProviders = options.kmsProviders || {};
-    this._timeoutMS = options.timeoutMS ?? client.options.timeoutMS;
+    const { timeoutMS } = resolveTimeoutOptions(client, options);
+    this._timeoutMS = timeoutMS;
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -277,14 +278,9 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const timeoutContext: CSOTTimeoutContext | undefined =
-      typeof this._timeoutMS === 'number'
-        ? (CSOTTimeoutContext.create({
-            serverSelectionTimeoutMS: this._client.s.options.serverSelectionTimeoutMS,
-            waitQueueTimeoutMS: this._client.s.options.waitQueueTimeoutMS,
-            timeoutMS: this._timeoutMS
-          }) as CSOTTimeoutContext)
-        : undefined;
+    const timeoutContext = TimeoutContext.create(
+      resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS })
+    );
 
     const { v: dataKeys } = deserialize(await stateMachine.execute(this, context, timeoutContext));
     if (dataKeys.length === 0) {

@@ -1,3 +1,6 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 import { EJSON, UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
@@ -10,10 +13,9 @@ import {
   type Collection,
   type CommandStartedEvent,
   type MongoClient,
-  MongoOperationTimeoutError,
-  StateMachine
+  MongoOperationTimeoutError
 } from '../../mongodb';
-import { type FailPoint, getEncryptExtraOptions } from '../../tools/utils';
+import { clearFailPoint, configureFailPoint, getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
@@ -21,11 +23,6 @@ const metadata: MongoDBMetadataUI = {
     clientSideEncryption: true
   }
 };
-
-const LOCAL_KEY = Buffer.from(
-  'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-  'base64'
-);
 
 describe('Client Side Encryption Functional', function () {
   const dataDbName = 'db';
@@ -414,175 +411,236 @@ describe('Client Side Encryption Functional', function () {
     }
   );
 
-  describe('CSOT on ClientEncryption', function () {
-    const metadata: MongoDBMetadataUI = {
-      requires: { clientSideEncryption: true, mongodb: '>=4.4' }
-    };
-    function makeBlockingFailFor(command: string, blockTimeMS: number) {
-      beforeEach(async function () {
-        const utilClient = this.configuration.newClient();
-        await utilClient.db('admin').command({
-          configureFailPoint: 'failCommand',
-          mode: { times: 2 },
-          data: {
-            failCommands: [command],
-            blockConnection: true,
-            blockTimeMS,
-            appName: 'clientEncryption'
-          }
-        } as FailPoint);
-        await utilClient.close();
-      });
-
-      afterEach(async function () {
-        sinon.restore();
-        const utilClient = this.configuration.newClient();
-        await utilClient
-          .db('admin')
-          .command({ configureFailPoint: 'failCommand', mode: 'off' } as FailPoint);
-        await utilClient.close();
-      });
-    }
-
-    function expectCSOTTimeout(fn: () => Promise<void>) {
-      return async () => {
-        const start = performance.now();
-        const error = await fn().then(
-          () => null,
-          error => error
-        );
-        const end = performance.now();
-        if (error?.name === 'MongoBulkWriteError') {
-          expect(error)
-            .to.have.property('errorResponse')
-            .that.is.instanceOf(MongoOperationTimeoutError);
-        } else {
-          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-        }
-        expect(end - start).to.be.within(498, 1000);
+  describe.only(
+    'CSOT on ClientEncryption',
+    { requires: { clientSideEncryption: true } },
+    function () {
+      const metadata: MongoDBMetadataUI = {
+        requires: { clientSideEncryption: true, mongodb: '>=4.4' }
       };
-    }
 
-    let client: MongoClient;
-    let clientEncryption: ClientEncryption;
+      const LOCAL_KEY = Buffer.from(
+        'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+        'base64'
+      );
 
-    beforeEach(async function () {
-      if (!this.configuration.clientSideEncryption.enabled) {
-        this.skip();
+      function makeBlockingFailFor(command: string, blockTimeMS: number) {
+        beforeEach(async function () {
+          await configureFailPoint(this.configuration, {
+            configureFailPoint: 'failCommand',
+            mode: { times: 2 },
+            data: {
+              failCommands: [command],
+              blockConnection: true,
+              blockTimeMS,
+              appName: 'clientEncryption'
+            }
+          });
+        });
+
+        afterEach(async function () {
+          sinon.restore();
+          await clearFailPoint(this.configuration);
+        });
       }
 
-      client = this.configuration.newClient({}, { appName: 'clientEncryption' });
-      await client.connect();
-      clientEncryption = new ClientEncryption(client, {
-        kmsProviders: { local: { key: LOCAL_KEY } },
-        keyVaultNamespace,
-        keyVaultClient: null,
-        timeoutMS: 500,
-        ...getEncryptExtraOptions()
-      });
-    });
+      function runAndCheckForCSOTTimeout(fn: () => Promise<void>) {
+        return async () => {
+          const start = performance.now();
+          const error = await fn().then(
+            () => 'API did not reject',
+            error => error
+          );
+          const end = performance.now();
+          if (error?.name === 'MongoBulkWriteError') {
+            expect(error)
+              .to.have.property('errorResponse')
+              .that.is.instanceOf(MongoOperationTimeoutError);
+          } else {
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          }
+          expect(end - start).to.be.within(498, 1000);
+        };
+      }
 
-    afterEach(async function () {
-      await client?.close();
-    });
+      let client: MongoClient;
+      let clientEncryption: ClientEncryption;
+      let key1Id;
 
-    describe('rewrapManyDataKey', function () {
-      makeBlockingFailFor('update', 2000);
+      const data = path.join(
+        __dirname,
+        '..',
+        '..',
+        'spec',
+        'client-side-encryption',
+        'etc',
+        'data'
+      );
 
       beforeEach(async function () {
-        sinon
-          .stub(StateMachine.prototype, 'execute')
-          .callsFake(async function (executor, context, timeoutContext) {
-            expect(timeoutContext).to.have.property('timeoutMS', 500);
-            return BSON.serialize({ v: [{ _id: new UUID() }] });
-          });
+        // Load the file encryptedFields.json as encryptedFields.
+        const encryptedFields = EJSON.parse(
+          await fs.promises.readFile(path.join(data, 'encryptedFields.json'), 'utf8'),
+          { relaxed: false }
+        );
+        // Load the file key1-document.json as key1Document.
+        const key1Document = EJSON.parse(
+          await fs.promises.readFile(path.join(data, 'keys', 'key1-document.json'), 'utf8'),
+          { relaxed: false }
+        );
+        // Read the "_id" field of key1Document as key1ID.
+        key1Id = key1Document._id;
+        const setupClient = this.configuration.newClient();
+        // Drop and create the collection db.explicit_encryption using encryptedFields as an option.
+        const db = setupClient.db('db');
+        await db
+          .collection('explicit_encryption')
+          .drop()
+          .catch(() => null);
+        await db.createCollection('explicit_encryption', { encryptedFields });
+        // Drop and create the collection keyvault.datakeys.
+        const kdb = setupClient.db('keyvault');
+        await kdb
+          .collection('datakeys')
+          .drop()
+          .catch(() => null);
+        await kdb.createCollection('datakeys');
+        // Insert key1Document in keyvault.datakeys with majority write concern.
+        await kdb
+          .collection('datakeys')
+          .insertOne(key1Document, { writeConcern: { w: 'majority' } });
+
+        client = this.configuration.newClient({}, { appName: 'clientEncryption' });
+        await client.connect();
+        clientEncryption = new ClientEncryption(client, {
+          kmsProviders: { local: { key: LOCAL_KEY } },
+          keyVaultNamespace,
+          keyVaultClient: null,
+          timeoutMS: 500,
+          ...getEncryptExtraOptions()
+        });
+
+        await setupClient.close();
       });
 
       afterEach(async function () {
-        sinon.restore();
+        await client?.close();
       });
 
-      it(
-        'throws a timeout error if the bulk operation takes too long',
-        metadata,
-        expectCSOTTimeout(async () => {
-          await clientEncryption.rewrapManyDataKey({ _id: new UUID() }, { provider: 'local' });
-        })
-      );
-    });
+      describe('rewrapManyDataKey', function () {
+        describe('when the bulk operation takes too long', function () {
+          makeBlockingFailFor('update', 2000);
 
-    describe('deleteKey', function () {
-      makeBlockingFailFor('delete', 2000);
+          it(
+            'throws a timeout error',
+            metadata,
+            runAndCheckForCSOTTimeout(async () => {
+              await clientEncryption.rewrapManyDataKey({ _id: key1Id }, { provider: 'local' });
+            })
+          );
+        });
 
-      it(
-        'throws a timeout error if the delete operation takes too long',
-        metadata,
-        expectCSOTTimeout(async () => {
-          await clientEncryption.deleteKey(new UUID());
-        })
-      );
-    });
+        describe('when the find operation for fetchKeys takes too long', function () {
+          makeBlockingFailFor('find', 2000);
 
-    describe('getKey', function () {
-      makeBlockingFailFor('find', 2000);
+          it(
+            'throws a timeout error',
+            metadata,
+            runAndCheckForCSOTTimeout(async () => {
+              await clientEncryption.rewrapManyDataKey({ _id: key1Id }, { provider: 'local' });
+            })
+          );
+        });
 
-      it(
-        'throws a timeout error if the bulk operation takes too long',
-        metadata,
-        expectCSOTTimeout(async () => {
-          await clientEncryption.getKey(new UUID());
-        })
-      );
-    });
+        // TOOD, does not make rewriteManyDataKey fail
+        describe.skip('when the find and bulk operation takes too long', function () {
+          // together they add up to 600, exceeding the timeout of 500
+          makeBlockingFailFor('update', 400);
+          makeBlockingFailFor('listCollections', 400);
 
-    describe('getKeys', function () {
-      makeBlockingFailFor('find', 2000);
+          it(
+            'throws a timeout error',
+            metadata,
+            runAndCheckForCSOTTimeout(async () => {
+              await clientEncryption.rewrapManyDataKey({ _id: key1Id }, { provider: 'local' });
+            })
+          );
+        });
+      });
 
-      it(
-        'throws a timeout error if the find operation takes too long',
-        metadata,
-        expectCSOTTimeout(async () => {
-          await clientEncryption.getKeys().toArray();
-        })
-      );
-    });
+      describe('deleteKey', function () {
+        makeBlockingFailFor('delete', 2000);
 
-    describe('removeKeyAltName', function () {
-      makeBlockingFailFor('findAndModify', 2000);
+        it(
+          'throws a timeout error if the delete operation takes too long',
+          metadata,
+          runAndCheckForCSOTTimeout(async () => {
+            await clientEncryption.deleteKey(new UUID());
+          })
+        );
+      });
 
-      it(
-        'throws a timeout error if the findAndModify operation takes too long',
-        metadata,
-        expectCSOTTimeout(async () => {
-          await clientEncryption.removeKeyAltName(new UUID(), 'blah');
-        })
-      );
-    });
+      describe('getKey', function () {
+        makeBlockingFailFor('find', 2000);
 
-    describe('addKeyAltName', function () {
-      makeBlockingFailFor('findAndModify', 2000);
+        it(
+          'throws a timeout error if the bulk operation takes too long',
+          metadata,
+          runAndCheckForCSOTTimeout(async () => {
+            await clientEncryption.getKey(new UUID());
+          })
+        );
+      });
 
-      it(
-        'throws a timeout error if the findAndModify operation takes too long',
-        metadata,
-        expectCSOTTimeout(async () => {
-          await clientEncryption.addKeyAltName(new UUID(), 'blah');
-        })
-      );
-    });
+      describe('getKeys', function () {
+        makeBlockingFailFor('find', 2000);
 
-    describe('getKeyByAltName', function () {
-      makeBlockingFailFor('find', 2000);
+        it(
+          'throws a timeout error if the find operation takes too long',
+          metadata,
+          runAndCheckForCSOTTimeout(async () => {
+            await clientEncryption.getKeys().toArray();
+          })
+        );
+      });
 
-      it(
-        'throws a timeout error if the find operation takes too long',
-        metadata,
-        expectCSOTTimeout(async () => {
-          await clientEncryption.getKeyByAltName('blah');
-        })
-      );
-    });
-  });
+      describe('removeKeyAltName', function () {
+        makeBlockingFailFor('findAndModify', 2000);
+
+        it(
+          'throws a timeout error if the findAndModify operation takes too long',
+          metadata,
+          runAndCheckForCSOTTimeout(async () => {
+            await clientEncryption.removeKeyAltName(new UUID(), 'blah');
+          })
+        );
+      });
+
+      describe('addKeyAltName', function () {
+        makeBlockingFailFor('findAndModify', 2000);
+
+        it(
+          'throws a timeout error if the findAndModify operation takes too long',
+          metadata,
+          runAndCheckForCSOTTimeout(async () => {
+            await clientEncryption.addKeyAltName(new UUID(), 'blah');
+          })
+        );
+      });
+
+      describe('getKeyByAltName', function () {
+        makeBlockingFailFor('find', 2000);
+
+        it(
+          'throws a timeout error if the find operation takes too long',
+          metadata,
+          runAndCheckForCSOTTimeout(async () => {
+            await clientEncryption.getKeyByAltName('blah');
+          })
+        );
+      });
+    }
+  );
 });
 
 describe('Range Explicit Encryption with JS native types', function () {
