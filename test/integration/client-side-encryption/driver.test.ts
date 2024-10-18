@@ -4,15 +4,14 @@ import * as crypto from 'crypto';
 import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { StateMachine } from '../../../lib/client-side-encryption/state_machine';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import {
   BSON,
   type Collection,
   type CommandStartedEvent,
   type MongoClient,
-  MongoOperationTimeoutError
+  MongoOperationTimeoutError,
+  StateMachine
 } from '../../mongodb';
 import { type FailPoint, getEncryptExtraOptions } from '../../tools/utils';
 
@@ -479,16 +478,19 @@ describe('Client Side Encryption Functional', function () {
     });
 
     afterEach(async function () {
-      await client.close();
+      await client?.close();
     });
 
     describe('rewrapManyDataKey', function () {
       makeBlockingFailFor('update', 2000);
 
       beforeEach(async function () {
-        sinon.stub(StateMachine.prototype, 'execute').callsFake(async function () {
-          return BSON.serialize({ v: [{ _id: new UUID() }] });
-        });
+        sinon
+          .stub(StateMachine.prototype, 'execute')
+          .callsFake(async function (executor, context, timeoutContext) {
+            expect(timeoutContext).to.have.property('timeoutMS', 500);
+            return BSON.serialize({ v: [{ _id: new UUID() }] });
+          });
       });
 
       afterEach(async function () {
