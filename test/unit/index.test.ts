@@ -54,6 +54,7 @@ const EXPECTED_EXPORTS = [
   'Decimal128',
   'Double',
   'ExplainVerbosity',
+  'ExplainableCursor',
   'FindCursor',
   'GridFSBucket',
   'GridFSBucketReadStream',

@@ -10,6 +10,7 @@ import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import type { RunCommandCursor } from './cursor/run_command_cursor';
 import { Db } from './db';
+import { ExplainableCursor } from './explain';
 import { GridFSBucket } from './gridfs';
 import { GridFSBucketReadStream } from './gridfs/download';
 import { GridFSBucketWriteStream } from './gridfs/upload';
@@ -91,6 +92,7 @@ export {
   ClientSession,
   Collection,
   Db,
+  ExplainableCursor,
   FindCursor,
   GridFSBucket,
   GridFSBucketReadStream,
