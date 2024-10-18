@@ -1,5 +1,4 @@
-import { type Document } from 'bson';
-
+import { type Document } from './bson';
 import { AbstractCursor } from './cursor/abstract_cursor';
 import { MongoAPIError } from './error';
 
