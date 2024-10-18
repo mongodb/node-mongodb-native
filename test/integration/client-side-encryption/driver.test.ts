@@ -437,7 +437,7 @@ describe('Client Side Encryption Functional', function () {
       afterEach(async function () {
         sinon.restore();
         const utilClient = this.configuration.newClient();
-        utilClient
+        await utilClient
           .db('admin')
           .command({ configureFailPoint: 'failCommand', mode: 'off' } as FailPoint);
         await utilClient.close();
