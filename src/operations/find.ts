@@ -44,7 +44,8 @@ export interface FindOptions<TSchema extends Document = Document>
   min?: Document;
   /** The exclusive upper bound for a specific index */
   max?: Document;
-  /** Number of milliseconds to wait before aborting the query. */
+  /** Number of milliseconds to wait before aborting the query.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead. */
   maxTimeMS?: number;
   /** The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. Requires `tailable` and `awaitData` to be true */
   maxAwaitTimeMS?: number;
@@ -73,7 +74,6 @@ export interface FindOptions<TSchema extends Document = Document>
    * @deprecated This API is deprecated in favor of `collection.find().explain()`.
    */
   explain?: ExplainOptions['explain'];
-  /** @internal*/
   timeoutMode?: CursorTimeoutMode;
 }
 

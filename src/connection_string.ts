@@ -1099,6 +1099,7 @@ export const OPTIONS = {
     type: 'string'
   },
   socketTimeoutMS: {
+    deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
   },
@@ -1169,6 +1170,7 @@ export const OPTIONS = {
     }
   },
   waitQueueTimeoutMS: {
+    deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
   },
@@ -1209,6 +1211,7 @@ export const OPTIONS = {
     }
   } as OptionDescriptor,
   wtimeoutMS: {
+    deprecated: 'Please use timeoutMS instead',
     target: 'writeConcern',
     transform({ values: [value], options }) {
       const wc = WriteConcern.fromOptions({

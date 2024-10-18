@@ -482,13 +482,28 @@ export class ClientSession
       maxTimeMS?: number;
     } = { commitTransaction: 1 };
 
+    const timeoutMS =
+      typeof options?.timeoutMS === 'number'
+        ? options.timeoutMS
+        : typeof this.timeoutMS === 'number'
+          ? this.timeoutMS
+          : null;
+
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
     if (wc != null) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
+      if (timeoutMS == null && this.timeoutContext == null) {
+        WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
+      } else {
+        WriteConcern.apply(command, { w: 'majority', ...wc, wtimeoutMS: undefined });
+      }
     }
 
     if (this.transaction.state === TxnState.TRANSACTION_COMMITTED) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
+      if (timeoutMS == null && this.timeoutContext == null) {
+        WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
+      } else {
+        WriteConcern.apply(command, { w: 'majority', ...wc, wtimeoutMS: undefined });
+      }
     }
 
     if (typeof this.transaction.options.maxTimeMS === 'number') {
@@ -504,13 +519,6 @@ export class ClientSession
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
-
-    const timeoutMS =
-      typeof options?.timeoutMS === 'number'
-        ? options.timeoutMS
-        : typeof this.timeoutMS === 'number'
-          ? this.timeoutMS
-          : null;
 
     const timeoutContext =
       this.timeoutContext ??
@@ -601,21 +609,6 @@ export class ClientSession
       recoveryToken?: Document;
     } = { abortTransaction: 1 };
 
-    const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
-    if (wc != null) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
-    }
-
-    if (this.transaction.recoveryToken) {
-      command.recoveryToken = this.transaction.recoveryToken;
-    }
-
-    const operation = new RunAdminCommandOperation(command, {
-      session: this,
-      readPreference: ReadPreference.primary,
-      bypassPinningCheck: true
-    });
-
     const timeoutMS =
       typeof options?.timeoutMS === 'number'
         ? options.timeoutMS
@@ -633,6 +626,21 @@ export class ClientSession
             socketTimeoutMS: this.clientOptions.socketTimeoutMS
           })
         : null;
+
+    const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
+    if (wc != null && timeoutMS == null) {
+      WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
+    }
+
+    if (this.transaction.recoveryToken) {
+      command.recoveryToken = this.transaction.recoveryToken;
+    }
+
+    const operation = new RunAdminCommandOperation(command, {
+      session: this,
+      readPreference: ReadPreference.primary,
+      bypassPinningCheck: true
+    });
 
     try {
       await executeOperation(this.client, operation, timeoutContext);
