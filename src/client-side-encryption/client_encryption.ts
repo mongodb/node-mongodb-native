@@ -313,7 +313,7 @@ export class ClientEncryption {
       .collection<DataKey>(collectionName)
       .bulkWrite(replacements, {
         writeConcern: { w: 'majority' },
-        timeoutMS: timeoutContext?.remainingTimeMS
+        timeoutMS: timeoutContext.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
       });
 
     return { bulkWriteResult: result };

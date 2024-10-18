@@ -541,7 +541,7 @@ describe('Client Side Encryption Functional', function () {
 
       // TOOD, does not make rewriteManyDataKey fail
       describe.skip('when the find and bulk operation takes too long', function () {
-        // together they add up to 600, exceeding the timeout of 500
+        // together they add up to 800, exceeding the timeout of 500
         makeBlockingFailFor('update', 400);
         makeBlockingFailFor('listCollections', 400);
 
