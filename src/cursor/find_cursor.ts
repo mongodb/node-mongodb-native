@@ -3,6 +3,7 @@ import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoAPIError, MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import {
   Explain,
+  ExplainableCursor,
   type ExplainCommandOptions,
   type ExplainVerbosityLike,
   validateExplainTimeoutOptions
@@ -16,7 +17,7 @@ import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
-import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
+import { type InitialCursorResponse } from './abstract_cursor';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -29,7 +30,7 @@ export const FLAGS = [
 ] as const;
 
 /** @public */
-export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
+export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   /** @internal */
   private cursorFilter: Document;
   /** @internal */
@@ -159,24 +160,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     verbosity?: ExplainVerbosityLike | ExplainCommandOptions | { timeoutMS?: number },
     options?: { timeoutMS?: number }
   ): Promise<Document> {
-    let explain: ExplainVerbosityLike | ExplainCommandOptions | undefined;
-    let timeout: { timeoutMS?: number } | undefined;
-    if (verbosity == null && options == null) {
-      explain = true;
-      timeout = undefined;
-    } else if (verbosity != null && options == null) {
-      explain =
-        typeof verbosity !== 'object'
-          ? verbosity
-          : 'verbosity' in verbosity
-            ? verbosity
-            : undefined;
-      timeout = typeof verbosity === 'object' && 'timeoutMS' in verbosity ? verbosity : undefined;
-    } else {
-      // @ts-expect-error TS isn't smart enough to determine that if both options are provided, the first is explain options
-      explain = verbosity;
-      timeout = options;
-    }
+    const { explain, timeout } = this.resolveExplainTimeoutOptions(verbosity, options);
 
     return (
       await executeOperation(

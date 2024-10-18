@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import { MongoAPIError } from '../error';
 import {
   Explain,
+  ExplainableCursor,
   type ExplainCommandOptions,
   type ExplainVerbosityLike,
   validateExplainTimeoutOptions
@@ -13,7 +14,6 @@ import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
 import { mergeOptions, type MongoDBNamespace } from '../utils';
 import {
-  AbstractCursor,
   type AbstractCursorOptions,
   CursorTimeoutMode,
   type InitialCursorResponse
@@ -29,7 +29,7 @@ export interface AggregationCursorOptions extends AbstractCursorOptions, Aggrega
  * or higher stream
  * @public
  */
-export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
+export class AggregationCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   public readonly pipeline: Document[];
   /** @internal */
   private aggregateOptions: AggregateOptions;
@@ -102,26 +102,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     verbosity?: ExplainVerbosityLike | ExplainCommandOptions | { timeoutMS?: number },
     options?: { timeoutMS?: number }
   ): Promise<Document> {
-    let explain: ExplainVerbosityLike | ExplainCommandOptions | undefined;
-    let timeout: { timeoutMS?: number } | undefined;
-    if (verbosity == null && options == null) {
-      explain = true;
-      timeout = undefined;
-    } else if (verbosity != null && options == null) {
-      explain =
-        typeof verbosity !== 'object'
-          ? verbosity
-          : 'verbosity' in verbosity
-            ? verbosity
-            : undefined;
-
-      timeout = typeof verbosity === 'object' && 'timeoutMS' in verbosity ? verbosity : undefined;
-    } else {
-      // @ts-expect-error TS isn't smart enough to determine that if both options are provided, the first is explain options
-      explain = verbosity;
-      timeout = options;
-    }
-
+    const { explain, timeout } = this.resolveExplainTimeoutOptions(verbosity, options);
     return (
       await executeOperation(
         this.client,

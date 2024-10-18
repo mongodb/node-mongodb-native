@@ -8,8 +8,7 @@ import {
   type Document,
   type MongoClient,
   MongoOperationTimeoutError,
-  MongoServerError,
-  squashError
+  MongoServerError
 } from '../../mongodb';
 import { clearFailPoint, configureFailPoint, measureDuration } from '../../tools/utils';
 import { filterForCommands } from '../shared';
@@ -308,40 +307,40 @@ describe('CRUD API explain option', function () {
     };
     const commands: ExplainStartedEvent[] = [];
 
+    afterEach(async function () {
+      await clearFailPoint(
+        this.configuration,
+        this.configuration.url({ useMultipleMongoses: false })
+      );
+    });
+
+    beforeEach(async function () {
+      const uri = this.configuration.url({ useMultipleMongoses: false });
+      await configureFailPoint(
+        this.configuration,
+        {
+          configureFailPoint: 'failCommand',
+          mode: 'alwaysOn',
+          data: {
+            failCommands: ['explain'],
+            blockConnection: true,
+            blockTimeMS: 2000
+          }
+        },
+        this.configuration.url({ useMultipleMongoses: false })
+      );
+
+      client = this.configuration.newClient(uri, { monitorCommands: true });
+      client.on('commandStarted', filterForCommands('explain', commands));
+      await client.connect();
+    });
+
+    afterEach(async function () {
+      await client?.close();
+      commands.length = 0;
+    });
+
     describe('Explain helpers respect timeoutMS', function () {
-      afterEach(async function () {
-        await clearFailPoint(
-          this.configuration,
-          this.configuration.url({ useMultipleMongoses: false })
-        );
-      });
-
-      beforeEach(async function () {
-        const uri = this.configuration.url({ useMultipleMongoses: false });
-        await configureFailPoint(
-          this.configuration,
-          {
-            configureFailPoint: 'failCommand',
-            mode: 'alwaysOn',
-            data: {
-              failCommands: ['explain'],
-              blockConnection: true,
-              blockTimeMS: 2000
-            }
-          },
-          this.configuration.url({ useMultipleMongoses: false })
-        );
-
-        client = this.configuration.newClient(uri, { monitorCommands: true });
-        client.on('commandStarted', filterForCommands('explain', commands));
-        await client.connect();
-      });
-
-      afterEach(async function () {
-        await client?.close();
-        commands.length = 0;
-      });
-
       describe('when a cursor api is being explained', function () {
         describe('when timeoutMS is provided', function () {
           it(
@@ -568,140 +567,101 @@ describe('CRUD API explain option', function () {
     });
 
     describe('fluent api timeoutMS precedence and inheritance', function () {
-      beforeEach(async function () {
-        client = this.configuration.newClient({}, { monitorCommands: true });
-        client.on('commandStarted', filterForCommands('explain', commands));
-        await client.connect();
-        await client.db('foo').dropDatabase().catch(squashError);
-        await client.db('foo').createCollection('bar');
-      });
-
-      afterEach(async function () {
-        await client?.close();
-        commands.length = 0;
-      });
-
-      /**
-       * The tests in this section test that timeoutMS is respected by asserting that when specified,
-       * maxTimeMS is set on the explain command.  That should only ever be true when timeoutMS is
-       * set, but if that is true when timeoutMS is not set, that could cause these tests to pass
-       * erroneously.
-       *
-       * These tests assert that maxTimeMS is not present on commands when timeoutMS is not provided.
-       */
-      describe('precondition tests', function () {
-        beforeEach('find does not set maxTimeMS if timeoutMS is not set', async function () {
-          {
-            const cursor = client.db('foo').collection('bar').find();
-            await cursor.explain({ verbosity: 'queryPlanner' });
-
-            const [
-              {
-                command: { maxTimeMS }
-              }
-            ] = commands;
-            expect(maxTimeMS).not.to.exist;
-            commands.length = 0;
-          }
-        });
-
-        beforeEach('aggregate does not set maxTimeMS if timeoutMS is not set', async function () {
-          {
-            const cursor = client.db('foo').collection('bar').aggregate([]);
-            await cursor.explain({ verbosity: 'queryPlanner' });
-
-            const [
-              {
-                command: { maxTimeMS }
-              }
-            ] = commands;
-            expect(maxTimeMS).not.to.exist;
-            commands.length = 0;
-          }
-        });
-      });
-
       describe('find({}, { timeoutMS }).explain()', function () {
-        it('respects the timeoutMS from the find options', async function () {
-          const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 800 });
-          await cursor.explain({ verbosity: 'queryPlanner' });
+        it(
+          'respects the timeoutMS from the find options',
+          { requires: { mongodb: '>=4.4' } },
+          async function () {
+            const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 800 });
+            const { duration, result: error } = await measureDuration(() =>
+              cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e)
+            );
 
-          const [
-            {
-              command: { maxTimeMS }
-            }
-          ] = commands;
-          expect(maxTimeMS).to.exist;
-        });
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(800 - 100, 800 + 100);
+          }
+        );
       });
 
       describe('find().explain({}, { timeoutMS })', function () {
-        it('respects the timeoutMS from the explain helper', async function () {
-          const cursor = client.db('foo').collection('bar').find();
-          await cursor.explain({ verbosity: 'queryPlanner' }, { timeoutMS: 800 });
+        it(
+          'respects the timeoutMS from the explain helper',
+          { requires: { mongodb: '>=4.4' } },
+          async function () {
+            const cursor = client.db('foo').collection('bar').find();
+            const { duration, result: error } = await measureDuration(() =>
+              cursor.explain({ verbosity: 'queryPlanner' }, { timeoutMS: 800 }).catch(e => e)
+            );
 
-          const [
-            {
-              command: { maxTimeMS }
-            }
-          ] = commands;
-          expect(maxTimeMS).to.exist;
-        });
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(800 - 100, 800 + 100);
+          }
+        );
       });
 
       describe('find({}, { timeoutMS} ).explain({}, { timeoutMS })', function () {
-        it('the timeoutMS from the explain helper has precedence', async function () {
-          const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 100 });
-          await cursor.explain({ verbosity: 'queryPlanner' }, { timeoutMS: 800 });
-          const [
-            {
-              command: { maxTimeMS }
-            }
-          ] = commands;
-          expect(maxTimeMS).to.exist;
-          expect(maxTimeMS).to.be.greaterThan(100);
-        });
+        it(
+          'the timeoutMS from the explain helper has precedence',
+          { requires: { mongodb: '>=4.4' } },
+          async function () {
+            const cursor = client.db('foo').collection('bar').find({}, { timeoutMS: 100 });
+            const { duration, result: error } = await measureDuration(() =>
+              cursor.explain({ verbosity: 'queryPlanner' }, { timeoutMS: 800 }).catch(e => e)
+            );
+
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(800 - 100, 800 + 100);
+          }
+        );
       });
 
       describe('aggregate([], { timeoutMS }).explain()', function () {
-        it('respects the timeoutMS from the find options', async function () {
-          const cursor = client.db('foo').collection('bar').aggregate([], { timeoutMS: 800 });
-          await cursor.explain({ verbosity: 'queryPlanner' });
+        it(
+          'respects the timeoutMS from the find options',
+          { requires: { mongodb: '>=4.4' } },
+          async function () {
+            const cursor = client.db('foo').collection('bar').aggregate([], { timeoutMS: 800 });
+            const { duration, result: error } = await measureDuration(() =>
+              cursor.explain({ verbosity: 'queryPlanner' }).catch(e => e)
+            );
 
-          const [
-            {
-              command: { maxTimeMS }
-            }
-          ] = commands;
-          expect(maxTimeMS).to.exist;
-        });
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(800 - 100, 800 + 100);
+          }
+        );
       });
 
       describe('aggregate([], { timeoutMS })', function () {
-        it('respects the timeoutMS from the explain helper', async function () {
-          const cursor = client.db('foo').collection('bar').aggregate();
-          await cursor.explain({ verbosity: 'queryPlanner' }, { timeoutMS: 800 });
-          const [
-            {
-              command: { maxTimeMS }
-            }
-          ] = commands;
-          expect(maxTimeMS).to.exist;
-        });
+        it(
+          'respects the timeoutMS from the explain helper',
+          { requires: { mongodb: '>=4.4' } },
+          async function () {
+            const cursor = client.db('foo').collection('bar').aggregate();
+
+            const { duration, result: error } = await measureDuration(() =>
+              cursor.explain({ verbosity: 'queryPlanner' }, { timeoutMS: 800 }).catch(e => e)
+            );
+
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(800 - 100, 800 + 100);
+          }
+        );
       });
 
       describe('aggregate([], { timeoutMS} ).explain({}, { timeoutMS })', function () {
-        it('the timeoutMS from the explain helper has precedence', async function () {
-          const cursor = client.db('foo').collection('bar').aggregate([], { timeoutMS: 100 });
-          await cursor.explain({ verbosity: 'queryPlanner' }, { timeoutMS: 800 });
-          const [
-            {
-              command: { maxTimeMS }
-            }
-          ] = commands;
-          expect(maxTimeMS).to.exist;
-          expect(maxTimeMS).to.be.greaterThan(100);
-        });
+        it(
+          'the timeoutMS from the explain helper has precedence',
+          { requires: { mongodb: '>=4.4' } },
+          async function () {
+            const cursor = client.db('foo').collection('bar').aggregate([], { timeoutMS: 100 });
+            const { duration, result: error } = await measureDuration(() =>
+              cursor.explain({ verbosity: 'queryPlanner' }, { timeoutMS: 800 }).catch(e => e)
+            );
+
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(800 - 100, 800 + 100);
+          }
+        );
       });
     });
   });
