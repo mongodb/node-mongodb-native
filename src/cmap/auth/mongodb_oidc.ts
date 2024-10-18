@@ -1,5 +1,4 @@
-import type { Document } from 'bson';
-
+import type { Document } from '../../bson';
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';

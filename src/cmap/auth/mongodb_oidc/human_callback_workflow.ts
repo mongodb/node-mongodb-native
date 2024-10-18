@@ -1,5 +1,4 @@
-import { BSON } from 'bson';
-
+import { BSON } from '../../../bson';
 import { MONGODB_ERROR_CODES, MongoError, MongoOIDCError } from '../../../error';
 import { Timeout, TimeoutError } from '../../../timeout';
 import { type Connection } from '../../connection';
