@@ -479,6 +479,7 @@ export type {
 export type {
   AnyClientBulkWriteModel,
   ClientBulkWriteError,
+  ClientBulkWriteModel,
   ClientBulkWriteOptions,
   ClientBulkWriteResult,
   ClientDeleteManyModel,
