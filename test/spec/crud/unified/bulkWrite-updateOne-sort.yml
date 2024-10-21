@@ -4,20 +4,20 @@ schemaVersion: "1.0"
 
 createEntities:
   - client:
-      id: client0
+      id: &client0 client0
       observeEvents: [ commandStartedEvent, commandSucceededEvent ]
   - database:
-      id: database0
-      client: client0
-      databaseName: crud-tests
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
   - collection:
-      id: collection0
-      database: database0
-      collectionName: coll0
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
 
 initialData:
-  - collectionName: coll0
-    databaseName: crud-tests
+  - collectionName: *collection0Name
+    databaseName: *database0Name
     documents:
       - { _id: 1, x: 11 }
       - { _id: 2, x: 22 }
@@ -28,7 +28,7 @@ tests:
     runOnRequirements:
       - minServerVersion: "8.0"
     operations:
-      - object: collection0
+      - object: *collection0
         name: bulkWrite
         arguments:
           requests:
@@ -37,11 +37,11 @@ tests:
                 sort: { _id: -1 }
                 update: [ $set: { x: 1 } ]
     expectEvents:
-      - client: client0
+      - client: *client0
         events:
           - commandStartedEvent:
               command:
-                update: coll0
+                update: *collection0Name
                 updates:
                   - q: { _id: { $gt: 1 } }
                     u: [ $set: { x: 1 } ]
@@ -52,8 +52,8 @@ tests:
               reply: { ok: 1, n: 1 }
               commandName: update
     outcome:
-      - collectionName: coll0
-        databaseName: crud-tests
+      - collectionName: *collection0Name
+        databaseName: *database0Name
         documents:
           - { _id: 1, x: 11 }
           - { _id: 2, x: 22 }
@@ -63,7 +63,7 @@ tests:
     runOnRequirements:
       - maxServerVersion: "7.99"
     operations:
-      - object: collection0
+      - object: *collection0
         name: bulkWrite
         arguments:
           requests:
@@ -74,11 +74,11 @@ tests:
         expectError:
           isClientError: false
     expectEvents:
-      - client: client0
+      - client: *client0
         events:
           - commandStartedEvent:
               command:
-                update: coll0
+                update: *collection0Name
                 updates:
                   - q: { _id: { $gt: 1 } }
                     u: [ $set: { x: 1 } ]
@@ -86,8 +86,8 @@ tests:
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
     outcome:
-      - collectionName: coll0
-        databaseName: crud-tests
+      - collectionName: *collection0Name
+        databaseName: *database0Name
         documents:
           - { _id: 1, x: 11 }
           - { _id: 2, x: 22 }

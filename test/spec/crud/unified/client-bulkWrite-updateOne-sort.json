@@ -1,0 +1,166 @@
+{
+  "description": "client bulkWrite updateOne-sort",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "8.0"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "_yamlAnchors": {
+    "namespace": "crud-tests.coll0"
+  },
+  "tests": [
+    {
+      "description": "client bulkWrite updateOne with sort option",
+      "operations": [
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "updateOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  },
+                  "sort": {
+                    "_id": -1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "ops": [
+                    {
+                      "update": 0,
+                      "filter": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "updateMods": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "sort": {
+                        "_id": -1
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "crud-tests.coll0"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "nErrors": 0,
+                  "nMatched": 1,
+                  "nModified": 1
+                },
+                "commandName": "bulkWrite"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 34
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
