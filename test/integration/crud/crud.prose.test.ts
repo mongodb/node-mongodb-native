@@ -3,9 +3,10 @@ import { once } from 'events';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
-  type AnyClientBulkWriteModel,
+  type ClientBulkWriteModel,
   type ClientSession,
   type Collection,
+  type Document,
   MongoBulkWriteError,
   type MongoClient,
   MongoClientBulkWriteError,
@@ -175,7 +176,7 @@ describe('CRUD Prose Spec Tests', () => {
     // firstEvent.operationId is equal to secondEvent.operationId.
     let client: MongoClient;
     let maxWriteBatchSize;
-    const models: AnyClientBulkWriteModel[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -188,12 +189,12 @@ describe('CRUD Prose Spec Tests', () => {
       client.on('commandStarted', filterForCommands('bulkWrite', commands));
       commands.length = 0;
 
-      Array.from({ length: maxWriteBatchSize + 1 }, () => {
-        models.push({
+      models = Array.from({ length: maxWriteBatchSize + 1 }, () => {
+        return {
           namespace: 'db.coll',
           name: 'insertOne',
           document: { a: 'b' }
-        });
+        };
       });
     });
 
@@ -243,7 +244,7 @@ describe('CRUD Prose Spec Tests', () => {
     let maxBsonObjectSize;
     let maxMessageSizeBytes;
     let numModels;
-    const models: AnyClientBulkWriteModel[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -258,14 +259,14 @@ describe('CRUD Prose Spec Tests', () => {
       client.on('commandStarted', filterForCommands('bulkWrite', commands));
       commands.length = 0;
 
-      Array.from({ length: numModels }, () => {
-        models.push({
+      models = Array.from({ length: numModels }, () => {
+        return {
           name: 'insertOne',
           namespace: 'db.coll',
           document: {
             a: 'b'.repeat(maxBsonObjectSize - 500)
           }
-        });
+        };
       });
     });
 
@@ -314,7 +315,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Assert that two CommandStartedEvents were observed for the bulkWrite command.
     let client: MongoClient;
     let maxWriteBatchSize;
-    const models: AnyClientBulkWriteModel[] = [];
+    let models: ClientBulkWriteModel[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -338,12 +339,12 @@ describe('CRUD Prose Spec Tests', () => {
       client.on('commandStarted', filterForCommands('bulkWrite', commands));
       commands.length = 0;
 
-      Array.from({ length: maxWriteBatchSize + 1 }, () => {
-        models.push({
+      models = Array.from({ length: maxWriteBatchSize + 1 }, () => {
+        return {
           namespace: 'db.coll',
           name: 'insertOne',
           document: { a: 'b' }
-        });
+        };
       });
     });
 
@@ -382,7 +383,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Construct a list of write models (referred to as models) with model repeated maxWriteBatchSize + 1 times.
     let client: MongoClient;
     let maxWriteBatchSize;
-    const models: AnyClientBulkWriteModel[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -390,18 +391,18 @@ describe('CRUD Prose Spec Tests', () => {
       await client.connect();
       await client.db('db').collection('coll').drop();
       const hello = await client.db('admin').command({ hello: 1 });
-      await client.db('db').collection('coll').insertOne({ _id: 1 });
+      await client.db('db').collection<{ _id?: number }>('coll').insertOne({ _id: 1 });
       maxWriteBatchSize = hello.maxWriteBatchSize;
 
       client.on('commandStarted', filterForCommands('bulkWrite', commands));
       commands.length = 0;
 
-      Array.from({ length: maxWriteBatchSize + 1 }, () => {
-        models.push({
+      models = Array.from({ length: maxWriteBatchSize + 1 }, () => {
+        return {
           namespace: 'db.coll',
           name: 'insertOne',
           document: { _id: 1 }
-        });
+        };
       });
     });
 
@@ -471,7 +472,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Assert that a CommandStartedEvent was observed for the getMore command.
     let client: MongoClient;
     let maxBsonObjectSize;
-    const models: AnyClientBulkWriteModel[] = [];
+    const models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -545,7 +546,7 @@ describe('CRUD Prose Spec Tests', () => {
     let client: MongoClient;
     let session: ClientSession;
     let maxBsonObjectSize;
-    const models: AnyClientBulkWriteModel[] = [];
+    const models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -632,7 +633,7 @@ describe('CRUD Prose Spec Tests', () => {
     // Assert that a CommandStartedEvent was observed for the killCursors command.
     let client: MongoClient;
     let maxBsonObjectSize;
-    const models: AnyClientBulkWriteModel[] = [];
+    const models: ClientBulkWriteModel<Document>[] = [];
     const getMoreCommands: CommandStartedEvent[] = [];
     const killCursorsCommands: CommandStartedEvent[] = [];
 
@@ -738,7 +739,8 @@ describe('CRUD Prose Spec Tests', () => {
         async test() {
           const error = await client
             .bulkWrite([{ name: 'insertOne', namespace: 'db.coll', document: document }], {
-              writeConcern: { w: 0 }
+              writeConcern: { w: 0 },
+              ordered: false
             })
             .catch(error => error);
           expect(error.message).to.include('Client bulk write operation ops of length');
@@ -763,7 +765,7 @@ describe('CRUD Prose Spec Tests', () => {
           const error = await client
             .bulkWrite(
               [{ name: 'replaceOne', namespace: 'db.coll', filter: {}, replacement: document }],
-              { writeConcern: { w: 0 } }
+              { writeConcern: { w: 0 }, ordered: false }
             )
             .catch(error => error);
           expect(error.message).to.include('Client bulk write operation ops of length');
@@ -802,7 +804,7 @@ describe('CRUD Prose Spec Tests', () => {
     let opsBytes;
     let numModels;
     let remainderBytes;
-    let models: AnyClientBulkWriteModel[] = [];
+    let models: ClientBulkWriteModel<Document>[] = [];
     const commands: CommandStartedEvent[] = [];
 
     beforeEach(async function () {
@@ -820,12 +822,12 @@ describe('CRUD Prose Spec Tests', () => {
       commands.length = 0;
       models = [];
 
-      Array.from({ length: numModels }, () => {
-        models.push({
+      models = Array.from({ length: numModels }, () => {
+        return {
           namespace: 'db.coll',
           name: 'insertOne',
           document: { a: 'b'.repeat(maxBsonObjectSize - 57) }
-        });
+        };
       });
 
       if (remainderBytes >= 217) {
@@ -858,7 +860,7 @@ describe('CRUD Prose Spec Tests', () => {
       it('executes in a single batch', {
         metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
         async test() {
-          const sameNamespaceModel: AnyClientBulkWriteModel = {
+          const sameNamespaceModel: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
             namespace: 'db.coll',
             document: { a: 'b' }
@@ -895,7 +897,7 @@ describe('CRUD Prose Spec Tests', () => {
         metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
         async test() {
           const namespace = `db.${'c'.repeat(200)}`;
-          const newNamespaceModel: AnyClientBulkWriteModel = {
+          const newNamespaceModel: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
             namespace: namespace,
             document: { a: 'b' }
@@ -949,7 +951,7 @@ describe('CRUD Prose Spec Tests', () => {
       it('raises a client error', {
         metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
         async test() {
-          const model: AnyClientBulkWriteModel = {
+          const model: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
             namespace: 'db.coll',
             document: { a: 'b'.repeat(maxMessageSizeBytes) }
@@ -975,7 +977,7 @@ describe('CRUD Prose Spec Tests', () => {
         metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
         async test() {
           const namespace = `db.${'c'.repeat(maxMessageSizeBytes)}`;
-          const model: AnyClientBulkWriteModel = {
+          const model: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
             namespace: namespace,
             document: { a: 'b' }
@@ -1032,7 +1034,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('raises a client side error', async function () {
-      const model: AnyClientBulkWriteModel = {
+      const model: ClientBulkWriteModel<Document> = {
         name: 'insertOne',
         namespace: 'db.coll',
         document: { a: 'b' }
@@ -1077,6 +1079,91 @@ describe('CRUD Prose Spec Tests', () => {
 
       const [{ command }] = commands;
       expect(command).to.have.property('maxTimeMS', 2000);
+    });
+  });
+
+  describe('15. `MongoClient.bulkWrite` with unacknowledged write concern uses `w:0` for all batches', function () {
+    // This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
+    // If testing with a sharded cluster, only connect to one mongos. This is intended to ensure the `countDocuments` operation
+    // uses the same connection as the `bulkWrite` to get the correct connection count. (See
+    // [DRIVERS-2921](https://jira.mongodb.org/browse/DRIVERS-2921)).
+    // Construct a `MongoClient` (referred to as `client`) with
+    // [command monitoring](../../command-logging-and-monitoring/command-logging-and-monitoring.md) enabled to observe
+    // CommandStartedEvents. Perform a `hello` command using `client` and record the `maxBsonObjectSize` and
+    // `maxMessageSizeBytes` values in the response.
+    // Construct a `MongoCollection` (referred to as `coll`) for the collection "db.coll". Drop `coll`.
+    // Use the `create` command to create "db.coll" to workaround [SERVER-95537](https://jira.mongodb.org/browse/SERVER-95537).
+    // Construct the following write model (referred to as `model`):
+    // InsertOne: {
+    //   "namespace": "db.coll",
+    //   "document": { "a": "b".repeat(maxBsonObjectSize - 500) }
+    // }
+    // Construct a list of write models (referred to as `models`) with `model` repeated
+    // `maxMessageSizeBytes / maxBsonObjectSize + 1` times.
+    // Call `client.bulkWrite` with `models`. Pass `BulkWriteOptions` with `ordered` set to `false` and `writeConcern` set to
+    // an unacknowledged write concern. Assert no error occurred. Assert the result indicates the write was unacknowledged.
+    // Assert that two CommandStartedEvents (referred to as `firstEvent` and `secondEvent`) were observed for the `bulkWrite`
+    // command. Assert that the length of `firstEvent.command.ops` is `maxMessageSizeBytes / maxBsonObjectSize`. Assert that
+    // the length of `secondEvent.command.ops` is 1. If the driver exposes `operationId`s in its CommandStartedEvents, assert
+    // that `firstEvent.operationId` is equal to `secondEvent.operationId`. Assert both commands include
+    // `writeConcern: {w: 0}`.
+    // To force completion of the `w:0` writes, execute `coll.countDocuments` and expect the returned count is
+    // `maxMessageSizeBytes / maxBsonObjectSize + 1`. This is intended to avoid incomplete writes interfering with other tests
+    // that may use this collection.
+    let client: MongoClient;
+    let maxBsonObjectSize;
+    let maxMessageSizeBytes;
+    let numModels;
+    let models: ClientBulkWriteModel<Document>[] = [];
+    const commands: CommandStartedEvent[] = [];
+
+    beforeEach(async function () {
+      const uri = this.configuration.url({
+        useMultipleMongoses: false
+      });
+      client = this.configuration.newClient(uri, { monitorCommands: true });
+      await client.connect();
+      await client
+        .db('db')
+        .collection('coll')
+        .drop()
+        .catch(() => null);
+      await client.db('db').createCollection('coll');
+      const hello = await client.db('admin').command({ hello: 1 });
+      maxBsonObjectSize = hello.maxBsonObjectSize;
+      maxMessageSizeBytes = hello.maxMessageSizeBytes;
+      numModels = Math.floor(maxMessageSizeBytes / maxBsonObjectSize) + 1;
+      models = Array.from({ length: numModels }, () => {
+        return {
+          name: 'insertOne',
+          namespace: 'db.coll',
+          document: {
+            a: 'b'.repeat(maxBsonObjectSize - 500)
+          }
+        };
+      });
+
+      client.on('commandStarted', filterForCommands('bulkWrite', commands));
+      commands.length = 0;
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('performs all writes unacknowledged', {
+      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      async test() {
+        const result = await client.bulkWrite(models, { ordered: false, writeConcern: { w: 0 } });
+        expect(result.acknowledged).to.be.false;
+        expect(commands.length).to.equal(2);
+        expect(commands[0].command.ops.length).to.equal(numModels - 1);
+        expect(commands[0].command.writeConcern.w).to.equal(0);
+        expect(commands[1].command.ops.length).to.equal(1);
+        expect(commands[1].command.writeConcern.w).to.equal(0);
+        const count = await client.db('db').collection('coll').countDocuments();
+        expect(count).to.equal(numModels);
+      }
     });
   });
 });

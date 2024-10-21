@@ -1,9 +1,8 @@
-import { type DeserializeOptions } from 'bson';
-
 import {
   type BSONElement,
   type BSONSerializeOptions,
   BSONType,
+  type DeserializeOptions,
   type Document,
   Long,
   parseToElementsToArray,

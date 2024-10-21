@@ -1,5 +1,4 @@
-import type { Document } from 'bson';
-
+import type { Document } from '../../bson';
 import type { Collection } from '../../collection';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';

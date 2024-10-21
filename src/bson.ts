@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import { BSON, type DeserializeOptions, type SerializeOptions } from 'bson';
 
 export {
@@ -12,6 +13,7 @@ export {
   DBRef,
   Decimal128,
   deserialize,
+  type DeserializeOptions,
   Document,
   Double,
   EJSON,
@@ -21,6 +23,7 @@ export {
   MaxKey,
   MinKey,
   ObjectId,
+  type ObjectIdLike,
   serialize,
   Timestamp,
   UUID

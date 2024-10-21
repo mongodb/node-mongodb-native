@@ -15,6 +15,7 @@ import {
   type Document,
   type HostAddress,
   MongoClient,
+  now,
   OP_MSG,
   Topology,
   type TopologyOptions
@@ -601,8 +602,12 @@ export async function waitUntilPoolsFilled(
   await Promise.all([wait$(), client.connect()]);
 }
 
-export async function configureFailPoint(configuration: TestConfiguration, failPoint: FailPoint) {
-  const utilClient = configuration.newClient();
+export async function configureFailPoint(
+  configuration: TestConfiguration,
+  failPoint: FailPoint,
+  uri = configuration.url()
+) {
+  const utilClient = configuration.newClient(uri);
   await utilClient.connect();
 
   try {
@@ -612,8 +617,8 @@ export async function configureFailPoint(configuration: TestConfiguration, failP
   }
 }
 
-export async function clearFailPoint(configuration: TestConfiguration) {
-  const utilClient = configuration.newClient();
+export async function clearFailPoint(configuration: TestConfiguration, url = configuration.url()) {
+  const utilClient = configuration.newClient(url);
   await utilClient.connect();
 
   try {
@@ -664,4 +669,22 @@ export async function makeMultiResponseBatchModelArray(
   ];
 
   return models;
+}
+
+/**
+ * A utility to measure the duration of an async function.  This is intended to be used for CSOT
+ * testing, where we expect to timeout within a certain threshold and want to measure the duration
+ * of that operation.
+ */
+export async function measureDuration<T>(f: () => Promise<T>): Promise<{
+  duration: number;
+  result: T | Error;
+}> {
+  const start = now();
+  const result = await f().catch(e => e);
+  const end = now();
+  return {
+    duration: end - start,
+    result
+  };
 }
