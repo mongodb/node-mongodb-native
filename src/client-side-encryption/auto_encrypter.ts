@@ -310,7 +310,7 @@ export class AutoEncrypter {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: TS complains as this always returns true on versions where it is present.
       if (net.getDefaultAutoSelectFamily) {
-        Object.assign(clientOptions, autoSelectSocketOptions(this._client.options));
+        Object.assign(clientOptions, autoSelectSocketOptions(this._client.s.options));
       }
 
       this._mongocryptdClient = new MongoClient(this._mongocryptdManager.uri, clientOptions);
@@ -392,7 +392,7 @@ export class AutoEncrypter {
       promoteLongs: false,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options
     });
 
     return deserialize(await stateMachine.execute(this, context), {
@@ -413,7 +413,7 @@ export class AutoEncrypter {
       ...options,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
     return await stateMachine.execute(this, context);

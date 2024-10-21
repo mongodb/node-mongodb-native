@@ -217,7 +217,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
     const dataKey = deserialize(await stateMachine.execute(this, context)) as DataKey;
@@ -275,7 +275,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
     const timeoutContext = TimeoutContext.create(
@@ -664,7 +664,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
     const { v } = deserialize(await stateMachine.execute(this, context));
@@ -743,7 +743,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
