@@ -11,7 +11,7 @@ import {
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
-import { MongoInvalidArgumentError } from './error';
+import { MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Filter,
@@ -262,6 +262,11 @@ export class Collection<TSchema extends Document = Document> {
     this.s.collectionHint = normalizeHintField(v);
   }
 
+  /** @internal */
+  get timeoutMS(): number | undefined {
+    return this.s.options.timeoutMS;
+  }
+
   /**
    * Inserts a single document into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -465,10 +470,14 @@ export class Collection<TSchema extends Document = Document> {
     // Intentionally, we do not inherit options from parent for this operation.
     return await executeOperation(
       this.client,
-      new RenameOperation(this as TODO_NODE_3286, newName, {
-        ...options,
-        readPreference: ReadPreference.PRIMARY
-      }) as TODO_NODE_3286
+      new RenameOperation(
+        this as TODO_NODE_3286,
+        newName,
+        resolveOptions(undefined, {
+          ...options,
+          readPreference: ReadPreference.PRIMARY
+        })
+      ) as TODO_NODE_3286
     );
   }
 
@@ -492,12 +501,18 @@ export class Collection<TSchema extends Document = Document> {
    */
   async findOne(): Promise<WithId<TSchema> | null>;
   async findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
-  async findOne(filter: Filter<TSchema>, options: FindOptions): Promise<WithId<TSchema> | null>;
+  async findOne(
+    filter: Filter<TSchema>,
+    options: Omit<FindOptions, 'timeoutMode'>
+  ): Promise<WithId<TSchema> | null>;
 
   // allow an override of the schema.
   async findOne<T = TSchema>(): Promise<T | null>;
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
-  async findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | null>;
+  async findOne<T = TSchema>(
+    filter: Filter<TSchema>,
+    options?: Omit<FindOptions, 'timeoutMode'>
+  ): Promise<T | null>;
 
   async findOne(
     filter: Filter<TSchema> = {},
@@ -669,7 +684,9 @@ export class Collection<TSchema extends Document = Document> {
         new DropIndexOperation(this as TODO_NODE_3286, '*', resolveOptions(this, options))
       );
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof MongoOperationTimeoutError) throw error; // TODO: Check the spec for index management behaviour/file a drivers ticket for this
+      // Seems like we should throw all errors
       return false;
     }
   }

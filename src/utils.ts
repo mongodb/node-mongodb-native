@@ -26,7 +26,6 @@ import {
   MongoParseError,
   MongoRuntimeError
 } from './error';
-import type { Explain, ExplainVerbosity } from './explain';
 import type { MongoClient } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
@@ -36,6 +35,7 @@ import { ServerType } from './sdam/common';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
 import type { ClientSession } from './sessions';
+import { type TimeoutContextOptions } from './timeout';
 import { WriteConcern } from './write_concern';
 
 /**
@@ -243,32 +243,6 @@ export function decorateWithReadConcern(
   if (Object.keys(readConcern).length > 0) {
     Object.assign(command, { readConcern: readConcern });
   }
-}
-
-/**
- * Applies an explain to a given command.
- * @internal
- *
- * @param command - the command on which to apply the explain
- * @param options - the options containing the explain verbosity
- */
-export function decorateWithExplain(
-  command: Document,
-  explain: Explain
-): {
-  explain: Document;
-  verbosity: ExplainVerbosity;
-  maxTimeMS?: number;
-} {
-  type ExplainCommand = ReturnType<typeof decorateWithExplain>;
-  const { verbosity, maxTimeMS } = explain;
-  const baseCommand: ExplainCommand = { explain: command, verbosity };
-
-  if (typeof maxTimeMS === 'number') {
-    baseCommand.maxTimeMS = maxTimeMS;
-  }
-
-  return baseCommand;
 }
 
 /**
@@ -515,9 +489,25 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
   return keys.length > 0 && keys[0][0] === '$';
 }
 
+export function resolveTimeoutOptions<T extends Partial<TimeoutContextOptions>>(
+  client: MongoClient,
+  options: T
+): T &
+  Pick<
+    MongoClient['s']['options'],
+    'timeoutMS' | 'serverSelectionTimeoutMS' | 'waitQueueTimeoutMS' | 'socketTimeoutMS'
+  > {
+  const { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS, timeoutMS } =
+    client.s.options;
+  return { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS, timeoutMS, ...options };
+}
 /**
  * Merge inherited properties from parent into options, prioritizing values from options,
  * then values from parent.
+ *
+ * @param parent - An optional owning class of the operation being run. ex. Db/Collection/MongoClient.
+ * @param options - The options passed to the operation method.
+ *
  * @internal
  */
 export function resolveOptions<T extends CommandOperationOptions>(
@@ -544,6 +534,15 @@ export function resolveOptions<T extends CommandOperationOptions>(
   if (readPreference) {
     result.readPreference = readPreference;
   }
+
+  const isConvenientTransaction = session?.explicit && session?.timeoutContext != null;
+  if (isConvenientTransaction && options?.timeoutMS != null) {
+    throw new MongoInvalidArgumentError(
+      'An operation cannot be given a timeoutMS setting when inside a withTransaction call that has a timeoutMS setting'
+    );
+  }
+
+  result.timeoutMS = options?.timeoutMS ?? parent?.timeoutMS;
 
   return result;
 }
@@ -1396,6 +1395,12 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
   } catch {
     return false;
   }
+}
+
+export function csotMin(duration1: number, duration2: number): number {
+  if (duration1 === 0) return duration2;
+  if (duration2 === 0) return duration1;
+  return Math.min(duration1, duration2);
 }
 
 export function noop() {

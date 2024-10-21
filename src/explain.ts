@@ -1,3 +1,7 @@
+import { type Document } from './bson';
+import { AbstractCursor } from './cursor/abstract_cursor';
+import { MongoAPIError } from './error';
+
 /** @public */
 export const ExplainVerbosity = Object.freeze({
   queryPlanner: 'queryPlanner',
@@ -84,5 +88,86 @@ export class Explain {
 
     const { verbosity, maxTimeMS } = explain;
     return new Explain(verbosity, maxTimeMS);
+  }
+}
+
+export function validateExplainTimeoutOptions(options: Document, explain?: Explain) {
+  const { maxTimeMS, timeoutMS } = options;
+  if (timeoutMS != null && (maxTimeMS != null || explain?.maxTimeMS != null)) {
+    throw new MongoAPIError('Cannot use maxTimeMS with timeoutMS for explain commands.');
+  }
+}
+
+/**
+ * Applies an explain to a given command.
+ * @internal
+ *
+ * @param command - the command on which to apply the explain
+ * @param options - the options containing the explain verbosity
+ */
+export function decorateWithExplain(
+  command: Document,
+  explain: Explain
+): {
+  explain: Document;
+  verbosity: ExplainVerbosity;
+  maxTimeMS?: number;
+} {
+  type ExplainCommand = ReturnType<typeof decorateWithExplain>;
+  const { verbosity, maxTimeMS } = explain;
+  const baseCommand: ExplainCommand = { explain: command, verbosity };
+
+  if (typeof maxTimeMS === 'number') {
+    baseCommand.maxTimeMS = maxTimeMS;
+  }
+
+  return baseCommand;
+}
+
+/**
+ * @public
+ *
+ * A base class for any cursors that have `explain()` methods.
+ */
+export abstract class ExplainableCursor<TSchema> extends AbstractCursor<TSchema> {
+  /** Execute the explain for the cursor */
+  abstract explain(): Promise<Document>;
+  abstract explain(verbosity: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document>;
+  abstract explain(options: { timeoutMS?: number }): Promise<Document>;
+  abstract explain(
+    verbosity: ExplainVerbosityLike | ExplainCommandOptions,
+    options: { timeoutMS?: number }
+  ): Promise<Document>;
+  abstract explain(
+    verbosity?: ExplainVerbosityLike | ExplainCommandOptions | { timeoutMS?: number },
+    options?: { timeoutMS?: number }
+  ): Promise<Document>;
+
+  protected resolveExplainTimeoutOptions(
+    verbosity?: ExplainVerbosityLike | ExplainCommandOptions | { timeoutMS?: number },
+    options?: { timeoutMS?: number }
+  ): { timeout?: { timeoutMS?: number }; explain?: ExplainVerbosityLike | ExplainCommandOptions } {
+    let explain: ExplainVerbosityLike | ExplainCommandOptions | undefined;
+    let timeout: { timeoutMS?: number } | undefined;
+
+    if (verbosity == null && options == null) {
+      explain = undefined;
+      timeout = undefined;
+    } else if (verbosity != null && options == null) {
+      explain =
+        typeof verbosity !== 'object'
+          ? verbosity
+          : 'verbosity' in verbosity
+            ? verbosity
+            : undefined;
+
+      timeout = typeof verbosity === 'object' && 'timeoutMS' in verbosity ? verbosity : undefined;
+    } else {
+      // @ts-expect-error TS isn't smart enough to determine that if both options are provided, the first is explain options
+      explain = verbosity;
+      timeout = options;
+    }
+
+    return { timeout, explain };
   }
 }

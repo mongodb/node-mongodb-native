@@ -109,7 +109,10 @@
                 "reply": {
                   "cursor": {
                     "id": {
-                      "$$type": "long"
+                      "$$type": [
+                        "int",
+                        "long"
+                      ]
                     },
                     "ns": {
                       "$$type": "string"
@@ -126,7 +129,10 @@
               "commandStartedEvent": {
                 "command": {
                   "getMore": {
-                    "$$type": "long"
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
                   },
                   "collection": "coll0"
                 },
@@ -138,7 +144,10 @@
                 "reply": {
                   "cursor": {
                     "id": {
-                      "$$type": "long"
+                      "$$type": [
+                        "int",
+                        "long"
+                      ]
                     },
                     "ns": {
                       "$$type": "string"

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { it } from 'mocha';
 
-import { Explain, ExplainVerbosity } from '../mongodb';
+import { Explain, ExplainVerbosity, FindCursor, MongoClient, MongoDBNamespace } from '../mongodb';
 
 describe('class Explain {}', function () {
   describe('static .fromOptions()', function () {
@@ -48,6 +48,44 @@ describe('class Explain {}', function () {
         expect(explain).to.have.property('verbosity', 'some random string');
         expect(explain).to.have.property('maxTimeMS', 2000);
       });
+    });
+  });
+
+  describe('parseTimeoutOptions()', function () {
+    const cursor = new FindCursor(
+      new MongoClient('mongodb://localhost:27027'),
+      MongoDBNamespace.fromString('foo.bar'),
+      {},
+      {}
+    );
+
+    it('parseTimeoutOptions()', function () {
+      const { timeout, explain } = cursor.resolveExplainTimeoutOptions();
+      expect(timeout).to.be.undefined;
+      expect(explain).to.be.undefined;
+    });
+
+    it('parseTimeoutOptions(<timeout options>)', function () {
+      const { timeout, explain } = cursor.resolveExplainTimeoutOptions({ timeoutMS: 1_000 });
+      expect(timeout).to.deep.equal({ timeoutMS: 1_000 });
+      expect(explain).to.be.undefined;
+    });
+
+    it('parseTimeoutOptions(<explain options>)', function () {
+      const { timeout, explain } = cursor.resolveExplainTimeoutOptions({
+        verbosity: 'queryPlanner'
+      });
+      expect(timeout).to.be.undefined;
+      expect(explain).to.deep.equal({ verbosity: 'queryPlanner' });
+    });
+
+    it('parseTimeoutOptions(<explain options, timeout options>)', function () {
+      const { timeout, explain } = cursor.resolveExplainTimeoutOptions(
+        { verbosity: 'queryPlanner' },
+        { timeoutMS: 1_000 }
+      );
+      expect(timeout).to.deep.equal({ timeoutMS: 1_000 });
+      expect(explain).to.deep.equal({ verbosity: 'queryPlanner' });
     });
   });
 });

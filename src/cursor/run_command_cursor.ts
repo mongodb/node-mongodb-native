@@ -9,12 +9,22 @@ import type { ReadConcernLike } from '../read_concern';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { ns } from '../utils';
-import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
+import {
+  AbstractCursor,
+  type CursorTimeoutMode,
+  type InitialCursorResponse
+} from './abstract_cursor';
 
 /** @public */
 export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
+  /** @internal */
+  timeoutMS?: number;
+  /** @internal */
+  timeoutMode?: CursorTimeoutMode;
+  tailable?: boolean;
+  awaitData?: boolean;
 } & BSONSerializeOptions;
 
 /** @public */
@@ -105,7 +115,7 @@ export class RunCommandCursor extends AbstractCursor {
       responseType: CursorResponse
     });
 
-    const response = await executeOperation(this.client, operation);
+    const response = await executeOperation(this.client, operation, this.timeoutContext);
 
     return {
       server: operation.server,
@@ -123,6 +133,6 @@ export class RunCommandCursor extends AbstractCursor {
       ...this.getMoreOptions
     });
 
-    return await executeOperation(this.client, getMoreOperation);
+    return await executeOperation(this.client, getMoreOperation, this.timeoutContext);
   }
 }
