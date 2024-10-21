@@ -392,7 +392,7 @@ export class AutoEncrypter {
       promoteLongs: false,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
     return deserialize(await stateMachine.execute(this, context), {
