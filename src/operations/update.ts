@@ -28,9 +28,9 @@ export interface UpdateOptions extends CommandOperationOptions {
    * documents. The first document matched by the sort order will be updated.
    *
    * The server will report an error if the caller explicitly provides a value with updateMany().
-   * 
+   *
    * This option is only supported by servers >= 8.0. Older servers will report an error for using this option.
-  */
+   */
   sort?: Document;
 }
 
@@ -219,14 +219,14 @@ export interface ReplaceOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
-  /** 
+  /**
    * Specify which document the operation replaces if the query matches multiple
    * documents. The first document matched by the sort order will be replaced.
-   * 
+   *
    * The server will report an error if the caller explicitly provides a value with replaceMany().
-   * 
+   *
    * This option is only supported by servers >= 8.0. Older servers will report an error for using this option.
-  */
+   */
   sort?: Document;
 }
 
@@ -289,7 +289,7 @@ export function makeUpdateStatement(
 
   if (options.multi) {
     op.multi = options.multi;
-  } 
+  }
 
   if (options.sort) {
     op.sort = formatSort(options?.sort);

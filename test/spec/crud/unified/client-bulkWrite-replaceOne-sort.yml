@@ -1,4 +1,4 @@
-description: client bulkWrite updateOne-sort
+description: client bulkWrite replaceOne-sort
 
 schemaVersion: "1.4"
 
