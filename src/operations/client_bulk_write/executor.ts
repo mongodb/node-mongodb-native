@@ -1,5 +1,4 @@
-import { type Document } from 'bson';
-
+import { type Document } from '../../bson';
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
 import {
   MongoClientBulkWriteError,
