@@ -1,5 +1,5 @@
 /* Anything javascript specific relating to timeouts */
-import { once } from 'node:events';
+import { on, once } from 'node:events';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { setTimeout } from 'node:timers/promises';
@@ -10,6 +10,7 @@ import * as sinon from 'sinon';
 
 import {
   BSON,
+  type ChangeStream,
   type ClientSession,
   type Collection,
   type CommandFailedEvent,
@@ -810,6 +811,183 @@ describe('CSOT driver tests', metadata, () => {
           expect(getMores).to.have.lengthOf(1);
           expect(getMores[0].command.getMore).to.exist;
           expect(getMores[0].command.getMore.maxTimeMS).to.not.exist;
+        });
+      });
+    });
+  });
+
+  describe('Change Streams', function () {
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', topology: '!single' } };
+    let internalClient: MongoClient;
+    let client: MongoClient;
+    let commandsStarted: CommandStartedEvent[];
+
+    beforeEach(async function () {
+      internalClient = this.configuration.newClient();
+      await internalClient
+        .db('db')
+        .dropCollection('coll')
+        .catch(() => null);
+      await internalClient.db('db').collection('coll').insertOne({ x: 0 });
+      commandsStarted = [];
+
+      client = await this.configuration.newClient(undefined, { monitorCommands: true }).connect();
+      client.on('commandStarted', ev => {
+        commandsStarted.push(ev);
+      });
+    });
+
+    afterEach(async function () {
+      await internalClient
+        .db()
+        .admin()
+        ?.command({ configureFailPoint: 'failCommand', mode: 'off' });
+      await internalClient?.close();
+      await client?.close();
+    });
+
+    context('when in stream mode', function () {
+      let data: any[];
+      let cs: ChangeStream;
+      let errorIter: AsyncIterableIterator<any[]>;
+
+      afterEach(async function () {
+        await cs?.close();
+      });
+
+      context('when the initial aggregate times out', function () {
+        beforeEach(async function () {
+          data = [];
+          const failpoint: FailPoint = {
+            configureFailPoint: 'failCommand',
+            mode: { times: 1 }, // fail twice to account for executeOperation's retry attempt
+            data: {
+              failCommands: ['aggregate'],
+              blockConnection: true,
+              blockTimeMS: 130
+            }
+          };
+
+          await internalClient.db().admin().command(failpoint);
+          cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
+          errorIter = on(cs, 'error');
+          cs.on('change', () => {
+            // Add empty listener just to get the change stream running
+          });
+        });
+
+        it('emits an error event', metadata, async function () {
+          const err = (await errorIter.next()).value[0];
+
+          expect(data).to.have.lengthOf(0);
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+        });
+
+        it('closes the change stream', metadata, async function () {
+          const err = (await errorIter.next()).value[0];
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+          expect(cs.closed).to.be.true;
+        });
+      });
+
+      context('when the getMore times out', function () {
+        beforeEach(async function () {
+          data = [];
+          const failpoint: FailPoint = {
+            configureFailPoint: 'failCommand',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              blockConnection: true,
+              blockTimeMS: 130
+            }
+          };
+
+          await internalClient.db().admin().command(failpoint);
+          cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
+          errorIter = on(cs, 'error');
+          cs.on('change', () => {
+            // Add empty listener just to get the change stream running
+          });
+        });
+
+        it('emits an error event', metadata, async function () {
+          const [err] = (await errorIter.next()).value;
+          expect(data).to.have.lengthOf(0);
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+        });
+
+        it('continues emitting change events', metadata, async function () {
+          const err = (await errorIter.next()).value[0];
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+
+          await once(cs, 'resumeTokenChanged');
+
+          await client.db('db').collection('coll').insertOne({ x: 1 });
+
+          const [change] = await once(cs, 'change');
+          expect(change).to.have.ownProperty('operationType', 'insert');
+        });
+
+        it('does not close the change stream', metadata, async function () {
+          const [err] = (await errorIter.next()).value;
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+
+          expect(cs.closed).to.be.false;
+        });
+
+        it('attempts to create a new change stream cursor', metadata, async function () {
+          await errorIter.next();
+          let aggregates = commandsStarted
+            .filter(x => x.commandName === 'aggregate')
+            .map(x => x.command);
+          expect(aggregates).to.have.lengthOf(1);
+
+          await once(cs, 'resumeTokenChanged');
+
+          aggregates = commandsStarted
+            .filter(x => x.commandName === 'aggregate')
+            .map(x => x.command);
+
+          expect(aggregates).to.have.lengthOf(2);
+
+          expect(aggregates[0].pipeline).to.deep.equal([{ $changeStream: {} }]);
+          expect(aggregates[1].pipeline).to.deep.equal([
+            { $changeStream: { resumeAfter: cs.resumeToken } }
+          ]);
+        });
+      });
+
+      context('when the resume attempt times out', function () {
+        const failpoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: { times: 2 }, // timeout the getMore, and the aggregate
+          data: {
+            failCommands: ['getMore', 'aggregate'],
+            blockConnection: true,
+            blockTimeMS: 130
+          }
+        };
+
+        beforeEach(async function () {
+          cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
+          const _changePromise = once(cs, 'change');
+          await once(cs.cursor, 'init');
+
+          await internalClient.db().admin().command(failpoint);
+        });
+
+        it('emits an error event', async function () {
+          let [err] = await once(cs, 'error'); // getMore failure
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+          [err] = await once(cs, 'error'); // aggregate failure
+          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+        });
+
+        it('closes the change stream', async function () {
+          await once(cs, 'error'); // await the getMore Failure
+          await once(cs, 'error'); // await the aggregate failure
+          expect(cs.closed).to.be.true;
         });
       });
     });
