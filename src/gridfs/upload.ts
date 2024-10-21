@@ -143,7 +143,7 @@ export class GridFSBucketWriteStream extends Writable {
     if (options.timeoutMS != null)
       this.timeoutContext = new CSOTTimeoutContext({
         timeoutMS: options.timeoutMS,
-        serverSelectionTimeoutMS: this.bucket.s.db.client.options.serverSelectionTimeoutMS
+        serverSelectionTimeoutMS: this.bucket.s.db.client.s.options.serverSelectionTimeoutMS
       });
   }
 
