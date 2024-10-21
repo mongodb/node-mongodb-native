@@ -4,6 +4,7 @@ import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } 
 import type { InferIdType, TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { formatSort } from '../sort';
 import { hasAtomicOperators, type MongoDBNamespace } from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -22,6 +23,15 @@ export interface UpdateOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /**
+   * Specify which document the operation updates if the query matches multiple
+   * documents. The first document matched by the sort order will be updated.
+   *
+   * The server will report an error if the caller explicitly provides a value with updateMany().
+   * 
+   * This option is only supported by servers >= 8.0. Older servers will report an error for using this option.
+  */
+  sort?: Document;
 }
 
 /**
@@ -57,6 +67,8 @@ export interface UpdateStatement {
   arrayFilters?: Document[];
   /** A document or string that specifies the index to use to support the query predicate. */
   hint?: Hint;
+  /** If the query matches multiple documents, the first document matched by the sort order will be updated. */
+  sort?: Map<string, 1 | -1 | { $meta: string }>;
 }
 
 /**
@@ -207,6 +219,15 @@ export interface ReplaceOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /** 
+   * Specify which document the operation replaces if the query matches multiple
+   * documents. The first document matched by the sort order will be replaced.
+   * 
+   * The server will report an error if the caller explicitly provides a value with replaceMany().
+   * 
+   * This option is only supported by servers >= 8.0. Older servers will report an error for using this option.
+  */
+  sort?: Document;
 }
 
 /** @internal */
@@ -268,6 +289,10 @@ export function makeUpdateStatement(
 
   if (options.multi) {
     op.multi = options.multi;
+  } 
+
+  if (options.sort) {
+    op.sort = formatSort(options?.sort);
   }
 
   if (options.hint) {
