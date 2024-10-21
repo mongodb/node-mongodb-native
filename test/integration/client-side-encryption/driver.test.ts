@@ -4,9 +4,14 @@ import * as crypto from 'crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { ObjectId, MongoOperationTimeoutError, type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  type MongoClient,
+  MongoCryptCreateEncryptedCollectionError
+} from '../../mongodb';
 import * as BSON from '../../mongodb';
-import { FailPoint, getEncryptExtraOptions } from '../../tools/utils';
+import { type FailPoint, getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata = {
   requires: {
@@ -474,21 +479,24 @@ describe('Range Explicit Encryption with JS native types', function () {
 
 describe('CSOT', function () {
   describe('Explicit Encryption', function () {
-    describe.only('#createEncryptedCollection', function () {
+    describe('#createEncryptedCollection', function () {
       let keyVaultClient: MongoClient;
       let internalClient: MongoClient;
       let clientEncryption: ClientEncryption;
+      const LOCAL_KEY = Buffer.from(
+        'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+        'base64'
+      );
 
       beforeEach(async function () {
         internalClient = this.configuration.newClient();
         await internalClient.connect();
         await internalClient.db('keyvault').createCollection('datakeys');
-        keyVaultClient = this.configuration.newClient({}); // { timeoutMS: 100 });
+        keyVaultClient = this.configuration.newClient({ timeoutMS: 100 });
         clientEncryption = new ClientEncryption(keyVaultClient, {
           keyVaultNamespace: 'keyvault.datakeys',
-          kmsProviders: { local: null }
+          kmsProviders: { local: { key: LOCAL_KEY } }
         });
-        /*
         await internalClient
           .db()
           .admin()
@@ -500,9 +508,9 @@ describe('CSOT', function () {
             data: {
               failCommands: ['create'],
               blockConnection: true,
-              blockTimeMS: 0
+              blockTimeMS: 1000
             }
-          } as FailPoint); */
+          } as FailPoint);
       });
 
       afterEach(async function () {
@@ -513,6 +521,7 @@ describe('CSOT', function () {
             configureFailPoint: 'failCommand',
             mode: 'off'
           } as FailPoint);
+        internalClient.db('db').collection('newnew').drop();
         await internalClient.close();
         await keyVaultClient.close();
       });
@@ -521,7 +530,7 @@ describe('CSOT', function () {
         'times out due to timeoutMS',
         {
           requires: {
-            //clientSideEncryption: true,
+            clientSideEncryption: true,
             mongodb: '>=7.0.0',
             topology: '!single'
           }
@@ -531,7 +540,7 @@ describe('CSOT', function () {
             encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
           };
 
-          let db = internalClient.db('db');
+          const db = internalClient.db('db');
           const err = await clientEncryption
             .createEncryptedCollection(db, 'newnew', {
               provider: 'local',
@@ -540,7 +549,10 @@ describe('CSOT', function () {
             })
             .catch(err => err);
 
-          expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(err).to.be.instanceOf(MongoCryptCreateEncryptedCollectionError);
+          expect(err.message).to.contain(
+            'Unable to create collection: Timed out during socket read'
+          );
         }
       );
     });

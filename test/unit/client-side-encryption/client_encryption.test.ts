@@ -140,7 +140,6 @@ describe('ClientEncryption', function () {
           expect(clientEncryption._timeoutMS).to.equal(100);
         });
       });
-
     });
   });
 
@@ -236,7 +235,10 @@ describe('ClientEncryption', function () {
         masterKey
       });
       expect(result).to.have.property('collection');
-      expect(createDataKey).to.have.been.calledOnceWithExactly('aws', { masterKey, timeoutContext: undefined });
+      expect(createDataKey).to.have.been.calledOnceWithExactly('aws', {
+        masterKey,
+        timeoutContext: undefined
+      });
     });
 
     context('when createDataKey rejects', () => {
