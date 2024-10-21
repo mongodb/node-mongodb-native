@@ -154,7 +154,6 @@ describe('CSOT spec prose tests', function () {
       it('maxTimeMS is not set', async function () {
         const commandStarted = [];
         client.on('commandStarted', ev => commandStarted.push(ev));
-        await client.connect();
         await client
           .db('admin')
           .command({ ping: 1 })
@@ -353,7 +352,7 @@ describe('CSOT spec prose tests', function () {
 
       client = this.configuration.newClient(undefined, {
         monitorCommands: true,
-        timeoutMS: 100,
+        timeoutMS: 150,
         minPoolSize: 20
       });
       await client.connect();

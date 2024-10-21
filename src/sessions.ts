@@ -131,6 +131,10 @@ export class ClientSession
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
+  /** @internal
+   * Keeps track of whether or not the current transaction has attempted to be committed. Is
+   * initially undefined. Gets set to false when startTransaction is called. When commitTransaction is sent to server, if the commitTransaction succeeds, it is then set to undefined, otherwise, set to true */
+  commitAttempted?: boolean;
   /** @internal */
   [kServerSession]: ServerSession | null;
   /** @internal */
@@ -428,6 +432,7 @@ export class ClientSession
       );
     }
 
+    this.commitAttempted = false;
     // increment txnNumber
     this.incrementTransactionNumber();
     // create transaction state
@@ -487,7 +492,7 @@ export class ClientSession
       WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
     }
 
-    if (this.transaction.state === TxnState.TRANSACTION_COMMITTED) {
+    if (this.transaction.state === TxnState.TRANSACTION_COMMITTED || this.commitAttempted) {
       WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
     }
 
@@ -524,8 +529,10 @@ export class ClientSession
 
     try {
       await executeOperation(this.client, operation, timeoutContext);
+      this.commitAttempted = undefined;
       return;
     } catch (firstCommitError) {
+      this.commitAttempted = true;
       if (firstCommitError instanceof MongoError && isRetryableWriteError(firstCommitError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
@@ -533,7 +540,15 @@ export class ClientSession
         this.unpin({ force: true });
 
         try {
-          await executeOperation(this.client, operation, timeoutContext);
+          await executeOperation(
+            this.client,
+            new RunAdminCommandOperation(command, {
+              session: this,
+              readPreference: ReadPreference.primary,
+              bypassPinningCheck: true
+            }),
+            timeoutContext
+          );
           return;
         } catch (retryCommitError) {
           // If the retry failed, we process that error instead of the original

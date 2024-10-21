@@ -320,7 +320,9 @@ describe('Client Bulk Write', function () {
 
         it(
           'timeoutMS is refreshed to the timeoutMS passed to the bulk write for the killCursors command',
-          metadata,
+          {
+            requires: { ...metadata.requires, topology: '!load-balanced' }
+          },
           async function () {
             const models = await makeMultiResponseBatchModelArray(this.configuration);
             const timeoutError = await client

@@ -266,6 +266,12 @@
             "patterns": [
               "**/../lib/**",
               "mongodb-mock-server"
+            ],
+            "paths": [
+              {
+                "name": "bson",
+                "message": "Import from the driver's bson.ts file instead."
+              }
             ]
           }
         ]

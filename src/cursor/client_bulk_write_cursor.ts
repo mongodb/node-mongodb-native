@@ -1,5 +1,4 @@
-import { type Document } from 'bson';
-
+import { type Document } from '../bson';
 import { type ClientBulkWriteCursorResponse } from '../cmap/wire_protocol/responses';
 import type { MongoClient } from '../mongo_client';
 import { ClientBulkWriteOperation } from '../operations/client_bulk_write/client_bulk_write';

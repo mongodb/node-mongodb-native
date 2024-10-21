@@ -1,19 +1,19 @@
 import type { BSONSerializeOptions, Document } from '../bson';
 import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError } from '../error';
-import { Explain, type ExplainOptions } from '../explain';
+import {
+  decorateWithExplain,
+  Explain,
+  type ExplainOptions,
+  validateExplainTimeoutOptions
+} from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { MIN_SECONDARY_WRITE_WIRE_VERSION } from '../sdam/server_selection';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import {
-  commandSupportsReadConcern,
-  decorateWithExplain,
-  maxWireVersion,
-  MongoDBNamespace
-} from '../utils';
+import { commandSupportsReadConcern, maxWireVersion, MongoDBNamespace } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
 import { AbstractOperation, Aspect, type OperationOptions } from './operation';
@@ -97,6 +97,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);
+      validateExplainTimeoutOptions(this.options, this.explain);
     } else if (options?.explain != null) {
       throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
     }
