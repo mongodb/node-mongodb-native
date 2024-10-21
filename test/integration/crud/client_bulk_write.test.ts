@@ -172,7 +172,7 @@ describe('Client Bulk Write', function () {
                   document: { age: 10 }
                 }
               ],
-              { timeoutMS: 200, writeConcern: { w: 0 } }
+              { timeoutMS: 200, writeConcern: { w: 0 }, ordered: false }
             )
             .catch(e => e)
             .then(e => {
@@ -201,7 +201,8 @@ describe('Client Bulk Write', function () {
             const timeoutError = client
               .bulkWrite(models, {
                 timeoutMS: 400,
-                writeConcern: { w: 0 }
+                writeConcern: { w: 0 },
+                ordered: false
               })
               .catch(e => e)
               .then(r => {
