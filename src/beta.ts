@@ -1,4 +1,4 @@
-import { type Document } from 'bson';
+import { type Document } from './bson';
 
 export * from './index';
 

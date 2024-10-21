@@ -109,3 +109,14 @@ describe('class OpCompressedRequest', () => {
     }
   });
 });
+
+describe('OpMsgRequest', () => {
+  describe('#constructor', () => {
+    context('when writeConcern = 0', () => {
+      it('moreToCome is set to true', async () => {
+        const request = new OpMsgRequest('db', { a: 1, writeConcern: { w: 0 } }, {});
+        expect(request.moreToCome).to.be.true;
+      });
+    });
+  });
+});

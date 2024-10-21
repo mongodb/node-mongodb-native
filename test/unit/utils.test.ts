@@ -3,14 +3,16 @@ import { expect } from 'chai';
 import {
   BufferPool,
   ByteUtils,
+  checkParentDomainMatch,
   compareObjectId,
+  decorateWithExplain,
+  Explain,
   HostAddress,
   hostMatchesWildcards,
   isHello,
   isUint8Array,
   LEGACY_HELLO_COMMAND,
   List,
-  matchesParentDomain,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
   MongoRuntimeError,
@@ -937,46 +939,94 @@ describe('driver utils', function () {
     });
   });
 
-  describe('matchesParentDomain()', () => {
-    const exampleSrvName = 'i-love-javascript.mongodb.io';
-    const exampleSrvNameWithDot = 'i-love-javascript.mongodb.io.';
-    const exampleHostNameWithoutDot = 'i-love-javascript-00.mongodb.io';
-    const exampleHostNamesWithDot = exampleHostNameWithoutDot + '.';
-    const exampleHostNamThatDoNotMatchParent = 'i-love-javascript-00.evil-mongodb.io';
-    const exampleHostNamThatDoNotMatchParentWithDot = 'i-love-javascript-00.evil-mongodb.io.';
+  describe('checkParentDomainMatch()', () => {
+    const exampleSrvName = ['i-love-js', 'i-love-js.mongodb', 'i-love-javascript.mongodb.io'];
+    const exampleSrvNameWithDot = [
+      'i-love-js.',
+      'i-love-js.mongodb.',
+      'i-love-javascript.mongodb.io.'
+    ];
+    const exampleHostNameWithoutDot = [
+      'js-00.i-love-js',
+      'js-00.i-love-js.mongodb',
+      'i-love-javascript-00.mongodb.io'
+    ];
+    const exampleHostNamesWithDot = [
+      'js-00.i-love-js.',
+      'js-00.i-love-js.mongodb.',
+      'i-love-javascript-00.mongodb.io.'
+    ];
+    const exampleHostNameThatDoNotMatchParent = [
+      'js-00.i-love-js-a-little',
+      'js-00.i-love-js-a-little.mongodb',
+      'i-love-javascript-00.evil-mongodb.io'
+    ];
+    const exampleHostNameThatDoNotMatchParentWithDot = [
+      'i-love-js',
+      '',
+      'i-love-javascript-00.evil-mongodb.io.'
+    ];
 
-    context('when address does not match parent domain', () => {
-      it('without a trailing dot returns false', () => {
-        expect(matchesParentDomain(exampleHostNamThatDoNotMatchParent, exampleSrvName)).to.be.false;
-      });
+    for (let num = 0; num < 3; num += 1) {
+      context(`when srvName has ${num + 1} part${num !== 0 ? 's' : ''}`, () => {
+        context('when address does not match parent domain', () => {
+          it('without a trailing dot throws', () => {
+            expect(() =>
+              checkParentDomainMatch(exampleHostNameThatDoNotMatchParent[num], exampleSrvName[num])
+            ).to.throw('Server record does not share hostname with parent URI');
+          });
 
-      it('with a trailing dot returns false', () => {
-        expect(matchesParentDomain(exampleHostNamThatDoNotMatchParentWithDot, exampleSrvName)).to.be
-          .false;
-      });
-    });
+          it('with a trailing dot throws', () => {
+            expect(() =>
+              checkParentDomainMatch(
+                exampleHostNameThatDoNotMatchParentWithDot[num],
+                exampleSrvName[num]
+              )
+            ).to.throw();
+          });
+        });
 
-    context('when addresses in SRV record end with a dot', () => {
-      it('accepts address since it is considered to still match the parent domain', () => {
-        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
-      });
-    });
+        context('when addresses in SRV record end with a dot', () => {
+          it('accepts address since it is considered to still match the parent domain', () => {
+            expect(() =>
+              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvName[num])
+            ).to.not.throw();
+          });
+        });
 
-    context('when SRV host ends with a dot', () => {
-      it('accepts address if it ends with a dot', () => {
-        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvNameWithDot)).to.be.true;
-      });
+        context('when SRV host ends with a dot', () => {
+          it('accepts address if it ends with a dot', () => {
+            expect(() =>
+              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvNameWithDot[num])
+            ).to.not.throw();
+          });
 
-      it('accepts address if it does not end with a dot', () => {
-        expect(matchesParentDomain(exampleHostNameWithoutDot, exampleSrvName)).to.be.true;
-      });
-    });
+          it('accepts address if it does not end with a dot', () => {
+            expect(() =>
+              checkParentDomainMatch(exampleHostNameWithoutDot[num], exampleSrvNameWithDot[num])
+            ).to.not.throw();
+          });
 
-    context('when addresses in SRV record end without dots', () => {
-      it('accepts address since it matches the parent domain', () => {
-        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
+          if (num < 2) {
+            it('does not accept address if it does not contain an extra domain level', () => {
+              expect(() =>
+                checkParentDomainMatch(exampleSrvNameWithDot[num], exampleSrvNameWithDot[num])
+              ).to.throw(
+                'Server record does not have at least one more domain level than parent URI'
+              );
+            });
+          }
+        });
+
+        context('when addresses in SRV record end without dots', () => {
+          it('accepts address since it matches the parent domain', () => {
+            expect(() =>
+              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvName[num])
+            ).to.not.throw();
+          });
+        });
       });
-    });
+    }
   });
 
   describe('isUint8Array()', () => {
@@ -1002,5 +1052,43 @@ describe('driver utils', function () {
 
     describe('when given an object that does not respond to Symbol.toStringTag', () =>
       it('returns false', () => expect(isUint8Array(Object.create(null))).to.be.false));
+  });
+
+  describe('decorateWithExplain()', function () {
+    it('when the command is a valid explain command, the command is still wrapped', function () {
+      const command = { explain: { hello: 'world' } };
+      const result = decorateWithExplain(command, Explain.fromOptions({ explain: true }));
+
+      expect(result).to.deep.equal({ explain: command, verbosity: 'allPlansExecution' });
+    });
+
+    it('when the options have a maxTimeMS, it is attached to the explain command', function () {
+      const command = { ping: 1 };
+      const result = decorateWithExplain(
+        command,
+        Explain.fromOptions({
+          explain: { verbosity: 'queryPlanner', maxTimeMS: 1000 }
+        })
+      );
+      expect(result).to.deep.equal({
+        explain: { ping: 1 },
+        verbosity: 'queryPlanner',
+        maxTimeMS: 1000
+      });
+    });
+
+    it('when the options have do not have a maxTimeMS, it is not attached to the explain command', function () {
+      const command = { ping: 1 };
+      const result = decorateWithExplain(
+        command,
+        Explain.fromOptions({
+          explain: { verbosity: 'queryPlanner' }
+        })
+      );
+      expect(result).to.deep.equal({
+        explain: { ping: 1 },
+        verbosity: 'queryPlanner'
+      });
+    });
   });
 });

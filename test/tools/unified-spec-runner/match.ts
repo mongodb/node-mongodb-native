@@ -23,6 +23,7 @@ import {
   type Document,
   Long,
   MongoBulkWriteError,
+  MongoClientBulkWriteError,
   MongoError,
   MongoServerError,
   ObjectId,
@@ -213,7 +214,18 @@ export function resultCheck(
       }
       resultCheck(actual[key], value, entities, path, checkExtraKeys);
     } else {
-      resultCheck(actual[key], value, entities, path, checkExtraKeys);
+      // If our actual value is a map, such as in the client bulk write results, we need
+      // to convert the expected keys from the string numbers to actual numbers since the key
+      // values in the maps are actual numbers.
+      const isActualMap = actual instanceof Map;
+      const mapKey = !Number.isNaN(Number(key)) ? Number(key) : key;
+      resultCheck(
+        isActualMap ? actual.get(mapKey) : actual[key],
+        value,
+        entities,
+        path,
+        checkExtraKeys
+      );
     }
   }
 
@@ -754,7 +766,11 @@ export function expectErrorCheck(
   }
 
   if (expected.errorCode != null) {
-    expect(error, expectMessage).to.have.property('code', expected.errorCode);
+    if (error instanceof MongoClientBulkWriteError) {
+      expect(error.cause).to.have.property('code', expected.errorCode);
+    } else {
+      expect(error, expectMessage).to.have.property('code', expected.errorCode);
+    }
   }
 
   if (expected.errorCodeName != null) {
@@ -762,7 +778,10 @@ export function expectErrorCheck(
   }
 
   if (expected.errorLabelsContain != null) {
-    const mongoError = error as MongoError;
+    let mongoError = error as MongoError;
+    if (error instanceof MongoClientBulkWriteError) {
+      mongoError = error.cause as MongoError;
+    }
     for (const errorLabel of expected.errorLabelsContain) {
       expect(
         mongoError.hasErrorLabel(errorLabel),
@@ -782,10 +801,18 @@ export function expectErrorCheck(
   }
 
   if (expected.expectResult != null) {
-    resultCheck(error, expected.expectResult as any, entities);
+    if ('partialResult' in error) {
+      resultCheck(error.partialResult, expected.expectResult as any, entities);
+    } else {
+      resultCheck(error, expected.expectResult as any, entities);
+    }
   }
 
   if (expected.errorResponse != null) {
-    resultCheck(error, expected.errorResponse, entities);
+    if (error instanceof MongoClientBulkWriteError) {
+      resultCheck(error.cause, expected.errorResponse, entities);
+    } else {
+      resultCheck(error, expected.errorResponse, entities);
+    }
   }
 }

@@ -1,11 +1,10 @@
-import { type DeserializeOptions } from 'bson';
-
 import {
   Binary,
   type BSONElement,
   BSONError,
   BSONType,
   deserialize,
+  type DeserializeOptions,
   getBigInt64LE,
   getFloat64LE,
   getInt32LE,

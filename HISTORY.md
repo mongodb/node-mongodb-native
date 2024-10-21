@@ -2,6 +2,63 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.10.0](https://github.com/mongodb/node-mongodb-native/compare/v6.9.0...v6.10.0) (2024-10-21)
+
+
+### Features
+
+* **NODE-5838:** remove support for server 3.6 ([#4182](https://github.com/mongodb/node-mongodb-native/issues/4182)) ([7b71e1f](https://github.com/mongodb/node-mongodb-native/commit/7b71e1fdc179a9e0628a6b23519e3c00acaadf22))
+* **NODE-6060:** set fire-and-forget protocol when writeConcern is w: 0 ([#4219](https://github.com/mongodb/node-mongodb-native/issues/4219)) ([643a875](https://github.com/mongodb/node-mongodb-native/commit/643a87553b5314abb44bcdc342a8bb8cb51d2052))
+* **NODE-6289:** allow valid srv hostnames with less than 3 parts ([#4197](https://github.com/mongodb/node-mongodb-native/issues/4197)) ([3d5bd51](https://github.com/mongodb/node-mongodb-native/commit/3d5bd513b590f8de91a3edb0a6d2a9d81a4666e2))
+* **NODE-6329:** client bulk write happy path ([#4206](https://github.com/mongodb/node-mongodb-native/issues/4206)) ([3d3da40](https://github.com/mongodb/node-mongodb-native/commit/3d3da4070b155d372477fd9b76ac9f1cd5e5011c))
+* **NODE-6337:** implement client bulk write batching ([#4248](https://github.com/mongodb/node-mongodb-native/issues/4248)) ([d56e235](https://github.com/mongodb/node-mongodb-native/commit/d56e235cb7aa9d991cc1fb200c8a94e6a1b788fa))
+* **NODE-6338:** implement client bulk write error handling ([#4262](https://github.com/mongodb/node-mongodb-native/issues/4262)) ([8def42d](https://github.com/mongodb/node-mongodb-native/commit/8def42ded5df4cb7d5ba1c65445d90042b1667c3))
+* **NODE-6342:** support maxTimeMS for explain commands ([#4207](https://github.com/mongodb/node-mongodb-native/issues/4207)) ([20396e1](https://github.com/mongodb/node-mongodb-native/commit/20396e1bdba9c3fb89c789b1955f117ed28a3926))
+* **NODE-6350:** add typescript support to client bulkWrite API ([#4257](https://github.com/mongodb/node-mongodb-native/issues/4257)) ([30c61f2](https://github.com/mongodb/node-mongodb-native/commit/30c61f2a926f1d8908b0800a4f9bb409e5d9581e))
+* **NODE-6409:** new errors for unacknowledged bulk writes ([#4276](https://github.com/mongodb/node-mongodb-native/issues/4276)) ([7fde8dd](https://github.com/mongodb/node-mongodb-native/commit/7fde8ddc869623e9df3ea7753a46cae8d6e3e9dd))
+* **NODE-6419:** deprecate explain options API for find and aggregate ([#4271](https://github.com/mongodb/node-mongodb-native/issues/4271)) ([a473de9](https://github.com/mongodb/node-mongodb-native/commit/a473de95091a7d89c3cbe1c44222b04d3695387e))
+
+
+### Bug Fixes
+
+* **NODE-6394:** data events missed while awaiting drain ([#4249](https://github.com/mongodb/node-mongodb-native/issues/4249)) ([3f9d243](https://github.com/mongodb/node-mongodb-native/commit/3f9d24379afa1e1e953b77f46563fca5a26c8407))
+* **NODE-6418:** change stream resumes infinitely after failed aggregates ([#4267](https://github.com/mongodb/node-mongodb-native/issues/4267)) ([6ecf198](https://github.com/mongodb/node-mongodb-native/commit/6ecf198f2e4805da42f651717c6e7f8182a8faeb))
+* **NODE-6436:** only force majority write concern on commitTransaction retry ([#4284](https://github.com/mongodb/node-mongodb-native/issues/4284)) ([a7d1d43](https://github.com/mongodb/node-mongodb-native/commit/a7d1d43e96c6875dd325d17d87639c2338eb35f3))
+
+## [6.9.0](https://github.com/mongodb/node-mongodb-native/compare/v6.8.0...v6.9.0) (2024-09-12)
+
+
+### Features
+
+* **NODE-5459:** add durations to connection pool events ([#4166](https://github.com/mongodb/node-mongodb-native/issues/4166)) ([7295695](https://github.com/mongodb/node-mongodb-native/commit/729569527e353a942200533f6150e748454c798d))
+* **NODE-5614:** add support for explicit resource management ([#4177](https://github.com/mongodb/node-mongodb-native/issues/4177)) ([b3f3987](https://github.com/mongodb/node-mongodb-native/commit/b3f3987041ddf0aae86044f3fdd1364eecd26d46))
+* **NODE-5754:** allow auto select family options ([#4185](https://github.com/mongodb/node-mongodb-native/issues/4185)) ([54efb7d](https://github.com/mongodb/node-mongodb-native/commit/54efb7d497f8efb9953f5d315267e299ed4cf5af))
+* **NODE-5908:** support range v2 ([#4141](https://github.com/mongodb/node-mongodb-native/issues/4141)) ([de253a7](https://github.com/mongodb/node-mongodb-native/commit/de253a749f1dd1194b6fbc30c36e88f906981bd3))
+* **NODE-6225:** add property ownership check before referencing `mongocryptdSpawnPath` and `mongocryptdSpawnArgs` ([#4151](https://github.com/mongodb/node-mongodb-native/issues/4151)) ([f48f8d3](https://github.com/mongodb/node-mongodb-native/commit/f48f8d36cf96c25ebf656e359e97b61dbfe7c4ed))
+* **NODE-6244:** Bump max supported wire version and server version ([#4163](https://github.com/mongodb/node-mongodb-native/issues/4163)) ([45bc098](https://github.com/mongodb/node-mongodb-native/commit/45bc0982f0f00e1811baf2a613989a808783b8b1))
+* **NODE-6252:** insertMany and bulkWrite permit readonly arrays ([#4175](https://github.com/mongodb/node-mongodb-native/issues/4175)) ([4b219d3](https://github.com/mongodb/node-mongodb-native/commit/4b219d361b6309dcec480c2bc7e54f548201c15b))
+* **NODE-6278:** deprecate 3.6 servers ([#4178](https://github.com/mongodb/node-mongodb-native/issues/4178)) ([35d8840](https://github.com/mongodb/node-mongodb-native/commit/35d88404aad343dfbff502fd350bb22a241fed2a))
+* **NODE-6309:** Mark range API as stable ([#4190](https://github.com/mongodb/node-mongodb-native/issues/4190)) ([f53e9d9](https://github.com/mongodb/node-mongodb-native/commit/f53e9d9cebdfaac5edd0e46ee46f1c2eb5b7f8ae))
+* **NODE-6327:** new client bulk write types and builders ([#4205](https://github.com/mongodb/node-mongodb-native/issues/4205)) ([6d65ae7](https://github.com/mongodb/node-mongodb-native/commit/6d65ae77835cf144b540a5a344e1f10bb1988bc5))
+* **NODE-6365:** pass through `allowPartialTrustChain` TLS flag ([#4228](https://github.com/mongodb/node-mongodb-native/issues/4228)) ([d6c147d](https://github.com/mongodb/node-mongodb-native/commit/d6c147d62a9aa96f0807e190190a06ed880df07f))
+
+
+### Bug Fixes
+
+* **NODE-5720:** on pre-4.4 sharded servers, the node driver uses `error.writeConcern.code` to determine retryability ([#4155](https://github.com/mongodb/node-mongodb-native/issues/4155)) ([b26c328](https://github.com/mongodb/node-mongodb-native/commit/b26c32800ecb2658a0d9c779bdb741aa06a629d0))
+* **NODE-6241:** allow Binary as local kms provider key for auto encryption ([#4165](https://github.com/mongodb/node-mongodb-native/issues/4165)) ([d85f827](https://github.com/mongodb/node-mongodb-native/commit/d85f827aca56603b5d7b64f853c190473be81b6f))
+* **NODE-6259:** replace dynamically assigned length property with a static getter ([#4173](https://github.com/mongodb/node-mongodb-native/issues/4173)) ([320dde0](https://github.com/mongodb/node-mongodb-native/commit/320dde04aa1547dd838e7c790bb3432e2ca2bc19))
+* **NODE-6276:** preserve top level error code MongoWriteConcernError ([#4183](https://github.com/mongodb/node-mongodb-native/issues/4183)) ([e902584](https://github.com/mongodb/node-mongodb-native/commit/e9025843e43bedb2326675184b6ce49b103e3c77))
+* **NODE-6284:** make sparsity and trimFactor optional ([#4189](https://github.com/mongodb/node-mongodb-native/issues/4189)) ([8622545](https://github.com/mongodb/node-mongodb-native/commit/8622545c18d321ae17184cd43207652e454170fc))
+* **NODE-6355:** respect utf8 validation options when iterating cursors ([#4214](https://github.com/mongodb/node-mongodb-native/issues/4214)) ([8bfe187](https://github.com/mongodb/node-mongodb-native/commit/8bfe18716197f58c025520da5d771b520e1b1350))
+* **NODE-6362:** cache cursor deserialization options across deserialize calls ([#4221](https://github.com/mongodb/node-mongodb-native/issues/4221)) ([833eaa4](https://github.com/mongodb/node-mongodb-native/commit/833eaa41c5f379268be46408282b0c97323ea1bc))
+* **NODE-6367:** enable mixed use of iteration APIs ([#4231](https://github.com/mongodb/node-mongodb-native/issues/4231)) ([08912c8](https://github.com/mongodb/node-mongodb-native/commit/08912c8a191937bdef921b4e9a4581b12ebf8b59))
+
+
+### Performance Improvements
+
+* **NODE-5906:** optimize toArray to use batches ([#4171](https://github.com/mongodb/node-mongodb-native/issues/4171)) ([5565d50](https://github.com/mongodb/node-mongodb-native/commit/5565d5008812f03e9ff86a7b6326447ac5916244))
+
 ## [6.8.0](https://github.com/mongodb/node-mongodb-native/compare/v6.7.0...v6.8.0) (2024-06-27)
 
 

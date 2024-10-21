@@ -17,7 +17,7 @@
       {
         "address": "c:27017",
         "type": "RSSecondary",
-        "maxWireVersion": 6,
+        "maxWireVersion": 21,
         "avg_rtt_ms": 5,
         "lastWrite": {
           "lastWriteDate": {
@@ -35,7 +35,7 @@
     {
       "address": "c:27017",
       "type": "RSSecondary",
-      "maxWireVersion": 6,
+      "maxWireVersion": 21,
       "avg_rtt_ms": 5,
       "lastWrite": {
         "lastWriteDate": {
@@ -48,7 +48,7 @@
     {
       "address": "c:27017",
       "type": "RSSecondary",
-      "maxWireVersion": 6,
+      "maxWireVersion": 21,
       "avg_rtt_ms": 5,
       "lastWrite": {
         "lastWriteDate": {

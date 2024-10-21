@@ -1,0 +1,263 @@
+description: "client bulkWrite transactions"
+schemaVersion: "1.4" # To support `serverless: forbid`
+runOnRequirements:
+  - minServerVersion: "8.0"
+    topologies:
+      - replicaset
+      - sharded
+      - load-balanced
+    serverless: forbid
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name transaction-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+  - session:
+      id: &session0 session0
+      client: *client0
+  - client:
+      id: &client_with_wmajority client_with_wmajority
+      uriOptions:
+        w: majority
+      observeEvents:
+        - commandStartedEvent
+  - session:
+      id: &session_with_wmajority session_with_wmajority
+      client: *client_with_wmajority
+
+_yamlAnchors:
+  namespace: &namespace "transaction-tests.coll0"
+
+initialData:
+  - databaseName: *database0Name
+    collectionName: *collection0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+      - { _id: 5, x: 55 }
+      - { _id: 6, x: 66 }
+      - { _id: 7, x: 77 }
+
+tests:
+  - description: "client bulkWrite in a transaction"
+    operations:
+      - object: *session0
+        name: startTransaction
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          session: *session0
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 8, x: 88 }
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 1 }
+                update: { $inc: { x: 1 } }
+            - updateMany:
+                namespace: *namespace
+                filter:
+                  $and: [ { _id: { $gt: 1 } }, { _id: { $lte: 3 } } ]
+                update: { $inc: { x: 2 } }
+            - replaceOne:
+                namespace: *namespace
+                filter: { _id: 4 }
+                replacement: { x: 44 }
+                upsert: true
+            - deleteOne:
+                namespace: *namespace
+                filter: { _id: 5 }
+            - deleteMany:
+                namespace: *namespace
+                filter:
+                  $and: [ { _id: { $gt: 5 } }, { _id: { $lte: 7 } } ]
+          verboseResults: true
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 1
+          matchedCount: 3
+          modifiedCount: 3
+          deletedCount: 3
+          insertResults:
+            0:
+              insertedId: 8
+          updateResults:
+            1:
+              matchedCount: 1
+              modifiedCount: 1
+              upsertedId: { $$exists: false }
+            2:
+              matchedCount: 2
+              modifiedCount: 2
+              upsertedId: { $$exists: false }
+            3:
+              matchedCount: 1
+              modifiedCount: 0
+              upsertedId: 4
+          deleteResults:
+            4:
+              deletedCount: 1
+            5:
+              deletedCount: 2
+      - object: *session0
+        name: commitTransaction
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+                bulkWrite: 1
+                errorsOnly: false
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 8, x: 88 }
+                  - update: 0
+                    filter: { _id: 1 }
+                    updateMods: { $inc: { x: 1 } }
+                    multi: false
+                  - update: 0
+                    filter:
+                      $and: [ { _id: { $gt: 1 } }, { _id: { $lte: 3 } } ]
+                    updateMods: { $inc: { x: 2 } }
+                    multi: true
+                  - update: 0
+                    filter: { _id: 4 }
+                    updateMods: { x: 44 }
+                    upsert: true
+                    multi: false
+                  - delete: 0
+                    filter: { _id: 5 }
+                    multi: false
+                  - delete: 0
+                    filter:
+                      $and: [ { _id: { $gt: 5 } }, { _id: { $lte: 7 } } ]
+                    multi: true
+                nsInfo:
+                  - ns: *namespace
+          - commandStartedEvent:
+              commandName: commitTransaction
+              databaseName: admin
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 12 }
+          - { _id: 2, x: 24 }
+          - { _id: 3, x: 35 }
+          - { _id: 4, x: 44 }
+          - { _id: 8, x: 88 }
+  - description: 'client writeConcern ignored for client bulkWrite in transaction'
+    operations:
+      - object: *session_with_wmajority
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: 1
+      - object: *client_with_wmajority
+        name: clientBulkWrite
+        arguments:
+          session: *session_with_wmajority
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 8, x: 88 }
+        expectResult:
+          insertedCount: 1
+          upsertedCount: 0
+          matchedCount: 0
+          modifiedCount: 0
+          deletedCount: 0
+          insertResults:
+            $$unsetOrMatches: {}
+          updateResults:
+            $$unsetOrMatches: {}
+          deleteResults:
+            $$unsetOrMatches: {}
+      - object: *session_with_wmajority
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client_with_wmajority
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                lsid: { $$sessionLsid: *session_with_wmajority }
+                txnNumber: 1
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+                bulkWrite: 1
+                errorsOnly: true
+                ordered: true
+                ops:
+                  - insert: 0
+                    document: { _id: 8, x: 88 }
+                nsInfo:
+                  - ns: *namespace
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session_with_wmajority }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: 1
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+          - { _id: 5, x: 55 }
+          - { _id: 6, x: 66 }
+          - { _id: 7, x: 77 }
+          - { _id: 8, x: 88 }
+  - description: "client bulkWrite with writeConcern in a transaction causes a transaction error"
+    operations:
+      - object: *session0
+        name: startTransaction
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          session: *session0
+          writeConcern:
+            w: 1
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 8, x: 88 }
+        expectError:
+          isClientError: true
+          errorContains: "Cannot set write concern after starting a transaction"

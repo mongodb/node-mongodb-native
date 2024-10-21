@@ -14,146 +14,219 @@ import {
   type ClientReplaceOneModel,
   type ClientUpdateManyModel,
   type ClientUpdateOneModel,
-  DocumentSequence
+  DEFAULT_PK_FACTORY,
+  DocumentSequence,
+  ObjectId
 } from '../../../mongodb';
 
 describe('ClientBulkWriteCommandBuilder', function () {
-  describe('#buildCommand', function () {
+  describe('#buildBatch', function () {
     context('when custom options are provided', function () {
+      const id = new ObjectId();
       const model: ClientInsertOneModel = {
         name: 'insertOne',
         namespace: 'test.coll',
-        document: { name: 1 }
+        document: { _id: id, name: 1 }
       };
       const builder = new ClientBulkWriteCommandBuilder([model], {
         verboseResults: true,
         bypassDocumentValidation: true,
-        ordered: false
+        ordered: false,
+        comment: { bulk: 'write' }
       });
-      const commands = builder.buildCommands();
+      const command = builder.buildBatch(48000000, 100000, 16777216);
 
       it('sets the bulkWrite command', function () {
-        expect(commands[0].bulkWrite).to.equal(1);
+        expect(command.bulkWrite).to.equal(1);
       });
 
       it('sets the errorsOnly field to the inverse of verboseResults', function () {
-        expect(commands[0].errorsOnly).to.be.false;
+        expect(command.errorsOnly).to.be.false;
       });
 
       it('sets the ordered field', function () {
-        expect(commands[0].ordered).to.be.false;
+        expect(command.ordered).to.be.false;
       });
 
       it('sets the bypassDocumentValidation field', function () {
-        expect(commands[0].bypassDocumentValidation).to.be.true;
+        expect(command.bypassDocumentValidation).to.be.true;
       });
 
       it('sets the ops document sequence', function () {
-        expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-        expect(commands[0].ops.documents[0]).to.deep.equal({ insert: 0, document: { name: 1 } });
+        expect(command.ops).to.be.instanceOf(DocumentSequence);
+        expect(command.ops.documents[0]).to.deep.equal({
+          insert: 0,
+          document: { _id: id, name: 1 }
+        });
       });
 
       it('sets the nsInfo document sequence', function () {
-        expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-        expect(commands[0].nsInfo.documents[0]).to.deep.equal({ ns: 'test.coll' });
+        expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+        expect(command.nsInfo.documents[0]).to.deep.equal({ ns: 'test.coll' });
+      });
+
+      it('passes comment options into the commands', function () {
+        expect(command.comment).to.deep.equal({ bulk: 'write' });
       });
     });
 
     context('when no options are provided', function () {
       context('when a single model is provided', function () {
+        const id = new ObjectId();
         const model: ClientInsertOneModel = {
           name: 'insertOne',
           namespace: 'test.coll',
-          document: { name: 1 }
+          document: { _id: id, name: 1 }
         };
         const builder = new ClientBulkWriteCommandBuilder([model], {});
-        const commands = builder.buildCommands();
+        const command = builder.buildBatch(48000000, 100000, 16777216);
 
         it('sets the bulkWrite command', function () {
-          expect(commands[0].bulkWrite).to.equal(1);
+          expect(command.bulkWrite).to.equal(1);
         });
 
         it('sets the default errorsOnly field', function () {
-          expect(commands[0].errorsOnly).to.be.true;
+          expect(command.errorsOnly).to.be.true;
         });
 
         it('sets the default ordered field', function () {
-          expect(commands[0].ordered).to.be.true;
+          expect(command.ordered).to.be.true;
         });
 
         it('sets the ops document sequence', function () {
-          expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-          expect(commands[0].ops.documents[0]).to.deep.equal({ insert: 0, document: { name: 1 } });
+          expect(command.ops).to.be.instanceOf(DocumentSequence);
+          expect(command.ops.documents[0]).to.deep.equal({
+            insert: 0,
+            document: { _id: id, name: 1 }
+          });
         });
 
         it('sets the nsInfo document sequence', function () {
-          expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-          expect(commands[0].nsInfo.documents[0]).to.deep.equal({ ns: 'test.coll' });
+          expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+          expect(command.nsInfo.documents[0]).to.deep.equal({ ns: 'test.coll' });
         });
       });
 
       context('when multiple models are provided', function () {
-        context('when the namespace is the same', function () {
+        context('when exceeding the max batch size', function () {
+          const idOne = new ObjectId();
+          const idTwo = new ObjectId();
           const modelOne: ClientInsertOneModel = {
             name: 'insertOne',
             namespace: 'test.coll',
-            document: { name: 1 }
+            document: { _id: idOne, name: 1 }
           };
           const modelTwo: ClientInsertOneModel = {
             name: 'insertOne',
             namespace: 'test.coll',
-            document: { name: 2 }
+            document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const commands = builder.buildCommands();
+          const commandOne = builder.buildBatch(48000000, 1, 16777216);
+          const commandTwo = builder.buildBatch(48000000, 1, 16777216);
+
+          it('splits the operations into multiple commands', function () {
+            expect(commandOne.ops.documents).to.deep.equal([
+              { insert: 0, document: { _id: idOne, name: 1 } }
+            ]);
+            expect(commandTwo.ops.documents).to.deep.equal([
+              { insert: 0, document: { _id: idTwo, name: 2 } }
+            ]);
+          });
+        });
+
+        context('when exceeding the max message size in bytes', function () {
+          const idOne = new ObjectId();
+          const idTwo = new ObjectId();
+          const modelOne: ClientInsertOneModel = {
+            name: 'insertOne',
+            namespace: 'test.coll',
+            document: { _id: idOne, name: 1 }
+          };
+          const modelTwo: ClientInsertOneModel = {
+            name: 'insertOne',
+            namespace: 'test.coll',
+            document: { _id: idTwo, name: 2 }
+          };
+          const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
+          const commandOne = builder.buildBatch(1090, 100000, 16777216);
+          const commandTwo = builder.buildBatch(1090, 100000, 16777216);
+
+          it('splits the operations into multiple commands', function () {
+            expect(commandOne.ops.documents).to.deep.equal([
+              { insert: 0, document: { _id: idOne, name: 1 } }
+            ]);
+            expect(commandTwo.ops.documents).to.deep.equal([
+              { insert: 0, document: { _id: idTwo, name: 2 } }
+            ]);
+          });
+        });
+
+        context('when the namespace is the same', function () {
+          const idOne = new ObjectId();
+          const idTwo = new ObjectId();
+          const modelOne: ClientInsertOneModel = {
+            name: 'insertOne',
+            namespace: 'test.coll',
+            document: { _id: idOne, name: 1 }
+          };
+          const modelTwo: ClientInsertOneModel = {
+            name: 'insertOne',
+            namespace: 'test.coll',
+            document: { _id: idTwo, name: 2 }
+          };
+          const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
+          const command = builder.buildBatch(48000000, 100000, 16777216);
 
           it('sets the bulkWrite command', function () {
-            expect(commands[0].bulkWrite).to.equal(1);
+            expect(command.bulkWrite).to.equal(1);
           });
 
           it('sets the ops document sequence', function () {
-            expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].ops.documents).to.deep.equal([
-              { insert: 0, document: { name: 1 } },
-              { insert: 0, document: { name: 2 } }
+            expect(command.ops).to.be.instanceOf(DocumentSequence);
+            expect(command.ops.documents).to.deep.equal([
+              { insert: 0, document: { _id: idOne, name: 1 } },
+              { insert: 0, document: { _id: idTwo, name: 2 } }
             ]);
           });
 
           it('sets the nsInfo document sequence', function () {
-            expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].nsInfo.documents).to.deep.equal([{ ns: 'test.coll' }]);
+            expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+            expect(command.nsInfo.documents).to.deep.equal([{ ns: 'test.coll' }]);
           });
         });
 
         context('when the namespace differs', function () {
+          const idOne = new ObjectId();
+          const idTwo = new ObjectId();
           const modelOne: ClientInsertOneModel = {
             name: 'insertOne',
             namespace: 'test.coll',
-            document: { name: 1 }
+            document: { _id: idOne, name: 1 }
           };
           const modelTwo: ClientInsertOneModel = {
             name: 'insertOne',
             namespace: 'test.coll2',
-            document: { name: 2 }
+            document: { _id: idTwo, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo], {});
-          const commands = builder.buildCommands();
+          const command = builder.buildBatch(48000000, 100000, 16777216);
 
           it('sets the bulkWrite command', function () {
-            expect(commands[0].bulkWrite).to.equal(1);
+            expect(command.bulkWrite).to.equal(1);
           });
 
           it('sets the ops document sequence', function () {
-            expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].ops.documents).to.deep.equal([
-              { insert: 0, document: { name: 1 } },
-              { insert: 1, document: { name: 2 } }
+            expect(command.ops).to.be.instanceOf(DocumentSequence);
+            expect(command.ops.documents).to.deep.equal([
+              { insert: 0, document: { _id: idOne, name: 1 } },
+              { insert: 1, document: { _id: idTwo, name: 2 } }
             ]);
           });
 
           it('sets the nsInfo document sequence', function () {
-            expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].nsInfo.documents).to.deep.equal([
+            expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+            expect(command.nsInfo.documents).to.deep.equal([
               { ns: 'test.coll' },
               { ns: 'test.coll2' }
             ]);
@@ -161,40 +234,43 @@ describe('ClientBulkWriteCommandBuilder', function () {
         });
 
         context('when the namespaces are intermixed', function () {
+          const idOne = new ObjectId();
+          const idTwo = new ObjectId();
+          const idThree = new ObjectId();
           const modelOne: ClientInsertOneModel = {
             name: 'insertOne',
             namespace: 'test.coll',
-            document: { name: 1 }
+            document: { _id: idOne, name: 1 }
           };
           const modelTwo: ClientInsertOneModel = {
             name: 'insertOne',
             namespace: 'test.coll2',
-            document: { name: 2 }
+            document: { _id: idTwo, name: 2 }
           };
           const modelThree: ClientInsertOneModel = {
             name: 'insertOne',
             namespace: 'test.coll',
-            document: { name: 2 }
+            document: { _id: idThree, name: 2 }
           };
           const builder = new ClientBulkWriteCommandBuilder([modelOne, modelTwo, modelThree], {});
-          const commands = builder.buildCommands();
+          const command = builder.buildBatch(48000000, 100000, 16777216);
 
           it('sets the bulkWrite command', function () {
-            expect(commands[0].bulkWrite).to.equal(1);
+            expect(command.bulkWrite).to.equal(1);
           });
 
           it('sets the ops document sequence', function () {
-            expect(commands[0].ops).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].ops.documents).to.deep.equal([
-              { insert: 0, document: { name: 1 } },
-              { insert: 1, document: { name: 2 } },
-              { insert: 0, document: { name: 2 } }
+            expect(command.ops).to.be.instanceOf(DocumentSequence);
+            expect(command.ops.documents).to.deep.equal([
+              { insert: 0, document: { _id: idOne, name: 1 } },
+              { insert: 1, document: { _id: idTwo, name: 2 } },
+              { insert: 0, document: { _id: idThree, name: 2 } }
             ]);
           });
 
           it('sets the nsInfo document sequence', function () {
-            expect(commands[0].nsInfo).to.be.instanceOf(DocumentSequence);
-            expect(commands[0].nsInfo.documents).to.deep.equal([
+            expect(command.nsInfo).to.be.instanceOf(DocumentSequence);
+            expect(command.nsInfo.documents).to.deep.equal([
               { ns: 'test.coll' },
               { ns: 'test.coll2' }
             ]);
@@ -205,15 +281,33 @@ describe('ClientBulkWriteCommandBuilder', function () {
   });
 
   describe('#buildInsertOneOperation', function () {
-    const model: ClientInsertOneModel = {
-      name: 'insertOne',
-      namespace: 'test.coll',
-      document: { name: 1 }
-    };
-    const operation = buildInsertOneOperation(model, 5);
+    context('when no _id exists on the document', function () {
+      const model: ClientInsertOneModel = {
+        name: 'insertOne',
+        namespace: 'test.coll',
+        document: { name: 1 }
+      };
+      const operation = buildInsertOneOperation(model, 5, DEFAULT_PK_FACTORY);
 
-    it('generates the insert operation', function () {
-      expect(operation).to.deep.equal({ insert: 5, document: { name: 1 } });
+      it('generates the insert operation with an _id', function () {
+        expect(operation.insert).to.equal(5);
+        expect(operation.document.name).to.equal(1);
+        expect(operation.document).to.have.property('_id');
+      });
+    });
+
+    context('when an _id exists on the document', function () {
+      const id = new ObjectId();
+      const model: ClientInsertOneModel = {
+        name: 'insertOne',
+        namespace: 'test.coll',
+        document: { _id: id, name: 1 }
+      };
+      const operation = buildInsertOneOperation(model, 5, DEFAULT_PK_FACTORY);
+
+      it('generates the insert operation with an _id', function () {
+        expect(operation).to.deep.equal({ insert: 5, document: { _id: id, name: 1 } });
+      });
     });
   });
 
@@ -317,7 +411,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
         update: { $set: { name: 2 } },
         hint: 'test',
         upsert: true,
-        arrayFilters: [{ test: 1 }]
+        arrayFilters: [{ test: 1 }],
+        collation: { locale: 'de' }
       };
       const operation = buildUpdateOneOperation(model, 5);
 
@@ -329,7 +424,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
           multi: false,
           hint: 'test',
           upsert: true,
-          arrayFilters: [{ test: 1 }]
+          arrayFilters: [{ test: 1 }],
+          collation: { locale: 'de' }
         });
       });
     });
@@ -363,7 +459,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
         update: { $set: { name: 2 } },
         hint: 'test',
         upsert: true,
-        arrayFilters: [{ test: 1 }]
+        arrayFilters: [{ test: 1 }],
+        collation: { locale: 'de' }
       };
       const operation = buildUpdateManyOperation(model, 5);
 
@@ -375,7 +472,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
           multi: true,
           hint: 'test',
           upsert: true,
-          arrayFilters: [{ test: 1 }]
+          arrayFilters: [{ test: 1 }],
+          collation: { locale: 'de' }
         });
       });
     });
@@ -408,7 +506,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
         filter: { name: 1 },
         replacement: { name: 2 },
         hint: 'test',
-        upsert: true
+        upsert: true,
+        collation: { locale: 'de' }
       };
       const operation = buildReplaceOneOperation(model, 5);
 
@@ -419,7 +518,8 @@ describe('ClientBulkWriteCommandBuilder', function () {
           updateMods: { name: 2 },
           multi: false,
           hint: 'test',
-          upsert: true
+          upsert: true,
+          collation: { locale: 'de' }
         });
       });
     });

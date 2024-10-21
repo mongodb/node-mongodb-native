@@ -1,6 +1,7 @@
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError } from '../error';
+import { type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -15,7 +16,7 @@ import { Aspect, defineAspects, type Hint } from './operation';
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface FindOptions<TSchema extends Document = Document>
-  extends Omit<CommandOperationOptions, 'writeConcern'> {
+  extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'> {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
@@ -63,6 +64,12 @@ export interface FindOptions<TSchema extends Document = Document>
    * @deprecated Starting from MongoDB 4.4 this flag is not needed and will be ignored.
    */
   oplogReplay?: boolean;
+
+  /**
+   * Specifies the verbosity mode for the explain output.
+   * @deprecated This API is deprecated in favor of `collection.find().explain()`.
+   */
+  explain?: ExplainOptions['explain'];
 }
 
 /** @internal */

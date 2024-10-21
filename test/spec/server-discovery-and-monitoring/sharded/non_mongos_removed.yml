@@ -14,7 +14,7 @@ phases: [
                     isWritablePrimary: true,
                     msg: "isdbgrid",
                     minWireVersion: 0,
-                    maxWireVersion: 6
+                    maxWireVersion: 21
                 }],
 
                 ["b:27017", {
@@ -25,7 +25,7 @@ phases: [
                     hosts: ["b:27017"],
                     setName: "rs",
                     minWireVersion: 0,
-                    maxWireVersion: 6
+                    maxWireVersion: 21
                 }]
         ],
 

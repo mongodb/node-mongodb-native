@@ -1,0 +1,111 @@
+description: "unacknowledged-client-bulkWrite"
+
+schemaVersion: "1.7"
+
+runOnRequirements:
+  - minServerVersion: "8.0"
+    serverless: forbid
+
+createEntities:
+  - client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+      uriOptions:
+        w: 0
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName command-monitoring-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName test
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+_yamlAnchors:
+  namespace: &namespace "command-monitoring-tests.test"
+
+tests:
+  - description: 'A successful mixed client bulkWrite'
+    operations:
+      - object: *client
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 4, x: 44 }
+            - updateOne:
+                namespace: *namespace
+                filter: { _id: 3 }
+                update: { $set: { x: 333 } }
+          ordered: false
+        expectResult:
+          insertedCount:
+            $$unsetOrMatches: 0
+          upsertedCount:
+            $$unsetOrMatches: 0
+          matchedCount:
+            $$unsetOrMatches: 0
+          modifiedCount:
+            $$unsetOrMatches: 0
+          deletedCount:
+            $$unsetOrMatches: 0
+          insertResults:
+            $$unsetOrMatches: {}
+          updateResults:
+            $$unsetOrMatches: {}
+          deleteResults:
+            $$unsetOrMatches: {}
+      # Force completion of the w:0 write by executing a find on the same connection
+      - object: *collection
+        name: find
+        arguments:
+          filter: {}
+        expectResult:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 333 }
+          - { _id: 4, x: 44 }
+
+    expectEvents:
+      -
+        client: *client
+        ignoreExtraEvents: true
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                errorsOnly: true
+                ordered: false
+                ops:
+                  - insert: 0
+                    document: { _id: 4, x: 44 }
+                  - update: 0
+                    filter: { _id: 3 }
+                    updateMods: { $set: { x: 333 } }
+                    multi: false
+                nsInfo:
+                  - ns: *namespace
+          - commandSucceededEvent:
+              commandName: bulkWrite
+              reply:
+                ok: 1
+                nInserted: { $$exists: false }
+                nMatched: { $$exists: false }
+                nModified: { $$exists: false }
+                nUpserted: { $$exists: false }
+                nDeleted: { $$exists: false }

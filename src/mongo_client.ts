@@ -30,6 +30,12 @@ import {
   SeverityLevel
 } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
+import {
+  type ClientBulkWriteModel,
+  type ClientBulkWriteOptions,
+  type ClientBulkWriteResult
+} from './operations/client_bulk_write/common';
+import { ClientBulkWriteExecutor } from './operations/client_bulk_write/executor';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
@@ -325,7 +331,6 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
 };
 
 /** @internal */
-
 const kOptions = Symbol('options');
 
 /**
@@ -475,6 +480,29 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   get bsonOptions(): BSONSerializeOptions {
     return this.s.bsonOptions;
+  }
+
+  /**
+   * Executes a client bulk write operation, available on server 8.0+.
+   * @param models - The client bulk write models.
+   * @param options - The client bulk write options.
+   * @returns A ClientBulkWriteResult for acknowledged writes and ok: 1 for unacknowledged writes.
+   */
+  async bulkWrite<SchemaMap extends Record<string, Document> = Record<string, Document>>(
+    models: ReadonlyArray<ClientBulkWriteModel<SchemaMap>>,
+    options?: ClientBulkWriteOptions
+  ): Promise<ClientBulkWriteResult> {
+    if (this.autoEncrypter) {
+      throw new MongoInvalidArgumentError(
+        'MongoClient bulkWrite does not currently support automatic encryption.'
+      );
+    }
+    // We do not need schema type information past this point ("as any" is fine)
+    return await new ClientBulkWriteExecutor(
+      this,
+      models as any,
+      resolveOptions(this, options)
+    ).execute();
   }
 
   /**

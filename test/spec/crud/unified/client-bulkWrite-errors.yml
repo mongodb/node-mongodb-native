@@ -2,6 +2,7 @@ description: "client bulkWrite errors"
 schemaVersion: "1.21"
 runOnRequirements:
   - minServerVersion: "8.0"
+    serverless: forbid
 
 createEntities:
   - client:
@@ -238,3 +239,32 @@ tests:
           verboseResults: true
         expectError:
           isClientError: true
+  - description: "Requesting unacknowledged write with verboseResults is a client-side error"
+    operations:
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 10 }
+          verboseResults: true
+          ordered: false
+          writeConcern: { w: 0 }
+        expectError:
+          isClientError: true
+          errorContains: "Cannot request unacknowledged write concern and verbose results"
+  - description: "Requesting unacknowledged write with ordered is a client-side error"
+    operations:
+      - name: clientBulkWrite
+        object: *client0
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: { _id: 10 }
+          # Omit `ordered` option. Defaults to true.
+          writeConcern: { w: 0 }
+        expectError:
+          isClientError: true
+          errorContains: "Cannot request unacknowledged write concern and ordered writes"

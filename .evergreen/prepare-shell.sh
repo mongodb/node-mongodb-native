@@ -1,7 +1,8 @@
 #! /usr/bin/env bash
 
-set -o xtrace
-set -o errexit
+# Only set errexit and xtrace if shell is NOT interactive
+[[ $- == *i* ]] || set -o xtrace
+[[ $- == *i* ]] || set -o errexit
 
 # This script prepares a shell to run the remaining scripts in this folder
 # It MUST be kept idempotent! It will overwrite the orchestration config and expansion.yml file upon every run
@@ -34,7 +35,7 @@ if [ ! -d "$DRIVERS_TOOLS" ]; then
   git clone --depth=1 "https://github.com/mongodb-labs/drivers-evergreen-tools.git" "${DRIVERS_TOOLS}"
 fi
 
-echo "installed DRIVERS_EVERGREEN_TOOLS from commit $(git -C $DRIVERS_EVERGREEN_TOOLS rev-parse HEAD)"
+echo "installed DRIVERS_TOOLS from commit $(git -C "${DRIVERS_TOOLS}" rev-parse HEAD)"
 
 cat <<EOT > "$MONGO_ORCHESTRATION_HOME/orchestration.config"
 {

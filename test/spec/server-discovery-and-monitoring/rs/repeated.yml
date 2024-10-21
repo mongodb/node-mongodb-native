@@ -15,7 +15,7 @@ phases:
         hosts: ["a:27017", "c:27017"]
         setName: "rs"
         minWireVersion: 0
-        maxWireVersion: 6
+        maxWireVersion: 21
     outcome:
       servers:
         "a:27017":
@@ -39,7 +39,7 @@ phases:
         helloOk: true
         isWritablePrimary: true
         minWireVersion: 0
-        maxWireVersion: 6
+        maxWireVersion: 21
     outcome:
       servers:
         "a:27017":
@@ -64,7 +64,7 @@ phases:
         hosts: ["a:27017", "c:27017"]
         setName: "rs"
         minWireVersion: 0
-        maxWireVersion: 6
+        maxWireVersion: 21
     outcome:
       servers:
         "a:27017":
@@ -90,7 +90,7 @@ phases:
         hosts: ["a:27017", "c:27017"]
         setName: "rs"
         minWireVersion: 0
-        maxWireVersion: 6
+        maxWireVersion: 21
     outcome:
       servers:
         "a:27017":

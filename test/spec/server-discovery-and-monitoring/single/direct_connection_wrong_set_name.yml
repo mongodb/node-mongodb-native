@@ -11,7 +11,7 @@ phases:
       - b:27017
       setName: wrong
       minWireVersion: 0
-      maxWireVersion: 6
+      maxWireVersion: 21
   outcome:
     servers:
       a:27017:
@@ -29,7 +29,7 @@ phases:
       - b:27017
       setName: rs
       minWireVersion: 0
-      maxWireVersion: 6
+      maxWireVersion: 21
   outcome:
     servers:
       a:27017:

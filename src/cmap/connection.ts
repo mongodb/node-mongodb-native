@@ -1,8 +1,13 @@
-import { type DeserializeOptions } from 'bson';
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
-import { type BSONSerializeOptions, deserialize, type Document, type ObjectId } from '../bson';
+import {
+  type BSONSerializeOptions,
+  deserialize,
+  type DeserializeOptions,
+  type Document,
+  type ObjectId
+} from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import {
   CLOSE,
@@ -237,6 +242,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       .on('error', this.onError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
+
+    this.messageStream.pause();
   }
 
   public get hello() {
@@ -439,7 +446,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         zlibCompressionLevel: this.description.zlibCompressionLevel
       });
 
-      if (options.noResponse) {
+      if (options.noResponse || message.moreToCome) {
         yield MongoDBResponse.empty;
         return;
       }
@@ -527,7 +534,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse ? undefined : (object ??= document.toObject(bsonOptions)),
+              options.noResponse
+                ? undefined
+                : message.moreToCome
+                  ? { ok: 1 }
+                  : (object ??= document.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )
@@ -647,6 +658,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *readMany(): AsyncGenerator<OpMsgResponse | OpReply> {
     try {
       this.dataEvents = onData(this.messageStream);
+      this.messageStream.resume();
       for await (const message of this.dataEvents) {
         const response = await decompressResponse(message);
         yield response;
@@ -657,6 +669,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
     } finally {
       this.dataEvents = null;
+      this.messageStream.pause();
       this.throwIfAborted();
     }
   }
