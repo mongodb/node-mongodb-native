@@ -487,6 +487,7 @@ describe('CSOT', function () {
   describe('Auto encryption', function () {
     let setupClient;
     let keyVaultClient: MongoClient;
+    let dataKey;
 
     beforeEach(async function () {
       keyVaultClient = this.configuration.newClient();
@@ -496,7 +497,7 @@ describe('CSOT', function () {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: getKmsProviders()
       });
-      await clientEncryption.createDataKey('local');
+      dataKey = await clientEncryption.createDataKey('local');
       setupClient = this.configuration.newClient();
       await setupClient
         .db()
@@ -551,7 +552,21 @@ describe('CSOT', function () {
               keyVaultNamespace: 'keyvault.datakeys',
               kmsProviders: getKmsProviders(),
               schemaMap: {
-                'test.test': {}
+                'test.test': {
+                  bsonType: 'object',
+                  encryptMetadata: {
+                    keyId: [new UUID(dataKey)]
+                  },
+                  properties: {
+                    a: {
+                      encrypt: {
+                        bsonType: 'int',
+                        algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
+                        keyId: [new UUID(dataKey)]
+                      }
+                    }
+                  }
+                }
               }
             },
             timeoutMS: 1000
