@@ -491,7 +491,7 @@ describe('CSOT', function () {
     beforeEach(async function () {
       keyVaultClient = this.configuration.newClient();
       await keyVaultClient.connect();
-      await keyVaultClient.db('keyvault').createCollection('datakeys');
+      await keyVaultClient.db('keyvault').collection('datakeys');
       const clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: getKmsProviders()
@@ -513,7 +513,6 @@ describe('CSOT', function () {
     });
 
     afterEach(async function () {
-      await keyVaultClient.db('keyvault').collection('datakeys').drop();
       await keyVaultClient.close();
       await setupClient
         .db()
