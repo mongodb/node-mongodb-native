@@ -486,7 +486,11 @@ describe('Client Side Encryption Functional', function () {
         .collection('explicit_encryption')
         .drop()
         .catch(() => null);
-      await db.createCollection('explicit_encryption', { encryptedFields });
+      await db.createCollection('explicit_encryption', { encryptedFields }).catch(error => {
+        const expected =
+          'Driver support of Queryable Encryption is incompatible with server'.toLowerCase();
+        if (!error.message.toLowerCase().includes(expected)) throw error;
+      });
       // Drop and create the collection keyvault.datakeys.
       const kdb = setupClient.db('keyvault');
       await kdb
