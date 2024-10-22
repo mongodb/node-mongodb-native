@@ -977,14 +977,14 @@ describe('CSOT driver tests', metadata, () => {
           await internalClient.db().admin().command(failpoint);
         });
 
-        it('emits an error event', async function () {
+        it('emits an error event', metadata, async function () {
           let [err] = await once(cs, 'error'); // getMore failure
           expect(err).to.be.instanceof(MongoOperationTimeoutError);
           [err] = await once(cs, 'error'); // aggregate failure
           expect(err).to.be.instanceof(MongoOperationTimeoutError);
         });
 
-        it('closes the change stream', async function () {
+        it('closes the change stream', metadata, async function () {
           await once(cs, 'error'); // await the getMore Failure
           await once(cs, 'error'); // await the aggregate failure
           expect(cs.closed).to.be.true;
