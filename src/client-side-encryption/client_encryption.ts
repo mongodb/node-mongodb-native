@@ -24,7 +24,7 @@ import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Filter, type WithId } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
-import { CSOTTimeoutContext, TimeoutContext } from '../timeout';
+import { TimeoutContext } from '../timeout';
 import { MongoDBCollectionNamespace, resolveTimeoutOptions } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import {
