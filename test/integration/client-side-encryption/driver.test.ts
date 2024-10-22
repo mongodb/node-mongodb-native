@@ -17,7 +17,7 @@ import {
   MongoOperationTimeoutError
 } from '../../mongodb';
 import * as BSON from '../../mongodb';
-import { type FailPoint, getEncryptExtraOptions, sleep } from '../../tools/utils';
+import { type FailPoint, getEncryptExtraOptions, measureDuration, sleep } from '../../tools/utils';
 
 const metadata = {
   requires: {
@@ -536,82 +536,92 @@ describe('CSOT', function () {
     const metadata: MongoDBMetadataUI = {
       requires: {
         mongodb: '>=4.2.0',
-        clientSideEncryption: '>=6.1.0'
+        clientSideEncryption: true
       }
     };
 
-    context('when client is provided timeoutMS and command hangs', function () {
-      let encryptedClient: MongoClient;
+    context(
+      'when an auto encrypted client is configured with timeoutMS and auto encryption takes longer than timeoutMS',
+      function () {
+        let encryptedClient: MongoClient;
+        const timeoutMS = 1000;
 
-      beforeEach(async function () {
-        encryptedClient = this.configuration.newClient(
-          {},
-          {
-            autoEncryption: {
-              keyVaultClient,
-              keyVaultNamespace: 'keyvault.datakeys',
-              kmsProviders: getKmsProviders(),
-              schemaMap: {
-                'test.test': {
-                  bsonType: 'object',
-                  encryptMetadata: {
-                    keyId: [new UUID(dataKey)]
-                  },
-                  properties: {
-                    a: {
-                      encrypt: {
-                        bsonType: 'int',
-                        algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
-                        keyId: [new UUID(dataKey)]
+        beforeEach(async function () {
+          encryptedClient = this.configuration.newClient(
+            {},
+            {
+              autoEncryption: {
+                keyVaultClient,
+                keyVaultNamespace: 'keyvault.datakeys',
+                kmsProviders: getKmsProviders(),
+                schemaMap: {
+                  'test.test': {
+                    bsonType: 'object',
+                    encryptMetadata: {
+                      keyId: [new UUID(dataKey)]
+                    },
+                    properties: {
+                      a: {
+                        encrypt: {
+                          bsonType: 'int',
+                          algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
+                          keyId: [new UUID(dataKey)]
+                        }
                       }
                     }
                   }
                 }
-              }
-            },
-            timeoutMS: 1000
-          }
-        );
-        await encryptedClient.connect();
-      });
-
-      afterEach(async function () {
-        await encryptedClient.close();
-      });
-
-      it('the command should fail due to a timeout error', metadata, async function () {
-        const err = await encryptedClient
-          .db('test')
-          .collection('test')
-          .insertOne({ a: 1 })
-          .catch(e => e);
-        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-      });
-    });
-
-    context('when client is not provided timeoutMS and command hangs', function () {
-      let encryptedClient: MongoClient;
-      beforeEach(async function () {
-        encryptedClient = this.configuration.newClient(
-          {},
-          {
-            autoEncryption: {
-              keyVaultClient,
-              keyVaultNamespace: 'admin.datakeys',
-              kmsProviders: getKmsProviders()
+              },
+              timeoutMS
             }
-          }
-        );
-      });
+          );
+          await encryptedClient.connect();
+        });
 
-      afterEach(async function () {
-        encryptedClient.close();
-      });
+        afterEach(async function () {
+          await encryptedClient.close();
+        });
 
-      it('the command should not fail', metadata, async function () {
-        await encryptedClient.db('test').collection('test').aggregate([]).toArray();
-      });
-    });
+        it('the command should fail due to a timeout error', metadata, async function () {
+          const { duration, result: error } = await measureDuration(() =>
+            encryptedClient
+              .db('test')
+              .collection('test')
+              .insertOne({ a: 1 })
+              .catch(e => e)
+          );
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
+        });
+      }
+    );
+
+    context(
+      'when an auto encrypted client is not configured with timeoutMS and auto encryption is delayed',
+      function () {
+        let encryptedClient: MongoClient;
+        beforeEach(async function () {
+          encryptedClient = this.configuration.newClient(
+            {},
+            {
+              autoEncryption: {
+                keyVaultClient,
+                keyVaultNamespace: 'admin.datakeys',
+                kmsProviders: getKmsProviders()
+              }
+            }
+          );
+        });
+
+        afterEach(async function () {
+          await encryptedClient.close();
+        });
+
+        it('the command succeeds', metadata, async function () {
+          await encryptedClient.db('test').collection('test').aggregate([]).toArray();
+        });
+      }
+    );
   });
 
   describe('State machine', function () {
@@ -619,54 +629,62 @@ describe('CSOT', function () {
 
     const timeoutContext = () => {
       return new CSOTTimeoutContext({
-        timeoutMS: 500,
+        timeoutMS: 1000,
         serverSelectionTimeoutMS: 30000
       });
     };
 
-    describe('#markCommand', function () {
-      context('when provided timeoutContext and command hangs', function () {
-        let encryptedClient: MongoClient;
+    const timeoutMS = 1000;
 
-        beforeEach(async function () {
-          encryptedClient = this.configuration.newClient(
-            {},
-            {
-              timeoutMS: 500
+    describe('#markCommand', function () {
+      context(
+        'when csot is enabled and markCommand() takes longer than the remaining timeoutMS',
+        function () {
+          let encryptedClient: MongoClient;
+
+          beforeEach(async function () {
+            encryptedClient = this.configuration.newClient(
+              {},
+              {
+                timeoutMS
+              }
+            );
+            await encryptedClient.connect();
+
+            const stub = sinon
+              // @ts-expect-error accessing private method
+              .stub(Connection.prototype, 'sendCommand')
+              .callsFake(async function* (...args) {
+                await sleep(1000);
+                yield* stub.wrappedMethod.call(this, ...args);
+              });
+          });
+
+          afterEach(async function () {
+            await encryptedClient?.close();
+            sinon.restore();
+          });
+
+          it(
+            'the command should fail due to a timeout error',
+            { requires: { mongodb: '>=4.2.0' } },
+            async function () {
+              const { duration, result: error } = await measureDuration(() =>
+                stateMachine
+                  .markCommand(
+                    encryptedClient,
+                    'test.test',
+                    BSON.serialize({ ping: 1 }),
+                    timeoutContext()
+                  )
+                  .catch(e => e)
+              );
+              expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
             }
           );
-          await encryptedClient.connect();
-
-          const stub = sinon
-            // @ts-expect-error accessing private method
-            .stub(Connection.prototype, 'sendCommand')
-            .callsFake(async function* (...args) {
-              await sleep(1000);
-              yield* stub.wrappedMethod.call(this, ...args);
-            });
-        });
-
-        afterEach(async function () {
-          await encryptedClient?.close();
-          sinon.restore();
-        });
-
-        it(
-          'the command should fail due to a timeout error',
-          { requires: { mongodb: '>=4.2.0' } },
-          async function () {
-            const err = await stateMachine
-              .markCommand(
-                encryptedClient,
-                'test.test',
-                BSON.serialize({ ping: 1 }),
-                timeoutContext()
-              )
-              .catch(e => e);
-            expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-          }
-        );
-      });
+        }
+      );
     });
 
     describe('#fetchKeys', function () {
@@ -699,36 +717,47 @@ describe('CSOT', function () {
         await setupClient.close();
       });
 
-      context('when provided timeoutContext and command hangs', function () {
-        let encryptedClient;
+      context(
+        'when csot is enabled and fetchKeys() takes longer than the remaining timeoutMS',
+        function () {
+          let encryptedClient;
 
-        beforeEach(async function () {
-          encryptedClient = this.configuration.newClient(
-            {},
-            {
-              timeoutMS: 1000
+          beforeEach(async function () {
+            encryptedClient = this.configuration.newClient(
+              {},
+              {
+                timeoutMS
+              }
+            );
+            await encryptedClient.connect();
+          });
+
+          afterEach(async function () {
+            await encryptedClient?.close();
+          });
+
+          it(
+            'the command should fail due to a timeout error',
+            { requires: { mongodb: '>=4.2.0' } },
+            async function () {
+              const { duration, result: error } = await measureDuration(() =>
+                stateMachine
+                  .fetchKeys(
+                    encryptedClient,
+                    'test.test',
+                    BSON.serialize({ a: 1 }),
+                    timeoutContext()
+                  )
+                  .catch(e => e)
+              );
+              expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
             }
           );
-          await encryptedClient.connect();
-        });
+        }
+      );
 
-        afterEach(async function () {
-          await encryptedClient?.close();
-        });
-
-        it(
-          'the command should fail due to a timeout error',
-          { requires: { mongodb: '>=4.2.0' } },
-          async function () {
-            const err = await stateMachine
-              .fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }), timeoutContext())
-              .catch(e => e);
-            expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-          }
-        );
-      });
-
-      context('when not provided timeoutContext and command hangs', function () {
+      context('when csot is not enabled and fetchKeys() is delayed', function () {
         let encryptedClient;
 
         beforeEach(async function () {
@@ -740,13 +769,9 @@ describe('CSOT', function () {
           await encryptedClient?.close();
         });
 
-        it(
-          'the command should not fail due to a server error',
-          { requires: { mongodb: '>=4.2.0' } },
-          async function () {
-            await stateMachine.fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }));
-          }
-        );
+        it('the command succeeds', { requires: { mongodb: '>=4.2.0' } }, async function () {
+          await stateMachine.fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }));
+        });
       });
     });
 
@@ -780,36 +805,42 @@ describe('CSOT', function () {
         await setupClient.close();
       });
 
-      context('when provided timeoutContext and command hangs', function () {
-        let encryptedClient: MongoClient;
+      context(
+        'when csot is enabled and fetchCollectionInfo() takes longer than the remaining timeoutMS',
+        function () {
+          let encryptedClient: MongoClient;
 
-        beforeEach(async function () {
-          encryptedClient = this.configuration.newClient(
-            {},
-            {
-              timeoutMS: 1000
+          beforeEach(async function () {
+            encryptedClient = this.configuration.newClient(
+              {},
+              {
+                timeoutMS
+              }
+            );
+            await encryptedClient.connect();
+          });
+
+          afterEach(async function () {
+            await encryptedClient?.close();
+          });
+
+          it(
+            'the command should fail due to a timeout error',
+            { requires: { mongodb: '>=4.2.0' } },
+            async function () {
+              const { duration, result: error } = await measureDuration(() =>
+                stateMachine
+                  .fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 }, timeoutContext())
+                  .catch(e => e)
+              );
+              expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
             }
           );
-          await encryptedClient.connect();
-        });
+        }
+      );
 
-        afterEach(async function () {
-          await encryptedClient?.close();
-        });
-
-        it(
-          'the command should fail due to a timeout error',
-          { requires: { mongodb: '>=4.2.0' } },
-          async function () {
-            const err = await stateMachine
-              .fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 }, timeoutContext())
-              .catch(e => e);
-            expect(err).to.be.instanceOf(MongoOperationTimeoutError);
-          }
-        );
-      });
-
-      context('when not provided timeoutContext and command hangs', function () {
+      context('when csot is not enabled and fetchCollectionInfo() is delayed', function () {
         let encryptedClient: MongoClient;
 
         beforeEach(async function () {
@@ -821,13 +852,9 @@ describe('CSOT', function () {
           await encryptedClient?.close();
         });
 
-        it(
-          'the command should not fail due to a server error',
-          { requires: { mongodb: '>=4.2.0' } },
-          async function () {
-            await stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
-          }
-        );
+        it('the command succeeds', { requires: { mongodb: '>=4.2.0' } }, async function () {
+          await stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
+        });
       });
     });
   });

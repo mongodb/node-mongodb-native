@@ -139,9 +139,7 @@ describe('CSOT spec prose tests', function () {
 
         childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
         client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
-          family: 6,
-          monitorCommands: true,
-          serverSelectionTimeoutMS: 2000
+          monitorCommands: true
         });
       });
 

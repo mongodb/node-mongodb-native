@@ -22,7 +22,7 @@ import {
   TimeoutContext,
   Topology
 } from '../../mongodb';
-import { sleep } from '../../tools/utils';
+import { measureDuration, sleep } from '../../tools/utils';
 import { createTimerSandbox } from '../../unit/timer_sandbox';
 
 // TODO(NODE-5824): Implement CSOT prose tests
@@ -186,6 +186,7 @@ describe('CSOT spec unit tests', function () {
     describe('Auto Encryption', function () {
       context('when provided timeoutMS and command hangs', function () {
         let encryptedClient;
+        const timeoutMS = 500;
 
         beforeEach(async function () {
           encryptedClient = this.configuration.newClient(
@@ -206,7 +207,7 @@ describe('CSOT spec unit tests', function () {
                   local: { key: Buffer.alloc(96) }
                 }
               },
-              timeoutMS: 500
+              timeoutMS
             }
           );
           await encryptedClient.connect();
@@ -215,7 +216,7 @@ describe('CSOT spec unit tests', function () {
             // @ts-expect-error accessing private method
             .stub(Connection.prototype, 'sendCommand')
             .callsFake(async function* (...args) {
-              await sleep(1000);
+              await sleep(timeoutMS * 2);
               yield* stub.wrappedMethod.call(this, ...args);
             });
         });
@@ -229,11 +230,14 @@ describe('CSOT spec unit tests', function () {
           'the command should fail due to a timeout error',
           { requires: { mongodb: '>=4.2' } },
           async function () {
-            const err = await encryptedClient
-              .db()
-              .command({ ping: 1 })
-              .catch(e => e);
-            expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+            const { duration, result: error } = await measureDuration(() =>
+              encryptedClient
+                .db()
+                .command({ ping: 1 })
+                .catch(e => e)
+            );
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
           }
         );
       });
