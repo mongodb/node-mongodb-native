@@ -248,7 +248,7 @@ export abstract class AbstractCursor<
         this.cursorOptions.timeoutMode = options.timeoutMode;
       }
     } else {
-      if (this.cursorOptions.timeoutMode != null)
+      if (options.timeoutMode != null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
 
