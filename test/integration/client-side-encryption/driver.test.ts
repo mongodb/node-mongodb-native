@@ -636,6 +636,12 @@ describe('CSOT', function () {
 
     const timeoutMS = 1000;
 
+    const metadata: MongoDBMetadataUI = {
+      requires: {
+        mongodb: '>=4.2.0'
+      }
+    };
+
     describe('#markCommand', function () {
       context(
         'when csot is enabled and markCommand() takes longer than the remaining timeoutMS',
@@ -665,24 +671,20 @@ describe('CSOT', function () {
             sinon.restore();
           });
 
-          it(
-            'the command should fail due to a timeout error',
-            { requires: { mongodb: '>=4.2.0' } },
-            async function () {
-              const { duration, result: error } = await measureDuration(() =>
-                stateMachine
-                  .markCommand(
-                    encryptedClient,
-                    'test.test',
-                    BSON.serialize({ ping: 1 }),
-                    timeoutContext()
-                  )
-                  .catch(e => e)
-              );
-              expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
-            }
-          );
+          it('the command should fail due to a timeout error', metadata, async function () {
+            const { duration, result: error } = await measureDuration(() =>
+              stateMachine
+                .markCommand(
+                  encryptedClient,
+                  'test.test',
+                  BSON.serialize({ ping: 1 }),
+                  timeoutContext()
+                )
+                .catch(e => e)
+            );
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
+          });
         }
       );
     });
@@ -736,24 +738,15 @@ describe('CSOT', function () {
             await encryptedClient?.close();
           });
 
-          it(
-            'the command should fail due to a timeout error',
-            { requires: { mongodb: '>=4.2.0' } },
-            async function () {
-              const { duration, result: error } = await measureDuration(() =>
-                stateMachine
-                  .fetchKeys(
-                    encryptedClient,
-                    'test.test',
-                    BSON.serialize({ a: 1 }),
-                    timeoutContext()
-                  )
-                  .catch(e => e)
-              );
-              expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
-            }
-          );
+          it('the command should fail due to a timeout error', metadata, async function () {
+            const { duration, result: error } = await measureDuration(() =>
+              stateMachine
+                .fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }), timeoutContext())
+                .catch(e => e)
+            );
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
+          });
         }
       );
 
@@ -769,7 +762,7 @@ describe('CSOT', function () {
           await encryptedClient?.close();
         });
 
-        it('the command succeeds', { requires: { mongodb: '>=4.2.0' } }, async function () {
+        it('the command succeeds', metadata, async function () {
           await stateMachine.fetchKeys(encryptedClient, 'test.test', BSON.serialize({ a: 1 }));
         });
       });
@@ -807,6 +800,7 @@ describe('CSOT', function () {
 
       context(
         'when csot is enabled and fetchCollectionInfo() takes longer than the remaining timeoutMS',
+        metadata,
         function () {
           let encryptedClient: MongoClient;
 
@@ -824,38 +818,38 @@ describe('CSOT', function () {
             await encryptedClient?.close();
           });
 
-          it(
-            'the command should fail due to a timeout error',
-            { requires: { mongodb: '>=4.2.0' } },
-            async function () {
-              const { duration, result: error } = await measureDuration(() =>
-                stateMachine
-                  .fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 }, timeoutContext())
-                  .catch(e => e)
-              );
-              expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
-            }
-          );
+          it('the command should fail due to a timeout error', metadata, async function () {
+            const { duration, result: error } = await measureDuration(() =>
+              stateMachine
+                .fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 }, timeoutContext())
+                .catch(e => e)
+            );
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
+          });
         }
       );
 
-      context('when csot is not enabled and fetchCollectionInfo() is delayed', function () {
-        let encryptedClient: MongoClient;
+      context(
+        'when csot is not enabled and fetchCollectionInfo() is delayed',
+        metadata,
+        function () {
+          let encryptedClient: MongoClient;
 
-        beforeEach(async function () {
-          encryptedClient = this.configuration.newClient();
-          await encryptedClient.connect();
-        });
+          beforeEach(async function () {
+            encryptedClient = this.configuration.newClient();
+            await encryptedClient.connect();
+          });
 
-        afterEach(async function () {
-          await encryptedClient?.close();
-        });
+          afterEach(async function () {
+            await encryptedClient?.close();
+          });
 
-        it('the command succeeds', { requires: { mongodb: '>=4.2.0' } }, async function () {
-          await stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
-        });
-      });
+          it('the command succeeds', metadata, async function () {
+            await stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
+          });
+        }
+      );
     });
   });
 });
