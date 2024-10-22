@@ -413,7 +413,7 @@ describe('Client Side Encryption Functional', function () {
 
   describe('CSOT on ClientEncryption', { requires: { clientSideEncryption: true } }, function () {
     const metadata: MongoDBMetadataUI = {
-      requires: { clientSideEncryption: true, mongodb: '>=4.4' }
+      requires: { clientSideEncryption: true, mongodb: '>=4.4', topology: '!single' }
     };
 
     const LOCAL_KEY = Buffer.from(
