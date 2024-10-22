@@ -499,7 +499,7 @@ export class ClientSession
       if (timeoutMS == null && this.timeoutContext == null) {
         WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
       } else {
-        WriteConcern.apply(command, { w: 'majority', ...wc, wtimeoutMS: undefined });
+        WriteConcern.apply(command, { ...wc, wtimeoutMS: undefined });
       }
     }
 
