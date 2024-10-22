@@ -499,7 +499,10 @@ export class ClientSession
       if (timeoutMS == null && this.timeoutContext == null) {
         WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
       } else {
-        WriteConcern.apply(command, { ...wc, wtimeoutMS: undefined });
+        const wcKeys = Object.keys(wc);
+        if (wcKeys.length > 2 || (!wcKeys.includes('wtimeoutMS') && !wcKeys.includes('wTimeoutMS')))
+          // if the write concern was specified with wTimeoutMS, then we set both wtimeoutMS and wTimeoutMS, guaranteeing at least two keys, so if we have more than two keys, then we can automatically assume that we should add the write concern to the command. If it has 2 or fewer keys, we need to check that those keys aren't the wtimeoutMS or wTimeoutMS options before we add the write concern to the command
+          WriteConcern.apply(command, { ...wc, wtimeoutMS: undefined });
       }
     }
 
