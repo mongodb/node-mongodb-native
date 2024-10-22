@@ -75,8 +75,7 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
       session
     };
 
-    const explain = Explain.fromOptions(options);
-    if (explain) {
+    if (options.explain) {
       try {
         validateExplainTimeoutOptions(options, Explain.fromOptions(options));
       } catch {

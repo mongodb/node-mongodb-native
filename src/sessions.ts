@@ -507,7 +507,6 @@ export class ClientSession
     }
 
     if (this.transaction.state === TxnState.TRANSACTION_COMMITTED || this.commitAttempted) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
       if (timeoutMS == null && this.timeoutContext == null) {
         WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
       } else {
