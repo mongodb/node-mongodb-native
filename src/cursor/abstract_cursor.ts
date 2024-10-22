@@ -248,7 +248,7 @@ export abstract class AbstractCursor<
         this.cursorOptions.timeoutMode = options.timeoutMode;
       }
     } else {
-      if (options.timeoutMode != null)
+      if (this.cursorOptions.timeoutMode != null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
 
@@ -1134,6 +1134,10 @@ export class CursorTimeoutContext extends TimeoutContext {
   }
   override get maxTimeMS(): number | null {
     return this.timeoutContext.maxTimeMS;
+  }
+
+  get timeoutMS(): number | null {
+    return this.timeoutContext.csotEnabled() ? this.timeoutContext.timeoutMS : null;
   }
 
   override refreshed(): CursorTimeoutContext {
