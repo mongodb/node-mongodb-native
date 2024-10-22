@@ -1,3 +1,4 @@
+import { type Document } from '../../bson';
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
 import {
   MongoClientBulkWriteError,
@@ -22,9 +23,9 @@ import { ClientBulkWriteResultsMerger } from './results_merger';
  * @internal
  */
 export class ClientBulkWriteExecutor {
-  client: MongoClient;
-  options: ClientBulkWriteOptions;
-  operations: AnyClientBulkWriteModel[];
+  private readonly client: MongoClient;
+  private readonly options: ClientBulkWriteOptions;
+  private readonly operations: ReadonlyArray<AnyClientBulkWriteModel<Document>>;
 
   /**
    * Instantiate the executor.
@@ -34,7 +35,7 @@ export class ClientBulkWriteExecutor {
    */
   constructor(
     client: MongoClient,
-    operations: AnyClientBulkWriteModel[],
+    operations: ReadonlyArray<AnyClientBulkWriteModel<Document>>,
     options?: ClientBulkWriteOptions
   ) {
     if (operations.length === 0) {
@@ -75,7 +76,7 @@ export class ClientBulkWriteExecutor {
    * for each, then merge the results into one.
    * @returns The result.
    */
-  async execute(): Promise<ClientBulkWriteResult | { ok: 1 }> {
+  async execute(): Promise<ClientBulkWriteResult> {
     // The command builder will take the user provided models and potential split the batch
     // into multiple commands due to size.
     const pkFactory = this.client.s.options.pkFactory;
@@ -90,7 +91,7 @@ export class ClientBulkWriteExecutor {
         const operation = new ClientBulkWriteOperation(commandBuilder, this.options);
         await executeOperation(this.client, operation);
       }
-      return { ok: 1 };
+      return ClientBulkWriteResultsMerger.unacknowledged();
     } else {
       const resultsMerger = new ClientBulkWriteResultsMerger(this.options);
       // For each command will will create and exhaust a cursor for the results.
@@ -110,7 +111,7 @@ export class ClientBulkWriteExecutor {
               message: 'Mongo client bulk write encountered an error during execution'
             });
             bulkWriteError.cause = error;
-            bulkWriteError.partialResult = resultsMerger.result;
+            bulkWriteError.partialResult = resultsMerger.bulkWriteResult;
             throw bulkWriteError;
           } else {
             // Client side errors are just thrown.
@@ -126,11 +127,11 @@ export class ClientBulkWriteExecutor {
         });
         error.writeConcernErrors = resultsMerger.writeConcernErrors;
         error.writeErrors = resultsMerger.writeErrors;
-        error.partialResult = resultsMerger.result;
+        error.partialResult = resultsMerger.bulkWriteResult;
         throw error;
       }
 
-      return resultsMerger.result;
+      return resultsMerger.bulkWriteResult;
     }
   }
 }

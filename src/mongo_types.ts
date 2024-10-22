@@ -1,15 +1,16 @@
-import type { BSONType, ObjectIdLike } from 'bson';
 import { EventEmitter } from 'events';
 
 import type {
   Binary,
   BSONRegExp,
+  BSONType,
   Decimal128,
   Document,
   Double,
   Int32,
   Long,
   ObjectId,
+  ObjectIdLike,
   Timestamp
 } from './bson';
 import { type CommandStartedEvent } from './cmap/command_monitoring_events';

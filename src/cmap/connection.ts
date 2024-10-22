@@ -1,8 +1,13 @@
-import { type DeserializeOptions } from 'bson';
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
-import { type BSONSerializeOptions, deserialize, type Document, type ObjectId } from '../bson';
+import {
+  type BSONSerializeOptions,
+  deserialize,
+  type DeserializeOptions,
+  type Document,
+  type ObjectId
+} from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import {
   CLOSE,
