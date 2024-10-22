@@ -718,7 +718,7 @@ export class ChangeStream<
           try {
             await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError && this.cursor.id != null) {
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id == null) {
               throw error;
             }
             try {
@@ -753,7 +753,7 @@ export class ChangeStream<
           try {
             await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError && this.cursor.id != null) {
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id == null) {
               throw error;
             }
             try {
@@ -789,7 +789,7 @@ export class ChangeStream<
           try {
             await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError && this.cursor.id != null) throw error;
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id == null) throw error;
             try {
               await this.close();
             } catch (error) {
