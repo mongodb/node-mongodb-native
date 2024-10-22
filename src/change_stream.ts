@@ -711,15 +711,14 @@ export class ChangeStream<
     this.timeoutContext?.refresh();
     try {
       while (true) {
-        const cursorInitialized = this.cursor.id != null;
         try {
           const hasNext = await this.cursor.hasNext();
           return hasNext;
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error, cursorInitialized);
+            await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError && cursorInitialized) {
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id != null) {
               throw error;
             }
             try {
@@ -746,16 +745,15 @@ export class ChangeStream<
 
     try {
       while (true) {
-        const cursorInitialized = this.cursor.id != null;
         try {
           const change = await this.cursor.next();
           const processedChange = this._processChange(change ?? null);
           return processedChange;
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error, cursorInitialized);
+            await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError && cursorInitialized) {
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id != null) {
               throw error;
             }
             try {
@@ -784,15 +782,14 @@ export class ChangeStream<
 
     try {
       while (true) {
-        const cursorInitialized = this.cursor.id != null;
         try {
           const change = await this.cursor.tryNext();
           return change ?? null;
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error, cursorInitialized);
+            await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            if (error instanceof MongoOperationTimeoutError && cursorInitialized) throw error;
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id != null) throw error;
             try {
               await this.close();
             } catch (error) {
