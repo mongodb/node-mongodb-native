@@ -310,7 +310,9 @@ export class AutoEncrypter {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: TS complains as this always returns true on versions where it is present.
       if (net.getDefaultAutoSelectFamily) {
-        Object.assign(clientOptions, autoSelectSocketOptions(this._client.s.options));
+        // AutoEncrypter is made inside of MongoClient constructor while options are being parsed,
+        // we do not have access to the options that are in progress.
+        Object.assign(clientOptions, autoSelectSocketOptions(this._client.s?.options ?? {}));
       }
 
       this._mongocryptdClient = new MongoClient(this._mongocryptdManager.uri, clientOptions);
