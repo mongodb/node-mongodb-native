@@ -2,10 +2,10 @@ import type { BSONSerializeOptions, Document } from '../bson';
 import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError } from '../error';
 import {
-  cleanUpExplainTimeoutOptions,
   decorateWithExplain,
   Explain,
-  type ExplainOptions
+  type ExplainOptions,
+  validateExplainTimeoutOptions
 } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
@@ -99,7 +99,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);
-      cleanUpExplainTimeoutOptions(this.options, this.explain);
+      if (this.explain) validateExplainTimeoutOptions(this.options, this.explain);
     } else if (options?.explain != null) {
       throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
     }

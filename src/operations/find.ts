@@ -2,7 +2,11 @@ import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
-import { cleanUpExplainTimeoutOptions, decorateWithExplain, type ExplainOptions } from '../explain';
+import {
+  decorateWithExplain,
+  type ExplainOptions,
+  validateExplainTimeoutOptions
+} from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -119,7 +123,7 @@ export class FindOperation extends CommandOperation<CursorResponse> {
 
     let findCommand = makeFindCommand(this.ns, this.filter, options);
     if (this.explain) {
-      cleanUpExplainTimeoutOptions(this.options, this.explain);
+      validateExplainTimeoutOptions(this.options, this.explain);
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
 

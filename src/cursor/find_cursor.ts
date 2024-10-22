@@ -2,11 +2,11 @@ import { type Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoAPIError, MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import {
-  cleanUpExplainTimeoutOptions,
   Explain,
   ExplainableCursor,
   type ExplainCommandOptions,
-  type ExplainVerbosityLike
+  type ExplainVerbosityLike,
+  validateExplainTimeoutOptions
 } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
@@ -75,7 +75,16 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
       session
     };
 
-    cleanUpExplainTimeoutOptions(options, Explain.fromOptions(options));
+    const explain = Explain.fromOptions(options);
+    if (explain) {
+      try {
+        validateExplainTimeoutOptions(options, Explain.fromOptions(options));
+      } catch {
+        throw new MongoAPIError(
+          'timeoutMS cannot be used with explain when explain is specified in findOptions'
+        );
+      }
+    }
 
     const findOperation = new FindOperation(this.namespace, this.cursorFilter, options);
 
