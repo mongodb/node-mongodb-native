@@ -2,11 +2,11 @@ import { type Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoAPIError, MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import {
+  cleanUpExplainTimeoutOptions,
   Explain,
   ExplainableCursor,
   type ExplainCommandOptions,
-  type ExplainVerbosityLike,
-  validateExplainTimeoutOptions
+  type ExplainVerbosityLike
 } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
@@ -75,13 +75,7 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
       session
     };
 
-    try {
-      validateExplainTimeoutOptions(options, Explain.fromOptions(options));
-    } catch {
-      throw new MongoAPIError(
-        'timeoutMS cannot be used with explain when explain is specified in findOptions'
-      );
-    }
+    cleanUpExplainTimeoutOptions(options, Explain.fromOptions(options));
 
     const findOperation = new FindOperation(this.namespace, this.cursorFilter, options);
 
@@ -333,7 +327,6 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
    * Set a maxTimeMS on the cursor query, allowing for hard timeout limits on queries (Only supported on MongoDB 2.6 or higher)
    *
    * @param value - Number of milliseconds to wait before aborting the query.
-   *@deprecated Will be removed in the next major version. Please use timeoutMS instead.
    */
   override maxTimeMS(value: number): this {
     this.throwIfInitialized();

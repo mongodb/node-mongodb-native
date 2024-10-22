@@ -2,11 +2,7 @@ import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
-import {
-  decorateWithExplain,
-  type ExplainOptions,
-  validateExplainTimeoutOptions
-} from '../explain';
+import { cleanUpExplainTimeoutOptions, decorateWithExplain, type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -48,8 +44,7 @@ export interface FindOptions<TSchema extends Document = Document>
   min?: Document;
   /** The exclusive upper bound for a specific index */
   max?: Document;
-  /** Number of milliseconds to wait before aborting the query.
-   * @deprecated Will be removed in the next major version. Please use timeoutMS instead. */
+  /** Number of milliseconds to wait before aborting the query. */
   maxTimeMS?: number;
   /** The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. Requires `tailable` and `awaitData` to be true */
   maxAwaitTimeMS?: number;
@@ -78,6 +73,7 @@ export interface FindOptions<TSchema extends Document = Document>
    * @deprecated This API is deprecated in favor of `collection.find().explain()`.
    */
   explain?: ExplainOptions['explain'];
+  /** @internal*/
   timeoutMode?: CursorTimeoutMode;
 }
 
@@ -123,7 +119,7 @@ export class FindOperation extends CommandOperation<CursorResponse> {
 
     let findCommand = makeFindCommand(this.ns, this.filter, options);
     if (this.explain) {
-      validateExplainTimeoutOptions(this.options, this.explain);
+      cleanUpExplainTimeoutOptions(this.options, this.explain);
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
 

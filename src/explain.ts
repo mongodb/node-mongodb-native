@@ -66,7 +66,7 @@ export interface ExplainOptions {
 /** @internal */
 export class Explain {
   readonly verbosity: ExplainVerbosity;
-  readonly maxTimeMS?: number;
+  maxTimeMS?: number;
 
   private constructor(verbosity: ExplainVerbosityLike, maxTimeMS?: number) {
     if (typeof verbosity === 'boolean') {
@@ -92,10 +92,11 @@ export class Explain {
   }
 }
 
-export function validateExplainTimeoutOptions(options: Document, explain?: Explain) {
+export function cleanUpExplainTimeoutOptions(options: Document, explain?: Explain) {
   const { maxTimeMS, timeoutMS } = options;
   if (timeoutMS != null && (maxTimeMS != null || explain?.maxTimeMS != null)) {
-    throw new MongoAPIError('Cannot use maxTimeMS with timeoutMS for explain commands.');
+    if (maxTimeMS != null) delete options.maxTimeMS;
+    if (explain?.maxTimeMS != null) delete explain.maxTimeMS;
   }
 }
 
