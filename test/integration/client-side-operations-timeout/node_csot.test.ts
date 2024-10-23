@@ -826,6 +826,7 @@ describe('CSOT driver tests', metadata, () => {
     let commandsStarted: CommandStartedEvent[];
 
     beforeEach(async function () {
+      this.configuration.url({ useMultipleMongoses: false });
       internalClient = this.configuration.newClient();
       await internalClient
         .db('db')
@@ -945,12 +946,15 @@ describe('CSOT driver tests', metadata, () => {
 
           await once(cs.cursor, 'resumeTokenChanged');
 
-          const { promise: changePromise, resolve } =
-            promiseWithResolvers<ChangeStreamDocument<BSON.Document>>();
+          const {
+            promise: changePromise,
+            resolve,
+            reject
+          } = promiseWithResolvers<ChangeStreamDocument<BSON.Document>>();
 
-          cs.once('change', change => {
-            resolve(change);
-          });
+          cs.once('change', resolve);
+
+          cs.once('error', reject);
 
           const change = await changePromise;
           expect(change).to.have.ownProperty('operationType', 'insert');
