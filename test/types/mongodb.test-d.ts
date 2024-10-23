@@ -20,8 +20,32 @@ declare const options: MongoDBDriver.MongoClientOptions;
 expectDeprecated(options.w);
 expectDeprecated(options.journal);
 expectDeprecated(options.wtimeoutMS);
+expectDeprecated(options.socketTimeoutMS);
+expectDeprecated(options.waitQueueTimeoutMS);
 expectNotDeprecated(options.writeConcern);
 expectType<WriteConcernSettings | WriteConcern | undefined>(options.writeConcern);
+
+declare const estimatedDocumentCountOptions: MongoDBDriver.EstimatedDocumentCountOptions;
+expectDeprecated(estimatedDocumentCountOptions.maxTimeMS);
+
+declare const countOptions: MongoDBDriver.CountOptions;
+expectDeprecated(countOptions.maxTimeMS);
+
+declare const commandOptions: MongoDBDriver.CommandOperationOptions;
+expectDeprecated(commandOptions.maxTimeMS);
+
+declare const aggregateOptions: MongoDBDriver.AggregateOptions;
+expectDeprecated(aggregateOptions.maxTimeMS);
+
+declare const runCommandCursor: MongoDBDriver.RunCommandCursor;
+expectDeprecated(runCommandCursor.setMaxTimeMS);
+expectDeprecated(runCommandCursor.maxTimeMS);
+
+declare const cursorOptions: MongoDBDriver.AbstractCursorOptions;
+expectDeprecated(cursorOptions.maxTimeMS);
+
+declare const abstractCursor: MongoDBDriver.AbstractCursor;
+expectDeprecated(abstractCursor.maxTimeMS);
 
 interface TSchema extends Document {
   name: string;
