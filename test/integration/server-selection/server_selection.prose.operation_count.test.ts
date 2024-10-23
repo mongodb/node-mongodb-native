@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { on } from 'events';
 
 import {
   type Collection,
@@ -7,7 +6,7 @@ import {
   HostAddress,
   type MongoClient
 } from '../../mongodb';
-import { sleep } from '../../tools/utils';
+import { waitUntilPoolsFilled } from '../../tools/utils';
 
 const failPoint = {
   configureFailPoint: 'failCommand',
@@ -25,17 +24,6 @@ const POOL_SIZE = 100;
 async function runTaskGroup(collection: Collection, count: 10 | 100 | 1000) {
   for (let i = 0; i < count; ++i) {
     await collection.findOne({});
-  }
-}
-
-async function ensurePoolIsFull(client: MongoClient): Promise<boolean> {
-  let connectionCount = 0;
-
-  for await (const _event of on(client, 'connectionCreated')) {
-    connectionCount++;
-    if (connectionCount === POOL_SIZE * 2) {
-      break;
-    }
   }
 }
 
@@ -75,15 +63,8 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
 
     client.on('commandStarted', updateCount);
 
-    const poolIsFullPromise = ensurePoolIsFull(client);
-
-    await client.connect();
-
     // Step 4: Using CMAP events, ensure the client's connection pools for both mongoses have been saturated
-    const poolIsFull = Promise.race([poolIsFullPromise, sleep(30 * 1000)]);
-    if (!poolIsFull) {
-      throw new Error('Timed out waiting for connection pool to fill to minPoolSize');
-    }
+    await waitUntilPoolsFilled(client, AbortSignal.timeout(30_000), POOL_SIZE * 2);
 
     seeds = client.topology.s.seedlist.map(address => address.toString());
 

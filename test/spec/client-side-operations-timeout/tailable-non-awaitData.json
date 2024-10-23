@@ -17,7 +17,7 @@
       "client": {
         "id": "client",
         "uriOptions": {
-          "timeoutMS": 10
+          "timeoutMS": 200
         },
         "useMultipleMongoses": false,
         "observeEvents": [
@@ -94,7 +94,7 @@
                   "find"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 15
+                "blockTimeMS": 250
               }
             }
           }
@@ -154,7 +154,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 15
+                "blockTimeMS": 150
               }
             }
           }
@@ -165,7 +165,7 @@
           "arguments": {
             "filter": {},
             "cursorType": "tailable",
-            "timeoutMS": 20,
+            "timeoutMS": 200,
             "batchSize": 1
           },
           "saveResultAsEntity": "tailableCursor"
@@ -239,7 +239,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 15
+                "blockTimeMS": 250
               }
             }
           }

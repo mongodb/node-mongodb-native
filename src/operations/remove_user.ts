@@ -1,6 +1,7 @@
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -22,8 +23,12 @@ export class RemoveUserOperation extends CommandOperation<boolean> {
     return 'dropUser' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
-    await super.executeCommand(server, session, { dropUser: this.username });
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<boolean> {
+    await super.executeCommand(server, session, { dropUser: this.username }, timeoutContext);
     return true;
   }
 }

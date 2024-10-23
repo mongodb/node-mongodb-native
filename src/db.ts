@@ -222,6 +222,11 @@ export class Db {
     return this.s.namespace.toString();
   }
 
+  /** @internal */
+  get timeoutMS(): number | undefined {
+    return this.s.options?.timeoutMS;
+  }
+
   /**
    * Create a new collection on a server with the specified options. Use this to create capped collections.
    * More information about command options available at https://www.mongodb.com/docs/manual/reference/command/create/
@@ -270,11 +275,16 @@ export class Db {
     // Intentionally, we do not inherit options from parent for this operation.
     return await executeOperation(
       this.client,
-      new RunCommandOperation(this, command, {
-        ...resolveBSONOptions(options),
-        session: options?.session,
-        readPreference: options?.readPreference
-      })
+      new RunCommandOperation(
+        this,
+        command,
+        resolveOptions(undefined, {
+          ...resolveBSONOptions(options),
+          timeoutMS: options?.timeoutMS ?? this.timeoutMS,
+          session: options?.session,
+          readPreference: options?.readPreference
+        })
+      )
     );
   }
 
@@ -379,7 +389,11 @@ export class Db {
       new RenameOperation(
         this.collection<TSchema>(fromCollection) as TODO_NODE_3286,
         toCollection,
-        { ...options, new_collection: true, readPreference: ReadPreference.primary }
+        resolveOptions(undefined, {
+          ...options,
+          new_collection: true,
+          readPreference: ReadPreference.primary
+        })
       ) as TODO_NODE_3286
     );
   }

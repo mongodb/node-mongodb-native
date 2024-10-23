@@ -143,7 +143,7 @@ tests:
   - description: "readConcern majority with out stage"
     runOnRequirements:
       - minServerVersion: "4.1.0"
-        topologies: [ replicaset, sharded-replicaset ]
+        topologies: [ replicaset, sharded ]
         serverless: "forbid"
     operations:
       - name: aggregate

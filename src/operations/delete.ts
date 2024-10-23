@@ -4,6 +4,7 @@ import { MongoCompatibilityError, MongoServerError } from '../error';
 import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { type MongoDBNamespace } from '../utils';
 import { type WriteConcernOptions } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
@@ -67,7 +68,8 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<DeleteResult> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
@@ -95,7 +97,12 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
       }
     }
 
-    const res: TODO_NODE_3286 = await super.executeCommand(server, session, command);
+    const res: TODO_NODE_3286 = await super.executeCommand(
+      server,
+      session,
+      command,
+      timeoutContext
+    );
     return res;
   }
 }
@@ -107,9 +114,10 @@ export class DeleteOneOperation extends DeleteOperation {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<DeleteResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session);
+    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
     if (this.explain) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
@@ -127,9 +135,10 @@ export class DeleteManyOperation extends DeleteOperation {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<DeleteResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session);
+    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
     if (this.explain) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);

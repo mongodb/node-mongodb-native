@@ -1,4 +1,5 @@
 import { type Document } from '../../bson';
+import { CursorTimeoutContext, CursorTimeoutMode } from '../../cursor/abstract_cursor';
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
 import {
   MongoClientBulkWriteError,
@@ -7,6 +8,8 @@ import {
   MongoServerError
 } from '../../error';
 import { type MongoClient } from '../../mongo_client';
+import { TimeoutContext } from '../../timeout';
+import { resolveTimeoutOptions } from '../../utils';
 import { WriteConcern } from '../../write_concern';
 import { executeOperation } from '../execute_operation';
 import { ClientBulkWriteOperation } from './client_bulk_write';
@@ -86,17 +89,26 @@ export class ClientBulkWriteExecutor {
       pkFactory
     );
     // Unacknowledged writes need to execute all batches and return { ok: 1}
+    const resolvedOptions = resolveTimeoutOptions(this.client, this.options);
+    const context = TimeoutContext.create(resolvedOptions);
+
     if (this.options.writeConcern?.w === 0) {
       while (commandBuilder.hasNextBatch()) {
         const operation = new ClientBulkWriteOperation(commandBuilder, this.options);
-        await executeOperation(this.client, operation);
+        await executeOperation(this.client, operation, context);
       }
       return ClientBulkWriteResultsMerger.unacknowledged();
     } else {
       const resultsMerger = new ClientBulkWriteResultsMerger(this.options);
       // For each command will will create and exhaust a cursor for the results.
       while (commandBuilder.hasNextBatch()) {
-        const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, this.options);
+        const cursorContext = new CursorTimeoutContext(context, Symbol());
+        const options = {
+          ...this.options,
+          timeoutContext: cursorContext,
+          ...(resolvedOptions.timeoutMS != null && { timeoutMode: CursorTimeoutMode.LIFETIME })
+        };
+        const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, options);
         try {
           await resultsMerger.merge(cursor);
         } catch (error) {

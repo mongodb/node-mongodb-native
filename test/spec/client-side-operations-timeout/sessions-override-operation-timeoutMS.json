@@ -75,7 +75,7 @@
                   "commitTransaction"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 60
+                "blockTimeMS": 600
               }
             }
           }
@@ -98,7 +98,7 @@
           "name": "commitTransaction",
           "object": "session",
           "arguments": {
-            "timeoutMS": 50
+            "timeoutMS": 500
           },
           "expectError": {
             "isTimeoutError": true
@@ -165,7 +165,7 @@
                   "abortTransaction"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 60
+                "blockTimeMS": 600
               }
             }
           }
@@ -188,7 +188,7 @@
           "name": "abortTransaction",
           "object": "session",
           "arguments": {
-            "timeoutMS": 50
+            "timeoutMS": 500
           }
         }
       ],
@@ -252,7 +252,7 @@
                   "insert"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 60
+                "blockTimeMS": 600
               }
             }
           }
@@ -261,7 +261,7 @@
           "name": "withTransaction",
           "object": "session",
           "arguments": {
-            "timeoutMS": 50,
+            "timeoutMS": 500,
             "callback": [
               {
                 "name": "insertOne",
@@ -305,6 +305,26 @@
             {
               "commandFailedEvent": {
                 "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction",
+                "databaseName": "admin",
+                "command": {
+                  "abortTransaction": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "abortTransaction"
               }
             }
           ]
