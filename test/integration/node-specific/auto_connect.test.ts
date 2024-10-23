@@ -7,7 +7,7 @@ import {
   type ChangeStream,
   ClientSession,
   type Collection,
-  type MongoClient,
+  MongoClient,
   MongoNotConnectedError,
   ProfilingLevel,
   Topology,
@@ -828,7 +828,7 @@ describe('When executing an operation for the first time', () => {
     let client: MongoClient;
 
     beforeEach(async function () {
-      client = this.configuration.newClient({ timeoutMS: 1000 });
+      client = this.configuration.newClient({ timeoutMS: 500 });
     });
 
     afterEach(async function () {
@@ -853,7 +853,7 @@ describe('When executing an operation for the first time', () => {
           await utilClient.db('admin').command({
             configureFailPoint: 'failCommand',
             mode: { times: 1 },
-            data: { failCommands: ['ping'], blockConnection: true, blockTimeMS: 2000 }
+            data: { failCommands: ['ping'], blockConnection: true, blockTimeMS: 1000 }
           } as FailPoint);
           await utilClient.close();
         });
@@ -863,7 +863,7 @@ describe('When executing an operation for the first time', () => {
           const returnedClient = await client.connect();
           const end = performance.now();
           expect(returnedClient).to.equal(client);
-          expect(end - start).to.be.within(2000, 2500); // timeoutMS is 1000, did not apply.
+          expect(end - start).to.be.within(1000, 1500); // timeoutMS is 1000, did not apply.
         });
       }
     );
@@ -876,7 +876,7 @@ describe('When executing an operation for the first time', () => {
           const selectServerStub = sinon
             .stub(Topology.prototype, 'selectServer')
             .callsFake(async function (selector, options) {
-              await sleep(2000);
+              await sleep(1000);
               const result = selectServerStub.wrappedMethod.call(this, selector, options);
               sinon.restore(); // restore after connect selection
               return result;
@@ -891,12 +891,36 @@ describe('When executing an operation for the first time', () => {
         it('client.connect() takes as long as selectServer is delayed for and does not throw a timeout error', async function () {
           const start = performance.now();
           expect(client.topology).to.not.exist; // make sure not connected.
-          const res = await client.db().collection('test').insertOne({ a: 1 }, { timeoutMS: 1000 }); // auto-connect
+          const res = await client.db().collection('test').insertOne({ a: 1 }, { timeoutMS: 500 }); // auto-connect
           const end = performance.now();
           expect(res).to.have.property('acknowledged', true);
-          expect(end - start).to.be.within(2000, 2500); // timeoutMS is 1000, did not apply.
+          expect(end - start).to.be.within(1000, 1500); // timeoutMS is 1000, did not apply.
         });
       }
     );
+
+    describe('when auto connect is used and connect() takes longer than timeoutMS', function () {
+      // This test stubs the connect method to check that connect() does not get timed out
+      // vs. the test above makes sure that the `ping` does not inherit the client's timeoutMS setting
+      beforeEach(async function () {
+        const connectStub = sinon
+          .stub(MongoClient.prototype, 'connect')
+          .callsFake(async function () {
+            await sleep(1000);
+            const result = connectStub.wrappedMethod.call(this);
+            sinon.restore(); // restore after connect selection
+            return result;
+          });
+      });
+
+      it('the operation succeeds', async function () {
+        const start = performance.now();
+        expect(client.topology).to.not.exist; // make sure not connected.
+        const res = await client.db().collection('test').insertOne({ a: 1 }); // auto-connect
+        const end = performance.now();
+        expect(res).to.have.property('acknowledged', true);
+        expect(end - start).to.be.within(1000, 1500); // timeoutMS is 1000, did not apply.
+      });
+    });
   });
 });
