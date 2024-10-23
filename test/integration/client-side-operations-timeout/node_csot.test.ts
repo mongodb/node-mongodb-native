@@ -2,7 +2,7 @@
 import { on, once } from 'node:events';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { setTimeout } from 'node:timers/promises';
+import { setInterval, setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
 import * as semver from 'semver';
@@ -11,6 +11,7 @@ import * as sinon from 'sinon';
 import {
   BSON,
   type ChangeStream,
+  type ChangeStreamDocument,
   type ClientSession,
   type Collection,
   type CommandFailedEvent,
@@ -25,7 +26,9 @@ import {
   MongoInvalidArgumentError,
   MongoOperationTimeoutError,
   MongoServerError,
-  ObjectId
+  ObjectId,
+  promiseWithResolvers,
+  TopologyType
 } from '../../mongodb';
 import { type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
 
@@ -828,7 +831,19 @@ describe('CSOT driver tests', metadata, () => {
         .db('db')
         .dropCollection('coll')
         .catch(() => null);
-      await internalClient.db('db').collection('coll').insertOne({ x: 0 });
+      const updater = async function () {
+        for await (const _ of setInterval(200)) {
+          try {
+            await internalClient
+              .db('db')
+              .collection('coll')
+              .updateOne({ x: { $exists: true } }, { $inc: { x: 1 } }, { upsert: true });
+          } catch {
+            break;
+          }
+        }
+      };
+      updater();
       commandsStarted = [];
 
       client = await this.configuration.newClient(undefined, { monitorCommands: true }).connect();
@@ -891,7 +906,11 @@ describe('CSOT driver tests', metadata, () => {
       });
 
       context('when the getMore times out', function () {
+        let onSharded: boolean;
         beforeEach(async function () {
+          onSharded =
+            this.configuration.topologyType === TopologyType.LoadBalanced ||
+            this.configuration.topologyType === TopologyType.Sharded;
           data = [];
           const failpoint: FailPoint = {
             configureFailPoint: 'failCommand',
@@ -899,12 +918,15 @@ describe('CSOT driver tests', metadata, () => {
             data: {
               failCommands: ['getMore'],
               blockConnection: true,
-              blockTimeMS: 130
+              blockTimeMS: onSharded ? 21_000 : 120
             }
           };
 
           await internalClient.db().admin().command(failpoint);
-          cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
+          cs = client
+            .db('db')
+            .collection('coll')
+            .watch([], { timeoutMS: onSharded ? 20_000 : 100 });
           errorIter = on(cs, 'error');
           cs.on('change', () => {
             // Add empty listener just to get the change stream running
@@ -921,11 +943,16 @@ describe('CSOT driver tests', metadata, () => {
           const err = (await errorIter.next()).value[0];
           expect(err).to.be.instanceof(MongoOperationTimeoutError);
 
-          await once(cs, 'resumeTokenChanged');
+          await once(cs.cursor, 'resumeTokenChanged');
 
-          await client.db('db').collection('coll').insertOne({ x: 1 });
+          const { promise: changePromise, resolve } =
+            promiseWithResolvers<ChangeStreamDocument<BSON.Document>>();
 
-          const [change] = await once(cs, 'change');
+          cs.once('change', change => {
+            resolve(change);
+          });
+
+          const change = await changePromise;
           expect(change).to.have.ownProperty('operationType', 'insert');
         });
 
