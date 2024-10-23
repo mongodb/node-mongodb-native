@@ -10,7 +10,7 @@ import {
 } from 'mongodb';
 import { type Connection, createConnection, Schema, SchemaTypes } from 'mongoose';
 
-const getKmsProviders = () => {
+const getKmsProviders = (): { local: { key: string } } => {
   const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
     local: unknown;
   };
@@ -213,18 +213,32 @@ describe('Range Explicit Encryption', function () {
       }
     };
 
-    connection = createConnection(this.configuration.url(), {
-      ...options,
-      dbName: 'encrypted'
+    connection = createConnection();
+
+    const Model = connection.model(
+      'Model',
+      new Schema({
+        ssn: String
+      }),
+      'patents_autocreate'
+    );
+
+    await connection.openUri(this.configuration.url(), {
+      ...(options as any),
+      dbName: 'encrypted',
+      autoCreate: true
     });
 
-    await connection.asPromise();
+    await Model.init();
 
-    const collections = (await connection.listCollections()).map(coll => coll.name);
+    const collections = (await connection.listCollections()).flatMap(coll =>
+      coll.name.includes('autocreate') ? coll.name : []
+    );
+
     expect(collections.toSorted()).to.deep.equal([
-      'enxcol_.patents.ecoc',
-      'enxcol_.patents.esc',
-      'patents'
+      'enxcol_.patents_autocreate.ecoc',
+      'enxcol_.patents_autocreate.esc',
+      'patents_autocreate'
     ]);
   });
 
