@@ -245,7 +245,7 @@ describe('CSOT spec prose tests', function () {
        * 1. Verify that an `insert` command was executed against to `keyvault.datakeys` as part of the `createDataKey` call.
        */
       beforeEach(async function () {
-        configureFailPoint(this.configuration, {
+        await configureFailPoint(this.configuration, {
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: { failCommands: ['insert'], blockConnection: true, blockTimeMS }
@@ -285,7 +285,7 @@ describe('CSOT spec prose tests', function () {
        */
 
       beforeEach(async function () {
-        configureFailPoint(this.configuration, {
+        await configureFailPoint(this.configuration, {
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: { failCommands: ['find'], blockConnection: true, blockTimeMS }
@@ -353,7 +353,7 @@ describe('CSOT spec prose tests', function () {
           kmsProviders: { local: { key: LOCAL_KEY } }
         });
 
-        configureFailPoint(this.configuration, {
+        await configureFailPoint(this.configuration, {
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: { failCommands: ['find'], blockConnection: true, blockTimeMS }
