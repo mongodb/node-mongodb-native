@@ -832,19 +832,6 @@ describe('CSOT driver tests', metadata, () => {
         .db('db')
         .dropCollection('coll')
         .catch(() => null);
-      const updater = async function () {
-        for await (const _ of setInterval(200)) {
-          try {
-            await internalClient
-              .db('db')
-              .collection('coll')
-              .updateOne({ x: { $exists: true } }, { $inc: { x: 1 } }, { upsert: true });
-          } catch {
-            break;
-          }
-        }
-      };
-      updater();
       commandsStarted = [];
 
       client = await this.configuration.newClient(undefined, { monitorCommands: true }).connect();
@@ -956,6 +943,7 @@ describe('CSOT driver tests', metadata, () => {
 
           cs.once('error', reject);
 
+          await internalClient.db('db').collection('coll').insertOne({ x: 1 });
           const change = await changePromise;
           expect(change).to.have.ownProperty('operationType', 'insert');
         });
