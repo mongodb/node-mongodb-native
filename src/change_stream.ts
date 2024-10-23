@@ -543,7 +543,6 @@ export type ChangeStreamEvents<
   /**
    * @remarks Note that the `close` event is currently emitted whenever the internal `ChangeStreamCursor`
    * instance is closed, which can occur multiple times for a given `ChangeStream` instance.
-   * When this event is emitted is subject to change outside of major versions.
    */
   close(): void;
 };
