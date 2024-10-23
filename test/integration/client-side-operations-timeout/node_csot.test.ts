@@ -2,7 +2,7 @@
 import { on, once } from 'node:events';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { setInterval, setTimeout } from 'node:timers/promises';
+import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
 import * as semver from 'semver';
@@ -906,7 +906,7 @@ describe('CSOT driver tests', metadata, () => {
             data: {
               failCommands: ['getMore'],
               blockConnection: true,
-              blockTimeMS: onSharded ? 600 : 120
+              blockTimeMS: onSharded ? 1100 : 120
             }
           };
 
@@ -914,7 +914,7 @@ describe('CSOT driver tests', metadata, () => {
           cs = client
             .db('db')
             .collection('coll')
-            .watch([], { timeoutMS: onSharded ? 500 : 100 });
+            .watch([], { timeoutMS: onSharded ? 1000 : 100 });
           errorIter = on(cs, 'error');
           cs.on('change', () => {
             // Add empty listener just to get the change stream running
