@@ -858,7 +858,7 @@ describe('When executing an operation for the first time', () => {
           await utilClient.close();
         });
 
-        it('client.connect() takes as long as ping is delayed for and does not throw a timeout error', async function () {
+        it('timeoutMS from the client is not used for the internal `ping`', async function () {
           const start = performance.now();
           const returnedClient = await client.connect();
           const end = performance.now();
