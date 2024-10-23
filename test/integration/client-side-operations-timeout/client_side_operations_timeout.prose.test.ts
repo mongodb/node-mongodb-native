@@ -191,7 +191,7 @@ describe('CSOT spec prose tests', function () {
     let clientEncryption: ClientEncryption;
     let commandsStarted: CommandStartedEvent[];
 
-    const timeoutMS = 5000;
+    const timeoutMS = 200;
     const blockTimeMS = 2 * timeoutMS;
 
     beforeEach(async function () {
@@ -222,7 +222,6 @@ describe('CSOT spec prose tests', function () {
     });
 
     afterEach(async function () {
-      console.log('commandsStarted', commandsStarted);
       commandsStarted.length = 0;
       await keyVaultClient.close();
     });
@@ -268,7 +267,7 @@ describe('CSOT spec prose tests', function () {
       });
     });
 
-    describe.skip('encrypt', metadata, () => {
+    describe('encrypt', metadata, () => {
       /**
        * 1. Call `client_encryption.createDataKey()` with the `local` KMS provider.
        *    - Expect a BSON binary with subtype 4 to be returned, referred to as `datakeyId`.
@@ -291,30 +290,20 @@ describe('CSOT spec prose tests', function () {
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `encrypt` call.
        */
 
-      beforeEach(async function () {
-        await configureFailPoint(this.configuration, {
-          configureFailPoint: 'failCommand',
-          mode: { times: 1 },
-          data: { failCommands: ['find'], blockConnection: true, blockTimeMS }
-        });
-      });
-
       afterEach(async function () {
         await clearFailPoint(this.configuration);
       });
 
       it('throws a timeout error', metadata, async function () {
-        const tryGet = async () => {
-          while (true) {
-            try {
-              return await clientEncryption.createDataKey('local');
-            } catch {
-              /* empty */
-            }
-          }
-        };
-        const dataKeyId = await tryGet();
+        const dataKeyId = await clientEncryption.createDataKey('local');
         expect(dataKeyId).to.be.instanceOf(UUID);
+
+        await configureFailPoint(this.configuration, {
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: { failCommands: ['find'], blockConnection: true, blockTimeMS }
+        });
+
         const error = await clientEncryption
           .encrypt('hello', {
             keyId: dataKeyId,
