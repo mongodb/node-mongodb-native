@@ -27,7 +27,8 @@ export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain
   /** Return the query as cursor, on 2.6 \> it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
   cursor?: Document;
   /** specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point.
-   * @deprecated Will be removed in the next major version. Please use timeoutMS instead.*/
+   * @deprecated
+   * Will be removed in the next major version. Please use timeoutMS instead.*/
   maxTimeMS?: number;
   /** The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. */
   maxAwaitTimeMS?: number;

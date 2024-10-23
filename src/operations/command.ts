@@ -41,7 +41,8 @@ export interface CommandOperationOptions
   /** Collation */
   collation?: CollationOptions;
   /**
-   * @deprecated Will be removed in the next major version. Please use timeoutMS instead. */
+   * @deprecated
+   * Will be removed in the next major version. Please use timeoutMS instead. */
   maxTimeMS?: number;
   /**
    * Comment to apply to the operation.
