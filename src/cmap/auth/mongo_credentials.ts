@@ -10,7 +10,9 @@ import { GSSAPICanonicalizationValue } from './gssapi';
 import type { OIDCCallbackFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
-// https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
+/**
+ * @see https://github.com/mongodb/specifications/blob/master/source/auth/auth.md
+ */
 function getDefaultAuthMechanism(hello: Document | null): AuthMechanism {
   if (hello) {
     // If hello contains saslSupportedMechs, use scram-sha-256
