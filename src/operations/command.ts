@@ -55,7 +55,6 @@ export interface CommandOperationOptions
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
-  noResponse?: boolean;
 }
 
 /** @internal */

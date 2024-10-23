@@ -144,6 +144,25 @@ describe('Connection', function () {
         }
       }
     });
+
+    it('supports fire-and-forget messages', {
+      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
+      test: async function () {
+        const options: ConnectionOptions = {
+          ...commonConnectOptions,
+          connectionType: Connection,
+          ...this.configuration.options,
+          metadata: makeClientMetadata({ driverInfo: {} }),
+          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+        };
+
+        const conn = await connect(options);
+        const readSpy = sinon.spy(conn, 'readMany');
+        await conn.command(ns('$admin.cmd'), { ping: 1 }, { moreToCome: true });
+        expect(readSpy).to.not.have.been.called;
+        conn?.destroy();
+      }
+    });
   });
 
   describe('Connection - functional', function () {
@@ -278,8 +297,8 @@ describe('Connection', function () {
         });
 
         afterEach(async function () {
-          await client.close();
           mockServer.destroy();
+          await client.close();
           sinon.restore();
         });
 
