@@ -955,6 +955,7 @@ export class ChangeStream<
       } catch (error) {
         this.emit(ChangeStream.ERROR, error);
       }
+      this.timeoutContext?.refresh();
     });
     stream.on('error', error => this._processErrorStreamMode(error, this.cursor.id != null));
   }
