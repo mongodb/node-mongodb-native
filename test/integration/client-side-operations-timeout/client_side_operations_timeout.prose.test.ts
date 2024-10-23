@@ -222,7 +222,6 @@ describe('CSOT spec prose tests', function () {
     });
 
     afterEach(async function () {
-      await clearFailPoint(this.configuration);
       commandsStarted.length = 0;
       await keyVaultClient.close();
     });
@@ -253,6 +252,10 @@ describe('CSOT spec prose tests', function () {
           mode: { times: 1 },
           data: { failCommands: ['insert'], blockConnection: true, blockTimeMS }
         });
+      });
+
+      afterEach(async function () {
+        await clearFailPoint(this.configuration);
       });
 
       it('ran an insert and throws timeout error', metadata, async function () {
@@ -293,6 +296,10 @@ describe('CSOT spec prose tests', function () {
           mode: { times: 1 },
           data: { failCommands: ['find'], blockConnection: true, blockTimeMS }
         });
+      });
+
+      afterEach(async function () {
+        await clearFailPoint(this.configuration);
       });
 
       it('throws a timeout error', metadata, async function () {
@@ -336,6 +343,10 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `decrypt` call.
        */
+
+      afterEach(async function () {
+        await clearFailPoint(this.configuration);
+      });
 
       it('throws a timeout error', metadata, async function () {
         const dataKeyId = await clientEncryption.createDataKey('local');
