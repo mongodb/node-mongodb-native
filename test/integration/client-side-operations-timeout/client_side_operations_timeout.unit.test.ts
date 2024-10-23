@@ -184,7 +184,7 @@ describe('CSOT spec unit tests', function () {
     });
 
     describe('Auto Encryption', function () {
-      context('when provided timeoutMS and command hangs', function () {
+      context('when an auto encrypted client is configured with timeoutMS and the command takes longer than timeoutMS', function () {
         let encryptedClient;
         const timeoutMS = 500;
 
@@ -216,7 +216,7 @@ describe('CSOT spec unit tests', function () {
             // @ts-expect-error accessing private method
             .stub(Connection.prototype, 'sendCommand')
             .callsFake(async function* (...args) {
-              await sleep(timeoutMS * 2);
+              await sleep(timeoutMS + 50);
               yield* stub.wrappedMethod.call(this, ...args);
             });
         });
