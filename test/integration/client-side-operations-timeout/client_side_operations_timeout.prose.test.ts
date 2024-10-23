@@ -224,7 +224,7 @@ describe('CSOT spec prose tests', function () {
       await keyVaultClient.close();
     });
 
-    describe('createDataKey', () => {
+    describe('createDataKey', metadata, () => {
       /**
        * 1. Using `internalClient`, set the following fail point:
        * ```js
@@ -261,7 +261,7 @@ describe('CSOT spec prose tests', function () {
       });
     });
 
-    describe('encrypt', () => {
+    describe('encrypt', metadata, () => {
       /**
        * 1. Call `client_encryption.createDataKey()` with the `local` KMS provider.
        *    - Expect a BSON binary with subtype 4 to be returned, referred to as `datakeyId`.
@@ -308,7 +308,7 @@ describe('CSOT spec prose tests', function () {
       });
     });
 
-    describe('decrypt', () => {
+    describe('decrypt', metadata, () => {
       /**
        * 1. Call `clientEncryption.createDataKey()` with the `local` KMS provider.
        *    - Expect this to return a BSON binary with subtype 4, referred to as `dataKeyId`.
@@ -334,7 +334,7 @@ describe('CSOT spec prose tests', function () {
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `decrypt` call.
        */
 
-      it('throws a timeout error', async function () {
+      it('throws a timeout error', metadata, async function () {
         const dataKeyId = await clientEncryption.createDataKey('local');
         expect(dataKeyId).to.be.instanceOf(UUID);
         const encrypted = await clientEncryption.encrypt('hello', {
