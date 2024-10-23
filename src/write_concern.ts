@@ -29,7 +29,8 @@ export interface WriteConcernSettings {
   j?: boolean;
   /**
    * The write concern timeout.
-   * @deprecated Will be removed in the next major version. Please use the wtimeoutMS option.
+   * @deprecated
+   * Will be removed in the next major version. Please use the wtimeoutMS option.
    */
   wtimeout?: number;
   /**
