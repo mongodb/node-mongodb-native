@@ -206,15 +206,18 @@ describe('CSOT spec prose tests', function () {
 
       keyVaultClient = this.configuration.newClient(undefined, {
         timeoutMS,
-        monitorCommands: true
+        monitorCommands: true,
+        minPoolSize: 1
       });
+      await keyVaultClient.connect();
 
       commandsStarted = [];
       keyVaultClient.on('commandStarted', ev => commandsStarted.push(ev));
 
       clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: { local: { key: LOCAL_KEY } }
+        kmsProviders: { local: { key: LOCAL_KEY } },
+        timeoutMS
       });
     });
 
