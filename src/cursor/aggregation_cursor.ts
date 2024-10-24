@@ -75,12 +75,14 @@ export class AggregationCursor<TSchema = any> extends ExplainableCursor<TSchema>
       ...this.cursorOptions,
       session
     };
-    try {
-      validateExplainTimeoutOptions(options, Explain.fromOptions(options));
-    } catch {
-      throw new MongoAPIError(
-        'timeoutMS cannot be used with explain when explain is specified in aggregateOptions'
-      );
+    if (options.explain) {
+      try {
+        validateExplainTimeoutOptions(options, Explain.fromOptions(options));
+      } catch {
+        throw new MongoAPIError(
+          'timeoutMS cannot be used with explain when explain is specified in aggregateOptions'
+        );
+      }
     }
 
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, options);

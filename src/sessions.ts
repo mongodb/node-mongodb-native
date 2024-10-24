@@ -487,13 +487,31 @@ export class ClientSession
       maxTimeMS?: number;
     } = { commitTransaction: 1 };
 
+    const timeoutMS =
+      typeof options?.timeoutMS === 'number'
+        ? options.timeoutMS
+        : typeof this.timeoutMS === 'number'
+          ? this.timeoutMS
+          : null;
+
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
     if (wc != null) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
+      if (timeoutMS == null && this.timeoutContext == null) {
+        WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
+      } else {
+        const wcKeys = Object.keys(wc);
+        if (wcKeys.length > 2 || (!wcKeys.includes('wtimeoutMS') && !wcKeys.includes('wTimeoutMS')))
+          // if the write concern was specified with wTimeoutMS, then we set both wtimeoutMS and wTimeoutMS, guaranteeing at least two keys, so if we have more than two keys, then we can automatically assume that we should add the write concern to the command. If it has 2 or fewer keys, we need to check that those keys aren't the wtimeoutMS or wTimeoutMS options before we add the write concern to the command
+          WriteConcern.apply(command, { ...wc, wtimeoutMS: undefined });
+      }
     }
 
     if (this.transaction.state === TxnState.TRANSACTION_COMMITTED || this.commitAttempted) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
+      if (timeoutMS == null && this.timeoutContext == null) {
+        WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
+      } else {
+        WriteConcern.apply(command, { w: 'majority', ...wc, wtimeoutMS: undefined });
+      }
     }
 
     if (typeof this.transaction.options.maxTimeMS === 'number') {
@@ -509,13 +527,6 @@ export class ClientSession
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
-
-    const timeoutMS =
-      typeof options?.timeoutMS === 'number'
-        ? options.timeoutMS
-        : typeof this.timeoutMS === 'number'
-          ? this.timeoutMS
-          : null;
 
     const timeoutContext =
       this.timeoutContext ??
@@ -616,21 +627,6 @@ export class ClientSession
       recoveryToken?: Document;
     } = { abortTransaction: 1 };
 
-    const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
-    if (wc != null) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
-    }
-
-    if (this.transaction.recoveryToken) {
-      command.recoveryToken = this.transaction.recoveryToken;
-    }
-
-    const operation = new RunAdminCommandOperation(command, {
-      session: this,
-      readPreference: ReadPreference.primary,
-      bypassPinningCheck: true
-    });
-
     const timeoutMS =
       typeof options?.timeoutMS === 'number'
         ? options.timeoutMS
@@ -648,6 +644,21 @@ export class ClientSession
             socketTimeoutMS: this.clientOptions.socketTimeoutMS
           })
         : null;
+
+    const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
+    if (wc != null && timeoutMS == null) {
+      WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
+    }
+
+    if (this.transaction.recoveryToken) {
+      command.recoveryToken = this.transaction.recoveryToken;
+    }
+
+    const operation = new RunAdminCommandOperation(command, {
+      session: this,
+      readPreference: ReadPreference.primary,
+      bypassPinningCheck: true
+    });
 
     try {
       await executeOperation(this.client, operation, timeoutContext);

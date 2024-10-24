@@ -75,12 +75,14 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
       session
     };
 
-    try {
-      validateExplainTimeoutOptions(options, Explain.fromOptions(options));
-    } catch {
-      throw new MongoAPIError(
-        'timeoutMS cannot be used with explain when explain is specified in findOptions'
-      );
+    if (options.explain) {
+      try {
+        validateExplainTimeoutOptions(options, Explain.fromOptions(options));
+      } catch {
+        throw new MongoAPIError(
+          'timeoutMS cannot be used with explain when explain is specified in findOptions'
+        );
+      }
     }
 
     const findOperation = new FindOperation(this.namespace, this.cursorFilter, options);

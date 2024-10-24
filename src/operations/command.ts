@@ -40,6 +40,10 @@ export interface CommandOperationOptions
   readConcern?: ReadConcernLike;
   /** Collation */
   collation?: CollationOptions;
+  /**
+   * maxTimeMS is a server-side time limit in milliseconds for processing an operation.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead.
+   */
   maxTimeMS?: number;
   /**
    * Comment to apply to the operation.
@@ -97,7 +101,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);
-      validateExplainTimeoutOptions(this.options, this.explain);
+      if (this.explain) validateExplainTimeoutOptions(this.options, this.explain);
     } else if (options?.explain != null) {
       throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
     }

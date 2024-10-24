@@ -516,19 +516,30 @@ export function resolveOptions<T extends CommandOperationOptions>(
 ): T {
   const result: T = Object.assign({}, options, resolveBSONOptions(options, parent));
 
+  const timeoutMS = options?.timeoutMS ?? parent?.timeoutMS;
   // Users cannot pass a readConcern/writeConcern to operations in a transaction
   const session = options?.session;
+
   if (!session?.inTransaction()) {
     const readConcern = ReadConcern.fromOptions(options) ?? parent?.readConcern;
     if (readConcern) {
       result.readConcern = readConcern;
     }
 
-    const writeConcern = WriteConcern.fromOptions(options) ?? parent?.writeConcern;
+    let writeConcern = WriteConcern.fromOptions(options) ?? parent?.writeConcern;
     if (writeConcern) {
+      if (timeoutMS != null) {
+        writeConcern = WriteConcern.fromOptions({
+          ...writeConcern,
+          wtimeout: undefined,
+          wtimeoutMS: undefined
+        });
+      }
       result.writeConcern = writeConcern;
     }
   }
+
+  result.timeoutMS = timeoutMS;
 
   const readPreference = ReadPreference.fromOptions(options) ?? parent?.readPreference;
   if (readPreference) {
@@ -541,8 +552,6 @@ export function resolveOptions<T extends CommandOperationOptions>(
       'An operation cannot be given a timeoutMS setting when inside a withTransaction call that has a timeoutMS setting'
     );
   }
-
-  result.timeoutMS = options?.timeoutMS ?? parent?.timeoutMS;
 
   return result;
 }
