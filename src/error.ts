@@ -865,7 +865,6 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
  * @category Error
  *
  * This error is thrown when an operation could not be completed within the specified `timeoutMS`.
- * TODO(NODE-5688): expand this documentation.
  *
  * @example
  * ```ts

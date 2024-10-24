@@ -97,7 +97,7 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
   readConcern?: ReadConcern;
   /** Should retry failed writes */
   retryWrites?: boolean;
-  /** @internal TODO(NODE-5688): make this public */
+  /** Specifies the time an operation will run until it throws a timeout error */
   timeoutMS?: number;
 }
 
@@ -222,7 +222,6 @@ export class Db {
     return this.s.namespace.toString();
   }
 
-  /** @internal */
   get timeoutMS(): number | undefined {
     return this.s.options?.timeoutMS;
   }

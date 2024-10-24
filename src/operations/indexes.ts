@@ -361,8 +361,6 @@ export class DropIndexOperation extends CommandOperation<Document> {
 
 /** @public */
 export type ListIndexesOptions = AbstractCursorOptions & {
-  /** @internal TODO(NODE-5688): make this public */
-  timeoutMode?: CursorTimeoutMode;
   /** @internal */
   omitMaxTimeMS?: boolean;
 };
