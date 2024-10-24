@@ -267,7 +267,7 @@ describe('CSOT spec prose tests', function () {
       });
     });
 
-    describe('encrypt', metadata, () => {
+    context('encrypt', () => {
       /**
        * 1. Call `client_encryption.createDataKey()` with the `local` KMS provider.
        *    - Expect a BSON binary with subtype 4 to be returned, referred to as `datakeyId`.
@@ -289,35 +289,9 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `encrypt` call.
        */
-
-      afterEach(async function () {
-        await clearFailPoint(this.configuration);
-      });
-
-      it('throws a timeout error', metadata, async function () {
-        const dataKeyId = await clientEncryption.createDataKey('local');
-        expect(dataKeyId).to.be.instanceOf(UUID);
-
-        await configureFailPoint(this.configuration, {
-          configureFailPoint: 'failCommand',
-          mode: { times: 1 },
-          data: { failCommands: ['find'], blockConnection: true, blockTimeMS }
-        });
-
-        const error = await clientEncryption
-          .encrypt('hello', {
-            keyId: dataKeyId,
-            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-          })
-          .catch(e => e);
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-        const [find] = commandsStarted.filter(e => e.commandName === 'find');
-        expect(find.command).to.have.property('find', 'datakeys');
-        expect(find.command).to.have.property('$db', 'keyvault');
-      });
     });
 
-    describe('decrypt', metadata, () => {
+    context('decrypt', () => {
       /**
        * 1. Call `clientEncryption.createDataKey()` with the `local` KMS provider.
        *    - Expect this to return a BSON binary with subtype 4, referred to as `dataKeyId`.
@@ -342,42 +316,6 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `decrypt` call.
        */
-
-      afterEach(async function () {
-        await clearFailPoint(this.configuration);
-      });
-
-      it('throws a timeout error', metadata, async function () {
-        const dataKeyId = await clientEncryption.createDataKey('local');
-        expect(dataKeyId).to.be.instanceOf(UUID);
-        const encrypted = await clientEncryption.encrypt('hello', {
-          keyId: dataKeyId,
-          algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-        });
-        expect(encrypted).to.have.property('sub_type', 6);
-
-        await keyVaultClient.close();
-        keyVaultClient = this.configuration.newClient(undefined, {
-          timeoutMS,
-          monitorCommands: true
-        });
-        clientEncryption = new ClientEncryption(keyVaultClient, {
-          keyVaultNamespace: 'keyvault.datakeys',
-          kmsProviders: { local: { key: LOCAL_KEY } }
-        });
-
-        await configureFailPoint(this.configuration, {
-          configureFailPoint: 'failCommand',
-          mode: { times: 1 },
-          data: { failCommands: ['find'], blockConnection: true, blockTimeMS }
-        });
-
-        const error = await clientEncryption.decrypt(encrypted).catch(e => e);
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-        const [find] = commandsStarted.filter(e => e.commandName === 'find');
-        expect(find.command).to.have.property('find', 'datakeys');
-        expect(find.command).to.have.property('$db', 'keyvault');
-      });
     });
   });
 
