@@ -323,6 +323,20 @@ export class CSOTTimeoutContext extends TimeoutContext {
     return remainingTimeMS;
   }
 
+  /**
+   * @internal
+   * This method is intended to be used in situations where concurrent operation are on the same deadline, but cannot share a single `TimeoutContext` instance.
+   * Returns a new instance of `CSOTTimeoutContext` constructed with identical options, but setting the `start` property to `this.start`.
+   */
+  clone(): CSOTTimeoutContext {
+    const timeoutContext = new CSOTTimeoutContext({
+      timeoutMS: this.timeoutMS,
+      serverSelectionTimeoutMS: this.serverSelectionTimeoutMS
+    });
+    timeoutContext.start = this.start;
+    return timeoutContext;
+  }
+
   override refreshed(): CSOTTimeoutContext {
     return new CSOTTimeoutContext(this);
   }

@@ -10,6 +10,8 @@ import { pipeline } from 'stream/promises';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
+  Binary,
+  ClientEncryption,
   type CommandSucceededEvent,
   GridFSBucket,
   MongoBulkWriteError,
@@ -155,8 +157,7 @@ describe('CSOT spec prose tests', function () {
     }
   );
 
-  // TODO(NODE-6391): Add timeoutMS support to Explicit Encryption
-  context.skip('3. ClientEncryption', () => {
+  context('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
      * `LOCAL_MASTERKEY` refers to the following base64:
@@ -172,6 +173,47 @@ describe('CSOT spec prose tests', function () {
      * { local: { key: <base64 decoding of LOCAL_MASTERKEY> } }
      * ```
      */
+    let keyVaultClient: MongoClient;
+    let clientEncryption: ClientEncryption;
+    const LOCAL_MASTERKEY = Buffer.from(
+      'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+      'base64'
+    );
+
+    const clientEncryptionMetadata: MongoDBMetadataUI = {
+      requires: {
+        clientSideEncryption: true,
+        mongodb: '>=7.0.0',
+        topology: '!single'
+      }
+    } as const;
+
+    beforeEach(async function () {
+      await internalClient
+        .db('keyvault')
+        .collection('datakeys')
+        .drop()
+        .catch(() => null);
+      await internalClient.db('keyvault').collection('datakeys');
+      keyVaultClient = this.configuration.newClient({}, { timeoutMS: 100, monitorCommands: true });
+      clientEncryption = new ClientEncryption(keyVaultClient, {
+        keyVaultNamespace: 'keyvault.datakeys',
+        kmsProviders: { local: { key: LOCAL_MASTERKEY } }
+      });
+    });
+
+    afterEach(async function () {
+      await internalClient
+        .db()
+        .admin()
+        .command({
+          configureFailPoint: 'failCommand',
+          mode: 'off'
+        } as FailPoint);
+      await keyVaultClient.close();
+      await internalClient.close();
+    });
+
     context('createDataKey', () => {
       /**
        * 1. Using `internalClient`, set the following fail point:
@@ -192,6 +234,30 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that an `insert` command was executed against to `keyvault.datakeys` as part of the `createDataKey` call.
        */
+
+      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
+        await internalClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              failCommands: ['insert'],
+              blockConnection: true,
+              blockTimeMS: 150
+            }
+          } as FailPoint);
+        const commandStarted: CommandStartedEvent[] = [];
+        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
+        const err = await clientEncryption.createDataKey('local').catch(e => e);
+        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        const command = commandStarted[0].command;
+        expect(command).to.have.property('insert', 'datakeys');
+        expect(command).to.have.property('$db', 'keyvault');
+      });
     });
 
     context('encrypt', () => {
@@ -216,9 +282,44 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `encrypt` call.
        */
+      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
+        const datakeyId = await clientEncryption.createDataKey('local');
+        expect(datakeyId).to.be.instanceOf(Binary);
+        expect(datakeyId.sub_type).to.equal(Binary.SUBTYPE_UUID);
+
+        await internalClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              failCommands: ['find'],
+              blockConnection: true,
+              blockTimeMS: 150
+            }
+          } as FailPoint);
+
+        const commandStarted: CommandStartedEvent[] = [];
+        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
+
+        const err = await clientEncryption
+          .encrypt('hello', {
+            algorithm: `AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic`,
+            keyId: datakeyId
+          })
+          .catch(e => e);
+
+        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        const command = commandStarted[0].command;
+        expect(command).to.have.property('find', 'datakeys');
+        expect(command).to.have.property('$db', 'keyvault');
+      });
     });
 
-    context('decrypt', () => {
+    context('decrypt', clientEncryptionMetadata, () => {
       /**
        * 1. Call `clientEncryption.createDataKey()` with the `local` KMS provider.
        *    - Expect this to return a BSON binary with subtype 4, referred to as `dataKeyId`.
@@ -243,6 +344,43 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that a `find` command was executed against the `keyvault.datakeys` collection as part of the `decrypt` call.
        */
+      it('times out due to timeoutMS', clientEncryptionMetadata, async function () {
+        const datakeyId = await clientEncryption.createDataKey('local');
+        expect(datakeyId).to.be.instanceOf(Binary);
+        expect(datakeyId.sub_type).to.equal(Binary.SUBTYPE_UUID);
+
+        // pre-compute 'hello' encryption, otherwise the data key is cached sometimes and find in stateMachine.execute never runs
+        const encrypted = Binary.createFromBase64(
+          'Af6ie/LRP0uoisAZthHPUs0CKzTBFIkJr8kxmOk1pV1C/6K54otT8QvNJgNTNG2CNpThhfdXaObuOMMReNlTgwapqPYCb/HJRQ1Nfma6uA3cTg==',
+          6
+        );
+        expect(encrypted).to.be.instanceOf(Binary);
+        expect(encrypted.sub_type).to.equal(Binary.SUBTYPE_ENCRYPTED);
+
+        await internalClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              failCommands: ['find'],
+              blockConnection: true,
+              blockTimeMS: 150
+            }
+          } as FailPoint);
+
+        const commandStarted: CommandStartedEvent[] = [];
+        keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
+
+        const err = await clientEncryption.decrypt(encrypted).catch(e => e);
+        expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        const command = commandStarted[0].command;
+        expect(command).to.have.property('find', 'datakeys');
+        expect(command).to.have.property('$db', 'keyvault');
+      });
     });
   });
 
