@@ -326,7 +326,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
   /**
    * @internal
    * This function is intended to be used in situations where concurrent operation are on the same deadline, but cannot share a single `TimeoutContext`.
-   * Returns a deep copy of `this`,
+   * Returns a deep copy of `this`.
    */
   clone(): CSOTTimeoutContext {
     const timeoutContext = new CSOTTimeoutContext({
