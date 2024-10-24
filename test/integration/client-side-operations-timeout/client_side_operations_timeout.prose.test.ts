@@ -10,7 +10,6 @@ import { pipeline } from 'stream/promises';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {
-  ClientEncryption,
   type CommandSucceededEvent,
   GridFSBucket,
   MongoBulkWriteError,
@@ -20,16 +19,9 @@ import {
   now,
   ObjectId,
   promiseWithResolvers,
-  squashError,
-  UUID
+  squashError
 } from '../../mongodb';
-import {
-  clearFailPoint,
-  configureFailPoint,
-  type FailPoint,
-  makeMultiBatchWrite,
-  sleep
-} from '../../tools/utils';
+import { type FailPoint, makeMultiBatchWrite } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 // TODO(NODE-5824): Implement CSOT prose tests
@@ -163,7 +155,8 @@ describe('CSOT spec prose tests', function () {
     }
   );
 
-  describe('3. ClientEncryption', () => {
+  // TODO(NODE-6391): Add timeoutMS support to Explicit Encryption
+  context.skip('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
      * `LOCAL_MASTERKEY` refers to the following base64:
@@ -179,54 +172,7 @@ describe('CSOT spec prose tests', function () {
      * { local: { key: <base64 decoding of LOCAL_MASTERKEY> } }
      * ```
      */
-
-    const metadata: MongoDBMetadataUI = {
-      requires: { mongodb: '>=4.4', topology: '!single' }
-    };
-    const LOCAL_KEY = Buffer.from(
-      'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-      'base64'
-    );
-    let keyVaultClient: MongoClient;
-    let clientEncryption: ClientEncryption;
-    let commandsStarted: CommandStartedEvent[];
-
-    const timeoutMS = 200;
-    const blockTimeMS = 2 * timeoutMS;
-
-    beforeEach(async function () {
-      const internalClient = this.configuration.newClient();
-      await internalClient
-        .db('keyvault')
-        .dropCollection('datakeys', { writeConcern: { w: 'majority' } })
-        .catch(() => null);
-      await sleep(500);
-      await internalClient.db('keyvault').createCollection('datakeys');
-      await internalClient.close();
-
-      keyVaultClient = this.configuration.newClient(undefined, {
-        timeoutMS,
-        monitorCommands: true,
-        minPoolSize: 1
-      });
-      await keyVaultClient.connect();
-
-      commandsStarted = [];
-      keyVaultClient.on('commandStarted', ev => commandsStarted.push(ev));
-
-      clientEncryption = new ClientEncryption(keyVaultClient, {
-        keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: { local: { key: LOCAL_KEY } },
-        timeoutMS
-      });
-    });
-
-    afterEach(async function () {
-      commandsStarted.length = 0;
-      await keyVaultClient.close();
-    });
-
-    describe('createDataKey', metadata, () => {
+    context('createDataKey', () => {
       /**
        * 1. Using `internalClient`, set the following fail point:
        * ```js
@@ -246,25 +192,6 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a timeout error.
        * 1. Verify that an `insert` command was executed against to `keyvault.datakeys` as part of the `createDataKey` call.
        */
-      beforeEach(async function () {
-        await configureFailPoint(this.configuration, {
-          configureFailPoint: 'failCommand',
-          mode: { times: 1 },
-          data: { failCommands: ['insert'], blockConnection: true, blockTimeMS }
-        });
-      });
-
-      afterEach(async function () {
-        await clearFailPoint(this.configuration);
-      });
-
-      it('ran an insert and throws timeout error', metadata, async function () {
-        const error = await clientEncryption.createDataKey('local').catch(e => e);
-        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-        const [insert] = commandsStarted.filter(e => e.commandName === 'insert');
-        expect(insert.command).to.have.property('insert', 'datakeys');
-        expect(insert.command).to.have.property('$db', 'keyvault');
-      });
     });
 
     context('encrypt', () => {
