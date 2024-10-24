@@ -574,7 +574,10 @@ export class ClientEncryption {
           ? field
           : {
               ...field,
-              keyId: await this.createDataKey(provider, { masterKey, timeoutContext })
+              keyId: await this.createDataKey(provider, {
+                masterKey,
+                timeoutContext: timeoutContext?.clone()
+              })
             }
       );
 

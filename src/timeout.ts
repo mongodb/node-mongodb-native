@@ -323,6 +323,15 @@ export class CSOTTimeoutContext extends TimeoutContext {
     return remainingTimeMS;
   }
 
+  clone(): CSOTTimeoutContext {
+    const timeoutContext = new CSOTTimeoutContext({
+      timeoutMS: this.timeoutMS,
+      serverSelectionTimeoutMS: this.serverSelectionTimeoutMS
+    });
+    timeoutContext.start = this.start;
+    return timeoutContext;
+  }
+
   override refreshed(): CSOTTimeoutContext {
     return new CSOTTimeoutContext(this);
   }
