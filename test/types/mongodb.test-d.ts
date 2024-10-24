@@ -23,6 +23,9 @@ expectDeprecated(options.wtimeoutMS);
 expectDeprecated(options.socketTimeoutMS);
 expectDeprecated(options.waitQueueTimeoutMS);
 expectNotDeprecated(options.writeConcern);
+expectNotDeprecated(options.serverSelectionTimeoutMS);
+expectNotDeprecated(options.connectTimeoutMS);
+
 expectType<WriteConcernSettings | WriteConcern | undefined>(options.writeConcern);
 
 declare const estimatedDocumentCountOptions: MongoDBDriver.EstimatedDocumentCountOptions;
@@ -46,6 +49,9 @@ expectDeprecated(cursorOptions.maxTimeMS);
 
 declare const abstractCursor: MongoDBDriver.AbstractCursor;
 expectDeprecated(abstractCursor.maxTimeMS);
+
+declare const txnOptions: MongoDBDriver.TransactionOptions;
+expectDeprecated(txnOptions.maxCommitTimeMS);
 
 interface TSchema extends Document {
   name: string;
