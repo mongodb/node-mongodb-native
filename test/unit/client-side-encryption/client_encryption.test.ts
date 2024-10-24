@@ -201,7 +201,7 @@ describe('ClientEncryption', function () {
 
         expect(createDataKeySpy.callCount).to.equal(0);
         const options = createCollectionSpy.getCall(0).args[1];
-        expect(options).to.containSubset({ encryptedFields: { fields: 'not an array' } });
+        expect(options).to.deep.equal({ encryptedFields: { fields: 'not an array' }, timeoutMS: undefined });
       });
     });
 
@@ -218,8 +218,9 @@ describe('ClientEncryption', function () {
 
         expect(createDataKeyStub.callCount).to.equal(1);
         const options = createCollectionSpy.getCall(0).args[1];
-        expect(options).to.containSubset({
-          encryptedFields: { fields: ['not an array', { keyId: keyId }, { keyId: {} }] }
+        expect(options).to.deep.equal({
+          encryptedFields: { fields: ['not an array', { keyId: keyId }, { keyId: {} }] },
+          timeoutMS: undefined
         });
       });
     });

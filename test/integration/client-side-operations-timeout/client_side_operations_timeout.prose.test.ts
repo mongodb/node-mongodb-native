@@ -189,8 +189,8 @@ describe('CSOT spec prose tests', function () {
     } as const;
 
     beforeEach(async function () {
-      internalClient.db('keyvault').collection('datakeys').drop();
-      internalClient.db('keyvault').collection('datakeys');
+      await internalClient.db('keyvault').collection('datakeys').drop().catch(() => null);
+      await internalClient.db('keyvault').collection('datakeys');
       keyVaultClient = this.configuration.newClient({}, { timeoutMS: 100, monitorCommands: true });
       clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
@@ -207,6 +207,7 @@ describe('CSOT spec prose tests', function () {
           mode: 'off'
         } as FailPoint);
       await keyVaultClient.close();
+      await internalClient.close();
     });
 
     context('createDataKey', () => {

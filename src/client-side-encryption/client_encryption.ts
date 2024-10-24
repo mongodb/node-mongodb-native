@@ -240,7 +240,7 @@ export class ClientEncryption {
       .collection<DataKey>(collectionName)
       .insertOne(dataKey, {
         writeConcern: { w: 'majority' },
-        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
+        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.getRemainingTimeMSOrThrow() : undefined
       });
 
     return insertedId;
@@ -594,7 +594,7 @@ export class ClientEncryption {
       const collection = await db.createCollection<TSchema>(name, {
         ...createCollectionOptions,
         encryptedFields,
-        timeoutMS: timeoutContext?.remainingTimeMS
+        timeoutMS: timeoutContext?.getRemainingTimeMSOrThrow()
       });
       return { collection, encryptedFields };
     } catch (cause) {

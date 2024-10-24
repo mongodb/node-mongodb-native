@@ -521,7 +521,7 @@ describe('CSOT', function () {
             configureFailPoint: 'failCommand',
             mode: 'off'
           } as FailPoint);
-        internalClient.db('db').collection('newnew').drop();
+        await internalClient.db('db').collection('newnew').drop().catch(() => null);
         await internalClient.close();
         await keyVaultClient.close();
       });
