@@ -240,7 +240,9 @@ export class ClientEncryption {
       .collection<DataKey>(collectionName)
       .insertOne(dataKey, {
         writeConcern: { w: 'majority' },
-        timeoutMS: timeoutContext?.csotEnabled() ? timeoutContext?.getRemainingTimeMSOrThrow() : undefined
+        timeoutMS: timeoutContext?.csotEnabled()
+          ? timeoutContext?.getRemainingTimeMSOrThrow()
+          : undefined
       });
 
     return insertedId;

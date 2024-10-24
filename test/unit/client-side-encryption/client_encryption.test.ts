@@ -201,7 +201,10 @@ describe('ClientEncryption', function () {
 
         expect(createDataKeySpy.callCount).to.equal(0);
         const options = createCollectionSpy.getCall(0).args[1];
-        expect(options).to.deep.equal({ encryptedFields: { fields: 'not an array' }, timeoutMS: undefined });
+        expect(options).to.deep.equal({
+          encryptedFields: { fields: 'not an array' },
+          timeoutMS: undefined
+        });
       });
     });
 
