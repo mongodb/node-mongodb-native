@@ -1,6 +1,3 @@
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-
 import { EJSON, UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
