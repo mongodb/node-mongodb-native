@@ -927,26 +927,36 @@ describe('CSOT driver tests', metadata, () => {
           expect(err).to.be.instanceof(MongoOperationTimeoutError);
         });
 
-        it('continues emitting change events', metadata, async function () {
-          const err = (await errorIter.next()).value[0];
-          expect(err).to.be.instanceof(MongoOperationTimeoutError);
+        it(
+          'continues emitting change events',
+          {
+            requires: {
+              mongodb: '>=8.0', // NOTE: we are only testing on >= 8.0 because this version has increased performance and this test is sensitive to server performance. This feature should continue to work on server versions down to 4.4, but would require a larger value of timeoutMS which would either significantly slow down our CI testing or make the test flaky
+              topology: '!single',
+              os: 'linux'
+            }
+          },
+          async function () {
+            const err = (await errorIter.next()).value[0];
+            expect(err).to.be.instanceof(MongoOperationTimeoutError);
 
-          await once(cs.cursor, 'resumeTokenChanged');
+            await once(cs.cursor, 'resumeTokenChanged');
 
-          const {
-            promise: changePromise,
-            resolve,
-            reject
-          } = promiseWithResolvers<ChangeStreamDocument<BSON.Document>>();
+            const {
+              promise: changePromise,
+              resolve,
+              reject
+            } = promiseWithResolvers<ChangeStreamDocument<BSON.Document>>();
 
-          cs.once('change', resolve);
+            cs.once('change', resolve);
 
-          cs.once('error', reject);
+            cs.once('error', reject);
 
-          await internalClient.db('db').collection('coll').insertOne({ x: 1 });
-          const change = await changePromise;
-          expect(change).to.have.ownProperty('operationType', 'insert');
-        });
+            await internalClient.db('db').collection('coll').insertOne({ x: 1 });
+            const change = await changePromise;
+            expect(change).to.have.ownProperty('operationType', 'insert');
+          }
+        );
 
         it('does not close the change stream', metadata, async function () {
           const [err] = (await errorIter.next()).value;
