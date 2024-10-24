@@ -1255,6 +1255,23 @@ tasks:
             - AWS_SESSION_TOKEN
           args:
             - .evergreen/run-oidc-tests-k8s.sh
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: k8s
+            K8S_VARIANT: aks
+            SCRIPT: run-oidc-prose-tests.sh
+          include_expansions_in_env:
+            - DRIVERS_TOOLS
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_SESSION_TOKEN
+          args:
+            - .evergreen/run-oidc-tests-k8s.sh
   - name: oidc-auth-test-azure-latest
     commands:
       - func: install dependencies
