@@ -152,9 +152,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   tlsInsecure?: boolean;
   /** The time in milliseconds to attempt a connection before timing out. */
   connectTimeoutMS?: number;
-  /** The time in milliseconds to attempt a send or receive on a socket before the attempt times out.
-   * @deprecated
-   * Will be removed in the next major version. Please use timeoutMS instead */
+  /**
+   * The time in milliseconds to attempt a send or receive on a socket before the attempt times out.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead
+   */
   socketTimeoutMS?: number;
   /** An array or comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
   compressors?: CompressorName[] | string;
@@ -178,9 +179,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   maxConnecting?: number;
   /** The maximum number of milliseconds that a connection can remain idle in the pool before being removed and closed. */
   maxIdleTimeMS?: number;
-  /** The maximum time in milliseconds that a thread can wait for a connection to become available.
-   * @deprecated
-   * Will be removed in the next major version. Please use timeoutMS instead */
+  /**
+   * The maximum time in milliseconds that a thread can wait for a connection to become available.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead
+   */
   waitQueueTimeoutMS?: number;
   /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;

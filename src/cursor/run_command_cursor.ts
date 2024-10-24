@@ -48,8 +48,7 @@ export class RunCommandCursor extends AbstractCursor {
   /**
    * Controls the `getMore.maxTimeMS` field. Only valid when cursor is tailable await
    * @param maxTimeMS - the number of milliseconds to wait for new data
-   * @deprecated
-   * Will be removed in the next major version. Please use timeoutMS instead.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead.
    */
   public setMaxTimeMS(maxTimeMS: number): this {
     this.getMoreOptions.maxAwaitTimeMS = maxTimeMS;
@@ -84,9 +83,10 @@ export class RunCommandCursor extends AbstractCursor {
     );
   }
 
-  /** Unsupported for RunCommandCursor: maxTimeMS must be configured directly on command document
-   * @deprecated
-   * Will be removed in the next major version. */
+  /**
+   * Unsupported for RunCommandCursor: maxTimeMS must be configured directly on command document
+   * @deprecated Will be removed in the next major version.
+   */
   public override maxTimeMS(_: number): never {
     throw new MongoAPIError(
       'maxTimeMS must be configured on the command document directly, to configure getMore.maxTimeMS use cursor.setMaxTimeMS()'

@@ -67,8 +67,10 @@ export class WriteConcern {
   readonly w?: W;
   /** Request acknowledgment that the write operation has been written to the on-disk journal */
   readonly journal?: boolean;
-  /** Specify a time limit to prevent write operations from blocking indefinitely
-   * @deprecated Will be removed in the next major version. Please use timeoutMS */
+  /**
+   * Specify a time limit to prevent write operations from blocking indefinitely.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS
+   */
   readonly wtimeoutMS?: number;
   /**
    * Specify a time limit to prevent write operations from blocking indefinitely.
