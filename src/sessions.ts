@@ -709,8 +709,8 @@ export class ClientSession
    * **IMPORTANT:** Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
    * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
    * undefined behaviour.
-     *
-     * **IMPORTANT:** When running a 
+   *
+   * **IMPORTANT:** When running a
    *
    *
    * @remarks
