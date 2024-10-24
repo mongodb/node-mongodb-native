@@ -130,7 +130,7 @@ export type SupportedNodeConnectionOptions = SupportedTLSConnectionOptions &
 export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeConnectionOptions {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
-  /** @internal TODO(NODE-5688): This option is in development and currently has no behaviour.  */
+  /** Specifies the time an operation will run until it throws a timeout error */
   timeoutMS?: number;
   /** Enables or disables TLS/SSL for the connection. */
   tls?: boolean;
@@ -488,7 +488,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     return this.s.bsonOptions;
   }
 
-  /** @internal */
   get timeoutMS(): number | undefined {
     return this.s.options.timeoutMS;
   }
@@ -1029,6 +1028,5 @@ export interface MongoOptions
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
-  /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }
