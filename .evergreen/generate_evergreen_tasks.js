@@ -722,7 +722,9 @@ BUILD_VARIANTS.push({
     'testtestoidc_task_group',
     'testazureoidc_task_group',
     'testgcpoidc_task_group',
-    'testk8soidc_task_group'
+    'testk8soidc_task_group_eks',
+    'testk8soidc_task_group_gke',
+    'testk8soidc_task_group_aks'
   ]
 });
 

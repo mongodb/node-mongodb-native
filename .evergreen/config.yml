@@ -4471,7 +4471,7 @@ task_groups:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
     tasks:
       - test-azurekms-task
-  - name: testk8soidc_task_group
+  - name: testk8soidc_task_group_eks
     setup_group:
       - func: fetch source
       - command: ec2.assume_role
@@ -4492,7 +4492,47 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - oidc-auth-test-k8s-latest-eks
+  - name: testk8soidc_task_group_gke
+    setup_group:
+      - func: fetch source
+      - command: ec2.assume_role
+        params:
+          role_arn: ${OIDC_AWS_ROLE_ARN}
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
+    teardown_task:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
       - oidc-auth-test-k8s-latest-gke
+  - name: testk8soidc_task_group_aks
+    setup_group:
+      - func: fetch source
+      - command: ec2.assume_role
+        params:
+          role_arn: ${OIDC_AWS_ROLE_ARN}
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
+    teardown_task:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
       - oidc-auth-test-k8s-latest-aks
   - name: testtestoidc_task_group
     setup_group:
@@ -5177,7 +5217,9 @@ buildvariants:
       - testtestoidc_task_group
       - testazureoidc_task_group
       - testgcpoidc_task_group
-      - testk8soidc_task_group
+      - testk8soidc_task_group_eks
+      - testk8soidc_task_group_gke
+      - testk8soidc_task_group_aks
   - name: rhel8-test-atlas
     display_name: Atlas Cluster Tests
     run_on: rhel80-large
