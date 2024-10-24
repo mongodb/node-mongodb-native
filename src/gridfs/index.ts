@@ -38,7 +38,9 @@ export interface GridFSBucketOptions extends WriteConcernOptions {
   chunkSizeBytes?: number;
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
-  /** Specifies the time an operation will run until it throws a timeout error */
+  /** Specifies the time an operation will run until it throws a timeout error. Note that the
+  * deadline specified by this option may be breached if calls to interact with the stream take
+    * longer than the remaining timeout. FIXME(NODE-6456): what does this even mean?*/
   timeoutMS?: number;
 }
 

@@ -142,13 +142,16 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    */
   awaitData?: boolean;
   noCursorTimeout?: boolean;
-  /** Specifies the time an operation will run until it throws a timeout error. See {@link AbstractCursorOptions.timeoutMode} for more details. */
+  /** Specifies the time an operation will run until it throws a timeout error. See {@link AbstractCursorOptions.timeoutMode} for more details on how this option applies to cursors. */
   timeoutMS?: number;
   /**
    * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
    * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
    * `cursor.next()`.
    * When set to `'cursorLifetime'`, the deadline applies to the life of the entire cursor.
+   *
+   * Note that the use of '`cursorLifetime`' should be limited to relatively short-lived cursors as
+   * it has the potential to hang on an operation for the entirety of `timeoutMS`.
    *
    * @example
    * # Example showing use of `'iteration'`

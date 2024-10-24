@@ -103,7 +103,7 @@ export interface EndSessionOptions {
   force?: boolean;
   forceClear?: boolean;
 
-  /** @internal */
+  /** Specifies the time an operation will run until it throws a timeout error */
   timeoutMS?: number;
 }
 
@@ -145,7 +145,7 @@ export class ClientSession
   [kPinnedConnection]?: Connection;
   /** @internal */
   [kTxnNumberIncrement]: number;
-  /** @internal */
+  /** Specifies the time an operation in a given `ClientSession` will run until it throws a timeout error */
   timeoutMS?: number;
 
   /** @internal */
@@ -709,6 +709,8 @@ export class ClientSession
    * **IMPORTANT:** Running operations in parallel is not supported during a transaction. The use of `Promise.all`,
    * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
    * undefined behaviour.
+     *
+     * **IMPORTANT:** When running a 
    *
    *
    * @remarks
