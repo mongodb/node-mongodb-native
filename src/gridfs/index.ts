@@ -161,7 +161,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     if (timeoutMS) {
       timeoutContext = new CSOTTimeoutContext({
         timeoutMS,
-        serverSelectionTimeoutMS: this.s.db.client.options.serverSelectionTimeoutMS
+        serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
       });
     }
 
@@ -241,7 +241,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     if (timeoutMS) {
       timeoutContext = new CSOTTimeoutContext({
         timeoutMS,
-        serverSelectionTimeoutMS: this.s.db.client.options.serverSelectionTimeoutMS
+        serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
       });
     }
 

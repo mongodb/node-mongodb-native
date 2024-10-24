@@ -20,9 +20,11 @@ const { EJSON } = BSON;
 
 class MockClient {
   options: any;
+  s: { options: any };
 
   constructor(options?: any) {
     this.options = { options: options || {} };
+    this.s = { options: this.options };
   }
   db(dbName) {
     return {
