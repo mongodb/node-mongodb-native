@@ -73,6 +73,11 @@ export const CursorTimeoutMode = Object.freeze({
  * `cursor.next()`.
  * When set to `'cursorLifetime'`, the deadline applies to the life of the entire cursor.
  *
+ * Depending on the type of cursor being used, this option has different default values.
+ * For non-tailable cursors, this value defaults to `'cursorLifetime'`
+ * For tailable cursors, this value defaults to `'iteration'` since tailable cursors, by
+ * definition can have an arbitrarily long lifetime.
+ *
  * @example
  * # Example showing use of `'iteration'`
  * ```ts

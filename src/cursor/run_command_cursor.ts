@@ -19,9 +19,11 @@ import {
 export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
-  /** @internal */
+  /** Specifies the time an operation will run until it throws a timeout error. Note that if
+   * `maxTimeMS` is provided in the command in addition to setting `timeoutMS` in the options, then
+   * the original value of `maxTimeMS` will be overwritten. */
   timeoutMS?: number;
-  /** @internal */
+  /** See {@link CursorTimeoutMode} */
   timeoutMode?: CursorTimeoutMode;
   tailable?: boolean;
   awaitData?: boolean;
