@@ -11,6 +11,7 @@ import {
   serialize
 } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
+import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
@@ -524,9 +525,7 @@ export class StateMachine {
       .listCollections(filter, {
         promoteLongs: false,
         promoteValues: false,
-        ...(timeoutContext?.csotEnabled()
-          ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
-          : {})
+        timeoutContext: timeoutContext && new CursorTimeoutContext(timeoutContext, Symbol())
       })
       .toArray();
 
@@ -582,12 +581,9 @@ export class StateMachine {
     return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
-      .find(
-        deserialize(filter),
-        timeoutContext?.csotEnabled()
-          ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
-          : {}
-      )
+      .find(deserialize(filter), {
+        timeoutContext: timeoutContext && new CursorTimeoutContext(timeoutContext, Symbol())
+      })
       .toArray();
   }
 }
