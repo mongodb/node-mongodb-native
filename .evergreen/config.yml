@@ -1218,7 +1218,7 @@ tasks:
             EXPECTED_AZUREKMS_OUTCOME: failure
           args:
             - src/.evergreen/run-azure-kms-tests.sh
-  - name: oidc-auth-test-k8s-latest
+  - name: oidc-auth-test-k8s-latest-eks
     commands:
       - func: install dependencies
       - command: subprocess.exec
@@ -1233,12 +1233,14 @@ tasks:
             K8S_VARIANT: eks
             SCRIPT: run-oidc-prose-tests.sh
           include_expansions_in_env:
-            - DRIVERS_TOOLS
             - AWS_ACCESS_KEY_ID
             - AWS_SECRET_ACCESS_KEY
             - AWS_SESSION_TOKEN
           args:
             - .evergreen/run-oidc-tests-k8s.sh
+  - name: oidc-auth-test-k8s-latest-eks
+    commands:
+      - func: install dependencies
       - command: subprocess.exec
         type: test
         params:
@@ -1251,12 +1253,14 @@ tasks:
             K8S_VARIANT: gke
             SCRIPT: run-oidc-prose-tests.sh
           include_expansions_in_env:
-            - DRIVERS_TOOLS
             - AWS_ACCESS_KEY_ID
             - AWS_SECRET_ACCESS_KEY
             - AWS_SESSION_TOKEN
           args:
             - .evergreen/run-oidc-tests-k8s.sh
+  - name: oidc-auth-test-k8s-latest-aks
+    commands:
+      - func: install dependencies
       - command: subprocess.exec
         type: test
         params:
@@ -1269,7 +1273,6 @@ tasks:
             K8S_VARIANT: aks
             SCRIPT: run-oidc-prose-tests.sh
           include_expansions_in_env:
-            - DRIVERS_TOOLS
             - AWS_ACCESS_KEY_ID
             - AWS_SECRET_ACCESS_KEY
             - AWS_SESSION_TOKEN
@@ -4488,7 +4491,9 @@ task_groups:
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
-      - oidc-auth-test-k8s-latest
+      - oidc-auth-test-k8s-latest-eks
+      - oidc-auth-test-k8s-latest-gke
+      - oidc-auth-test-k8s-latest-aks
   - name: testtestoidc_task_group
     setup_group:
       - func: fetch source
