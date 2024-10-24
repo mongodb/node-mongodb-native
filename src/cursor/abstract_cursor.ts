@@ -170,7 +170,11 @@ export abstract class AbstractCursor<
   private cursorClient: MongoClient;
   /** @internal */
   private transform?: (doc: TSchema) => any;
-  /** @internal */
+  /**
+   * @internal
+   * This is true whether or not the first command fails. It only indicates whether or not the first
+   * command has been run.
+   */
   private initialized: boolean;
   /** @internal */
   private isClosed: boolean;
@@ -210,15 +214,16 @@ export abstract class AbstractCursor<
           ? options.readPreference
           : ReadPreference.primary,
       ...pluckBSONSerializeOptions(options),
-      timeoutMS: options.timeoutMS,
+      timeoutMS: options?.timeoutContext?.csotEnabled()
+        ? options.timeoutContext.timeoutMS
+        : options.timeoutMS,
       tailable: options.tailable,
       awaitData: options.awaitData
     };
+
     if (this.cursorOptions.timeoutMS != null) {
       if (options.timeoutMode == null) {
         if (options.tailable) {
-          this.cursorOptions.timeoutMode = CursorTimeoutMode.ITERATION;
-
           if (options.awaitData) {
             if (
               options.maxAwaitTimeMS != null &&
@@ -228,22 +233,21 @@ export abstract class AbstractCursor<
                 'Cannot specify maxAwaitTimeMS >= timeoutMS for a tailable awaitData cursor'
               );
           }
+
+          this.cursorOptions.timeoutMode = CursorTimeoutMode.ITERATION;
         } else {
           this.cursorOptions.timeoutMode = CursorTimeoutMode.LIFETIME;
         }
       } else {
-        if (options.tailable && this.cursorOptions.timeoutMode === CursorTimeoutMode.LIFETIME) {
+        if (options.tailable && options.timeoutMode === CursorTimeoutMode.LIFETIME) {
           throw new MongoInvalidArgumentError(
             "Cannot set tailable cursor's timeoutMode to LIFETIME"
           );
         }
         this.cursorOptions.timeoutMode = options.timeoutMode;
       }
-      this.cursorOptions.timeoutMode =
-        options.timeoutMode ??
-        (options.tailable ? CursorTimeoutMode.ITERATION : CursorTimeoutMode.LIFETIME);
     } else {
-      if (options.timeoutMode != null && options.timeoutContext == null)
+      if (options.timeoutMode != null)
         throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
     }
 
@@ -290,15 +294,6 @@ export abstract class AbstractCursor<
       }
     };
 
-    if (
-      options.timeoutContext != null &&
-      options.timeoutMS != null &&
-      this.cursorOptions.timeoutMode !== CursorTimeoutMode.LIFETIME
-    ) {
-      throw new MongoAPIError(
-        `cannot create a cursor with an externally provided timeout context that doesn't use timeoutMode=CURSOR_LIFETIME.`
-      );
-    }
     this.timeoutContext = options.timeoutContext;
   }
 
@@ -489,7 +484,7 @@ export abstract class AbstractCursor<
         await this.fetchBatch();
       } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION) {
         this.timeoutContext?.clear();
       }
     }
@@ -502,6 +497,7 @@ export abstract class AbstractCursor<
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
+
     if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
       this.timeoutContext?.refresh();
     }
@@ -516,7 +512,7 @@ export abstract class AbstractCursor<
         await this.fetchBatch();
       } while (!this.isDead || (this.documents?.length ?? 0) !== 0);
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION) {
         this.timeoutContext?.clear();
       }
     }
@@ -550,7 +546,7 @@ export abstract class AbstractCursor<
         return doc;
       }
     } finally {
-      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION && this.cursorId != null) {
+      if (this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION) {
         this.timeoutContext?.clear();
       }
     }
@@ -886,7 +882,6 @@ export abstract class AbstractCursor<
 
     // otherwise need to call getMore
     const batchSize = this.cursorOptions.batchSize || 1000;
-    this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
 
     try {
       const response = await this.getMore(batchSize);
@@ -1130,13 +1125,17 @@ export class CursorTimeoutContext extends TimeoutContext {
     return this.timeoutContext.csotEnabled();
   }
   override refresh(): void {
-    return this.timeoutContext.refresh();
+    if (typeof this.owner !== 'symbol') return this.timeoutContext.refresh();
   }
   override clear(): void {
-    return this.timeoutContext.clear();
+    if (typeof this.owner !== 'symbol') return this.timeoutContext.clear();
   }
   override get maxTimeMS(): number | null {
     return this.timeoutContext.maxTimeMS;
+  }
+
+  get timeoutMS(): number | null {
+    return this.timeoutContext.csotEnabled() ? this.timeoutContext.timeoutMS : null;
   }
 
   override refreshed(): CursorTimeoutContext {
