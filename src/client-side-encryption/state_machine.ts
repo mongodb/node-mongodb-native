@@ -3,7 +3,6 @@ import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-clien
 import * as net from 'net';
 import * as tls from 'tls';
 
-import { type FindOptions } from '../beta';
 import {
   type BSONSerializeOptions,
   deserialize,
