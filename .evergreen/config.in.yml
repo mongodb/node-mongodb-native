@@ -1284,7 +1284,7 @@ tasks:
           args:
             - .evergreen/run-oidc-tests-k8s.sh
 
-  - name: "oidc-auth-test-k8s-latest-eks"
+  - name: "oidc-auth-test-k8s-latest-gke"
     commands:
       - func: "install dependencies"
       - command: subprocess.exec
