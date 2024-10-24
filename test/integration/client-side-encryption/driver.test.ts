@@ -421,7 +421,7 @@ describe('Client Side Encryption Functional', function () {
     { requires: { clientSideEncryption: true } },
     function () {
       const metadata: MongoDBMetadataUI = {
-        requires: { clientSideEncryption: true, mongodb: '>=4.4', topology: '!single' }
+        requires: { clientSideEncryption: true, mongodb: '>=4.4' }
       };
 
       function makeBlockingFailFor(command: string | string[], blockTimeMS: number) {
