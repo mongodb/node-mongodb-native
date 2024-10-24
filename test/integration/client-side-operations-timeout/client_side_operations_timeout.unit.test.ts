@@ -184,63 +184,66 @@ describe('CSOT spec unit tests', function () {
     });
 
     describe('Auto Encryption', function () {
-      context('when an auto encrypted client is configured with timeoutMS and the command takes longer than timeoutMS', function () {
-        let encryptedClient;
-        const timeoutMS = 500;
+      context(
+        'when an auto encrypted client is configured with timeoutMS and the command takes longer than timeoutMS',
+        function () {
+          let encryptedClient;
+          const timeoutMS = 500;
 
-        beforeEach(async function () {
-          encryptedClient = this.configuration.newClient(
-            {},
-            {
-              autoEncryption: {
-                extraOptions: {
-                  mongocryptdBypassSpawn: true,
-                  mongocryptdURI: 'mongodb://localhost:27017/db?serverSelectionTimeoutMS=1000',
-                  mongocryptdSpawnArgs: [
-                    '--pidfilepath=bypass-spawning-mongocryptd.pid',
-                    '--port=27017'
-                  ]
+          beforeEach(async function () {
+            encryptedClient = this.configuration.newClient(
+              {},
+              {
+                autoEncryption: {
+                  extraOptions: {
+                    mongocryptdBypassSpawn: true,
+                    mongocryptdURI: 'mongodb://localhost:27017/db?serverSelectionTimeoutMS=1000',
+                    mongocryptdSpawnArgs: [
+                      '--pidfilepath=bypass-spawning-mongocryptd.pid',
+                      '--port=27017'
+                    ]
+                  },
+                  keyVaultNamespace: 'admin.datakeys',
+                  kmsProviders: {
+                    aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+                    local: { key: Buffer.alloc(96) }
+                  }
                 },
-                keyVaultNamespace: 'admin.datakeys',
-                kmsProviders: {
-                  aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-                  local: { key: Buffer.alloc(96) }
-                }
-              },
-              timeoutMS
+                timeoutMS
+              }
+            );
+            await encryptedClient.connect();
+
+            const stub = sinon
+              // @ts-expect-error accessing private method
+              .stub(Connection.prototype, 'sendCommand')
+              .callsFake(async function* (...args) {
+                await sleep(timeoutMS + 50);
+                yield* stub.wrappedMethod.call(this, ...args);
+              });
+          });
+
+          afterEach(async function () {
+            await encryptedClient?.close();
+            sinon.restore();
+          });
+
+          it(
+            'the command should fail due to a timeout error',
+            { requires: { mongodb: '>=4.2' } },
+            async function () {
+              const { duration, result: error } = await measureDuration(() =>
+                encryptedClient
+                  .db()
+                  .command({ ping: 1 })
+                  .catch(e => e)
+              );
+              expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
             }
           );
-          await encryptedClient.connect();
-
-          const stub = sinon
-            // @ts-expect-error accessing private method
-            .stub(Connection.prototype, 'sendCommand')
-            .callsFake(async function* (...args) {
-              await sleep(timeoutMS + 50);
-              yield* stub.wrappedMethod.call(this, ...args);
-            });
-        });
-
-        afterEach(async function () {
-          await encryptedClient?.close();
-          sinon.restore();
-        });
-
-        it(
-          'the command should fail due to a timeout error',
-          { requires: { mongodb: '>=4.2' } },
-          async function () {
-            const { duration, result: error } = await measureDuration(() =>
-              encryptedClient
-                .db()
-                .command({ ping: 1 })
-                .catch(e => e)
-            );
-            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-            expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
-          }
-        );
-      });
+        }
+      );
     });
   });
 
