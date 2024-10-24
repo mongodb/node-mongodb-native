@@ -577,7 +577,7 @@ export class ClientEncryption {
               keyId: await this.createDataKey(provider, {
                 masterKey,
                 // clone the timeoutContext
-                // in order to avoid sharing the same timeout for server selection and connection checkout across different operations
+                // in order to avoid sharing the same timeout for server selection and connection checkout across different concurrent operations
                 timeoutContext: timeoutContext?.clone()
               })
             }
