@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# source $DRIVERgit addS_TOOLS/.evergreen/init-node-and-npm-env.sh
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 echo "node: $(node --version)"
 echo "npm: $(npm --version)"
