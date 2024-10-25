@@ -1,8 +1,11 @@
+import * as util from 'node:util';
+
 import { join } from 'path';
 import * as semver from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
+util.inspect.defaultOptions.depth = 5;
 
 const skippedSpecs = {};
 
@@ -22,7 +25,8 @@ const skippedTests = {
     'TODO(DRIVERS-2970): see modified test in unified-csot-node-specs',
   'timeoutMS is refreshed for getMore - failure':
     'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs', // Skipping for both tailable awaitData and tailable non-awaitData cursors
-  'timeoutMS applies to full resume attempt in a next call': 'TODO(DRIVERS-3006)'
+  'timeoutMS applies to full resume attempt in a next call': 'TODO(DRIVERS-3006)',
+  'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set': 'TODO(DRIVERS-XXXX)'
 };
 
 describe('CSOT spec tests', function () {
