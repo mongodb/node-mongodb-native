@@ -835,7 +835,7 @@ export abstract class AbstractCursor<
     if (this.cursorOptions.timeoutMS != null) {
       this.timeoutContext ??= new CursorTimeoutContext(
         TimeoutContext.create({
-          serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
+          serverSelectionTimeoutMS: this.client.s.options.serverSelectionTimeoutMS,
           timeoutMS: this.cursorOptions.timeoutMS
         }),
         this
@@ -925,7 +925,7 @@ export abstract class AbstractCursor<
         this.timeoutContext?.clear();
         return new CursorTimeoutContext(
           TimeoutContext.create({
-            serverSelectionTimeoutMS: this.client.options.serverSelectionTimeoutMS,
+            serverSelectionTimeoutMS: this.client.s.options.serverSelectionTimeoutMS,
             timeoutMS
           }),
           this
