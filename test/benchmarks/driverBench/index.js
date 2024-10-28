@@ -52,10 +52,6 @@ function getSpecBenchmarkResults(microBench, suffix) {
   const multiBenchResults = microBench[multiBenchName];
   const parallelBenchResults = microBench[parallelBenchName];
 
-  console.log(inspect(singleBenchResults, { depth: Infinity, colors: true }));
-  console.log(inspect(multiBenchResults, { depth: Infinity, colors: true }));
-  console.log(inspect(parallelBenchResults, { depth: Infinity, colors: true }));
-
   const singleBench = average([
     singleBenchResults.findOne,
     singleBenchResults.smallDocInsertOne,
@@ -123,11 +119,11 @@ benchmarkRunner
     const csotTimeoutMS0Results = getSpecBenchmarkResults(microBench, '_timeoutMS_0');
     const csotTimeoutMS120000Results = getSpecBenchmarkResults(microBench, '_timeoutMS_120000');
 
-    return {
+    return [
       ...convertToPerfSend(noCSOTResults),
       ...convertToPerfSend(csotTimeoutMS0Results, '_timeoutMS_0'),
       ...convertToPerfSend(csotTimeoutMS120000Results, '_timeoutMS_120000')
-    };
+    ];
   })
   .then(data => {
     const results = JSON.stringify(data, undefined, 2);
