@@ -32,18 +32,30 @@ function average(arr) {
 
 const benchmarkRunner = new Runner()
   .suite('singleBench', suite => makeSingleBench(suite))
-  .suite('multiBench', suite => makeMultiBench(suite))
-  .suite('parallel', suite => makeParallelBenchmarks(suite));
+  .suite('singleBench_timeoutMS_0', suite => makeSingleBench(suite, { timeoutMS: 0 }))
+  .suite('singleBench_timeoutMS_10000', suite => makeSingleBench(suite, { timeoutMS: 10_000 }))
 
-function getSpecBenchmarkResults(suffix, microBench) {
-  const singleBenchResults = microBench['singleBench' + suffix];
+  .suite('multiBench', suite => makeMultiBench(suite))
+  .suite('multiBench_timeoutMS_0', suite => makeMultiBench(suite, { timeoutMS: 0 }))
+  .suite('multiBench_timeoutMS_10000', suite => makeMultiBench(suite, { timeoutMS: 10_000 }))
+
+  .suite('parallel', suite => makeParallelBenchmarks(suite))
+  .suite('parallel_timeoutMS_0', suite => makeParallelBenchmarks(suite, { timeoutMS: 0 }))
+  .suite('parallel_timeoutMS_10000', suite => makeParallelBenchmarks(suite, { timeoutMS: 10_000 }));
+
+function getSpecBenchmarkResults(microBench, suffix) {
+  const singleBenchName = typeof suffix === 'string' ? 'singleBench' + suffix : 'singleBench'
+  const multiBenchName = typeof suffix === 'string' ? 'multiBench' + suffix : 'multiBench'
+  const multiBenchName = typeof suffix === 'string' ? 'multiBench' + suffix : 'multiBench'
+
+  const singleBenchResults = microBench[singleBenchName];
   const singleBench = average([
     singleBenchResults.findOne,
     singleBenchResults.smallDocInsertOne,
     singleBenchResults.largeDocInsertOne
   ]);
 
-  const multiBenchResults = microBench['multiBench' + suffix];
+  const multiBenchResults = microBench[multiBenchName];
   const multiBench = average(Object.values(multiBenchResults));
 
   const parallelBenchResults = microBench['parallel' + suffix];
@@ -87,6 +99,18 @@ function getSpecBenchmarkResults(suffix, microBench) {
   };
 }
 
+function convertToPerfSend(benchmarkResults, nameSuffix) {
+  return Object.entries(benchmarkResults).map(([benchmarkName, result]) => {
+    return {
+      info: {
+        test_name: typeof nameSuffix === 'string' ? benchmarkName + nameSuffix : benchmarkName,
+        tags: [bsonType]
+      },
+      metrics: [{ name: 'megabytes_per_second', value: result }]
+    };
+  });
+}
+
 benchmarkRunner
   .run()
   .then(microBench => {
@@ -94,15 +118,11 @@ benchmarkRunner
     const csotTimeoutMS0Results = getSpecBenchmarkResults('_timeoutMS_0', microBench);
     const csotTimeoutMS10000Results = getSpecBenchmarkResults('_timeoutMS_10000', microBench);
 
-    return Object.entries(benchmarkResults).map(([benchmarkName, result]) => {
-      return {
-        info: {
-          test_name: benchmarkName,
-          tags: [bsonType]
-        },
-        metrics: [{ name: 'megabytes_per_second', value: result }]
-      };
-    });
+    return {
+      ...convertToPerfSend(noCSOTResults),
+      ...convertToPerfSend(csotTimeoutMS0Results, '_timeoutMS_0'),
+      ...convertToPerfSend(csotTimeoutMS10000Results, '_timeoutMS_10000')
+    };
   })
   .then(data => {
     const results = JSON.stringify(data, undefined, 2);
