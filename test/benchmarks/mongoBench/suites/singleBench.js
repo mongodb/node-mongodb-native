@@ -1,5 +1,4 @@
 const {
-  makeClient,
   makeClientWithOpts,
   connectClient,
   initDb,

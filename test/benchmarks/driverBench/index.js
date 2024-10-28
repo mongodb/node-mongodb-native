@@ -33,20 +33,22 @@ function average(arr) {
 const benchmarkRunner = new Runner()
   .suite('singleBench', suite => makeSingleBench(suite))
   .suite('singleBench_timeoutMS_0', suite => makeSingleBench(suite, { timeoutMS: 0 }))
-  .suite('singleBench_timeoutMS_120000', suite => makeSingleBench(suite, { timeoutMS: 120_000 }))
+  .suite('singleBench_timeoutMS_120000', suite => makeSingleBench(suite, { timeoutMS: 120000 }))
 
   .suite('multiBench', suite => makeMultiBench(suite))
   .suite('multiBench_timeoutMS_0', suite => makeMultiBench(suite, { timeoutMS: 0 }))
-  .suite('multiBench_timeoutMS_120000', suite => makeMultiBench(suite, { timeoutMS: 120_000 }))
+  .suite('multiBench_timeoutMS_120000', suite => makeMultiBench(suite, { timeoutMS: 120000 }))
 
   .suite('parallel', suite => makeParallelBenchmarks(suite))
   .suite('parallel_timeoutMS_0', suite => makeParallelBenchmarks(suite, { timeoutMS: 0 }))
-  .suite('parallel_timeoutMS_120000', suite => makeParallelBenchmarks(suite, { timeoutMS: 120_000 }));
+  .suite('parallel_timeoutMS_120000', suite =>
+    makeParallelBenchmarks(suite, { timeoutMS: 120000 })
+  );
 
 function getSpecBenchmarkResults(microBench, suffix) {
-  const singleBenchName = typeof suffix === 'string' ? 'singleBench' + suffix : 'singleBench'
-  const multiBenchName = typeof suffix === 'string' ? 'multiBench' + suffix : 'multiBench'
-  const parallelBenchName = typeof suffix === 'string' ? 'parallel' + suffix : 'parallel'
+  const singleBenchName = typeof suffix === 'string' ? 'singleBench' + suffix : 'singleBench';
+  const multiBenchName = typeof suffix === 'string' ? 'multiBench' + suffix : 'multiBench';
+  const parallelBenchName = typeof suffix === 'string' ? 'parallel' + suffix : 'parallel';
 
   const singleBenchResults = microBench[singleBenchName];
   const multiBenchResults = microBench[multiBenchName];
@@ -59,7 +61,6 @@ function getSpecBenchmarkResults(microBench, suffix) {
   ]);
 
   const multiBench = average(Object.values(multiBenchResults));
-
 
   const parallelBench = average([
     parallelBenchResults.ldjsonMultiFileUpload,

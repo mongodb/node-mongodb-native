@@ -6,7 +6,6 @@ const { resolve } = require('path');
 const { Readable } = require('stream');
 const readline = require('readline');
 const {
-  makeClient,
   makeClientWithOpts,
   disconnectClient,
   dropDb,

@@ -3,7 +3,6 @@ const { pipeline } = require('stream/promises');
 const {
   loadSpecFile,
   makeLoadJSON,
-  makeClient,
   makeClientWithOpts,
   connectClient,
   initDb,
