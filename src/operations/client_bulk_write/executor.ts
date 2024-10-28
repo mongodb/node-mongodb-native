@@ -56,7 +56,7 @@ export class ClientBulkWriteExecutor {
 
     // If no write concern was provided, we inherit one from the client.
     if (!this.options.writeConcern) {
-      this.options.writeConcern = WriteConcern.fromOptions(this.client.options);
+      this.options.writeConcern = WriteConcern.fromOptions(this.client.s.options);
     }
 
     if (this.options.writeConcern?.w === 0) {
