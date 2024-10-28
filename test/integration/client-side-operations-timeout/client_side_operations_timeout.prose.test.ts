@@ -23,7 +23,7 @@ import {
   promiseWithResolvers,
   squashError
 } from '../../mongodb';
-import { type FailPoint, makeMultiBatchWrite } from '../../tools/utils';
+import { type FailPoint, makeMultiBatchWrite, measureDuration } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 // TODO(NODE-5824): Implement CSOT prose tests
@@ -188,6 +188,8 @@ describe('CSOT spec prose tests', function () {
       }
     } as const;
 
+    const timeoutMS = 100;
+
     beforeEach(async function () {
       await internalClient
         .db('keyvault')
@@ -195,7 +197,7 @@ describe('CSOT spec prose tests', function () {
         .drop()
         .catch(() => null);
       await internalClient.db('keyvault').collection('datakeys');
-      keyVaultClient = this.configuration.newClient({}, { timeoutMS: 100, monitorCommands: true });
+      keyVaultClient = this.configuration.newClient({}, { timeoutMS, monitorCommands: true });
       clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: { local: { key: LOCAL_MASTERKEY } }
@@ -252,8 +254,12 @@ describe('CSOT spec prose tests', function () {
           } as FailPoint);
         const commandStarted: CommandStartedEvent[] = [];
         keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
-        const err = await clientEncryption.createDataKey('local').catch(e => e);
+
+        const { duration, result: err } = await measureDuration(() =>
+          clientEncryption.createDataKey('local').catch(e => e)
+        );
         expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
         const command = commandStarted[0].command;
         expect(command).to.have.property('insert', 'datakeys');
         expect(command).to.have.property('$db', 'keyvault');
@@ -305,21 +311,23 @@ describe('CSOT spec prose tests', function () {
         const commandStarted: CommandStartedEvent[] = [];
         keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
 
-        const err = await clientEncryption
-          .encrypt('hello', {
-            algorithm: `AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic`,
-            keyId: datakeyId
-          })
-          .catch(e => e);
-
+        const { duration, result: err } = await measureDuration(() =>
+          clientEncryption
+            .encrypt('hello', {
+              algorithm: `AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic`,
+              keyId: datakeyId
+            })
+            .catch(e => e)
+        );
         expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
         const command = commandStarted[0].command;
         expect(command).to.have.property('find', 'datakeys');
         expect(command).to.have.property('$db', 'keyvault');
       });
     });
 
-    context('decrypt', clientEncryptionMetadata, () => {
+    context('decrypt', () => {
       /**
        * 1. Call `clientEncryption.createDataKey()` with the `local` KMS provider.
        *    - Expect this to return a BSON binary with subtype 4, referred to as `dataKeyId`.
@@ -375,8 +383,11 @@ describe('CSOT spec prose tests', function () {
         const commandStarted: CommandStartedEvent[] = [];
         keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
 
-        const err = await clientEncryption.decrypt(encrypted).catch(e => e);
+        const { duration, result: err } = await measureDuration(() =>
+          clientEncryption.decrypt(encrypted).catch(e => e)
+        );
         expect(err).to.be.instanceOf(MongoOperationTimeoutError);
+        expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
         const command = commandStarted[0].command;
         expect(command).to.have.property('find', 'datakeys');
         expect(command).to.have.property('$db', 'keyvault');
