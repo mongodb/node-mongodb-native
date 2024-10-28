@@ -10,7 +10,7 @@ import {
   MongoOperationTimeoutError
 } from '../error';
 import { CSOTTimeoutContext } from '../timeout';
-import { type Callback, squashError } from '../utils';
+import { type Callback, resolveTimeoutOptions, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
 import type { GridFSFile } from './download';
@@ -143,7 +143,8 @@ export class GridFSBucketWriteStream extends Writable {
     if (options.timeoutMS != null)
       this.timeoutContext = new CSOTTimeoutContext({
         timeoutMS: options.timeoutMS,
-        serverSelectionTimeoutMS: this.bucket.s.db.client.options.serverSelectionTimeoutMS
+        serverSelectionTimeoutMS: resolveTimeoutOptions(this.bucket.s.db.client, {})
+          .serverSelectionTimeoutMS
       });
   }
 

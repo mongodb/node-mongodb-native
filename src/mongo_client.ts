@@ -490,7 +490,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /** @internal */
   get timeoutMS(): number | undefined {
-    return this.options.timeoutMS;
+    return this.s.options.timeoutMS;
   }
 
   /**
@@ -706,7 +706,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
     // Default to db from connection string if not provided
     if (!dbName) {
-      dbName = this.options.dbName;
+      dbName = this.s.options.dbName;
     }
 
     // Copy the options and add out internal override of the not shared flag
