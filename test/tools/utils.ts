@@ -269,6 +269,7 @@ export interface FailPoint {
     failInternalCommands?: boolean;
     errorLabels?: string[];
     appName?: string;
+    namespace?: string;
   };
 }
 
