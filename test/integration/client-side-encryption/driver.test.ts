@@ -11,7 +11,6 @@ import {
   type CommandStartedEvent,
   Connection,
   CSOTTimeoutContext,
-  type KMSProviders,
   type MongoClient,
   MongoOperationTimeoutError,
   StateMachine
@@ -30,6 +29,15 @@ const metadata: MongoDBMetadataUI = {
     mongodb: '>=4.2.0',
     clientSideEncryption: true
   }
+};
+
+const getLocalKmsProvider = (): { local: { key: Binary } } => {
+  const { local } = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as {
+    local: { key: Binary };
+    [key: string]: unknown;
+  };
+
+  return { local };
 };
 
 describe('Client Side Encryption Functional', function () {
@@ -461,12 +469,6 @@ describe('Client Side Encryption Functional', function () {
     }
 
     let key1Id;
-
-    const LOCAL_KEY = Buffer.from(
-      'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-      'base64'
-    );
-
     let keyVaultClient: MongoClient;
     let clientEncryption: ClientEncryption;
     let commandsStarted: CommandStartedEvent[];
@@ -477,7 +479,6 @@ describe('Client Side Encryption Functional', function () {
         .db('keyvault')
         .dropCollection('datakeys', { writeConcern: { w: 'majority' } })
         .catch(() => null);
-      await sleep(500);
       await internalClient.db('keyvault').createCollection('datakeys');
       await internalClient.close();
 
@@ -494,7 +495,7 @@ describe('Client Side Encryption Functional', function () {
 
       clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: { local: { key: LOCAL_KEY } },
+        kmsProviders: getLocalKmsProvider(),
         timeoutMS: 500
       });
 
@@ -560,7 +561,7 @@ describe('Client Side Encryption Functional', function () {
       makeBlockingFailFor('find', 2000);
 
       it(
-        'throws a timeout error if the bulk operation takes too long',
+        'throws a timeout error if the find takes too long',
         metadata,
         runAndCheckForCSOTTimeout(async () => {
           await clientEncryption.getKey(new UUID());
@@ -699,7 +700,7 @@ describe('CSOT', function () {
       await keyVaultClient.db('keyvault').collection('datakeys');
       const clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: getKmsProviders()
+        kmsProviders: getLocalKmsProvider()
       });
       dataKey = await clientEncryption.createDataKey('local');
       setupClient = this.configuration.newClient();
@@ -729,15 +730,6 @@ describe('CSOT', function () {
       await setupClient.close();
     });
 
-    const getKmsProviders = (): KMSProviders => {
-      const { local } = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as {
-        local: { key: Binary };
-        [key: string]: unknown;
-      };
-
-      return { local };
-    };
-
     const metadata: MongoDBMetadataUI = {
       requires: {
         mongodb: '>=4.2.0',
@@ -758,7 +750,7 @@ describe('CSOT', function () {
               autoEncryption: {
                 keyVaultClient,
                 keyVaultNamespace: 'keyvault.datakeys',
-                kmsProviders: getKmsProviders(),
+                kmsProviders: getLocalKmsProvider(),
                 schemaMap: {
                   'test.test': {
                     bsonType: 'object',
@@ -812,7 +804,7 @@ describe('CSOT', function () {
               autoEncryption: {
                 keyVaultClient,
                 keyVaultNamespace: 'admin.datakeys',
-                kmsProviders: getKmsProviders()
+                kmsProviders: getLocalKmsProvider()
               }
             }
           );
