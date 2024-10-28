@@ -121,12 +121,12 @@ benchmarkRunner
   .then(microBench => {
     const noCSOTResults = getSpecBenchmarkResults(microBench);
     const csotTimeoutMS0Results = getSpecBenchmarkResults(microBench, '_timeoutMS_0');
-    const csotTimeoutMS10000Results = getSpecBenchmarkResults(microBench, '_timeoutMS_40000');
+    const csotTimeoutMS120000Results = getSpecBenchmarkResults(microBench, '_timeoutMS_120000');
 
     return {
       ...convertToPerfSend(noCSOTResults),
       ...convertToPerfSend(csotTimeoutMS0Results, '_timeoutMS_0'),
-      ...convertToPerfSend(csotTimeoutMS10000Results, '_timeoutMS_40000')
+      ...convertToPerfSend(csotTimeoutMS120000Results, '_timeoutMS_120000')
     };
   })
   .then(data => {
