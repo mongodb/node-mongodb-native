@@ -33,22 +33,20 @@ function average(arr) {
 const benchmarkRunner = new Runner()
   .suite('singleBench', suite => makeSingleBench(suite))
   .suite('singleBench_timeoutMS_0', suite => makeSingleBench(suite, { timeoutMS: 0 }))
-  .suite('singleBench_timeoutMS_40000', suite => makeSingleBench(suite, { timeoutMS: 40_000 }))
+  .suite('singleBench_timeoutMS_120000', suite => makeSingleBench(suite, { timeoutMS: 120_000 }))
 
-/*
   .suite('multiBench', suite => makeMultiBench(suite))
   .suite('multiBench_timeoutMS_0', suite => makeMultiBench(suite, { timeoutMS: 0 }))
-  .suite('multiBench_timeoutMS_10000', suite => makeMultiBench(suite, { timeoutMS: 10_000 }))
+  .suite('multiBench_timeoutMS_120000', suite => makeMultiBench(suite, { timeoutMS: 120_000 }))
 
   .suite('parallel', suite => makeParallelBenchmarks(suite))
   .suite('parallel_timeoutMS_0', suite => makeParallelBenchmarks(suite, { timeoutMS: 0 }))
-  .suite('parallel_timeoutMS_10000', suite => makeParallelBenchmarks(suite, { timeoutMS: 10_000 }));
-*/
+  .suite('parallel_timeoutMS_120000', suite => makeParallelBenchmarks(suite, { timeoutMS: 120_000 }));
 
 function getSpecBenchmarkResults(microBench, suffix) {
   const singleBenchName = typeof suffix === 'string' ? 'singleBench' + suffix : 'singleBench'
   const multiBenchName = typeof suffix === 'string' ? 'multiBench' + suffix : 'multiBench'
-  const multiBenchName = typeof suffix === 'string' ? 'multiBench' + suffix : 'multiBench'
+  const parallelBenchName = typeof suffix === 'string' ? 'parallelBench' + suffix : 'parallelBench'
 
   const singleBenchResults = microBench[singleBenchName];
   const singleBench = average([
@@ -60,7 +58,7 @@ function getSpecBenchmarkResults(microBench, suffix) {
   const multiBenchResults = microBench[multiBenchName];
   const multiBench = average(Object.values(multiBenchResults));
 
-  const parallelBenchResults = microBench['parallel' + suffix];
+  const parallelBenchResults = microBench[parallelBenchName];
 
   const parallelBench = average([
     parallelBenchResults.ldjsonMultiFileUpload,
