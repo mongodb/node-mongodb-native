@@ -46,19 +46,24 @@ const benchmarkRunner = new Runner()
 function getSpecBenchmarkResults(microBench, suffix) {
   const singleBenchName = typeof suffix === 'string' ? 'singleBench' + suffix : 'singleBench'
   const multiBenchName = typeof suffix === 'string' ? 'multiBench' + suffix : 'multiBench'
-  const parallelBenchName = typeof suffix === 'string' ? 'parallelBench' + suffix : 'parallelBench'
+  const parallelBenchName = typeof suffix === 'string' ? 'parallel' + suffix : 'parallel'
 
   const singleBenchResults = microBench[singleBenchName];
+  const multiBenchResults = microBench[multiBenchName];
+  const parallelBenchResults = microBench[parallelBenchName];
+
+  console.log(inspect(singleBenchResults, { depth: Infinity, colors: true }));
+  console.log(inspect(multiBenchResults, { depth: Infinity, colors: true }));
+  console.log(inspect(parallelBenchResults, { depth: Infinity, colors: true }));
+
   const singleBench = average([
     singleBenchResults.findOne,
     singleBenchResults.smallDocInsertOne,
     singleBenchResults.largeDocInsertOne
   ]);
 
-  const multiBenchResults = microBench[multiBenchName];
   const multiBench = average(Object.values(multiBenchResults));
 
-  const parallelBenchResults = microBench[parallelBenchName];
 
   const parallelBench = average([
     parallelBenchResults.ldjsonMultiFileUpload,
@@ -115,8 +120,8 @@ benchmarkRunner
   .run()
   .then(microBench => {
     const noCSOTResults = getSpecBenchmarkResults(microBench);
-    const csotTimeoutMS0Results = getSpecBenchmarkResults(microBench,'_timeoutMS_0');
-    const csotTimeoutMS10000Results = getSpecBenchmarkResults(microBench,'_timeoutMS_40000');
+    const csotTimeoutMS0Results = getSpecBenchmarkResults(microBench, '_timeoutMS_0');
+    const csotTimeoutMS10000Results = getSpecBenchmarkResults(microBench, '_timeoutMS_40000');
 
     return {
       ...convertToPerfSend(noCSOTResults),
