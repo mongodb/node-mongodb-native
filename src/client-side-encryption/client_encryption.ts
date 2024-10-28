@@ -557,9 +557,10 @@ export class ClientEncryption {
       }
     } = options;
 
-    const timeoutContext = TimeoutContext.create(
-      resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS })
-    );
+    const timeoutContext =
+      this._timeoutMS != null
+        ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
+        : undefined;
 
     if (Array.isArray(encryptedFields.fields)) {
       const createDataKeyPromises = encryptedFields.fields.map(async field =>
@@ -680,9 +681,10 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.options)
     });
 
-    const timeoutContext = TimeoutContext.create(
-      resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS })
-    );
+    const timeoutContext =
+      this._timeoutMS != null
+        ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
+        : undefined;
 
     const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
 
@@ -764,9 +766,10 @@ export class ClientEncryption {
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
-    const timeoutContext = TimeoutContext.create(
-      resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS })
-    );
+    const timeoutContext =
+      this._timeoutMS != null
+        ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
+        : undefined;
     const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
     return v;
   }

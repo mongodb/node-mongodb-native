@@ -871,7 +871,7 @@ describe('CSOT', function () {
       };
 
       beforeEach(async function () {
-        local_key = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS).local;
+        local_key = { local: EJSON.parse(process.env.CSFLE_KMS_PROVIDERS).local };
         client = this.configuration.newClient({ timeoutMS });
         await client.connect();
         await client.db('keyvault').createCollection('datakeys');
