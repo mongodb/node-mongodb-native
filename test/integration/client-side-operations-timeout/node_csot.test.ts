@@ -906,7 +906,7 @@ describe('CSOT driver tests', metadata, () => {
             data: {
               failCommands: ['getMore'],
               blockConnection: true,
-              blockTimeMS: onSharded ? 5100 : 520
+              blockTimeMS: onSharded ? 5100 : 120
             }
           };
 
@@ -914,7 +914,7 @@ describe('CSOT driver tests', metadata, () => {
           cs = client
             .db('db')
             .collection('coll')
-            .watch([], { timeoutMS: onSharded ? 5000 : 500 });
+            .watch([], { timeoutMS: onSharded ? 5000 : 100 });
           errorIter = on(cs, 'error');
           cs.on('change', () => {
             // Add empty listener just to get the change stream running
@@ -937,6 +937,28 @@ describe('CSOT driver tests', metadata, () => {
             }
           },
           async function () {
+            // NOTE: duplicating setup code here so its particular configuration requirements don't
+            // affect other tests.
+            const failpoint: FailPoint = {
+              configureFailPoint: 'failCommand',
+              mode: { times: 1 },
+              data: {
+                failCommands: ['getMore'],
+                blockConnection: true,
+                blockTimeMS: onSharded ? 5100 : 520
+              }
+            };
+
+            await internalClient.db().admin().command(failpoint);
+            const cs = client
+              .db('db')
+              .collection('coll')
+              .watch([], { timeoutMS: onSharded ? 5000 : 500 });
+            const errorIter = on(cs, 'error');
+            cs.on('change', () => {
+              // Add empty listener just to get the change stream running
+            });
+
             const err = (await errorIter.next()).value[0];
             expect(err).to.be.instanceof(MongoOperationTimeoutError);
 
