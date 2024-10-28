@@ -152,7 +152,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   tlsInsecure?: boolean;
   /** The time in milliseconds to attempt a connection before timing out. */
   connectTimeoutMS?: number;
-  /** The time in milliseconds to attempt a send or receive on a socket before the attempt times out. */
+  /**
+   * The time in milliseconds to attempt a send or receive on a socket before the attempt times out.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead
+   */
   socketTimeoutMS?: number;
   /** An array or comma-delimited string of compressors to enable network compression for communication between this client and a mongod/mongos instance. */
   compressors?: CompressorName[] | string;
@@ -176,7 +179,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   maxConnecting?: number;
   /** The maximum number of milliseconds that a connection can remain idle in the pool before being removed and closed. */
   maxIdleTimeMS?: number;
-  /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
+  /**
+   * The maximum time in milliseconds that a thread can wait for a connection to become available.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead
+   */
   waitQueueTimeoutMS?: number;
   /** Specify a read concern for the collection (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
@@ -513,6 +519,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /**
    * Connect to MongoDB using a url
    *
+   * @remarks
+   * Calling `connect` is optional since the first operation you perform will call `connect` if it's needed.
+   * `timeoutMS` will bound the time any operation can take before throwing a timeout error.
+   * However, when the operation being run is automatically connecting your `MongoClient` the `timeoutMS` will not apply to the time taken to connect the MongoClient.
+   * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
+   * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
+   *
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   async connect(): Promise<this> {
@@ -708,6 +721,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /**
    * Connect to MongoDB using a url
+   *
+   * @remarks
+   * Calling `connect` is optional since the first operation you perform will call `connect` if it's needed.
+   * `timeoutMS` will bound the time any operation can take before throwing a timeout error.
+   * However, when the operation being run is automatically connecting your `MongoClient` the `timeoutMS` will not apply to the time taken to connect the MongoClient.
+   * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
+   * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
    *
    * @remarks
    * The programmatically provided options take precedence over the URI options.

@@ -3,6 +3,8 @@
 import { type ChildProcess, spawn } from 'node:child_process';
 
 import { expect } from 'chai';
+import * as os from 'os';
+import * as path from 'path';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
 import { Readable } from 'stream';
@@ -127,10 +129,15 @@ describe('CSOT spec prose tests', function () {
       let childProcess: ChildProcess;
 
       beforeEach(async function () {
-        childProcess = spawn('mongocryptd', ['--port', mongocryptdTestPort, '--ipv6'], {
-          stdio: 'ignore',
-          detached: true
-        });
+        const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
+        childProcess = spawn(
+          'mongocryptd',
+          ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
+          {
+            stdio: 'ignore',
+            detached: true
+          }
+        );
 
         childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
         client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
@@ -147,6 +154,7 @@ describe('CSOT spec prose tests', function () {
       it('maxTimeMS is not set', async function () {
         const commandStarted = [];
         client.on('commandStarted', ev => commandStarted.push(ev));
+        await client.connect();
         await client
           .db('admin')
           .command({ ping: 1 })

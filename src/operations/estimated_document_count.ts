@@ -12,6 +12,7 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
    * The maximum amount of time to allow the operation to run.
    *
    * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   * @deprecated Will be removed in the next major version. Please use timeoutMS instead.
    */
   maxTimeMS?: number;
 }
