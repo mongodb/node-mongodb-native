@@ -33,8 +33,9 @@ function average(arr) {
 const benchmarkRunner = new Runner()
   .suite('singleBench', suite => makeSingleBench(suite))
   .suite('singleBench_timeoutMS_0', suite => makeSingleBench(suite, { timeoutMS: 0 }))
-  .suite('singleBench_timeoutMS_10000', suite => makeSingleBench(suite, { timeoutMS: 10_000 }))
+  .suite('singleBench_timeoutMS_40000', suite => makeSingleBench(suite, { timeoutMS: 40_000 }))
 
+/*
   .suite('multiBench', suite => makeMultiBench(suite))
   .suite('multiBench_timeoutMS_0', suite => makeMultiBench(suite, { timeoutMS: 0 }))
   .suite('multiBench_timeoutMS_10000', suite => makeMultiBench(suite, { timeoutMS: 10_000 }))
@@ -42,6 +43,7 @@ const benchmarkRunner = new Runner()
   .suite('parallel', suite => makeParallelBenchmarks(suite))
   .suite('parallel_timeoutMS_0', suite => makeParallelBenchmarks(suite, { timeoutMS: 0 }))
   .suite('parallel_timeoutMS_10000', suite => makeParallelBenchmarks(suite, { timeoutMS: 10_000 }));
+*/
 
 function getSpecBenchmarkResults(microBench, suffix) {
   const singleBenchName = typeof suffix === 'string' ? 'singleBench' + suffix : 'singleBench'
@@ -114,14 +116,14 @@ function convertToPerfSend(benchmarkResults, nameSuffix) {
 benchmarkRunner
   .run()
   .then(microBench => {
-    const noCSOTResults = getSpecBenchmarkResults('', microBench);
-    const csotTimeoutMS0Results = getSpecBenchmarkResults('_timeoutMS_0', microBench);
-    const csotTimeoutMS10000Results = getSpecBenchmarkResults('_timeoutMS_10000', microBench);
+    const noCSOTResults = getSpecBenchmarkResults(microBench);
+    const csotTimeoutMS0Results = getSpecBenchmarkResults(microBench,'_timeoutMS_0');
+    const csotTimeoutMS10000Results = getSpecBenchmarkResults(microBench,'_timeoutMS_40000');
 
     return {
       ...convertToPerfSend(noCSOTResults),
       ...convertToPerfSend(csotTimeoutMS0Results, '_timeoutMS_0'),
-      ...convertToPerfSend(csotTimeoutMS10000Results, '_timeoutMS_10000')
+      ...convertToPerfSend(csotTimeoutMS10000Results, '_timeoutMS_40000')
     };
   })
   .then(data => {
