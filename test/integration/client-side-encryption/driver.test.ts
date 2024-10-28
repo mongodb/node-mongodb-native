@@ -487,7 +487,7 @@ describe('CSOT', function () {
       const LOCAL_KEY = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS).local;
       const timeoutMS = 1000;
 
-      const encryptionMetadata: MongoDBMetadataUI = {
+      const encryptedCollectionMetadata: MongoDBMetadataUI = {
         requires: {
           clientSideEncryption: true,
           mongodb: '>=7.0.0',
@@ -550,7 +550,7 @@ describe('CSOT', function () {
         () => {
           it(
             '`createEncryptedCollection throws `MongoCryptCreateDataKeyError` due to a timeout error',
-            encryptionMetadata,
+            encryptedCollectionMetadata,
             async function () {
               await client
                 .db()
@@ -581,7 +581,7 @@ describe('CSOT', function () {
         () => {
           it(
             '`createEncryptedCollection throws `MongoCryptCreateEncryptedCollectionError` due to a timeout error',
-            encryptionMetadata,
+            encryptedCollectionMetadata,
             async function () {
               await client
                 .db()
@@ -612,7 +612,7 @@ describe('CSOT', function () {
         () => {
           it(
             '`createEncryptedCollection throws `MongoCryptCreateEncryptedCollectionError` due to a timeout error',
-            encryptionMetadata,
+            encryptedCollectionMetadata,
             async function () {
               await client
                 .db()
