@@ -710,7 +710,8 @@ export class ClientSession
    * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
    * undefined behaviour.
    *
-   * **IMPORTANT:** When running a
+   * **IMPORTANT:** When running an operation inside a `withTransaction` callback, if it is not
+   * provided the explicit session in its options, it will not respect the timeoutMS.
    *
    *
    * @remarks
