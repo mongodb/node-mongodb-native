@@ -1,7 +1,7 @@
 import type { Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
+import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
 import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
 import type { Server } from '../sdam/server';
