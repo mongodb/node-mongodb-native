@@ -490,9 +490,6 @@ describe('Client Side Encryption Functional', function () {
       });
       await keyVaultClient.connect();
 
-      commandsStarted = [];
-      keyVaultClient.on('commandStarted', ev => commandsStarted.push(ev));
-
       clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: getLocalKmsProvider(),
@@ -500,6 +497,10 @@ describe('Client Side Encryption Functional', function () {
       });
 
       key1Id = await clientEncryption.createDataKey('local');
+      while ((await clientEncryption.getKey(key1Id)) == null);
+
+      commandsStarted = [];
+      keyVaultClient.on('commandStarted', ev => commandsStarted.push(ev));
     });
 
     afterEach(async function () {
