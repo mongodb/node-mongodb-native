@@ -4,6 +4,7 @@ const {
   loadSpecFile,
   makeLoadJSON,
   makeClient,
+  makeClientWithOpts,
   connectClient,
   initDb,
   dropDb,
