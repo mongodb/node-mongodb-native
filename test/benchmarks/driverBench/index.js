@@ -35,54 +35,64 @@ const benchmarkRunner = new Runner()
   .suite('multiBench', suite => makeMultiBench(suite))
   .suite('parallel', suite => makeParallelBenchmarks(suite));
 
+function getSpecBenchmarkResults(suffix, microBench) {
+  const singleBenchResults = microBench['singleBench' + suffix];
+  const singleBench = average([
+    singleBenchResults.findOne,
+    singleBenchResults.smallDocInsertOne,
+    singleBenchResults.largeDocInsertOne
+  ]);
+
+  const multiBenchResults = microBench['multiBench' + suffix];
+  const multiBench = average(Object.values(multiBenchResults));
+
+  const parallelBenchResults = microBench['parallel' + suffix];
+
+  const parallelBench = average([
+    parallelBenchResults.ldjsonMultiFileUpload,
+    parallelBenchResults.ldjsonMultiFileExport,
+    parallelBenchResults.gridfsMultiFileUpload,
+    parallelBenchResults.gridfsMultiFileDownload
+  ]);
+
+  const readBench = average([
+    singleBenchResults.findOne,
+    multiBenchResults.findManyAndEmptyCursor,
+    multiBenchResults.gridFsDownload,
+    parallelBenchResults.gridfsMultiFileDownload,
+    parallelBenchResults.ldjsonMultiFileExport
+  ]);
+  const writeBench = average([
+    singleBenchResults.smallDocInsertOne,
+    singleBenchResults.largeDocInsertOne,
+    multiBenchResults.smallDocBulkInsert,
+    multiBenchResults.largeDocBulkInsert,
+    multiBenchResults.gridFsUpload,
+    parallelBenchResults.ldjsonMultiFileUpload,
+    parallelBenchResults.gridfsMultiFileUpload
+  ]);
+
+  const driverBench = average([readBench, writeBench]);
+
+  return {
+    singleBench,
+    multiBench,
+    parallelBench,
+    readBench,
+    writeBench,
+    driverBench,
+    ...parallelBenchResults,
+    ...singleBenchResults,
+    ...multiBenchResults
+  };
+}
+
 benchmarkRunner
   .run()
   .then(microBench => {
-    const singleBench = average([
-      microBench.singleBench.findOne,
-      microBench.singleBench.smallDocInsertOne,
-      microBench.singleBench.largeDocInsertOne
-    ]);
-    const multiBench = average(Object.values(microBench.multiBench));
-
-    const parallelBench = average([
-      microBench.parallel.ldjsonMultiFileUpload,
-      microBench.parallel.ldjsonMultiFileExport,
-      microBench.parallel.gridfsMultiFileUpload,
-      microBench.parallel.gridfsMultiFileDownload
-    ]);
-
-    const readBench = average([
-      microBench.singleBench.findOne,
-      microBench.multiBench.findManyAndEmptyCursor,
-      microBench.multiBench.gridFsDownload,
-      microBench.parallel.gridfsMultiFileDownload,
-      microBench.parallel.ldjsonMultiFileExport
-    ]);
-    const writeBench = average([
-      microBench.singleBench.smallDocInsertOne,
-      microBench.singleBench.largeDocInsertOne,
-      microBench.multiBench.smallDocBulkInsert,
-      microBench.multiBench.largeDocBulkInsert,
-      microBench.multiBench.gridFsUpload,
-      microBench.parallel.ldjsonMultiFileUpload,
-      microBench.parallel.gridfsMultiFileUpload
-    ]);
-
-    const driverBench = average([readBench, writeBench]);
-
-    const benchmarkResults = {
-      singleBench,
-      multiBench,
-      parallelBench,
-      readBench,
-      writeBench,
-      driverBench,
-      ...microBench.parallel,
-      ...microBench.bsonBench,
-      ...microBench.singleBench,
-      ...microBench.multiBench
-    };
+    const noCSOTResults = getSpecBenchmarkResults('', microBench);
+    const csotTimeoutMS0Results = getSpecBenchmarkResults('_timeoutMS_0', microBench);
+    const csotTimeoutMS10000Results = getSpecBenchmarkResults('_timeoutMS_10000', microBench);
 
     return Object.entries(benchmarkResults).map(([benchmarkName, result]) => {
       return {

@@ -32,13 +32,13 @@ async function gridFsUpload() {
   await pipeline(uploadData, uploadStream);
 }
 
-function makeMultiBench(suite) {
+function makeMultiBench(suite, clientOptions) {
   return suite
     .benchmark('findManyAndEmptyCursor', benchmark =>
       benchmark
         .taskSize(16.22)
         .setup(makeLoadJSON('tweet.json'))
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -58,7 +58,7 @@ function makeMultiBench(suite) {
         .taskSize(2.75)
         .setup(makeLoadJSON('small_doc.json'))
         .setup(makeLoadInsertDocs(10000))
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -79,7 +79,7 @@ function makeMultiBench(suite) {
         .taskSize(27.31)
         .setup(makeLoadJSON('large_doc.json'))
         .setup(makeLoadInsertDocs(10))
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -99,7 +99,7 @@ function makeMultiBench(suite) {
       benchmark
         .taskSize(52.43)
         .setup(loadGridFs)
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -117,7 +117,7 @@ function makeMultiBench(suite) {
       benchmark
         .taskSize(52.43)
         .setup(loadGridFs)
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -144,7 +144,7 @@ function makeMultiBench(suite) {
       benchmark
         .taskSize(16.22)
         .setup(makeLoadJSON('tweet.json'))
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -159,7 +159,7 @@ function makeMultiBench(suite) {
     .benchmark('aggregateAMillionDocumentsAndToArray', benchmark =>
       benchmark
         .taskSize(16)
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -190,7 +190,7 @@ function makeMultiBench(suite) {
       benchmark
         .taskSize(1500)
         .setup(makeLoadJSON('tweet.json'))
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)

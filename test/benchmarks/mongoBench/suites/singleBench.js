@@ -1,5 +1,6 @@
 const {
   makeClient,
+  makeClientWithOpts,
   connectClient,
   initDb,
   disconnectClient,
@@ -11,7 +12,7 @@ const {
   makeLoadTweets
 } = require('../../driverBench/common');
 
-function makeSingleBench(suite) {
+function makeSingleBench(suite, clientOptions) {
   suite
     .benchmark('returnDocument', benchmark =>
       benchmark
@@ -24,7 +25,7 @@ function makeSingleBench(suite) {
     .benchmark('ping', benchmark =>
       benchmark
         .taskSize(0.15) // { ping: 1 } is 15 bytes of BSON x 10,000 iterations
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .task(async function () {
@@ -38,7 +39,7 @@ function makeSingleBench(suite) {
       benchmark
         // { hello: true } is 13 bytes. However the legacy hello was 16 bytes, to preserve history comparison data we leave this value as is.
         .taskSize(0.16)
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .task(async function () {
@@ -52,7 +53,7 @@ function makeSingleBench(suite) {
       benchmark
         .taskSize(16.22)
         .setup(makeLoadJSON('tweet.json'))
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -70,7 +71,7 @@ function makeSingleBench(suite) {
       benchmark
         .taskSize(2.75)
         .setup(makeLoadJSON('small_doc.json'))
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
@@ -95,7 +96,7 @@ function makeSingleBench(suite) {
       benchmark
         .taskSize(27.31)
         .setup(makeLoadJSON('large_doc.json'))
-        .setup(makeClient)
+        .setup(makeClientWithOpts(clientOptions))
         .setup(connectClient)
         .setup(initDb)
         .setup(dropDb)
