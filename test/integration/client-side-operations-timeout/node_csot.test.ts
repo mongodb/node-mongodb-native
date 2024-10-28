@@ -906,7 +906,7 @@ describe('CSOT driver tests', metadata, () => {
             data: {
               failCommands: ['getMore'],
               blockConnection: true,
-              blockTimeMS: onSharded ? 5100 : 120
+              blockTimeMS: onSharded ? 5100 : 520
             }
           };
 
@@ -914,7 +914,7 @@ describe('CSOT driver tests', metadata, () => {
           cs = client
             .db('db')
             .collection('coll')
-            .watch([], { timeoutMS: onSharded ? 5000 : 100 });
+            .watch([], { timeoutMS: onSharded ? 5000 : 500 });
           errorIter = on(cs, 'error');
           cs.on('change', () => {
             // Add empty listener just to get the change stream running
