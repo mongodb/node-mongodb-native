@@ -141,6 +141,89 @@
           ]
         }
       ]
+    },
+    {
+      "description": "timeoutMS is refreshed for getMore if maxAwaitTimeMS is set",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "find",
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 150
+              }
+            }
+          }
+        },
+        {
+          "name": "createFindCursor",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "cursorType": "tailableAwait",
+            "timeoutMS": 250,
+            "batchSize": 1,
+            "maxAwaitTimeMS": 10
+          },
+          "saveResultAsEntity": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "tailable": true,
+                  "awaitData": true,
+                  "maxTimeMS": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll",
+                  "maxTimeMS": 10 
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
