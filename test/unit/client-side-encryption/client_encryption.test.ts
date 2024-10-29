@@ -14,7 +14,7 @@ import {
 } from '../../../src/client-side-encryption/errors';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { Binary, BSON, deserialize } from '../../mongodb';
+import { Binary, BSON, deserialize, MongoClient } from '../../mongodb';
 
 const { EJSON } = BSON;
 
@@ -102,6 +102,49 @@ describe('ClientEncryption', function () {
     expect(ClientEncryption.libmongocryptVersion).to.be.a('string');
   });
 
+  describe('constructor', () => {
+    describe('_timeoutMS', () => {
+      const LOCAL_MASTERKEY = Buffer.from(
+        'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+        'base64'
+      );
+      context('when timeoutMS is provided in ClientEncryptionOptions and client', function () {
+        it('sets clientEncryption._timeoutMS to ClientEncryptionOptions.timeoutMS value', function () {
+          const client = new MongoClient('mongodb://a/', { timeoutMS: 100 });
+          const clientEncryption = new ClientEncryption(client, {
+            keyVaultNamespace: 'keyvault.datakeys',
+            kmsProviders: { local: { key: LOCAL_MASTERKEY } },
+            timeoutMS: 500
+          });
+          expect(clientEncryption._timeoutMS).to.equal(500);
+        });
+      });
+
+      context('when timeoutMS is only provided in ClientEncryptionOptions', function () {
+        it('sets clientEncryption._timeoutMS to ClientEncryptionOptions.timeoutMS value', function () {
+          const client = new MongoClient('mongodb://a/');
+          const clientEncryption = new ClientEncryption(client, {
+            keyVaultNamespace: 'keyvault.datakeys',
+            kmsProviders: { local: { key: LOCAL_MASTERKEY } },
+            timeoutMS: 500
+          });
+          expect(clientEncryption._timeoutMS).to.equal(500);
+        });
+      });
+
+      context('when timeoutMS is only provided in client', function () {
+        it('sets clientEncryption._timeoutMS to client.timeoutMS value', function () {
+          const client = new MongoClient('mongodb://a/', { timeoutMS: 100 });
+          const clientEncryption = new ClientEncryption(client, {
+            keyVaultNamespace: 'keyvault.datakeys',
+            kmsProviders: { local: { key: LOCAL_MASTERKEY } }
+          });
+          expect(clientEncryption._timeoutMS).to.equal(100);
+        });
+      });
+    });
+  });
+
   describe('createEncryptedCollection()', () => {
     let clientEncryption;
     const client = new MockClient();
@@ -160,7 +203,10 @@ describe('ClientEncryption', function () {
 
         expect(createDataKeySpy.callCount).to.equal(0);
         const options = createCollectionSpy.getCall(0).args[1];
-        expect(options).to.deep.equal({ encryptedFields: { fields: 'not an array' } });
+        expect(options).to.deep.equal({
+          encryptedFields: { fields: 'not an array' },
+          timeoutMS: undefined
+        });
       });
     });
 
@@ -178,7 +224,8 @@ describe('ClientEncryption', function () {
         expect(createDataKeyStub.callCount).to.equal(1);
         const options = createCollectionSpy.getCall(0).args[1];
         expect(options).to.deep.equal({
-          encryptedFields: { fields: ['not an array', { keyId: keyId }, { keyId: {} }] }
+          encryptedFields: { fields: ['not an array', { keyId: keyId }, { keyId: {} }] },
+          timeoutMS: undefined
         });
       });
     });
@@ -194,7 +241,10 @@ describe('ClientEncryption', function () {
         masterKey
       });
       expect(result).to.have.property('collection');
-      expect(createDataKey).to.have.been.calledOnceWithExactly('aws', { masterKey });
+      expect(createDataKey).to.have.been.calledOnceWithExactly('aws', {
+        masterKey,
+        timeoutContext: undefined
+      });
     });
 
     context('when createDataKey rejects', () => {
