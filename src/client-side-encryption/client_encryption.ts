@@ -123,7 +123,8 @@ export class ClientEncryption {
     this._proxyOptions = options.proxyOptions ?? {};
     this._tlsOptions = options.tlsOptions ?? {};
     this._kmsProviders = options.kmsProviders || {};
-    this._timeoutMS = options.timeoutMS ?? client.options.timeoutMS;
+    const { timeoutMS } = resolveTimeoutOptions(client, options);
+    this._timeoutMS = timeoutMS;
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -216,7 +217,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
     const timeoutContext =
@@ -285,10 +286,14 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
-    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context));
+    const timeoutContext = TimeoutContext.create(
+      resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS })
+    );
+
+    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context, timeoutContext));
     if (dataKeys.length === 0) {
       return {};
     }
@@ -318,7 +323,8 @@ export class ClientEncryption {
       .db(dbName)
       .collection<DataKey>(collectionName)
       .bulkWrite(replacements, {
-        writeConcern: { w: 'majority' }
+        writeConcern: { w: 'majority' },
+        timeoutMS: timeoutContext.csotEnabled() ? timeoutContext?.remainingTimeMS : undefined
       });
 
     return { bulkWriteResult: result };
@@ -347,7 +353,7 @@ export class ClientEncryption {
     return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .deleteOne({ _id }, { writeConcern: { w: 'majority' } });
+      .deleteOne({ _id }, { writeConcern: { w: 'majority' }, timeoutMS: this._timeoutMS });
   }
 
   /**
@@ -370,7 +376,7 @@ export class ClientEncryption {
     return this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .find({}, { readConcern: { level: 'majority' } });
+      .find({}, { readConcern: { level: 'majority' }, timeoutMS: this._timeoutMS });
   }
 
   /**
@@ -396,7 +402,7 @@ export class ClientEncryption {
     return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .findOne({ _id }, { readConcern: { level: 'majority' } });
+      .findOne({ _id }, { readConcern: { level: 'majority' }, timeoutMS: this._timeoutMS });
   }
 
   /**
@@ -423,7 +429,10 @@ export class ClientEncryption {
     return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .findOne({ keyAltNames: keyAltName }, { readConcern: { level: 'majority' } });
+      .findOne(
+        { keyAltNames: keyAltName },
+        { readConcern: { level: 'majority' }, timeoutMS: this._timeoutMS }
+      );
   }
 
   /**
@@ -457,7 +466,7 @@ export class ClientEncryption {
       .findOneAndUpdate(
         { _id },
         { $addToSet: { keyAltNames: keyAltName } },
-        { writeConcern: { w: 'majority' }, returnDocument: 'before' }
+        { writeConcern: { w: 'majority' }, returnDocument: 'before', timeoutMS: this._timeoutMS }
       );
 
     return value;
@@ -519,7 +528,8 @@ export class ClientEncryption {
       .collection<DataKey>(collectionName)
       .findOneAndUpdate({ _id }, pipeline, {
         writeConcern: { w: 'majority' },
-        returnDocument: 'before'
+        returnDocument: 'before',
+        timeoutMS: this._timeoutMS
       });
 
     return value;
@@ -678,7 +688,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
     const timeoutContext =
@@ -762,7 +772,7 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
@@ -857,6 +867,9 @@ export interface ClientEncryptionOptions {
   tlsOptions?: CSFLEKMSTlsOptions;
 
   /** @internal TODO(NODE-5688): make this public */
+   *
+   * The timeout setting to be used for all the operations on ClientEncryption.
+   */
   timeoutMS?: number;
 }
 
