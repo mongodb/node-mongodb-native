@@ -1,0 +1,135 @@
+{
+  "description": "timeoutMS behaves correctly for change streams",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4",
+      "topologies": [
+        "replicaset",
+        "sharded"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "client",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "ignoreCommandMonitoringEvents": [
+          "killCursors"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "test",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "timeoutMS is refreshed for getMore if maxAwaitTimeMS is set",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate",
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 150
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 200,
+            "batchSize": 2,
+            "maxAwaitTimeMS": 10
+          },
+          "saveResultAsEntity": "changeStream"
+        },
+        {
+          "name": "iterateOnce",
+          "object": "changeStream"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll",
+                  "maxTimeMS": 10
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
