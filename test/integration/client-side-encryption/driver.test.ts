@@ -12,6 +12,8 @@ import {
   Connection,
   CSOTTimeoutContext,
   type MongoClient,
+  MongoCryptCreateDataKeyError,
+  MongoCryptCreateEncryptedCollectionError,
   MongoOperationTimeoutError,
   StateMachine
 } from '../../mongodb';
@@ -1046,6 +1048,167 @@ describe('CSOT', function () {
           it('the command succeeds', metadata, async function () {
             await stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
           });
+        }
+      );
+    });
+  });
+
+  describe('Explicit Encryption', function () {
+    describe('#createEncryptedCollection', function () {
+      let client: MongoClient;
+      let clientEncryption: ClientEncryption;
+      let local_key;
+      const timeoutMS = 1000;
+
+      const encryptedCollectionMetadata: MongoDBMetadataUI = {
+        requires: {
+          clientSideEncryption: true,
+          mongodb: '>=7.0.0',
+          topology: '!single'
+        }
+      };
+
+      beforeEach(async function () {
+        local_key = { local: EJSON.parse(process.env.CSFLE_KMS_PROVIDERS).local };
+        client = this.configuration.newClient({ timeoutMS });
+        await client.connect();
+        await client.db('keyvault').createCollection('datakeys');
+        clientEncryption = new ClientEncryption(client, {
+          keyVaultNamespace: 'keyvault.datakeys',
+          keyVaultClient: client,
+          kmsProviders: local_key
+        });
+      });
+
+      afterEach(async function () {
+        await client
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          } as FailPoint);
+        await client
+          .db('db')
+          .collection('newnew')
+          .drop()
+          .catch(() => null);
+        await client
+          .db('keyvault')
+          .collection('datakeys')
+          .drop()
+          .catch(() => null);
+        await client.close();
+      });
+
+      async function runCreateEncryptedCollection() {
+        const createCollectionOptions = {
+          encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
+        };
+
+        const db = client.db('db');
+
+        return await measureDuration(() =>
+          clientEncryption
+            .createEncryptedCollection(db, 'newnew', {
+              provider: 'local',
+              createCollectionOptions,
+              masterKey: null
+            })
+            .catch(err => err)
+        );
+      }
+
+      context(
+        'when `createDataKey` hangs longer than timeoutMS and `createCollection` does not hang',
+        () => {
+          it(
+            '`createEncryptedCollection throws `MongoCryptCreateDataKeyError` due to a timeout error',
+            encryptedCollectionMetadata,
+            async function () {
+              await client
+                .db()
+                .admin()
+                .command({
+                  configureFailPoint: 'failCommand',
+                  mode: {
+                    times: 1
+                  },
+                  data: {
+                    failCommands: ['insert'],
+                    blockConnection: true,
+                    blockTimeMS: timeoutMS * 1.2
+                  }
+                } as FailPoint);
+
+              const { duration, result: err } = await runCreateEncryptedCollection();
+              expect(err).to.be.instanceOf(MongoCryptCreateDataKeyError);
+              expect(err.cause).to.be.instanceOf(MongoOperationTimeoutError);
+              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
+            }
+          );
+        }
+      );
+
+      context(
+        'when `createDataKey` does not hang and `createCollection` hangs longer than timeoutMS',
+        () => {
+          it(
+            '`createEncryptedCollection throws `MongoCryptCreateEncryptedCollectionError` due to a timeout error',
+            encryptedCollectionMetadata,
+            async function () {
+              await client
+                .db()
+                .admin()
+                .command({
+                  configureFailPoint: 'failCommand',
+                  mode: {
+                    times: 1
+                  },
+                  data: {
+                    failCommands: ['create'],
+                    blockConnection: true,
+                    blockTimeMS: timeoutMS * 1.2
+                  }
+                } as FailPoint);
+
+              const { duration, result: err } = await runCreateEncryptedCollection();
+              expect(err).to.be.instanceOf(MongoCryptCreateEncryptedCollectionError);
+              expect(err.cause).to.be.instanceOf(MongoOperationTimeoutError);
+              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
+            }
+          );
+        }
+      );
+
+      context(
+        'when `createDataKey` and `createCollection` cumulatively hang longer than timeoutMS',
+        () => {
+          it(
+            '`createEncryptedCollection throws `MongoCryptCreateEncryptedCollectionError` due to a timeout error',
+            encryptedCollectionMetadata,
+            async function () {
+              await client
+                .db()
+                .admin()
+                .command({
+                  configureFailPoint: 'failCommand',
+                  mode: {
+                    times: 2
+                  },
+                  data: {
+                    failCommands: ['insert', 'create'],
+                    blockConnection: true,
+                    blockTimeMS: timeoutMS * 0.6
+                  }
+                } as FailPoint);
+
+              const { duration, result: err } = await runCreateEncryptedCollection();
+              expect(err).to.be.instanceOf(MongoCryptCreateEncryptedCollectionError);
+              expect(err.cause).to.be.instanceOf(MongoOperationTimeoutError);
+              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
+            }
+          );
         }
       );
     });
