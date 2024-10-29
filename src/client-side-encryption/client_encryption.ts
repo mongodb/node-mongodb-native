@@ -866,7 +866,7 @@ export interface ClientEncryptionOptions {
    */
   tlsOptions?: CSFLEKMSTlsOptions;
 
-  /** @internal TODO(NODE-5688): make this public */
+  /** @internal TODO(NODE-5688): make this public
    *
    * The timeout setting to be used for all the operations on ClientEncryption.
    */

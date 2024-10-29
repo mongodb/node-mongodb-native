@@ -14,7 +14,7 @@ import {
   type MongoClient,
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError,
-  MongoOperationTimeoutError
+  MongoOperationTimeoutError,
   StateMachine
 } from '../../mongodb';
 import {
