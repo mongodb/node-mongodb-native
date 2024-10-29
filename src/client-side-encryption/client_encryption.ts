@@ -24,7 +24,7 @@ import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Filter, type WithId } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
-import { TimeoutContext } from '../timeout';
+import { type CSOTTimeoutContext, TimeoutContext } from '../timeout';
 import { MongoDBCollectionNamespace, resolveTimeoutOptions } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import {
@@ -220,7 +220,13 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
-    const dataKey = deserialize(await stateMachine.execute(this, context)) as DataKey;
+    const timeoutContext =
+      options?.timeoutContext ??
+      TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }));
+
+    const dataKey = deserialize(
+      await stateMachine.execute(this, context, timeoutContext)
+    ) as DataKey;
 
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
       this._keyVaultNamespace
@@ -229,7 +235,12 @@ export class ClientEncryption {
     const { insertedId } = await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .insertOne(dataKey, { writeConcern: { w: 'majority' } });
+      .insertOne(dataKey, {
+        writeConcern: { w: 'majority' },
+        timeoutMS: timeoutContext?.csotEnabled()
+          ? timeoutContext?.getRemainingTimeMSOrThrow()
+          : undefined
+      });
 
     return insertedId;
   }
@@ -511,6 +522,7 @@ export class ClientEncryption {
         }
       }
     ];
+
     const value = await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
@@ -555,16 +567,25 @@ export class ClientEncryption {
       }
     } = options;
 
+    const timeoutContext =
+      this._timeoutMS != null
+        ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
+        : undefined;
+
     if (Array.isArray(encryptedFields.fields)) {
       const createDataKeyPromises = encryptedFields.fields.map(async field =>
         field == null || typeof field !== 'object' || field.keyId != null
           ? field
           : {
               ...field,
-              keyId: await this.createDataKey(provider, { masterKey })
+              keyId: await this.createDataKey(provider, {
+                masterKey,
+                // clone the timeoutContext
+                // in order to avoid sharing the same timeout for server selection and connection checkout across different concurrent operations
+                timeoutContext: timeoutContext?.csotEnabled() ? timeoutContext?.clone() : undefined
+              })
             }
       );
-
       const createDataKeyResolutions = await Promise.allSettled(createDataKeyPromises);
 
       encryptedFields.fields = createDataKeyResolutions.map((resolution, index) =>
@@ -582,7 +603,10 @@ export class ClientEncryption {
     try {
       const collection = await db.createCollection<TSchema>(name, {
         ...createCollectionOptions,
-        encryptedFields
+        encryptedFields,
+        timeoutMS: timeoutContext?.csotEnabled()
+          ? timeoutContext?.getRemainingTimeMSOrThrow()
+          : undefined
       });
       return { collection, encryptedFields };
     } catch (cause) {
@@ -667,7 +691,12 @@ export class ClientEncryption {
       socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
-    const { v } = deserialize(await stateMachine.execute(this, context));
+    const timeoutContext =
+      this._timeoutMS != null
+        ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
+        : undefined;
+
+    const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
 
     return v;
   }
@@ -747,7 +776,11 @@ export class ClientEncryption {
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
-    const { v } = deserialize(await stateMachine.execute(this, context));
+    const timeoutContext =
+      this._timeoutMS != null
+        ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
+        : undefined;
+    const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
     return v;
   }
 }
@@ -833,7 +866,8 @@ export interface ClientEncryptionOptions {
    */
   tlsOptions?: CSFLEKMSTlsOptions;
 
-  /**
+  /** @internal TODO(NODE-5688): make this public
+   *
    * The timeout setting to be used for all the operations on ClientEncryption.
    */
   timeoutMS?: number;
@@ -965,6 +999,9 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
 
   /** @experimental */
   keyMaterial?: Buffer | Binary;
+
+  /** @internal */
+  timeoutContext?: CSOTTimeoutContext;
 }
 
 /**
