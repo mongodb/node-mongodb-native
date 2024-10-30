@@ -17,6 +17,7 @@ events:
   - type: ConnectionCheckOutFailed
     reason: connectionError
     address: 42
+    duration: 42
   - type: ConnectionPoolReady
     address: 42
   - type: ConnectionCheckOutStarted
@@ -25,6 +26,7 @@ events:
     address: 42
   - type: ConnectionCheckedOut
     address: 42
+    duration: 42
 ignore:
   - ConnectionPoolCreated
   - ConnectionReady

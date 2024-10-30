@@ -23,12 +23,14 @@
     {
       "type": "ConnectionReady",
       "connectionId": 1,
-      "address": 42
+      "address": 42,
+      "duration": 42
     },
     {
       "type": "ConnectionCheckedOut",
       "connectionId": 1,
-      "address": 42
+      "address": 42,
+      "duration": 42
     }
   ],
   "ignore": [

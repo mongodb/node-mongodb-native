@@ -38,7 +38,8 @@
     {
       "type": "ConnectionCheckedOut",
       "address": 42,
-      "connectionId": 42
+      "connectionId": 42,
+      "duration": 42
     },
     {
       "type": "ConnectionCheckedIn",
@@ -56,6 +57,7 @@
     {
       "type": "ConnectionCheckOutFailed",
       "address": 42,
+      "duration": 42,
       "reason": "poolClosed"
     }
   ],

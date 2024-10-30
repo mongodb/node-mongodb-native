@@ -31,7 +31,8 @@
     {
       "type": "ConnectionCheckOutFailed",
       "reason": "connectionError",
-      "address": 42
+      "address": 42,
+      "duration": 42
     },
     {
       "type": "ConnectionPoolReady",
@@ -47,7 +48,8 @@
     },
     {
       "type": "ConnectionCheckedOut",
-      "address": 42
+      "address": 42,
+      "duration": 42
     }
   ],
   "ignore": [
