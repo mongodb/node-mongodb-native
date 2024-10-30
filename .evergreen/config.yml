@@ -4332,14 +4332,8 @@ task_groups:
           script: |
             ${PREPARE_SHELL}
             set +o xtrace
-            if [[ -n "${USE_SERVERLESS_PROXY}" ]];
-            then
-              export SERVERLESS_GROUP="${PROXY_SERVERLESS_DRIVERS_GROUP}"
-            else
-              export SERVERLESS_GROUP="${SERVERLESS_DRIVERS_GROUP}"
-            fi
             LOADBALANCED=ON \
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_GROUP} \
+            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
             SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
             SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
               bash ${DRIVERS_TOOLS}/.evergreen/serverless/create-instance.sh
@@ -4353,13 +4347,7 @@ task_groups:
           script: |
             ${PREPARE_SHELL}
             set +o xtrace
-            if [[ -n "${USE_SERVERLESS_PROXY}" ]];
-            then
-              export SERVERLESS_GROUP="${PROXY_SERVERLESS_DRIVERS_GROUP}"
-            else
-              export SERVERLESS_GROUP="${SERVERLESS_DRIVERS_GROUP}"
-            fi
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_GROUP} \
+            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
             SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
             SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
             SERVERLESS_INSTANCE_NAME=${SERVERLESS_INSTANCE_NAME} \
@@ -5080,15 +5068,6 @@ buildvariants:
     expansions:
       NODE_LTS_VERSION: 16
       NPM_VERSION: 9
-    tasks:
-      - serverless_task_group
-  - name: rhel8-test-serverless-proxy
-    display_name: Serverless Proxy Test
-    run_on: rhel80-large
-    expansions:
-      NODE_LTS_VERSION: 16
-      NPM_VERSION: 9
-      USE_SERVERLESS_PROXY: true
     tasks:
       - serverless_task_group
   - name: rhel8-test-gcp-kms
