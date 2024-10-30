@@ -11,7 +11,7 @@ failPoint:
     failCommands: ["isMaster","hello"]
     closeConnection: false
     blockConnection: true
-    blockTimeMS: 1000
+    blockTimeMS: 10000
 poolOptions:
   minPoolSize: 0
 operations:
