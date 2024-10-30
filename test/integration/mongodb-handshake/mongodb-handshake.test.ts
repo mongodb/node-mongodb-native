@@ -4,6 +4,7 @@ import type Sinon from 'sinon';
 import * as sinon from 'sinon';
 
 import {
+  connect,
   Connection,
   LEGACY_HELLO_COMMAND,
   MongoServerError,
@@ -130,4 +131,38 @@ describe('MongoDB Handshake', () => {
       }
     });
   });
+
+  context(
+    `when the handshake response includes 'saslSupportedMechs' and the array includes an unknown mechanism`,
+    function () {
+      beforeEach(() => {
+        sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
+          // @ts-expect-error: sinon will place wrappedMethod there
+          const command = Connection.prototype.command.wrappedMethod.bind(this);
+          if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+            return stub();
+          }
+          return command(ns, cmd, options);
+
+          async function stub() {
+            const response = await command(ns, cmd, options);
+            // console.error({ response });
+            return {
+              ...response,
+              saslSupportedMechs: [...(response.saslSupportedMechs ?? []), 'random string']
+            };
+          }
+        });
+      });
+
+      afterEach(() => sinon.restore());
+
+      it('no error is thrown', { requires: { auth: 'enabled' } }, async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+        await client.db('foo').collection('bar').insertOne({ name: 'john doe' });
+        await client.close();
+      });
+    }
+  );
 });
