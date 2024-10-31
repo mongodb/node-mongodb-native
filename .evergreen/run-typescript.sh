@@ -44,8 +44,12 @@ if [ "$TS_CHECK" == "COMPILE_DRIVER" ]; then
     npm run build:ts
 elif [ "$TS_CHECK" == "CHECK_TYPES" ]; then
     echo "checking driver types"
+    if [ "$TS_VERSION" == "4.4" ]; then
     # check compilation
+        node $TSC mongodb.d.ts --module commonjs --target es2021
+    else
     node $TSC mongodb.d.ts --module node16 --target es2021
+    fi
 else
     "Invalid value $TS_CHECK for TS_CHECK environment variable."
     exit 1
