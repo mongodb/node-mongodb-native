@@ -1,5 +1,4 @@
-import type { Document } from 'bson';
-
+import type { Document } from '../../bson';
 import type { Collection } from '../../collection';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
 import type { Server } from '../../sdam/server';

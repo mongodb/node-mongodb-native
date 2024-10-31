@@ -322,6 +322,7 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-lint-checks.sh"
@@ -334,6 +335,7 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh"
@@ -346,6 +348,7 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           TS_VERSION: ${TS_VERSION}
           TS_CHECK: CHECK_TYPES
           TYPES_VERSION: ${TYPES_VERSION}
@@ -361,6 +364,7 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-resource-management.sh"
@@ -373,6 +377,7 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           MONGODB_URI: ${MONGODB_URI}
         binary: bash
         args:
@@ -386,6 +391,7 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           TS_VERSION: ${TS_VERSION}
           TS_CHECK: COMPILE_DRIVER
           TYPES_VERSION: ${TYPES_VERSION}
@@ -464,7 +470,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+          source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
           rm -rf ./node_modules/@aws-sdk/credential-providers
 
   "run atlas tests":
@@ -473,6 +479,8 @@ functions:
       params:
         working_dir: "src"
         binary: bash
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         args:
           - -c
           - ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/atlas_connect
@@ -482,6 +490,7 @@ functions:
         working_dir: "src"
         binary: bash
         env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           NODE_LTS_VERSION: ${NODE_LTS_VERSION}
         args:
           - .evergreen/run-atlas-tests.sh
@@ -527,43 +536,49 @@ functions:
           bash ${PROJECT_DIRECTORY}/.evergreen/run-socks5-tests.sh
 
   "run kerberos tests":
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
+        binary: bash
         working_dir: src
-        script: |
-          export PROJECT_DIRECTORY="$(pwd)"
-          export KRB5_KEYTAB='${gssapi_auth_keytab_base64}'
-          export KRB5_NEW_KEYTAB='${gssapi_auth_new_keytab_base64}'
-          export KRB5_PRINCIPAL='${gssapi_auth_principal}'
-          export MONGODB_URI='${gssapi_auth_mongodb_uri}'
-          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
-
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          KRB5_KEYTAB: ${gssapi_auth_keytab_base64}
+          KRB5_NEW_KEYTAB: ${gssapi_auth_new_keytab_base64}
+          KRB5_PRINCIPAL: ${gssapi_auth_principal}
+          MONGODB_URI: ${gssapi_auth_mongodb_uri}
+          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
+        args:
+          - .evergreen/run-kerberos-tests.sh
 
   "run ldap tests":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        script: |
-          export PROJECT_DIRECTORY="$(pwd)"
-          export MONGODB_URI='${plain_auth_mongodb_uri}'
-          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
-
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
-
-  "run data lake tests":
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
         working_dir: src
-        script: |
-          export PROJECT_DIRECTORY="$(pwd)"
-          export MONGODB_URI='mongodb://mhuser:pencil@localhost'
-          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
+        binary: bash
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_URI: ${plain_auth_mongodb_uri}
+          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
+        args:
+          - .evergreen/run-ldap-tests.sh
 
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
+  "run data lake tests":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_URI: "mongodb://mhuser:pencil@localhost"
+          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
+        args:
+          - .evergreen/run-data-lake-tests.sh
 
   "run tls tests":
     - command: shell.exec
@@ -856,7 +871,11 @@ functions:
           echo "npm run check:aws" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
 
           cp $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh $ECS_SRC_DIR/.evergreen
-          tar -czf $ECS_SRC_DIR/src.tgz -C $PROJECT_DIRECTORY .
+
+          cd ..
+          tar -czf src.tgz src drivers-tools
+          mv src.tgz $ECS_SRC_DIR/src.tgz
+
 
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           . ./activate-authawsvenv.sh
@@ -973,6 +992,7 @@ functions:
         env:
           MONGODB_URI: ${MONGODB_URI}
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-lambda-tests.sh"
@@ -1106,6 +1126,7 @@ functions:
         env:
           INSTALL_DIR: mongodb-client-encryption
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
@@ -1368,14 +1389,8 @@ task_groups:
           script: |
             ${PREPARE_SHELL}
             set +o xtrace
-            if [[ -n "${USE_SERVERLESS_PROXY}" ]];
-            then
-              export SERVERLESS_GROUP="${PROXY_SERVERLESS_DRIVERS_GROUP}"
-            else
-              export SERVERLESS_GROUP="${SERVERLESS_DRIVERS_GROUP}"
-            fi
             LOADBALANCED=ON \
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_GROUP} \
+            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
             SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
             SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
               bash ${DRIVERS_TOOLS}/.evergreen/serverless/create-instance.sh
@@ -1389,13 +1404,7 @@ task_groups:
           script: |
             ${PREPARE_SHELL}
             set +o xtrace
-            if [[ -n "${USE_SERVERLESS_PROXY}" ]];
-            then
-              export SERVERLESS_GROUP="${PROXY_SERVERLESS_DRIVERS_GROUP}"
-            else
-              export SERVERLESS_GROUP="${SERVERLESS_DRIVERS_GROUP}"
-            fi
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_GROUP} \
+            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
             SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
             SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
             SERVERLESS_INSTANCE_NAME=${SERVERLESS_INSTANCE_NAME} \

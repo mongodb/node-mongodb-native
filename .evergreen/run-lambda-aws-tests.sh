@@ -8,7 +8,7 @@ MONGODB_URI=${MONGODB_URI:-}
 set +x
 
 # load node.js environment
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 # the default connection string, may be overridden by the environment script
 export MONGODB_URI="mongodb://localhost:27017/aws"

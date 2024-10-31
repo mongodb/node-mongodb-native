@@ -7,7 +7,7 @@ if test -f secrets-export.sh; then
 fi
 
 PROJECT_DIRECTORY=${PROJECT_DIRECTORY:-"."}
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 node -v
 

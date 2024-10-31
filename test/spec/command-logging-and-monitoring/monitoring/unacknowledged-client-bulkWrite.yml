@@ -4,6 +4,7 @@ schemaVersion: "1.7"
 
 runOnRequirements:
   - minServerVersion: "8.0"
+    serverless: forbid
 
 createEntities:
   - client:
@@ -49,6 +50,7 @@ tests:
                 namespace: *namespace
                 filter: { _id: 3 }
                 update: { $set: { x: 333 } }
+          ordered: false
         expectResult:
           insertedCount:
             $$unsetOrMatches: 0
@@ -88,7 +90,7 @@ tests:
               command:
                 bulkWrite: 1
                 errorsOnly: true
-                ordered: true
+                ordered: false
                 ops:
                   - insert: 0
                     document: { _id: 4, x: 44 }

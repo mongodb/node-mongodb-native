@@ -1,8 +1,9 @@
 import { BSON, type Document } from '../../bson';
 import { DocumentSequence } from '../../cmap/commands';
+import { MongoAPIError, MongoInvalidArgumentError } from '../../error';
 import { type PkFactory } from '../../mongo_client';
 import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
-import { DEFAULT_PK_FACTORY } from '../../utils';
+import { DEFAULT_PK_FACTORY, hasAtomicOperators } from '../../utils';
 import { type CollationOptions } from '../command';
 import { type Hint } from '../operation';
 import type {
@@ -35,18 +36,24 @@ const MESSAGE_OVERHEAD_BYTES = 1000;
 
 /** @internal */
 export class ClientBulkWriteCommandBuilder {
-  models: AnyClientBulkWriteModel[];
+  models: ReadonlyArray<AnyClientBulkWriteModel<Document>>;
   options: ClientBulkWriteOptions;
   pkFactory: PkFactory;
+  /** The current index in the models array that is being processed. */
   currentModelIndex: number;
+  /** The model index that the builder was on when it finished the previous batch. Used for resets when retrying. */
+  previousModelIndex: number;
+  /** The last array of operations that were created. Used by the results merger for indexing results. */
   lastOperations: Document[];
+  /** Returns true if the current batch being created has no multi-updates. */
+  isBatchRetryable: boolean;
 
   /**
    * Create the command builder.
    * @param models - The client write models.
    */
   constructor(
-    models: AnyClientBulkWriteModel[],
+    models: ReadonlyArray<AnyClientBulkWriteModel<Document>>,
     options: ClientBulkWriteOptions,
     pkFactory?: PkFactory
   ) {
@@ -54,7 +61,9 @@ export class ClientBulkWriteCommandBuilder {
     this.options = options;
     this.pkFactory = pkFactory ?? DEFAULT_PK_FACTORY;
     this.currentModelIndex = 0;
+    this.previousModelIndex = 0;
     this.lastOperations = [];
+    this.isBatchRetryable = true;
   }
 
   /**
@@ -77,26 +86,56 @@ export class ClientBulkWriteCommandBuilder {
   }
 
   /**
+   * When we need to retry a command we need to set the current
+   * model index back to its previous value.
+   */
+  resetBatch(): boolean {
+    this.currentModelIndex = this.previousModelIndex;
+    return true;
+  }
+
+  /**
    * Build a single batch of a client bulk write command.
    * @param maxMessageSizeBytes - The max message size in bytes.
    * @param maxWriteBatchSize - The max write batch size.
    * @returns The client bulk write command.
    */
-  buildBatch(maxMessageSizeBytes: number, maxWriteBatchSize: number): ClientBulkWriteCommand {
+  buildBatch(
+    maxMessageSizeBytes: number,
+    maxWriteBatchSize: number,
+    maxBsonObjectSize: number
+  ): ClientBulkWriteCommand {
+    // We start by assuming the batch has no multi-updates, so it is retryable
+    // until we find them.
+    this.isBatchRetryable = true;
     let commandLength = 0;
     let currentNamespaceIndex = 0;
     const command: ClientBulkWriteCommand = this.baseCommand();
     const namespaces = new Map<string, number>();
+    // In the case of retries we need to mark where we started this batch.
+    this.previousModelIndex = this.currentModelIndex;
 
     while (this.currentModelIndex < this.models.length) {
       const model = this.models[this.currentModelIndex];
       const ns = model.namespace;
       const nsIndex = namespaces.get(ns);
 
+      // Multi updates are not retryable.
+      if (model.name === 'deleteMany' || model.name === 'updateMany') {
+        this.isBatchRetryable = false;
+      }
+
       if (nsIndex != null) {
         // Build the operation and serialize it to get the bytes buffer.
         const operation = buildOperation(model, nsIndex, this.pkFactory);
-        const operationBuffer = BSON.serialize(operation);
+        let operationBuffer;
+        try {
+          operationBuffer = BSON.serialize(operation);
+        } catch (cause) {
+          throw new MongoInvalidArgumentError(`Could not serialize operation to BSON`, { cause });
+        }
+
+        validateBufferSize('ops', operationBuffer, maxBsonObjectSize);
 
         // Check if the operation buffer can fit in the command. If it can,
         // then add the operation to the document sequence and increment the
@@ -119,9 +158,18 @@ export class ClientBulkWriteCommandBuilder {
         // construct our nsInfo and ops documents and buffers.
         namespaces.set(ns, currentNamespaceIndex);
         const nsInfo = { ns: ns };
-        const nsInfoBuffer = BSON.serialize(nsInfo);
         const operation = buildOperation(model, currentNamespaceIndex, this.pkFactory);
-        const operationBuffer = BSON.serialize(operation);
+        let nsInfoBuffer;
+        let operationBuffer;
+        try {
+          nsInfoBuffer = BSON.serialize(nsInfo);
+          operationBuffer = BSON.serialize(operation);
+        } catch (cause) {
+          throw new MongoInvalidArgumentError(`Could not serialize ns info to BSON`, { cause });
+        }
+
+        validateBufferSize('nsInfo', nsInfoBuffer, maxBsonObjectSize);
+        validateBufferSize('ops', operationBuffer, maxBsonObjectSize);
 
         // Check if the operation and nsInfo buffers can fit in the command. If they
         // can, then add the operation and nsInfo to their respective document
@@ -179,6 +227,14 @@ export class ClientBulkWriteCommandBuilder {
   }
 }
 
+function validateBufferSize(name: string, buffer: Uint8Array, maxBsonObjectSize: number) {
+  if (buffer.length > maxBsonObjectSize) {
+    throw new MongoInvalidArgumentError(
+      `Client bulk write operation ${name} of length ${buffer.length} exceeds the max bson object size of ${maxBsonObjectSize}`
+    );
+  }
+}
+
 /** @internal */
 interface ClientInsertOperation {
   insert: number;
@@ -192,7 +248,7 @@ interface ClientInsertOperation {
  * @returns the operation.
  */
 export const buildInsertOneOperation = (
-  model: ClientInsertOneModel,
+  model: ClientInsertOneModel<Document>,
   index: number,
   pkFactory: PkFactory
 ): ClientInsertOperation => {
@@ -219,7 +275,10 @@ export interface ClientDeleteOperation {
  * @param index - The namespace index.
  * @returns the operation.
  */
-export const buildDeleteOneOperation = (model: ClientDeleteOneModel, index: number): Document => {
+export const buildDeleteOneOperation = (
+  model: ClientDeleteOneModel<Document>,
+  index: number
+): Document => {
   return createDeleteOperation(model, index, false);
 };
 
@@ -229,7 +288,10 @@ export const buildDeleteOneOperation = (model: ClientDeleteOneModel, index: numb
  * @param index - The namespace index.
  * @returns the operation.
  */
-export const buildDeleteManyOperation = (model: ClientDeleteManyModel, index: number): Document => {
+export const buildDeleteManyOperation = (
+  model: ClientDeleteManyModel<Document>,
+  index: number
+): Document => {
   return createDeleteOperation(model, index, true);
 };
 
@@ -237,7 +299,7 @@ export const buildDeleteManyOperation = (model: ClientDeleteManyModel, index: nu
  * Creates a delete operation based on the parameters.
  */
 function createDeleteOperation(
-  model: ClientDeleteOneModel | ClientDeleteManyModel,
+  model: ClientDeleteOneModel<Document> | ClientDeleteManyModel<Document>,
   index: number,
   multi: boolean
 ): ClientDeleteOperation {
@@ -274,7 +336,7 @@ export interface ClientUpdateOperation {
  * @returns the operation.
  */
 export const buildUpdateOneOperation = (
-  model: ClientUpdateOneModel,
+  model: ClientUpdateOneModel<Document>,
   index: number
 ): ClientUpdateOperation => {
   return createUpdateOperation(model, index, false);
@@ -287,20 +349,37 @@ export const buildUpdateOneOperation = (
  * @returns the operation.
  */
 export const buildUpdateManyOperation = (
-  model: ClientUpdateManyModel,
+  model: ClientUpdateManyModel<Document>,
   index: number
 ): ClientUpdateOperation => {
   return createUpdateOperation(model, index, true);
 };
 
 /**
+ * Validate the update document.
+ * @param update - The update document.
+ */
+function validateUpdate(update: Document) {
+  if (!hasAtomicOperators(update)) {
+    throw new MongoAPIError(
+      'Client bulk write update models must only contain atomic modifiers (start with $) and must not be empty.'
+    );
+  }
+}
+
+/**
  * Creates a delete operation based on the parameters.
  */
 function createUpdateOperation(
-  model: ClientUpdateOneModel | ClientUpdateManyModel,
+  model: ClientUpdateOneModel<Document> | ClientUpdateManyModel<Document>,
   index: number,
   multi: boolean
 ): ClientUpdateOperation {
+  // Update documents provided in UpdateOne and UpdateMany write models are
+  // required only to contain atomic modifiers (i.e. keys that start with "$").
+  // Drivers MUST throw an error if an update document is empty or if the
+  // document's first key does not start with "$".
+  validateUpdate(model.update);
   const document: ClientUpdateOperation = {
     update: index,
     multi: multi,
@@ -340,9 +419,15 @@ export interface ClientReplaceOneOperation {
  * @returns the operation.
  */
 export const buildReplaceOneOperation = (
-  model: ClientReplaceOneModel,
+  model: ClientReplaceOneModel<Document>,
   index: number
 ): ClientReplaceOneOperation => {
+  if (hasAtomicOperators(model.replacement)) {
+    throw new MongoAPIError(
+      'Client bulk write replace models must not contain atomic modifiers (start with $) and must not be empty.'
+    );
+  }
+
   const document: ClientReplaceOneOperation = {
     update: index,
     multi: false,
@@ -363,7 +448,7 @@ export const buildReplaceOneOperation = (
 
 /** @internal */
 export function buildOperation(
-  model: AnyClientBulkWriteModel,
+  model: AnyClientBulkWriteModel<Document>,
   index: number,
   pkFactory: PkFactory
 ): Document {
