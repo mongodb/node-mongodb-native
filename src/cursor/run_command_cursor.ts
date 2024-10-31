@@ -19,11 +19,14 @@ import {
 export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
-  /** Specifies the time an operation will run until it throws a timeout error. Note that if
+  /**
+   * Specifies the time an operation will run until it throws a timeout error. Note that if
    * `maxTimeMS` is provided in the command in addition to setting `timeoutMS` in the options, then
-   * the original value of `maxTimeMS` will be overwritten. */
+   * the original value of `maxTimeMS` will be overwritten.
+   */
   timeoutMS?: number;
-  /** @public
+  /**
+   * @public
    * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
    * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
    * `cursor.next()`.
@@ -35,7 +38,6 @@ export type RunCursorCommandOptions = {
    * definition can have an arbitrarily long lifetime.
    *
    * @example
-   * # Example showing use of `'iteration'`
    * ```ts
    * const cursor = collection.find({}, {timeoutMS: 100, timeoutMode: 'iteration'});
    * for await (const doc of cursor) {
@@ -45,8 +47,7 @@ export type RunCursorCommandOptions = {
    * }
    * ```
    *
-   * # Example showing use of `'cursorLifetime'`
-   *
+   * @example
    * ```ts
    * const cursor = collection.find({}, { timeoutMS: 1000, timeoutMode: 'cursorLifetime' });
    * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.

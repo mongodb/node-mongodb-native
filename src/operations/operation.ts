@@ -61,9 +61,9 @@ export abstract class AbstractOperation<TResult = any> {
 
   options: OperationOptions;
 
-  /** @internal TODO(NODE-6197): remove dead code */
+  /** TODO(NODE-6197): remove dead code */
   timeout?: Timeout;
-  /** Specifies the time an operation will run until it throws a timeout error.*/
+  /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
 
   [kSession]: ClientSession | undefined;

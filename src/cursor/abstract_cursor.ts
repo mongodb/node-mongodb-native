@@ -61,13 +61,8 @@ export interface CursorStreamOptions {
 /** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
-/** @public */
-export const CursorTimeoutMode = Object.freeze({
-  ITERATION: 'iteration',
-  LIFETIME: 'cursorLifetime'
-} as const);
-
-/** @public
+/**
+ * @public
  * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
  * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
  * `cursor.next()`.
@@ -85,7 +80,7 @@ export const CursorTimeoutMode = Object.freeze({
  * for await (const doc of cursor) {
  *  // process doc
  *  // This will throw a timeout error if any of the iterator's `next()` calls takes more than 100ms, but
- * will continue to iterate successfully otherwise, regardless of the number of batches.
+ *  // will continue to iterate successfully otherwise, regardless of the number of batches.
  * }
  * ```
  *
@@ -96,6 +91,12 @@ export const CursorTimeoutMode = Object.freeze({
  * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.
  * ```
  */
+export const CursorTimeoutMode = Object.freeze({
+  ITERATION: 'iteration',
+  LIFETIME: 'cursorLifetime'
+} as const);
+
+/** @public */
 export type CursorTimeoutMode = (typeof CursorTimeoutMode)[keyof typeof CursorTimeoutMode];
 
 /** @public */
@@ -154,21 +155,19 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    * it has the potential to hang on an operation for the entirety of `timeoutMS`.
    *
    * @example
-   * # Example showing use of `'iteration'`
    * ```ts
    * const cursor = collection.find({}, {timeoutMS: 100, timeoutMode: 'iteration'});
    * for await (const doc of cursor) {
    *  // process doc
    *  // This will throw a timeout error if any of the iterator's `next()` calls takes more than 100ms, but
-   * will continue to iterate successfully otherwise, regardless of the number of batches.
+   *  // will continue to iterate successfully otherwise, regardless of the number of batches.
    * }
    * ```
    *
-   * # Example showing use of `'cursorLifetime'`
-   *
+   * @example
    * ```ts
    * const cursor = collection.find({}, { timeoutMS: 1000, timeoutMode: 'cursorLifetime' });
-   * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.
+   * const docs = await cursor.toArray(); // This line will throw a timeout error if all batches are not fetched and returned within 1000ms.
    * ```
    */
   timeoutMode?: CursorTimeoutMode;

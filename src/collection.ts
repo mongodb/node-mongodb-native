@@ -262,7 +262,7 @@ export class Collection<TSchema extends Document = Document> {
     this.s.collectionHint = normalizeHintField(v);
   }
 
-  get timeoutMS(): number | undefined {
+  public get timeoutMS(): number | undefined {
     return this.s.options.timeoutMS;
   }
 

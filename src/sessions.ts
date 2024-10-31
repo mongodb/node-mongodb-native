@@ -711,7 +711,7 @@ export class ClientSession
    * undefined behaviour.
    *
    * **IMPORTANT:** When running an operation inside a `withTransaction` callback, if it is not
-   * provided the explicit session in its options, it will not respect the timeoutMS.
+   * provided the explicit session in its options, it will not be part of the transaction and it will not respect timeoutMS.
    *
    *
    * @remarks

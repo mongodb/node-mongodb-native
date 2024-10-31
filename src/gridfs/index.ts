@@ -38,8 +38,10 @@ export interface GridFSBucketOptions extends WriteConcernOptions {
   chunkSizeBytes?: number;
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
-  /** Specifies the lifetime duration of a gridFS stream. If any async operations are in progress
-   * when this timeout expires, the stream will throw a timeout error. */
+  /**
+   * Specifies the lifetime duration of a gridFS stream. If any async operations are in progress
+   * when this timeout expires, the stream will throw a timeout error.
+   */
   timeoutMS?: number;
 }
 
