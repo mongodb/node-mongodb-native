@@ -866,9 +866,22 @@ export interface ClientEncryptionOptions {
    */
   tlsOptions?: CSFLEKMSTlsOptions;
 
-  /** @internal TODO(NODE-5688): make this public
+  /**
    *
    * The timeout setting to be used for all the operations on ClientEncryption.
+   *
+   * When provided, `timeoutMS` is used as the timeout for each operation executed on
+   * the ClientEncryption object.  For example:
+   *
+   * ```typescript
+   * const clientEncryption = new ClientEncryption(client, {
+   *  timeoutMS: 1_000
+   *  kmsProviders: { local: { key: '<KEY>' } }
+   * });
+   *
+   * // `1_000` is used as the timeout for createDataKey call
+   * await clientEncryption.createDataKey('local');
+   * ```
    */
   timeoutMS?: number;
 }
