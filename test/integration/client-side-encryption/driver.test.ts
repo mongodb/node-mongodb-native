@@ -2,6 +2,7 @@ import { type Binary, EJSON, UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
 import * as sinon from 'sinon';
+import { setTimeout } from 'timers/promises';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
@@ -15,7 +16,9 @@ import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError,
   MongoOperationTimeoutError,
-  StateMachine
+  resolveTimeoutOptions,
+  StateMachine,
+  TimeoutContext
 } from '../../mongodb';
 import {
   clearFailPoint,
@@ -25,6 +28,7 @@ import {
   measureDuration,
   sleep
 } from '../../tools/utils';
+import { filterForCommands } from '../shared';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
@@ -949,6 +953,68 @@ describe('CSOT', function () {
           });
         }
       );
+
+      context('when the cursor times out and a killCursors is executed', function () {
+        let client: MongoClient;
+        let commands: (CommandStartedEvent & { command: { maxTimeMS?: number } })[] = [];
+
+        beforeEach(async function () {
+          client = this.configuration.newClient({}, { monitorCommands: true });
+          commands = [];
+          client.on('commandStarted', filterForCommands('killCursors', commands));
+
+          await client.connect();
+          const docs = Array.from({ length: 1200 }, (_, i) => ({ i }));
+
+          await client.db('test').collection('test').insertMany(docs);
+
+          await configureFailPoint(this.configuration, {
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['getMore'],
+              blockConnection: true,
+              blockTimeMS: 2000
+            }
+          });
+        });
+
+        afterEach(async function () {
+          await clearFailPoint(this.configuration);
+          await client.close();
+        });
+
+        it(
+          'refreshes timeoutMS to the full timeout',
+          {
+            requires: {
+              ...metadata.requires,
+              topology: '!load-balanced'
+            }
+          },
+          async function () {
+            const timeoutContext = TimeoutContext.create(
+              resolveTimeoutOptions(client, { timeoutMS: 1900 })
+            );
+
+            await setTimeout(1500);
+
+            const { result: error } = await measureDuration(() =>
+              stateMachine
+                .fetchKeys(client, 'test.test', BSON.serialize({}), timeoutContext)
+                .catch(e => e)
+            );
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+
+            const [
+              {
+                command: { maxTimeMS }
+              }
+            ] = commands;
+            expect(maxTimeMS).to.be.greaterThan(1800);
+          }
+        );
+      });
 
       context('when csot is not enabled and fetchKeys() is delayed', function () {
         let encryptedClient;

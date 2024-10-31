@@ -14,7 +14,8 @@ import {
   clearFailPoint,
   configureFailPoint,
   makeMultiBatchWrite,
-  makeMultiResponseBatchModelArray
+  makeMultiResponseBatchModelArray,
+  mergeTestMetadata
 } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
@@ -268,7 +269,7 @@ describe('Client Bulk Write', function () {
 
         beforeEach(async function () {
           client = this.configuration.newClient({}, { monitorCommands: true, minPoolSize: 5 });
-          client.on('commandStarted', filterForCommands(['getMore'], commands));
+          client.on('commandStarted', filterForCommands(['getMore', 'killCursors'], commands));
           await client.connect();
 
           await configureFailPoint(this.configuration, {
@@ -278,25 +279,35 @@ describe('Client Bulk Write', function () {
           });
         });
 
-        it('the bulk write operation times out', metadata, async function () {
-          const models = await makeMultiResponseBatchModelArray(this.configuration);
-          const start = now();
-          const timeoutError = await client
-            .bulkWrite(models, {
-              verboseResults: true,
-              timeoutMS: 1500
-            })
-            .catch(e => e);
+        it(
+          'the bulk write operation times out',
+          mergeTestMetadata(metadata, {
+            requires: {
+              // this test has timing logic that depends on killCursors being executed, which does
+              // not happen in load balanced mode
+              topology: '!load-balanced'
+            }
+          }),
+          async function () {
+            const models = await makeMultiResponseBatchModelArray(this.configuration);
+            const start = now();
+            const timeoutError = await client
+              .bulkWrite(models, {
+                verboseResults: true,
+                timeoutMS: 1500
+              })
+              .catch(e => e);
 
-          const end = now();
-          expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
+            const end = now();
+            expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
 
-          // DRIVERS-3005 - killCursors causes cursor cleanup to extend past timeoutMS.
-          // The amount of time killCursors takes is wildly variable and can take up to almost
-          // 600-700ms sometimes.
-          expect(end - start).to.be.within(1500, 1500 + 800);
-          expect(commands).to.have.lengthOf(1);
-        });
+            // DRIVERS-3005 - killCursors causes cursor cleanup to extend past timeoutMS.
+            // The amount of time killCursors takes is wildly variable and can take up to almost
+            // 600-700ms sometimes.
+            expect(end - start).to.be.within(1500, 1500 + 800);
+            expect(commands.map(({ commandName }) => commandName)).to.have.lengthOf(2);
+          }
+        );
       });
 
       describe('if the cursor encounters an error and a killCursors is sent', function () {

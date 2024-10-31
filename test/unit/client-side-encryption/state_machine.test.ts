@@ -16,6 +16,8 @@ import {
   BSON,
   Collection,
   CSOTTimeoutContext,
+  CursorTimeoutContext,
+  type FindOptions,
   Int32,
   Long,
   MongoClient,
@@ -484,26 +486,29 @@ describe('StateMachine', function () {
       });
 
       context('when StateMachine.fetchKeys() is passed a `CSOTimeoutContext`', function () {
-        it('collection.find runs with its timeoutMS property set to remainingTimeMS', async function () {
-          const timeoutContext = new CSOTTimeoutContext({
+        it('collection.find uses the provided timeout context', async function () {
+          const context = new CSOTTimeoutContext({
             timeoutMS: 500,
             serverSelectionTimeoutMS: 30000
           });
-          await sleep(300);
+
           await stateMachine
-            .fetchKeys(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
+            .fetchKeys(client, 'keyVault', BSON.serialize({ a: 1 }), context)
             .catch(e => squashError(e));
-          expect(findSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
-          expect(findSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(205);
+
+          const { timeoutContext } = findSpy.getCalls()[0].args[1] as FindOptions;
+          expect(timeoutContext).to.be.instanceOf(CursorTimeoutContext);
+          expect(timeoutContext.timeoutContext).to.equal(context);
         });
       });
 
       context('when StateMachine.fetchKeys() is not passed a `CSOTimeoutContext`', function () {
-        it('collection.find runs with an undefined timeoutMS property', async function () {
+        it('a timeoutContext is not provided to the find cursor', async function () {
           await stateMachine
             .fetchKeys(client, 'keyVault', BSON.serialize({ a: 1 }))
             .catch(e => squashError(e));
-          expect(findSpy.getCalls()[0].args[1].timeoutMS).to.be.undefined;
+          const { timeoutContext } = findSpy.getCalls()[0].args[1] as FindOptions;
+          expect(timeoutContext).to.be.undefined;
         });
       });
     });
@@ -564,17 +569,18 @@ describe('StateMachine', function () {
       context(
         'when StateMachine.fetchCollectionInfo() is passed a `CSOTimeoutContext`',
         function () {
-          it('listCollections runs with its timeoutMS property set to remainingTimeMS', async function () {
-            const timeoutContext = new CSOTTimeoutContext({
+          it('listCollections uses the provided timeoutContext', async function () {
+            const context = new CSOTTimeoutContext({
               timeoutMS: 500,
               serverSelectionTimeoutMS: 30000
             });
             await sleep(300);
             await stateMachine
-              .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
+              .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }), context)
               .catch(e => squashError(e));
-            expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
-            expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(205);
+            const [_filter, { timeoutContext }] = listCollectionsSpy.getCalls()[0].args;
+            expect(timeoutContext).to.exist;
+            expect(timeoutContext.timeoutContext).to.equal(context);
           });
         }
       );
@@ -582,11 +588,12 @@ describe('StateMachine', function () {
       context(
         'when StateMachine.fetchCollectionInfo() is not passed a `CSOTimeoutContext`',
         function () {
-          it('listCollections runs with an undefined timeoutMS property', async function () {
+          it('no timeoutContext is provided to listCollections', async function () {
             await stateMachine
               .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }))
               .catch(e => squashError(e));
-            expect(listCollectionsSpy.getCalls()[0].args[1].timeoutMS).to.be.undefined;
+            const [_filter, { timeoutContext }] = listCollectionsSpy.getCalls()[0].args;
+            expect(timeoutContext).not.to.exist;
           });
         }
       );
