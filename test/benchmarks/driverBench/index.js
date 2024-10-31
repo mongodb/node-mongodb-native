@@ -11,6 +11,7 @@ let bsonType = 'js-bson';
 const { inspect } = require('util');
 const { writeFile } = require('fs/promises');
 const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
+const { MONGODB_URI, MONGODB_CLIENT_OPTIONS } = require('./common');
 
 const hw = os.cpus();
 const ram = os.totalmem() / 1024 ** 3;
@@ -89,7 +90,8 @@ benchmarkRunner
       return {
         info: {
           test_name: benchmarkName,
-          tags: [bsonType]
+          tags: [bsonType],
+          args: { MONGODB_URI, MONGODB_CLIENT_OPTIONS }
         },
         metrics: [{ name: 'megabytes_per_second', value: result }]
       };
