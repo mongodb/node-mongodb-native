@@ -1,6 +1,6 @@
 import type { Binary, Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
-import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
+import { type CursorTimeoutContext, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -19,6 +19,9 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
   batchSize?: number;
   /** @internal */
   timeoutMode?: CursorTimeoutMode;
+
+  /** @internal */
+  timeoutContext?: CursorTimeoutContext;
 }
 
 /** @internal */
