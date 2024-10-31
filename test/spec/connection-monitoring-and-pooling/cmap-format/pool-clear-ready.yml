@@ -20,15 +20,18 @@ events:
   - type: ConnectionCheckedOut
     address: 42
     connectionId: 42
+    duration: 42
   - type: ConnectionPoolCleared
     address: 42
   - type: ConnectionCheckOutFailed
     address: 42
+    duration: 42
     reason: connectionError
   - type: ConnectionPoolReady
     address: 42
   - type: ConnectionCheckedOut
     address: 42
+    duration: 42
 ignore:
   - ConnectionPoolCreated
   - ConnectionReady
