@@ -11,6 +11,7 @@ import {
   serialize
 } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
+import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
@@ -519,16 +520,16 @@ export class StateMachine {
   ): Promise<Uint8Array | null> {
     const { db } = MongoDBCollectionNamespace.fromString(ns);
 
-    const collections = await client
-      .db(db)
-      .listCollections(filter, {
-        promoteLongs: false,
-        promoteValues: false,
-        ...(timeoutContext?.csotEnabled()
-          ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
-          : {})
-      })
-      .toArray();
+    const cursor = client.db(db).listCollections(filter, {
+      promoteLongs: false,
+      promoteValues: false,
+      timeoutContext: timeoutContext && new CursorTimeoutContext(timeoutContext, Symbol())
+    });
+
+    // There is always exactly zero or one matching documents, so this should always exhaust the cursor
+    // in a single batch.  We call `toArray()` just to be safe and ensure that the cursor is always
+    // exhausted and closed.
+    const collections = await cursor.toArray();
 
     const info = collections.length > 0 ? serialize(collections[0]) : null;
     return info;
@@ -582,12 +583,9 @@ export class StateMachine {
     return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
-      .find(
-        deserialize(filter),
-        timeoutContext?.csotEnabled()
-          ? { timeoutMS: timeoutContext?.remainingTimeMS, timeoutMode: 'cursorLifetime' }
-          : {}
-      )
+      .find(deserialize(filter), {
+        timeoutContext: timeoutContext && new CursorTimeoutContext(timeoutContext, Symbol())
+      })
       .toArray();
   }
 }
