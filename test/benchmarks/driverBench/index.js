@@ -22,7 +22,9 @@ const systemInfo = () =>
     `- cores: ${platform.cores}`,
     `- arch: ${os.arch()}`,
     `- os: ${process.platform} (${os.release()})`,
-    `- ram: ${platform.ram}\n`
+    `- ram: ${platform.ram}`,
+    `- bson: ${require('bson/package.json').version}`,
+    `- node: ${process.version}\n`
   ].join('\n');
 console.log(systemInfo());
 
