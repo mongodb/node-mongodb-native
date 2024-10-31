@@ -689,3 +689,19 @@ export async function measureDuration<T>(f: () => Promise<T>): Promise<{
     result
   };
 }
+
+export function mergeTestMetadata(
+  metadata: MongoDBMetadataUI,
+  newMetadata: MongoDBMetadataUI
+): MongoDBMetadataUI {
+  return {
+    requires: {
+      ...metadata.requires,
+      ...newMetadata.requires
+    },
+    sessions: {
+      ...metadata.sessions,
+      ...newMetadata.sessions
+    }
+  };
+}
