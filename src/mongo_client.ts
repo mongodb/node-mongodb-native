@@ -130,7 +130,10 @@ export type SupportedNodeConnectionOptions = SupportedTLSConnectionOptions &
 export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeConnectionOptions {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
-  /** Specifies the time an operation will run until it throws a timeout error */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
   /** Enables or disables TLS/SSL for the connection. */
   tls?: boolean;

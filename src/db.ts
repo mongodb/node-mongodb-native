@@ -97,7 +97,10 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
   readConcern?: ReadConcern;
   /** Should retry failed writes */
   retryWrites?: boolean;
-  /** Specifies the time an operation will run until it throws a timeout error */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 

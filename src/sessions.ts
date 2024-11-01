@@ -145,7 +145,10 @@ export class ClientSession
   [kPinnedConnection]?: Connection;
   /** @internal */
   [kTxnNumberIncrement]: number;
-  /** Specifies the time an operation in a given `ClientSession` will run until it throws a timeout error */
+  /**
+   * @experimental
+   * Specifies the time an operation in a given `ClientSession` will run until it throws a timeout error
+   */
   timeoutMS?: number;
 
   /** @internal */

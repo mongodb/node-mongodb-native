@@ -95,7 +95,10 @@ export const CursorTimeoutMode = Object.freeze({
   LIFETIME: 'cursorLifetime'
 } as const);
 
-/** @public */
+/**
+ * @public
+ * @experimental
+ */
 export type CursorTimeoutMode = (typeof CursorTimeoutMode)[keyof typeof CursorTimeoutMode];
 
 /** @public */

@@ -115,7 +115,10 @@ export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOpt
   readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
   readPreference?: ReadPreferenceLike;
-  /** Specifies the time an operation will run until it throws a timeout error */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 
