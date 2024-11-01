@@ -24,9 +24,7 @@ function loadSpecString(filePath) {
 }
 
 function makeClient() {
-  this.client = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017', {
-    timeoutMS: 0
-  });
+  this.client = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017', {});
 }
 
 function connectClient() {
