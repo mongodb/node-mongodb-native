@@ -37,7 +37,11 @@ export {
   Timestamp,
   UUID
 } from './bson';
-export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
+export {
+  type AnyBulkWriteOperation,
+  type BulkWriteOptions,
+  MongoBulkWriteError
+} from './bulk/common';
 export { ClientEncryption } from './client-side-encryption/client_encryption';
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
@@ -111,7 +115,7 @@ export { AutoEncryptionLoggerLevel } from './client-side-encryption/auto_encrypt
 export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
-export { CURSOR_FLAGS, type CursorTimeoutMode } from './cursor/abstract_cursor';
+export { CURSOR_FLAGS, CursorTimeoutMode } from './cursor/abstract_cursor';
 export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { ServerApiVersion } from './mongo_client';

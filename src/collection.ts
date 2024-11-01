@@ -115,7 +115,10 @@ export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOpt
   readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
   readPreference?: ReadPreferenceLike;
-  /** @internal TODO(NODE-5688): make this public */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 
@@ -262,8 +265,7 @@ export class Collection<TSchema extends Document = Document> {
     this.s.collectionHint = normalizeHintField(v);
   }
 
-  /** @internal */
-  get timeoutMS(): number | undefined {
+  public get timeoutMS(): number | undefined {
     return this.s.options.timeoutMS;
   }
 

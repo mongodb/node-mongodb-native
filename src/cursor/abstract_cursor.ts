@@ -61,15 +61,44 @@ export interface CursorStreamOptions {
 /** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
-/** @public*/
+/**
+ * @public
+ * @experimental
+ * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
+ * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
+ * `cursor.next()`.
+ * When set to `'cursorLifetime'`, the deadline applies to the life of the entire cursor.
+ *
+ * Depending on the type of cursor being used, this option has different default values.
+ * For non-tailable cursors, this value defaults to `'cursorLifetime'`
+ * For tailable cursors, this value defaults to `'iteration'` since tailable cursors, by
+ * definition can have an arbitrarily long lifetime.
+ *
+ * @example
+ * ```ts
+ * const cursor = collection.find({}, {timeoutMS: 100, timeoutMode: 'iteration'});
+ * for await (const doc of cursor) {
+ *  // process doc
+ *  // This will throw a timeout error if any of the iterator's `next()` calls takes more than 100ms, but
+ *  // will continue to iterate successfully otherwise, regardless of the number of batches.
+ * }
+ * ```
+ *
+ * @example
+ * ```ts
+ * const cursor = collection.find({}, { timeoutMS: 1000, timeoutMode: 'cursorLifetime' });
+ * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.
+ * ```
+ */
 export const CursorTimeoutMode = Object.freeze({
   ITERATION: 'iteration',
   LIFETIME: 'cursorLifetime'
 } as const);
 
-/** @public
- * TODO(NODE-5688): Document and release
- * */
+/**
+ * @public
+ * @experimental
+ */
 export type CursorTimeoutMode = (typeof CursorTimeoutMode)[keyof typeof CursorTimeoutMode];
 
 /** @public */
@@ -116,9 +145,37 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    */
   awaitData?: boolean;
   noCursorTimeout?: boolean;
-  /** @internal TODO(NODE-5688): make this public */
+  /** Specifies the time an operation will run until it throws a timeout error. See {@link AbstractCursorOptions.timeoutMode} for more details on how this option applies to cursors. */
   timeoutMS?: number;
-  /** @internal TODO(NODE-5688): make this public */
+  /**
+   * @public
+   * @experimental
+   * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
+   * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
+   * `cursor.next()`.
+   * When set to `'cursorLifetime'`, the deadline applies to the life of the entire cursor.
+   *
+   * Depending on the type of cursor being used, this option has different default values.
+   * For non-tailable cursors, this value defaults to `'cursorLifetime'`
+   * For tailable cursors, this value defaults to `'iteration'` since tailable cursors, by
+   * definition can have an arbitrarily long lifetime.
+   *
+   * @example
+   * ```ts
+   * const cursor = collection.find({}, {timeoutMS: 100, timeoutMode: 'iteration'});
+   * for await (const doc of cursor) {
+   *  // process doc
+   *  // This will throw a timeout error if any of the iterator's `next()` calls takes more than 100ms, but
+   *  // will continue to iterate successfully otherwise, regardless of the number of batches.
+   * }
+   * ```
+   *
+   * @example
+   * ```ts
+   * const cursor = collection.find({}, { timeoutMS: 1000, timeoutMode: 'cursorLifetime' });
+   * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.
+   * ```
+   */
   timeoutMode?: CursorTimeoutMode;
 
   /**

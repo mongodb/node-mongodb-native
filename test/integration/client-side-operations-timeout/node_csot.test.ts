@@ -18,6 +18,7 @@ import {
   type CommandStartedEvent,
   type CommandSucceededEvent,
   Connection,
+  CursorTimeoutMode,
   type Db,
   type FindCursor,
   GridFSBucket,
@@ -423,7 +424,7 @@ describe('CSOT driver tests', metadata, () => {
             const cursor = client
               .db('db')
               .collection('coll')
-              .find({}, { batchSize: 3, timeoutMode: 'iteration', timeoutMS: 10 })
+              .find({}, { batchSize: 3, timeoutMode: CursorTimeoutMode.ITERATION, timeoutMS: 10 })
               .limit(3);
 
             const maybeError = await cursor.next().then(
