@@ -20,6 +20,7 @@ export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
   /**
+   * @experimental
    * Specifies the time an operation will run until it throws a timeout error. Note that if
    * `maxTimeMS` is provided in the command in addition to setting `timeoutMS` in the options, then
    * the original value of `maxTimeMS` will be overwritten.
