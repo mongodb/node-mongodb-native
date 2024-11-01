@@ -63,6 +63,7 @@ export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
 /**
  * @public
+ * @experimental
  * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
  * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
  * `cursor.next()`.
@@ -74,7 +75,6 @@ export type CursorFlag = (typeof CURSOR_FLAGS)[number];
  * definition can have an arbitrarily long lifetime.
  *
  * @example
- * # Example showing use of `'iteration'`
  * ```ts
  * const cursor = collection.find({}, {timeoutMS: 100, timeoutMode: 'iteration'});
  * for await (const doc of cursor) {
@@ -84,8 +84,7 @@ export type CursorFlag = (typeof CURSOR_FLAGS)[number];
  * }
  * ```
  *
- * # Example showing use of `'cursorLifetime'`
- *
+ * @example
  * ```ts
  * const cursor = collection.find({}, { timeoutMS: 1000, timeoutMode: 'cursorLifetime' });
  * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.
@@ -146,13 +145,17 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   /** Specifies the time an operation will run until it throws a timeout error. See {@link AbstractCursorOptions.timeoutMode} for more details on how this option applies to cursors. */
   timeoutMS?: number;
   /**
+   * @public
+   * @experimental
    * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
    * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
    * `cursor.next()`.
    * When set to `'cursorLifetime'`, the deadline applies to the life of the entire cursor.
    *
-   * Note that the use of '`cursorLifetime`' should be limited to relatively short-lived cursors as
-   * it has the potential to hang on an operation for the entirety of `timeoutMS`.
+   * Depending on the type of cursor being used, this option has different default values.
+   * For non-tailable cursors, this value defaults to `'cursorLifetime'`
+   * For tailable cursors, this value defaults to `'iteration'` since tailable cursors, by
+   * definition can have an arbitrarily long lifetime.
    *
    * @example
    * ```ts
@@ -167,7 +170,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    * @example
    * ```ts
    * const cursor = collection.find({}, { timeoutMS: 1000, timeoutMode: 'cursorLifetime' });
-   * const docs = await cursor.toArray(); // This line will throw a timeout error if all batches are not fetched and returned within 1000ms.
+   * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.
    * ```
    */
   timeoutMode?: CursorTimeoutMode;

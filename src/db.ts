@@ -222,7 +222,7 @@ export class Db {
     return this.s.namespace.toString();
   }
 
-  get timeoutMS(): number | undefined {
+  public get timeoutMS(): number | undefined {
     return this.s.options?.timeoutMS;
   }
 

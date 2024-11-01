@@ -27,6 +27,7 @@ export type RunCursorCommandOptions = {
   timeoutMS?: number;
   /**
    * @public
+   * @experimental
    * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
    * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
    * `cursor.next()`.
@@ -43,7 +44,7 @@ export type RunCursorCommandOptions = {
    * for await (const doc of cursor) {
    *  // process doc
    *  // This will throw a timeout error if any of the iterator's `next()` calls takes more than 100ms, but
-   * will continue to iterate successfully otherwise, regardless of the number of batches.
+   *  // will continue to iterate successfully otherwise, regardless of the number of batches.
    * }
    * ```
    *
