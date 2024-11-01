@@ -1,7 +1,7 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import { getFAASEnv, type MongoClient } from '../../mongodb';
-
+import { Connection, getFAASEnv, LEGACY_HELLO_COMMAND, type MongoClient } from '../../mongodb';
 describe('Handshake Prose Tests', function () {
   let client: MongoClient;
 
@@ -109,4 +109,38 @@ describe('Handshake Prose Tests', function () {
       });
     });
   }
+
+  context(`Test 2: Test that the driver accepts an arbitrary auth mechanism`, function () {
+    beforeEach(() => {
+      // Mock the server response in a way that saslSupportedMechs array in the hello command response contains an arbitrary string.
+      sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
+        // @ts-expect-error: sinon will place wrappedMethod there
+        const command = Connection.prototype.command.wrappedMethod.bind(this);
+        if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+          return stub();
+        }
+        return command(ns, cmd, options);
+
+        async function stub() {
+          const response = await command(ns, cmd, options);
+          // console.error({ response });
+          return {
+            ...response,
+            saslSupportedMechs: [...(response.saslSupportedMechs ?? []), 'random string']
+          };
+        }
+      });
+    });
+
+    afterEach(() => sinon.restore());
+
+    it('no error is thrown', { requires: { auth: 'enabled' } }, async function () {
+      // Create and connect a Connection object that connects to the server that returns the mocked response.
+      // Assert that no error is raised.
+      client = this.configuration.newClient();
+      await client.connect();
+      await client.db('foo').collection('bar').insertOne({ name: 'john doe' });
+      await client.close();
+    });
+  });
 });
