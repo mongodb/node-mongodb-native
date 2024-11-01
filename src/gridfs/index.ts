@@ -38,7 +38,11 @@ export interface GridFSBucketOptions extends WriteConcernOptions {
   chunkSizeBytes?: number;
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
-  /** @internal TODO(NODE-5688): make this public */
+  /**
+   * @experimental
+   * Specifies the lifetime duration of a gridFS stream. If any async operations are in progress
+   * when this timeout expires, the stream will throw a timeout error.
+   */
   timeoutMS?: number;
 }
 

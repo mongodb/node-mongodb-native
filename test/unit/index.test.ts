@@ -5,14 +5,7 @@ import { expect } from 'chai';
 import * as mongodb from '../../src/index';
 import { setDifference } from '../mongodb';
 
-/**
- * TS-NODE Adds these keys but they are undefined, they are not present when you import from lib
- * We did not think this strangeness was worth investigating so we just make sure they remain set to undefined
- */
-const TS_NODE_EXPORTS = ['AnyBulkWriteOperation', 'BulkWriteOptions'];
-
 const EXPECTED_EXPORTS = [
-  ...TS_NODE_EXPORTS,
   'AbstractCursor',
   'Admin',
   'AggregationCursor',
@@ -31,11 +24,11 @@ const EXPECTED_EXPORTS = [
   'ClientSession',
   'Code',
   'Collection',
-  'configureExplicitResourceManagement',
   'CommandFailedEvent',
   'CommandStartedEvent',
   'CommandSucceededEvent',
   'Compressor',
+  'configureExplicitResourceManagement',
   'ConnectionCheckedInEvent',
   'ConnectionCheckedOutEvent',
   'ConnectionCheckOutFailedEvent',
@@ -49,12 +42,13 @@ const EXPECTED_EXPORTS = [
   'ConnectionPoolReadyEvent',
   'ConnectionReadyEvent',
   'CURSOR_FLAGS',
+  'CursorTimeoutMode',
   'Db',
   'DBRef',
   'Decimal128',
   'Double',
-  'ExplainVerbosity',
   'ExplainableCursor',
+  'ExplainVerbosity',
   'FindCursor',
   'GridFSBucket',
   'GridFSBucketReadStream',
@@ -102,6 +96,7 @@ const EXPECTED_EXPORTS = [
   'MongoNetworkTimeoutError',
   'MongoNotConnectedError',
   'MongoOIDCError',
+  'MongoOperationTimeoutError',
   'MongoParseError',
   'MongoRuntimeError',
   'MongoServerClosedError',
@@ -111,10 +106,8 @@ const EXPECTED_EXPORTS = [
   'MongoTailableCursorError',
   'MongoTopologyClosedError',
   'MongoTransactionError',
-  'MongoOperationTimeoutError',
   'MongoUnexpectedServerResponseError',
   'MongoWriteConcernError',
-  'WriteConcernErrorResult',
   'ObjectId',
   'OrderedBulkOperation',
   'ProfilingLevel',
@@ -130,6 +123,10 @@ const EXPECTED_EXPORTS = [
   'ServerHeartbeatStartedEvent',
   'ServerHeartbeatSucceededEvent',
   'ServerOpeningEvent',
+  'ServerSelectionEvent',
+  'ServerSelectionFailedEvent',
+  'ServerSelectionStartedEvent',
+  'ServerSelectionSucceededEvent',
   'ServerType',
   'SrvPollingEvent',
   'Timestamp',
@@ -139,12 +136,9 @@ const EXPECTED_EXPORTS = [
   'TopologyType',
   'UnorderedBulkOperation',
   'UUID',
+  'WaitingForSuitableServerEvent',
   'WriteConcern',
-  'ServerSelectionEvent',
-  'ServerSelectionFailedEvent',
-  'ServerSelectionStartedEvent',
-  'ServerSelectionSucceededEvent',
-  'WaitingForSuitableServerEvent'
+  'WriteConcernErrorResult'
 ];
 
 describe('mongodb entrypoint', () => {
@@ -154,13 +148,5 @@ describe('mongodb entrypoint', () => {
 
   it('exports only the expected keys', () => {
     expect(setDifference(Object.keys(mongodb), EXPECTED_EXPORTS)).to.be.empty;
-  });
-
-  it('should export keys added by ts-node as undefined', () => {
-    // If the array is empty, this test would be a no-op so we should remove it
-    expect(TS_NODE_EXPORTS).to.have.length.greaterThan(0);
-    for (const tsNodeExportKey of TS_NODE_EXPORTS) {
-      expect(mongodb).to.have.property(tsNodeExportKey, undefined);
-    }
   });
 });
