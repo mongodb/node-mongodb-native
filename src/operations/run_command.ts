@@ -15,7 +15,10 @@ export type RunCommandOptions = {
   session?: ClientSession;
   /** The read preference */
   readPreference?: ReadPreferenceLike;
-  /** @internal */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
   /** @internal */
   omitMaxTimeMS?: boolean;

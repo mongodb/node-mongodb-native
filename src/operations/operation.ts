@@ -2,7 +2,7 @@ import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '..
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Timeout, type TimeoutContext } from '../timeout';
+import { type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
 
 export const Aspect = {
@@ -35,7 +35,10 @@ export interface OperationOptions extends BSONSerializeOptions {
   /** @internal Hint to `executeOperation` to omit maxTimeMS */
   omitMaxTimeMS?: boolean;
 
-  /** @internal TODO(NODE-5688): make this public */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 
@@ -61,9 +64,7 @@ export abstract class AbstractOperation<TResult = any> {
 
   options: OperationOptions;
 
-  /** @internal */
-  timeout?: Timeout;
-  /** @internal */
+  /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
 
   [kSession]: ClientSession | undefined;
