@@ -45,7 +45,8 @@ if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
   unset AWS_ACCESS_KEY_ID;
   unset AWS_SECRET_ACCESS_KEY;
 else
-  pip install --upgrade boto3
+  source "$DRIVERS_TOOLS/.evergreen/venv-utils.sh"
+  venvactivate "$DRIVERS_TOOLS/.evergreen/orchestration/venv"  pip install --upgrade boto3
   # Get access to the AWS temporary credentials:
   echo "adding temporary AWS credentials to environment"
   # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
