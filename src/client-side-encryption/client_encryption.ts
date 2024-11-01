@@ -883,13 +883,13 @@ export interface ClientEncryptionOptions {
    * await clientEncryption.createDataKey('local');
    * ```
    *
-   * If `timeoutMS` is configured on the provided client, the client's timeoutMS value
-   * will be used unless `timeoutMS` is also provided as a separate option.
+   * If `timeoutMS` is configured on the provided client, the client's `timeoutMS` value
+   * will be used unless `timeoutMS` is also provided as a client encryption option.
    *
    * ```typescript
    * const client = new MongoClient('<uri>', { timeoutMS: 2_000 });
    *
-   * // timeoutMS is set to 1_000
+   * // timeoutMS is set to 1_000 on clientEncryption
    * const clientEncryption = new ClientEncryption(client, {
    *  timeoutMS: 1_000
    *  kmsProviders: { local: { key: '<KEY>' } }
