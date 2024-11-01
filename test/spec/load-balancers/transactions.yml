@@ -1,6 +1,6 @@
 description: transactions are correctly pinned to connections for load-balanced clusters
 
-schemaVersion: '1.3'
+schemaVersion: '1.4'
 
 runOnRequirements:
   - topologies: [ load-balanced ]
@@ -595,4 +595,22 @@ tests:
           - connectionReadyEvent: {}
           - connectionCheckedOutEvent: {}
           # Events for abortTransaction.
+          - connectionCheckedInEvent: {}
+
+  - description: pinned connection is released when session ended
+    operations:
+      - *startTransaction
+      - *transactionalInsert
+      - *commitTransaction
+      - &endSession
+        name: endSession
+        object: *session0
+    expectEvents:
+      - client: *client0
+        eventType: cmap
+        events:
+          # Events for the insert and commitTransaction.
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          # Events for endSession.
           - connectionCheckedInEvent: {}
