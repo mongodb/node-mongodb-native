@@ -1064,6 +1064,7 @@ functions:
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           MONGODB_URI: ${MONGODB_URI}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
