@@ -68,10 +68,7 @@ export interface TransactionOptions extends Omit<CommandOperationOptions, 'timeo
   writeConcern?: WriteConcern;
   /** A default read preference for commands in this transaction */
   readPreference?: ReadPreferenceLike;
-  /**
-   * Specifies the maximum amount of time to allow a commit action on a transaction to run in milliseconds
-   * @deprecated This option is deprecated in favor of `timeoutMS` or `defaultTimeoutMS`.
-   */
+  /** Specifies the maximum amount of time to allow a commit action on a transaction to run in milliseconds */
   maxCommitTimeMS?: number;
 }
 

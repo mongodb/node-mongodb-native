@@ -14,5 +14,5 @@ expectNotAssignable<ListIndexesOptions>({ writeConcern: { w: 0 } });
 expectNotAssignable<ChangeStreamOptions>({ writeConcern: { w: 0 } });
 
 declare const wc: WriteConcern;
-expectDeprecated(wc.wtimeoutMS);
+// TODO(NODE-6491): expectDeprecated(wc.wtimeoutMS);
 expectDeprecated(wc.wtimeout);

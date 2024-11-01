@@ -1092,7 +1092,7 @@ export const OPTIONS = {
     type: 'string'
   },
   socketTimeoutMS: {
-    deprecated: 'Please use timeoutMS instead',
+    // TODO(NODE-6491): deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
   },
@@ -1163,7 +1163,7 @@ export const OPTIONS = {
     }
   },
   waitQueueTimeoutMS: {
-    deprecated: 'Please use timeoutMS instead',
+    // TODO(NODE-6491): deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
   },
