@@ -553,7 +553,7 @@ export type {
   ReadPreferenceOptions
 } from './read_preference';
 export type { AsyncDisposable } from './resource_management';
-export type { ClusterTime, TimerQueue } from './sdam/common';
+export type { ClusterTime } from './sdam/common';
 export type {
   Monitor,
   MonitorEvents,
