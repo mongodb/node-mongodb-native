@@ -59,19 +59,19 @@ describe('class Explain {}', function () {
       {}
     );
 
-    it('resolveExplainTimeoutOptions(no arguments)', function () {
+    it('when called with no arguments returns neither timeout nor explain', function () {
       const { timeout, explain } = cursor.resolveExplainTimeoutOptions();
       expect(timeout).to.be.undefined;
       expect(explain).to.be.undefined;
     });
 
-    it('resolveExplainTimeoutOptions(<timeout options>)', function () {
+    it('when called with a timeoutMS option returns only timeout options', function () {
       const { timeout, explain } = cursor.resolveExplainTimeoutOptions({ timeoutMS: 1_000 });
       expect(timeout).to.deep.equal({ timeoutMS: 1_000 });
       expect(explain).to.be.undefined;
     });
 
-    it('resolveExplainTimeoutOptions(<explain options>)', function () {
+    it('when called with explain settings returns only explain options', function () {
       const { timeout, explain } = cursor.resolveExplainTimeoutOptions({
         verbosity: 'queryPlanner'
       });
@@ -79,7 +79,7 @@ describe('class Explain {}', function () {
       expect(explain).to.deep.equal({ verbosity: 'queryPlanner' });
     });
 
-    it('resolveExplainTimeoutOptions(<explain options, timeout options>)', function () {
+    it('when called with explain settings and timeout options returns both explain and timeout options', function () {
       const { timeout, explain } = cursor.resolveExplainTimeoutOptions(
         { verbosity: 'queryPlanner' },
         { timeoutMS: 1_000 }
