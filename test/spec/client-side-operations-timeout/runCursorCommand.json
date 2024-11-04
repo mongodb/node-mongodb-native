@@ -200,7 +200,7 @@
                   },
                   "collection": "collection",
                   "maxTimeMS": {
-                    "$$exists": true
+                    "$$exists": false
                   }
                 }
               }
@@ -210,7 +210,7 @@
       ]
     },
     {
-      "description": "Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure",
+      "description": "Non-tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure",
       "runOnRequirements": [
         {
           "serverless": "forbid"
