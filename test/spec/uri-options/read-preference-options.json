@@ -37,13 +37,28 @@
       }
     },
     {
+      "description": "Read preference tags are case sensitive",
+      "uri": "mongodb://example.com/?readPreference=secondary&readPreferenceTags=dc:NY",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "readPreferenceTags": [
+          {
+            "dc": "NY"
+          }
+        ]
+      }
+    },
+    {
       "description": "Invalid readPreferenceTags causes a warning",
       "uri": "mongodb://example.com/?readPreferenceTags=invalid",
       "valid": true,
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Non-numeric maxStalenessSeconds causes a warning",
@@ -52,7 +67,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Too low maxStalenessSeconds causes a warning",
@@ -61,7 +76,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     }
   ]
 }

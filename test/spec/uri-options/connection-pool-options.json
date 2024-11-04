@@ -21,7 +21,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Too low maxIdleTimeMS causes a warning",
@@ -30,7 +30,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "maxPoolSize=0 does not error",
@@ -61,7 +61,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "maxConnecting<0 causes a warning",
@@ -70,7 +70,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     }
   ]
 }

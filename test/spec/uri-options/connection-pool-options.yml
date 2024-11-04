@@ -18,7 +18,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low maxIdleTimeMS causes a warning"
         uri: "mongodb://example.com/?maxIdleTimeMS=-2"
@@ -26,7 +26,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
 
     -
       description: "maxPoolSize=0 does not error"
@@ -46,7 +46,7 @@ tests:
       hosts: ~
       auth: ~
       options:
-          minPoolSize: 0 
+          minPoolSize: 0
 
     -
       description: "maxConnecting=0 causes a warning"
@@ -55,7 +55,7 @@ tests:
       warning: true
       hosts: ~
       auth: ~
-      options: {}
+      options: ~
 
     -
       description: "maxConnecting<0 causes a warning"
@@ -64,4 +64,4 @@ tests:
       warning: true
       hosts: ~
       auth: ~
-      options: {}
+      options: ~

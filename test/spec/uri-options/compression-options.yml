@@ -7,7 +7,7 @@ tests:
         hosts: ~
         auth: ~
         options:
-            compressors: 
+            compressors:
               - "zlib"
             zlibCompressionLevel: 9
     -
@@ -28,7 +28,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low zlibCompressionLevel causes a warning"
         uri: "mongodb://example.com/?compressors=zlib&zlibCompressionLevel=-2"
@@ -36,7 +36,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too high zlibCompressionLevel causes a warning"
         uri: "mongodb://example.com/?compressors=zlib&zlibCompressionLevel=10"
@@ -44,5 +44,5 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
 
