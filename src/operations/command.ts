@@ -42,7 +42,6 @@ export interface CommandOperationOptions
   collation?: CollationOptions;
   /**
    * maxTimeMS is a server-side time limit in milliseconds for processing an operation.
-   * @deprecated Will be removed in the next major version. Please use timeoutMS instead.
    */
   maxTimeMS?: number;
   /**

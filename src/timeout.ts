@@ -32,10 +32,6 @@ type Reject = Parameters<ConstructorParameters<typeof Promise<never>>[0]>[1];
  * if interacted with exclusively through its public API
  * */
 export class Timeout extends Promise<never> {
-  get [Symbol.toStringTag](): 'MongoDBTimeout' {
-    return 'MongoDBTimeout';
-  }
-
   private id?: NodeJS.Timeout;
 
   public readonly start: number;
@@ -110,17 +106,6 @@ export class Timeout extends Promise<never> {
 
   public static expires(duration: number, unref?: true): Timeout {
     return new Timeout(undefined, { duration, unref });
-  }
-
-  static is(timeout: unknown): timeout is Timeout {
-    return (
-      typeof timeout === 'object' &&
-      timeout != null &&
-      Symbol.toStringTag in timeout &&
-      timeout[Symbol.toStringTag] === 'MongoDBTimeout' &&
-      'then' in timeout &&
-      typeof timeout.then === 'function'
-    );
   }
 
   static override reject(rejection?: Error): Timeout {

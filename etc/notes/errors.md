@@ -111,7 +111,7 @@ This class should **never** be directly instantiated.
 
 ### `MongoOperationTimeoutError`
 
-- TODO(NODE-5688): Add MongoOperationTimeoutError documentation
+- TODO(NODE-6491): Add MongoOperationTimeoutError documentation
 
 ### MongoUnexpectedServerResponseError
 
