@@ -113,87 +113,89 @@ async function gridfsMultiFileDownload() {
  * @returns Benchmark
  */
 function makeParallelBenchmarks(suite) {
-  return suite
-    .benchmark('ldjsonMultiFileUpload', benchmark =>
-      // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-import
-      benchmark
-        .taskSize(565)
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .beforeTask(initCollection)
-        .beforeTask(dropCollection)
-        .beforeTask(createCollection)
-        .task(ldjsonMultiUpload)
-        .teardown(dropDb)
-        .teardown(disconnectClient)
-    )
-    .benchmark('ldjsonMultiFileExport', benchmark =>
-      // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-export
-      benchmark
-        .taskSize(565)
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .beforeTask(initCollection)
-        .beforeTask(dropCollection)
-        .beforeTask(createCollection)
-        .beforeTask(ldjsonMultiUpload)
-        .beforeTask(initTemporaryDirectory)
-        .task(ldjsonMultiExport)
-        .afterTask(clearTemporaryDirectory)
-        .teardown(dropDb)
-        .teardown(async function () {
-          await rm(this.temporaryDirectory, { recursive: true, force: true });
-        })
-        .teardown(disconnectClient)
-    )
-    .benchmark('gridfsMultiFileUpload', benchmark =>
-      // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-upload
-      benchmark
-        .taskSize(262.144)
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .setup(initDb)
-        .setup(initCollection)
-        .beforeTask(dropBucket)
-        .beforeTask(initBucket)
-        .beforeTask(async function () {
-          const stream = this.bucket.openUploadStream('setup-file.txt');
-          const oneByteFile = Readable.from('a');
-          return pipeline(oneByteFile, stream);
-        })
-        .task(gridfsMultiFileUpload)
-        .teardown(dropDb)
-        .teardown(disconnectClient)
-    )
-    .benchmark('gridfsMultiFileDownload', benchmark =>
-      // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-download
-      benchmark
-        .taskSize(262.144)
-        .setup(makeClient)
-        .setup(connectClient)
-        .setup(initDb)
-        .setup(dropDb)
-        .setup(initDb)
-        .setup(initCollection)
-        .setup(initTemporaryDirectory)
-        .setup(dropBucket)
-        .setup(initBucket)
-        .setup(gridfsMultiFileUpload)
-        .beforeTask(clearTemporaryDirectory)
-        .setup(initBucket)
-        .task(gridfsMultiFileDownload)
-        .teardown(dropDb)
-        .teardown(async function () {
-          await rm(this.temporaryDirectory, { recursive: true, force: true });
-        })
-        .teardown(disconnectClient)
-    );
+  return (
+    suite
+      // .benchmark('ldjsonMultiFileUpload', benchmark =>
+      //   // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-import
+      //   benchmark
+      //     .taskSize(565)
+      //     .setup(makeClient)
+      //     .setup(connectClient)
+      //     .setup(initDb)
+      //     .setup(dropDb)
+      //     .beforeTask(initCollection)
+      //     .beforeTask(dropCollection)
+      //     .beforeTask(createCollection)
+      //     .task(ldjsonMultiUpload)
+      //     .teardown(dropDb)
+      //     .teardown(disconnectClient)
+      // )
+      .benchmark('ldjsonMultiFileExport', benchmark =>
+        // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#ldjson-multi-file-export
+        benchmark
+          .taskSize(565)
+          .setup(makeClient)
+          .setup(connectClient)
+          .setup(initDb)
+          .setup(dropDb)
+          .beforeTask(initCollection)
+          .beforeTask(dropCollection)
+          .beforeTask(createCollection)
+          .beforeTask(ldjsonMultiUpload)
+          .beforeTask(initTemporaryDirectory)
+          .task(ldjsonMultiExport)
+          .afterTask(clearTemporaryDirectory)
+          .teardown(dropDb)
+          .teardown(async function () {
+            await rm(this.temporaryDirectory, { recursive: true, force: true });
+          })
+          .teardown(disconnectClient)
+      )
+      .benchmark('gridfsMultiFileUpload', benchmark =>
+        // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-upload
+        benchmark
+          .taskSize(262.144)
+          .setup(makeClient)
+          .setup(connectClient)
+          .setup(initDb)
+          .setup(dropDb)
+          .setup(initDb)
+          .setup(initCollection)
+          .beforeTask(dropBucket)
+          .beforeTask(initBucket)
+          .beforeTask(async function () {
+            const stream = this.bucket.openUploadStream('setup-file.txt');
+            const oneByteFile = Readable.from('a');
+            return pipeline(oneByteFile, stream);
+          })
+          .task(gridfsMultiFileUpload)
+          .teardown(dropDb)
+          .teardown(disconnectClient)
+      )
+      .benchmark('gridfsMultiFileDownload', benchmark =>
+        // https://github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-download
+        benchmark
+          .taskSize(262.144)
+          .setup(makeClient)
+          .setup(connectClient)
+          .setup(initDb)
+          .setup(dropDb)
+          .setup(initDb)
+          .setup(initCollection)
+          .setup(initTemporaryDirectory)
+          .setup(dropBucket)
+          .setup(initBucket)
+          .setup(gridfsMultiFileUpload)
+          .beforeTask(clearTemporaryDirectory)
+          .setup(initBucket)
+          .task(gridfsMultiFileDownload)
+          .teardown(dropDb)
+          .teardown(async function () {
+            await rm(this.temporaryDirectory, { recursive: true, force: true });
+          })
+          .teardown(disconnectClient)
+      )
+  );
 }
 
 module.exports = { makeParallelBenchmarks };

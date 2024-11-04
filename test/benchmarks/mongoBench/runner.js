@@ -3,11 +3,10 @@
 const CONSTANTS = require('./constants');
 const { performance } = require('perf_hooks');
 const Suite = require('./suite');
-
-const PERCENTILES = [10, 25, 50, 75, 95, 98, 99];
-function percentileIndex(percentile, total) {
-  return Math.max(Math.floor((total * percentile) / 100 - 1), 0);
-}
+const fs = require('fs');
+const child_process = require('child_process');
+const stream = require('stream/promises');
+const { Writable } = require('stream');
 
 function timeSyncTask(task, ctx) {
   const start = performance.now();
@@ -25,6 +24,22 @@ async function timeAsyncTask(task, ctx) {
   return (end - start) / 1000;
 }
 
+const awkFindMiddle = [
+  // For each line, store the line in the array `a` with the current line number as the index
+  '{ a[NR] = $0 }',
+  // After processing all lines (END block), calculate the middle index based on the total line count (NR)
+  'END {',
+  // Calculate `mid` as the integer division of the line count by 2
+  '  mid = int(NR / 2);',
+  // If the line count is odd, print the middle line (one-based index: mid + 1)
+  '  if (NR % 2)',
+  '    print a[mid + 1];',
+  // If the line count is even, print the two middle lines
+  '  else',
+  '    print a[mid], a[mid + 1];',
+  '}'
+].join(' ');
+
 /**
  * Returns the execution time for the benchmarks in mb/second
  *
@@ -32,23 +47,31 @@ async function timeAsyncTask(task, ctx) {
  * that as the median.
  *
  * @param {Benchmark} benchmark
- * @param {{ rawData: number[], count: number}} data
  * @returns number
  */
-function calculateMicroBench(benchmark, data) {
-  const rawData = data.rawData;
-  const count = data.count;
+async function calculateMicroBench(benchmark) {
+  const pipeOptions = { stdio: ['pipe', 'pipe', 'inherit'] };
+  const sort = child_process.spawn('sort', ['-n'], pipeOptions);
+  const awk = child_process.spawn('awk', [awkFindMiddle], pipeOptions);
 
-  const sortedData = [].concat(rawData).sort();
+  let lines = '';
+  const collect = new Writable({
+    write: (chunk, encoding, callback) => {
+      lines += encoding === 'buffer' ? chunk.toString('utf8') : chunk;
+      callback();
+    }
+  });
 
-  const percentiles = PERCENTILES.reduce((acc, pct) => {
-    acc[pct] = sortedData[percentileIndex(pct, count)];
-    return acc;
-  }, {});
+  await stream.pipeline(fs.createReadStream('raw.dat', 'utf8'), sort.stdin);
+  await stream.pipeline(sort.stdout, awk.stdin);
+  await stream.pipeline(awk.stdout, collect);
 
-  const medianExecution = percentiles[50];
+  fs.unlinkSync('raw.dat');
 
-  return benchmark.taskSize / medianExecution;
+  const [value0, value1] = lines.trim().split(' ');
+  const median = value1 ? (Number(value0) + Number(value1)) / 2 : Number(value0);
+
+  return benchmark.taskSize / median;
 }
 
 class Runner {
@@ -126,6 +149,7 @@ class Runner {
     for (const [name, benchmark] of benchmarks) {
       this.reporter(`    Executing Benchmark "${name}"`);
       result[name] = await this._runBenchmark(benchmark);
+      this.reporter(`    Executed Benchmark  "${name}" =`, result[name]);
     }
 
     return result;
@@ -142,11 +166,12 @@ class Runner {
     const ctx = {};
     try {
       await benchmark.setup.call(ctx);
-      const result = await this._loopTask(benchmark, ctx);
+      await this._loopTask(benchmark, ctx);
       await benchmark.teardown.call(ctx);
-      return calculateMicroBench(benchmark, result);
+      return await calculateMicroBench(benchmark);
     } catch (error) {
-      return this._errorHandler(error);
+      fs.unlinkSync('raw.dat');
+      this._errorHandler(error);
     }
   }
 
@@ -157,33 +182,38 @@ class Runner {
    * @returns {{ rawData: number[], count: number}}
    */
   async _loopTask(benchmark, ctx) {
-    const start = performance.now();
-    const rawData = [];
-    const minExecutionCount = this.minExecutionCount;
-    const minExecutionTime = this.minExecutionTime;
-    const maxExecutionTime = this.maxExecutionTime;
-    let time = performance.now() - start;
-    let count = 1;
+    const rawDataFile = fs.openSync('raw.dat', 'w');
+    try {
+      const start = performance.now();
+      const minExecutionCount = this.minExecutionCount;
+      const minExecutionTime = this.minExecutionTime;
+      const maxExecutionTime = this.maxExecutionTime;
+      let time = performance.now() - start;
+      let count = 1;
 
-    const taskTimer = benchmark._taskType === 'sync' ? timeSyncTask : timeAsyncTask;
+      const taskTimer = benchmark._taskType === 'sync' ? timeSyncTask : timeAsyncTask;
 
-    while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
-      await benchmark.beforeTask.call(ctx);
-      const executionTime = await taskTimer(benchmark.task, ctx);
-      rawData.push(executionTime);
-      count++;
-      time = performance.now();
+      while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
+        await benchmark.beforeTask.call(ctx);
+        const executionTime = await taskTimer(benchmark.task, ctx);
+        fs.writeSync(rawDataFile, String(executionTime) + '\n');
+        count++;
+        time = performance.now();
+      }
+    } finally {
+      fs.closeSync(rawDataFile);
     }
-
-    return {
-      rawData,
-      count
-    };
   }
 
-  _errorHandler(e) {
-    console.error(e);
-    return NaN;
+  _errorHandler(error) {
+    let currentError = error;
+    while (currentError) {
+      this.reporter(
+        `${currentError !== error ? 'Caused by' : 'Error'}: ${currentError.name} - ${currentError.message} - ${currentError.stack}`
+      );
+      currentError = currentError.cause;
+    }
+    throw error;
   }
 }
 
