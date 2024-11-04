@@ -821,9 +821,7 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
   if (!Number.isNaN(+opts.maxTimeMS)) cursor.setMaxTimeMS(+opts.maxTimeMS);
   if (opts.comment !== undefined) cursor.setComment(opts.comment);
 
-  const result = await cursor.toArray().catch(err => err);
-  if (result instanceof Error) throw result;
-  return result;
+  return cursor.toArray();
 });
 
 operations.set('createCommandCursor', async ({ entities, operation }: OperationFunctionParams) => {
@@ -1047,13 +1045,7 @@ export async function executeOperationAndCheck(
   }
 
   if (operation.expectError) {
-    const events = Array.from(entities.mapOf('client').entries(), ([_, client]) =>
-      client
-        .getCapturedEvents('command')
-        .map(event => `${event.name}(${event.commandName})`)
-        .join(', ')
-    ).join(', ');
-    expect.fail(`Operation ${operation.name} succeeded but was not supposed to: ${events}`);
+    expect.fail(`Operation ${operation.name} succeeded but was not supposed to`);
   }
 
   if (operation.expectResult) {
