@@ -15,7 +15,6 @@ export interface CountOptions extends CommandOperationOptions {
   limit?: number;
   /**
    * Number of milliseconds to wait before aborting the query.
-   * @deprecated Will be removed in the next major version. Please use timeoutMS instead.
    */
   maxTimeMS?: number;
   /** An index name hint for the query. */

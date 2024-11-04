@@ -113,7 +113,6 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   /**
    * When applicable `maxTimeMS` controls the amount of time the initial command
    * that constructs a cursor should take. (ex. find, aggregate, listCollections)
-   * @deprecated Will be removed in the next major version. Please use timeoutMS instead.
    */
   maxTimeMS?: number;
   /**
@@ -775,7 +774,6 @@ export abstract class AbstractCursor<
    * Set a maxTimeMS on the cursor query, allowing for hard timeout limits on queries (Only supported on MongoDB 2.6 or higher)
    *
    * @param value - Number of milliseconds to wait before aborting the query.
-   * @deprecated Will be removed in the next major version. Please use the timeoutMS option instead.
    */
   maxTimeMS(value: number): this {
     this.throwIfInitialized();

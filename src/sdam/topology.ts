@@ -180,7 +180,7 @@ export interface SelectServerOptions {
   previousServer?: ServerDescription;
   /**
    * @internal
-   * TODO(NODE-5685): Make this required
+   * TODO(NODE-6496): Make this required by making ChangeStream use LegacyTimeoutContext
    * */
   timeoutContext?: TimeoutContext;
 }

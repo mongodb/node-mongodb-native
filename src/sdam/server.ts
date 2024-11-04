@@ -346,7 +346,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
         await this.pool.reauthenticate(conn);
-        // TODO(NODE-5682): Implement CSOT support for socket read/write at the connection layer
         try {
           const res = await conn.command(ns, cmd, finalOptions, responseType);
           throwIfWriteConcernError(res);

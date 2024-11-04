@@ -403,6 +403,7 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
+  /** TODO(DRIVERS-2884): Drivers should not interrupt creating connections with a client-side timeout */
   context.skip('4. Background Connection Pooling', () => {
     /**
      * The tests in this section MUST only be run if the server version is 4.4 or higher and the URI has authentication

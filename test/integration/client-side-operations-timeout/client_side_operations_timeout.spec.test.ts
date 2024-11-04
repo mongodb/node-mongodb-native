@@ -7,16 +7,11 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 const skippedSpecs = {};
 
 const skippedTests = {
-  'timeoutMS can be configured on a MongoClient - createChangeStream on client': 'TODO(NODE-6305)',
-  'timeoutMS applies to whole operation, not individual attempts - createChangeStream on client':
-    'TODO(NODE-6305)',
-  'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(NODE-6305)',
+  'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(DRIVERS-2965)',
   'Tailable cursor awaitData iteration timeoutMS is refreshed for getMore - failure':
-    'TODO(NODE-6305)',
-  'command is not sent if RTT is greater than timeoutMS': 'TODO(DRIVERS-2965)',
-  'Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure':
     'TODO(DRIVERS-2965)',
-  'Non-tailable cursor lifetime remaining timeoutMS applied to getMore if timeoutMode is unset':
+  'command is not sent if RTT is greater than timeoutMS': 'TODO(DRIVERS-2965)',
+  'Non-tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure':
     'TODO(DRIVERS-2965)',
   'maxTimeMS value in the command is less than timeoutMS':
     'TODO(DRIVERS-2970): see modified test in unified-csot-node-specs',
