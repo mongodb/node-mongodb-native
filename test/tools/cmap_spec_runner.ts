@@ -168,8 +168,14 @@ const compareInputToSpec = (input, expected, message) => {
     return;
   }
 
+  const expectedEntries: [string, unknown][] = Object.entries(expected).map(([k, v]) => {
+    // Node uses `durationMS` instead of `duration` on CMAP events.
+    if (k === 'duration') return ['durationMS', v];
+    return [k, v];
+  });
+
   if (expected && typeof expected === 'object') {
-    for (const [expectedPropName, expectedValue] of Object.entries(expected)) {
+    for (const [expectedPropName, expectedValue] of expectedEntries) {
       expect(input, message).to.have.property(expectedPropName);
       compareInputToSpec(
         input[expectedPropName],

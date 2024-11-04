@@ -48,7 +48,8 @@
     {
       "type": "ConnectionCheckedOut",
       "connectionId": 42,
-      "address": 42
+      "address": 42,
+      "duration": 42
     },
     {
       "type": "ConnectionCheckOutStarted",
@@ -57,7 +58,8 @@
     {
       "type": "ConnectionCheckOutFailed",
       "reason": "timeout",
-      "address": 42
+      "address": 42,
+      "duration": 42
     },
     {
       "type": "ConnectionCheckedIn",

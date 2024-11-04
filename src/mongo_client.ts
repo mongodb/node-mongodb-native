@@ -31,7 +31,7 @@ import {
 } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import {
-  type AnyClientBulkWriteModel,
+  type ClientBulkWriteModel,
   type ClientBulkWriteOptions,
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
@@ -251,7 +251,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    *
    * @remarks
    *  Automatic encryption is an enterprise only feature that only applies to operations on a collection. Automatic encryption is not supported for operations on a database or view, and operations that are not bypassed will result in error
-   *  (see [libmongocrypt: Auto Encryption Allow-List](https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.rst#libmongocrypt-auto-encryption-allow-list)). To bypass automatic encryption for all operations, set bypassAutoEncryption=true in AutoEncryptionOpts.
+   *  (see [libmongocrypt: Auto Encryption Allow-List](https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.md#libmongocrypt-auto-encryption-allow-list)). To bypass automatic encryption for all operations, set bypassAutoEncryption=true in AutoEncryptionOpts.
    *
    *  Automatic encryption requires the authenticated user to have the [listCollections privilege action](https://www.mongodb.com/docs/manual/reference/command/listCollections/#dbcmd.listCollections).
    *
@@ -331,7 +331,6 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
 };
 
 /** @internal */
-
 const kOptions = Symbol('options');
 
 /**
@@ -489,11 +488,21 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * @param options - The client bulk write options.
    * @returns A ClientBulkWriteResult for acknowledged writes and ok: 1 for unacknowledged writes.
    */
-  async bulkWrite(
-    models: AnyClientBulkWriteModel[],
+  async bulkWrite<SchemaMap extends Record<string, Document> = Record<string, Document>>(
+    models: ReadonlyArray<ClientBulkWriteModel<SchemaMap>>,
     options?: ClientBulkWriteOptions
-  ): Promise<ClientBulkWriteResult | { ok: 1 }> {
-    return await new ClientBulkWriteExecutor(this, models, options).execute();
+  ): Promise<ClientBulkWriteResult> {
+    if (this.autoEncrypter) {
+      throw new MongoInvalidArgumentError(
+        'MongoClient bulkWrite does not currently support automatic encryption.'
+      );
+    }
+    // We do not need schema type information past this point ("as any" is fine)
+    return await new ClientBulkWriteExecutor(
+      this,
+      models as any,
+      resolveOptions(this, options)
+    ).execute();
   }
 
   /**

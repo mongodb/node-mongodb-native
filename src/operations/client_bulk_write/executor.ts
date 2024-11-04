@@ -1,11 +1,16 @@
-import { type Document } from 'bson';
-
+import { type Document } from '../../bson';
 import { ClientBulkWriteCursor } from '../../cursor/client_bulk_write_cursor';
+import {
+  MongoClientBulkWriteError,
+  MongoClientBulkWriteExecutionError,
+  MongoInvalidArgumentError,
+  MongoServerError
+} from '../../error';
 import { type MongoClient } from '../../mongo_client';
 import { WriteConcern } from '../../write_concern';
 import { executeOperation } from '../execute_operation';
 import { ClientBulkWriteOperation } from './client_bulk_write';
-import { type ClientBulkWriteCommand, ClientBulkWriteCommandBuilder } from './command_builder';
+import { ClientBulkWriteCommandBuilder } from './command_builder';
 import {
   type AnyClientBulkWriteModel,
   type ClientBulkWriteOptions,
@@ -18,9 +23,9 @@ import { ClientBulkWriteResultsMerger } from './results_merger';
  * @internal
  */
 export class ClientBulkWriteExecutor {
-  client: MongoClient;
-  options: ClientBulkWriteOptions;
-  operations: AnyClientBulkWriteModel[];
+  private readonly client: MongoClient;
+  private readonly options: ClientBulkWriteOptions;
+  private readonly operations: ReadonlyArray<AnyClientBulkWriteModel<Document>>;
 
   /**
    * Instantiate the executor.
@@ -30,16 +35,39 @@ export class ClientBulkWriteExecutor {
    */
   constructor(
     client: MongoClient,
-    operations: AnyClientBulkWriteModel[],
+    operations: ReadonlyArray<AnyClientBulkWriteModel<Document>>,
     options?: ClientBulkWriteOptions
   ) {
+    if (operations.length === 0) {
+      throw new MongoClientBulkWriteExecutionError('No client bulk write models were provided.');
+    }
+
     this.client = client;
     this.operations = operations;
-    this.options = { ...options };
+    this.options = {
+      ordered: true,
+      bypassDocumentValidation: false,
+      verboseResults: false,
+      ...options
+    };
 
     // If no write concern was provided, we inherit one from the client.
     if (!this.options.writeConcern) {
       this.options.writeConcern = WriteConcern.fromOptions(this.client.options);
+    }
+
+    if (this.options.writeConcern?.w === 0) {
+      if (this.options.verboseResults) {
+        throw new MongoInvalidArgumentError(
+          'Cannot request unacknowledged write concern and verbose results'
+        );
+      }
+
+      if (this.options.ordered) {
+        throw new MongoInvalidArgumentError(
+          'Cannot request unacknowledged write concern and ordered writes'
+        );
+      }
     }
   }
 
@@ -48,7 +76,7 @@ export class ClientBulkWriteExecutor {
    * for each, then merge the results into one.
    * @returns The result.
    */
-  async execute(): Promise<ClientBulkWriteResult | { ok: 1 }> {
+  async execute(): Promise<ClientBulkWriteResult> {
     // The command builder will take the user provided models and potential split the batch
     // into multiple commands due to size.
     const pkFactory = this.client.s.options.pkFactory;
@@ -57,43 +85,53 @@ export class ClientBulkWriteExecutor {
       this.options,
       pkFactory
     );
-    const commands = commandBuilder.buildCommands();
+    // Unacknowledged writes need to execute all batches and return { ok: 1}
     if (this.options.writeConcern?.w === 0) {
-      return await executeUnacknowledged(this.client, this.options, commands);
+      while (commandBuilder.hasNextBatch()) {
+        const operation = new ClientBulkWriteOperation(commandBuilder, this.options);
+        await executeOperation(this.client, operation);
+      }
+      return ClientBulkWriteResultsMerger.unacknowledged();
+    } else {
+      const resultsMerger = new ClientBulkWriteResultsMerger(this.options);
+      // For each command will will create and exhaust a cursor for the results.
+      while (commandBuilder.hasNextBatch()) {
+        const cursor = new ClientBulkWriteCursor(this.client, commandBuilder, this.options);
+        try {
+          await resultsMerger.merge(cursor);
+        } catch (error) {
+          // Write concern errors are recorded in the writeConcernErrors field on MongoClientBulkWriteError.
+          // When a write concern error is encountered, it should not terminate execution of the bulk write
+          // for either ordered or unordered bulk writes. However, drivers MUST throw an exception at the end
+          // of execution if any write concern errors were observed.
+          if (error instanceof MongoServerError && !(error instanceof MongoClientBulkWriteError)) {
+            // Server side errors need to be wrapped inside a MongoClientBulkWriteError, where the root
+            // cause is the error property and a partial result is to be included.
+            const bulkWriteError = new MongoClientBulkWriteError({
+              message: 'Mongo client bulk write encountered an error during execution'
+            });
+            bulkWriteError.cause = error;
+            bulkWriteError.partialResult = resultsMerger.bulkWriteResult;
+            throw bulkWriteError;
+          } else {
+            // Client side errors are just thrown.
+            throw error;
+          }
+        }
+      }
+
+      // If we have write concern errors or unordered write errors at the end we throw.
+      if (resultsMerger.writeConcernErrors.length > 0 || resultsMerger.writeErrors.size > 0) {
+        const error = new MongoClientBulkWriteError({
+          message: 'Mongo client bulk write encountered errors during execution.'
+        });
+        error.writeConcernErrors = resultsMerger.writeConcernErrors;
+        error.writeErrors = resultsMerger.writeErrors;
+        error.partialResult = resultsMerger.bulkWriteResult;
+        throw error;
+      }
+
+      return resultsMerger.bulkWriteResult;
     }
-    return await executeAcknowledged(this.client, this.options, commands);
   }
-}
-
-/**
- * Execute an acknowledged bulk write.
- */
-async function executeAcknowledged(
-  client: MongoClient,
-  options: ClientBulkWriteOptions,
-  commands: ClientBulkWriteCommand[]
-): Promise<ClientBulkWriteResult> {
-  const resultsMerger = new ClientBulkWriteResultsMerger(options);
-  // For each command will will create and exhaust a cursor for the results.
-  for (const command of commands) {
-    const cursor = new ClientBulkWriteCursor(client, command, options);
-    const docs = await cursor.toArray();
-    resultsMerger.merge(command.ops.documents, cursor.response, docs);
-  }
-  return resultsMerger.result;
-}
-
-/**
- * Execute an unacknowledged bulk write.
- */
-async function executeUnacknowledged(
-  client: MongoClient,
-  options: ClientBulkWriteOptions,
-  commands: Document[]
-): Promise<{ ok: 1 }> {
-  for (const command of commands) {
-    const operation = new ClientBulkWriteOperation(command, options);
-    await executeOperation(client, operation);
-  }
-  return { ok: 1 };
 }

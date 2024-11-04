@@ -89,7 +89,8 @@
     {
       "type": "ConnectionCheckOutFailed",
       "reason": "timeout",
-      "address": 42
+      "address": 42,
+      "duration": 42
     }
   ],
   "ignore": [

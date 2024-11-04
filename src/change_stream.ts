@@ -946,7 +946,7 @@ export class ChangeStream<
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
-    if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+    if (this.cursor.id != null && isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
 
       this.cursor.close().then(undefined, squashError);
@@ -975,7 +975,10 @@ export class ChangeStream<
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+    if (
+      this.cursor.id == null ||
+      !isResumableError(changeStreamError, this.cursor.maxWireVersion)
+    ) {
       try {
         await this.close();
       } catch (error) {

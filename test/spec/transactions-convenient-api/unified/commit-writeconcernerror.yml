@@ -1,6 +1,6 @@
 description: commit-writeconcernerror
 
-schemaVersion: '1.3'
+schemaVersion: '1.4' # For `serverless` in `runOnRequirements`
 
 runOnRequirements:
   - minServerVersion: '4.0'
@@ -151,6 +151,9 @@ tests:
     outcome: *outcome
   -
     description: commitTransaction is not retried after UnknownReplWriteConcern error
+    runOnRequirements:
+      # Serverless sets empty `codeName` on failpoint errors. Remove once CLOUDP-280424 is fixed.
+      - serverless: forbid
     operations:
       - name: failPoint
         object: testRunner
@@ -203,6 +206,9 @@ tests:
     outcome: *outcome
   -
     description: commitTransaction is not retried after UnsatisfiableWriteConcern error
+    runOnRequirements:
+      # Serverless sets empty `codeName` on failpoint errors. Remove once CLOUDP-280424 is fixed.
+      - serverless: forbid
     operations:
       - name: failPoint
         object: testRunner
@@ -226,6 +232,9 @@ tests:
     outcome: *outcome
   -
     description: commitTransaction is not retried after MaxTimeMSExpired error
+    runOnRequirements:
+      # Serverless sets empty `codeName` on failpoint errors. Remove once CLOUDP-280424 is fixed.
+      - serverless: forbid
     operations:
       - name: failPoint
         object: testRunner

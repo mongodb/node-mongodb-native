@@ -1,4 +1,8 @@
 import type { Document } from './bson';
+import {
+  type ClientBulkWriteError,
+  type ClientBulkWriteResult
+} from './operations/client_bulk_write/common';
 import type { ServerType } from './sdam/common';
 import type { TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
@@ -12,14 +16,14 @@ const kErrorLabels = Symbol('errorLabels');
 /**
  * @internal
  * The legacy error message from the server that indicates the node is not a writable primary
- * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ * https://github.com/mongodb/specifications/blob/921232976f9913cf17415b5ef937ee772e45e6ae/source/server-discovery-and-monitoring/server-discovery-and-monitoring.md#not-writable-primary-and-node-is-recovering
  */
 export const LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE = new RegExp('not master', 'i');
 
 /**
  * @internal
  * The legacy error message from the server that indicates the node is not a primary or secondary
- * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ * https://github.com/mongodb/specifications/blob/921232976f9913cf17415b5ef937ee772e45e6ae/source/server-discovery-and-monitoring/server-discovery-and-monitoring.md#not-writable-primary-and-node-is-recovering
  */
 export const LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE = new RegExp(
   'not master or secondary',
@@ -29,7 +33,7 @@ export const LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE = new RegExp(
 /**
  * @internal
  * The error message from the server that indicates the node is recovering
- * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ * https://github.com/mongodb/specifications/blob/921232976f9913cf17415b5ef937ee772e45e6ae/source/server-discovery-and-monitoring/server-discovery-and-monitoring.md#not-writable-primary-and-node-is-recovering
  */
 export const NODE_IS_RECOVERING_ERROR_MESSAGE = new RegExp('node is recovering', 'i');
 
@@ -65,7 +69,7 @@ export const MONGODB_ERROR_CODES = Object.freeze({
   ReadConcernMajorityNotAvailableYet: 134
 } as const);
 
-// From spec@https://github.com/mongodb/specifications/blob/f93d78191f3db2898a59013a7ed5650352ef6da8/source/change-streams/change-streams.rst#resumable-error
+// From spec https://github.com/mongodb/specifications/blob/921232976f9913cf17415b5ef937ee772e45e6ae/source/change-streams/change-streams.md#resumable-error
 export const GET_MORE_RESUMABLE_CODES = new Set<number>([
   MONGODB_ERROR_CODES.HostUnreachable,
   MONGODB_ERROR_CODES.HostNotFound,
@@ -617,12 +621,50 @@ export class MongoGCPError extends MongoOIDCError {
 }
 
 /**
+ * An error indicating that an error occurred when executing the bulk write.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoClientBulkWriteError extends MongoServerError {
+  /**
+   * Write concern errors that occurred while executing the bulk write. This list may have
+   * multiple items if more than one server command was required to execute the bulk write.
+   */
+  writeConcernErrors: Document[];
+  /**
+   * Errors that occurred during the execution of individual write operations. This map will
+   * contain at most one entry if the bulk write was ordered.
+   */
+  writeErrors: Map<number, ClientBulkWriteError>;
+  /**
+   * The results of any successful operations that were performed before the error was
+   * encountered.
+   */
+  partialResult?: ClientBulkWriteResult;
+
+  /**
+   * Initialize the client bulk write error.
+   * @param message - The error message.
+   */
+  constructor(message: ErrorDescription) {
+    super(message);
+    this.writeConcernErrors = [];
+    this.writeErrors = new Map();
+  }
+
+  override get name(): string {
+    return 'MongoClientBulkWriteError';
+  }
+}
+
+/**
  * An error indicating that an error occurred when processing bulk write results.
  *
  * @public
  * @category Error
  */
-export class MongoBulkWriteCursorError extends MongoRuntimeError {
+export class MongoClientBulkWriteCursorError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
    *
@@ -639,7 +681,34 @@ export class MongoBulkWriteCursorError extends MongoRuntimeError {
   }
 
   override get name(): string {
-    return 'MongoBulkWriteCursorError';
+    return 'MongoClientBulkWriteCursorError';
+  }
+}
+
+/**
+ * An error indicating that an error occurred on the client when executing a client bulk write.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoClientBulkWriteExecutionError extends MongoRuntimeError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message: string) {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoClientBulkWriteExecutionError';
   }
 }
 
@@ -1020,8 +1089,8 @@ export class MongoInvalidArgumentError extends MongoAPIError {
    *
    * @public
    **/
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -1234,7 +1303,7 @@ export class MongoWriteConcernError extends MongoServerError {
   }
 }
 
-// https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.rst#retryable-error
+// https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.md#retryable-error
 const RETRYABLE_READ_ERROR_CODES = new Set<number>([
   MONGODB_ERROR_CODES.HostUnreachable,
   MONGODB_ERROR_CODES.HostNotFound,
@@ -1251,7 +1320,7 @@ const RETRYABLE_READ_ERROR_CODES = new Set<number>([
   MONGODB_ERROR_CODES.ReadConcernMajorityNotAvailableYet
 ]);
 
-// see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms
+// see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.md#terms
 const RETRYABLE_WRITE_ERROR_CODES = RETRYABLE_READ_ERROR_CODES;
 
 export function needsRetryableWriteLabel(
@@ -1388,7 +1457,7 @@ export function isNodeShuttingDownError(err: MongoError): boolean {
  * then the pool will be cleared, and server state will completely reset
  * locally.
  *
- * @see https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-master-and-node-is-recovering
+ * @see https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.md#not-writable-primary-and-node-is-recovering
  */
 export function isSDAMUnrecoverableError(error: MongoError): boolean {
   // NOTE: null check is here for a strictly pre-CMAP world, a timeout or

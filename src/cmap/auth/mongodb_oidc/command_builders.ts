@@ -1,5 +1,4 @@
-import { Binary, BSON, type Document } from 'bson';
-
+import { Binary, BSON, type Document } from '../../../bson';
 import { type MongoCredentials } from '../mongo_credentials';
 import { AuthMechanism } from '../providers';
 

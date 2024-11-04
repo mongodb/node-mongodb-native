@@ -1,9 +1,8 @@
-import { type DeserializeOptions } from 'bson';
-
 import {
   type BSONElement,
   type BSONSerializeOptions,
   BSONType,
+  type DeserializeOptions,
   type Document,
   Long,
   parseToElementsToArray,
@@ -353,5 +352,9 @@ export class ClientBulkWriteCursorResponse extends CursorResponse {
 
   get deletedCount() {
     return this.get('nDeleted', BSONType.int, true);
+  }
+
+  get writeConcernError() {
+    return this.get('writeConcernError', BSONType.object, false);
   }
 }

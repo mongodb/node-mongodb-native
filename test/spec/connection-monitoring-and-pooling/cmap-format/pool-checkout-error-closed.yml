@@ -21,6 +21,7 @@ events:
   - type: ConnectionCheckedOut
     address: 42
     connectionId: 42
+    duration: 42
   - type: ConnectionCheckedIn
     address: 42
     connectionId: 42
@@ -30,6 +31,7 @@ events:
     address: 42
   - type: ConnectionCheckOutFailed
     address: 42
+    duration: 42
     reason: poolClosed
 ignore:
   - ConnectionPoolReady

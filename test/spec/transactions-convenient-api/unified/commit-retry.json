@@ -1,6 +1,6 @@
 {
   "description": "commit-retry",
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
       "minServerVersion": "4.0",
@@ -422,6 +422,11 @@
     },
     {
       "description": "commit is not retried after MaxTimeMSExpired error",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",

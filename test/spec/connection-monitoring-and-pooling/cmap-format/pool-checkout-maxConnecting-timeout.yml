@@ -60,6 +60,7 @@ events:
   - type: ConnectionCheckOutFailed
     reason: timeout
     address: 42
+    duration: 42
 ignore:
   - ConnectionCreated
   - ConnectionCheckedIn

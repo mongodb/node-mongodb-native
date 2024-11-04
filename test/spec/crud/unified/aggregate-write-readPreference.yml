@@ -51,9 +51,6 @@ initialData:
       - { _id: 1, x: 11 }
       - { _id: 2, x: 22 }
       - { _id: 3, x: 33 }
-  - collectionName: *collection1Name
-    databaseName: *database0Name
-    documents: []
 
 tests:
   - description: "Aggregate with $out includes read preference for 5.0+ server"
@@ -78,12 +75,6 @@ tests:
                 $readPreference: *readPreference
                 readConcern: *readConcern
                 writeConcern: *writeConcern
-    outcome: &outcome
-      - collectionName: *collection1Name
-        databaseName: *database0Name
-        documents:
-          - { _id: 2, x: 22 }
-          - { _id: 3, x: 33 }
 
   - description: "Aggregate with $out omits read preference for pre-5.0 server"
     runOnRequirements:
@@ -108,7 +99,6 @@ tests:
                 $readPreference: { $$exists: false }
                 readConcern: *readConcern
                 writeConcern: *writeConcern
-    outcome: *outcome
 
   - description: "Aggregate with $merge includes read preference for 5.0+ server"
     runOnRequirements:
@@ -131,7 +121,6 @@ tests:
                 $readPreference: *readPreference
                 readConcern: *readConcern
                 writeConcern: *writeConcern
-    outcome: *outcome
 
   - description: "Aggregate with $merge omits read preference for pre-5.0 server"
     runOnRequirements:
@@ -152,4 +141,3 @@ tests:
                 $readPreference: { $$exists: false }
                 readConcern: *readConcern
                 writeConcern: *writeConcern
-    outcome: *outcome

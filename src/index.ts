@@ -44,8 +44,10 @@ export {
   MongoAWSError,
   MongoAzureError,
   MongoBatchReExecutionError,
-  MongoBulkWriteCursorError,
   MongoChangeStreamError,
+  MongoClientBulkWriteCursorError,
+  MongoClientBulkWriteError,
+  MongoClientBulkWriteExecutionError,
   MongoCompatibilityError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
@@ -476,6 +478,8 @@ export type {
 } from './operations/aggregate';
 export type {
   AnyClientBulkWriteModel,
+  ClientBulkWriteError,
+  ClientBulkWriteModel,
   ClientBulkWriteOptions,
   ClientBulkWriteResult,
   ClientDeleteManyModel,

@@ -395,7 +395,7 @@ for (const {
       name: `${osName}-node-latest`,
       display_name: `${osDisplayName} Node Latest`,
       run_on,
-      expansions: { NODE_LTS_VERSION: LATEST_LTS },
+      expansions: { NODE_LTS_VERSION: 'latest' },
       tasks: tasks.map(({ name }) => name)
     };
     if (clientEncryption) {
@@ -691,18 +691,6 @@ BUILD_VARIANTS.push({
   expansions: {
     NODE_LTS_VERSION: LOWEST_LTS,
     NPM_VERSION: 9
-  },
-  tasks: ['serverless_task_group']
-});
-
-BUILD_VARIANTS.push({
-  name: 'rhel8-test-serverless-proxy',
-  display_name: 'Serverless Proxy Test',
-  run_on: DEFAULT_OS,
-  expansions: {
-    NODE_LTS_VERSION: LOWEST_LTS,
-    NPM_VERSION: 9,
-    USE_SERVERLESS_PROXY: true
   },
   tasks: ['serverless_task_group']
 });

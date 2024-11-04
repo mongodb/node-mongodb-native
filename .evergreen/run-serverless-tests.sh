@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 if [ -z ${SERVERLESS+omitted} ]; then echo "SERVERLESS is unset" && exit 1; fi
 if [ -z ${SERVERLESS_URI+omitted} ]; then echo "SERVERLESS_URI is unset" && exit 1; fi
@@ -20,6 +20,7 @@ npx mocha \
   test/integration/sessions/sessions.prose.test.ts \
   test/integration/sessions/sessions.test.ts \
   test/integration/transactions/transactions.spec.test.ts \
+  test/integration/transactions-convenient-api/transactions-convenient-api.spec.test.ts \
   test/integration/transactions/transactions.test.ts \
   test/integration/versioned-api/versioned_api.spec.test.ts \
   test/integration/load-balancers/load_balancers.spec.test.ts \
