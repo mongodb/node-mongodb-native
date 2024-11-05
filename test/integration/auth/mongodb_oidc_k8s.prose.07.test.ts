@@ -8,7 +8,7 @@ describe('OIDC Auth Spec K8s Tests', function () {
   // Note there is no spec or tests for K8s, and it's optional to run the entire
   // machine prose tests on the additional environments so we do 1 sanity check
   // here. This same test will run in CI on AKS, EKS, and GKE.
-  describe('6. GCP Tests', function () {
+  describe('7. K8s Tests', function () {
     let client: MongoClient;
     let collection: Collection;
 
