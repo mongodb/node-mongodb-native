@@ -39,7 +39,7 @@ function calculateMicroBench(benchmark, data) {
   const rawData = data.rawData;
   const count = data.count;
 
-  const sortedData = [].concat(rawData).sort();
+  const sortedData = [].concat(rawData).sort((a, b) => a - b);
 
   const percentiles = PERCENTILES.reduce((acc, pct) => {
     acc[pct] = sortedData[percentileIndex(pct, count)];
@@ -57,7 +57,7 @@ class Runner {
     this.minExecutionTime = options.minExecutionTime || CONSTANTS.DEFAULT_MIN_EXECUTION_TIME;
     this.maxExecutionTime = options.maxExecutionTime || CONSTANTS.DEFAULT_MAX_EXECUTION_TIME;
     this.minExecutionCount = options.minExecutionCount || CONSTANTS.DEFAULT_MIN_EXECUTION_COUNT;
-    this.minExecutionCount = options.maxExecutionCount || CONSTANTS.DEFAULT_MAX_EXECUTION_COUNT;
+    this.maxExecutionCount = options.maxExecutionCount || CONSTANTS.DEFAULT_MAX_EXECUTION_COUNT;
     this.reporter =
       options.reporter ||
       function () {
@@ -127,6 +127,7 @@ class Runner {
     for (const [name, benchmark] of benchmarks) {
       this.reporter(`    Executing Benchmark "${name}"`);
       result[name] = await this._runBenchmark(benchmark);
+      this.reporter(`    Executed Benchmark "${name}" =`, result[name]);
     }
 
     return result;
@@ -163,7 +164,7 @@ class Runner {
     const minExecutionCount = this.minExecutionCount;
     const minExecutionTime = this.minExecutionTime;
     const maxExecutionTime = this.maxExecutionTime;
-    const maxExecutionAttempts = this.minExecutionCount;
+    const maxExecutionAttempts = this.maxExecutionCount;
     let time = performance.now() - start;
     let count = 1;
 
@@ -172,7 +173,7 @@ class Runner {
     while (
       time < maxExecutionTime &&
       (time < minExecutionTime || count < minExecutionCount) &&
-      count < maxExecutionAttempts
+      count <= maxExecutionAttempts
     ) {
       await benchmark.beforeTask.call(ctx);
       const executionTime = await taskTimer(benchmark.task, ctx);
@@ -187,9 +188,12 @@ class Runner {
     };
   }
 
-  _errorHandler(e) {
-    console.error(e);
-    return NaN;
+  _errorHandler(error) {
+    this.reporter(`Error: ${error.name} - ${error.message} - ${error.stack}`);
+    for (let error = error.cause; error != null; error = error.cause) {
+      this.reporter(`Caused by: ${error.name} - ${error.message} - ${error.stack}`);
+    }
+    throw error;
   }
 }
 
