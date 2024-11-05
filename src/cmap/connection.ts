@@ -86,7 +86,6 @@ export interface CommandOptions extends BSONSerializeOptions {
   /** Session to use for the operation */
   session?: ClientSession;
   documentsReturnedIn?: string;
-  noResponse?: boolean;
   omitReadPreference?: boolean;
 
   // TODO(NODE-2802): Currently the CommandOptions take a property willRetryWrite which is a hint
@@ -99,6 +98,9 @@ export interface CommandOptions extends BSONSerializeOptions {
   writeConcern?: WriteConcern;
 
   directConnection?: boolean;
+
+  /** Triggers fire-and-forget protocol for commands that don't support WriteConcern */
+  moreToCome?: boolean;
 }
 
 /** @public */
@@ -446,7 +448,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         zlibCompressionLevel: this.description.zlibCompressionLevel
       });
 
-      if (options.noResponse || message.moreToCome) {
+      if (message.moreToCome) {
         yield MongoDBResponse.empty;
         return;
       }
@@ -534,11 +536,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse
-                ? undefined
-                : message.moreToCome
-                  ? { ok: 1 }
-                  : (object ??= document.toObject(bsonOptions)),
+              message.moreToCome ? { ok: 1 } : (object ??= document.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )
