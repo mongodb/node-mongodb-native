@@ -162,12 +162,17 @@ class Runner {
     const minExecutionCount = this.minExecutionCount;
     const minExecutionTime = this.minExecutionTime;
     const maxExecutionTime = this.maxExecutionTime;
+    const maxExecutionAttempts = 10000000;
     let time = performance.now() - start;
     let count = 1;
 
     const taskTimer = benchmark._taskType === 'sync' ? timeSyncTask : timeAsyncTask;
 
-    while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
+    while (
+      time < maxExecutionTime &&
+      (time < minExecutionTime || count < minExecutionCount) &&
+      count < maxExecutionAttempts
+    ) {
       await benchmark.beforeTask.call(ctx);
       const executionTime = await taskTimer(benchmark.task, ctx);
       rawData.push(executionTime);
