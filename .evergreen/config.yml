@@ -1119,7 +1119,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: v6.0-perf}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
