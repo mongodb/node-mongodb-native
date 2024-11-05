@@ -47,7 +47,7 @@ benchmarkRunner
     const multiBench = average(Object.values(microBench.multiBench));
 
     const parallelBench = average([
-      // microBench.parallel.ldjsonMultiFileUpload,
+      microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.ldjsonMultiFileExport,
       microBench.parallel.gridfsMultiFileUpload,
       microBench.parallel.gridfsMultiFileDownload
@@ -66,7 +66,7 @@ benchmarkRunner
       microBench.multiBench.smallDocBulkInsert,
       microBench.multiBench.largeDocBulkInsert,
       microBench.multiBench.gridFsUpload,
-      // microBench.parallel.ldjsonMultiFileUpload,
+      microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.gridfsMultiFileUpload
     ]);
 
