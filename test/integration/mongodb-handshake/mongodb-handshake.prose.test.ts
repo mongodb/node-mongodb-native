@@ -123,7 +123,6 @@ describe('Handshake Prose Tests', function () {
 
         async function stub() {
           const response = await command(ns, cmd, options);
-          // console.error({ response });
           return {
             ...response,
             saslSupportedMechs: [...(response.saslSupportedMechs ?? []), 'random string']

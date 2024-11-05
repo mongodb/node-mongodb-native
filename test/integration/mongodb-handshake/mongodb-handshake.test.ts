@@ -4,7 +4,6 @@ import type Sinon from 'sinon';
 import * as sinon from 'sinon';
 
 import {
-  connect,
   Connection,
   LEGACY_HELLO_COMMAND,
   MongoServerError,
