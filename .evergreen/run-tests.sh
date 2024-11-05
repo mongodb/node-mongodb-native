@@ -45,11 +45,13 @@ if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
   unset AWS_ACCESS_KEY_ID;
   unset AWS_SECRET_ACCESS_KEY;
 else
-  pip install --upgrade boto3
+  pushd "$DRIVERS_TOOLS/.evergreen/csfle"
+  . ./activateactivate-kmstlsvenv.sh
   # Get access to the AWS temporary credentials:
   echo "adding temporary AWS credentials to environment"
   # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
-  source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
+  source set-temp-creds.sh
+  popd
 fi
 
 npm install @mongodb-js/zstd
