@@ -28,7 +28,6 @@ import {
 import { type FailPoint, makeMultiBatchWrite, measureDuration } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
-// TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec prose tests', function () {
   let internalClient: MongoClient;
   let client: MongoClient;

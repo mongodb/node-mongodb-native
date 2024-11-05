@@ -460,11 +460,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
-    // TODO(NODE-6223): auto connect cannot use timeoutMS
-    // const timeoutMS = this.client.s.options.timeoutMS;
     const serverSelectionTimeoutMS = this.client.s.options.serverSelectionTimeoutMS;
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const timeoutContext = TimeoutContext.create({
+      // TODO(NODE-6448): auto-connect ignores timeoutMS; potential future feature
       timeoutMS: undefined,
       serverSelectionTimeoutMS,
       waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
