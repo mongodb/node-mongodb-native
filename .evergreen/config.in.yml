@@ -1616,4 +1616,4 @@ buildvariants:
     display_name: Performance Test
     run_on: rhel90-dbx-perf-large
     tasks:
-      - run-spec-benchmark-tests-node-18-server-6.0
+      - run-spec-benchmark-tests-node-server
