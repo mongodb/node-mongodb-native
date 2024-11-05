@@ -57,6 +57,7 @@ class Runner {
     this.minExecutionTime = options.minExecutionTime || CONSTANTS.DEFAULT_MIN_EXECUTION_TIME;
     this.maxExecutionTime = options.maxExecutionTime || CONSTANTS.DEFAULT_MAX_EXECUTION_TIME;
     this.minExecutionCount = options.minExecutionCount || CONSTANTS.DEFAULT_MIN_EXECUTION_COUNT;
+    this.minExecutionCount = options.maxExecutionCount || CONSTANTS.DEFAULT_MAX_EXECUTION_COUNT;
     this.reporter =
       options.reporter ||
       function () {
@@ -162,7 +163,7 @@ class Runner {
     const minExecutionCount = this.minExecutionCount;
     const minExecutionTime = this.minExecutionTime;
     const maxExecutionTime = this.maxExecutionTime;
-    const maxExecutionAttempts = 10000000;
+    const maxExecutionAttempts = this.minExecutionCount;
     let time = performance.now() - start;
     let count = 1;
 
