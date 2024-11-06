@@ -111,6 +111,7 @@ describe('Handshake Prose Tests', function () {
   }
 
   context(`Test 2: Test that the driver accepts an arbitrary auth mechanism`, function () {
+    let stubCalled = false;
     beforeEach(() => {
       // Mock the server response in a way that saslSupportedMechs array in the hello command response contains an arbitrary string.
       sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
@@ -122,6 +123,7 @@ describe('Handshake Prose Tests', function () {
         return command(ns, cmd, options);
 
         async function stub() {
+          stubCalled = true;
           const response = await command(ns, cmd, options);
           return {
             ...response,
@@ -139,6 +141,8 @@ describe('Handshake Prose Tests', function () {
       client = this.configuration.newClient();
       await client.connect();
       await client.db('foo').collection('bar').insertOne({ name: 'john doe' });
+
+      expect(stubCalled).to.be.true;
       await client.close();
     });
   });
