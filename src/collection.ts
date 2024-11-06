@@ -687,8 +687,8 @@ export class Collection<TSchema extends Document = Document> {
       );
       return true;
     } catch (error) {
-      if (error instanceof MongoOperationTimeoutError) throw error; // TODO: Check the spec for index management behaviour/file a drivers ticket for this
-      // Seems like we should throw all errors
+      // TODO(NODE-6517): Driver should only filter for namespace not found error. Other errors should be thrown.
+      if (error instanceof MongoOperationTimeoutError) throw error;
       return false;
     }
   }

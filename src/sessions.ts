@@ -61,6 +61,7 @@ export interface ClientSessionOptions {
   defaultTransactionOptions?: TransactionOptions;
   /**
    * @public
+   * @experimental
    * An overriding timeoutMS value to use for a client-side timeout.
    * If not provided the session uses the timeoutMS specified on the MongoClient.
    */

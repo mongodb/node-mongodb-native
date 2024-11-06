@@ -42,7 +42,10 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
    * @deprecated Will be removed in the next major version. Add an aliases field to the metadata document instead.
    */
   aliases?: string[];
-  /** @public */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 

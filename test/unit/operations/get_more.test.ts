@@ -53,7 +53,12 @@ describe('GetMoreOperation', function () {
           new ServerDescription('a:1'),
           {} as any
         );
-        const opts = { ...options, documentsReturnedIn: 'nextBatch', returnFieldSelector: null };
+        const opts = {
+          ...options,
+          documentsReturnedIn: 'nextBatch',
+          returnFieldSelector: null,
+          timeoutContext: undefined
+        };
         const operation = new GetMoreOperation(namespace, cursorId, server, opts);
         const stub = sinon.stub(server, 'command').resolves({});
 
@@ -69,7 +74,7 @@ describe('GetMoreOperation', function () {
         const call = stub.getCall(0);
         expect(call.args[0]).to.equal(namespace);
         expect(call.args[1]).to.deep.equal(expectedGetMoreCommand);
-        expect(call.args[2]).to.containSubset(opts);
+        expect(call.args[2]).to.deep.equal(opts);
       });
     });
 
