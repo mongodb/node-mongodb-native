@@ -30,7 +30,10 @@ export interface GridFSBucketReadStreamOptions {
    * to be returned by the stream. `end` is non-inclusive
    */
   end?: number;
-  /** @public */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 

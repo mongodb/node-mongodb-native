@@ -25,7 +25,6 @@ import {
 import { measureDuration, sleep } from '../../tools/utils';
 import { createTimerSandbox } from '../../unit/timer_sandbox';
 
-// TODO(NODE-5824): Implement CSOT prose tests
 describe('CSOT spec unit tests', function () {
   let client: MongoClient;
 
@@ -107,7 +106,7 @@ describe('CSOT spec unit tests', function () {
       () => {}
     );
   }).skipReason =
-    'TODO(NODE-5682): Add CSOT support for socket read/write at the connection layer for CRUD APIs';
+    'TODO(NODE-6518): Add CSOT support for socket read/write at the connection layer for CRUD APIs';
 
   describe('Client side encryption', function () {
     describe('KMS requests', function () {
