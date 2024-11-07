@@ -106,12 +106,6 @@ benchmarkRunner
   })
   .then(data => {
     const results = JSON.stringify(data, undefined, 2);
-    const print_results = data.map(({ info: { test_name, args }, metrics: [{ value }] }) => ({
-      test_name,
-      args,
-      value
-    }));
-    console.log(inspect(print_results, { depth: Infinity, colors: true }));
     return writeFile('results.json', results);
   })
   .catch(err => console.error(err));

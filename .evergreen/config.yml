@@ -1171,27 +1171,6 @@ tasks:
       - command: perf.send
         params:
           file: src/results.json
-  - name: run-spec-benchmark-tests-node-server-enableUtf8Validation-false
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 3600
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: MONGODB_CLIENT_OPTIONS, value: '{"enableUtf8Validation": false}'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/results.json
   - name: test-gcpkms-task
     commands:
       - command: expansions.update
@@ -4736,7 +4715,6 @@ buildvariants:
       - run-spec-benchmark-tests-node-server
       - run-spec-benchmark-tests-node-server-timeoutMS-120000
       - run-spec-benchmark-tests-node-server-timeoutMS-0
-      - run-spec-benchmark-tests-node-server-enableUtf8Validation-false
   - name: rhel80-large-gallium
     display_name: rhel8 Node16
     run_on: rhel80-large
