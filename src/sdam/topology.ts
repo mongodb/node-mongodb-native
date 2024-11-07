@@ -24,6 +24,7 @@ import {
   type MongoDriverError,
   MongoError,
   MongoErrorLabel,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerSelectionError,
   MongoTopologyClosedError
@@ -33,7 +34,7 @@ import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mong
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { Timeout, TimeoutError } from '../timeout';
+import { Timeout, TimeoutContext, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
@@ -105,7 +106,6 @@ export interface ServerSelectionRequest {
   resolve: (server: Server) => void;
   reject: (error: MongoError) => void;
   [kCancelled]?: boolean;
-  timeout: Timeout;
   operationName: string;
   waitingLogged: boolean;
   previousServer?: ServerDescription;
@@ -174,8 +174,11 @@ export interface SelectServerOptions {
   session?: ClientSession;
   operationName: string;
   previousServer?: ServerDescription;
-  /** @internal*/
-  timeout?: Timeout;
+  /**
+   * @internal
+   * TODO(NODE-6496): Make this required by making ChangeStream use LegacyTimeoutContext
+   * */
+  timeoutContext?: TimeoutContext;
 }
 
 /** @public */
@@ -449,17 +452,28 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
+    const serverSelectionTimeoutMS = this.client.s.options.serverSelectionTimeoutMS;
     const readPreference = options.readPreference ?? ReadPreference.primary;
-    const selectServerOptions = { operationName: 'ping', ...options };
+    const timeoutContext = TimeoutContext.create({
+      // TODO(NODE-6448): auto-connect ignores timeoutMS; potential future feature
+      timeoutMS: undefined,
+      serverSelectionTimeoutMS,
+      waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
+    });
+    const selectServerOptions = {
+      operationName: 'ping',
+      ...options,
+      timeoutContext
+    };
+
     try {
       const server = await this.selectServer(
         readPreferenceServerSelector(readPreference),
         selectServerOptions
       );
-
       const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
-      if (!skipPingOnConnect && server && this.s.credentials) {
-        await server.command(ns('admin.$cmd'), { ping: 1 }, {});
+      if (!skipPingOnConnect && this.s.credentials) {
+        await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
         this.emit(Topology.CONNECT, this);
@@ -547,6 +561,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         new ServerSelectionStartedEvent(selector, this.description, options.operationName)
       );
     }
+    let timeout;
+    if (options.timeoutContext) timeout = options.timeoutContext.serverSelectionTimeout;
+    else {
+      timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
+    }
 
     const isSharded = this.description.type === TopologyType.Sharded;
     const session = options.session;
@@ -569,11 +588,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
+      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
       return transaction.server;
     }
 
     const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
-    const timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
+
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
       topologyDescription: this.description,
@@ -581,7 +601,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       transaction,
       resolve,
       reject,
-      timeout,
       startTime: now(),
       operationName: options.operationName,
       waitingLogged: false,
@@ -592,14 +611,18 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     processWaitQueue(this);
 
     try {
-      return await Promise.race([serverPromise, waitQueueMember.timeout]);
+      timeout?.throwIfExpired();
+      const server = await (timeout ? Promise.race([serverPromise, timeout]) : serverPromise);
+      if (options.timeoutContext?.csotEnabled() && server.description.minRoundTripTime !== 0) {
+        options.timeoutContext.minRoundTripTime = server.description.minRoundTripTime;
+      }
+      return server;
     } catch (error) {
       if (TimeoutError.is(error)) {
         // Timeout
         waitQueueMember[kCancelled] = true;
-        timeout.clear();
         const timeoutError = new MongoServerSelectionError(
-          `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
+          `Server selection timed out after ${timeout?.duration} ms`,
           this.description
         );
         if (
@@ -619,10 +642,17 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           );
         }
 
+        if (options.timeoutContext?.csotEnabled()) {
+          throw new MongoOperationTimeoutError('Timed out during server selection', {
+            cause: timeoutError
+          });
+        }
         throw timeoutError;
       }
       // Other server selection error
       throw error;
+    } finally {
+      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
     }
   }
   /**
@@ -880,8 +910,6 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, drainError: MongoDr
       continue;
     }
 
-    waitQueueMember.timeout.clear();
-
     if (!waitQueueMember[kCancelled]) {
       if (
         waitQueueMember.mongoLogger?.willLog(
@@ -935,7 +963,6 @@ function processWaitQueue(topology: Topology) {
           )
         : serverDescriptions;
     } catch (selectorError) {
-      waitQueueMember.timeout.clear();
       if (
         topology.client.mongoLogger?.willLog(
           MongoLoggableComponent.SERVER_SELECTION,
@@ -1022,8 +1049,6 @@ function processWaitQueue(topology: Topology) {
     if (isSharded && transaction && transaction.isActive && selectedServer) {
       transaction.pinServer(selectedServer);
     }
-
-    waitQueueMember.timeout.clear();
 
     if (
       topology.client.mongoLogger?.willLog(

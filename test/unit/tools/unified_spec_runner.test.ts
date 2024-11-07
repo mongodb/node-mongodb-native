@@ -100,7 +100,7 @@ describe('Unified Spec Runner', function () {
 
             expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
-              /Expected \[string\] to be one of \[int\]/
+              /\[string\] to be one of \[int\]/
             );
           });
         });

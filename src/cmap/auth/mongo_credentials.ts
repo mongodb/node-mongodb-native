@@ -31,7 +31,8 @@ function getDefaultAuthMechanism(hello: Document | null): AuthMechanism {
 const ALLOWED_ENVIRONMENT_NAMES: AuthMechanismProperties['ENVIRONMENT'][] = [
   'test',
   'azure',
-  'gcp'
+  'gcp',
+  'k8s'
 ];
 const ALLOWED_HOSTS_ERROR = 'Auth mechanism property ALLOWED_HOSTS must be an array of strings.';
 
@@ -62,7 +63,7 @@ export interface AuthMechanismProperties extends Document {
   /** A user provided OIDC human interacted callback function. */
   OIDC_HUMAN_CALLBACK?: OIDCCallbackFunction;
   /** The OIDC environment. Note that 'test' is for internal use only. */
-  ENVIRONMENT?: 'test' | 'azure' | 'gcp';
+  ENVIRONMENT?: 'test' | 'azure' | 'gcp' | 'k8s';
   /** Allowed hosts that OIDC auth can connect to. */
   ALLOWED_HOSTS?: string[];
   /** The resource token for OIDC auth in Azure and GCP. */

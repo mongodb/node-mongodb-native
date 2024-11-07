@@ -1,13 +1,16 @@
 import { expect } from 'chai';
 import { type ChildProcess, spawn } from 'child_process';
 import { once } from 'events';
+import * as os from 'os';
+import * as path from 'path';
 
 import {
   type Collection,
   type CommandStartedEvent,
   MongoClient,
   MongoDriverError,
-  MongoInvalidArgumentError
+  MongoInvalidArgumentError,
+  ObjectId
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
@@ -131,10 +134,15 @@ describe('Sessions Prose Tests', () => {
     let childProcess: ChildProcess;
 
     before(() => {
-      childProcess = spawn('mongocryptd', ['--port', mongocryptdTestPort, '--ipv6'], {
-        stdio: 'ignore',
-        detached: true
-      });
+      const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
+      childProcess = spawn(
+        'mongocryptd',
+        ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
+        {
+          stdio: 'ignore',
+          detached: true
+        }
+      );
 
       childProcess.on('error', err => {
         console.warn('Sessions prose mongocryptd error:', err);

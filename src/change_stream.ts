@@ -3,7 +3,7 @@ import type { Readable } from 'stream';
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
-import type { AbstractCursorEvents, CursorStreamOptions } from './cursor/abstract_cursor';
+import { type CursorStreamOptions, CursorTimeoutContext } from './cursor/abstract_cursor';
 import { ChangeStreamCursor, type ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 import { Db } from './db';
 import {
@@ -11,6 +11,7 @@ import {
   isResumableError,
   MongoAPIError,
   MongoChangeStreamError,
+  MongoOperationTimeoutError,
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
@@ -20,6 +21,7 @@ import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerSessionId } from './sessions';
+import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
 import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
 /** @internal */
@@ -538,7 +540,14 @@ export type ChangeStreamEvents<
   end(): void;
   error(error: Error): void;
   change(change: TChange): void;
-} & AbstractCursorEvents;
+  /**
+   * @remarks Note that the `close` event is currently emitted whenever the internal `ChangeStreamCursor`
+   * instance is closed, which can occur multiple times for a given `ChangeStream` instance.
+   *
+   * TODO(NODE-6434): address this issue in NODE-6434
+   */
+  close(): void;
+};
 
 /**
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
@@ -609,6 +618,13 @@ export class ChangeStream<
    */
   static readonly RESUME_TOKEN_CHANGED = RESUME_TOKEN_CHANGED;
 
+  private timeoutContext?: TimeoutContext;
+  /**
+   * Note that this property is here to uniquely identify a ChangeStream instance as the owner of
+   * the {@link CursorTimeoutContext} instance (see {@link ChangeStream._createChangeStreamCursor}) to ensure
+   * that {@link AbstractCursor.close} does not mutate the timeoutContext.
+   */
+  private contextOwner: symbol;
   /**
    * @internal
    *
@@ -624,20 +640,25 @@ export class ChangeStream<
 
     this.pipeline = pipeline;
     this.options = { ...options };
+    let serverSelectionTimeoutMS: number;
     delete this.options.writeConcern;
 
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;
+      serverSelectionTimeoutMS = parent.s.db.client.options.serverSelectionTimeoutMS;
     } else if (parent instanceof Db) {
       this.type = CHANGE_DOMAIN_TYPES.DATABASE;
+      serverSelectionTimeoutMS = parent.client.options.serverSelectionTimeoutMS;
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
+      serverSelectionTimeoutMS = parent.options.serverSelectionTimeoutMS;
     } else {
       throw new MongoChangeStreamError(
         'Parent provided to ChangeStream constructor must be an instance of Collection, Db, or MongoClient'
       );
     }
 
+    this.contextOwner = Symbol();
     this.parent = parent;
     this.namespace = parent.s.namespace;
     if (!this.options.readPreference && parent.readPreference) {
@@ -662,6 +683,13 @@ export class ChangeStream<
         this[kCursorStream]?.removeAllListeners('data');
       }
     });
+
+    if (this.options.timeoutMS != null) {
+      this.timeoutContext = new CSOTTimeoutContext({
+        timeoutMS: this.options.timeoutMS,
+        serverSelectionTimeoutMS
+      });
+    }
   }
 
   /** @internal */
@@ -681,22 +709,30 @@ export class ChangeStream<
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
 
-    while (true) {
-      try {
-        const hasNext = await this.cursor.hasNext();
-        return hasNext;
-      } catch (error) {
+    this.timeoutContext?.refresh();
+    try {
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
+          const hasNext = await this.cursor.hasNext();
+          return hasNext;
         } catch (error) {
           try {
-            await this.close();
+            await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            squashError(error);
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id == null) {
+              throw error;
+            }
+            try {
+              await this.close();
+            } catch (error) {
+              squashError(error);
+            }
+            throw error;
           }
-          throw error;
         }
       }
+    } finally {
+      this.timeoutContext?.clear();
     }
   }
 
@@ -706,24 +742,32 @@ export class ChangeStream<
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
+    this.timeoutContext?.refresh();
 
-    while (true) {
-      try {
-        const change = await this.cursor.next();
-        const processedChange = this._processChange(change ?? null);
-        return processedChange;
-      } catch (error) {
+    try {
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
+          const change = await this.cursor.next();
+          const processedChange = this._processChange(change ?? null);
+          return processedChange;
         } catch (error) {
           try {
-            await this.close();
+            await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            squashError(error);
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id == null) {
+              throw error;
+            }
+            try {
+              await this.close();
+            } catch (error) {
+              squashError(error);
+            }
+            throw error;
           }
-          throw error;
         }
       }
+    } finally {
+      this.timeoutContext?.clear();
     }
   }
 
@@ -735,23 +779,29 @@ export class ChangeStream<
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt
     // fails.
+    this.timeoutContext?.refresh();
 
-    while (true) {
-      try {
-        const change = await this.cursor.tryNext();
-        return change ?? null;
-      } catch (error) {
+    try {
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
+          const change = await this.cursor.tryNext();
+          return change ?? null;
         } catch (error) {
           try {
-            await this.close();
+            await this._processErrorIteratorMode(error, this.cursor.id != null);
           } catch (error) {
-            squashError(error);
+            if (error instanceof MongoOperationTimeoutError && this.cursor.id == null) throw error;
+            try {
+              await this.close();
+            } catch (error) {
+              squashError(error);
+            }
+            throw error;
           }
-          throw error;
         }
       }
+    } finally {
+      this.timeoutContext?.clear();
     }
   }
 
@@ -784,6 +834,8 @@ export class ChangeStream<
    * Frees the internal resources used by the change stream.
    */
   async close(): Promise<void> {
+    this.timeoutContext?.clear();
+    this.timeoutContext = undefined;
     this[kClosed] = true;
 
     const cursor = this.cursor;
@@ -866,7 +918,12 @@ export class ChangeStream<
       client,
       this.namespace,
       pipeline,
-      options
+      {
+        ...options,
+        timeoutContext: this.timeoutContext
+          ? new CursorTimeoutContext(this.timeoutContext, this.contextOwner)
+          : undefined
+      }
     );
 
     for (const event of CHANGE_STREAM_EVENTS) {
@@ -899,8 +956,9 @@ export class ChangeStream<
       } catch (error) {
         this.emit(ChangeStream.ERROR, error);
       }
+      this.timeoutContext?.refresh();
     });
-    stream.on('error', error => this._processErrorStreamMode(error));
+    stream.on('error', error => this._processErrorStreamMode(error, this.cursor.id != null));
   }
 
   /** @internal */
@@ -942,24 +1000,30 @@ export class ChangeStream<
   }
 
   /** @internal */
-  private _processErrorStreamMode(changeStreamError: AnyError) {
+  private _processErrorStreamMode(changeStreamError: AnyError, cursorInitialized: boolean) {
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
-    if (this.cursor.id != null && isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+    if (
+      cursorInitialized &&
+      (isResumableError(changeStreamError, this.cursor.maxWireVersion) ||
+        changeStreamError instanceof MongoOperationTimeoutError)
+    ) {
       this._endStream();
 
-      this.cursor.close().then(undefined, squashError);
-
-      const topology = getTopology(this.parent);
-      topology
-        .selectServer(this.cursor.readPreference, {
-          operationName: 'reconnect topology in change stream'
-        })
-
+      this.cursor
+        .close()
+        .then(
+          () => this._resume(changeStreamError),
+          e => {
+            squashError(e);
+            return this._resume(changeStreamError);
+          }
+        )
         .then(
           () => {
-            this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
+            if (changeStreamError instanceof MongoOperationTimeoutError)
+              this.emit(ChangeStream.ERROR, changeStreamError);
           },
           () => this._closeEmitterModeWithError(changeStreamError)
         );
@@ -969,33 +1033,44 @@ export class ChangeStream<
   }
 
   /** @internal */
-  private async _processErrorIteratorMode(changeStreamError: AnyError) {
+  private async _processErrorIteratorMode(changeStreamError: AnyError, cursorInitialized: boolean) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
     if (
-      this.cursor.id == null ||
-      !isResumableError(changeStreamError, this.cursor.maxWireVersion)
+      cursorInitialized &&
+      (isResumableError(changeStreamError, this.cursor.maxWireVersion) ||
+        changeStreamError instanceof MongoOperationTimeoutError)
     ) {
+      try {
+        await this.cursor.close();
+      } catch (error) {
+        squashError(error);
+      }
+
+      await this._resume(changeStreamError);
+
+      if (changeStreamError instanceof MongoOperationTimeoutError) throw changeStreamError;
+    } else {
       try {
         await this.close();
       } catch (error) {
         squashError(error);
       }
+
       throw changeStreamError;
     }
+  }
 
-    try {
-      await this.cursor.close();
-    } catch (error) {
-      squashError(error);
-    }
+  private async _resume(changeStreamError: AnyError) {
+    this.timeoutContext?.refresh();
     const topology = getTopology(this.parent);
     try {
       await topology.selectServer(this.cursor.readPreference, {
-        operationName: 'reconnect topology in change stream'
+        operationName: 'reconnect topology in change stream',
+        timeoutContext: this.timeoutContext
       });
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
     } catch {

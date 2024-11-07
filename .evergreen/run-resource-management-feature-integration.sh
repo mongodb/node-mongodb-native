@@ -2,6 +2,9 @@
 
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
+echo "node: $(node --version)"
+echo "npm: $(npm --version)"
+
 echo "Building driver..."
 npm pack
 echo "Building driver...finished."

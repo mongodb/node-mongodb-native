@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, type MongoClient } from '../../mongodb';
+import { Collection, type Db, type MongoClient, ObjectId } from '../../mongodb';
 
 describe('Collection Management and Db Management', function () {
   let client: MongoClient;
@@ -16,7 +16,7 @@ describe('Collection Management and Db Management', function () {
   });
 
   it('returns a collection object after calling createCollection', async function () {
-    const collection = await db.createCollection('collection');
+    const collection = await db.createCollection(new ObjectId().toHexString());
     expect(collection).to.be.instanceOf(Collection);
   });
 

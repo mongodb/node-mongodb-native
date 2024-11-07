@@ -20,8 +20,38 @@ declare const options: MongoDBDriver.MongoClientOptions;
 expectDeprecated(options.w);
 expectDeprecated(options.journal);
 expectDeprecated(options.wtimeoutMS);
+// TODO(NODE-6491): expectDeprecated(options.socketTimeoutMS);
+// TODO(NODE-6491): expectDeprecated(options.waitQueueTimeoutMS);
 expectNotDeprecated(options.writeConcern);
+expectNotDeprecated(options.serverSelectionTimeoutMS);
+expectNotDeprecated(options.connectTimeoutMS);
+
 expectType<WriteConcernSettings | WriteConcern | undefined>(options.writeConcern);
+
+declare const estimatedDocumentCountOptions: MongoDBDriver.EstimatedDocumentCountOptions;
+// TODO(NODE-6491): expectDeprecated(estimatedDocumentCountOptions.maxTimeMS);
+
+declare const countOptions: MongoDBDriver.CountOptions;
+// TODO(NODE-6491): expectDeprecated(countOptions.maxTimeMS);
+
+declare const commandOptions: MongoDBDriver.CommandOperationOptions;
+// TODO(NODE-6491): expectDeprecated(commandOptions.maxTimeMS);
+
+declare const aggregateOptions: MongoDBDriver.AggregateOptions;
+// TODO(NODE-6491): expectDeprecated(aggregateOptions.maxTimeMS);
+
+declare const runCommandCursor: MongoDBDriver.RunCommandCursor;
+// TODO(NODE-6491): expectDeprecated(runCommandCursor.setMaxTimeMS);
+// TODO(NODE-6491): expectDeprecated(runCommandCursor.maxTimeMS);
+
+declare const cursorOptions: MongoDBDriver.AbstractCursorOptions;
+// TODO(NODE-6491): expectDeprecated(cursorOptions.maxTimeMS);
+
+declare const abstractCursor: MongoDBDriver.AbstractCursor;
+// TODO(NODE-6491): expectDeprecated(abstractCursor.maxTimeMS);
+
+declare const txnOptions: MongoDBDriver.TransactionOptions;
+// TODO(NODE-6491): expectDeprecated(txnOptions.maxCommitTimeMS);
 
 interface TSchema extends Document {
   name: string;
