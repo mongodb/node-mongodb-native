@@ -29,6 +29,7 @@ import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
+import { TimeoutContext } from './timeout';
 import {
   isTransactionCommand,
   Transaction,
@@ -58,8 +59,12 @@ export interface ClientSessionOptions {
   snapshot?: boolean;
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
-  /** @internal
-   * The value of timeoutMS used for CSOT. Used to override client timeoutMS */
+  /**
+   * @public
+   * @experimental
+   * An overriding timeoutMS value to use for a client-side timeout.
+   * If not provided the session uses the timeoutMS specified on the MongoClient.
+   */
   defaultTimeoutMS?: number;
 
   /** @internal */
@@ -98,6 +103,9 @@ export interface EndSessionOptions {
   error?: AnyError;
   force?: boolean;
   forceClear?: boolean;
+
+  /** Specifies the time an operation will run until it throws a timeout error */
+  timeoutMS?: number;
 }
 
 /**
@@ -115,7 +123,7 @@ export class ClientSession
   /** @internal */
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
-  clientOptions?: MongoOptions;
+  clientOptions: MongoOptions;
   supports: { causalConsistency: boolean };
   clusterTime?: ClusterTime;
   operationTime?: Timestamp;
@@ -138,8 +146,14 @@ export class ClientSession
   [kPinnedConnection]?: Connection;
   /** @internal */
   [kTxnNumberIncrement]: number;
-  /** @internal */
+  /**
+   * @experimental
+   * Specifies the time an operation in a given `ClientSession` will run until it throws a timeout error
+   */
   timeoutMS?: number;
+
+  /** @internal */
+  public timeoutContext: TimeoutContext | null = null;
 
   /**
    * Create a client session.
@@ -153,7 +167,7 @@ export class ClientSession
     client: MongoClient,
     sessionPool: ServerSessionPool,
     options: ClientSessionOptions,
-    clientOptions?: MongoOptions
+    clientOptions: MongoOptions
   ) {
     super();
 
@@ -273,8 +287,13 @@ export class ClientSession
   async endSession(options?: EndSessionOptions): Promise<void> {
     try {
       if (this.inTransaction()) {
-        await this.abortTransaction();
+        await this.abortTransaction({ ...options, throwTimeout: true });
       }
+    } catch (error) {
+      // spec indicates that we should ignore all errors for `endSessions`
+      if (error.name === 'MongoOperationTimeoutError') throw error;
+      squashError(error);
+    } finally {
       if (!this.hasEnded) {
         const serverSession = this[kServerSession];
         if (serverSession != null) {
@@ -290,10 +309,6 @@ export class ClientSession
         this.hasEnded = true;
         this.emit('ended', this);
       }
-    } catch (error) {
-      // spec indicates that we should ignore all errors for `endSessions`
-      squashError(error);
-    } finally {
       maybeClearPinnedConnection(this, { force: true, ...options });
     }
   }
@@ -446,8 +461,10 @@ export class ClientSession
 
   /**
    * Commits the currently active transaction in this session.
+   *
+   * @param options - Optional options, can be used to override `defaultTimeoutMS`.
    */
-  async commitTransaction(): Promise<void> {
+  async commitTransaction(options?: { timeoutMS?: number }): Promise<void> {
     if (this.transaction.state === TxnState.NO_TRANSACTION) {
       throw new MongoTransactionError('No transaction started');
     }
@@ -474,13 +491,31 @@ export class ClientSession
       maxTimeMS?: number;
     } = { commitTransaction: 1 };
 
+    const timeoutMS =
+      typeof options?.timeoutMS === 'number'
+        ? options.timeoutMS
+        : typeof this.timeoutMS === 'number'
+          ? this.timeoutMS
+          : null;
+
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
     if (wc != null) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
+      if (timeoutMS == null && this.timeoutContext == null) {
+        WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
+      } else {
+        const wcKeys = Object.keys(wc);
+        if (wcKeys.length > 2 || (!wcKeys.includes('wtimeoutMS') && !wcKeys.includes('wTimeoutMS')))
+          // if the write concern was specified with wTimeoutMS, then we set both wtimeoutMS and wTimeoutMS, guaranteeing at least two keys, so if we have more than two keys, then we can automatically assume that we should add the write concern to the command. If it has 2 or fewer keys, we need to check that those keys aren't the wtimeoutMS or wTimeoutMS options before we add the write concern to the command
+          WriteConcern.apply(command, { ...wc, wtimeoutMS: undefined });
+      }
     }
 
     if (this.transaction.state === TxnState.TRANSACTION_COMMITTED || this.commitAttempted) {
-      WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
+      if (timeoutMS == null && this.timeoutContext == null) {
+        WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
+      } else {
+        WriteConcern.apply(command, { w: 'majority', ...wc, wtimeoutMS: undefined });
+      }
     }
 
     if (typeof this.transaction.options.maxTimeMS === 'number') {
@@ -497,8 +532,18 @@ export class ClientSession
       bypassPinningCheck: true
     });
 
+    const timeoutContext =
+      this.timeoutContext ??
+      (typeof timeoutMS === 'number'
+        ? TimeoutContext.create({
+            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+            socketTimeoutMS: this.clientOptions.socketTimeoutMS,
+            timeoutMS
+          })
+        : null);
+
     try {
-      await executeOperation(this.client, operation);
+      await executeOperation(this.client, operation, timeoutContext);
       this.commitAttempted = undefined;
       return;
     } catch (firstCommitError) {
@@ -516,7 +561,8 @@ export class ClientSession
               session: this,
               readPreference: ReadPreference.primary,
               bypassPinningCheck: true
-            })
+            }),
+            timeoutContext
           );
           return;
         } catch (retryCommitError) {
@@ -549,8 +595,13 @@ export class ClientSession
 
   /**
    * Aborts the currently active transaction in this session.
+   *
+   * @param options - Optional options, can be used to override `defaultTimeoutMS`.
    */
-  async abortTransaction(): Promise<void> {
+  async abortTransaction(options?: { timeoutMS?: number }): Promise<void>;
+  /** @internal */
+  async abortTransaction(options?: { timeoutMS?: number; throwTimeout?: true }): Promise<void>;
+  async abortTransaction(options?: { timeoutMS?: number; throwTimeout?: true }): Promise<void> {
     if (this.transaction.state === TxnState.NO_TRANSACTION) {
       throw new MongoTransactionError('No transaction started');
     }
@@ -580,8 +631,26 @@ export class ClientSession
       recoveryToken?: Document;
     } = { abortTransaction: 1 };
 
+    const timeoutMS =
+      typeof options?.timeoutMS === 'number'
+        ? options.timeoutMS
+        : this.timeoutContext?.csotEnabled()
+          ? this.timeoutContext.timeoutMS // refresh timeoutMS for abort operation
+          : typeof this.timeoutMS === 'number'
+            ? this.timeoutMS
+            : null;
+
+    const timeoutContext =
+      timeoutMS != null
+        ? TimeoutContext.create({
+            timeoutMS,
+            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+            socketTimeoutMS: this.clientOptions.socketTimeoutMS
+          })
+        : null;
+
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
-    if (wc != null) {
+    if (wc != null && timeoutMS == null) {
       WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
     }
 
@@ -596,17 +665,26 @@ export class ClientSession
     });
 
     try {
-      await executeOperation(this.client, operation);
+      await executeOperation(this.client, operation, timeoutContext);
       this.unpin();
       return;
     } catch (firstAbortError) {
       this.unpin();
 
+      if (firstAbortError.name === 'MongoRuntimeError') throw firstAbortError;
+      if (options?.throwTimeout && firstAbortError.name === 'MongoOperationTimeoutError') {
+        throw firstAbortError;
+      }
+
       if (firstAbortError instanceof MongoError && isRetryableWriteError(firstAbortError)) {
         try {
-          await executeOperation(this.client, operation);
+          await executeOperation(this.client, operation, timeoutContext);
           return;
-        } catch {
+        } catch (secondAbortError) {
+          if (secondAbortError.name === 'MongoRuntimeError') throw secondAbortError;
+          if (options?.throwTimeout && secondAbortError.name === 'MongoOperationTimeoutError') {
+            throw secondAbortError;
+          }
           // we do not retry the retry
         }
       }
@@ -636,6 +714,9 @@ export class ClientSession
    * `Promise.allSettled`, `Promise.race`, etc to parallelize operations inside a transaction is
    * undefined behaviour.
    *
+   * **IMPORTANT:** When running an operation inside a `withTransaction` callback, if it is not
+   * provided the explicit session in its options, it will not be part of the transaction and it will not respect timeoutMS.
+   *
    *
    * @remarks
    * - If all operations successfully complete and the `commitTransaction` operation is successful, then the provided function will return the result of the provided function.
@@ -661,96 +742,119 @@ export class ClientSession
    */
   async withTransaction<T = any>(
     fn: WithTransactionCallback<T>,
-    options?: TransactionOptions
+    options?: TransactionOptions & {
+      /**
+       * Configures a timeoutMS expiry for the entire withTransactionCallback.
+       *
+       * @remarks
+       * - The remaining timeout will not be applied to callback operations that do not use the ClientSession.
+       * - Overriding timeoutMS for operations executed using the explicit session inside the provided callback will result in a client-side error.
+       */
+      timeoutMS?: number;
+    }
   ): Promise<T> {
     const MAX_TIMEOUT = 120000;
-    const startTime = now();
+
+    const timeoutMS = options?.timeoutMS ?? this.timeoutMS ?? null;
+    this.timeoutContext =
+      timeoutMS != null
+        ? TimeoutContext.create({
+            timeoutMS,
+            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+            socketTimeoutMS: this.clientOptions.socketTimeoutMS
+          })
+        : null;
+
+    const startTime = this.timeoutContext?.csotEnabled() ? this.timeoutContext.start : now();
 
     let committed = false;
     let result: any;
 
-    while (!committed) {
-      this.startTransaction(options); // may throw on error
-
-      try {
-        const promise = fn(this);
-        if (!isPromiseLike(promise)) {
-          throw new MongoInvalidArgumentError(
-            'Function provided to `withTransaction` must return a Promise'
-          );
-        }
-
-        result = await promise;
-
-        if (
-          this.transaction.state === TxnState.NO_TRANSACTION ||
-          this.transaction.state === TxnState.TRANSACTION_COMMITTED ||
-          this.transaction.state === TxnState.TRANSACTION_ABORTED
-        ) {
-          // Assume callback intentionally ended the transaction
-          return result;
-        }
-      } catch (fnError) {
-        if (!(fnError instanceof MongoError) || fnError instanceof MongoInvalidArgumentError) {
-          await this.abortTransaction();
-          throw fnError;
-        }
-
-        if (
-          this.transaction.state === TxnState.STARTING_TRANSACTION ||
-          this.transaction.state === TxnState.TRANSACTION_IN_PROGRESS
-        ) {
-          await this.abortTransaction();
-        }
-
-        if (
-          fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-          now() - startTime < MAX_TIMEOUT
-        ) {
-          continue;
-        }
-
-        throw fnError;
-      }
-
+    try {
       while (!committed) {
+        this.startTransaction(options); // may throw on error
+
         try {
-          /*
-           * We will rely on ClientSession.commitTransaction() to
-           * apply a majority write concern if commitTransaction is
-           * being retried (see: DRIVERS-601)
-           */
-          await this.commitTransaction();
-          committed = true;
-        } catch (commitError) {
-          /*
-           * Note: a maxTimeMS error will have the MaxTimeMSExpired
-           * code (50) and can be reported as a top-level error or
-           * inside writeConcernError, ex.
-           * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
-           * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
-           */
+          const promise = fn(this);
+          if (!isPromiseLike(promise)) {
+            throw new MongoInvalidArgumentError(
+              'Function provided to `withTransaction` must return a Promise'
+            );
+          }
+
+          result = await promise;
+
           if (
-            !isMaxTimeMSExpiredError(commitError) &&
-            commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult) &&
-            now() - startTime < MAX_TIMEOUT
+            this.transaction.state === TxnState.NO_TRANSACTION ||
+            this.transaction.state === TxnState.TRANSACTION_COMMITTED ||
+            this.transaction.state === TxnState.TRANSACTION_ABORTED
+          ) {
+            // Assume callback intentionally ended the transaction
+            return result;
+          }
+        } catch (fnError) {
+          if (!(fnError instanceof MongoError) || fnError instanceof MongoInvalidArgumentError) {
+            await this.abortTransaction();
+            throw fnError;
+          }
+
+          if (
+            this.transaction.state === TxnState.STARTING_TRANSACTION ||
+            this.transaction.state === TxnState.TRANSACTION_IN_PROGRESS
+          ) {
+            await this.abortTransaction();
+          }
+
+          if (
+            fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
+            (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
           ) {
             continue;
           }
 
-          if (
-            commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-            now() - startTime < MAX_TIMEOUT
-          ) {
-            break;
-          }
+          throw fnError;
+        }
 
-          throw commitError;
+        while (!committed) {
+          try {
+            /*
+             * We will rely on ClientSession.commitTransaction() to
+             * apply a majority write concern if commitTransaction is
+             * being retried (see: DRIVERS-601)
+             */
+            await this.commitTransaction();
+            committed = true;
+          } catch (commitError) {
+            /*
+             * Note: a maxTimeMS error will have the MaxTimeMSExpired
+             * code (50) and can be reported as a top-level error or
+             * inside writeConcernError, ex.
+             * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
+             * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
+             */
+            if (
+              !isMaxTimeMSExpiredError(commitError) &&
+              commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult) &&
+              (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
+            ) {
+              continue;
+            }
+
+            if (
+              commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
+              (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
+            ) {
+              break;
+            }
+
+            throw commitError;
+          }
         }
       }
+      return result;
+    } finally {
+      this.timeoutContext = null;
     }
-
-    return result;
   }
 }
 

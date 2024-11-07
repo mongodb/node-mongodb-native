@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
 import { clearTimeout, setTimeout } from 'timers';
+import { inspect } from 'util';
 
 import {
   addContainerMetadata,
@@ -12,7 +13,8 @@ import {
   makeClientMetadata,
   type MongoClient,
   type Server,
-  shuffle
+  shuffle,
+  TimeoutContext
 } from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { type FailPoint, sleep } from './utils';
@@ -168,8 +170,14 @@ const compareInputToSpec = (input, expected, message) => {
     return;
   }
 
+  const expectedEntries: [string, unknown][] = Object.entries(expected).map(([k, v]) => {
+    // Node uses `durationMS` instead of `duration` on CMAP events.
+    if (k === 'duration') return ['durationMS', v];
+    return [k, v];
+  });
+
   if (expected && typeof expected === 'object') {
-    for (const [expectedPropName, expectedValue] of Object.entries(expected)) {
+    for (const [expectedPropName, expectedValue] of expectedEntries) {
       expect(input, message).to.have.property(expectedPropName);
       compareInputToSpec(
         input[expectedPropName],
@@ -185,7 +193,14 @@ const compareInputToSpec = (input, expected, message) => {
 
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   checkOut: async function (op) {
-    const connection: Connection = await ConnectionPool.prototype.checkOut.call(threadContext.pool);
+    const timeoutContext = TimeoutContext.create({
+      serverSelectionTimeoutMS: 0,
+      waitQueueTimeoutMS: threadContext.pool.options.waitQueueTimeoutMS
+    });
+    const connection: Connection = await ConnectionPool.prototype.checkOut.call(
+      threadContext.pool,
+      { timeoutContext }
+    );
     if (op.label != null) {
       threadContext.connections.set(op.label, connection);
     } else {
@@ -419,7 +434,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     }
     compareInputToSpec(actualError, errorPropsToCheck, `failed while checking ${errorType}`);
   } else {
-    expect(actualError).to.not.exist;
+    expect(actualError, inspect(actualError)).to.not.exist;
   }
 
   const actualEvents = threadContext.poolEvents.filter(

@@ -2,6 +2,7 @@ import { Readable } from 'stream';
 
 import type { Document, ObjectId } from '../bson';
 import type { Collection } from '../collection';
+import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { FindCursor } from '../cursor/find_cursor';
 import {
   MongoGridFSChunkError,
@@ -12,6 +13,7 @@ import {
 import type { FindOptions } from '../operations/find';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
+import { CSOTTimeoutContext } from '../timeout';
 import type { Callback } from '../utils';
 import type { GridFSChunk } from './upload';
 
@@ -28,7 +30,10 @@ export interface GridFSBucketReadStreamOptions {
    * to be returned by the stream. `end` is non-inclusive
    */
   end?: number;
-  /** @internal TODO(NODE-5688): make this public */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 
@@ -98,8 +103,10 @@ export interface GridFSBucketReadStreamPrivate {
     skip?: number;
     start: number;
     end: number;
+    timeoutMS?: number;
   };
   readPreference?: ReadPreference;
+  timeoutContext?: CSOTTimeoutContext;
 }
 
 /**
@@ -148,7 +155,11 @@ export class GridFSBucketReadStream extends Readable {
         end: 0,
         ...options
       },
-      readPreference
+      readPreference,
+      timeoutContext:
+        options?.timeoutMS != null
+          ? new CSOTTimeoutContext({ timeoutMS: options.timeoutMS, serverSelectionTimeoutMS: 0 })
+          : undefined
     };
   }
 
@@ -196,7 +207,8 @@ export class GridFSBucketReadStream extends Readable {
   async abort(): Promise<void> {
     this.push(null);
     this.destroy();
-    await this.s.cursor?.close();
+    const remainingTimeMS = this.s.timeoutContext?.getRemainingTimeMSOrThrow();
+    await this.s.cursor?.close({ timeoutMS: remainingTimeMS });
   }
 }
 
@@ -352,7 +364,22 @@ function init(stream: GridFSBucketReadStream): void {
         filter['n'] = { $gte: skip };
       }
     }
-    stream.s.cursor = stream.s.chunks.find(filter).sort({ n: 1 });
+
+    let remainingTimeMS: number | undefined;
+    try {
+      remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(
+        `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
+      );
+    } catch (error) {
+      return stream.destroy(error);
+    }
+
+    stream.s.cursor = stream.s.chunks
+      .find(filter, {
+        timeoutMode: stream.s.options.timeoutMS != null ? CursorTimeoutMode.LIFETIME : undefined,
+        timeoutMS: remainingTimeMS
+      })
+      .sort({ n: 1 });
 
     if (stream.s.readPreference) {
       stream.s.cursor.withReadPreference(stream.s.readPreference);
@@ -370,6 +397,18 @@ function init(stream: GridFSBucketReadStream): void {
     stream.emit(GridFSBucketReadStream.FILE, doc);
     return;
   };
+
+  let remainingTimeMS: number | undefined;
+  try {
+    remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(
+      `Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`
+    );
+  } catch (error) {
+    if (!stream.destroyed) stream.destroy(error);
+    return;
+  }
+
+  findOneOptions.timeoutMS = remainingTimeMS;
 
   stream.s.files.findOne(stream.s.filter, findOneOptions).then(handleReadResult, error => {
     if (stream.destroyed) return;

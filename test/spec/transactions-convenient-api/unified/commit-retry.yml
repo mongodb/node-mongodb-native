@@ -1,6 +1,6 @@
 description: commit-retry
 
-schemaVersion: '1.3'
+schemaVersion: '1.4'
 
 runOnRequirements:
   - minServerVersion: '4.0'
@@ -212,6 +212,9 @@ tests:
           - { _id: 1 }
   -
     description: commit is not retried after MaxTimeMSExpired error
+    runOnRequirements:
+      # Serverless sets empty `codeName` on failpoint errors. Remove once CLOUDP-280424 is fixed.
+      - serverless: forbid
     operations:
       - name: failPoint
         object: testRunner

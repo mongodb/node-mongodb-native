@@ -59,7 +59,8 @@
     },
     {
       "type": "ConnectionCheckedOut",
-      "address": 42
+      "address": 42,
+      "duration": 42
     },
     {
       "type": "ConnectionCheckOutStarted",
@@ -76,17 +77,20 @@
     {
       "type": "ConnectionCheckOutFailed",
       "reason": "connectionError",
-      "address": 42
+      "address": 42,
+      "duration": 42
     },
     {
       "type": "ConnectionCheckOutFailed",
       "reason": "connectionError",
-      "address": 42
+      "address": 42,
+      "duration": 42
     },
     {
       "type": "ConnectionCheckOutFailed",
       "reason": "connectionError",
-      "address": 42
+      "address": 42,
+      "duration": 42
     }
   ],
   "ignore": [

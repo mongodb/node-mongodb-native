@@ -40,9 +40,11 @@ const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(`${__dirname}/data/kms-decrypt-r
 
 class MockClient {
   options: any;
+  s: { options: any };
 
   constructor(options?: any) {
     this.options = { options: options || {} };
+    this.s = { options: this.options };
   }
 }
 

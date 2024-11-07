@@ -1102,6 +1102,7 @@ functions:
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           MONGODB_URI: ${MONGODB_URI}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
@@ -1146,7 +1147,7 @@ tasks:
       - func: bootstrap kms servers
       - func: "run serverless tests"
 
-  - name: run-spec-benchmark-tests-node-18-server-6.0
+  - name: run-spec-benchmark-tests-node-server
     tags:
       - run-spec-benchmark-tests
       - performance
@@ -1156,8 +1157,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: NODE_LTS_VERSION, value: v18.16.0 }
-            - { key: NPM_VERSION, value: "9" }
+            - { key: NODE_LTS_VERSION, value: v22.11.0 }
             - { key: VERSION, value: v6.0-perf }
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: noauth }
@@ -1615,4 +1615,4 @@ buildvariants:
     display_name: Performance Test
     run_on: rhel90-dbx-perf-large
     tasks:
-      - run-spec-benchmark-tests-node-18-server-6.0
+      - run-spec-benchmark-tests-node-server

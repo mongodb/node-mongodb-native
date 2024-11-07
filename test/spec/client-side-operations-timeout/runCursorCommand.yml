@@ -70,7 +70,7 @@ tests:
     runOnRequirements:
       - serverless: forbid
     operations:
-      # Block find/getMore for 15ms.
+      # Block find/getMore for 60ms.
       - name: failPoint
         object: testRunner
         arguments:
@@ -83,8 +83,9 @@ tests:
               blockConnection: true
               blockTimeMS: 60
       # Run a find with timeoutMS less than double our failPoint blockTimeMS and
-      # batchSize less than the total document count will cause a find and a getMore to be sent.
-      # Both will block for 60ms so together they will go over the timeout.
+      # batchSize less than the total document count will cause a find and a 
+      # getMore to be sent. Both will block for 60ms so together they will go 
+      # over the timeout.
       - name: runCursorCommand
         object: *db
         arguments:
@@ -106,12 +107,12 @@ tests:
               command:
                 getMore: { $$type: [int, long] }
                 collection: *collection
-                maxTimeMS: { $$exists: true }
+                maxTimeMS: { $$exists: false }
 
   # If timeoutMode=ITERATION, timeoutMS applies separately to the initial find and the getMore on the cursor. Neither
   # command should have a maxTimeMS field. This is a failure test. The "find" inherits timeoutMS=100 and "getMore"
   # commands are blocked for 60ms, causing iteration to fail with a timeout error.
-  - description: Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure
+  - description: Non-tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure
     runOnRequirements:
       - serverless: forbid
     operations:

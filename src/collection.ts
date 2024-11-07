@@ -11,7 +11,7 @@ import {
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
-import { MongoInvalidArgumentError } from './error';
+import { MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Filter,
@@ -115,7 +115,10 @@ export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOpt
   readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
   readPreference?: ReadPreferenceLike;
-  /** @internal TODO(NODE-5688): make this public */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 
@@ -260,6 +263,10 @@ export class Collection<TSchema extends Document = Document> {
 
   set hint(v: Hint | undefined) {
     this.s.collectionHint = normalizeHintField(v);
+  }
+
+  public get timeoutMS(): number | undefined {
+    return this.s.options.timeoutMS;
   }
 
   /**
@@ -465,10 +472,14 @@ export class Collection<TSchema extends Document = Document> {
     // Intentionally, we do not inherit options from parent for this operation.
     return await executeOperation(
       this.client,
-      new RenameOperation(this as TODO_NODE_3286, newName, {
-        ...options,
-        readPreference: ReadPreference.PRIMARY
-      }) as TODO_NODE_3286
+      new RenameOperation(
+        this as TODO_NODE_3286,
+        newName,
+        resolveOptions(undefined, {
+          ...options,
+          readPreference: ReadPreference.PRIMARY
+        })
+      ) as TODO_NODE_3286
     );
   }
 
@@ -492,12 +503,18 @@ export class Collection<TSchema extends Document = Document> {
    */
   async findOne(): Promise<WithId<TSchema> | null>;
   async findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
-  async findOne(filter: Filter<TSchema>, options: FindOptions): Promise<WithId<TSchema> | null>;
+  async findOne(
+    filter: Filter<TSchema>,
+    options: Omit<FindOptions, 'timeoutMode'>
+  ): Promise<WithId<TSchema> | null>;
 
   // allow an override of the schema.
   async findOne<T = TSchema>(): Promise<T | null>;
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
-  async findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | null>;
+  async findOne<T = TSchema>(
+    filter: Filter<TSchema>,
+    options?: Omit<FindOptions, 'timeoutMode'>
+  ): Promise<T | null>;
 
   async findOne(
     filter: Filter<TSchema> = {},
@@ -669,7 +686,9 @@ export class Collection<TSchema extends Document = Document> {
         new DropIndexOperation(this as TODO_NODE_3286, '*', resolveOptions(this, options))
       );
       return true;
-    } catch {
+    } catch (error) {
+      // TODO(NODE-6517): Driver should only filter for namespace not found error. Other errors should be thrown.
+      if (error instanceof MongoOperationTimeoutError) throw error;
       return false;
     }
   }
@@ -1031,6 +1050,59 @@ export class Collection<TSchema extends Document = Document> {
    *     // No need to narrow in code because the generics did that for us!
    *     expectType<Schema>(change.fullDocument);
    *   });
+   * ```
+   *
+   * @remarks
+   * When `timeoutMS` is configured for a change stream, it will have different behaviour depending
+   * on whether the change stream is in iterator mode or emitter mode. In both cases, a change
+   * stream will time out if it does not receive a change event within `timeoutMS` of the last change
+   * event.
+   *
+   * Note that if a change stream is consistently timing out when watching a collection, database or
+   * client that is being changed, then this may be due to the server timing out before it can finish
+   * processing the existing oplog. To address this, restart the change stream with a higher
+   * `timeoutMS`.
+   *
+   * If the change stream times out the initial aggregate operation to establish the change stream on
+   * the server, then the client will close the change stream. If the getMore calls to the server
+   * time out, then the change stream will be left open, but will throw a MongoOperationTimeoutError
+   * when in iterator mode and emit an error event that returns a MongoOperationTimeoutError in
+   * emitter mode.
+   *
+   * To determine whether or not the change stream is still open following a timeout, check the
+   * {@link ChangeStream.closed} getter.
+   *
+   * @example
+   * In iterator mode, if a next() call throws a timeout error, it will attempt to resume the change stream.
+   * The next call can just be retried after this succeeds.
+   * ```ts
+   * const changeStream = collection.watch([], { timeoutMS: 100 });
+   * try {
+   *     await changeStream.next();
+   * } catch (e) {
+   *     if (e instanceof MongoOperationTimeoutError && !changeStream.closed) {
+   *       await changeStream.next();
+   *     }
+   *     throw e;
+   * }
+   * ```
+   *
+   * @example
+   * In emitter mode, if the change stream goes `timeoutMS` without emitting a change event, it will
+   * emit an error event that returns a MongoOperationTimeoutError, but will not close the change
+   * stream unless the resume attempt fails. There is no need to re-establish change listeners as
+   * this will automatically continue emitting change events once the resume attempt completes.
+   *
+   * ```ts
+   * const changeStream = collection.watch([], { timeoutMS: 100 });
+   * changeStream.on('change', console.log);
+   * changeStream.on('error', e => {
+   *     if (e instanceof MongoOperationTimeoutError && !changeStream.closed) {
+   *         // do nothing
+   *     } else {
+   *         changeStream.close();
+   *     }
+   * });
    * ```
    *
    * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.

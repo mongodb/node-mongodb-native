@@ -130,7 +130,10 @@ export type SupportedNodeConnectionOptions = SupportedTLSConnectionOptions &
 export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeConnectionOptions {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
-  /** @internal TODO(NODE-5688): This option is in development and currently has no behaviour.  */
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
   /** Enables or disables TLS/SSL for the connection. */
   tls?: boolean;
@@ -482,6 +485,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     return this.s.bsonOptions;
   }
 
+  get timeoutMS(): number | undefined {
+    return this.s.options.timeoutMS;
+  }
+
   /**
    * Executes a client bulk write operation, available on server 8.0+.
    * @param models - The client bulk write models.
@@ -507,6 +514,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /**
    * Connect to MongoDB using a url
+   *
+   * @remarks
+   * Calling `connect` is optional since the first operation you perform will call `connect` if it's needed.
+   * `timeoutMS` will bound the time any operation can take before throwing a timeout error.
+   * However, when the operation being run is automatically connecting your `MongoClient` the `timeoutMS` will not apply to the time taken to connect the MongoClient.
+   * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
+   * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
    *
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
@@ -688,7 +702,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
     // Default to db from connection string if not provided
     if (!dbName) {
-      dbName = this.options.dbName;
+      dbName = this.s.options.dbName;
     }
 
     // Copy the options and add out internal override of the not shared flag
@@ -703,6 +717,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /**
    * Connect to MongoDB using a url
+   *
+   * @remarks
+   * Calling `connect` is optional since the first operation you perform will call `connect` if it's needed.
+   * `timeoutMS` will bound the time any operation can take before throwing a timeout error.
+   * However, when the operation being run is automatically connecting your `MongoClient` the `timeoutMS` will not apply to the time taken to connect the MongoClient.
+   * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
+   * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
    *
    * @remarks
    * The programmatically provided options take precedence over the URI options.
@@ -789,6 +810,58 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * - The first is to provide the schema that may be defined for all the data within the current cluster
    * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
    *
+   * @remarks
+   * When `timeoutMS` is configured for a change stream, it will have different behaviour depending
+   * on whether the change stream is in iterator mode or emitter mode. In both cases, a change
+   * stream will time out if it does not receive a change event within `timeoutMS` of the last change
+   * event.
+   *
+   * Note that if a change stream is consistently timing out when watching a collection, database or
+   * client that is being changed, then this may be due to the server timing out before it can finish
+   * processing the existing oplog. To address this, restart the change stream with a higher
+   * `timeoutMS`.
+   *
+   * If the change stream times out the initial aggregate operation to establish the change stream on
+   * the server, then the client will close the change stream. If the getMore calls to the server
+   * time out, then the change stream will be left open, but will throw a MongoOperationTimeoutError
+   * when in iterator mode and emit an error event that returns a MongoOperationTimeoutError in
+   * emitter mode.
+   *
+   * To determine whether or not the change stream is still open following a timeout, check the
+   * {@link ChangeStream.closed} getter.
+   *
+   * @example
+   * In iterator mode, if a next() call throws a timeout error, it will attempt to resume the change stream.
+   * The next call can just be retried after this succeeds.
+   * ```ts
+   * const changeStream = collection.watch([], { timeoutMS: 100 });
+   * try {
+   *     await changeStream.next();
+   * } catch (e) {
+   *     if (e instanceof MongoOperationTimeoutError && !changeStream.closed) {
+   *       await changeStream.next();
+   *     }
+   *     throw e;
+   * }
+   * ```
+   *
+   * @example
+   * In emitter mode, if the change stream goes `timeoutMS` without emitting a change event, it will
+   * emit an error event that returns a MongoOperationTimeoutError, but will not close the change
+   * stream unless the resume attempt fails. There is no need to re-establish change listeners as
+   * this will automatically continue emitting change events once the resume attempt completes.
+   *
+   * ```ts
+   * const changeStream = collection.watch([], { timeoutMS: 100 });
+   * changeStream.on('change', console.log);
+   * changeStream.on('error', e => {
+   *     if (e instanceof MongoOperationTimeoutError && !changeStream.closed) {
+   *         // do nothing
+   *     } else {
+   *         changeStream.close();
+   *     }
+   * });
+   * ```
    * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    * @typeParam TSchema - Type of the data being detected by the change stream
@@ -952,6 +1025,5 @@ export interface MongoOptions
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
-  /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }

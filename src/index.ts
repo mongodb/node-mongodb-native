@@ -10,6 +10,7 @@ import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import type { RunCommandCursor } from './cursor/run_command_cursor';
 import { Db } from './db';
+import { ExplainableCursor } from './explain';
 import { GridFSBucket } from './gridfs';
 import { GridFSBucketReadStream } from './gridfs/download';
 import { GridFSBucketWriteStream } from './gridfs/upload';
@@ -36,7 +37,11 @@ export {
   Timestamp,
   UUID
 } from './bson';
-export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
+export {
+  type AnyBulkWriteOperation,
+  type BulkWriteOptions,
+  MongoBulkWriteError
+} from './bulk/common';
 export { ClientEncryption } from './client-side-encryption/client_encryption';
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
@@ -66,6 +71,7 @@ export {
   MongoNetworkTimeoutError,
   MongoNotConnectedError,
   MongoOIDCError,
+  MongoOperationTimeoutError,
   MongoParseError,
   MongoRuntimeError,
   MongoServerClosedError,
@@ -90,6 +96,7 @@ export {
   ClientSession,
   Collection,
   Db,
+  ExplainableCursor,
   FindCursor,
   GridFSBucket,
   GridFSBucketReadStream,
@@ -108,7 +115,7 @@ export { AutoEncryptionLoggerLevel } from './client-side-encryption/auto_encrypt
 export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
-export { CURSOR_FLAGS } from './cursor/abstract_cursor';
+export { CURSOR_FLAGS, CursorTimeoutMode } from './cursor/abstract_cursor';
 export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { ServerApiVersion } from './mongo_client';
@@ -358,6 +365,7 @@ export type {
   CursorStreamOptions
 } from './cursor/abstract_cursor';
 export type {
+  CursorTimeoutContext,
   InitialCursorResponse,
   InternalAbstractCursorOptions
 } from './cursor/abstract_cursor';
@@ -566,7 +574,13 @@ export type {
   RTTSampler,
   ServerMonitoringMode
 } from './sdam/monitor';
-export type { Server, ServerEvents, ServerOptions, ServerPrivate } from './sdam/server';
+export type {
+  Server,
+  ServerCommandOptions,
+  ServerEvents,
+  ServerOptions,
+  ServerPrivate
+} from './sdam/server';
 export type {
   ServerDescription,
   ServerDescriptionOptions,
@@ -597,7 +611,15 @@ export type {
   WithTransactionCallback
 } from './sessions';
 export type { Sort, SortDirection, SortDirectionForCmd, SortForCmd } from './sort';
-export type { Timeout } from './timeout';
+export type {
+  CSOTTimeoutContext,
+  CSOTTimeoutContextOptions,
+  LegacyTimeoutContext,
+  LegacyTimeoutContextOptions,
+  Timeout,
+  TimeoutContext,
+  TimeoutContextOptions
+} from './timeout';
 export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,

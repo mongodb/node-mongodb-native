@@ -1,7 +1,13 @@
 'use strict';
 const { expect } = require('chai');
 const { filterForCommands } = require('../shared');
-const { promiseWithResolvers, MongoCursorExhaustedError } = require('../../mongodb');
+const {
+  promiseWithResolvers,
+  MongoCursorExhaustedError,
+  CursorTimeoutContext,
+  TimeoutContext,
+  MongoAPIError
+} = require('../../mongodb');
 
 describe('Find Cursor', function () {
   let client;
@@ -246,23 +252,45 @@ describe('Find Cursor', function () {
   });
 
   context('#rewind', function () {
-    it('should rewind a cursor', function (done) {
+    it('should rewind a cursor', async function () {
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({});
-      this.defer(() => cursor.close());
 
-      cursor.toArray((err, docs) => {
-        expect(err).to.not.exist;
-        expect(docs).to.have.length(6);
+      try {
+        let docs = await cursor.toArray();
+        expect(docs).to.have.lengthOf(6);
 
         cursor.rewind();
-        cursor.toArray((err, docs) => {
-          expect(err).to.not.exist;
-          expect(docs).to.have.length(6);
+        docs = await cursor.toArray();
+        expect(docs).to.have.lengthOf(6);
+      } finally {
+        await cursor.close();
+      }
+    });
 
-          done();
-        });
-      });
+    it('throws if the cursor does not own its timeoutContext', async function () {
+      const coll = client.db().collection('abstract_cursor');
+      const cursor = coll.find(
+        {},
+        {
+          timeoutContext: new CursorTimeoutContext(
+            TimeoutContext.create({
+              timeoutMS: 1000,
+              serverSelectionTimeoutMS: 1000
+            }),
+            Symbol()
+          )
+        }
+      );
+
+      try {
+        cursor.rewind();
+        expect.fail(`rewind should have thrown.`);
+      } catch (error) {
+        expect(error).to.be.instanceOf(MongoAPIError);
+      } finally {
+        await cursor.close();
+      }
     });
 
     it('should end an implicit session on rewind', {

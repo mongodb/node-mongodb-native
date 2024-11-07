@@ -1,14 +1,25 @@
 import { expect } from 'chai';
 
-import { MongoInvalidArgumentError, Timeout, TimeoutError } from '../mongodb';
+import {
+  CSOTTimeoutContext,
+  LegacyTimeoutContext,
+  MongoInvalidArgumentError,
+  MongoRuntimeError,
+  Timeout,
+  TimeoutContext,
+  TimeoutError
+} from '../mongodb';
 
 describe('Timeout', function () {
   let timeout: Timeout;
 
   beforeEach(() => {
-    if (Timeout.is(timeout)) {
-      timeout.clear();
-    }
+    timeout = null;
+  });
+
+  beforeEach(() => {
+    timeout?.clear();
+    timeout = null;
   });
 
   describe('expires()', function () {
@@ -63,54 +74,197 @@ describe('Timeout', function () {
       });
     });
   });
+});
 
-  describe('is()', function () {
-    context('when called on a Timeout instance', function () {
-      it('returns true', function () {
-        expect(Timeout.is(Timeout.expires(0))).to.be.true;
+describe('TimeoutContext', function () {
+  describe('TimeoutContext.create', function () {
+    context('when timeoutMS is a number', function () {
+      it('returns a CSOTTimeoutContext instance', function () {
+        const ctx = TimeoutContext.create({
+          timeoutMS: 0,
+          serverSelectionTimeoutMS: 0,
+          waitQueueTimeoutMS: 0
+        });
+
+        expect(ctx).to.be.instanceOf(CSOTTimeoutContext);
       });
     });
 
-    context('when called on a nullish object ', function () {
-      it('returns false', function () {
-        expect(Timeout.is(undefined)).to.be.false;
-        expect(Timeout.is(null)).to.be.false;
+    context('when timeoutMS is undefined', function () {
+      it('returns a LegacyTimeoutContext instance', function () {
+        const ctx = TimeoutContext.create({
+          serverSelectionTimeoutMS: 0,
+          waitQueueTimeoutMS: 0
+        });
+
+        expect(ctx).to.be.instanceOf(LegacyTimeoutContext);
+      });
+    });
+  });
+
+  describe('CSOTTimeoutContext', function () {
+    let ctx: CSOTTimeoutContext;
+
+    describe('get serverSelectionTimeout()', function () {
+      let timeout: Timeout | null;
+
+      afterEach(() => {
+        timeout?.clear();
+      });
+
+      context('when timeoutMS is 0 and serverSelectionTimeoutMS is 0', function () {
+        it('returns null', function () {
+          ctx = new CSOTTimeoutContext({
+            timeoutMS: 0,
+            serverSelectionTimeoutMS: 0
+          });
+
+          expect(ctx.serverSelectionTimeout).to.be.null;
+        });
+      });
+
+      context('when timeoutMS is 0 and serverSelectionTimeoutMS is >0', function () {
+        it('returns a Timeout instance with duration set to serverSelectionTimeoutMS', function () {
+          ctx = new CSOTTimeoutContext({
+            timeoutMS: 0,
+            serverSelectionTimeoutMS: 10
+          });
+
+          timeout = ctx.serverSelectionTimeout;
+          expect(timeout).to.be.instanceOf(Timeout);
+
+          expect(timeout.duration).to.equal(ctx.serverSelectionTimeoutMS);
+        });
+      });
+
+      context(
+        'when timeoutMS is >0 serverSelectionTimeoutMS is >0 and timeoutMS > serverSelectionTimeoutMS',
+        function () {
+          it('returns a Timeout instance with duration set to serverSelectionTimeoutMS', function () {
+            ctx = new CSOTTimeoutContext({
+              timeoutMS: 15,
+              serverSelectionTimeoutMS: 10
+            });
+
+            timeout = ctx.serverSelectionTimeout;
+            expect(timeout).to.exist;
+            expect(timeout).to.be.instanceOf(Timeout);
+            expect(timeout.duration).to.equal(ctx.serverSelectionTimeoutMS);
+          });
+        }
+      );
+
+      context(
+        'when timeoutMS is >0, serverSelectionTimeoutMS is >0 and timeoutMS < serverSelectionTimeoutMS',
+        function () {
+          it('returns a Timeout instance with duration set to timeoutMS', function () {
+            ctx = new CSOTTimeoutContext({
+              timeoutMS: 10,
+              serverSelectionTimeoutMS: 15
+            });
+
+            timeout = ctx.serverSelectionTimeout;
+            expect(timeout).to.exist;
+            expect(timeout).to.be.instanceOf(Timeout);
+            expect(timeout.duration).to.equal(ctx.timeoutMS);
+          });
+        }
+      );
+    });
+
+    describe('get connectionCheckoutTimeout()', function () {
+      context('when called before get serverSelectionTimeout()', function () {
+        it('throws a MongoRuntimeError', function () {
+          ctx = new CSOTTimeoutContext({
+            timeoutMS: 100,
+            serverSelectionTimeoutMS: 15
+          });
+
+          expect(() => ctx.connectionCheckoutTimeout).to.throw(MongoRuntimeError);
+        });
+      });
+
+      context('when called after get serverSelectionTimeout()', function () {
+        let serverSelectionTimeout: Timeout;
+        let connectionCheckoutTimeout: Timeout;
+
+        afterEach(() => {
+          serverSelectionTimeout.clear();
+          connectionCheckoutTimeout.clear();
+        });
+
+        it('returns same timeout as serverSelectionTimeout', function () {
+          ctx = new CSOTTimeoutContext({
+            timeoutMS: 100,
+            serverSelectionTimeoutMS: 86
+          });
+          serverSelectionTimeout = ctx.serverSelectionTimeout;
+          connectionCheckoutTimeout = ctx.connectionCheckoutTimeout;
+
+          expect(connectionCheckoutTimeout).to.exist;
+          expect(connectionCheckoutTimeout).to.equal(serverSelectionTimeout);
+        });
+      });
+    });
+  });
+
+  describe('LegacyTimeoutContext', function () {
+    let timeout: Timeout | null;
+
+    afterEach(() => {
+      timeout?.clear();
+    });
+
+    describe('get serverSelectionTimeout()', function () {
+      context('when serverSelectionTimeoutMS > 0', function () {
+        it('returns a Timeout instance with duration set to serverSelectionTimeoutMS', function () {
+          const ctx = new LegacyTimeoutContext({
+            serverSelectionTimeoutMS: 100,
+            waitQueueTimeoutMS: 10
+          });
+
+          timeout = ctx.serverSelectionTimeout;
+          expect(timeout).to.be.instanceOf(Timeout);
+          expect(timeout.duration).to.equal(ctx.options.serverSelectionTimeoutMS);
+        });
+      });
+
+      context('when serverSelectionTimeoutMS = 0', function () {
+        it('returns null', function () {
+          const ctx = new LegacyTimeoutContext({
+            serverSelectionTimeoutMS: 0,
+            waitQueueTimeoutMS: 10
+          });
+
+          timeout = ctx.serverSelectionTimeout;
+          expect(timeout).to.be.null;
+        });
       });
     });
 
-    context('when called on a primitive type', function () {
-      it('returns false', function () {
-        expect(Timeout.is(1)).to.be.false;
-        expect(Timeout.is('hello')).to.be.false;
-        expect(Timeout.is(true)).to.be.false;
-        expect(Timeout.is(1n)).to.be.false;
-        expect(Timeout.is(Symbol.for('test'))).to.be.false;
+    describe('get connectionCheckoutTimeout()', function () {
+      context('when waitQueueTimeoutMS > 0', function () {
+        it('returns a Timeout instance with duration set to waitQueueTimeoutMS', function () {
+          const ctx = new LegacyTimeoutContext({
+            serverSelectionTimeoutMS: 10,
+            waitQueueTimeoutMS: 20
+          });
+          timeout = ctx.connectionCheckoutTimeout;
+
+          expect(timeout).to.be.instanceOf(Timeout);
+          expect(timeout.duration).to.equal(ctx.options.waitQueueTimeoutMS);
+        });
       });
-    });
 
-    context('when called on a Promise-like object with a matching toStringTag', function () {
-      it('returns true', function () {
-        const timeoutLike = {
-          [Symbol.toStringTag]: 'MongoDBTimeout',
-          then() {
-            return 0;
-          }
-        };
+      context('when waitQueueTimeoutMS = 0', function () {
+        it('returns null', function () {
+          const ctx = new LegacyTimeoutContext({
+            serverSelectionTimeoutMS: 10,
+            waitQueueTimeoutMS: 0
+          });
 
-        expect(Timeout.is(timeoutLike)).to.be.true;
-      });
-    });
-
-    context('when called on a Promise-like object without a matching toStringTag', function () {
-      it('returns false', function () {
-        const timeoutLike = {
-          [Symbol.toStringTag]: 'lol',
-          then() {
-            return 0;
-          }
-        };
-
-        expect(Timeout.is(timeoutLike)).to.be.false;
+          expect(ctx.connectionCheckoutTimeout).to.be.null;
+        });
       });
     });
   });
