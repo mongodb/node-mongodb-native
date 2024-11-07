@@ -22,7 +22,6 @@ import {
   MongoServerSelectionError,
   now,
   ObjectId,
-  promiseWithResolvers,
   squashError
 } from '../../mongodb';
 import { type FailPoint, makeMultiBatchWrite, measureDuration } from '../../tools/utils';
