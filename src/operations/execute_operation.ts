@@ -24,6 +24,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
+import { TimeoutContext } from '../timeout';
 import { supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
@@ -57,7 +58,7 @@ type ResultTypeFromOperation<TOperation> =
 export async function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T): Promise<TResult> {
+>(client: MongoClient, operation: T, timeoutContext?: TimeoutContext | null): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
@@ -80,11 +81,6 @@ export async function executeOperation<
   } else if (session.client !== client) {
     throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');
   }
-  if (session.explicit && session?.timeoutMS != null && operation.options.timeoutMS != null) {
-    throw new MongoInvalidArgumentError(
-      'Do not specify timeoutMS on operation if already specified on an explicit session'
-    );
-  }
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
@@ -105,9 +101,17 @@ export async function executeOperation<
     session.unpin();
   }
 
+  timeoutContext ??= TimeoutContext.create({
+    session,
+    serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
+    waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
+    timeoutMS: operation.options.timeoutMS
+  });
+
   try {
     return await tryOperation(operation, {
       topology,
+      timeoutContext,
       session,
       readPreference
     });
@@ -148,6 +152,7 @@ type RetryOptions = {
   session: ClientSession | undefined;
   readPreference: ReadPreference;
   topology: Topology;
+  timeoutContext: TimeoutContext;
 };
 
 /**
@@ -171,7 +176,10 @@ type RetryOptions = {
 async function tryOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(operation: T, { topology, session, readPreference }: RetryOptions): Promise<TResult> {
+>(
+  operation: T,
+  { topology, timeoutContext, session, readPreference }: RetryOptions
+): Promise<TResult> {
   let selector: ReadPreference | ServerSelector;
 
   if (operation.hasAspect(Aspect.MUST_SELECT_SAME_SERVER)) {
@@ -189,7 +197,8 @@ async function tryOperation<
 
   let server = await topology.selectServer(selector, {
     session,
-    operationName: operation.commandName
+    operationName: operation.commandName,
+    timeoutContext
   });
 
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
@@ -214,12 +223,10 @@ async function tryOperation<
     session.incrementTransactionNumber();
   }
 
-  // TODO(NODE-6231): implement infinite retry within CSOT timeout here
-  const maxTries = willRetry ? 2 : 1;
+  const maxTries = willRetry ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 
-  // TODO(NODE-6231): implement infinite retry within CSOT timeout here
   for (let tries = 0; tries < maxTries; tries++) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
@@ -268,10 +275,9 @@ async function tryOperation<
       if (tries > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
         operation.resetBatch();
       }
-      return await operation.execute(server, session);
+      return await operation.execute(server, session, timeoutContext);
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;
-
       if (
         previousOperationError != null &&
         operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
@@ -280,6 +286,9 @@ async function tryOperation<
       }
       previousServer = server.description;
       previousOperationError = operationError;
+
+      // Reset timeouts
+      timeoutContext.clear();
     }
   }
 

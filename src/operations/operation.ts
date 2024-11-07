@@ -2,6 +2,7 @@ import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '..
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
 
 export const Aspect = {
@@ -31,7 +32,13 @@ export interface OperationOptions extends BSONSerializeOptions {
   bypassPinningCheck?: boolean;
   omitReadPreference?: boolean;
 
-  /** @internal TODO(NODE-5688): make this public */
+  /** @internal Hint to `executeOperation` to omit maxTimeMS */
+  omitMaxTimeMS?: boolean;
+
+  /**
+   * @experimental
+   * Specifies the time an operation will run until it throws a timeout error
+   */
   timeoutMS?: number;
 }
 
@@ -57,6 +64,9 @@ export abstract class AbstractOperation<TResult = any> {
 
   options: OperationOptions;
 
+  /** Specifies the time an operation will run until it throws a timeout error. */
+  timeoutMS?: number;
+
   [kSession]: ClientSession | undefined;
 
   static aspects?: Set<symbol>;
@@ -80,7 +90,11 @@ export abstract class AbstractOperation<TResult = any> {
   Command name should be stateless (should not use 'this' keyword) */
   abstract get commandName(): string;
 
-  abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;
+  abstract execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<TResult>;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as { aspects?: Set<symbol> };

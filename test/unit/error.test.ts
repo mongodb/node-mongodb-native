@@ -14,12 +14,15 @@ import {
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   MONGODB_ERROR_CODES,
+  MongoDriverError,
   MongoError,
   MongoErrorLabel,
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoOperationTimeoutError,
   MongoParseError,
+  MongoRuntimeError,
   MongoServerError,
   MongoSystemError,
   MongoWriteConcernError,
@@ -28,6 +31,7 @@ import {
   ns,
   PoolClosedError as MongoPoolClosedError,
   setDifference,
+  TimeoutContext,
   type TopologyDescription,
   type TopologyOptions,
   WaitQueueTimeoutError as MongoWaitQueueTimeoutError
@@ -169,6 +173,23 @@ describe('MongoErrors', () => {
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', undefined);
       });
+    });
+  });
+
+  describe('class MongoOperationTimeoutError', () => {
+    it('has a name property equal to MongoOperationTimeoutError', () => {
+      const error = new MongoOperationTimeoutError('time out!');
+      expect(error).to.have.property('name', 'MongoOperationTimeoutError');
+    });
+
+    it('is instanceof MongoDriverError', () => {
+      const error = new MongoOperationTimeoutError('time out!');
+      expect(error).to.be.instanceOf(MongoDriverError);
+    });
+
+    it('is not instanceof MongoRuntimeError', () => {
+      const error = new MongoOperationTimeoutError('time out!');
+      expect(error).to.not.be.instanceOf(MongoRuntimeError);
     });
   });
 
@@ -376,11 +397,17 @@ describe('MongoErrors', () => {
         { replicaSet: 'rs' } as TopologyOptions
       );
 
+      const timeoutContext = TimeoutContext.create({
+        serverSelectionTimeoutMS: 0,
+        waitQueueTimeoutMS: 0
+      });
       return replSet
         .connect()
-        .then(topology => topology.selectServer('primary', {}))
+        .then(topology => topology.selectServer('primary', { timeoutContext }))
         .then(server =>
-          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
+          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {
+            timeoutContext
+          })
         )
         .then(
           () => expect.fail('expected command to fail'),
@@ -419,10 +446,14 @@ describe('MongoErrors', () => {
         if (err) {
           return cleanup(err);
         }
+        const timeoutContext = TimeoutContext.create({
+          serverSelectionTimeoutMS: 0,
+          waitQueueTimeoutMS: 0
+        });
 
-        topology.selectServer('primary', {}).then(server => {
+        topology.selectServer('primary', { timeoutContext }).then(server => {
           server
-            .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
+            .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), { timeoutContext })
             .then(expect.fail, err => {
               let _err;
               try {

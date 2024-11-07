@@ -1108,7 +1108,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap kms servers
       - func: run serverless tests
-  - name: run-spec-benchmark-tests-node-18-server-6.0
+  - name: run-spec-benchmark-tests-node-server
     tags:
       - run-spec-benchmark-tests
       - performance
@@ -1118,8 +1118,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: v18.16.0}
-            - {key: NPM_VERSION, value: '9'}
+            - {key: NODE_LTS_VERSION, value: v22.11.0}
             - {key: VERSION, value: v6.0-perf}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -1218,6 +1217,66 @@ tasks:
             EXPECTED_AZUREKMS_OUTCOME: failure
           args:
             - src/.evergreen/run-azure-kms-tests.sh
+  - name: oidc-auth-test-k8s-latest-eks
+    commands:
+      - func: install dependencies
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: k8s
+            K8S_VARIANT: eks
+            SCRIPT: run-oidc-prose-tests.sh
+          include_expansions_in_env:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_SESSION_TOKEN
+          args:
+            - .evergreen/run-oidc-tests-k8s.sh
+  - name: oidc-auth-test-k8s-latest-gke
+    commands:
+      - func: install dependencies
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: k8s
+            K8S_VARIANT: gke
+            SCRIPT: run-oidc-prose-tests.sh
+          include_expansions_in_env:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_SESSION_TOKEN
+          args:
+            - .evergreen/run-oidc-tests-k8s.sh
+  - name: oidc-auth-test-k8s-latest-aks
+    commands:
+      - func: install dependencies
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: k8s
+            K8S_VARIANT: aks
+            SCRIPT: run-oidc-prose-tests.sh
+          include_expansions_in_env:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_SESSION_TOKEN
+          args:
+            - .evergreen/run-oidc-tests-k8s.sh
   - name: oidc-auth-test-azure-latest
     commands:
       - func: install dependencies
@@ -4411,6 +4470,69 @@ task_groups:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
     tasks:
       - test-azurekms-task
+  - name: testk8soidc_task_group_eks
+    setup_group:
+      - func: fetch source
+      - command: ec2.assume_role
+        params:
+          role_arn: ${OIDC_AWS_ROLE_ARN}
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
+    teardown_task:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-k8s-latest-eks
+  - name: testk8soidc_task_group_gke
+    setup_group:
+      - func: fetch source
+      - command: ec2.assume_role
+        params:
+          role_arn: ${OIDC_AWS_ROLE_ARN}
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
+    teardown_task:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-k8s-latest-gke
+  - name: testk8soidc_task_group_aks
+    setup_group:
+      - func: fetch source
+      - command: ec2.assume_role
+        params:
+          role_arn: ${OIDC_AWS_ROLE_ARN}
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
+    teardown_task:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-k8s-latest-aks
   - name: testtestoidc_task_group
     setup_group:
       - func: fetch source
@@ -4547,7 +4669,7 @@ buildvariants:
     display_name: Performance Test
     run_on: rhel90-dbx-perf-large
     tasks:
-      - run-spec-benchmark-tests-node-18-server-6.0
+      - run-spec-benchmark-tests-node-server
   - name: rhel80-large-gallium
     display_name: rhel8 Node16
     run_on: rhel80-large
@@ -5094,6 +5216,9 @@ buildvariants:
       - testtestoidc_task_group
       - testazureoidc_task_group
       - testgcpoidc_task_group
+      - testk8soidc_task_group_eks
+      - testk8soidc_task_group_gke
+      - testk8soidc_task_group_aks
   - name: rhel8-test-atlas
     display_name: Atlas Cluster Tests
     run_on: rhel80-large

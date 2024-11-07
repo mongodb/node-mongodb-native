@@ -1,7 +1,13 @@
 import { type Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
-import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
-import { type ExplainCommandOptions, type ExplainVerbosityLike } from '../explain';
+import { MongoAPIError, MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
+import {
+  Explain,
+  ExplainableCursor,
+  type ExplainCommandOptions,
+  type ExplainVerbosityLike,
+  validateExplainTimeoutOptions
+} from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, type CountOptions } from '../operations/count';
@@ -11,7 +17,7 @@ import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
-import { AbstractCursor, type InitialCursorResponse } from './abstract_cursor';
+import { type InitialCursorResponse } from './abstract_cursor';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [
@@ -24,7 +30,7 @@ export const FLAGS = [
 ] as const;
 
 /** @public */
-export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
+export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   /** @internal */
   private cursorFilter: Document;
   /** @internal */
@@ -63,13 +69,25 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
-    const findOperation = new FindOperation(this.namespace, this.cursorFilter, {
+    const options = {
       ...this.findOptions, // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
       session
-    });
+    };
 
-    const response = await executeOperation(this.client, findOperation);
+    if (options.explain) {
+      try {
+        validateExplainTimeoutOptions(options, Explain.fromOptions(options));
+      } catch {
+        throw new MongoAPIError(
+          'timeoutMS cannot be used with explain when explain is specified in findOptions'
+        );
+      }
+    }
+
+    const findOperation = new FindOperation(this.namespace, this.cursorFilter, options);
+
+    const response = await executeOperation(this.client, findOperation, this.timeoutContext);
 
     // the response is not a cursor when `explain` is enabled
     this.numReturned = response.batchSize;
@@ -133,14 +151,27 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** Execute the explain for the cursor */
-  async explain(verbosity?: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document> {
+  async explain(): Promise<Document>;
+  async explain(verbosity: ExplainVerbosityLike | ExplainCommandOptions): Promise<Document>;
+  async explain(options: { timeoutMS?: number }): Promise<Document>;
+  async explain(
+    verbosity: ExplainVerbosityLike | ExplainCommandOptions,
+    options: { timeoutMS?: number }
+  ): Promise<Document>;
+  async explain(
+    verbosity?: ExplainVerbosityLike | ExplainCommandOptions | { timeoutMS?: number },
+    options?: { timeoutMS?: number }
+  ): Promise<Document> {
+    const { explain, timeout } = this.resolveExplainTimeoutOptions(verbosity, options);
+
     return (
       await executeOperation(
         this.client,
         new FindOperation(this.namespace, this.cursorFilter, {
           ...this.findOptions, // NOTE: order matters here, we may need to refine this
           ...this.cursorOptions,
-          explain: verbosity ?? true
+          ...timeout,
+          explain: explain ?? true
         })
       )
     ).shift(this.deserializationOptions);

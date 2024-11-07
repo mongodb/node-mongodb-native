@@ -2,10 +2,12 @@ import type { ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import type { FindCursor } from '../cursor/find_cursor';
 import type { Db } from '../db';
-import { MongoRuntimeError } from '../error';
+import { MongoOperationTimeoutError, MongoRuntimeError } from '../error';
 import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
+import { CSOTTimeoutContext } from '../timeout';
+import { resolveOptions } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -36,7 +38,11 @@ export interface GridFSBucketOptions extends WriteConcernOptions {
   chunkSizeBytes?: number;
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
-  /** @internal TODO(NODE-5688): make this public */
+  /**
+   * @experimental
+   * Specifies the lifetime duration of a gridFS stream. If any async operations are in progress
+   * when this timeout expires, the stream will throw a timeout error.
+   */
   timeoutMS?: number;
 }
 
@@ -48,6 +54,7 @@ export interface GridFSBucketPrivate {
     chunkSizeBytes: number;
     readPreference?: ReadPreference;
     writeConcern: WriteConcern | undefined;
+    timeoutMS?: number;
   };
   _chunksCollection: Collection<GridFSChunk>;
   _filesCollection: Collection<GridFSFile>;
@@ -81,11 +88,11 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   constructor(db: Db, options?: GridFSBucketOptions) {
     super();
     this.setMaxListeners(0);
-    const privateOptions = {
+    const privateOptions = resolveOptions(db, {
       ...DEFAULT_GRIDFS_BUCKET_OPTIONS,
       ...options,
       writeConcern: WriteConcern.fromOptions(options)
-    };
+    });
     this.s = {
       db,
       options: privateOptions,
@@ -109,7 +116,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     filename: string,
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
-    return new GridFSBucketWriteStream(this, filename, options);
+    return new GridFSBucketWriteStream(this, filename, {
+      timeoutMS: this.s.options.timeoutMS,
+      ...options
+    });
   }
 
   /**
@@ -122,7 +132,11 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     filename: string,
     options?: GridFSBucketWriteStreamOptions
   ): GridFSBucketWriteStream {
-    return new GridFSBucketWriteStream(this, filename, { ...options, id });
+    return new GridFSBucketWriteStream(this, filename, {
+      timeoutMS: this.s.options.timeoutMS,
+      ...options,
+      id
+    });
   }
 
   /** Returns a readable stream (GridFSBucketReadStream) for streaming file data from GridFS. */
@@ -135,7 +149,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       this.s._filesCollection,
       this.s.options.readPreference,
       { _id: id },
-      options
+      { timeoutMS: this.s.options.timeoutMS, ...options }
     );
   }
 
@@ -144,11 +158,27 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    *
    * @param id - The id of the file doc
    */
-  async delete(id: ObjectId): Promise<void> {
-    const { deletedCount } = await this.s._filesCollection.deleteOne({ _id: id });
+  async delete(id: ObjectId, options?: { timeoutMS: number }): Promise<void> {
+    const { timeoutMS } = resolveOptions(this.s.db, options);
+    let timeoutContext: CSOTTimeoutContext | undefined = undefined;
 
+    if (timeoutMS) {
+      timeoutContext = new CSOTTimeoutContext({
+        timeoutMS,
+        serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
+      });
+    }
+
+    const { deletedCount } = await this.s._filesCollection.deleteOne(
+      { _id: id },
+      { timeoutMS: timeoutContext?.remainingTimeMS }
+    );
+
+    const remainingTimeMS = timeoutContext?.remainingTimeMS;
+    if (remainingTimeMS != null && remainingTimeMS <= 0)
+      throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
     // Delete orphaned chunks before returning FileNotFound
-    await this.s._chunksCollection.deleteMany({ files_id: id });
+    await this.s._chunksCollection.deleteMany({ files_id: id }, { timeoutMS: remainingTimeMS });
 
     if (deletedCount === 0) {
       // TODO(NODE-3483): Replace with more appropriate error
@@ -188,7 +218,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       this.s._filesCollection,
       this.s.options.readPreference,
       { filename },
-      { ...options, sort, skip }
+      { timeoutMS: this.s.options.timeoutMS, ...options, sort, skip }
     );
   }
 
@@ -198,18 +228,36 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param id - the id of the file to rename
    * @param filename - new name for the file
    */
-  async rename(id: ObjectId, filename: string): Promise<void> {
+  async rename(id: ObjectId, filename: string, options?: { timeoutMS: number }): Promise<void> {
     const filter = { _id: id };
     const update = { $set: { filename } };
-    const { matchedCount } = await this.s._filesCollection.updateOne(filter, update);
+    const { matchedCount } = await this.s._filesCollection.updateOne(filter, update, options);
     if (matchedCount === 0) {
       throw new MongoRuntimeError(`File with id ${id} not found`);
     }
   }
 
   /** Removes this bucket's files collection, followed by its chunks collection. */
-  async drop(): Promise<void> {
-    await this.s._filesCollection.drop();
-    await this.s._chunksCollection.drop();
+  async drop(options?: { timeoutMS: number }): Promise<void> {
+    const { timeoutMS } = resolveOptions(this.s.db, options);
+    let timeoutContext: CSOTTimeoutContext | undefined = undefined;
+
+    if (timeoutMS) {
+      timeoutContext = new CSOTTimeoutContext({
+        timeoutMS,
+        serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
+      });
+    }
+
+    if (timeoutContext) {
+      await this.s._filesCollection.drop({ timeoutMS: timeoutContext.remainingTimeMS });
+      const remainingTimeMS = timeoutContext.getRemainingTimeMSOrThrow(
+        `Timed out after ${timeoutMS}ms`
+      );
+      await this.s._chunksCollection.drop({ timeoutMS: remainingTimeMS });
+    } else {
+      await this.s._filesCollection.drop();
+      await this.s._chunksCollection.drop();
+    }
   }
 }

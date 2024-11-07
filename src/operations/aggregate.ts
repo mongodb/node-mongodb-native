@@ -1,9 +1,11 @@
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import { type ExplainOptions } from '../explain';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
@@ -24,7 +26,9 @@ export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain
   bypassDocumentValidation?: boolean;
   /** Return the query as cursor, on 2.6 \> it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
   cursor?: Document;
-  /** specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point. */
+  /**
+   * Specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point.
+   */
   maxTimeMS?: number;
   /** The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. */
   maxAwaitTimeMS?: number;
@@ -43,6 +47,8 @@ export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain
    * or `db.aggregate().explain()`.
    */
   explain?: ExplainOptions['explain'];
+  /** @internal */
+  timeoutMode?: CursorTimeoutMode;
 }
 
 /** @internal */
@@ -105,7 +111,8 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
 
   override async execute(
     server: Server,
-    session: ClientSession | undefined
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
   ): Promise<CursorResponse> {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
@@ -150,6 +157,7 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
       server,
       session,
       command,
+      timeoutContext,
       this.explain ? ExplainedCursorResponse : CursorResponse
     );
   }
