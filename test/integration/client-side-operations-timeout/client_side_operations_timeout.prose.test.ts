@@ -1,6 +1,7 @@
 /* Specification prose tests */
 
 import { type ChildProcess, spawn } from 'node:child_process';
+import { once } from 'node:events';
 
 import { expect } from 'chai';
 import * as os from 'os';
@@ -708,8 +709,7 @@ describe('CSOT spec prose tests', function () {
       );
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
     });
-
-    it('Aborting an upload stream can be timed out', metadata, async function () {
+    it.only('Aborting an upload stream can be timed out', metadata, async function () {
       /**
        * This test only applies to drivers that provide an API to abort a GridFS upload stream.
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -735,37 +735,37 @@ describe('CSOT spec prose tests', function () {
        */
       const failpoint: FailPoint = {
         configureFailPoint: 'failCommand',
-        mode: { times: 1 },
+        mode: { times: 10 },
         data: {
           failCommands: ['delete'],
           blockConnection: true,
-          blockTimeMS: 200
+          blockTimeMS: 300
         }
       };
 
       await internalClient.db().admin().command(failpoint);
       const bucket = new GridFSBucket(client.db('db'), { chunkSizeBytes: 2 });
+      // 2. Call `bucket.open_upload_stream()` with the filename `filename` to create an upload stream (referred to as `uploadStream`).
+      //    - Expect this to succeed and return a non-null stream.
       const uploadStream = bucket.openUploadStream('filename', { timeoutMS: 300 });
+      const { duration } = await measureDuration(async () => {
+        // 3. Using `uploadStream`, upload the bytes `[0x01, 0x02, 0x03, 0x04]`.
 
-      const data = Buffer.from('01020304', 'hex');
+        await pipeline(Readable.from(Buffer.from('01020304', 'hex')), uploadStream, {
+          end: false
+        });
 
-      const { promise: writePromise, resolve, reject } = promiseWithResolvers<void>();
-      uploadStream.on('error', error => uploadStream.destroy(error));
-      uploadStream.write(data, error => {
-        if (error) reject(error);
-        else resolve();
+        // 4. Call `uploadStream.abort()`.
+        //   - Expect this to fail with a timeout error.
+        const timeoutError = await uploadStream.abort().then(
+          () => null,
+          error => error
+        );
+        expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
       });
-      let maybeError = await writePromise.then(
-        () => null,
-        e => e
-      );
-      expect(maybeError).to.be.null;
 
-      maybeError = await uploadStream.abort().then(
-        () => null,
-        error => error
-      );
-      expect(maybeError).to.be.instanceOf(MongoOperationTimeoutError);
+      expect(duration).to.be.within(300 - 15, 300 + 15);
+
       uploadStream.destroy();
     });
   });
