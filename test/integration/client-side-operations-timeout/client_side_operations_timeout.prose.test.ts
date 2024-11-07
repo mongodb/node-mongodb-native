@@ -1,7 +1,6 @@
 /* Specification prose tests */
 
 import { type ChildProcess, spawn } from 'node:child_process';
-import { once } from 'node:events';
 
 import { expect } from 'chai';
 import * as os from 'os';
@@ -709,7 +708,7 @@ describe('CSOT spec prose tests', function () {
       );
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
     });
-    it.only('Aborting an upload stream can be timed out', metadata, async function () {
+    it('Aborting an upload stream can be timed out', metadata, async function () {
       /**
        * This test only applies to drivers that provide an API to abort a GridFS upload stream.
        * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -735,7 +734,7 @@ describe('CSOT spec prose tests', function () {
        */
       const failpoint: FailPoint = {
         configureFailPoint: 'failCommand',
-        mode: { times: 10 },
+        mode: { times: 1 },
         data: {
           failCommands: ['delete'],
           blockConnection: true,
