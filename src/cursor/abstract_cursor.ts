@@ -1169,9 +1169,6 @@ export class CursorTimeoutContext extends TimeoutContext {
   override get clearServerSelectionTimeout(): boolean {
     return this.timeoutContext.clearServerSelectionTimeout;
   }
-  override get clearConnectionCheckoutTimeout(): boolean {
-    return this.timeoutContext.clearConnectionCheckoutTimeout;
-  }
   override get timeoutForSocketWrite(): Timeout | null {
     return this.timeoutContext.timeoutForSocketWrite;
   }

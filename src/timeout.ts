@@ -171,8 +171,6 @@ export abstract class TimeoutContext {
 
   abstract get clearServerSelectionTimeout(): boolean;
 
-  abstract get clearConnectionCheckoutTimeout(): boolean;
-
   abstract get timeoutForSocketWrite(): Timeout | null;
 
   abstract get timeoutForSocketRead(): Timeout | null;
@@ -193,7 +191,6 @@ export class CSOTTimeoutContext extends TimeoutContext {
   serverSelectionTimeoutMS: number;
   socketTimeoutMS?: number;
 
-  clearConnectionCheckoutTimeout: boolean;
   clearServerSelectionTimeout: boolean;
 
   private _serverSelectionTimeout?: Timeout | null;
@@ -212,7 +209,6 @@ export class CSOTTimeoutContext extends TimeoutContext {
     this.socketTimeoutMS = options.socketTimeoutMS;
 
     this.clearServerSelectionTimeout = false;
-    this.clearConnectionCheckoutTimeout = true;
   }
 
   get maxTimeMS(): number {
@@ -331,13 +327,11 @@ export class CSOTTimeoutContext extends TimeoutContext {
 export class LegacyTimeoutContext extends TimeoutContext {
   options: LegacyTimeoutContextOptions;
   clearServerSelectionTimeout: boolean;
-  clearConnectionCheckoutTimeout: boolean;
 
   constructor(options: LegacyTimeoutContextOptions) {
     super();
     this.options = options;
     this.clearServerSelectionTimeout = true;
-    this.clearConnectionCheckoutTimeout = true;
   }
 
   csotEnabled(): this is CSOTTimeoutContext {
