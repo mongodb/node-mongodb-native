@@ -1,3 +1,4 @@
+import { type Document } from 'bson';
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
@@ -183,6 +184,10 @@ export abstract class TimeoutContext {
 
   /** Returns a new instance of the TimeoutContext, with all timeouts refreshed and restarted. */
   abstract refreshed(): TimeoutContext;
+
+  abstract addMaxTimeMSToCommand(command: Document, options: { omitMaxTimeMS?: boolean }): void;
+
+  abstract getSocketTimeoutMS(): number | undefined;
 }
 
 /** @internal */
@@ -321,6 +326,16 @@ export class CSOTTimeoutContext extends TimeoutContext {
   override refreshed(): CSOTTimeoutContext {
     return new CSOTTimeoutContext(this);
   }
+
+  override addMaxTimeMSToCommand(command: Document, options: { omitMaxTimeMS?: boolean }): void {
+    if (options.omitMaxTimeMS) return;
+    const maxTimeMS = this.remainingTimeMS - this.minRoundTripTime;
+    if (maxTimeMS > 0 && Number.isFinite(maxTimeMS)) command.maxTimeMS = maxTimeMS;
+  }
+
+  override getSocketTimeoutMS(): number | undefined {
+    return 0;
+  }
 }
 
 /** @internal */
@@ -372,5 +387,13 @@ export class LegacyTimeoutContext extends TimeoutContext {
 
   override refreshed(): LegacyTimeoutContext {
     return new LegacyTimeoutContext(this.options);
+  }
+
+  override addMaxTimeMSToCommand(_command: Document, _options: { omitMaxTimeMS?: boolean }): void {
+    // No max timeMS is added to commands in legacy timeout mode.
+  }
+
+  override getSocketTimeoutMS(): number | undefined {
+    return this.options.socketTimeoutMS;
   }
 }

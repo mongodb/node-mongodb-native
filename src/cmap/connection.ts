@@ -427,10 +427,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       ...options
     };
 
-    if (!options.omitMaxTimeMS) {
-      const maxTimeMS = options.timeoutContext?.maxTimeMS;
-      if (maxTimeMS && maxTimeMS > 0 && Number.isFinite(maxTimeMS)) cmd.maxTimeMS = maxTimeMS;
-    }
+    options.timeoutContext?.addMaxTimeMSToCommand(cmd, options);
 
     const message = this.supportsOpMsg
       ? new OpMsgRequest(db, cmd, commandOptions)
@@ -446,13 +443,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
 
-    if (options.timeoutContext?.csotEnabled()) {
-      this.socket.setTimeout(0);
-    } else if (typeof options.socketTimeoutMS === 'number') {
-      this.socket.setTimeout(options.socketTimeoutMS);
-    } else if (this.socketTimeoutMS !== 0) {
-      this.socket.setTimeout(this.socketTimeoutMS);
-    }
+    const timeout =
+      options.socketTimeoutMS ??
+      options?.timeoutContext?.getSocketTimeoutMS() ??
+      this.socketTimeoutMS;
+    this.socket.setTimeout(timeout);
 
     try {
       await this.writeCommand(message, {
@@ -487,11 +482,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         yield document;
         this.throwIfAborted();
 
-        if (typeof options.socketTimeoutMS === 'number') {
-          this.socket.setTimeout(options.socketTimeoutMS);
-        } else if (this.socketTimeoutMS !== 0) {
-          this.socket.setTimeout(this.socketTimeoutMS);
-        }
+        this.socket.setTimeout(timeout);
       }
     } finally {
       this.socket.setTimeout(0);
