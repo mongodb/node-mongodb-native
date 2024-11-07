@@ -50,13 +50,11 @@ import {
 import {
   _advanceClusterTime,
   type ClusterTime,
-  drainTimerQueue,
   ServerType,
   STATE_CLOSED,
   STATE_CLOSING,
   STATE_CONNECTED,
   STATE_CONNECTING,
-  type TimerQueue,
   TopologyType
 } from './common';
 import {
@@ -132,8 +130,6 @@ export interface TopologyPrivate {
   servers: Map<string, Server>;
   credentials?: MongoCredentials;
   clusterTime?: ClusterTime;
-  /** timers created for the initial connect to a server */
-  connectionTimers: TimerQueue;
 
   /** related to srv polling */
   srvPoller?: SrvPoller;
@@ -325,8 +321,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       credentials: options?.credentials,
       clusterTime: undefined,
 
-      // timer management
-      connectionTimers: new Set<NodeJS.Timeout>(),
       detectShardedTopology: ev => this.detectShardedTopology(ev),
       detectSrvRecords: ev => this.detectSrvRecords(ev)
     };
@@ -415,8 +409,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     } finally {
       this.connectionLock = undefined;
     }
-
-    return this;
   }
 
   private async _connect(options?: ConnectOptions): Promise<Topology> {
@@ -515,7 +507,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     stateTransition(this, STATE_CLOSING);
 
     drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
-    drainTimerQueue(this.s.connectionTimers);
 
     if (this.s.srvPoller) {
       this.s.srvPoller.stop();

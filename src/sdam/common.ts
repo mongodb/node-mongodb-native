@@ -1,5 +1,3 @@
-import { clearTimeout } from 'timers';
-
 import type { Binary, Long, Timestamp } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { Topology } from './topology';
@@ -45,15 +43,6 @@ export const ServerType = Object.freeze({
 
 /** @public */
 export type ServerType = (typeof ServerType)[keyof typeof ServerType];
-
-/** @internal */
-export type TimerQueue = Set<NodeJS.Timeout>;
-
-/** @internal */
-export function drainTimerQueue(queue: TimerQueue): void {
-  queue.forEach(clearTimeout);
-  queue.clear();
-}
 
 /**
  * @public
