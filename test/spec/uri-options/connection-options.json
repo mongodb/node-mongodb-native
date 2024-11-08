@@ -27,7 +27,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Too low connectTimeoutMS causes a warning",
@@ -36,7 +36,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Non-numeric heartbeatFrequencyMS causes a warning",
@@ -45,7 +45,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Too low heartbeatFrequencyMS causes a warning",
@@ -54,7 +54,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Non-numeric localThresholdMS causes a warning",
@@ -63,7 +63,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Too low localThresholdMS causes a warning",
@@ -72,7 +72,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Invalid retryWrites causes a warning",
@@ -81,7 +81,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Non-numeric serverSelectionTimeoutMS causes a warning",
@@ -90,7 +90,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Too low serverSelectionTimeoutMS causes a warning",
@@ -99,7 +99,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Non-numeric socketTimeoutMS causes a warning",
@@ -108,7 +108,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Too low socketTimeoutMS causes a warning",
@@ -117,7 +117,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "directConnection=true",
@@ -137,7 +137,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "directConnection=false",
@@ -168,7 +168,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "loadBalanced=true",
@@ -211,7 +211,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "loadBalanced=true with multiple hosts causes an error",
@@ -220,7 +220,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "loadBalanced=true with directConnection=true causes an error",
@@ -229,7 +229,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "loadBalanced=true with replicaSet causes an error",
@@ -238,7 +238,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "timeoutMS=0",
@@ -258,7 +258,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "Too low timeoutMS causes a warning",
@@ -267,7 +267,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     }
   ]
 }

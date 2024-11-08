@@ -32,4 +32,4 @@ tests:
       warning: true
       hosts: ~
       auth: ~
-      options: {}
+      options: ~

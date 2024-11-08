@@ -6,7 +6,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "proxyUsername without proxyHost"
         uri: "mongodb://localhost/?proxyUsername=abc"
@@ -14,7 +14,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "proxyPassword without proxyHost"
         uri: "mongodb://localhost/?proxyPassword=def"
@@ -22,7 +22,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "all other proxy options without proxyHost"
         uri: "mongodb://localhost/?proxyPort=1080&proxyUsername=abc&proxyPassword=def"
@@ -30,7 +30,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "proxyUsername without proxyPassword"
         uri: "mongodb://localhost/?proxyHost=localhost&proxyUsername=abc"
@@ -38,7 +38,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "proxyPassword without proxyUsername"
         uri: "mongodb://localhost/?proxyHost=localhost&proxyPassword=def"
@@ -46,7 +46,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "multiple proxyHost parameters"
         uri: "mongodb://localhost/?proxyHost=localhost&proxyHost=localhost2"
@@ -54,7 +54,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "multiple proxyPort parameters"
         uri: "mongodb://localhost/?proxyHost=localhost&proxyPort=1234&proxyPort=12345"
@@ -62,7 +62,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "multiple proxyUsername parameters"
         uri: "mongodb://localhost/?proxyHost=localhost&proxyUsername=abc&proxyUsername=def&proxyPassword=123"
@@ -70,7 +70,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "multiple proxyPassword parameters"
         uri: "mongodb://localhost/?proxyHost=localhost&proxyUsername=abc&proxyPassword=123&proxyPassword=456"
@@ -78,7 +78,7 @@ tests:
         warning: false
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "only host present"
         uri: "mongodb://localhost/?proxyHost=localhost"

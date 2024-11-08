@@ -36,7 +36,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low wTimeoutMS causes a warning"
         uri: "mongodb://example.com/?wTimeoutMS=-2"
@@ -44,7 +44,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Invalid journal causes a warning"
         uri: "mongodb://example.com/?journal=invalid"
@@ -52,4 +52,4 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
