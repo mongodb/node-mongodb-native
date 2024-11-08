@@ -190,8 +190,8 @@ class Runner {
 
   _errorHandler(error) {
     this.reporter(`Error: ${error.name} - ${error.message} - ${error.stack}`);
-    for (let error = error.cause; error != null; error = error.cause) {
-      this.reporter(`Caused by: ${error.name} - ${error.message} - ${error.stack}`);
+    for (let cause = error.cause; cause != null; cause = cause.cause) {
+      this.reporter(`Caused by: ${cause.name} - ${cause.message} - ${cause.stack}`);
     }
     throw error;
   }

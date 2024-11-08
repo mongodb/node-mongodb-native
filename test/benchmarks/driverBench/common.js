@@ -23,8 +23,22 @@ function loadSpecString(filePath) {
   return loadSpecFile(filePath, 'utf8');
 }
 
+const MONGODB_CLIENT_OPTIONS = (() => {
+  const optionsString = process.env.MONGODB_CLIENT_OPTIONS;
+  let options = undefined;
+  if (optionsString?.length) {
+    options = JSON.parse(optionsString);
+  }
+  return { ...options };
+})();
+
+const MONGODB_URI = (() => {
+  if (process.env.MONGODB_URI?.length) return process.env.MONGODB_URI;
+  return 'mongodb://127.0.0.1:27017';
+})();
+
 function makeClient() {
-  this.client = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
+  this.client = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
 }
 
 function connectClient() {
@@ -101,6 +115,8 @@ async function writeSingleByteFileToBucket() {
 }
 
 module.exports = {
+  MONGODB_URI,
+  MONGODB_CLIENT_OPTIONS,
   makeClient,
   connectClient,
   disconnectClient,

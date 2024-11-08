@@ -8,9 +8,9 @@ const Runner = MongoBench.Runner;
 let bsonType = 'js-bson';
 // TODO(NODE-4606): test against different driver configurations in CI
 
-const { inspect } = require('util');
 const { writeFile } = require('fs/promises');
 const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
+const { MONGODB_CLIENT_OPTIONS } = require('./common');
 
 const hw = os.cpus();
 const ram = os.totalmem() / 1024 ** 3;
@@ -89,7 +89,15 @@ benchmarkRunner
       return {
         info: {
           test_name: benchmarkName,
-          tags: [bsonType]
+          tags: [bsonType],
+          // Args can only be a map of string -> int32. So if its a number leave it be,
+          // if it is anything else test for truthiness and set to 1 or 0.
+          args: Object.fromEntries(
+            Object.entries(MONGODB_CLIENT_OPTIONS).map(([key, value]) => [
+              key,
+              typeof value === 'number' ? value | 0 : value ? 1 : 0
+            ])
+          )
         },
         metrics: [{ name: 'megabytes_per_second', value: result }]
       };
@@ -97,7 +105,6 @@ benchmarkRunner
   })
   .then(data => {
     const results = JSON.stringify(data, undefined, 2);
-    console.log(inspect(data, { depth: Infinity, colors: true }));
     return writeFile('results.json', results);
   })
   .catch(err => console.error(err));
