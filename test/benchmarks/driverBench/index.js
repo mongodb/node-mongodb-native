@@ -90,12 +90,12 @@ benchmarkRunner
         info: {
           test_name: benchmarkName,
           tags: [bsonType],
-          // Args can only be a map of string -> int32. So if its a number coerce it to an int32,
+          // Args can only be a map of string -> int32. So if its a number leave it be,
           // if it is anything else test for truthiness and set to 1 or 0.
           args: Object.fromEntries(
             Object.entries(MONGODB_CLIENT_OPTIONS).map(([key, value]) => [
               key,
-              typeof value === 'number' ? value | 0 : value ? 1 : 0
+              typeof value === 'number' ? value : value ? 1 : 0
             ])
           )
         },
