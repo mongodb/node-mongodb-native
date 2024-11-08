@@ -970,9 +970,7 @@ export class ServerSession {
   isDirty: boolean;
 
   /** @internal */
-  constructor(
-    cloned?: { id: ServerSessionId; lastUse: number; txnNumber: number; isDirty: boolean } | null
-  ) {
+  constructor(cloned?: ServerSession | null) {
     if (cloned != null) {
       const idBytes = Buffer.allocUnsafe(16);
       idBytes.set(cloned.id.id.buffer);
