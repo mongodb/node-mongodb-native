@@ -299,11 +299,8 @@ export class ClientSession
         if (serverSession != null) {
           // release the server session back to the pool
           this.sessionPool.release(serverSession);
-          // Make sure a new serverSession never makes it onto this ClientSession
-          Object.defineProperty(this, kServerSession, {
-            value: ServerSession.clone(serverSession),
-            writable: false
-          });
+          // Store a clone of the server session for reference (debugging)
+          this[kServerSession] = new ServerSession(serverSession);
         }
         // mark the session as ended, and emit a signal
         this.hasEnded = true;
@@ -973,7 +970,18 @@ export class ServerSession {
   isDirty: boolean;
 
   /** @internal */
-  constructor() {
+  constructor(
+    cloned?: { id: ServerSessionId; lastUse: number; txnNumber: number; isDirty: boolean } | null
+  ) {
+    if (cloned != null) {
+      const idBytes = Buffer.allocUnsafe(16);
+      idBytes.set(cloned.id.id.buffer);
+      this.id = { id: new Binary(idBytes, cloned.id.id.sub_type) };
+      this.lastUse = cloned.lastUse;
+      this.txnNumber = cloned.txnNumber;
+      this.isDirty = cloned.isDirty;
+      return;
+    }
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
     this.lastUse = now();
     this.txnNumber = 0;
@@ -993,30 +1001,6 @@ export class ServerSession {
     );
 
     return idleTimeMinutes > sessionTimeoutMinutes - 1;
-  }
-
-  /**
-   * @internal
-   * Cloning meant to keep a readable reference to the server session data
-   * after ClientSession has ended
-   */
-  static clone(serverSession: ServerSession): Readonly<ServerSession> {
-    const arrayBuffer = new ArrayBuffer(16);
-    const idBytes = Buffer.from(arrayBuffer);
-    idBytes.set(serverSession.id.id.buffer);
-
-    const id = new Binary(idBytes, serverSession.id.id.sub_type);
-
-    // Manual prototype construction to avoid modifying the constructor of this class
-    return Object.setPrototypeOf(
-      {
-        id: { id },
-        lastUse: serverSession.lastUse,
-        txnNumber: serverSession.txnNumber,
-        isDirty: serverSession.isDirty
-      },
-      ServerSession.prototype
-    );
   }
 }
 
