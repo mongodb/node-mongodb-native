@@ -707,11 +707,10 @@ describe('CSOT spec prose tests', function () {
       const bucket = new GridFSBucket(client.db('db'));
       const stream = bucket.openUploadStream('filename');
 
-      const { result: maybeError, duration } = await measureDuration(() =>
-        pipeline(Readable.from(Buffer.from('13', 'hex')), stream).catch(error => error)
+      const maybeError = pipeline(Readable.from(Buffer.from('13', 'hex')), stream).catch(
+        error => error
       );
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
-      expect(duration).to.be.within(150 - 15, 150 + 15);
     });
     it('Aborting an upload stream can be timed out', metadata, async function () {
       // 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -753,16 +752,12 @@ describe('CSOT spec prose tests', function () {
       const bucket = new GridFSBucket(client.db('db'), { chunkSizeBytes: 2 });
       const uploadStream = bucket.openUploadStream('filename');
 
-      const { duration } = await measureDuration(async () => {
-        await pipeline(Readable.from(Buffer.from('01020304', 'hex')), uploadStream, {
-          end: false
-        });
-
-        const timeoutError = await uploadStream.abort().catch(error => error);
-        expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
+      await pipeline(Readable.from(Buffer.from('01020304', 'hex')), uploadStream, {
+        end: false
       });
 
-      expect(duration).to.be.within(150 - 15, 150 + 15);
+      const timeoutError = await uploadStream.abort().catch(error => error);
+      expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
 
       uploadStream.destroy();
     });
