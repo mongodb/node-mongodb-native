@@ -60,7 +60,7 @@ const COMMITTED_STATES: Set<TxnState> = new Set([
  * Configuration options for a transaction.
  * @public
  */
-export interface TransactionOptions extends CommandOperationOptions {
+export interface TransactionOptions extends Omit<CommandOperationOptions, 'timeoutMS'> {
   // TODO(NODE-3344): These options use the proper class forms of these settings, it should accept the basic enum values too
   /** A default read concern for commands in this transaction */
   readConcern?: ReadConcernLike;

@@ -46,13 +46,13 @@ tests:
             data:
               failCommands: ["getMore"]
               blockConnection: true
-              blockTimeMS: 50
+              blockTimeMS: 250
       - name: createFindCursor
         object: *collection
         arguments:
           filter: {}
           batchSize: 2
-          timeoutMS: 20
+          timeoutMS: 200
         saveResultAsEntity: &cursor cursor
       # Iterate the cursor three times. The third should do a getMore, which should fail with a timeout error.
       - name: iterateUntilDocumentOrError
@@ -99,18 +99,18 @@ tests:
             data:
               failCommands: ["killCursors"]
               blockConnection: true
-              blockTimeMS: 30
+              blockTimeMS: 250
       - name: createFindCursor
         object: *collection
         arguments:
           filter: {}
           batchSize: 2
-          timeoutMS: 20
+          timeoutMS: 200
         saveResultAsEntity: &cursor cursor
       - name: close
         object: *cursor
         arguments:
-          timeoutMS: 40
+          timeoutMS: 400
     expectEvents:
       - client: *client
         events:
@@ -120,7 +120,7 @@ tests:
               commandName: find
           - commandStartedEvent:
               command:
-                killCursors: *collection
+                killCursors: *collectionName
                 maxTimeMS: { $$type: ["int", "long"] }
               commandName: killCursors
           - commandSucceededEvent:

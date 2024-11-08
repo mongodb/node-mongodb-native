@@ -34,7 +34,7 @@ export class ClientBulkWriteCursor extends AbstractCursor {
   constructor(
     client: MongoClient,
     commandBuilder: ClientBulkWriteCommandBuilder,
-    options: ClientBulkWriteOptions = {}
+    options: ClientBulkWriteCursorOptions = {}
   ) {
     super(client, new MongoDBNamespace('admin', '$cmd'), options);
 
@@ -71,7 +71,11 @@ export class ClientBulkWriteCursor extends AbstractCursor {
       session
     });
 
-    const response = await executeOperation(this.client, clientBulkWriteOperation);
+    const response = await executeOperation(
+      this.client,
+      clientBulkWriteOperation,
+      this.timeoutContext
+    );
     this.cursorResponse = response;
 
     return { server: clientBulkWriteOperation.server, session, response };

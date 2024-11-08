@@ -7,12 +7,20 @@ import { inspect } from 'util';
 import {
   AbstractCursor,
   type Collection,
+  type CommandStartedEvent,
+  CSOTTimeoutContext,
+  CursorTimeoutContext,
+  CursorTimeoutMode,
   type FindCursor,
   MongoAPIError,
   type MongoClient,
   MongoCursorExhaustedError,
-  MongoServerError
+  MongoOperationTimeoutError,
+  MongoServerError,
+  TimeoutContext
 } from '../../mongodb';
+import { clearFailPoint, configureFailPoint } from '../../tools/utils';
+import { filterForCommands } from '../shared';
 
 describe('class AbstractCursor', function () {
   describe('regression tests NODE-5372', function () {
@@ -393,6 +401,159 @@ describe('class AbstractCursor', function () {
       expect(nextSpy.callCount).to.equal(numBatches + 1);
       const numDocuments = numBatches * batchSize;
       expect(nextSpy.callCount).to.be.lessThan(numDocuments);
+    });
+  });
+
+  describe('externally provided timeout contexts', function () {
+    let client: MongoClient;
+    let collection: Collection;
+    let context: CursorTimeoutContext;
+    const commands: CommandStartedEvent[] = [];
+    let internalContext: TimeoutContext;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      client.on('commandStarted', filterForCommands('killCursors', commands));
+
+      collection = client.db('abstract_cursor_integration').collection('test');
+      internalContext = TimeoutContext.create({ timeoutMS: 1000, serverSelectionTimeoutMS: 2000 });
+
+      context = new CursorTimeoutContext(internalContext, Symbol());
+
+      await collection.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await collection.deleteMany({});
+      await client.close();
+    });
+
+    it('CursorTimeoutMode.refresh is a no-op', async function () {
+      const cursorTimeoutRefreshSpy = sinon.spy(CursorTimeoutContext.prototype, 'refresh');
+      const csotTimeoutContextRefreshSpy = sinon.spy(CSOTTimeoutContext.prototype, 'refresh');
+      const abstractCursorGetMoreSpy = sinon.spy(AbstractCursor.prototype, 'getMore');
+
+      const cursor = collection.find(
+        {},
+        { timeoutMode: CursorTimeoutMode.ITERATION, timeoutContext: context, batchSize: 1 }
+      );
+      await cursor.toArray();
+
+      expect(abstractCursorGetMoreSpy).to.have.been.calledThrice;
+
+      expect(cursorTimeoutRefreshSpy.getCalls()).to.have.length(3);
+      expect(csotTimeoutContextRefreshSpy).to.not.have.been.called;
+    });
+
+    it('CursorTimeoutMode.clear is a no-op', async function () {
+      const cursorTimeoutClearSpy = sinon.spy(CursorTimeoutContext.prototype, 'clear');
+      const csotTimeoutContextRefreshSpy = sinon.spy(CSOTTimeoutContext.prototype, 'clear');
+      const abstractCursorGetMoreSpy = sinon.spy(AbstractCursor.prototype, 'getMore');
+
+      const cursor = collection.find(
+        {},
+        { timeoutMode: CursorTimeoutMode.ITERATION, timeoutContext: context, batchSize: 1 }
+      );
+      await cursor.toArray();
+
+      expect(abstractCursorGetMoreSpy).to.have.been.calledThrice;
+
+      expect(cursorTimeoutClearSpy.getCalls()).to.have.length(4);
+      expect(csotTimeoutContextRefreshSpy).to.not.have.been.called;
+    });
+
+    describe('when timeoutMode is omitted', function () {
+      it('stores timeoutContext as the timeoutContext on the cursor', function () {
+        const cursor = collection.find({}, { timeoutContext: context, timeoutMS: 1000 });
+
+        // @ts-expect-error Private access.
+        expect(cursor.timeoutContext).to.equal(context);
+      });
+    });
+
+    describe('when timeoutMode is LIFETIME', function () {
+      it('stores timeoutContext as the timeoutContext on the cursor', function () {
+        const cursor = collection.find(
+          {},
+          { timeoutContext: context, timeoutMS: 1000, timeoutMode: CursorTimeoutMode.LIFETIME }
+        );
+
+        // @ts-expect-error Private access.
+        expect(cursor.timeoutContext).to.equal(context);
+      });
+    });
+
+    describe('when the cursor is initialized', function () {
+      it('the provided timeoutContext is not overwritten', async function () {
+        const cursor = collection.find(
+          {},
+          { timeoutContext: context, timeoutMS: 1000, timeoutMode: CursorTimeoutMode.LIFETIME }
+        );
+
+        await cursor.toArray();
+
+        // @ts-expect-error Private access.
+        expect(cursor.timeoutContext).to.equal(context);
+      });
+    });
+
+    describe('when the cursor refreshes the timeout for killCursors', function () {
+      let uri: string;
+
+      before(function () {
+        uri = this.configuration.url({ useMultipleMongoses: false });
+      });
+
+      beforeEach(async function () {
+        commands.length = 0;
+        await configureFailPoint(
+          this.configuration,
+          {
+            configureFailPoint: 'failCommand',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              blockConnection: true,
+              blockTimeMS: 5000
+            }
+          },
+          uri
+        );
+      });
+
+      afterEach(async function () {
+        await clearFailPoint(this.configuration, uri);
+      });
+
+      it(
+        'the provided timeoutContext is not modified',
+        {
+          requires: {
+            mongodb: '>=4.4',
+            topology: '!load-balanced'
+          }
+        },
+        async function () {
+          const cursor = collection.find(
+            {},
+            {
+              timeoutContext: context,
+              timeoutMS: 150,
+              timeoutMode: CursorTimeoutMode.LIFETIME,
+              batchSize: 1
+            }
+          );
+
+          const refresh = sinon.spy(context, 'refresh');
+          const refreshed = sinon.spy(context, 'refreshed');
+          const error = await cursor.toArray().catch(e => e);
+
+          expect(error).to.be.instanceof(MongoOperationTimeoutError);
+          expect(refresh.called).to.be.false;
+          expect(refreshed.called).to.be.true;
+        }
+      );
     });
   });
 });

@@ -7,7 +7,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "proxyUsername without proxyHost",
@@ -16,7 +16,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "proxyPassword without proxyHost",
@@ -25,7 +25,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "all other proxy options without proxyHost",
@@ -34,7 +34,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "proxyUsername without proxyPassword",
@@ -43,7 +43,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "proxyPassword without proxyUsername",
@@ -52,7 +52,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "multiple proxyHost parameters",
@@ -61,7 +61,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "multiple proxyPort parameters",
@@ -70,7 +70,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "multiple proxyUsername parameters",
@@ -79,7 +79,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "multiple proxyPassword parameters",
@@ -88,7 +88,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "only host present",

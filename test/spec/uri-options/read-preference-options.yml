@@ -27,13 +27,24 @@ tests:
                 -
                     dc: "ny"
     -
+        description: "Read preference tags are case sensitive"
+        uri: "mongodb://example.com/?readPreference=secondary&readPreferenceTags=dc:NY"
+        valid: true
+        warning: false
+        hosts: ~
+        auth: ~
+        options:
+            readPreferenceTags:
+                -
+                    dc: "NY"
+    -
         description: "Invalid readPreferenceTags causes a warning"
         uri: "mongodb://example.com/?readPreferenceTags=invalid"
         valid: true
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Non-numeric maxStalenessSeconds causes a warning"
         uri: "mongodb://example.com/?maxStalenessSeconds=invalid"
@@ -41,7 +52,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low maxStalenessSeconds causes a warning"
         uri: "mongodb://example.com/?maxStalenessSeconds=-2"
@@ -49,5 +60,5 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
 

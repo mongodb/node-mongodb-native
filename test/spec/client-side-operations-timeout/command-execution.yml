@@ -3,9 +3,8 @@ description: "timeoutMS behaves correctly during command execution"
 schemaVersion: "1.9"
 
 runOnRequirements:
-  # The appName filter cannot be used to set a fail point on connection handshakes until server version 4.9 due to
-  # SERVER-49220/SERVER-49336.
-  - minServerVersion: "4.9"
+  # Require SERVER-49336 for failCommand + appName on the initial handshake.
+  - minServerVersion: "4.4.7"
     # Skip load-balanced and serverless which do not support RTT measurements.
     topologies: [ single, replicaset, sharded ]
     serverless: forbid

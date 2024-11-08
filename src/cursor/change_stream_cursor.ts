@@ -55,7 +55,7 @@ export class ChangeStreamCursor<
     pipeline: Document[] = [],
     options: ChangeStreamCursorOptions = {}
   ) {
-    super(client, namespace, options);
+    super(client, namespace, { ...options, tailable: true, awaitData: true });
 
     this.pipeline = pipeline;
     this.changeStreamCursorOptions = options;
@@ -133,7 +133,11 @@ export class ChangeStreamCursor<
       session
     });
 
-    const response = await executeOperation(session.client, aggregateOperation);
+    const response = await executeOperation(
+      session.client,
+      aggregateOperation,
+      this.timeoutContext
+    );
 
     const server = aggregateOperation.server;
     this.maxWireVersion = maxWireVersion(server);

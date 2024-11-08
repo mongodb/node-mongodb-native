@@ -28,7 +28,7 @@ interface UriTest extends UriTestBase {
     password: string;
     db: string;
   };
-  options: Record<string, any>;
+  options: Record<string, any> | null;
 }
 
 interface AuthTest extends UriTestBase {

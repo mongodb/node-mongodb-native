@@ -40,7 +40,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     }
   ]
 }

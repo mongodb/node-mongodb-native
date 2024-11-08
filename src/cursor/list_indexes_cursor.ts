@@ -30,7 +30,7 @@ export class ListIndexesCursor extends AbstractCursor {
       session
     });
 
-    const response = await executeOperation(this.parent.client, operation);
+    const response = await executeOperation(this.parent.client, operation, this.timeoutContext);
 
     return { server: operation.server, session, response };
   }

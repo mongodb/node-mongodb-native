@@ -31,7 +31,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates is parsed correctly",
@@ -62,7 +62,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure is parsed correctly",
@@ -82,7 +82,7 @@
       "warning": true,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure and tlsAllowInvalidCertificates both present (and true) raises an error",
@@ -91,7 +91,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure and tlsAllowInvalidCertificates both present (and false) raises an error",
@@ -100,7 +100,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates and tlsInsecure both present (and true) raises an error",
@@ -109,7 +109,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates and tlsInsecure both present (and false) raises an error",
@@ -118,7 +118,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure and tlsAllowInvalidHostnames both present (and true) raises an error",
@@ -127,7 +127,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure and tlsAllowInvalidHostnames both present (and false) raises an error",
@@ -136,7 +136,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidHostnames and tlsInsecure both present (and true) raises an error",
@@ -145,7 +145,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidHostnames and tlsInsecure both present (and false) raises an error",
@@ -154,7 +154,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tls=true and ssl=true doesn't warn",
@@ -199,7 +199,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tls=true and ssl=false raises error",
@@ -208,7 +208,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "ssl=false and tls=true raises error",
@@ -217,7 +217,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "ssl=true and tls=false raises error",
@@ -226,7 +226,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck can be set to true",
@@ -259,7 +259,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates=true and tlsDisableCertificateRevocationCheck=false raises an error",
@@ -268,7 +268,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates=false and tlsDisableCertificateRevocationCheck=true raises an error",
@@ -277,7 +277,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates and tlsDisableCertificateRevocationCheck both present (and false) raises an error",
@@ -286,7 +286,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck and tlsAllowInvalidCertificates both present (and true) raises an error",
@@ -295,7 +295,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck=true and tlsAllowInvalidCertificates=false raises an error",
@@ -304,7 +304,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck=false and tlsAllowInvalidCertificates=true raises an error",
@@ -313,7 +313,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck and tlsAllowInvalidCertificates both present (and false) raises an error",
@@ -322,7 +322,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure and tlsDisableCertificateRevocationCheck both present (and true) raises an error",
@@ -331,7 +331,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure=true and tlsDisableCertificateRevocationCheck=false raises an error",
@@ -340,7 +340,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure=false and tlsDisableCertificateRevocationCheck=true raises an error",
@@ -349,7 +349,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure and tlsDisableCertificateRevocationCheck both present (and false) raises an error",
@@ -358,7 +358,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck and tlsInsecure both present (and true) raises an error",
@@ -367,7 +367,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck=true and tlsInsecure=false raises an error",
@@ -376,7 +376,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck=false and tlsInsecure=true raises an error",
@@ -385,7 +385,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck and tlsInsecure both present (and false) raises an error",
@@ -394,7 +394,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck and tlsDisableOCSPEndpointCheck both present (and true) raises an error",
@@ -403,7 +403,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck=true and tlsDisableOCSPEndpointCheck=false raises an error",
@@ -412,7 +412,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck=false and tlsDisableOCSPEndpointCheck=true raises an error",
@@ -421,7 +421,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableCertificateRevocationCheck and tlsDisableOCSPEndpointCheck both present (and false) raises an error",
@@ -430,7 +430,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck and tlsDisableCertificateRevocationCheck both present (and true) raises an error",
@@ -439,7 +439,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck=true and tlsDisableCertificateRevocationCheck=false raises an error",
@@ -448,7 +448,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck=false and tlsDisableCertificateRevocationCheck=true raises an error",
@@ -457,7 +457,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck and tlsDisableCertificateRevocationCheck both present (and false) raises an error",
@@ -466,7 +466,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck can be set to true",
@@ -499,7 +499,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure=true and tlsDisableOCSPEndpointCheck=false raises an error",
@@ -508,7 +508,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure=false and tlsDisableOCSPEndpointCheck=true raises an error",
@@ -517,7 +517,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsInsecure and tlsDisableOCSPEndpointCheck both present (and false) raises an error",
@@ -526,7 +526,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck and tlsInsecure both present (and true) raises an error",
@@ -535,7 +535,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck=true and tlsInsecure=false raises an error",
@@ -544,7 +544,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck=false and tlsInsecure=true raises an error",
@@ -553,7 +553,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck and tlsInsecure both present (and false) raises an error",
@@ -562,7 +562,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates and tlsDisableOCSPEndpointCheck both present (and true) raises an error",
@@ -571,7 +571,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates=true and tlsDisableOCSPEndpointCheck=false raises an error",
@@ -580,7 +580,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates=false and tlsDisableOCSPEndpointCheck=true raises an error",
@@ -589,7 +589,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsAllowInvalidCertificates and tlsDisableOCSPEndpointCheck both present (and false) raises an error",
@@ -598,7 +598,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck and tlsAllowInvalidCertificates both present (and true) raises an error",
@@ -607,7 +607,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck=true and tlsAllowInvalidCertificates=false raises an error",
@@ -616,7 +616,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck=false and tlsAllowInvalidCertificates=true raises an error",
@@ -625,7 +625,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     },
     {
       "description": "tlsDisableOCSPEndpointCheck and tlsAllowInvalidCertificates both present (and false) raises an error",
@@ -634,7 +634,7 @@
       "warning": false,
       "hosts": null,
       "auth": null,
-      "options": {}
+      "options": null
     }
   ]
 }

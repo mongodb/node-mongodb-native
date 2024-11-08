@@ -24,7 +24,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low connectTimeoutMS causes a warning"
         uri: "mongodb://example.com/?connectTimeoutMS=-2"
@@ -32,7 +32,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Non-numeric heartbeatFrequencyMS causes a warning"
         uri: "mongodb://example.com/?heartbeatFrequencyMS=invalid"
@@ -40,7 +40,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low heartbeatFrequencyMS causes a warning"
         uri: "mongodb://example.com/?heartbeatFrequencyMS=-2"
@@ -48,7 +48,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Non-numeric localThresholdMS causes a warning"
         uri: "mongodb://example.com/?localThresholdMS=invalid"
@@ -56,7 +56,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low localThresholdMS causes a warning"
         uri: "mongodb://example.com/?localThresholdMS=-2"
@@ -64,15 +64,15 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
-    - 
+        options: ~
+    -
         description: "Invalid retryWrites causes a warning"
         uri: "mongodb://example.com/?retryWrites=invalid"
         valid: true
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Non-numeric serverSelectionTimeoutMS causes a warning"
         uri: "mongodb://example.com/?serverSelectionTimeoutMS=invalid"
@@ -80,7 +80,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low serverSelectionTimeoutMS causes a warning"
         uri: "mongodb://example.com/?serverSelectionTimeoutMS=-2"
@@ -88,7 +88,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Non-numeric socketTimeoutMS causes a warning"
         uri: "mongodb://example.com/?socketTimeoutMS=invalid"
@@ -96,7 +96,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low socketTimeoutMS causes a warning"
         uri: "mongodb://example.com/?socketTimeoutMS=-2"
@@ -104,7 +104,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
       description: directConnection=true
       uri: "mongodb://example.com/?directConnection=true"
@@ -121,7 +121,7 @@ tests:
       warning: false
       hosts: ~
       auth: ~
-      options: {}
+      options: ~
     -
       description: directConnection=false
       uri: "mongodb://example.com/?directConnection=false"
@@ -147,7 +147,7 @@ tests:
       warning: true
       hosts: ~
       auth: ~
-      options: {}
+      options: ~
     -
       description: loadBalanced=true
       uri: "mongodb://example.com/?loadBalanced=true"
@@ -183,7 +183,7 @@ tests:
       warning: true
       hosts: ~
       auth: ~
-      options: {}
+      options: ~
     -
       description: loadBalanced=true with multiple hosts causes an error
       uri: "mongodb://example1,example2/?loadBalanced=true"
@@ -191,7 +191,7 @@ tests:
       warning: false
       hosts: ~
       auth: ~
-      options: {}
+      options: ~
     -
       description: loadBalanced=true with directConnection=true causes an error
       uri: "mongodb://example.com/?loadBalanced=true&directConnection=true"
@@ -199,7 +199,7 @@ tests:
       warning: false
       hosts: ~
       auth: ~
-      options: {}
+      options: ~
     -
       description: loadBalanced=true with replicaSet causes an error
       uri: "mongodb://example.com/?loadBalanced=true&replicaSet=replset"
@@ -207,7 +207,7 @@ tests:
       warning: false
       hosts: ~
       auth: ~
-      options: {}
+      options: ~
     -
         description: "timeoutMS=0"
         uri: "mongodb://example.com/?timeoutMS=0"
@@ -224,7 +224,7 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
     -
         description: "Too low timeoutMS causes a warning"
         uri: "mongodb://example.com/?timeoutMS=-2"
@@ -232,4 +232,4 @@ tests:
         warning: true
         hosts: ~
         auth: ~
-        options: {}
+        options: ~
