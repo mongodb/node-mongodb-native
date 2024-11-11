@@ -384,10 +384,10 @@ The following steps will walk you through how to run the tests for CSFLE.
 
 1. Set temporary AWS credentials
 
-  ```
-  pip3 install boto3
-  PYTHON="python3" source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/set-temp-creds.sh
-  ```
+   ```
+   source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/activate-kmstlsvenv.sh
+   source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/set-temp-creds.sh
+   ```
 
   Alternatively for fish users the following script can be substituted for set-temp-creds.sh:
 
