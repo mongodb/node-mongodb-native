@@ -113,7 +113,8 @@ export async function performInitialHandshake(
   }
 
   const start = new Date().getTime();
-  const response = await conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions);
+
+  const response = await executeHandshake(handshakeDoc, handshakeOptions);
 
   if (!('isWritablePrimary' in response)) {
     // Provide hello-style response document.
@@ -175,6 +176,22 @@ export async function performInitialHandshake(
   // Connection establishment is socket creation (tcp handshake, tls handshake, MongoDB handshake (saslStart, saslContinue))
   // Once connection is established, command logging can log events (if enabled)
   conn.established = true;
+
+  async function executeHandshake(handshakeDoc: Document, handshakeOptions: CommandOptions) {
+    try {
+      const handshakeResponse = await conn.command(
+        ns('admin.$cmd'),
+        handshakeDoc,
+        handshakeOptions
+      );
+      return handshakeResponse;
+    } catch (error) {
+      if (error instanceof MongoError) {
+        error.addErrorLabel(MongoErrorLabel.HandshakeError);
+      }
+      throw error;
+    }
+  }
 }
 
 /**

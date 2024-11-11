@@ -30,11 +30,11 @@ events:
     address: 42
   - type: ConnectionCreated
     address: 42
+  - type: ConnectionPoolCleared
+    address: 42
   - type: ConnectionClosed
     address: 42
     connectionId: 42
     reason: error
-  - type: ConnectionPoolCleared
-    address: 42
 ignore:
   - ConnectionPoolCreated

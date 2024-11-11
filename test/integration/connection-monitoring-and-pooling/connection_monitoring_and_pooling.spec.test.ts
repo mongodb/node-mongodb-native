@@ -69,9 +69,6 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration) - logging',
     ) {
       return 'not applicable: waitQueueSize not supported';
     }
-    if (test.description === 'Connection checkout fails due to error establishing connection') {
-      return 'TODO(NODE-5230): unskip this once event ordering issue is resolved';
-    }
     return false;
   });
 });

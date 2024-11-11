@@ -200,7 +200,7 @@ tests:
           event:
             poolClearedEvent: {}
           count: 1
-      # Perform an operation to ensure the node still useable.
+      # Perform an operation to ensure the node still usable.
       - name: insertOne
         object: *collection
         arguments:
