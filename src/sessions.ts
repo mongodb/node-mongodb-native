@@ -137,7 +137,7 @@ export class ClientSession
    * initially undefined. Gets set to false when startTransaction is called. When commitTransaction is sent to server, if the commitTransaction succeeds, it is then set to undefined, otherwise, set to true */
   commitAttempted?: boolean;
   /** @internal */
-  [kServerSession]: ServerSession | null;
+  private [kServerSession]: ServerSession | null;
   /** @internal */
   [kSnapshotTime]?: Timestamp;
   /** @internal */
