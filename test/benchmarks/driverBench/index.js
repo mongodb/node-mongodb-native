@@ -95,7 +95,7 @@ benchmarkRunner
           args: Object.fromEntries(
             Object.entries(MONGODB_CLIENT_OPTIONS).map(([key, value]) => [
               key,
-              typeof value === 'number' ? value | 0 : value ? 1 : 0
+              typeof value === 'number' ? value : value ? 1 : 0
             ])
           )
         },
