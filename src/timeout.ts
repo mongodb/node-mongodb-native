@@ -1,6 +1,6 @@
-import { type Document } from 'bson';
 import { clearTimeout, setTimeout } from 'timers';
 
+import { type Document } from './bson';
 import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
 import { type ClientSession } from './sessions';
 import { csotMin, noop } from './utils';
