@@ -4,6 +4,9 @@ if [ -z ${DRIVERS_TOOLS+omitted} ]; then echo "DRIVERS_TOOLS is unset" && exit 1
 
 set -o errexit
 
-python3 $DRIVERS_TOOLS/.evergreen/csfle/bottle.py fake_azure:imds &
+pushd $DRIVERS_TOOLS/.evergreen/csfle
+. ./activate-kmstlsvenv.sh
+python bottle.py fake_azure:imds &
+popd
 
 echo "Running Azure KMS idms server on port 8080"
