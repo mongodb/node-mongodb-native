@@ -25,15 +25,15 @@
     "email": "dbx-node@mongodb.com"
   },
   "dependencies": {
-    "@mongodb-js/saslprep": "^1.1.5",
-    "bson": "^6.7.0",
+    "@mongodb-js/saslprep": "^1.1.9",
+    "bson": "^6.9.0",
     "mongodb-connection-string-url": "^3.0.0"
   },
   "peerDependencies": {
-    "@aws-sdk/credential-providers": "^3.188.0",
-    "@mongodb-js/zstd": "^1.1.0",
+    "@aws-sdk/credential-providers": "^3.687.0",
+    "@mongodb-js/zstd": "^1.2.2",
     "gcp-metadata": "^5.2.0",
-    "kerberos": "^2.0.1",
+    "kerberos": "^2.2.0",
     "mongodb-client-encryption": ">=6.0.0 <7",
     "snappy": "^7.2.2",
     "socks": "^2.7.1"
@@ -62,7 +62,7 @@
     }
   },
   "devDependencies": {
-    "@aws-sdk/credential-providers": "^3.686.0",
+    "@aws-sdk/credential-providers": "^3.687.0",
     "@iarna/toml": "^2.2.5",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@microsoft/api-extractor": "^7.47.11",
