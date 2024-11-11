@@ -707,7 +707,7 @@ describe('CSOT spec prose tests', function () {
       const bucket = new GridFSBucket(client.db('db'));
       const stream = bucket.openUploadStream('filename');
 
-      const maybeError = pipeline(Readable.from(Buffer.from('13', 'hex')), stream).catch(
+      const maybeError = await pipeline(Readable.from(Buffer.from('13', 'hex')), stream).catch(
         error => error
       );
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
