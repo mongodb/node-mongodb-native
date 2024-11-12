@@ -1,6 +1,6 @@
 import { EJSON, type ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { type MongoError, MongoRuntimeError } from '../error';
+import { type MongoError, MongoRuntimeError, MongoStalePrimaryError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
 import { ServerType, TopologyType } from './common';
 import { ServerDescription } from './server_description';
@@ -400,7 +400,11 @@ function updateRsFromPrimary(
       // replace serverDescription with a default ServerDescription of type "Unknown"
       serverDescriptions.set(
         serverDescription.address,
-        new ServerDescription(serverDescription.address)
+        new ServerDescription(serverDescription.address, undefined, {
+          error: new MongoStalePrimaryError(
+            'Primary marked stale due to mismatched setVersion or electionId'
+          )
+        })
       );
 
       return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
@@ -416,7 +420,11 @@ function updateRsFromPrimary(
           // this primary is stale, we must remove it
           serverDescriptions.set(
             serverDescription.address,
-            new ServerDescription(serverDescription.address)
+            new ServerDescription(serverDescription.address, undefined, {
+              error: new MongoStalePrimaryError(
+                'Primary marked stale due to mismatched setVersion or electionId'
+              )
+            })
           );
 
           return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
