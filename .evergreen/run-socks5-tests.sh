@@ -7,7 +7,7 @@ set -o xtrace  # For debuggability, no external credentials are used here
 
 node -v
 
-PYTHON_BINARY=${PYTHON_BINARY:-python3}
+PYTHON_BINARY=$(bash -c ". $DRIVERS_TOOLS/.evergreen/find-python3.sh && ensure_python3 2>/dev/null")
 
 # ssl setup
 SSL=${SSL:-nossl}
