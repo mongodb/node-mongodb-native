@@ -1169,9 +1169,6 @@ export class CursorTimeoutContext extends TimeoutContext {
   override get clearServerSelectionTimeout(): boolean {
     return this.timeoutContext.clearServerSelectionTimeout;
   }
-  override get clearConnectionCheckoutTimeout(): boolean {
-    return this.timeoutContext.clearConnectionCheckoutTimeout;
-  }
   override get timeoutForSocketWrite(): Timeout | null {
     return this.timeoutContext.timeoutForSocketWrite;
   }
@@ -1190,12 +1187,16 @@ export class CursorTimeoutContext extends TimeoutContext {
   override get maxTimeMS(): number | null {
     return this.timeoutContext.maxTimeMS;
   }
-
   get timeoutMS(): number | null {
     return this.timeoutContext.csotEnabled() ? this.timeoutContext.timeoutMS : null;
   }
-
   override refreshed(): CursorTimeoutContext {
     return new CursorTimeoutContext(this.timeoutContext.refreshed(), this.owner);
+  }
+  override addMaxTimeMSToCommand(command: Document, options: { omitMaxTimeMS?: boolean }): void {
+    this.timeoutContext.addMaxTimeMSToCommand(command, options);
+  }
+  override getSocketTimeoutMS(): number | undefined {
+    return this.timeoutContext.getSocketTimeoutMS();
   }
 }

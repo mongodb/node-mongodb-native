@@ -402,7 +402,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       throw error;
     } finally {
-      if (options.timeoutContext.clearConnectionCheckoutTimeout) timeout?.clear();
+      timeout?.clear();
     }
   }
 
