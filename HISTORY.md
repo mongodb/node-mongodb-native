@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.10.0](https://github.com/mongodb/node-mongodb-native/compare/v5.9.2...v5.10.0) (2024-11-13)
+
+
+### Features
+
+* **NODE-5815:** remove oidc ([#3981](https://github.com/mongodb/node-mongodb-native/issues/3981)) ([4893330](https://github.com/mongodb/node-mongodb-native/commit/48933301caf293a1e76bff96ce7b1e7a8e321067))
+* **NODE-5940:** cache the AWS credentials provider in the MONGODB-AWS auth logic ([#4000](https://github.com/mongodb/node-mongodb-native/issues/4000)) ([60bfc48](https://github.com/mongodb/node-mongodb-native/commit/60bfc483dba568c1a0f62a2a78d7ce50ed03082c))
+* **NODE-5967:** container and Kubernetes awareness in client metadata ([#4011](https://github.com/mongodb/node-mongodb-native/issues/4011)) ([55c290a](https://github.com/mongodb/node-mongodb-native/commit/55c290ae9283c3194f9a043c2b66e66c50101617))
+
+
+### Bug Fixes
+
+* **NODE-5790:** type error with $addToSet in bulkWrite ([#3956](https://github.com/mongodb/node-mongodb-native/issues/3956)) ([f524a94](https://github.com/mongodb/node-mongodb-native/commit/f524a946ae99caf710220d264819187bd976af53))
+* **NODE-5945:** make AWS session token optional ([#4006](https://github.com/mongodb/node-mongodb-native/issues/4006)) ([cbaf47a](https://github.com/mongodb/node-mongodb-native/commit/cbaf47a08dd478a8e469bd96e95a33fc8306802e))
+* **NODE-6067:** make topology descriptions JSON stringifiable ([#4076](https://github.com/mongodb/node-mongodb-native/issues/4076)) ([7ae6eac](https://github.com/mongodb/node-mongodb-native/commit/7ae6eac967621c1a8bdd4f1fa5dc9c7dc3ec8269))
+
 ## [5.9.2](https://github.com/mongodb/node-mongodb-native/compare/v5.9.1...v5.9.2) (2023-11-16)
 
 
