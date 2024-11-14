@@ -99,6 +99,8 @@ This is the lowest typescript version guaranteed to work with our driver: older 
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
 If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
 
+Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version.  Currently, our Typescript targets es2021.
+
 ## Installation
 
 The recommended way to get started using the Node.js 5.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
