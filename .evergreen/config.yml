@@ -46,6 +46,11 @@ functions:
     - command: expansions.update
       params:
         file: mo-expansion.yml
+  stop mongo-orchestration:
+    - command: shell.exec
+      params:
+        script: |
+          bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
   bootstrap mongohoused:
     - command: shell.exec
       params:
@@ -4706,6 +4711,7 @@ pre:
 post:
   - func: reset aws instance profile
   - func: upload test results
+  - func: stop mongo-orchestration
   - func: upload coverage report
   - func: cleanup
 ignore:
