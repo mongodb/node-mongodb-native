@@ -13,9 +13,7 @@ const {
   dropBucket,
   initCollection,
   initDb,
-  connectClient,
-  createCollection,
-  dropCollection
+  connectClient
 } = require('../../driverBench/common');
 const { pipeline } = require('stream/promises');
 const { EJSON } = require('bson');
@@ -36,6 +34,7 @@ async function clearTemporaryDirectory() {
   await Promise.all(files.map(file => rm(file)));
 }
 
+// eslint-disable-next-line no-unused-vars
 async function ldjsonMultiUpload() {
   const directory = resolve(benchmarkFileDirectory, 'ldjson_multi');
   const files = await readdir(directory);
@@ -64,6 +63,7 @@ async function ldjsonMultiUpload() {
   await Promise.all(uploads);
 }
 
+// eslint-disable-next-line no-unused-vars
 async function ldjsonMultiExport() {
   const skips = Array.from({ length: 100 }, (_, index) => index * 5000);
 
