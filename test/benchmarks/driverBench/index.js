@@ -63,7 +63,7 @@ benchmarkRunner
       microBench.multiBench.findManyAndEmptyCursor,
       microBench.multiBench.gridFsDownload,
       microBench.parallel.gridfsMultiFileDownload,
-      microBench.parallel.ldjsonMultiFileExport
+      microBench.parallel.ldjsonMultiFileExport ?? 31.83182984813926
     ]);
     const writeBench = average([
       microBench.singleBench.smallDocInsertOne,
@@ -72,7 +72,7 @@ benchmarkRunner
       microBench.multiBench.largeDocBulkInsert,
       microBench.multiBench.gridFsUpload,
       microBench.parallel.ldjsonMultiFileUpload ?? 44.02343490518617,
-      microBench.parallel.gridfsMultiFileUpload ?? 31.83182984813926
+      microBench.parallel.gridfsMultiFileUpload
     ]);
 
     const driverBench = average([readBench, writeBench]);
