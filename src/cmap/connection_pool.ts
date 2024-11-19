@@ -685,6 +685,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       },
       error => {
         this[kPending]--;
+        this[kServer].handleError(error);
         this.emitAndLog(
           ConnectionPool.CONNECTION_CLOSED,
           new ConnectionClosedEvent(
@@ -719,9 +720,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // connection permits because that potentially delays the availability of
       // the connection to a checkout request
       this.createConnection((err, connection) => {
-        if (err) {
-          this[kServer].handleError(err);
-        }
         if (!err && connection) {
           this[kConnections].push(connection);
           process.nextTick(() => this.processWaitQueue());
