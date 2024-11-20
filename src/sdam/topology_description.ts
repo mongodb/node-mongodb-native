@@ -1,6 +1,6 @@
 import { EJSON, type ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { type MongoError, MongoRuntimeError } from '../error';
+import { MongoError, MongoRuntimeError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
 import { ServerType, TopologyType } from './common';
 import { ServerDescription } from './server_description';
@@ -400,7 +400,9 @@ function updateRsFromPrimary(
       // replace serverDescription with a default ServerDescription of type "Unknown"
       serverDescriptions.set(
         serverDescription.address,
-        new ServerDescription(serverDescription.address)
+        new ServerDescription(serverDescription.address, undefined, {
+          error: new MongoError('stale')
+        })
       );
 
       return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
@@ -416,7 +418,9 @@ function updateRsFromPrimary(
           // this primary is stale, we must remove it
           serverDescriptions.set(
             serverDescription.address,
-            new ServerDescription(serverDescription.address)
+            new ServerDescription(serverDescription.address, undefined, {
+              error: new MongoError('stale')
+            })
           );
 
           return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
@@ -438,7 +442,10 @@ function updateRsFromPrimary(
   for (const [address, server] of serverDescriptions) {
     if (server.type === ServerType.RSPrimary && server.address !== serverDescription.address) {
       // Reset old primary's type to Unknown.
-      serverDescriptions.set(address, new ServerDescription(server.address));
+      serverDescriptions.set(
+        address,
+        new ServerDescription(server.address, undefined, { error: new MongoError('stale') })
+      );
 
       // There can only be one primary
       break;

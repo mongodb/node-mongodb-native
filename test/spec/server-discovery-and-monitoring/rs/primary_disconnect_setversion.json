@@ -47,6 +47,7 @@
         "servers": {
           "a:27017": {
             "type": "Unknown",
+            "error": { "message": "stale" },
             "setName": null,
             "electionId": null
           },

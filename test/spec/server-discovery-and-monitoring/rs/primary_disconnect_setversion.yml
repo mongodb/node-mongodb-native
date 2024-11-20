@@ -35,6 +35,7 @@ phases: [
             servers: {
                 "a:27017": {
                     type: "Unknown",
+                    error: "stale",
                     setName: ,
                     electionId:
                 },
