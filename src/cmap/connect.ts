@@ -387,10 +387,18 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     resolve(socket);
   } else {
     const connectEvent = useTLS ? 'secureConnect' : 'connect';
+    const start = performance.now();
     socket
       .once(connectEvent, () => resolve(socket))
       .once('error', error => reject(connectionFailureError('error', error)))
-      .once('timeout', () => reject(connectionFailureError('timeout')))
+      .once('timeout', () => {
+        const end = performance.now();
+        return reject(
+          new MongoNetworkTimeoutError(
+            `socket.connect() timed out! connectTimeoutMS=${connectTimeoutMS}ms, socket.setTimeout fired after ${end - start}ms.`
+          )
+        );
+      })
       .once('close', () => reject(connectionFailureError('close')));
 
     if (options.cancellationToken != null) {

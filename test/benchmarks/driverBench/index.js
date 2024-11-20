@@ -59,10 +59,6 @@ benchmarkRunner
     ]);
     const multiBench = average(Object.values(microBench.multiBench));
 
-    // ldjsonMultiFileUpload and ldjsonMultiFileExport cause connection errors.
-    // While we investigate, we will use the last known good values:
-    // https://spruce.mongodb.com/task/mongo_node_driver_next_performance_tests_run_spec_benchmark_tests_node_server_4bc3e500b6f0e8ab01f052c4a1bfb782d6a29b4e_f168e1328f821bbda265e024cc91ae54_24_11_18_15_37_24/logs?execution=0
-
     const parallelBench = average([
       microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.ldjsonMultiFileExport,
