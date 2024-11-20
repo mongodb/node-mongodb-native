@@ -10,7 +10,9 @@ let bsonType = 'js-bson';
 // TODO(NODE-4606): test against different driver configurations in CI
 
 const { writeFile } = require('fs/promises');
-const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
+const {
+  makeParallelBenchmarks /* makeSingleBench, makeMultiBench*/
+} = require('../mongoBench/suites');
 const { MONGODB_CLIENT_OPTIONS } = require('./common');
 
 const hw = os.cpus();
@@ -33,27 +35,23 @@ function average(arr) {
 }
 
 const benchmarkRunner = new Runner()
-  .suite('singleBench', suite => makeSingleBench(suite))
-  .suite('multiBench', suite => makeMultiBench(suite))
+  // .suite('singleBench', suite => makeSingleBench(suite))
+  // .suite('multiBench', suite => makeMultiBench(suite))
   .suite('parallel', suite => makeParallelBenchmarks(suite));
 
 benchmarkRunner
   .run()
   .then(microBench => {
-    const singleBench = average([
-      microBench.singleBench.findOne,
-      microBench.singleBench.smallDocInsertOne,
-      microBench.singleBench.largeDocInsertOne
-    ]);
-    const multiBench = average(Object.values(microBench.multiBench));
-
-    // ldjsonMultiFileUpload and ldjsonMultiFileExport cause connection errors.
-    // While we investigate, we will use the last known good values:
-    // https://spruce.mongodb.com/task/mongo_node_driver_next_performance_tests_run_spec_benchmark_tests_node_server_4bc3e500b6f0e8ab01f052c4a1bfb782d6a29b4e_f168e1328f821bbda265e024cc91ae54_24_11_18_15_37_24/logs?execution=0
+    // const singleBench = average([
+    //   microBench.singleBench.findOne,
+    //   microBench.singleBench.smallDocInsertOne,
+    //   microBench.singleBench.largeDocInsertOne
+    // ]);
+    // const multiBench = average(Object.values(microBench.multiBench));
 
     const parallelBench = average([
-      microBench.parallel.ldjsonMultiFileUpload ?? 44.02343490518617,
-      microBench.parallel.ldjsonMultiFileExport ?? 31.83182984813926,
+      microBench.parallel.ldjsonMultiFileUpload,
+      microBench.parallel.ldjsonMultiFileExport,
       microBench.parallel.gridfsMultiFileUpload,
       microBench.parallel.gridfsMultiFileDownload
     ]);
@@ -63,7 +61,7 @@ benchmarkRunner
       microBench.multiBench.findManyAndEmptyCursor,
       microBench.multiBench.gridFsDownload,
       microBench.parallel.gridfsMultiFileDownload,
-      microBench.parallel.ldjsonMultiFileExport ?? 31.83182984813926
+      microBench.parallel.ldjsonMultiFileExport
     ]);
     const writeBench = average([
       microBench.singleBench.smallDocInsertOne,
@@ -71,15 +69,15 @@ benchmarkRunner
       microBench.multiBench.smallDocBulkInsert,
       microBench.multiBench.largeDocBulkInsert,
       microBench.multiBench.gridFsUpload,
-      microBench.parallel.ldjsonMultiFileUpload ?? 44.02343490518617,
+      microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.gridfsMultiFileUpload
     ]);
 
     const driverBench = average([readBench, writeBench]);
 
     const benchmarkResults = {
-      singleBench,
-      multiBench,
+      // singleBench,
+      // multiBench,
       parallelBench,
       readBench,
       writeBench,
