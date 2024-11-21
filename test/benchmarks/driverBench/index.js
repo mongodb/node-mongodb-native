@@ -2,6 +2,7 @@
 
 const MongoBench = require('../mongoBench');
 const os = require('node:os');
+const util = require('node:util');
 const process = require('node:process');
 
 const Runner = MongoBench.Runner;
@@ -11,9 +12,17 @@ let bsonType = 'js-bson';
 
 const { writeFile } = require('fs/promises');
 const {
-  makeParallelBenchmarks /* makeSingleBench, makeMultiBench*/
+  makeParallelBenchmarks /* makeSingleBench, makeMultiBench */
 } = require('../mongoBench/suites');
-const { MONGODB_CLIENT_OPTIONS } = require('./common');
+const {
+  MONGODB_CLIENT_OPTIONS,
+  MONGODB_DRIVER_PATH,
+  MONGODB_DRIVER_VERSION,
+  MONGODB_DRIVER_REVISION,
+  MONGODB_BSON_PATH,
+  MONGODB_BSON_VERSION,
+  MONGODB_BSON_REVISION
+} = require('./common');
 
 const hw = os.cpus();
 const ram = os.totalmem() / 1024 ** 3;
@@ -26,7 +35,10 @@ const systemInfo = () =>
     `- arch: ${os.arch()}`,
     `- os: ${process.platform} (${os.release()})`,
     `- ram: ${platform.ram}`,
-    `- node: ${process.version}\n`
+    `- node: ${process.version}`,
+    `- driver: ${MONGODB_DRIVER_VERSION} (${MONGODB_DRIVER_REVISION}): ${MONGODB_DRIVER_PATH}`,
+    `  - options ${util.inspect(MONGODB_CLIENT_OPTIONS)}`,
+    `- bson: ${MONGODB_BSON_VERSION} (${MONGODB_BSON_REVISION}): (${MONGODB_BSON_PATH})\n`
   ].join('\n');
 console.log(systemInfo());
 
@@ -57,18 +69,18 @@ benchmarkRunner
     ]);
 
     const readBench = average([
-      microBench.singleBench.findOne,
-      microBench.multiBench.findManyAndEmptyCursor,
-      microBench.multiBench.gridFsDownload,
+      // microBench.singleBench.findOne,
+      // microBench.multiBench.findManyAndEmptyCursor,
+      // microBench.multiBench.gridFsDownload,
       microBench.parallel.gridfsMultiFileDownload,
       microBench.parallel.ldjsonMultiFileExport
     ]);
     const writeBench = average([
-      microBench.singleBench.smallDocInsertOne,
-      microBench.singleBench.largeDocInsertOne,
-      microBench.multiBench.smallDocBulkInsert,
-      microBench.multiBench.largeDocBulkInsert,
-      microBench.multiBench.gridFsUpload,
+      // microBench.singleBench.smallDocInsertOne,
+      // microBench.singleBench.largeDocInsertOne,
+      // microBench.multiBench.smallDocBulkInsert,
+      // microBench.multiBench.largeDocBulkInsert,
+      // microBench.multiBench.gridFsUpload,
       microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.gridfsMultiFileUpload
     ]);
@@ -111,6 +123,6 @@ benchmarkRunner
     return writeFile('results.json', results);
   })
   .catch(err => {
-    console.error('failure: ', err.name, err.message);
+    console.error('failure: ', err.name, err.message, err.stack);
     process.exit(1);
   });
