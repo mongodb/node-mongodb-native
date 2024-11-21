@@ -25,7 +25,7 @@ jobs:
       - name: Build Docs
         run: npm run build:docs -- --yes
       - name: Open Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           title: 'docs: generate docs from latest main [skip-ci]'
           delete-branch: true
