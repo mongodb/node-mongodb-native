@@ -78,7 +78,7 @@
     "@types/semver": "^7.5.8",
     "@types/sinon": "^17.0.3",
     "@types/sinon-chai": "^3.2.12",
-    "@types/whatwg-url": "^11.0.5",
+    "@types/whatwg-url": "^13.0.0",
     "@typescript-eslint/eslint-plugin": "8.4.0",
     "@typescript-eslint/parser": "8.4.0",
     "chai": "^4.4.1",
