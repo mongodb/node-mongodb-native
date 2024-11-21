@@ -67,18 +67,18 @@ benchmarkRunner
     ]);
 
     const readBench = average([
-      microBench.singleBench.findOne,
-      microBench.multiBench.findManyAndEmptyCursor,
-      microBench.multiBench.gridFsDownload,
+      // microBench.singleBench.findOne,
+      // microBench.multiBench.findManyAndEmptyCursor,
+      // microBench.multiBench.gridFsDownload,
       microBench.parallel.gridfsMultiFileDownload,
       microBench.parallel.ldjsonMultiFileExport
     ]);
     const writeBench = average([
-      microBench.singleBench.smallDocInsertOne,
-      microBench.singleBench.largeDocInsertOne,
-      microBench.multiBench.smallDocBulkInsert,
-      microBench.multiBench.largeDocBulkInsert,
-      microBench.multiBench.gridFsUpload,
+      // microBench.singleBench.smallDocInsertOne,
+      // microBench.singleBench.largeDocInsertOne,
+      // microBench.multiBench.smallDocBulkInsert,
+      // microBench.multiBench.largeDocBulkInsert,
+      // microBench.multiBench.gridFsUpload,
       microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.gridfsMultiFileUpload
     ]);
@@ -121,6 +121,6 @@ benchmarkRunner
     return writeFile('results.json', results);
   })
   .catch(err => {
-    console.error('failure: ', err.name, err.message);
+    console.error('failure: ', err.name, err.message, err.stack);
     process.exit(1);
   });
