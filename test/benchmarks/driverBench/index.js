@@ -2,7 +2,6 @@
 
 const MongoBench = require('../mongoBench');
 const os = require('node:os');
-const util = require('node:util');
 const process = require('node:process');
 
 const Runner = MongoBench.Runner;
@@ -33,10 +32,7 @@ const systemInfo = () =>
     `- arch: ${os.arch()}`,
     `- os: ${process.platform} (${os.release()})`,
     `- ram: ${platform.ram}`,
-    `- node: ${process.version}`,
-    `- driver: ${MONGODB_DRIVER_VERSION} (${MONGODB_DRIVER_REVISION}): ${MONGODB_DRIVER_PATH}`,
-    `  - options ${util.inspect(MONGODB_CLIENT_OPTIONS)}`,
-    `- bson: ${MONGODB_BSON_VERSION} (${MONGODB_BSON_REVISION}): (${MONGODB_BSON_PATH})\n`
+    `- node: ${process.version}\n`
   ].join('\n');
 console.log(systemInfo());
 
@@ -67,18 +63,18 @@ benchmarkRunner
     ]);
 
     const readBench = average([
-      // microBench.singleBench.findOne,
-      // microBench.multiBench.findManyAndEmptyCursor,
-      // microBench.multiBench.gridFsDownload,
+      microBench.singleBench.findOne,
+      microBench.multiBench.findManyAndEmptyCursor,
+      microBench.multiBench.gridFsDownload,
       microBench.parallel.gridfsMultiFileDownload,
       microBench.parallel.ldjsonMultiFileExport
     ]);
     const writeBench = average([
-      // microBench.singleBench.smallDocInsertOne,
-      // microBench.singleBench.largeDocInsertOne,
-      // microBench.multiBench.smallDocBulkInsert,
-      // microBench.multiBench.largeDocBulkInsert,
-      // microBench.multiBench.gridFsUpload,
+      microBench.singleBench.smallDocInsertOne,
+      microBench.singleBench.largeDocInsertOne,
+      microBench.multiBench.smallDocBulkInsert,
+      microBench.multiBench.largeDocBulkInsert,
+      microBench.multiBench.gridFsUpload,
       microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.gridfsMultiFileUpload
     ]);
@@ -121,6 +117,6 @@ benchmarkRunner
     return writeFile('results.json', results);
   })
   .catch(err => {
-    console.error('failure: ', err.name, err.message, err.stack);
+    console.error('failure: ', err.name, err.message);
     process.exit(1);
   });
