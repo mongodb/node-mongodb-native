@@ -6,6 +6,11 @@ const { Readable } = require('stream');
 const { pipeline } = require('stream/promises');
 const child_process = require('child_process');
 
+/**
+ * The path to the MongoDB Node.js driver.
+ * This MUST be set to the directory the driver is installed in
+ * NOT the file "lib/index.js" that is the driver's export.
+ */
 const MONGODB_DRIVER_PATH = (() => {
   let driverPath = process.env.MONGODB_DRIVER_PATH;
   if (!driverPath?.length) {
@@ -16,8 +21,13 @@ const MONGODB_DRIVER_PATH = (() => {
 
 const { MongoClient, GridFSBucket } = require(MONGODB_DRIVER_PATH);
 
+/** Grab the version from the package.json */
 const { version: MONGODB_DRIVER_VERSION } = require(path.join(MONGODB_DRIVER_PATH, 'package.json'));
 
+/**
+ * Use git to optionally determine the git revision,
+ * but the benchmarks could be run against an npm installed version so this should be allowed to fail
+ */
 const MONGODB_DRIVER_REVISION = (() => {
   try {
     return child_process
@@ -31,8 +41,20 @@ const MONGODB_DRIVER_REVISION = (() => {
   }
 })();
 
+/**
+ * Find the BSON dependency inside the driver PATH given and grab the version from the package.json.
+ */
 const MONGODB_BSON_PATH = path.join(MONGODB_DRIVER_PATH, 'node_modules', 'bson');
 const { version: MONGODB_BSON_VERSION } = require(path.join(MONGODB_BSON_PATH, 'package.json'));
+
+/**
+ * If you need to test BSON changes, you should clone, checkout and build BSON.
+ * run: `npm link` with no arguments to register the link.
+ * Then in the driver you are testing run `npm link bson` to use your local build.
+ *
+ * This will symlink the BSON into the driver's node_modules directory. So here
+ * we can find the revision of the BSON we are testing against if .git exists.
+ */
 const MONGODB_BSON_REVISION = (() => {
   if (!fs.existsSync(path.join(MONGODB_BSON_PATH, '.git'))) {
     return 'installed from npm';
