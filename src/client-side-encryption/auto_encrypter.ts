@@ -57,7 +57,7 @@ export interface AutoEncryptionOptions {
     /** If true, autoEncryption will not attempt to spawn a mongocryptd before connecting  */
     mongocryptdBypassSpawn?: boolean;
     /** The path to the mongocryptd executable on the system */
-    mongocryptdSpawnPath?: string;
+    mongocryptdSpawnPath?: `${string}mongocryptd${'.exe' | ''}`;
     /** Command line arguments to use when auto-spawning a mongocryptd */
     mongocryptdSpawnArgs?: string[];
     /**
@@ -83,7 +83,7 @@ export interface AutoEncryptionOptions {
      *
      * Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
      */
-    cryptSharedLibPath?: string;
+    cryptSharedLibPath?: `${string}mongo_crypt_v${number}.${'so' | 'dll' | 'dylib'}`;
     /**
      * If specified, never use mongocryptd and instead fail when the MongoDB Crypt
      * shared library could not be loaded.
