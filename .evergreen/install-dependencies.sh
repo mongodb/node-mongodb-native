@@ -19,5 +19,6 @@ fi
 source $DRIVERS_TOOLS/.evergreen/install-node.sh
 
 npm install "${NPM_OPTIONS}"
+npm install mongodb/js-bson#main
 
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
