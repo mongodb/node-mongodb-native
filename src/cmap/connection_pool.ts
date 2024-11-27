@@ -706,11 +706,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   private ensureMinPoolSize() {
     const minPoolSize = this.options.minPoolSize;
-    if (this[kPoolState] !== PoolState.ready || minPoolSize === 0) {
+    if (this[kPoolState] !== PoolState.ready) {
       return;
     }
 
     this[kConnections].prune(connection => this.destroyConnectionIfPerished(connection));
+
+    if(minPoolSize === 0) {
+      return;
+    }
 
     if (
       this.totalConnectionCount < minPoolSize &&
