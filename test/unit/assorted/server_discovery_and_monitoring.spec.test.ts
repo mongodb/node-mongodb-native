@@ -271,7 +271,7 @@ function normalizeServerDescription(serverDescription) {
     // it as `Unknown`.
     serverDescription.type = 'Unknown';
   }
-  serverDescription.error == serverDescription?.error?.message;
+  //serverDescription.error = serverDescription?.error?.message;
 
   return serverDescription;
 }
@@ -475,7 +475,7 @@ function assertTopologyDescriptionOutcomeExpectations(
       } else if (expectedKey !== 'error') {
         expect(actualServer).to.have.deep.property(expectedKey, expectedValue);
       } else {
-        // Check that if we have
+        // pull the message off the error if it is present
         expect(actualServer).to.have.deep.property(expectedKey).instanceof(MongoError);
         expect(actualServer).property(expectedKey).property('message').includes(expectedValue);
       }

@@ -1,6 +1,6 @@
 import { EJSON, type ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { MongoError, MongoRuntimeError } from '../error';
+import { type MongoError, MongoRuntimeError, MongoStalePrimaryError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
 import { ServerType, TopologyType } from './common';
 import { ServerDescription } from './server_description';
@@ -401,9 +401,7 @@ function updateRsFromPrimary(
       serverDescriptions.set(
         serverDescription.address,
         new ServerDescription(serverDescription.address, undefined, {
-          error: new MongoError(
-            `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`
-          )
+          error: new MongoStalePrimaryError(serverDescription, maxSetVersion, maxElectionId)
         })
       );
 
@@ -421,9 +419,7 @@ function updateRsFromPrimary(
           serverDescriptions.set(
             serverDescription.address,
             new ServerDescription(serverDescription.address, undefined, {
-              error: new MongoError(
-                `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`
-              )
+              error: new MongoStalePrimaryError(serverDescription, maxSetVersion, maxElectionId)
             })
           );
 
@@ -449,9 +445,7 @@ function updateRsFromPrimary(
       serverDescriptions.set(
         address,
         new ServerDescription(server.address, undefined, {
-          error: new MongoError(
-            `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${server.setVersion}, server electionId: ${server.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`
-          )
+          error: new MongoStalePrimaryError(serverDescription, maxSetVersion, maxElectionId)
         })
       );
 
