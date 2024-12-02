@@ -47,9 +47,9 @@
         "servers": {
           "a:27017": {
             "type": "Unknown",
-            "error": {"message": "stale"},
             "setName": null,
-            "electionId": null
+            "electionId": null,
+            "error": "primary marked stale due to electionId/setVersion mismatch"
           },
           "b:27017": {
             "type": "RSPrimary",

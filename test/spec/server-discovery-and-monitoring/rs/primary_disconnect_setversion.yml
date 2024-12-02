@@ -35,9 +35,9 @@ phases: [
             servers: {
                 "a:27017": {
                     type: "Unknown",
-                    error: "stale",
                     setName: ,
-                    electionId:
+                    electionId:,
+                    error: "primary marked stale due to electionId/setVersion mismatch"
                 },
                 "b:27017": {
                     type: "RSPrimary",
