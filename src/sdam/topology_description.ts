@@ -401,7 +401,9 @@ function updateRsFromPrimary(
       serverDescriptions.set(
         serverDescription.address,
         new ServerDescription(serverDescription.address, undefined, {
-          error: new MongoError('stale')
+          error: new MongoError(
+            `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`
+          )
         })
       );
 
@@ -419,7 +421,9 @@ function updateRsFromPrimary(
           serverDescriptions.set(
             serverDescription.address,
             new ServerDescription(serverDescription.address, undefined, {
-              error: new MongoError('stale')
+              error: new MongoError(
+                `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`
+              )
             })
           );
 
@@ -444,7 +448,11 @@ function updateRsFromPrimary(
       // Reset old primary's type to Unknown.
       serverDescriptions.set(
         address,
-        new ServerDescription(server.address, undefined, { error: new MongoError('stale') })
+        new ServerDescription(server.address, undefined, {
+          error: new MongoError(
+            `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${server.setVersion}, server electionId: ${server.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`
+          )
+        })
       );
 
       // There can only be one primary
