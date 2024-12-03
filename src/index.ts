@@ -77,6 +77,7 @@ export {
   MongoServerClosedError,
   MongoServerError,
   MongoServerSelectionError,
+  MongoStalePrimaryError,
   MongoSystemError,
   MongoTailableCursorError,
   MongoTopologyClosedError,
