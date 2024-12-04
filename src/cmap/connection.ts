@@ -769,7 +769,7 @@ export class SizedMessageTransform extends Transform {
   connection: Connection;
 
   constructor({ connection }: { connection: Connection }) {
-    super({ objectMode: false });
+    super({ writableObjectMode: false, readableObjectMode: true });
     this.bufferPool = new BufferPool();
     this.connection = connection;
   }
