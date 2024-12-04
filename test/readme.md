@@ -241,6 +241,48 @@ beforeEach(() => {
 });
 ```
 
+## Running Benchmarks
+
+Refer to the `run-spec-benchmark-tests-node-server` task for Node.js version, MongoDB server version, and platform that we run benchmarks against in CI.
+
+The server is run in standalone mode and the server versions are aliased by this script: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/5048cca80e9ca62642409de2d401058bbd7057fa/.evergreen/mongodl.py#L58 check the latest version to see what alias the driver is running against.
+
+The host used is described here: https://spruce.mongodb.com/distro/rhel90-dbx-perf-large/settings/general (Auth required to view)
+
+It is best to try reproductions against as similar a deployment as possible to isolate regressions.
+
+### Configuration
+
+The benchmarks can be directed to test different settings and driver versions.
+
+The following are environment variables and how the benchmark runner uses them:
+
+- `MONGODB_DRIVER_PATH` - if set MUST be set to the directory a driver version is in, usually another clone of the driver checked out to a different revision.
+- `MONGODB_CLIENT_OPTIONS` - if set MUST be a JSON string that will be parsed and passed as the second argument to the MongoClient constructor.
+- `MONGODB_URI` - if set MUST be a valid MongoDB connection string and it will be used as the host the benchmarks will run against.
+
+It may be desirable to test how changes to `BSON` impact the driver's performance.
+
+To do this:
+- clone the changed version of BSON
+  - run the build script for that repo (usually done by `npm install` for you)
+- run `npm link`
+- over in the driver repo run `npm link bson`
+
+When you run the benchmarks verify that the BSON version has been picked by the version references that are printed out:
+
+```md
+- cpu: Apple M1 Max
+- cores: 10
+- arch: arm64
+- os: darwin (23.6.0)
+- ram: 32GB
+- node: v22.6.0
+- driver: 6.11.0 (df3ea32a9): .../mongodb
+  - options {}
+- bson: 6.10.1 (installed from npm): (.../mongodb/node_modules/bson)
+```
+
 ## Testing with Special Environments
 
 In order to test some features, you will need to generate and set a specialized group of environment variables. The subsections below will walk you through how to generate and set the environment variables for these features.
