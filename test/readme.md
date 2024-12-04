@@ -251,7 +251,15 @@ Refer to the `run-spec-benchmark-tests-node-server` task for Node.js version, Mo
 
 The server is run in standalone mode and the server versions are aliased by this script: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/5048cca80e9ca62642409de2d401058bbd7057fa/.evergreen/mongodl.py#L58 check the latest version to see what alias the driver is running against.
 
-The host used is described here: https://spruce.mongodb.com/distro/rhel90-dbx-perf-large/settings/general (Auth required to view)
+The host used is described in detail here: https://spruce.mongodb.com/distro/rhel90-dbx-perf-large/settings/general (Auth required to view)
+
+Here is a rough list of the key configurations:
+
+- cpu: Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+- cores: 16
+- arch: x64
+- os: RHEL 9.0 linux (5.14.0-70.75.1.el9_0.x86_64)
+- ram: 64 GB
 
 It is best to try reproductions against as similar a deployment as possible to isolate regressions.
 
@@ -261,9 +269,9 @@ The benchmarks can be directed to test different settings and driver versions.
 
 The following are environment variables and how the benchmark runner uses them:
 
-- `MONGODB_DRIVER_PATH` - if set MUST be set to the directory a driver version is in, usually another clone of the driver checked out to a different revision.
-- `MONGODB_CLIENT_OPTIONS` - if set MUST be a JSON string that will be parsed and passed as the second argument to the MongoClient constructor.
-- `MONGODB_URI` - if set MUST be a valid MongoDB connection string and it will be used as the host the benchmarks will run against.
+- `MONGODB_DRIVER_PATH` - (default: current working driver) if set MUST be set to the directory a driver version is in, usually another clone of the driver checked out to a different revision.
+- `MONGODB_CLIENT_OPTIONS` - (default: empty object) if set MUST be a JSON string that will be parsed and passed as the second argument to the MongoClient constructor.
+- `MONGODB_URI` - (default: `mongodb://127.0.0.1:27017`) if set MUST be a valid MongoDB connection string and it will be used as the host the benchmarks will run against.
 
 It may be desirable to test how changes to `BSON` impact the driver's performance.
 
