@@ -386,15 +386,35 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   if (existingSocket) {
     resolve(socket);
   } else {
+    const start = performance.now();
     const connectEvent = useTLS ? 'secureConnect' : 'connect';
     socket
       .once(connectEvent, () => resolve(socket))
-      .once('error', error => reject(connectionFailureError('error', error)))
-      .once('timeout', () => reject(connectionFailureError('timeout')))
-      .once('close', () => reject(connectionFailureError('close')));
+      .once('error', cause =>
+        reject(new MongoNetworkError(MongoError.buildErrorMessage(cause), { cause }))
+      )
+      .once('timeout', () => {
+        reject(
+          new MongoNetworkTimeoutError(
+            `Socket '${connectEvent}' timed out after ${(performance.now() - start) | 0}ms (connectTimeoutMS: ${connectTimeoutMS})`
+          )
+        );
+      })
+      .once('close', () =>
+        reject(
+          new MongoNetworkError(
+            `Socket closed after ${(performance.now() - start) | 0} during connection establishment`
+          )
+        )
+      );
 
     if (options.cancellationToken != null) {
-      cancellationHandler = () => reject(connectionFailureError('cancel'));
+      cancellationHandler = () =>
+        reject(
+          new MongoNetworkError(
+            `Socket connection establishment was cancelled after ${(performance.now() - start) | 0}`
+          )
+        );
       options.cancellationToken.once('cancel', cancellationHandler);
     }
   }
@@ -447,9 +467,11 @@ async function makeSocks5Connection(options: MakeConnectionOptions): Promise<Str
 
   socks ??= loadSocks();
 
+  let existingSocket: Stream;
+
   try {
     // Then, establish the Socks5 proxy connection:
-    const { socket } = await socks.SocksClient.createConnection({
+    const connection = await socks.SocksClient.createConnection({
       existing_socket: rawSocket,
       timeout: options.connectTimeoutMS,
       command: 'connect',
@@ -466,35 +488,12 @@ async function makeSocks5Connection(options: MakeConnectionOptions): Promise<Str
         password: options.proxyPassword || undefined
       }
     });
-
-    // Finally, now treat the resulting duplex stream as the
-    // socket over which we send and receive wire protocol messages:
-    return await makeSocket({
-      ...options,
-      existingSocket: socket,
-      proxyHost: undefined
-    });
-  } catch (error) {
-    throw connectionFailureError('error', error);
+    existingSocket = connection.socket;
+  } catch (cause) {
+    throw new MongoNetworkError(MongoError.buildErrorMessage(cause), { cause });
   }
-}
 
-function connectionFailureError(type: 'error', cause: Error): MongoNetworkError;
-function connectionFailureError(type: 'close' | 'timeout' | 'cancel'): MongoNetworkError;
-function connectionFailureError(
-  type: 'error' | 'close' | 'timeout' | 'cancel',
-  cause?: Error
-): MongoNetworkError {
-  switch (type) {
-    case 'error':
-      return new MongoNetworkError(MongoError.buildErrorMessage(cause), { cause });
-    case 'timeout':
-      return new MongoNetworkTimeoutError('connection timed out');
-    case 'close':
-      return new MongoNetworkError('connection closed');
-    case 'cancel':
-      return new MongoNetworkError('connection establishment was cancelled');
-    default:
-      return new MongoNetworkError('unknown network error');
-  }
+  // Finally, now treat the resulting duplex stream as the
+  // socket over which we send and receive wire protocol messages:
+  return await makeSocket({ ...options, existingSocket, proxyHost: undefined });
 }
