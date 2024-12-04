@@ -243,6 +243,10 @@ beforeEach(() => {
 
 ## Running Benchmarks
 
+```sh
+npm run check:bench
+```
+
 Refer to the `run-spec-benchmark-tests-node-server` task for Node.js version, MongoDB server version, and platform that we run benchmarks against in CI.
 
 The server is run in standalone mode and the server versions are aliased by this script: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/5048cca80e9ca62642409de2d401058bbd7057fa/.evergreen/mongodl.py#L58 check the latest version to see what alias the driver is running against.
