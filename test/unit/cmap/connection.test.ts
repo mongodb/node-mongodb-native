@@ -11,7 +11,8 @@ import {
   MongoClientAuthProviders,
   MongoDBCollectionNamespace,
   MongoNetworkTimeoutError,
-  ns
+  ns,
+  SizedMessageTransform
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { getSymbolFrom } from '../../tools/utils';
@@ -321,6 +322,21 @@ describe('new Connection()', function () {
           });
         });
       });
+    });
+  });
+
+  describe('SizedMessageTransform', function () {
+    it('parses chunks of wire messages', function () {
+      const stream = new SizedMessageTransform({ connection: {} as any });
+      // Message of length 4 + 4 = 8
+      stream.write(Buffer.from([8, 0, 0, 0]));
+      stream.write(Buffer.from([1, 2, 3, 4]));
+      // Message of length 4 + 2 = 6, chunked differently
+      stream.write(Buffer.from([6, 0, 0]));
+      stream.write(Buffer.from([0, 5, 6]));
+      expect(stream.read(1)).to.deep.equal(Buffer.from([8, 0, 0, 0, 1, 2, 3, 4]));
+      expect(stream.read(1)).to.deep.equal(Buffer.from([6, 0, 0, 0, 5, 6]));
+      expect(stream.read(1)).to.equal(null);
     });
   });
 });

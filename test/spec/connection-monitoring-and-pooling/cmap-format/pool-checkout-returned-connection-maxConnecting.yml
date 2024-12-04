@@ -15,6 +15,7 @@ failPoint:
     blockConnection: true
     blockTimeMS: 750
 poolOptions:
+  maxConnecting: 2
   maxPoolSize: 10
   waitQueueTimeoutMS: 5000
 operations:
@@ -45,14 +46,13 @@ operations:
     count: 4
   - name: wait
     ms: 100
-  # check original connection back in, so the thread that isn't
-  # currently establishing will become unblocked. Then wait for
-  # all threads to complete.
+  # Check original connection back in, so one of the waiting threads can check
+  # out the idle connection before the two new connections are ready.
   - name: checkIn
     connection: conn0
-  - name: waitForEvent
-    event: ConnectionCheckedOut
-    count: 4
+  # Wait for 100ms to let one of the blocked checkOut operations complete.
+  - name: wait
+    ms: 100
 events:
   # main thread checking out a Connection and holding it
   - type: ConnectionCreated
@@ -69,15 +69,13 @@ events:
   - type: ConnectionCheckedIn
     connectionId: 1
     address: 42
-  # remaining thread checking out the returned Connection
+  # Another thread checks out the returned Connection before the two new
+  # connections are checked out.
   - type: ConnectionCheckedOut
     connectionId: 1
     address: 42
-  # first two threads finishing Connection establishment
-  - type: ConnectionCheckedOut
-    address: 42
-  - type: ConnectionCheckedOut
-    address: 42
+  # Events after this can come in different orders but still be valid.
+  # See DRIVERS-2223 for details.
 ignore:
   - ConnectionPoolReady
   - ConnectionClosed
