@@ -89,11 +89,6 @@
   "tests": [
     {
       "description": "commitTransaction fails after Interrupted",
-      "runOnRequirements": [
-        {
-          "serverless": "forbid"
-        }
-      ],
       "operations": [
         {
           "object": "testRunner",
