@@ -3555,6 +3555,18 @@ tasks:
             - {key: NPM_VERSION, value: latest}
       - func: install dependencies
       - func: run unit tests
+  - name: run-unit-tests-node-22
+    tags:
+      - unit-tests
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NPM_VERSION, value: latest}
+      - func: install dependencies
+      - func: run unit tests
   - name: run-lint-checks
     tags:
       - lint-checks
@@ -4892,6 +4904,64 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: rhel80-large-Node22
+    display_name: rhel8 Node22
+    run_on: rhel80-large
+    expansions:
+      NODE_LTS_VERSION: 22
+      NPM_VERSION: latest
+      CLIENT_ENCRYPTION: true
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-latest-server-v1-api
+      - test-x509-authentication
+      - test-atlas-connectivity
+      - test-5.0-load-balanced
+      - test-6.0-load-balanced
+      - test-7.0-load-balanced
+      - test-8.0-load-balanced
+      - test-rapid-load-balanced
+      - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-socks5
+      - test-socks5-csfle
+      - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
+      - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: rhel80-large-node-latest
     display_name: rhel8 Node Latest
     run_on: rhel80-large
@@ -5080,6 +5150,52 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: windows-vsCurrent-large-Node22
+    display_name: Windows Node22
+    run_on: windows-vsCurrent-large
+    expansions:
+      NODE_LTS_VERSION: 22
+      NPM_VERSION: latest
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-latest-server-v1-api
+      - test-socks5
+      - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
+      - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: rhel8-node16-test-csfle-mongocryptd
     display_name: rhel 8 Node16 test mongocryptd
     run_on: rhel80-large
@@ -5097,8 +5213,8 @@ buildvariants:
       - test-5.0-csfle-mongocryptd
       - test-4.4-csfle-mongocryptd
       - test-4.2-csfle-mongocryptd
-  - name: rhel8-node20-test-csfle-mongocryptd
-    display_name: rhel 8 Node20 test mongocryptd
+  - name: rhel8-node22-test-csfle-mongocryptd
+    display_name: rhel 8 Node22 test mongocryptd
     run_on: rhel80-large
     expansions:
       CLIENT_ENCRYPTION: true
@@ -5115,10 +5231,10 @@ buildvariants:
       - test-4.4-csfle-mongocryptd
       - test-4.2-csfle-mongocryptd
   - name: macos-1100
-    display_name: MacOS 11 Node20
+    display_name: MacOS 11 Node22
     run_on: macos-1100
     expansions:
-      NODE_LTS_VERSION: 20
+      NODE_LTS_VERSION: 22
       CLIENT_ENCRYPTION: true
     tasks:
       - test-rapid-server
@@ -5138,7 +5254,7 @@ buildvariants:
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu2004-small
     expansions:
-      NODE_LTS_VERSION: 20
+      NODE_LTS_VERSION: 22
     tasks:
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
@@ -5228,7 +5344,7 @@ buildvariants:
     display_name: Atlas Data Lake Tests
     run_on: ubuntu2204-large
     expansions:
-      NODE_LTS_VERSION: 20
+      NODE_LTS_VERSION: 22
     tasks:
       - test-atlas-data-lake
   - name: rhel8-custom-dependency-tests
@@ -5264,7 +5380,7 @@ buildvariants:
     display_name: MONGODB-OIDC Auth Tests
     run_on: ubuntu2004-small
     expansions:
-      NODE_LTS_VERSION: 20
+      NODE_LTS_VERSION: 22
     batchtime: 20160
     tasks:
       - testtestoidc_task_group

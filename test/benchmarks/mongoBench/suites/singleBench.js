@@ -36,8 +36,8 @@ function makeSingleBench(suite) {
     )
     .benchmark('runCommand', benchmark =>
       benchmark
-        // { hello: true } is 13 bytes. However the legacy hello was 16 bytes, to preserve history comparison data we leave this value as is.
-        .taskSize(0.16)
+        // { hello: true } is 13 bytes of BSON x 10,000 iterations
+        .taskSize(0.13)
         .setup(makeClient)
         .setup(connectClient)
         .setup(initDb)
