@@ -2,6 +2,7 @@
 
 const MongoBench = require('../mongoBench');
 const os = require('node:os');
+const util = require('node:util');
 const process = require('node:process');
 
 const Runner = MongoBench.Runner;
@@ -32,7 +33,10 @@ const systemInfo = () =>
     `- arch: ${os.arch()}`,
     `- os: ${process.platform} (${os.release()})`,
     `- ram: ${platform.ram}`,
-    `- node: ${process.version}\n`
+    `- node: ${process.version}`,
+    `- driver: ${MONGODB_DRIVER_VERSION} (${MONGODB_DRIVER_REVISION}): ${MONGODB_DRIVER_PATH}`,
+    `  - options ${util.inspect(MONGODB_CLIENT_OPTIONS)}`,
+    `- bson: ${MONGODB_BSON_VERSION} (${MONGODB_BSON_REVISION}): (${MONGODB_BSON_PATH})\n`
   ].join('\n');
 console.log(systemInfo());
 
