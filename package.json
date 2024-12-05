@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@mongodb-js/saslprep": "^1.1.9",
-    "bson": "^6.10.0",
+    "bson": "^6.10.1",
     "mongodb-connection-string-url": "^3.0.0"
   },
   "peerDependencies": {

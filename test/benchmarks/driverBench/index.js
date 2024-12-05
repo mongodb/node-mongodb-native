@@ -2,6 +2,7 @@
 
 const MongoBench = require('../mongoBench');
 const os = require('node:os');
+const util = require('node:util');
 const process = require('node:process');
 
 const Runner = MongoBench.Runner;
@@ -11,7 +12,15 @@ let bsonType = 'js-bson';
 
 const { writeFile } = require('fs/promises');
 const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
-const { MONGODB_CLIENT_OPTIONS } = require('./common');
+const {
+  MONGODB_CLIENT_OPTIONS,
+  MONGODB_DRIVER_PATH,
+  MONGODB_DRIVER_VERSION,
+  MONGODB_DRIVER_REVISION,
+  MONGODB_BSON_PATH,
+  MONGODB_BSON_VERSION,
+  MONGODB_BSON_REVISION
+} = require('./common');
 
 const hw = os.cpus();
 const ram = os.totalmem() / 1024 ** 3;
@@ -24,7 +33,10 @@ const systemInfo = () =>
     `- arch: ${os.arch()}`,
     `- os: ${process.platform} (${os.release()})`,
     `- ram: ${platform.ram}`,
-    `- node: ${process.version}\n`
+    `- node: ${process.version}`,
+    `- driver: ${MONGODB_DRIVER_VERSION} (${MONGODB_DRIVER_REVISION}): ${MONGODB_DRIVER_PATH}`,
+    `  - options ${util.inspect(MONGODB_CLIENT_OPTIONS)}`,
+    `- bson: ${MONGODB_BSON_VERSION} (${MONGODB_BSON_REVISION}): (${MONGODB_BSON_PATH})\n`
   ].join('\n');
 console.log(systemInfo());
 
@@ -52,8 +64,8 @@ benchmarkRunner
     // https://spruce.mongodb.com/task/mongo_node_driver_next_performance_tests_run_spec_benchmark_tests_node_server_4bc3e500b6f0e8ab01f052c4a1bfb782d6a29b4e_f168e1328f821bbda265e024cc91ae54_24_11_18_15_37_24/logs?execution=0
 
     const parallelBench = average([
-      microBench.parallel.ldjsonMultiFileUpload ?? 44.02343490518617,
-      microBench.parallel.ldjsonMultiFileExport ?? 31.83182984813926,
+      microBench.parallel.ldjsonMultiFileUpload,
+      microBench.parallel.ldjsonMultiFileExport,
       microBench.parallel.gridfsMultiFileUpload,
       microBench.parallel.gridfsMultiFileDownload
     ]);
@@ -63,7 +75,7 @@ benchmarkRunner
       microBench.multiBench.findManyAndEmptyCursor,
       microBench.multiBench.gridFsDownload,
       microBench.parallel.gridfsMultiFileDownload,
-      microBench.parallel.ldjsonMultiFileExport ?? 31.83182984813926
+      microBench.parallel.ldjsonMultiFileExport
     ]);
     const writeBench = average([
       microBench.singleBench.smallDocInsertOne,
@@ -71,7 +83,7 @@ benchmarkRunner
       microBench.multiBench.smallDocBulkInsert,
       microBench.multiBench.largeDocBulkInsert,
       microBench.multiBench.gridFsUpload,
-      microBench.parallel.ldjsonMultiFileUpload ?? 44.02343490518617,
+      microBench.parallel.ldjsonMultiFileUpload,
       microBench.parallel.gridfsMultiFileUpload
     ]);
 
