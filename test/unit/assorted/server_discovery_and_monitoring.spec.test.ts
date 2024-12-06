@@ -476,7 +476,7 @@ function assertTopologyDescriptionOutcomeExpectations(
         expect(actualServer).to.have.deep.property(expectedKey, expectedValue);
       } else {
         // pull the message off the error if it is present
-        expect(actualServer).to.have.deep.property(expectedKey).instanceof(MongoError);
+        expect(actualServer).to.have.property(expectedKey).instanceof(MongoError);
         expect(actualServer).property(expectedKey).property('message').includes(expectedValue);
       }
     }
