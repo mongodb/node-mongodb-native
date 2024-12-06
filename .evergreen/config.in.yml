@@ -321,6 +321,7 @@ functions:
       params:
         working_dir: src
         script: |
+          source ${DRIVERS_TOOLS}/.evergreen/init-node-and-npm-env.sh
           npm install --force ${PACKAGE}
 
   "run lint checks":

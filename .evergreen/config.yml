@@ -287,6 +287,7 @@ functions:
       params:
         working_dir: src
         script: |
+          source ${DRIVERS_TOOLS}/.evergreen/init-node-and-npm-env.sh
           npm install --force ${PACKAGE}
   run lint checks:
     - command: subprocess.exec
@@ -2105,7 +2106,23 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run socks5 tests
-  - name: test-zstd-compression
+  - name: test-snappy-compression
+    tags:
+      - latest
+      - snappy
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: COMPRESSOR, value: snappy}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run-compression-tests
+  - name: test-zstd-1.x-compression
     tags:
       - latest
       - zstd
@@ -2120,11 +2137,14 @@ tasks:
             - {key: COMPRESSOR, value: zstd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
+      - func: install package
+        vars:
+          PACKAGE: '@mongodb-js/zstd@1.x'
       - func: run-compression-tests
-  - name: test-snappy-compression
+  - name: test-zstd-2.x-compression
     tags:
       - latest
-      - snappy
+      - zstd
     commands:
       - command: expansions.update
         type: setup
@@ -2133,7 +2153,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-            - {key: COMPRESSOR, value: snappy}
+            - {key: COMPRESSOR, value: zstd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run-compression-tests
@@ -4785,6 +4805,9 @@ buildvariants:
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -4841,6 +4864,9 @@ buildvariants:
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -4897,6 +4923,9 @@ buildvariants:
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -4953,8 +4982,9 @@ buildvariants:
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
-      - test-zstd-compression
       - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -5009,8 +5039,9 @@ buildvariants:
       - test-auth-ldap
       - test-socks5-csfle
       - test-socks5-tls
-      - test-zstd-compression
       - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -5055,6 +5086,9 @@ buildvariants:
       - test-latest-server-v1-api
       - test-socks5
       - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -5099,6 +5133,9 @@ buildvariants:
       - test-latest-server-v1-api
       - test-socks5
       - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -5143,6 +5180,9 @@ buildvariants:
       - test-latest-server-v1-api
       - test-socks5
       - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -5187,8 +5227,9 @@ buildvariants:
       - test-latest-server-v1-api
       - test-socks5
       - test-socks5-tls
-      - test-zstd-compression
       - test-snappy-compression
+      - test-zstd-1.x-compression
+      - test-zstd-2.x-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0

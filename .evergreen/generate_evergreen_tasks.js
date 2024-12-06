@@ -211,23 +211,60 @@ TASKS.push(
   ]
 );
 
-for (const compressor of ['zstd', 'snappy']) {
-  TASKS.push({
-    name: `test-${compressor}-compression`,
-    tags: ['latest', compressor],
-    commands: [
-      updateExpansions({
-        VERSION: 'latest',
-        TOPOLOGY: 'replica_set',
-        AUTH: 'auth',
-        COMPRESSOR: compressor
-      }),
-      { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'run-compression-tests' }
-    ]
-  });
-}
+TASKS.push({
+  name: `test-snappy-compression`,
+  tags: ['latest', 'snappy'],
+  commands: [
+    updateExpansions({
+      VERSION: 'latest',
+      TOPOLOGY: 'replica_set',
+      AUTH: 'auth',
+      COMPRESSOR: 'snappy'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run-compression-tests' }
+  ]
+});
+
+TASKS.push({
+  name: `test-zstd-1.x-compression`,
+  tags: ['latest', 'zstd'],
+  commands: [
+    updateExpansions({
+      VERSION: 'latest',
+      TOPOLOGY: 'replica_set',
+      AUTH: 'auth',
+      COMPRESSOR: 'zstd'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
+    {
+      func: 'install package',
+      vars: {
+        PACKAGE: '@mongodb-js/zstd@1.x'
+      }
+    },
+    { func: 'run-compression-tests' }
+  ]
+});
+
+TASKS.push({
+  name: `test-zstd-2.x-compression`,
+  tags: ['latest', 'zstd'],
+  commands: [
+    updateExpansions({
+      VERSION: 'latest',
+      TOPOLOGY: 'replica_set',
+      AUTH: 'auth',
+      COMPRESSOR: 'zstd'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
+    // no need to manually install zstd - we specify 2.x as a dev dependency in package.json
+    { func: 'run-compression-tests' }
+  ]
+});
 
 const AWS_LAMBDA_HANDLER_TASKS = [];
 // Add task for testing lambda example without aws auth.
@@ -765,15 +802,6 @@ BUILD_VARIANTS.push({
   run_on: DEFAULT_OS,
   tasks: ['.resource-management']
 });
-
-// TODO(NODE-4575): unskip zstd and snappy on node 16
-for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && [16, 18, 20].includes(variant.expansions.NODE_LTS_VERSION)
-)) {
-  variant.tasks = variant.tasks.filter(
-    name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
-  );
-}
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
 for (const variant of BUILD_VARIANTS.filter(
