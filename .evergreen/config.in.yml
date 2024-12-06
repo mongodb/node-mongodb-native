@@ -316,7 +316,7 @@ functions:
           SKIP_DEPS=${SKIP_DEPS|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
-  install package:
+  "install package":
     - command: shell.exec
       params:
         working_dir: src
@@ -773,8 +773,8 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  ? "run aws auth test with aws credentials and session token as environment variables"
-  : - command: shell.exec
+  "run aws auth test with aws credentials and session token as environment variables":
+    - command: shell.exec
       type: test
       params:
         working_dir: "src"
@@ -830,8 +830,8 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
 
-  ? "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset"
-  : - command: shell.exec
+  "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset":
+    - command: shell.exec
       type: test
       params:
         working_dir: "src"
@@ -1144,12 +1144,12 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
 
 tasks:
-  - name: "test-atlas-data-lake"
+  - name: 'test-atlas-data-lake'
     tags: ["datalake", "mongohouse"]
     commands:
-      - func: "install dependencies"
-      - func: "bootstrap mongohoused"
-      - func: "run data lake tests"
+      - func: 'install dependencies'
+      - func: 'bootstrap mongohoused'
+      - func: 'run data lake tests'
 
   - name: "test-serverless"
     tags: ["serverless"]
@@ -1334,8 +1334,7 @@ tasks:
             ENVIRONMENT: k8s
             K8S_VARIANT: eks
             SCRIPT: run-oidc-prose-tests.sh
-          include_expansions_in_env:
-            ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
+          include_expansions_in_env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
           args:
             - .evergreen/run-oidc-tests-k8s.sh
 
@@ -1353,8 +1352,7 @@ tasks:
             ENVIRONMENT: k8s
             K8S_VARIANT: gke
             SCRIPT: run-oidc-prose-tests.sh
-          include_expansions_in_env:
-            ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
+          include_expansions_in_env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
           args:
             - .evergreen/run-oidc-tests-k8s.sh
 
@@ -1372,8 +1370,7 @@ tasks:
             ENVIRONMENT: k8s
             K8S_VARIANT: aks
             SCRIPT: run-oidc-prose-tests.sh
-          include_expansions_in_env:
-            ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
+          include_expansions_in_env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
           args:
             - .evergreen/run-oidc-tests-k8s.sh
 
@@ -1662,12 +1659,11 @@ task_groups:
       - command: subprocess.exec
         params:
           binary: bash
-          include_expansions_in_env:
-            ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
+          include_expansions_in_env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
           env:
             MONGODB_VERSION: "8.0"
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
+          - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
