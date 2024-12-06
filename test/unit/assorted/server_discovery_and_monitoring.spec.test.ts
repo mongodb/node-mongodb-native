@@ -271,7 +271,6 @@ function normalizeServerDescription(serverDescription) {
     // it as `Unknown`.
     serverDescription.type = 'Unknown';
   }
-  //serverDescription.error = serverDescription?.error?.message;
 
   return serverDescription;
 }
@@ -475,9 +474,11 @@ function assertTopologyDescriptionOutcomeExpectations(
       } else if (expectedKey !== 'error') {
         expect(actualServer).to.have.deep.property(expectedKey, expectedValue);
       } else {
-        // pull the message off the error if it is present
-        expect(actualServer).to.have.property(expectedKey).instanceof(MongoError);
-        expect(actualServer).property(expectedKey).property('message').includes(expectedValue);
+        expect(typeof expectedValue).to.equal('string');
+        expect(actualServer)
+          .to.have.property(expectedKey)
+          .instanceof(MongoError)
+          .to.match(new RegExp(expectedValue as string));
       }
     }
   }
