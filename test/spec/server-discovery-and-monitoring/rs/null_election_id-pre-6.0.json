@@ -66,7 +66,7 @@
               "$oid": "000000000000000000000002"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 21
+            "maxWireVersion": 7
           }
         ]
       ],

@@ -10,6 +10,7 @@ import {
   isRecord,
   MongoClient,
   MongoCompatibilityError,
+  MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerError,
@@ -25,6 +26,7 @@ import {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
   ServerOpeningEvent,
+  squashError,
   Topology,
   TOPOLOGY_CLOSED,
   TOPOLOGY_DESCRIPTION_CHANGED,
@@ -108,6 +110,7 @@ interface MonitoringOutcome {
 interface OutcomeServerDescription {
   type?: string;
   setName?: string;
+  error?: { message: string };
   setVersion?: number;
   electionId?: ObjectId | null;
   logicalSessionTimeoutMinutes?: number;
@@ -322,84 +325,88 @@ async function executeSDAMTest(testData: SDAMTest) {
   // connect the topology
   await client.connect();
 
-  for (const phase of testData.phases) {
-    // Determine which of the two kinds of phases we're running
-    if ('responses' in phase && phase.responses != null) {
-      // phase with responses for hello simulations
-      for (const [address, hello] of phase.responses) {
-        client.topology.serverUpdateHandler(new ServerDescription(address, hello));
-      }
-    } else if ('applicationErrors' in phase && phase.applicationErrors) {
-      // phase with applicationErrors simulating error's from network, timeouts, server
-      for (const appError of phase.applicationErrors) {
-        // Stub will return appError to SDAM machinery
-        const checkOutStub = sinon
-          .stub(ConnectionPool.prototype, 'checkOut')
-          .callsFake(checkoutStubImpl(appError));
-
-        const server = client.topology.s.servers.get(appError.address);
-
-        // Run a dummy command to encounter the error
-        const res = server.command.bind(server)(ns('admin.$cmd'), { ping: 1 }, {});
-        const thrownError = await res.catch(error => error);
-
-        // Restore the stub before asserting anything in case of errors
-        checkOutStub.restore();
-
-        const isApplicationError = error => {
-          // These errors all come from the withConnection stub
-          return (
-            error instanceof MongoNetworkError ||
-            error instanceof MongoNetworkTimeoutError ||
-            error instanceof MongoServerError
-          );
-        };
-        expect(
-          thrownError,
-          `expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError (referred to in the spec as an "Application Error") got ${thrownError.name} ${thrownError.stack}`
-        ).to.satisfy(isApplicationError);
-      }
-    } else if (phase.outcome != null && Object.keys(phase).length === 1) {
-      // Load Balancer SDAM tests have no "work" to be done for the phase
-    } else {
-      expect.fail(ejson`Unknown phase shape - ${phase}`);
-    }
-
-    if ('outcome' in phase && phase.outcome != null) {
-      if (isMonitoringOutcome(phase.outcome)) {
-        // Test for monitoring events
-        const expectedEvents = convertOutcomeEvents(phase.outcome.events);
-
-        expect(events).to.have.length(expectedEvents.length);
-        for (const [i, actualEvent] of Object.entries(events)) {
-          const actualEventClone = cloneForCompare(actualEvent);
-          expect(actualEventClone).to.matchMongoSpec(expectedEvents[i]);
+  try {
+    for (const phase of testData.phases) {
+      // Determine which of the two kinds of phases we're running
+      if ('responses' in phase && phase.responses != null) {
+        // phase with responses for hello simulations
+        for (const [address, hello] of phase.responses) {
+          client.topology.serverUpdateHandler(new ServerDescription(address, hello));
         }
-      } else if (isTopologyDescriptionOutcome(phase.outcome)) {
-        // Test for SDAM machinery correctly changing the topology type among other properties
-        assertTopologyDescriptionOutcomeExpectations(client.topology, phase.outcome);
-        if (phase.outcome.compatible === false) {
-          // driver specific error throwing
-          if (testData.description === 'Multiple mongoses with large minWireVersion') {
-            // TODO(DRIVERS-2250): There is test bug that causes two errors
-            // this will start failing when the test is synced and fixed
-            expect(errorsThrown).to.have.lengthOf(2);
-          } else {
-            expect(errorsThrown).to.have.lengthOf(1);
-          }
-          expect(errorsThrown[0]).to.be.instanceOf(MongoCompatibilityError);
-          expect(errorsThrown[0].message).to.match(/but this version of the driver/);
-        } else {
-          // unset or true means no errors should be thrown
-          expect(errorsThrown).to.be.empty;
+      } else if ('applicationErrors' in phase && phase.applicationErrors) {
+        // phase with applicationErrors simulating error's from network, timeouts, server
+        for (const appError of phase.applicationErrors) {
+          // Stub will return appError to SDAM machinery
+          const checkOutStub = sinon
+            .stub(ConnectionPool.prototype, 'checkOut')
+            .callsFake(checkoutStubImpl(appError));
+
+          const server = client.topology.s.servers.get(appError.address);
+
+          // Run a dummy command to encounter the error
+          const res = server.command.bind(server)(ns('admin.$cmd'), { ping: 1 }, {});
+          const thrownError = await res.catch(error => error);
+
+          // Restore the stub before asserting anything in case of errors
+          checkOutStub.restore();
+
+          const isApplicationError = error => {
+            // These errors all come from the withConnection stub
+            return (
+              error instanceof MongoNetworkError ||
+              error instanceof MongoNetworkTimeoutError ||
+              error instanceof MongoServerError
+            );
+          };
+          expect(
+            thrownError,
+            `expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError (referred to in the spec as an "Application Error") got ${thrownError.name} ${thrownError.stack}`
+          ).to.satisfy(isApplicationError);
         }
+      } else if (phase.outcome != null && Object.keys(phase).length === 1) {
+        // Load Balancer SDAM tests have no "work" to be done for the phase
       } else {
-        expect.fail(ejson`Unknown outcome shape - ${phase.outcome}`);
+        expect.fail(ejson`Unknown phase shape - ${phase}`);
       }
 
-      events = [];
-      errorsThrown = [];
+      if ('outcome' in phase && phase.outcome != null) {
+        if (isMonitoringOutcome(phase.outcome)) {
+          // Test for monitoring events
+          const expectedEvents = convertOutcomeEvents(phase.outcome.events);
+
+          expect(events).to.have.length(expectedEvents.length);
+          for (const [i, actualEvent] of Object.entries(events)) {
+            const actualEventClone = cloneForCompare(actualEvent);
+            expect(actualEventClone).to.matchMongoSpec(expectedEvents[i]);
+          }
+        } else if (isTopologyDescriptionOutcome(phase.outcome)) {
+          // Test for SDAM machinery correctly changing the topology type among other properties
+          assertTopologyDescriptionOutcomeExpectations(client.topology, phase.outcome);
+          if (phase.outcome.compatible === false) {
+            // driver specific error throwing
+            if (testData.description === 'Multiple mongoses with large minWireVersion') {
+              // TODO(DRIVERS-2250): There is test bug that causes two errors
+              // this will start failing when the test is synced and fixed
+              expect(errorsThrown).to.have.lengthOf(2);
+            } else {
+              expect(errorsThrown).to.have.lengthOf(1);
+            }
+            expect(errorsThrown[0]).to.be.instanceOf(MongoCompatibilityError);
+            expect(errorsThrown[0].message).to.match(/but this version of the driver/);
+          } else {
+            // unset or true means no errors should be thrown
+            expect(errorsThrown).to.be.empty;
+          }
+        } else {
+          expect.fail(ejson`Unknown outcome shape - ${phase.outcome}`);
+        }
+
+        events = [];
+        errorsThrown = [];
+      }
     }
+  } finally {
+    await client.close().catch(squashError);
   }
 }
 
@@ -464,8 +471,14 @@ function assertTopologyDescriptionOutcomeExpectations(
       if (WIRE_VERSION_KEYS.has(expectedKey) && expectedValue === null) {
         // For wireVersion keys we default to zero instead of null
         expect(actualServer).to.have.property(expectedKey, 0);
-      } else {
+      } else if (expectedKey !== 'error') {
         expect(actualServer).to.have.deep.property(expectedKey, expectedValue);
+      } else {
+        expect(typeof expectedValue).to.equal('string');
+        expect(actualServer)
+          .to.have.property(expectedKey)
+          .instanceof(MongoError)
+          .to.match(new RegExp(expectedValue as string));
       }
     }
   }

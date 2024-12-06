@@ -68,7 +68,8 @@ phases: [
                 "b:27017": {
                     type: "Unknown",
                     setName: ,
-                    electionId:
+                    electionId:,
+                    error: "primary marked stale due to electionId/setVersion mismatch"
                 }
             },
             topologyType: "ReplicaSetWithPrimary",
@@ -106,7 +107,8 @@ phases: [
                 "b:27017":{
                     type: "Unknown",
                     setName: ,
-                    electionId:
+                    electionId:,
+                    error: "primary marked stale due to electionId/setVersion mismatch"
                 }
             },
             topologyType: "ReplicaSetWithPrimary",
