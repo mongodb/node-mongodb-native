@@ -1,3 +1,4 @@
+import * as zstd from '@mongodb-js/zstd';
 import { expect } from 'chai';
 
 import { compress, Compressor, decompress } from '../../../mongodb';
@@ -12,20 +13,8 @@ describe('compression', function () {
 
         it('compresses the data', async function () {
           const data = await compress(options, buffer);
-          const zstdMagicNumber = data.reverse().toString('hex').substring(16, 26);
-          // Zstd magic number first set of bytes is is 0xFD2FB528
-          expect(zstdMagicNumber).to.equal('00fd2fb528');
-        });
-      });
-
-      context('when a level is provided', function () {
-        const options = { agreedCompressor: 'zstd' as const, zlibCompressionLevel: 2 };
-
-        it('compresses the data', async function () {
-          const data = await compress(options, buffer);
-          const zstdMagicNumber = data.reverse().toString('hex').substring(16, 26);
-          // Zstd magic number first set of bytes is is 0xFD2FB528
-          expect(zstdMagicNumber).to.equal('00fd2fb528');
+          // decompress throws if the message is not zstd compresed
+          expect(await zstd.decompress(data)).to.deep.equal(buffer);
         });
       });
     });
