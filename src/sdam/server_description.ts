@@ -126,6 +126,10 @@ export class ServerDescription {
     this.me = hello?.me?.toLowerCase() ?? null;
     this.$clusterTime = hello?.$clusterTime ?? null;
     this.iscryptd = Boolean(hello?.iscryptd);
+
+    // NOTE: This actually builds the stack string instead of holding onto the getter and all its
+    // associated references. This is done to prevent a memory leak.
+    if (options.error) options.error.stack;
   }
 
   get hostAddress(): HostAddress {
