@@ -61,7 +61,8 @@ phases: [
                 "a:27017": {
                     type: "Unknown",
                     setName: ,
-                    electionId:
+                    electionId:,
+                    error: "primary marked stale due to electionId/setVersion mismatch"
                 },
                 "b:27017": {
                     type: "RSPrimary",

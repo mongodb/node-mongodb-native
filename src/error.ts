@@ -1,10 +1,10 @@
-import type { Document } from './bson';
+import type { Document, ObjectId } from './bson';
 import {
   type ClientBulkWriteError,
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
 import type { ServerType } from './sdam/common';
-import type { TopologyVersion } from './sdam/server_description';
+import type { ServerDescription, TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
 
 /** @public */
@@ -337,6 +337,41 @@ export class MongoRuntimeError extends MongoDriverError {
 
   override get name(): string {
     return 'MongoRuntimeError';
+  }
+}
+
+/**
+ * An error generated when a primary server is marked stale, never directly thrown
+ *
+ * @public
+ * @category Error
+ */
+export class MongoStalePrimaryError extends MongoRuntimeError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(
+    serverDescription: ServerDescription,
+    maxSetVersion: number | null,
+    maxElectionId: ObjectId | null,
+    options?: { cause?: Error }
+  ) {
+    super(
+      `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`,
+      options
+    );
+  }
+
+  override get name(): string {
+    return 'MongoStalePrimaryError';
   }
 }
 
