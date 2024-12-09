@@ -106,6 +106,7 @@ const EXPECTED_EXPORTS = [
   'MongoTailableCursorError',
   'MongoTopologyClosedError',
   'MongoTransactionError',
+  'MongoStalePrimaryError',
   'MongoUnexpectedServerResponseError',
   'MongoWriteConcernError',
   'ObjectId',
