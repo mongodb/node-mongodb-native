@@ -342,8 +342,6 @@ export class MongoRuntimeError extends MongoDriverError {
 
 /**
  * An error generated when a primary server is marked stale, never directly thrown
- * @privateRemarks
- * Should **never** be directly instantiated.
  *
  * @public
  * @category Error
