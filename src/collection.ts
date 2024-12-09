@@ -765,6 +765,9 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Gets the number of documents matching the filter.
    * For a fast count of the total documents in a collection see {@link Collection#estimatedDocumentCount| estimatedDocumentCount}.
+   *
+   * Due to countDocuments using the $match aggregation pipeline stage, certain query operators cannot be used in countDocuments. This includes the $where and $near query operators, among others. Details can be found in the documentation for the $match aggregation pipeline stage.
+   *
    * **Note**: When migrating from {@link Collection#count| count} to {@link Collection#countDocuments| countDocuments}
    * the following query operators must be replaced:
    *
