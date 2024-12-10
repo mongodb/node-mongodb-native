@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.12.0](https://github.com/mongodb/node-mongodb-native/compare/v6.11.0...v6.12.0) (2024-12-10)
+
+
+### Features
+
+* **NODE-6593:** add support for zstd@2.x ([#4346](https://github.com/mongodb/node-mongodb-native/issues/4346)) ([ea8a33f](https://github.com/mongodb/node-mongodb-native/commit/ea8a33f1c34e93dd8048ba83edca3294e474ddf5))
+* **NODE-6605:** add error message when invalidating primary ([#4340](https://github.com/mongodb/node-mongodb-native/issues/4340)) ([37613f1](https://github.com/mongodb/node-mongodb-native/commit/37613f1a726d330967012b0c007560db1cc79bd9))
+
+
+### Bug Fixes
+
+* **NODE-6583:** upgrade to BSON v6.10.1 to remove internal unbounded type cache ([#4338](https://github.com/mongodb/node-mongodb-native/issues/4338)) ([249c279](https://github.com/mongodb/node-mongodb-native/commit/249c279ee21c0635ab22be10788ffcae52ad3bb5))
+* **NODE-6600:** set object mode correctly for message chunking in SizedMessageTransform ([#4345](https://github.com/mongodb/node-mongodb-native/issues/4345)) ([5558573](https://github.com/mongodb/node-mongodb-native/commit/555857319605d72ce57c639166ce25f57739bf74))
+* **NODE-6602:** only wrap errors from SOCKS in network errors ([#4347](https://github.com/mongodb/node-mongodb-native/issues/4347)) ([ed83f36](https://github.com/mongodb/node-mongodb-native/commit/ed83f36ce17e40f0faf4bbaaeab6fa3b7f90b10a))
+
 ## [6.11.0](https://github.com/mongodb/node-mongodb-native/compare/v6.10.0...v6.11.0) (2024-11-22)
 
 
