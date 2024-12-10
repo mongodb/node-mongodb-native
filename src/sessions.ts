@@ -83,17 +83,6 @@ export type ClientSessionEvents = {
   ended(session: ClientSession): void;
 };
 
-/** @internal */
-const kServerSession = Symbol('serverSession');
-/** @internal */
-const kSnapshotTime = Symbol('snapshotTime');
-/** @internal */
-const kSnapshotEnabled = Symbol('snapshotEnabled');
-/** @internal */
-const kPinnedConnection = Symbol('pinnedConnection');
-/** @internal Accumulates total number of increments to add to txnNumber when applying session to command */
-const kTxnNumberIncrement = Symbol('txnNumberIncrement');
-
 /** @public */
 export interface EndSessionOptions {
   /**
@@ -132,20 +121,22 @@ export class ClientSession
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
-  /** @internal
+  /**
+   * @internal
    * Keeps track of whether or not the current transaction has attempted to be committed. Is
-   * initially undefined. Gets set to false when startTransaction is called. When commitTransaction is sent to server, if the commitTransaction succeeds, it is then set to undefined, otherwise, set to true */
-  commitAttempted?: boolean;
+   * initially undefined. Gets set to false when startTransaction is called. When commitTransaction is sent to server, if the commitTransaction succeeds, it is then set to undefined, otherwise, set to true
+   */
+  private commitAttempted?: boolean;
+  public readonly snapshotEnabled: boolean;
+
   /** @internal */
-  private [kServerSession]: ServerSession | null;
+  private _serverSession: ServerSession | null;
   /** @internal */
-  [kSnapshotTime]?: Timestamp;
+  public snapshotTime?: Timestamp;
   /** @internal */
-  [kSnapshotEnabled] = false;
+  public pinnedConnection?: Connection;
   /** @internal */
-  [kPinnedConnection]?: Connection;
-  /** @internal */
-  [kTxnNumberIncrement]: number;
+  public txnNumberIncrement: number;
   /**
    * @experimental
    * Specifies the time an operation in a given `ClientSession` will run until it throws a timeout error
@@ -184,12 +175,14 @@ export class ClientSession
     options = options ?? {};
 
     if (options.snapshot === true) {
-      this[kSnapshotEnabled] = true;
+      this.snapshotEnabled = true;
       if (options.causalConsistency === true) {
         throw new MongoInvalidArgumentError(
           'Properties "causalConsistency" and "snapshot" are mutually exclusive'
         );
       }
+    } else {
+      this.snapshotEnabled = false;
     }
 
     this.client = client;
@@ -199,8 +192,8 @@ export class ClientSession
     this.timeoutMS = options.defaultTimeoutMS ?? client.s.options?.timeoutMS;
 
     this.explicit = !!options.explicit;
-    this[kServerSession] = this.explicit ? this.sessionPool.acquire() : null;
-    this[kTxnNumberIncrement] = 0;
+    this._serverSession = this.explicit ? this.sessionPool.acquire() : null;
+    this.txnNumberIncrement = 0;
 
     const defaultCausalConsistencyValue = this.explicit && options.snapshot !== true;
     this.supports = {
@@ -218,11 +211,11 @@ export class ClientSession
 
   /** The server id associated with this session */
   get id(): ServerSessionId | undefined {
-    return this[kServerSession]?.id;
+    return this.serverSession?.id;
   }
 
   get serverSession(): ServerSession {
-    let serverSession = this[kServerSession];
+    let serverSession = this._serverSession;
     if (serverSession == null) {
       if (this.explicit) {
         throw new MongoRuntimeError('Unexpected null serverSession for an explicit session');
@@ -231,14 +224,9 @@ export class ClientSession
         throw new MongoRuntimeError('Unexpected null serverSession for an ended implicit session');
       }
       serverSession = this.sessionPool.acquire();
-      this[kServerSession] = serverSession;
+      this._serverSession = serverSession;
     }
     return serverSession;
-  }
-
-  /** Whether or not this session is configured for snapshot reads */
-  get snapshotEnabled(): boolean {
-    return this[kSnapshotEnabled];
   }
 
   get loadBalanced(): boolean {
@@ -246,17 +234,12 @@ export class ClientSession
   }
 
   /** @internal */
-  get pinnedConnection(): Connection | undefined {
-    return this[kPinnedConnection];
-  }
-
-  /** @internal */
   pin(conn: Connection): void {
-    if (this[kPinnedConnection]) {
+    if (this.pinnedConnection) {
       throw TypeError('Cannot pin multiple connections to the same session');
     }
 
-    this[kPinnedConnection] = conn;
+    this.pinnedConnection = conn;
     conn.emit(
       PINNED,
       this.inTransaction() ? ConnectionPoolMetrics.TXN : ConnectionPoolMetrics.CURSOR
@@ -273,7 +256,7 @@ export class ClientSession
   }
 
   get isPinned(): boolean {
-    return this.loadBalanced ? !!this[kPinnedConnection] : this.transaction.isPinned;
+    return this.loadBalanced ? !!this.pinnedConnection : this.transaction.isPinned;
   }
 
   /**
@@ -295,12 +278,12 @@ export class ClientSession
       squashError(error);
     } finally {
       if (!this.hasEnded) {
-        const serverSession = this[kServerSession];
+        const serverSession = this.serverSession;
         if (serverSession != null) {
           // release the server session back to the pool
           this.sessionPool.release(serverSession);
           // Store a clone of the server session for reference (debugging)
-          this[kServerSession] = new ServerSession(serverSession);
+          this._serverSession = new ServerSession(serverSession);
         }
         // mark the session as ended, and emit a signal
         this.hasEnded = true;
@@ -391,7 +374,7 @@ export class ClientSession
    * This is because the serverSession is lazily acquired after a connection is obtained
    */
   incrementTransactionNumber(): void {
-    this[kTxnNumberIncrement] += 1;
+    this.txnNumberIncrement += 1;
   }
 
   /** @returns whether this session is currently in a transaction or not */
@@ -410,7 +393,7 @@ export class ClientSession
    * @param options - Options for the transaction
    */
   startTransaction(options?: TransactionOptions): void {
-    if (this[kSnapshotEnabled]) {
+    if (this.snapshotEnabled) {
       throw new MongoCompatibilityError('Transactions are not supported in snapshot sessions');
     }
 
@@ -908,7 +891,7 @@ export function maybeClearPinnedConnection(
   options?: EndSessionOptions
 ): void {
   // unpin a connection if it has been pinned
-  const conn = session[kPinnedConnection];
+  const conn = session.pinnedConnection;
   const error = options?.error;
 
   if (
@@ -929,7 +912,7 @@ export function maybeClearPinnedConnection(
 
     if (options?.error == null || options?.force) {
       loadBalancer.pool.checkIn(conn);
-      session[kPinnedConnection] = undefined;
+      session.pinnedConnection = undefined;
       conn.emit(
         UNPINNED,
         session.transaction.state !== TxnState.NO_TRANSACTION
@@ -1123,8 +1106,8 @@ export function applySession(
   const isRetryableWrite = !!options.willRetryWrite;
 
   if (isRetryableWrite || inTxnOrTxnCommand) {
-    serverSession.txnNumber += session[kTxnNumberIncrement];
-    session[kTxnNumberIncrement] = 0;
+    serverSession.txnNumber += session.txnNumberIncrement;
+    session.txnNumberIncrement = 0;
     // TODO(NODE-2674): Preserve int64 sent from MongoDB
     command.txnNumber = Long.fromNumber(serverSession.txnNumber);
   }
@@ -1141,10 +1124,10 @@ export function applySession(
     ) {
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
-    } else if (session[kSnapshotEnabled]) {
+    } else if (session.snapshotEnabled) {
       command.readConcern = command.readConcern || { level: ReadConcernLevel.snapshot };
-      if (session[kSnapshotTime] != null) {
-        Object.assign(command.readConcern, { atClusterTime: session[kSnapshotTime] });
+      if (session.snapshotTime != null) {
+        Object.assign(command.readConcern, { atClusterTime: session.snapshotTime });
       }
     }
 
@@ -1187,12 +1170,12 @@ export function updateSessionFromResponse(session: ClientSession, document: Mong
     session.transaction._recoveryToken = document.recoveryToken;
   }
 
-  if (session?.[kSnapshotEnabled] && session[kSnapshotTime] == null) {
+  if (session?.snapshotEnabled && session.snapshotTime == null) {
     // find and aggregate commands return atClusterTime on the cursor
     // distinct includes it in the response body
     const atClusterTime = document.atClusterTime;
     if (atClusterTime) {
-      session[kSnapshotTime] = atClusterTime;
+      session.snapshotTime = atClusterTime;
     }
   }
 }

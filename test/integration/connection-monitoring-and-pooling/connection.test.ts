@@ -22,7 +22,7 @@ import {
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
-import { getSymbolFrom, sleep } from '../../tools/utils';
+import { sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
 const commonConnectOptions = {
@@ -291,10 +291,9 @@ describe('Connection', function () {
           // Get the only connection
           const pool = [...client.topology.s.servers.values()][0].pool;
 
-          const connections = pool[getSymbolFrom(pool, 'connections')];
-          expect(connections).to.have.lengthOf(1);
+          expect(pool.connections).to.have.lengthOf(1);
 
-          const connection = connections.first();
+          const connection = pool.connections.first();
           const socket: EventEmitter = connection.socket;
 
           // Spy on the socket event listeners

@@ -52,35 +52,6 @@ import {
 } from './errors';
 import { ConnectionPoolMetrics } from './metrics';
 
-/** @internal */
-const kServer = Symbol('server');
-/** @internal */
-const kConnections = Symbol('connections');
-/** @internal */
-const kPending = Symbol('pending');
-/** @internal */
-const kCheckedOut = Symbol('checkedOut');
-/** @internal */
-const kMinPoolSizeTimer = Symbol('minPoolSizeTimer');
-/** @internal */
-const kGeneration = Symbol('generation');
-/** @internal */
-const kServiceGenerations = Symbol('serviceGenerations');
-/** @internal */
-const kConnectionCounter = Symbol('connectionCounter');
-/** @internal */
-const kCancellationToken = Symbol('cancellationToken');
-/** @internal */
-const kWaitQueue = Symbol('waitQueue');
-/** @internal */
-const kCancelled = Symbol('cancelled');
-/** @internal */
-const kMetrics = Symbol('metrics');
-/** @internal */
-const kProcessingWaitQueue = Symbol('processingWaitQueue');
-/** @internal */
-const kPoolState = Symbol('poolState');
-
 /** @public */
 export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'generation'> {
   /** The maximum number of connections that may be associated with a pool at a given time. This includes in use and available connections. */
@@ -103,7 +74,7 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
 export interface WaitQueueMember {
   resolve: (conn: Connection) => void;
   reject: (err: AnyError) => void;
-  [kCancelled]?: boolean;
+  cancelled: boolean;
   checkoutTime: number;
 }
 
@@ -113,6 +84,8 @@ export const PoolState = Object.freeze({
   ready: 'ready',
   closed: 'closed'
 } as const);
+
+type PoolState = (typeof PoolState)[keyof typeof PoolState];
 
 /**
  * @public
@@ -143,26 +116,21 @@ export type ConnectionPoolEvents = {
  * @internal
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
-  options: Readonly<ConnectionPoolOptions>;
-  [kPoolState]: (typeof PoolState)[keyof typeof PoolState];
-  [kServer]: Server;
-  [kConnections]: List<Connection>;
-  [kPending]: number;
-  [kCheckedOut]: Set<Connection>;
-  [kMinPoolSizeTimer]?: NodeJS.Timeout;
-  /**
-   * An integer representing the SDAM generation of the pool
-   */
-  [kGeneration]: number;
-  /**
-   * A map of generations to service ids
-   */
-  [kServiceGenerations]: Map<string, number>;
-  [kConnectionCounter]: Generator<number>;
-  [kCancellationToken]: CancellationToken;
-  [kWaitQueue]: List<WaitQueueMember>;
-  [kMetrics]: ConnectionPoolMetrics;
-  [kProcessingWaitQueue]: boolean;
+  public options: Readonly<ConnectionPoolOptions>;
+  public generation: number;
+  public serviceGenerations: Map<string, number>;
+
+  private poolState: PoolState;
+  private server: Server;
+  private connections: List<Connection>;
+  private pending: number;
+  private checkedOut: Set<Connection>;
+  private minPoolSizeTimer?: NodeJS.Timeout;
+  private connectionCounter: Generator<number>;
+  private cancellationToken: CancellationToken;
+  private waitQueue: List<WaitQueueMember>;
+  private metrics: ConnectionPoolMetrics;
+  private processingWaitQueue: boolean;
 
   /**
    * Emitted when the connection pool is created.
@@ -241,22 +209,22 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
     }
 
-    this[kPoolState] = PoolState.paused;
-    this[kServer] = server;
-    this[kConnections] = new List();
-    this[kPending] = 0;
-    this[kCheckedOut] = new Set();
-    this[kMinPoolSizeTimer] = undefined;
-    this[kGeneration] = 0;
-    this[kServiceGenerations] = new Map();
-    this[kConnectionCounter] = makeCounter(1);
-    this[kCancellationToken] = new CancellationToken();
-    this[kCancellationToken].setMaxListeners(Infinity);
-    this[kWaitQueue] = new List();
-    this[kMetrics] = new ConnectionPoolMetrics();
-    this[kProcessingWaitQueue] = false;
+    this.poolState = PoolState.paused;
+    this.server = server;
+    this.connections = new List();
+    this.pending = 0;
+    this.checkedOut = new Set();
+    this.minPoolSizeTimer = undefined;
+    this.generation = 0;
+    this.serviceGenerations = new Map();
+    this.connectionCounter = makeCounter(1);
+    this.cancellationToken = new CancellationToken();
+    this.cancellationToken.setMaxListeners(Infinity);
+    this.waitQueue = new List();
+    this.metrics = new ConnectionPoolMetrics();
+    this.processingWaitQueue = false;
 
-    this.mongoLogger = this[kServer].topology.client?.mongoLogger;
+    this.mongoLogger = this.server.topology.client?.mongoLogger;
     this.component = 'connection';
 
     process.nextTick(() => {
@@ -275,12 +243,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * TODO(NODE-3263): We can remove this property once shell no longer needs it
    */
   get closed(): boolean {
-    return this[kPoolState] === PoolState.closed;
-  }
-
-  /** An integer representing the SDAM generation of the pool */
-  get generation(): number {
-    return this[kGeneration];
+    return this.poolState === PoolState.closed;
   }
 
   /** An integer expressing how many total connections (available + pending + in use) the pool currently has */
@@ -292,31 +255,27 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   /** An integer expressing how many connections are currently available in the pool. */
   get availableConnectionCount(): number {
-    return this[kConnections].length;
+    return this.connections.length;
   }
 
   get pendingConnectionCount(): number {
-    return this[kPending];
+    return this.pending;
   }
 
   get currentCheckedOutCount(): number {
-    return this[kCheckedOut].size;
+    return this.checkedOut.size;
   }
 
   get waitQueueSize(): number {
-    return this[kWaitQueue].length;
+    return this.waitQueue.length;
   }
 
   get loadBalanced(): boolean {
     return this.options.loadBalanced;
   }
 
-  get serviceGenerations(): Map<string, number> {
-    return this[kServiceGenerations];
-  }
-
   get serverError() {
-    return this[kServer].description.error;
+    return this.server.description.error;
   }
 
   /**
@@ -327,26 +286,26 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * This property may be removed as a part of NODE-3263.
    */
   get checkedOutConnections() {
-    return this[kCheckedOut];
+    return this.checkedOut;
   }
 
   /**
    * Get the metrics information for the pool when a wait queue timeout occurs.
    */
   private waitQueueErrorMetrics(): string {
-    return this[kMetrics].info(this.options.maxPoolSize);
+    return this.metrics.info(this.options.maxPoolSize);
   }
 
   /**
    * Set the pool state to "ready"
    */
   ready(): void {
-    if (this[kPoolState] !== PoolState.paused) {
+    if (this.poolState !== PoolState.paused) {
       return;
     }
-    this[kPoolState] = PoolState.ready;
+    this.poolState = PoolState.ready;
     this.emitAndLog(ConnectionPool.CONNECTION_POOL_READY, new ConnectionPoolReadyEvent(this));
-    clearTimeout(this[kMinPoolSizeTimer]);
+    clearTimeout(this.minPoolSizeTimer);
     this.ensureMinPoolSize();
   }
 
@@ -369,10 +328,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     const waitQueueMember: WaitQueueMember = {
       resolve,
       reject,
+      cancelled: false,
       checkoutTime
     };
 
-    this[kWaitQueue].push(waitQueueMember);
+    this.waitQueue.push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());
 
     try {
@@ -381,7 +341,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     } catch (error) {
       if (TimeoutError.is(error)) {
         timeout?.clear();
-        waitQueueMember[kCancelled] = true;
+        waitQueueMember.cancelled = true;
 
         this.emitAndLog(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
@@ -412,7 +372,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * @param connection - The connection to check in
    */
   checkIn(connection: Connection): void {
-    if (!this[kCheckedOut].has(connection)) {
+    if (!this.checkedOut.has(connection)) {
       return;
     }
     const poolClosed = this.closed;
@@ -421,10 +381,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     if (!willDestroy) {
       connection.markAvailable();
-      this[kConnections].unshift(connection);
+      this.connections.unshift(connection);
     }
 
-    this[kCheckedOut].delete(connection);
+    this.checkedOut.delete(connection);
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECKED_IN,
       new ConnectionCheckedInEvent(this, connection)
@@ -475,10 +435,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
     // handle non load-balanced case
     const interruptInUseConnections = options.interruptInUseConnections ?? false;
-    const oldGeneration = this[kGeneration];
-    this[kGeneration] += 1;
-    const alreadyPaused = this[kPoolState] === PoolState.paused;
-    this[kPoolState] = PoolState.paused;
+    const oldGeneration = this.generation;
+    this.generation += 1;
+    const alreadyPaused = this.poolState === PoolState.paused;
+    this.poolState = PoolState.paused;
 
     this.clearMinPoolSizeTimer();
     if (!alreadyPaused) {
@@ -503,7 +463,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * Only connections where `connection.generation <= minGeneration` are killed.
    */
   private interruptInUseConnections(minGeneration: number) {
-    for (const connection of this[kCheckedOut]) {
+    for (const connection of this.checkedOut) {
       if (connection.generation <= minGeneration) {
         connection.onError(new PoolClearedOnNetworkError(this));
         this.checkIn(connection);
@@ -518,25 +478,25 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     // immediately cancel any in-flight connections
-    this[kCancellationToken].emit('cancel');
+    this.cancellationToken.emit('cancel');
 
     // end the connection counter
-    if (typeof this[kConnectionCounter].return === 'function') {
-      this[kConnectionCounter].return(undefined);
+    if (typeof this.connectionCounter.return === 'function') {
+      this.connectionCounter.return(undefined);
     }
 
-    this[kPoolState] = PoolState.closed;
+    this.poolState = PoolState.closed;
     this.clearMinPoolSizeTimer();
     this.processWaitQueue();
 
-    for (const conn of this[kConnections]) {
+    for (const conn of this.connections) {
       this.emitAndLog(
         ConnectionPool.CONNECTION_CLOSED,
         new ConnectionClosedEvent(this, conn, 'poolClosed')
       );
       conn.destroy();
     }
-    this[kConnections].clear();
+    this.connections.clear();
     this.emitAndLog(ConnectionPool.CONNECTION_POOL_CLOSED, new ConnectionPoolClosedEvent(this));
   }
 
@@ -557,7 +517,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello);
-    const provider = this[kServer].topology.client.s.authProviders.getOrCreateProvider(
+    const provider = this.server.topology.client.s.authProviders.getOrCreateProvider(
       resolvedCredentials.mechanism,
       resolvedCredentials.mechanismProperties
     );
@@ -575,7 +535,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   /** Clear the min pool size timer */
   private clearMinPoolSizeTimer(): void {
-    const minPoolSizeTimer = this[kMinPoolSizeTimer];
+    const minPoolSizeTimer = this.minPoolSizeTimer;
     if (minPoolSizeTimer) {
       clearTimeout(minPoolSizeTimer);
     }
@@ -601,7 +561,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       return connection.generation !== generation;
     }
 
-    return connection.generation !== this[kGeneration];
+    return connection.generation !== this.generation;
   }
 
   private connectionIsIdle(connection: Connection) {
@@ -627,14 +587,14 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   private createConnection(callback: Callback<Connection>) {
     const connectOptions: ConnectionOptions = {
       ...this.options,
-      id: this[kConnectionCounter].next().value,
-      generation: this[kGeneration],
-      cancellationToken: this[kCancellationToken],
+      id: this.connectionCounter.next().value,
+      generation: this.generation,
+      cancellationToken: this.cancellationToken,
       mongoLogger: this.mongoLogger,
-      authProviders: this[kServer].topology.client.s.authProviders
+      authProviders: this.server.topology.client.s.authProviders
     };
 
-    this[kPending]++;
+    this.pending++;
     // This is our version of a "virtual" no-I/O connection as the spec requires
     const connectionCreatedTime = now();
     this.emitAndLog(
@@ -645,8 +605,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     connect(connectOptions).then(
       connection => {
         // The pool might have closed since we started trying to create a connection
-        if (this[kPoolState] !== PoolState.ready) {
-          this[kPending]--;
+        if (this.poolState !== PoolState.ready) {
+          this.pending--;
           connection.destroy();
           callback(this.closed ? new PoolClosedError(this) : new PoolClearedError(this));
           return;
@@ -658,8 +618,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         }
 
         if (this.loadBalanced) {
-          connection.on(Connection.PINNED, pinType => this[kMetrics].markPinned(pinType));
-          connection.on(Connection.UNPINNED, pinType => this[kMetrics].markUnpinned(pinType));
+          connection.on(Connection.PINNED, pinType => this.metrics.markPinned(pinType));
+          connection.on(Connection.UNPINNED, pinType => this.metrics.markUnpinned(pinType));
 
           const serviceId = connection.serviceId;
           if (serviceId) {
@@ -680,12 +640,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           new ConnectionReadyEvent(this, connection, connectionCreatedTime)
         );
 
-        this[kPending]--;
+        this.pending--;
         callback(undefined, connection);
       },
       error => {
-        this[kPending]--;
-        this[kServer].handleError(error);
+        this.pending--;
+        this.server.handleError(error);
         this.emitAndLog(
           ConnectionPool.CONNECTION_CLOSED,
           new ConnectionClosedEvent(
@@ -706,11 +666,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   private ensureMinPoolSize() {
     const minPoolSize = this.options.minPoolSize;
-    if (this[kPoolState] !== PoolState.ready || minPoolSize === 0) {
+    if (this.poolState !== PoolState.ready || minPoolSize === 0) {
       return;
     }
 
-    this[kConnections].prune(connection => this.destroyConnectionIfPerished(connection));
+    this.connections.prune(connection => this.destroyConnectionIfPerished(connection));
 
     if (
       this.totalConnectionCount < minPoolSize &&
@@ -721,20 +681,20 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // the connection to a checkout request
       this.createConnection((err, connection) => {
         if (!err && connection) {
-          this[kConnections].push(connection);
+          this.connections.push(connection);
           process.nextTick(() => this.processWaitQueue());
         }
-        if (this[kPoolState] === PoolState.ready) {
-          clearTimeout(this[kMinPoolSizeTimer]);
-          this[kMinPoolSizeTimer] = setTimeout(
+        if (this.poolState === PoolState.ready) {
+          clearTimeout(this.minPoolSizeTimer);
+          this.minPoolSizeTimer = setTimeout(
             () => this.ensureMinPoolSize(),
             this.options.minPoolSizeCheckFrequencyMS
           );
         }
       });
     } else {
-      clearTimeout(this[kMinPoolSizeTimer]);
-      this[kMinPoolSizeTimer] = setTimeout(
+      clearTimeout(this.minPoolSizeTimer);
+      this.minPoolSizeTimer = setTimeout(
         () => this.ensureMinPoolSize(),
         this.options.minPoolSizeCheckFrequencyMS
       );
@@ -742,31 +702,31 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   private processWaitQueue() {
-    if (this[kProcessingWaitQueue]) {
+    if (this.processingWaitQueue) {
       return;
     }
-    this[kProcessingWaitQueue] = true;
+    this.processingWaitQueue = true;
 
     while (this.waitQueueSize) {
-      const waitQueueMember = this[kWaitQueue].first();
+      const waitQueueMember = this.waitQueue.first();
       if (!waitQueueMember) {
-        this[kWaitQueue].shift();
+        this.waitQueue.shift();
         continue;
       }
 
-      if (waitQueueMember[kCancelled]) {
-        this[kWaitQueue].shift();
+      if (waitQueueMember.cancelled) {
+        this.waitQueue.shift();
         continue;
       }
 
-      if (this[kPoolState] !== PoolState.ready) {
+      if (this.poolState !== PoolState.ready) {
         const reason = this.closed ? 'poolClosed' : 'connectionError';
         const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
         this.emitAndLog(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
           new ConnectionCheckOutFailedEvent(this, reason, waitQueueMember.checkoutTime, error)
         );
-        this[kWaitQueue].shift();
+        this.waitQueue.shift();
         waitQueueMember.reject(error);
         continue;
       }
@@ -775,19 +735,19 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         break;
       }
 
-      const connection = this[kConnections].shift();
+      const connection = this.connections.shift();
       if (!connection) {
         break;
       }
 
       if (!this.destroyConnectionIfPerished(connection)) {
-        this[kCheckedOut].add(connection);
+        this.checkedOut.add(connection);
         this.emitAndLog(
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(this, connection, waitQueueMember.checkoutTime)
         );
 
-        this[kWaitQueue].shift();
+        this.waitQueue.shift();
         waitQueueMember.resolve(connection);
       }
     }
@@ -798,14 +758,14 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this.pendingConnectionCount < maxConnecting &&
       (maxPoolSize === 0 || this.totalConnectionCount < maxPoolSize)
     ) {
-      const waitQueueMember = this[kWaitQueue].shift();
-      if (!waitQueueMember || waitQueueMember[kCancelled]) {
+      const waitQueueMember = this.waitQueue.shift();
+      if (!waitQueueMember || waitQueueMember.cancelled) {
         continue;
       }
       this.createConnection((err, connection) => {
-        if (waitQueueMember[kCancelled]) {
+        if (waitQueueMember.cancelled) {
           if (!err && connection) {
-            this[kConnections].push(connection);
+            this.connections.push(connection);
           }
         } else {
           if (err) {
@@ -821,7 +781,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             );
             waitQueueMember.reject(err);
           } else if (connection) {
-            this[kCheckedOut].add(connection);
+            this.checkedOut.add(connection);
             this.emitAndLog(
               ConnectionPool.CONNECTION_CHECKED_OUT,
               new ConnectionCheckedOutEvent(this, connection, waitQueueMember.checkoutTime)
@@ -832,7 +792,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         process.nextTick(() => this.processWaitQueue());
       });
     }
-    this[kProcessingWaitQueue] = false;
+    this.processingWaitQueue = false;
   }
 }
 

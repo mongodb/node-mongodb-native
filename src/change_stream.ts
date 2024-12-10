@@ -24,13 +24,6 @@ import type { ServerSessionId } from './sessions';
 import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
 import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
-/** @internal */
-const kCursorStream = Symbol('cursorStream');
-/** @internal */
-const kClosed = Symbol('closed');
-/** @internal */
-const kMode = Symbol('mode');
-
 const CHANGE_STREAM_OPTIONS = [
   'resumeAfter',
   'startAfter',
@@ -584,14 +577,14 @@ export class ChangeStream<
   namespace: MongoDBNamespace;
   type: symbol;
   /** @internal */
-  cursor: ChangeStreamCursor<TSchema, TChange>;
+  private cursor: ChangeStreamCursor<TSchema, TChange>;
   streamOptions?: CursorStreamOptions;
   /** @internal */
-  [kCursorStream]?: Readable & AsyncIterable<TChange>;
+  private cursorStream?: Readable & AsyncIterable<TChange>;
   /** @internal */
-  [kClosed]: boolean;
+  private isClosed: boolean;
   /** @internal */
-  [kMode]: false | 'iterator' | 'emitter';
+  private mode: false | 'iterator' | 'emitter';
 
   /** @event */
   static readonly RESPONSE = RESPONSE;
@@ -668,8 +661,8 @@ export class ChangeStream<
     // Create contained Change Stream cursor
     this.cursor = this._createChangeStreamCursor(options);
 
-    this[kClosed] = false;
-    this[kMode] = false;
+    this.isClosed = false;
+    this.mode = false;
 
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', eventName => {
@@ -680,7 +673,7 @@ export class ChangeStream<
 
     this.on('removeListener', eventName => {
       if (eventName === 'change' && this.listenerCount('change') === 0 && this.cursor) {
-        this[kCursorStream]?.removeAllListeners('data');
+        this.cursorStream?.removeAllListeners('data');
       }
     });
 
@@ -690,11 +683,6 @@ export class ChangeStream<
         serverSelectionTimeoutMS
       });
     }
-  }
-
-  /** @internal */
-  get cursorStream(): (Readable & AsyncIterable<TChange>) | undefined {
-    return this[kCursorStream];
   }
 
   /** The cached resume token that is used to resume after the most recently returned change. */
@@ -806,7 +794,7 @@ export class ChangeStream<
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, void> {
-    if (this.closed) {
+    if (this.isClosed) {
       return;
     }
 
@@ -826,8 +814,8 @@ export class ChangeStream<
   }
 
   /** Is the cursor closed */
-  get closed(): boolean {
-    return this[kClosed] || this.cursor.closed;
+  public get closed(): boolean {
+    return this.isClosed || this.cursor.closed;
   }
 
   /**
@@ -836,7 +824,7 @@ export class ChangeStream<
   async close(): Promise<void> {
     this.timeoutContext?.clear();
     this.timeoutContext = undefined;
-    this[kClosed] = true;
+    this.isClosed = true;
 
     const cursor = this.cursor;
     try {
@@ -855,7 +843,7 @@ export class ChangeStream<
    * @throws MongoChangeStreamError if the underlying cursor or the change stream is closed
    */
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
-    if (this.closed) {
+    if (this.isClosed) {
       throw new MongoChangeStreamError(CHANGESTREAM_CLOSED_ERROR);
     }
 
@@ -865,24 +853,24 @@ export class ChangeStream<
 
   /** @internal */
   private _setIsEmitter(): void {
-    if (this[kMode] === 'iterator') {
+    if (this.mode === 'iterator') {
       // TODO(NODE-3485): Replace with MongoChangeStreamModeError
       throw new MongoAPIError(
         'ChangeStream cannot be used as an EventEmitter after being used as an iterator'
       );
     }
-    this[kMode] = 'emitter';
+    this.mode = 'emitter';
   }
 
   /** @internal */
   private _setIsIterator(): void {
-    if (this[kMode] === 'emitter') {
+    if (this.mode === 'emitter') {
       // TODO(NODE-3485): Replace with MongoChangeStreamModeError
       throw new MongoAPIError(
         'ChangeStream cannot be used as an iterator after being used as an EventEmitter'
       );
     }
-    this[kMode] = 'iterator';
+    this.mode = 'iterator';
   }
 
   /**
@@ -947,8 +935,8 @@ export class ChangeStream<
   /** @internal */
   private _streamEvents(cursor: ChangeStreamCursor<TSchema, TChange>): void {
     this._setIsEmitter();
-    const stream = this[kCursorStream] ?? cursor.stream();
-    this[kCursorStream] = stream;
+    const stream = this.cursorStream ?? cursor.stream();
+    this.cursorStream = stream;
     stream.on('data', change => {
       try {
         const processedChange = this._processChange(change);
@@ -963,18 +951,18 @@ export class ChangeStream<
 
   /** @internal */
   private _endStream(): void {
-    const cursorStream = this[kCursorStream];
+    const cursorStream = this.cursorStream;
     if (cursorStream) {
       ['data', 'close', 'end', 'error'].forEach(event => cursorStream.removeAllListeners(event));
       cursorStream.destroy();
     }
 
-    this[kCursorStream] = undefined;
+    this.cursorStream = undefined;
   }
 
   /** @internal */
   private _processChange(change: TChange | null): TChange {
-    if (this[kClosed]) {
+    if (this.isClosed) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
@@ -1002,7 +990,7 @@ export class ChangeStream<
   /** @internal */
   private _processErrorStreamMode(changeStreamError: AnyError, cursorInitialized: boolean) {
     // If the change stream has been closed explicitly, do not process error.
-    if (this[kClosed]) return;
+    if (this.isClosed) return;
 
     if (
       cursorInitialized &&
@@ -1034,7 +1022,7 @@ export class ChangeStream<
 
   /** @internal */
   private async _processErrorIteratorMode(changeStreamError: AnyError, cursorInitialized: boolean) {
-    if (this[kClosed]) {
+    if (this.isClosed) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }

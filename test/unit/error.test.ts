@@ -38,7 +38,7 @@ import {
 } from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
-import { getSymbolFrom, topologyWithPlaceholderClient } from '../tools/utils';
+import { topologyWithPlaceholderClient } from '../tools/utils';
 
 describe('MongoErrors', () => {
   let errorClassesFromEntryPoint = Object.fromEntries(
@@ -291,19 +291,19 @@ describe('MongoErrors', () => {
   describe('when MongoNetworkError is constructed', () => {
     it('should only define beforeHandshake symbol if boolean option passed in', function () {
       const errorWithOptionTrue = new MongoNetworkError('', { beforeHandshake: true });
-      expect(getSymbolFrom(errorWithOptionTrue, 'beforeHandshake', false)).to.be.a('symbol');
+      expect(errorWithOptionTrue).to.have.property('beforeHandshake', true);
 
       const errorWithOptionFalse = new MongoNetworkError('', { beforeHandshake: false });
-      expect(getSymbolFrom(errorWithOptionFalse, 'beforeHandshake', false)).to.be.a('symbol');
+      expect(errorWithOptionFalse).to.have.property('beforeHandshake', false);
 
       const errorWithBadOption = new MongoNetworkError('', {
         // @ts-expect-error: beforeHandshake must be a boolean value
         beforeHandshake: 'not boolean'
       });
-      expect(getSymbolFrom(errorWithBadOption, 'beforeHandshake', false)).to.be.an('undefined');
+      expect(errorWithBadOption).to.not.have.property('beforeHandshake');
 
       const errorWithoutOption = new MongoNetworkError('');
-      expect(getSymbolFrom(errorWithoutOption, 'beforeHandshake', false)).to.be.an('undefined');
+      expect(errorWithoutOption).to.not.have.property('beforeHandshake');
     });
   });
 
