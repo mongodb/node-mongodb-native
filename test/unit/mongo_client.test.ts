@@ -829,7 +829,7 @@ describe('MongoClient', function () {
   });
 
   describe('logging client options', function () {
-    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+    const loggerFeatureFlag = __enableMongoLogger;
 
     describe('mongodbLogPath', function () {
       context('when mongodbLogPath is in options', function () {

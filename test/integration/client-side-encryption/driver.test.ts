@@ -394,7 +394,7 @@ describe('Client Side Encryption Functional', function () {
           }
         );
 
-        encryptedClient.autoEncrypter[Symbol.for('@@mdb.decorateDecryptionResult')] = true;
+        encryptedClient.autoEncrypter[__decorateDecryptionResult] = true;
         await encryptedClient.connect();
       });
 
@@ -418,13 +418,13 @@ describe('Client Side Encryption Functional', function () {
 
         expect(decrypted).to.deep.equal(data);
         expect(decrypted)
-          .to.have.property(Symbol.for('@@mdb.decryptedKeys'))
+          .to.have.property(__decryptedKeys)
           .that.deep.equals(['a', 'b']);
 
         // Nested
         expect(decrypted).to.have.property('c');
         expect(decrypted.c)
-          .to.have.property(Symbol.for('@@mdb.decryptedKeys'))
+          .to.have.property(__decryptedKeys)
           .that.deep.equals(['d']);
       });
     }

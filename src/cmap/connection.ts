@@ -889,7 +889,7 @@ export class CryptoConnection extends Connection {
 
     const decryptedResponse = responseType?.make(result) ?? deserialize(result, options);
 
-    if (autoEncrypter[kDecorateResult]) {
+    if (autoEncrypter.__decorateDecryptionResult) {
       if (responseType == null) {
         decorateDecryptionResult(decryptedResponse, encryptedResponse.toObject(), true);
       } else if (decryptedResponse instanceof CursorResponse) {

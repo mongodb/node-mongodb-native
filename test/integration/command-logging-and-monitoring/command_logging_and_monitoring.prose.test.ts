@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { DEFAULT_MAX_DOCUMENT_LENGTH, type Document } from '../../mongodb';
 
 describe('Command Logging and Monitoring Prose Tests', function () {
-  const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+  const loggerFeatureFlag = __enableMongoLogger;
   const ELLIPSES_LENGTH = 3;
   let client;
   let writable;

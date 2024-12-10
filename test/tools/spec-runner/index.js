@@ -363,7 +363,7 @@ function runTestSuiteTest(configuration, spec, context) {
     minHeartbeatFrequencyMS: 100,
     monitorCommands: true,
     ...spec.clientOptions,
-    [Symbol.for('@@mdb.skipPingOnConnect')]: true
+    [__skipPingOnConnect]: true
   });
 
   if (context.requiresCSFLE) {

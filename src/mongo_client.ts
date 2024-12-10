@@ -299,7 +299,11 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   mongodbLogMaxDocumentLength?: number;
 
   /** @internal */
-  [featureFlag: symbol]: any;
+  __skipPingOnConnect?: boolean;
+  /** @internal */
+  __internalLoggerConfig?: any;
+  /** @internal */
+  __enableMongoLogger?: boolean;
 }
 
 /** @public */

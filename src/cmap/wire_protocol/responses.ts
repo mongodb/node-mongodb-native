@@ -221,9 +221,9 @@ export class MongoDBResponse extends OnDemandDocument {
 export class CursorResponse extends MongoDBResponse {
   /**
    * Devtools need to know which keys were encrypted before the driver automatically decrypted them.
-   * If decorating is enabled (`Symbol.for('@@mdb.decorateDecryptionResult')`), this field will be set,
+   * If decorating is enabled (`__decorateDecryptionResult`), this field will be set,
    * storing the original encrypted response from the server, so that we can build an object that has
-   * the list of BSON keys that were encrypted stored at a well known symbol: `Symbol.for('@@mdb.decryptedKeys')`.
+   * the list of BSON keys that were encrypted stored at a well known symbol: `__decryptedKeys`.
    */
   encryptedResponse?: MongoDBResponse;
   /**

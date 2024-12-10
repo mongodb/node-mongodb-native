@@ -160,6 +160,7 @@ export class AutoEncrypter {
   _mongocrypt: MongoCrypt;
 
   /**
+   * @internal
    * Used by devtools to enable decorating decryption results.
    *
    * When set and enabled, `decrypt` will automatically recursively

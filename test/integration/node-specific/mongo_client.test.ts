@@ -456,8 +456,8 @@ describe('class MongoClient', function () {
         const [findCommandStarted] = await findCommandToBeStarted;
 
         expect(findCommandStarted).to.have.property('commandName', 'find');
-        expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-        expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+        expect(client.options).to.not.have.property(__skipPingOnConnect);
+        expect(client.s.options).to.not.have.property(__skipPingOnConnect);
 
         // Assertion is redundant but it shows that no initial ping is run
         expect(findCommandStarted.commandName).to.not.equal('ping');
@@ -475,8 +475,8 @@ describe('class MongoClient', function () {
         const [insertCommandStarted] = await insertOneCommandToBeStarted;
 
         expect(insertCommandStarted).to.have.property('commandName', 'insert');
-        expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-        expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+        expect(client.options).to.not.have.property(__skipPingOnConnect);
+        expect(client.s.options).to.not.have.property(__skipPingOnConnect);
 
         // Assertion is redundant but it shows that no initial ping is run
         expect(insertCommandStarted.commandName).to.not.equal('ping');

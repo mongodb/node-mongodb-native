@@ -249,13 +249,6 @@ export function parseOptions(
 
   const mongoOptions = Object.create(null);
 
-  // Feature flags
-  for (const flag of Object.getOwnPropertySymbols(options)) {
-    if (FEATURE_FLAGS.has(flag)) {
-      mongoOptions[flag] = options[flag];
-    }
-  }
-
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
 
   const urlOptions = new CaseInsensitiveMap<unknown[]>();
@@ -515,7 +508,7 @@ export function parseOptions(
     );
   }
 
-  const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+  const loggerFeatureFlag = '__enableMongoLogger';
   mongoOptions[loggerFeatureFlag] = mongoOptions[loggerFeatureFlag] ?? false;
 
   let loggerEnvOptions: MongoLoggerEnvOptions = {};
@@ -530,7 +523,7 @@ export function parseOptions(
       MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
       MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
       MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH,
-      ...mongoOptions[Symbol.for('@@mdb.internalLoggerConfig')]
+      ...mongoOptions['__internalLoggerConfig']
     };
     loggerClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath,
@@ -1331,7 +1324,7 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
  * @internal
  */
 export const FEATURE_FLAGS = new Set([
-  Symbol.for('@@mdb.skipPingOnConnect'),
-  Symbol.for('@@mdb.enableMongoLogger'),
-  Symbol.for('@@mdb.internalLoggerConfig')
+  '__skipPingOnConnect',
+  '__enableMongoLogger',
+  '__internalLoggerConfig'
 ]);

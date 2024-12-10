@@ -751,9 +751,9 @@ describe('Connection String', function () {
   describe('feature flags', () => {
     it('should be stored in the FEATURE_FLAGS Set', () => {
       expect(FEATURE_FLAGS.size).to.equal(3);
-      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.skipPingOnConnect'))).to.be.true;
-      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.enableMongoLogger'))).to.be.true;
-      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.internalLoggerConfig'))).to.be.true;
+      expect(FEATURE_FLAGS.has(__skipPingOnConnect)).to.be.true;
+      expect(FEATURE_FLAGS.has(__enableMongoLogger)).to.be.true;
+      expect(FEATURE_FLAGS.has(__internalLoggerConfig)).to.be.true;
       // Add more flags here
     });
 
@@ -874,7 +874,7 @@ describe('Connection String', function () {
   });
 
   describe('when mongodbLogPath is in options', function () {
-    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+    const loggerFeatureFlag = __enableMongoLogger;
 
     let stderrStub;
     let stdoutStub;
@@ -931,7 +931,7 @@ describe('Connection String', function () {
       process.env.MONGODB_LOG_CLIENT = undefined;
     });
 
-    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+    const loggerFeatureFlag = __enableMongoLogger;
     const test_cases = [
       ['non-SRV example uri', 'mongodb://a.example.com:27017,b.example.com:27017/', ''],
       ['non-SRV default uri', 'mongodb://a.mongodb.net:27017', ''],

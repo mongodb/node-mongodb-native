@@ -24,7 +24,7 @@ describe('Feature Flags', () => {
     for (const { description, value, expectEvents } of tests) {
       it(description, async function () {
         const options =
-          value === undefined ? {} : { [Symbol.for('@@mdb.skipPingOnConnect')]: value };
+          value === undefined ? {} : { [__skipPingOnConnect]: value };
         const client = this.configuration.newClient({}, { ...options, monitorCommands: true });
         const events = [];
         client.on('commandStarted', event => events.push(event));
@@ -48,7 +48,7 @@ describe('Feature Flags', () => {
   // TODO(NODE-5672): Release Standardized Logger
   describe('@@mdb.enableMongoLogger', () => {
     let cachedEnv;
-    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+    const loggerFeatureFlag = __enableMongoLogger;
 
     before(() => {
       cachedEnv = process.env;
@@ -138,8 +138,8 @@ describe('Feature Flags', () => {
 
       it('falls back to environment options', function () {
         const client = new MongoClient('mongodb://localhost:27017', {
-          [Symbol.for('@@mdb.enableMongoLogger')]: true,
-          [Symbol.for('@@mdb.internalLoggerConfig')]: undefined
+          [__enableMongoLogger]: true,
+          [__internalLoggerConfig]: undefined
         });
 
         expect(client.mongoLogger?.componentSeverities).to.have.property(
@@ -152,8 +152,8 @@ describe('Feature Flags', () => {
     context('when defined', function () {
       it('overrides environment options', function () {
         const client = new MongoClient('mongodb://localhost:27017', {
-          [Symbol.for('@@mdb.enableMongoLogger')]: true,
-          [Symbol.for('@@mdb.internalLoggerConfig')]: {
+          [__enableMongoLogger]: true,
+          [__internalLoggerConfig]: {
             MONGODB_LOG_COMMAND: SeverityLevel.ALERT
           }
         });
