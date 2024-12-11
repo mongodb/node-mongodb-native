@@ -153,7 +153,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   serverMonitoringMode: ServerMonitoringMode;
   /** MongoDB server API version */
   serverApi?: ServerApi;
-  [featureFlag: symbol]: any;
+  __skipPingOnConnect?: boolean;
 }
 
 /** @public */
@@ -466,7 +466,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         readPreferenceServerSelector(readPreference),
         selectServerOptions
       );
-      const skipPingOnConnect = this.s.options[__skipPingOnConnect] === true;
+      const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
       if (!skipPingOnConnect && this.s.credentials) {
         await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
         stateTransition(this, STATE_CONNECTED);

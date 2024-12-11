@@ -131,7 +131,7 @@ async function autoConnect(client: MongoClient): Promise<Topology> {
     if (client.s.hasBeenClosed) {
       throw new MongoNotConnectedError('Client must be connected before running operations');
     }
-    client.s.options[__skipPingOnConnect] = true;
+    client.s.options.__skipPingOnConnect = true;
     try {
       await client.connect();
       if (client.topology == null) {
@@ -141,7 +141,7 @@ async function autoConnect(client: MongoClient): Promise<Topology> {
       }
       return client.topology;
     } finally {
-      delete client.s.options[__skipPingOnConnect];
+      delete client.s.options.__skipPingOnConnect;
     }
   }
   return client.topology;

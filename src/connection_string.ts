@@ -1311,7 +1311,13 @@ export const OPTIONS = {
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogMaxDocumentLength: { type: 'uint' }
-} as Record<keyof MongoClientOptions, OptionDescriptor>;
+} as Record<
+  keyof Omit<
+    MongoClientOptions,
+    '__enableMongoLogger' | '__internalLoggerConfig' | '__skipPingOnConnect'
+  >,
+  OptionDescriptor
+>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
   Object.entries(OPTIONS)

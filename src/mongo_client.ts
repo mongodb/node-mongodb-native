@@ -1010,9 +1010,6 @@ export interface MongoOptions
   tlsCRLFile?: string;
   tlsCertificateKeyFile?: string;
 
-  /** @internal */
-  [featureFlag: symbol]: any;
-
   /**
    * @internal
    * TODO: NODE-5671 - remove internal flag
@@ -1024,4 +1021,10 @@ export interface MongoOptions
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
   timeoutMS?: number;
+  /** @internal */
+  __skipPingOnConnect?: boolean;
+  /** @internal */
+  __internalLoggerConfig?: Document;
+  /** @internal */
+  __enableMongoLogger?: boolean;
 }
