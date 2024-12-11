@@ -794,7 +794,7 @@ export class ChangeStream<
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, void> {
-    if (this.isClosed) {
+    if (this.closed) {
       return;
     }
 
@@ -843,7 +843,7 @@ export class ChangeStream<
    * @throws MongoChangeStreamError if the underlying cursor or the change stream is closed
    */
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
-    if (this.isClosed) {
+    if (this.closed) {
       throw new MongoChangeStreamError(CHANGESTREAM_CLOSED_ERROR);
     }
 
