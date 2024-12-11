@@ -25,7 +25,8 @@ export class CommandStartedEvent {
   requestId: number;
   databaseName: string;
   commandName: string;
-  command: Document;
+  private _command?: Document;
+  private _commandRef?: WriteProtocolMessageType;
   address: string;
   /** Driver generated connection id */
   connectionId?: string | number;
@@ -51,14 +52,15 @@ export class CommandStartedEvent {
     command: WriteProtocolMessageType,
     serverConnectionId: bigint | null
   ) {
-    const cmd = extractCommand(command);
-    const commandName = extractCommandName(cmd);
+    const commandName = extractCommandName(command);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     // TODO: remove in major revision, this is not spec behavior
     if (SENSITIVE_COMMANDS.has(commandName)) {
       this.commandObj = {};
       this.commandObj[commandName] = true;
+    } else {
+      this._commandRef = command;
     }
 
     this.address = address;
@@ -67,13 +69,23 @@ export class CommandStartedEvent {
     this.requestId = command.requestId;
     this.databaseName = command.databaseName;
     this.commandName = commandName;
-    this.command = maybeRedact(commandName, cmd, cmd);
     this.serverConnectionId = serverConnectionId;
   }
 
   /* @internal */
   get hasServiceId(): boolean {
     return !!this.serviceId;
+  }
+
+  get command(): Document {
+    if (this._command) return this._command;
+    if (!this._commandRef) return {};
+    const cmd = extractCommand(this._commandRef);
+    const sensitive = isSensitive(this.commandName, cmd);
+    this._command = maybeRedact(sensitive, cmd);
+    delete this._commandRef;
+
+    return this._command;
   }
 }
 
@@ -94,8 +106,13 @@ export class CommandSucceededEvent {
   requestId: number;
   duration: number;
   commandName: string;
-  reply: unknown;
+  private _reply: unknown;
+  private _replyRef?: Document | undefined;
+  private _commandIsLegacyFind: boolean;
+  private _commandIsOpMsg: boolean;
+  private _namespace?: string;
   serviceId?: ObjectId;
+  private sensitive: boolean;
   /** @internal */
   name = COMMAND_SUCCEEDED;
 
@@ -115,23 +132,40 @@ export class CommandSucceededEvent {
     started: number,
     serverConnectionId: bigint | null
   ) {
-    const cmd = extractCommand(command);
-    const commandName = extractCommandName(cmd);
+    const commandName = extractCommandName(command);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
+    const isOpMsg = command instanceof OpMsgRequest;
+    this._commandIsLegacyFind = !isOpMsg && command.query != null && command.query.$query != null;
+    this._commandIsOpMsg = isOpMsg;
+    if (this._commandIsLegacyFind) this._namespace = namespace(command as OpQueryRequest);
+
+    this.sensitive = isSensitive(commandName, command);
+    if (this.sensitive) this._reply = {};
+    else {
+      this._replyRef = reply;
+    }
     this.address = address;
     this.connectionId = connectionId;
     this.serviceId = serviceId;
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
     this.serverConnectionId = serverConnectionId;
   }
 
   /* @internal */
   get hasServiceId(): boolean {
     return !!this.serviceId;
+  }
+
+  get reply(): unknown {
+    if (this._reply) return this._reply;
+    this._reply = maybeRedact(
+      this.sensitive,
+      extractReply(this._commandIsOpMsg, this._commandIsLegacyFind, this._namespace, this._replyRef)
+    );
+    return this._reply;
   }
 }
 
@@ -216,11 +250,10 @@ const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMM
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
 const namespace = (command: OpQueryRequest) => command.ns;
 const collectionName = (command: OpQueryRequest) => command.ns.split('.')[1];
-const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
+const isSensitive = (commandName: string, commandDoc: Document): boolean =>
   SENSITIVE_COMMANDS.has(commandName) ||
-  (HELLO_COMMANDS.has(commandName) && commandDoc.speculativeAuthenticate)
-    ? {}
-    : result;
+  (HELLO_COMMANDS.has(commandName) && commandDoc.speculativeAuthenticate);
+const maybeRedact = (isSensitive: boolean, result: Error | Document) => (isSensitive ? {} : result);
 
 const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
   $query: 'filter',
@@ -320,22 +353,27 @@ function extractCommand(command: WriteProtocolMessageType): Document {
   return command.query ? clonedQuery : clonedCommand;
 }
 
-function extractReply(command: WriteProtocolMessageType, reply?: Document) {
+function extractReply(
+  isOpMsg: boolean,
+  isLegacyFind: boolean,
+  namespace?: string,
+  reply?: Document
+) {
   if (!reply) {
     return reply;
   }
 
-  if (command instanceof OpMsgRequest) {
+  if (isOpMsg) {
     return deepCopy(reply.result ? reply.result : reply);
   }
 
   // is this a legacy find command?
-  if (command.query && command.query.$query != null) {
+  if (isLegacyFind) {
     return {
       ok: 1,
       cursor: {
         id: deepCopy(reply.cursorId),
-        ns: namespace(command),
+        ns: namespace,
         firstBatch: deepCopy(reply.documents)
       }
     };
