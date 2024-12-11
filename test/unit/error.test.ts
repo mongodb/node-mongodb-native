@@ -289,21 +289,25 @@ describe('MongoErrors', () => {
   });
 
   describe('when MongoNetworkError is constructed', () => {
-    it('should only define beforeHandshake symbol if boolean option passed in', function () {
-      const errorWithOptionTrue = new MongoNetworkError('', { beforeHandshake: true });
-      expect(errorWithOptionTrue).to.have.property('beforeHandshake', true);
-
-      const errorWithOptionFalse = new MongoNetworkError('', { beforeHandshake: false });
-      expect(errorWithOptionFalse).to.have.property('beforeHandshake', false);
-
-      const errorWithBadOption = new MongoNetworkError('', {
-        // @ts-expect-error: beforeHandshake must be a boolean value
-        beforeHandshake: 'not boolean'
+    describe('without options', () => {
+      it('sets beforeHandshake to false', () => {
+        const error = new MongoNetworkError('error');
+        expect(error.beforeHandshake).to.be.false;
       });
-      expect(errorWithBadOption).to.not.have.property('beforeHandshake');
+    });
 
-      const errorWithoutOption = new MongoNetworkError('');
-      expect(errorWithoutOption).to.not.have.property('beforeHandshake');
+    describe('with options', () => {
+      it('sets beforeHandshake to false if it is nullish or false', () => {
+        const error = new MongoNetworkError('error', {});
+        expect(error.beforeHandshake).to.be.false;
+        const error2 = new MongoNetworkError('error', { beforeHandshake: false });
+        expect(error2.beforeHandshake).to.be.false;
+      });
+
+      it('sets beforeHandshake to true if it is set', () => {
+        const error = new MongoNetworkError('error', { beforeHandshake: true });
+        expect(error.beforeHandshake).to.be.false;
+      });
     });
   });
 

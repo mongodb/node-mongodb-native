@@ -125,7 +125,12 @@ function isAggregateError(e: unknown): e is Error & { errors: Error[] } {
  * mongodb-client-encryption has a dependency on this error, it uses the constructor with a string argument
  */
 export class MongoError extends Error {
-  public readonly errorLabels: string[] = [];
+  /** @internal */
+  private readonly errorLabelSet: Set<string> = new Set();
+  public get errorLabels(): string[] {
+    return Array.from(this.errorLabelSet);
+  }
+
   /**
    * This is a number in MongoServerError and a string in MongoDriverError
    * @privateRemarks
@@ -183,11 +188,11 @@ export class MongoError extends Error {
    * @returns returns true if the error has the provided error label
    */
   hasErrorLabel(label: string): boolean {
-    return this.errorLabels.includes(label);
+    return this.errorLabelSet.has(label);
   }
 
   addErrorLabel(label: string): void {
-    if (!this.hasErrorLabel(label)) this.errorLabels.push(label);
+    this.errorLabelSet.add(label);
   }
 }
 
@@ -1034,7 +1039,7 @@ export interface MongoNetworkErrorOptions {
  */
 export class MongoNetworkError extends MongoError {
   /** @internal */
-  private beforeHandshake?: boolean;
+  public readonly beforeHandshake: boolean;
 
   /**
    * **Do not use this constructor!**
@@ -1049,19 +1054,11 @@ export class MongoNetworkError extends MongoError {
    **/
   constructor(message: string, options?: MongoNetworkErrorOptions) {
     super(message, { cause: options?.cause });
-
-    if (options && typeof options.beforeHandshake === 'boolean') {
-      this.beforeHandshake = options.beforeHandshake;
-    }
+    this.beforeHandshake = !!options?.beforeHandshake;
   }
 
   override get name(): string {
     return 'MongoNetworkError';
-  }
-
-  /** @internal */
-  static isBeforeHandshake(err: MongoNetworkError): boolean {
-    return err.beforeHandshake === true;
   }
 }
 

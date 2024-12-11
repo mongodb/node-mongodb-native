@@ -117,7 +117,9 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   public options: Readonly<ConnectionPoolOptions>;
+  /**  An integer representing the SDAM generation of the pool */
   public generation: number;
+  /** A map of generations to service ids */
   public serviceGenerations: Map<string, number>;
 
   private poolState: PoolState;

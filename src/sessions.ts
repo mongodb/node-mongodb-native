@@ -174,15 +174,11 @@ export class ClientSession
 
     options = options ?? {};
 
-    if (options.snapshot === true) {
-      this.snapshotEnabled = true;
-      if (options.causalConsistency === true) {
-        throw new MongoInvalidArgumentError(
-          'Properties "causalConsistency" and "snapshot" are mutually exclusive'
-        );
-      }
-    } else {
-      this.snapshotEnabled = false;
+    this.snapshotEnabled = options.snapshot === true;
+    if (options.causalConsistency === true && this.snapshotEnabled) {
+      throw new MongoInvalidArgumentError(
+        'Properties "causalConsistency" and "snapshot" are mutually exclusive'
+      );
     }
 
     this.client = client;

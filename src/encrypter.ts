@@ -57,7 +57,6 @@ export class Encrypter {
   }
 
   getInternalClient(client: MongoClient, uri: string, options: MongoClientOptions): MongoClient {
-    // TODO(NODE-4144): Remove new variable for type narrowing
     let internalClient = this.internalClient;
     if (internalClient == null) {
       const clonedOptions: MongoClientOptions = {};
@@ -92,7 +91,6 @@ export class Encrypter {
   }
 
   async connectInternalClient(): Promise<void> {
-    // TODO(NODE-4144): Remove new variable for type narrowing
     const internalClient = this.internalClient;
     if (this.needsConnecting && internalClient != null) {
       this.needsConnecting = false;
