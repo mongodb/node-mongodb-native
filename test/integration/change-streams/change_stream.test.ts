@@ -22,13 +22,7 @@ import {
   type ResumeToken
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import {
-  type FailPoint,
-  getSymbolFrom,
-  sleep,
-  TestBuilder,
-  UnifiedTestSuiteBuilder
-} from '../../tools/utils';
+import { type FailPoint, sleep, TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
 
 const initIteratorMode = async (cs: ChangeStream) => {
@@ -719,7 +713,7 @@ describe('Change Streams', function () {
   });
 
   describe('should error when used as iterator and emitter concurrently', function () {
-    let client, coll, changeStream, kMode;
+    let client, coll, changeStream;
 
     beforeEach(async function () {
       client = this.configuration.newClient();
@@ -727,7 +721,6 @@ describe('Change Streams', function () {
 
       coll = client.db(this.configuration.db).collection('tester');
       changeStream = coll.watch();
-      kMode = getSymbolFrom(changeStream, 'mode');
     });
 
     afterEach(async function () {
@@ -738,14 +731,14 @@ describe('Change Streams', function () {
     it('should throw when mixing event listeners with iterator methods', {
       metadata: { requires: { topology: 'replicaset' } },
       async test() {
-        expect(changeStream).to.have.property(kMode, false);
+        expect(changeStream).to.have.property('mode', false);
         changeStream.on('change', () => {
           // ChangeStream detects emitter usage via 'newListener' event
           // so this covers all emitter methods
         });
 
         await once(changeStream.cursor, 'init');
-        expect(changeStream).to.have.property(kMode, 'emitter');
+        expect(changeStream).to.have.property('mode', 'emitter');
 
         const errRegex = /ChangeStream cannot be used as an iterator/;
 
@@ -764,10 +757,10 @@ describe('Change Streams', function () {
       metadata: { requires: { topology: 'replicaset' } },
       async test() {
         await initIteratorMode(changeStream);
-        expect(changeStream).to.have.property(kMode, false);
+        expect(changeStream).to.have.property('mode', false);
         const res = await changeStream.tryNext();
         expect(res).to.not.exist;
-        expect(changeStream).to.have.property(kMode, 'iterator');
+        expect(changeStream).to.have.property('mode', 'iterator');
 
         expect(() => {
           changeStream.on('change', () => {

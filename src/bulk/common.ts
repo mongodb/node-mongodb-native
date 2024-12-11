@@ -30,9 +30,6 @@ import {
 } from '../utils';
 import { WriteConcern } from '../write_concern';
 
-/** @internal */
-const kServerError = Symbol('serverError');
-
 /** @public */
 export const BatchType = Object.freeze({
   INSERT: 1,
@@ -315,29 +312,29 @@ export interface WriteConcernErrorData {
  */
 export class WriteConcernError {
   /** @internal */
-  [kServerError]: WriteConcernErrorData;
+  private serverError: WriteConcernErrorData;
 
   constructor(error: WriteConcernErrorData) {
-    this[kServerError] = error;
+    this.serverError = error;
   }
 
   /** Write concern error code. */
   get code(): number | undefined {
-    return this[kServerError].code;
+    return this.serverError.code;
   }
 
   /** Write concern error message. */
   get errmsg(): string | undefined {
-    return this[kServerError].errmsg;
+    return this.serverError.errmsg;
   }
 
   /** Write concern error info. */
   get errInfo(): Document | undefined {
-    return this[kServerError].errInfo;
+    return this.serverError.errInfo;
   }
 
   toJSON(): WriteConcernErrorData {
-    return this[kServerError];
+    return this.serverError;
   }
 
   toString(): string {

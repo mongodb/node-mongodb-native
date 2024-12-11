@@ -15,7 +15,6 @@ import {
   SizedMessageTransform
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { getSymbolFrom } from '../../tools/utils';
 
 const connectionOptionsDefaults = {
   id: 0,
@@ -102,9 +101,7 @@ describe('new Connection()', function () {
       .command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 })
       .catch(error => error);
 
-    const beforeHandshakeSymbol = getSymbolFrom(error, 'beforeHandshake', false);
-    expect(beforeHandshakeSymbol).to.be.a('symbol');
-    expect(error).to.have.property(beforeHandshakeSymbol, false);
+    expect(error).to.have.property('beforeHandshake', false);
   });
 
   it('calls the command function through command', async function () {
@@ -143,9 +140,7 @@ describe('new Connection()', function () {
 
     const error = await connect(options).catch(error => error);
 
-    const beforeHandshakeSymbol = getSymbolFrom(error, 'beforeHandshake', false);
-    expect(beforeHandshakeSymbol).to.be.a('symbol');
-    expect(error).to.have.property(beforeHandshakeSymbol, true);
+    expect(error).to.have.property('beforeHandshake', true);
   });
 
   describe('NODE-6370: regression test', function () {

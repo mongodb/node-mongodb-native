@@ -15,7 +15,6 @@ import {
 } from '../mongodb';
 import { genClusterTime } from '../tools/common';
 import * as mock from '../tools/mongodb-mock/index';
-import { getSymbolFrom } from '../tools/utils';
 
 describe('Sessions - unit', function () {
   let client;
@@ -253,24 +252,21 @@ describe('Sessions - unit', function () {
 
       it('should acquire a serverSession in the constructor if the session is explicit', () => {
         const session = new ClientSession(client, serverSessionPool, { explicit: true });
-        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol).that.is.an.instanceOf(ServerSession);
+        expect(session).to.have.property('_serverSession').that.is.an.instanceOf(ServerSession);
       });
 
       it('should leave serverSession null if the session is implicit', () => {
         // implicit via false (this should not be allowed...)
         let session = new ClientSession(client, serverSessionPool, { explicit: false });
-        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol, null);
+        expect(session).to.have.property('_serverSession', null);
         // implicit via omission
         session = new ClientSession(client, serverSessionPool, {});
-        expect(session).to.have.property(serverSessionSymbol, null);
+        expect(session).to.have.property('_serverSession', null);
       });
 
       it('should start the txnNumberIncrement at zero', () => {
         const session = new ClientSession(client, serverSessionPool);
-        const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
-        expect(session).to.have.property(txnNumberIncrementSymbol, 0);
+        expect(session).to.have.property('txnNumberIncrement', 0);
       });
 
       describe('defaultTimeoutMS', function () {
@@ -329,34 +325,25 @@ describe('Sessions - unit', function () {
     });
 
     describe('get serverSession()', () => {
-      let serverSessionSymbol;
-
-      before(() => {
-        serverSessionSymbol = getSymbolFrom(
-          new ClientSession(client, serverSessionPool, {}),
-          'serverSession'
-        );
-      });
-
       describe('from an explicit session', () => {
         it('should always have a non-null serverSession after construction', () => {
           const session = new ClientSession(client, serverSessionPool, { explicit: true });
-          expect(session).to.have.a.property(serverSessionSymbol).be.an.instanceOf(ServerSession);
+          expect(session).to.have.a.property('_serverSession').be.an.instanceOf(ServerSession);
           expect(session.serverSession).be.an.instanceOf(ServerSession);
         });
 
         it('should always have non-null serverSession even if it is ended before getter called', () => {
           const session = new ClientSession(client, serverSessionPool, { explicit: true });
           session.hasEnded = true;
-          expect(session).to.have.a.property(serverSessionSymbol).be.an.instanceOf(ServerSession);
+          expect(session).to.have.a.property('_serverSession').be.an.instanceOf(ServerSession);
           expect(session.serverSession).be.an.instanceOf(ServerSession);
         });
 
         it('should throw if the serverSession at the symbol property goes missing', () => {
           const session = new ClientSession(client, serverSessionPool, { explicit: true });
           // We really want to make sure a ClientSession is not separated from its serverSession
-          session[serverSessionSymbol] = null;
-          expect(session).to.have.a.property(serverSessionSymbol).be.null;
+          session['_serverSession'] = null;
+          expect(session).to.have.a.property('_serverSession').be.null;
           expect(() => session.serverSession).throw(MongoRuntimeError);
         });
       });
@@ -364,14 +351,14 @@ describe('Sessions - unit', function () {
       describe('from an implicit session', () => {
         it('should throw if the session ended before serverSession was acquired', () => {
           const session = new ClientSession(client, serverSessionPool, { explicit: false }); // make an implicit session
-          expect(session).to.have.property(serverSessionSymbol, null);
+          expect(session).to.have.property('_serverSession', null);
           session.hasEnded = true;
           expect(() => session.serverSession).to.throw(MongoRuntimeError);
         });
 
         it('should acquire a serverSession if clientSession.hasEnded is false and serverSession is not set', () => {
           const session = new ClientSession(client, serverSessionPool, { explicit: false }); // make an implicit session
-          expect(session).to.have.property(serverSessionSymbol, null);
+          expect(session).to.have.property('_serverSession', null);
           session.hasEnded = false;
           const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
           expect(session.serverSession).to.be.instanceOf(ServerSession);
@@ -381,7 +368,7 @@ describe('Sessions - unit', function () {
 
         it('should return the existing serverSession and not acquire a new one if one is already set', () => {
           const session = new ClientSession(client, serverSessionPool, { explicit: false }); // make an implicit session
-          expect(session).to.have.property(serverSessionSymbol, null);
+          expect(session).to.have.property('_serverSession', null);
           const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
           const firstServerSessionGetResult = session.serverSession;
           expect(firstServerSessionGetResult).to.be.instanceOf(ServerSession);
@@ -404,7 +391,7 @@ describe('Sessions - unit', function () {
 
         it('should return the existing serverSession and not acquire a new one if one is already set and session is ended', () => {
           const session = new ClientSession(client, serverSessionPool, { explicit: false }); // make an implicit session
-          expect(session).to.have.property(serverSessionSymbol, null);
+          expect(session).to.have.property('_serverSession', null);
           const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
           const firstServerSessionGetResult = session.serverSession;
           expect(firstServerSessionGetResult).to.be.instanceOf(ServerSession);
@@ -432,43 +419,38 @@ describe('Sessions - unit', function () {
     describe('incrementTransactionNumber()', () => {
       it('should not allocate serverSession', () => {
         const session = new ClientSession(client, serverSessionPool);
-        const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
 
         session.incrementTransactionNumber();
-        expect(session).to.have.property(txnNumberIncrementSymbol, 1);
+        expect(session).to.have.property('txnNumberIncrement', 1);
 
-        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol, null);
+        expect(session).to.have.property('_serverSession', null);
       });
 
       it('should save increments to txnNumberIncrement symbol', () => {
         const session = new ClientSession(client, serverSessionPool);
-        const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
 
         session.incrementTransactionNumber();
         session.incrementTransactionNumber();
         session.incrementTransactionNumber();
 
-        expect(session).to.have.property(txnNumberIncrementSymbol, 3);
+        expect(session).to.have.property('txnNumberIncrement', 3);
       });
     });
 
     describe('applySession()', () => {
       it('should allocate serverSession', () => {
         const session = new ClientSession(client, serverSessionPool);
-        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
 
         const command = { magic: 1 };
         const result = applySession(session, command, {});
 
         expect(result).to.not.exist;
         expect(command).to.have.property('lsid');
-        expect(session).to.have.property(serverSessionSymbol).that.is.instanceOf(ServerSession);
+        expect(session).to.have.property('_serverSession').that.is.instanceOf(ServerSession);
       });
 
       it('should apply saved txnNumberIncrements', () => {
         const session = new ClientSession(client, serverSessionPool);
-        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
 
         session.incrementTransactionNumber();
         session.incrementTransactionNumber();
@@ -484,7 +466,7 @@ describe('Sessions - unit', function () {
         expect(command).to.have.property('lsid');
         expect(command).to.have.property('txnNumber').instanceOf(Long);
         expect(command.txnNumber.toNumber()).to.equal(3);
-        expect(session).to.have.property(serverSessionSymbol).that.is.instanceOf(ServerSession);
+        expect(session).to.have.property('_serverSession').that.is.instanceOf(ServerSession);
       });
     });
   });
