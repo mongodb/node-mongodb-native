@@ -1,4 +1,4 @@
-import { type Document, type ObjectId } from '../bson';
+import { deserialize, type Document, type ObjectId, serialize } from '../bson';
 import {
   COMMAND_FAILED,
   COMMAND_STARTED,
@@ -254,7 +254,7 @@ const OP_QUERY_KEYS = [
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof OpMsgRequest) {
-    const cmd = deepCopy(command.command);
+    const cmd = deserialize(serialize(command.command));
     // For OP_MSG with payload type 1 we need to pull the documents
     // array out of the document sequence for monitoring.
     if (cmd.ops instanceof DocumentSequence) {
@@ -275,16 +275,20 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       // up-convert legacy find command
       result = { find: collectionName(command) };
       Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
-        if (command.query[key] != null) {
-          result[LEGACY_FIND_QUERY_MAP[key]] = deepCopy(command.query[key]);
+        if (typeof command.query[key] === 'object') {
+          result[LEGACY_FIND_QUERY_MAP[key]] = deserialize(serialize(command.query[key]));
+        } else {
+          result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
         }
       });
     }
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
       const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
-      if (command[legacyKey] != null) {
-        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deepCopy(command[legacyKey]);
+      if (typeof command[legacyKey] === 'object') {
+        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deserialize(serialize(command[legacyKey]));
+      } else {
+        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
       }
     });
 
@@ -304,29 +308,19 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     return result;
   }
 
-  const clonedQuery: Record<string, unknown> = {};
-  const clonedCommand: Record<string, unknown> = {};
-  if (command.query) {
-    for (const k in command.query) {
-      clonedQuery[k] = deepCopy(command.query[k]);
-    }
-    clonedCommand.query = clonedQuery;
-  }
-
-  for (const k in command) {
-    if (k === 'query') continue;
-    clonedCommand[k] = deepCopy((command as unknown as Record<string, unknown>)[k]);
-  }
-  return command.query ? clonedQuery : clonedCommand;
+  const clonedCommand: Record<string, unknown> & { query?: Document } = deserialize(
+    serialize(command.query)
+  );
+  return clonedCommand.query ? clonedCommand.query : clonedCommand;
 }
 
-function extractReply(command: WriteProtocolMessageType, reply?: Document) {
+function extractReply(command: WriteProtocolMessageType, reply?: Document): any {
   if (!reply) {
     return reply;
   }
 
   if (command instanceof OpMsgRequest) {
-    return deepCopy(reply.result ? reply.result : reply);
+    return deserialize(serialize(reply.result ? reply.result : reply));
   }
 
   // is this a legacy find command?
@@ -336,12 +330,12 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
       cursor: {
         id: deepCopy(reply.cursorId),
         ns: namespace(command),
-        firstBatch: deepCopy(reply.documents)
+        firstBatch: deserialize(serialize(reply.documents))
       }
     };
   }
 
-  return deepCopy(reply.result ? reply.result : reply);
+  return deserialize(serialize(reply.result ? reply.result : reply));
 }
 
 function extractConnectionDetails(connection: Connection) {
