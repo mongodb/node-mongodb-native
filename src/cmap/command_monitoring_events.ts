@@ -257,10 +257,10 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     const cmd = deserialize(serialize(command.command));
     // For OP_MSG with payload type 1 we need to pull the documents
     // array out of the document sequence for monitoring.
-    if (cmd.ops instanceof DocumentSequence) {
+    if (command.command.ops instanceof DocumentSequence && cmd.ops) {
       cmd.ops = cmd.ops.documents;
     }
-    if (cmd.nsInfo instanceof DocumentSequence) {
+    if (command.command.nsInfo instanceof DocumentSequence && cmd.nsInfo) {
       cmd.nsInfo = cmd.nsInfo.documents;
     }
     return cmd;
@@ -274,29 +274,29 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     } else {
       // up-convert legacy find command
       result = { find: collectionName(command) };
-      Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
+      for (const key of Object.keys(LEGACY_FIND_QUERY_MAP)) {
         if (typeof command.query[key] === 'object') {
           result[LEGACY_FIND_QUERY_MAP[key]] = deserialize(serialize(command.query[key]));
         } else {
           result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
         }
-      });
+      }
     }
 
-    Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
+    for (const key of Object.keys(LEGACY_FIND_OPTIONS_MAP)) {
       const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
       if (typeof command[legacyKey] === 'object') {
         result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deserialize(serialize(command[legacyKey]));
       } else {
         result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
       }
-    });
+    }
 
-    OP_QUERY_KEYS.forEach(key => {
+    for (const key of OP_QUERY_KEYS) {
       if (command[key]) {
         result[key] = command[key];
       }
-    });
+    }
 
     if (command.pre32Limit != null) {
       result.limit = command.pre32Limit;
