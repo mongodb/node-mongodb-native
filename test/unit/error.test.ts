@@ -306,7 +306,7 @@ describe('MongoErrors', () => {
 
       it('sets beforeHandshake to true if it is set', () => {
         const error = new MongoNetworkError('error', { beforeHandshake: true });
-        expect(error.beforeHandshake).to.be.false;
+        expect(error.beforeHandshake).to.be.true;
       });
     });
   });
