@@ -161,9 +161,12 @@ export class CommandSucceededEvent {
 
   get reply(): unknown {
     if (this._reply) return this._reply;
-    this._reply = maybeRedact(
-      this.sensitive,
-      extractReply(this._commandIsOpMsg, this._commandIsLegacyFind, this._namespace, this._replyRef)
+    if (this.sensitive) this._reply = {};
+    this._reply = extractReply(
+      this._commandIsOpMsg,
+      this._commandIsLegacyFind,
+      this._namespace,
+      this._replyRef
     );
     return this._reply;
   }
@@ -186,6 +189,7 @@ export class CommandFailedEvent {
   requestId: number;
   duration: number;
   commandName: string;
+  private sensitive: boolean;
   failure: Error;
   serviceId?: ObjectId;
   /** @internal */
@@ -211,6 +215,8 @@ export class CommandFailedEvent {
     const commandName = extractCommandName(cmd);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
+    this.sensitive = isSensitive(commandName, command);
+
     this.address = address;
     this.connectionId = connectionId;
     this.serviceId = serviceId;
@@ -218,7 +224,7 @@ export class CommandFailedEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.failure = maybeRedact(commandName, cmd, error) as Error;
+    this.failure = maybeRedact(this.sensitive, error) as Error;
     this.serverConnectionId = serverConnectionId;
   }
 
@@ -247,7 +253,14 @@ export const SENSITIVE_COMMANDS = new Set([
 const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMMAND_CAMEL_CASE]);
 
 // helper methods
-const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
+const extractCommandName = (commandDoc: Document) => {
+  if (commandDoc.query != null) {
+    if (commandDoc.query.$query != null) return Object.keys(commandDoc.query.$query)[0];
+    return Object.keys(commandDoc.query)[0];
+  }
+  if (commandDoc.command != null) return Object.keys(commandDoc.command)[0];
+  return Object.keys(commandDoc)[0];
+};
 const namespace = (command: OpQueryRequest) => command.ns;
 const collectionName = (command: OpQueryRequest) => command.ns.split('.')[1];
 const isSensitive = (commandName: string, commandDoc: Document): boolean =>
