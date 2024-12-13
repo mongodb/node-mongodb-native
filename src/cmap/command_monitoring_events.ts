@@ -236,10 +236,30 @@ const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
   $snapshot: 'snapshot'
 };
 
+const LEGACY_FIND_QUERY_MAP_rev: Record<any, string> = {
+  filter: '$query',
+  sort: '$orderby',
+  hint: '$hint',
+  comment: '$comment',
+  maxScan: '$maxScan',
+  max: '$max',
+  min: '$min',
+  returnKey: '$returnKey',
+  showRecordId: '$showDiskLoc',
+  maxTimeMS: '$maxTimeMS',
+  snapshot: '$snapshot'
+};
+
 const LEGACY_FIND_OPTIONS_MAP = {
   numberToSkip: 'skip',
   numberToReturn: 'batchSize',
   returnFieldSelector: 'projection'
+} as const;
+
+const LEGACY_FIND_OPTIONS_MAP_rev: Record<any, string> = {
+  skip: 'numberToSkip',
+  batchSize: 'numberToReturn',
+  projection: 'returnFieldSelector'
 } as const;
 
 const OP_QUERY_KEYS = [
@@ -254,70 +274,69 @@ const OP_QUERY_KEYS = [
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof OpMsgRequest) {
-    const cmd = deepCopy(command.command);
-    // For OP_MSG with payload type 1 we need to pull the documents
-    // array out of the document sequence for monitoring.
-    if (cmd.ops instanceof DocumentSequence) {
-      cmd.ops = cmd.ops.documents;
-    }
-    if (cmd.nsInfo instanceof DocumentSequence) {
-      cmd.nsInfo = cmd.nsInfo.documents;
-    }
+    const cmd = new Proxy(command.command, {
+      // For OP_MSG with payload type 1 we need to pull the documents
+      // array out of the document sequence for monitoring.
+      get(target, prop) {
+        if (prop === 'ops') {
+          if (target.ops instanceof DocumentSequence) {
+            return target.ops.documents;
+          } else {
+            return target.ops;
+          }
+        }
+
+        if (prop === 'nsInfo') {
+          if (target.nsInfo instanceof DocumentSequence) {
+            return target.nsInfo.documents;
+          } else {
+            return target.nsInfo;
+          }
+        }
+
+        return typeof prop === 'string' && prop in target ? target[prop] : undefined;
+      }
+    });
     return cmd;
   }
 
   if (command.query?.$query) {
-    let result: Document;
-    if (command.ns === 'admin.$cmd') {
-      // up-convert legacy command
-      result = Object.assign({}, command.query.$query);
-    } else {
-      // up-convert legacy find command
-      result = { find: collectionName(command) };
-      Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
-        if (command.query[key] != null) {
-          result[LEGACY_FIND_QUERY_MAP[key]] = deepCopy(command.query[key]);
+    const cmd = new Proxy(command, {
+      get(target: Document, prop) {
+        if (target.ns === 'admin.$cmd') {
+          // up-convert legacy command
+          return target.query.$query[prop];
+        } else {
+          // up-convert legacy find command
+          if (prop === 'find') {
+            return collectionName(target as OpQueryRequest);
+          }
+          if (typeof prop !== 'string') return undefined;
+
+          if (LEGACY_FIND_QUERY_MAP_rev[prop] != null) {
+            return target.query[LEGACY_FIND_QUERY_MAP_rev[prop]];
+          }
         }
-      });
-    }
 
-    Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
-      const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
-      if (command[legacyKey] != null) {
-        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deepCopy(command[legacyKey]);
+        if (LEGACY_FIND_OPTIONS_MAP_rev[prop] != null) {
+          return target[LEGACY_FIND_OPTIONS_MAP_rev[prop]];
+        }
+
+        if (prop === 'limit' && target.pre32Limit != null) return target.pre32Limit;
+
+        return target[prop];
       }
     });
 
-    OP_QUERY_KEYS.forEach(key => {
-      if (command[key]) {
-        result[key] = command[key];
-      }
-    });
-
-    if (command.pre32Limit != null) {
-      result.limit = command.pre32Limit;
-    }
-
-    if (command.query.$explain) {
-      return { explain: result };
-    }
-    return result;
+    if (command.query.$explain) return { explain: cmd };
+    return cmd;
   }
 
-  const clonedQuery: Record<string, unknown> = {};
-  const clonedCommand: Record<string, unknown> = {};
   if (command.query) {
-    for (const k in command.query) {
-      clonedQuery[k] = deepCopy(command.query[k]);
-    }
-    clonedCommand.query = clonedQuery;
+    return new Proxy(command.query, {});
+  } else {
+    return new Proxy(command, {});
   }
-
-  for (const k in command) {
-    if (k === 'query') continue;
-    clonedCommand[k] = deepCopy((command as unknown as Record<string, unknown>)[k]);
-  }
-  return command.query ? clonedQuery : clonedCommand;
 }
 
 function extractReply(command: WriteProtocolMessageType, reply?: Document) {
@@ -326,22 +345,34 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   }
 
   if (command instanceof OpMsgRequest) {
-    return deepCopy(reply.result ? reply.result : reply);
+    return new Proxy(reply, {});
   }
 
   // is this a legacy find command?
   if (command.query && command.query.$query != null) {
-    return {
-      ok: 1,
-      cursor: {
-        id: deepCopy(reply.cursorId),
-        ns: namespace(command),
-        firstBatch: deepCopy(reply.documents)
+    return new Proxy(reply, {
+      get(target, prop) {
+        if (typeof prop !== 'string') return undefined;
+        if (prop === 'ok') {
+          return 1;
+        }
+        if (prop === 'cursor') {
+          return {
+            id: target.cursorId,
+            ns: namespace(command),
+            firstBatch: target.documents
+          };
+        }
+        return target[prop];
       }
-    };
+    });
   }
 
-  return deepCopy(reply.result ? reply.result : reply);
+  if (reply.result != null) {
+    return new Proxy(reply.result, {});
+  } else {
+    return new Proxy(reply, {});
+  }
 }
 
 function extractConnectionDetails(connection: Connection) {
