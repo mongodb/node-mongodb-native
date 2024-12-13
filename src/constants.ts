@@ -172,6 +172,6 @@ export const LEGACY_HELLO_COMMAND_CAMEL_CASE = 'isMaster';
 // the objects (and class) that we expect to see them on and prevent TS
 // errors.
 /** @internal */
-export const kDecorateResult = '__decorateDecryptionResult';
+export const kDecorateResult = Symbol.for('@@mdb.decorateDecryptionResult');
 /** @internal */
-export const kDecoratedKeys = '__decryptedKeys';
+export const kDecoratedKeys = Symbol.for('@@mdb.decryptedKeys');
