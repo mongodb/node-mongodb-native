@@ -38,7 +38,7 @@ describe('mongodb-legacy', () => {
     it(`test suite imports a ${className} with the legacy symbol`, () => {
       // Just confirming that the mongodb-legacy import is correctly overriding the local copies
       // of these classes from "src". See test/mongodb.ts for more.
-      expect(ctor.prototype).to.have.property(__callbacks.toLegacy);
+      expect(ctor.prototype).to.have.property(Symbol.for('@@mdb.callbacks.toLegacy'));
     });
   }
 
