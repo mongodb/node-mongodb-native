@@ -52,7 +52,7 @@ export class CommandStartedEvent {
     serverConnectionId: bigint | null
   ) {
     const cmd = extractCommand(command);
-    const commandName = extractCommandName(cmd);
+    const commandName = extractCommandName(command);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     // TODO: remove in major revision, this is not spec behavior
@@ -116,7 +116,7 @@ export class CommandSucceededEvent {
     serverConnectionId: bigint | null
   ) {
     const cmd = extractCommand(command);
-    const commandName = extractCommandName(cmd);
+    const commandName = extractCommandName(command);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     this.address = address;
@@ -174,7 +174,7 @@ export class CommandFailedEvent {
     serverConnectionId: bigint | null
   ) {
     const cmd = extractCommand(command);
-    const commandName = extractCommandName(cmd);
+    const commandName = extractCommandName(command);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
 
     this.address = address;
@@ -213,7 +213,14 @@ export const SENSITIVE_COMMANDS = new Set([
 const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMMAND_CAMEL_CASE]);
 
 // helper methods
-const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
+const extractCommandName = (commandDoc: Document) => {
+  if (commandDoc.query != null) {
+    if (commandDoc.query.$query != null) return Object.keys(commandDoc.query.$query)[0];
+    return Object.keys(commandDoc.query)[0];
+  }
+  if (commandDoc.command != null) return Object.keys(commandDoc.command)[0];
+  return Object.keys(commandDoc)[0];
+};
 const namespace = (command: OpQueryRequest) => command.ns;
 const collectionName = (command: OpQueryRequest) => command.ns.split('.')[1];
 const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
