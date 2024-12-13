@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { MongoClient, SeverityLevel } from '../../mongodb';
 
 describe('Feature Flags', () => {
-  describe('@@mdb.skipPingOnConnect', () => {
+  describe('__skipPingOnConnect', () => {
     beforeEach(function () {
       if (process.env.AUTH !== 'auth') {
         this.currentTest.skipReason = 'ping count relies on auth to be enabled';
@@ -23,8 +23,7 @@ describe('Feature Flags', () => {
     ];
     for (const { description, value, expectEvents } of tests) {
       it(description, async function () {
-        const options =
-          value === undefined ? {} : { [__skipPingOnConnect]: value };
+        const options = value === undefined ? {} : { __skipPingOnConnect: value };
         const client = this.configuration.newClient({}, { ...options, monitorCommands: true });
         const events = [];
         client.on('commandStarted', event => events.push(event));
@@ -46,9 +45,8 @@ describe('Feature Flags', () => {
   });
 
   // TODO(NODE-5672): Release Standardized Logger
-  describe('@@mdb.enableMongoLogger', () => {
+  describe('__enableMongoLogger', () => {
     let cachedEnv;
-    const loggerFeatureFlag = __enableMongoLogger;
 
     before(() => {
       cachedEnv = process.env;
@@ -66,7 +64,7 @@ describe('Feature Flags', () => {
 
         it('enables logging for the specified component', () => {
           const client = new MongoClient('mongodb://localhost:27017', {
-            [loggerFeatureFlag]: true
+            __enableMongoLogger: true
           });
           expect(client.mongoLogger?.componentSeverities).to.have.property(
             'command',
@@ -82,7 +80,7 @@ describe('Feature Flags', () => {
 
         it('does not create logger', () => {
           const client = new MongoClient('mongodb://localhost:27017', {
-            [loggerFeatureFlag]: true
+            __enableMongoLogger: true
           });
           expect(client.mongoLogger).to.not.exist;
         });
@@ -98,7 +96,7 @@ describe('Feature Flags', () => {
 
           it('does not instantiate logger', () => {
             const client = new MongoClient('mongodb://localhost:27017', {
-              [loggerFeatureFlag]: featureFlagValue
+              __enableMongoLogger: featureFlagValue
             });
             expect(client.mongoLogger).to.not.exist;
           });
@@ -111,7 +109,7 @@ describe('Feature Flags', () => {
 
           it('does not instantiate logger', () => {
             const client = new MongoClient('mongodb://localhost:27017', {
-              [loggerFeatureFlag]: featureFlagValue
+              __enableMongoLogger: featureFlagValue
             });
             expect(client.mongoLogger).to.not.exist;
           });
@@ -120,7 +118,7 @@ describe('Feature Flags', () => {
     }
   });
 
-  describe('@@mdb.internalLoggerConfig', () => {
+  describe('__internalLoggerConfig', () => {
     let cachedEnv: NodeJS.ProcessEnv;
 
     before(() => {
@@ -138,8 +136,8 @@ describe('Feature Flags', () => {
 
       it('falls back to environment options', function () {
         const client = new MongoClient('mongodb://localhost:27017', {
-          [__enableMongoLogger]: true,
-          [__internalLoggerConfig]: undefined
+          __enableMongoLogger: true,
+          __internalLoggerConfig: undefined
         });
 
         expect(client.mongoLogger?.componentSeverities).to.have.property(
@@ -152,8 +150,8 @@ describe('Feature Flags', () => {
     context('when defined', function () {
       it('overrides environment options', function () {
         const client = new MongoClient('mongodb://localhost:27017', {
-          [__enableMongoLogger]: true,
-          [__internalLoggerConfig]: {
+          __enableMongoLogger: true,
+          __internalLoggerConfig: {
             MONGODB_LOG_COMMAND: SeverityLevel.ALERT
           }
         });

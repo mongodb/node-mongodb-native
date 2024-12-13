@@ -34,7 +34,7 @@ class CapturingMongoClient extends MongoClient {
   commandStartedEvents: Array<CommandStartedEvent> = [];
   clientsCreated = 0;
   constructor(url: string, options: MongoClientOptions = {}) {
-    options = { ...options, monitorCommands: true, [__skipPingOnConnect]: true };
+    options = { ...options, monitorCommands: true, [Symbol.for('@@mdb.skipPingOnConnect')]: true };
     if (process.env.MONGODB_API_VERSION) {
       options.serverApi = process.env.MONGODB_API_VERSION as MongoClientOptions['serverApi'];
     }

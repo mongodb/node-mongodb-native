@@ -222,9 +222,9 @@ export class UnifiedMongoClient extends MongoClient {
 
     super(uri, {
       monitorCommands: true,
-      [__skipPingOnConnect]: true,
-      [__enableMongoLogger]: true,
-      [__internalLoggerConfig]: componentSeverities,
+      __skipPingOnConnect: true,
+      __enableMongoLogger: true,
+      __internalLoggerConfig: componentSeverities,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {}),
       mongodbLogPath: logCollector,

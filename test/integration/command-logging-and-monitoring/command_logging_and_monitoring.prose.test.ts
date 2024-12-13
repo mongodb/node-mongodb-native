@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { DEFAULT_MAX_DOCUMENT_LENGTH, type Document } from '../../mongodb';
 
 describe('Command Logging and Monitoring Prose Tests', function () {
-  const loggerFeatureFlag = __enableMongoLogger;
   const ELLIPSES_LENGTH = 3;
   let client;
   let writable;
@@ -40,7 +39,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       client = this.configuration.newClient(
         {},
         {
-          [loggerFeatureFlag]: true,
+          __enableMongoLogger: true,
           mongodbLogPath: writable,
           mongodbLogComponentSeverities: {
             command: 'debug'
@@ -124,7 +123,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       client = this.configuration.newClient(
         {},
         {
-          [loggerFeatureFlag]: true,
+          __enableMongoLogger: true,
           mongodbLogPath: writable,
           mongodbLogComponentSeverities: {
             command: 'debug'
@@ -181,7 +180,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       client = this.configuration.newClient(
         {},
         {
-          [loggerFeatureFlag]: true,
+          __enableMongoLogger: true,
           mongodbLogPath: writable,
           mongodbLogComponentSeverities: {
             command: 'debug'

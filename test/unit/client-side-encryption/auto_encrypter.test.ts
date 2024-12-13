@@ -177,8 +177,8 @@ describe('AutoEncrypter', function () {
       });
       const decrypted = BSON.deserialize(await mc.decrypt(input));
       expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
-      expect(decrypted).to.not.have.property(__decryptedKeys);
-      expect(decrypted.filter).to.not.have.property(__decryptedKeys);
+      expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
+      expect(decrypted.filter).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
     });
 
     it('should decrypt mock data and mark decrypted items if enabled for testing', async function () {
@@ -213,14 +213,14 @@ describe('AutoEncrypter', function () {
       expect(decrypted).to.eql({
         a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
       });
-      expect(decrypted).to.not.have.property(__decryptedKeys);
+      expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
 
       // The same, but with nested data inside the decrypted input
       decrypted = BSON.deserialize(await mc.decrypt(nestedInput));
       expect(decrypted).to.eql({ nested: { x: { y: 1234 } } });
-      expect(decrypted.nested).to.not.have.property(__decryptedKeys);
-      expect(decrypted.nested.x).to.not.have.property(__decryptedKeys);
-      expect(decrypted.nested.x.y).to.not.have.property(__decryptedKeys);
+      expect(decrypted.nested).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
+      expect(decrypted.nested.x).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
+      expect(decrypted.nested.x.y).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
     });
 
     context('when the aws sdk is installed', function () {
