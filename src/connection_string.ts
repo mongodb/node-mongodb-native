@@ -1310,7 +1310,10 @@ export const OPTIONS = {
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
-  mongodbLogMaxDocumentLength: { type: 'uint' }
+  mongodbLogMaxDocumentLength: { type: 'uint' },
+  __enableMongoLogger: { type: 'boolean' },
+  __skipPingOnConnect: { type: 'boolean' },
+  __internalLoggerConfig: { type: 'any' }
 } as Record<
   keyof Omit<
     MongoClientOptions,

@@ -829,8 +829,6 @@ describe('MongoClient', function () {
   });
 
   describe('logging client options', function () {
-    const loggerFeatureFlag = __enableMongoLogger;
-
     describe('mongodbLogPath', function () {
       context('when mongodbLogPath is in options', function () {
         let stderrStub;
@@ -848,7 +846,7 @@ describe('MongoClient', function () {
         context('when option is `stderr`', function () {
           it('it is accessible through mongoLogger.logDestination', function () {
             const client = new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true,
+              __enableMongoLogger: true,
               mongodbLogPath: 'stderr'
             });
             const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
@@ -867,7 +865,7 @@ describe('MongoClient', function () {
               }
             };
             const client = new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true,
+              __enableMongoLogger: true,
               mongodbLogPath: writable
             });
             expect(client.options.mongoLoggerOptions.logDestination).to.deep.equal(writable);
@@ -877,7 +875,7 @@ describe('MongoClient', function () {
         context('when option is `stdout`', function () {
           it('it is accessible through mongoLogger.logDestination', function () {
             const client = new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true,
+              __enableMongoLogger: true,
               mongodbLogPath: 'stdout'
             });
             const log = { t: new Date(), c: 'constructorStdOut', s: 'error' };
@@ -894,7 +892,7 @@ describe('MongoClient', function () {
               expect(
                 () =>
                   new MongoClient('mongodb://a/', {
-                    [loggerFeatureFlag]: true,
+                    __enableMongoLogger: true,
                     mongodbLogPath: invalidOption
                   })
               ).to.throw(MongoAPIError);
@@ -912,7 +910,7 @@ describe('MongoClient', function () {
               expect(
                 () =>
                   new MongoClient('mongodb://a/', {
-                    [loggerFeatureFlag]: true,
+                    __enableMongoLogger: true,
                     mongodbLogPath: writable
                   })
               ).to.throw(MongoAPIError);
@@ -934,7 +932,7 @@ describe('MongoClient', function () {
 
         it('should default to stderr', function () {
           const client = new MongoClient('mongodb://a/', {
-            [loggerFeatureFlag]: true
+            __enableMongoLogger: true
           });
           const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
           client.options.mongoLoggerOptions.logDestination.write(log);
@@ -958,7 +956,7 @@ describe('MongoClient', function () {
           it(`it stores severity levels for ${components[i]} component correctly`, function () {
             for (const severityLevel of Object.values(SeverityLevel)) {
               const client = new MongoClient('mongodb://a/', {
-                [loggerFeatureFlag]: true,
+                __enableMongoLogger: true,
                 mongodbLogComponentSeverities: {
                   [components[i]]: severityLevel
                 }
@@ -982,7 +980,7 @@ describe('MongoClient', function () {
             process.env[env_component_names[i]] = 'emergency';
             for (const severityLevel of Object.values(SeverityLevel)) {
               const client = new MongoClient('mongodb://a/', {
-                [loggerFeatureFlag]: true,
+                __enableMongoLogger: true,
                 mongodbLogComponentSeverities: {
                   [components[i]]: severityLevel
                 }
@@ -1007,7 +1005,7 @@ describe('MongoClient', function () {
             for (const severityLevel of Object.values(SeverityLevel)) {
               for (const defaultSeverityLevel of Object.values(SeverityLevel)) {
                 const client = new MongoClient('mongodb://a/', {
-                  [loggerFeatureFlag]: true,
+                  __enableMongoLogger: true,
                   mongodbLogComponentSeverities: {
                     [components[i]]: severityLevel,
                     default: defaultSeverityLevel
@@ -1032,7 +1030,7 @@ describe('MongoClient', function () {
         context('when invalid client option is provided', function () {
           const badClientCreator = () =>
             new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true,
+              __enableMongoLogger: true,
               mongodbLogComponentSeverities: {
                 default: 'imFake'
               }
@@ -1077,12 +1075,12 @@ describe('MongoClient', function () {
               expect(
                 () =>
                   new MongoClient('mongodb://a/', {
-                    [loggerFeatureFlag]: true,
+                    __enableMongoLogger: true,
                     mongodbLogComponentSeverities: {}
                   })
               ).to.not.throw(MongoAPIError);
               const client = new MongoClient('mongodb://a/', {
-                [loggerFeatureFlag]: true,
+                __enableMongoLogger: true,
                 mongodbLogComponentSeverities: { client: 'error' } // dummy so logger doesn't turn on
               });
               expect(client.mongoLogger?.componentSeverities.command).to.equal('off');
@@ -1093,12 +1091,12 @@ describe('MongoClient', function () {
               expect(
                 () =>
                   new MongoClient('mongodb://a/', {
-                    [loggerFeatureFlag]: true,
+                    __enableMongoLogger: true,
                     mongodbLogComponentSeverities: { default: 'emergency' }
                   })
               ).to.not.throw(MongoAPIError);
               const client = new MongoClient('mongodb://a/', {
-                [loggerFeatureFlag]: true,
+                __enableMongoLogger: true,
                 mongodbLogComponentSeverities: { command: 'emergency' }
               });
               expect(client.mongoLogger?.componentSeverities.command).to.equal('emergency');
@@ -1113,7 +1111,7 @@ describe('MongoClient', function () {
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
           it('should store value for maxDocumentLength correctly', function () {
             const client = new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true,
+              __enableMongoLogger: true,
               mongodbLogMaxDocumentLength: 290
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
@@ -1122,7 +1120,7 @@ describe('MongoClient', function () {
             expect(
               () =>
                 new MongoClient('mongodb://a/', {
-                  [loggerFeatureFlag]: true,
+                  __enableMongoLogger: true,
                   mongodbLogMaxDocumentLength: -290
                 })
             ).to.throw(MongoParseError);
@@ -1139,7 +1137,7 @@ describe('MongoClient', function () {
 
           it('should store value for maxDocumentLength correctly (client option value takes precedence)', function () {
             const client = new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true,
+              __enableMongoLogger: true,
               mongodbLogMaxDocumentLength: 290
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
@@ -1148,7 +1146,7 @@ describe('MongoClient', function () {
             expect(
               () =>
                 new MongoClient('mongodb://a/', {
-                  [loggerFeatureFlag]: true,
+                  __enableMongoLogger: true,
                   mongodbLogMaxDocumentLength: -290
                 })
             ).to.throw(MongoParseError);
@@ -1159,7 +1157,7 @@ describe('MongoClient', function () {
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
           it('should store value for default maxDocumentLength correctly', function () {
             const client = new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true
+              __enableMongoLogger: true
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
           });
@@ -1172,7 +1170,7 @@ describe('MongoClient', function () {
           it('should store value for maxDocumentLength correctly', function () {
             process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '155';
             const client = new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true
+              __enableMongoLogger: true
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(155);
           });
@@ -1180,7 +1178,7 @@ describe('MongoClient', function () {
           it('should not throw error for negative MONGODB_MAX_DOCUMENT_LENGTH and set to default', function () {
             process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '-14';
             const client = new MongoClient('mongodb://a/', {
-              [loggerFeatureFlag]: true
+              __enableMongoLogger: true
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
           });
