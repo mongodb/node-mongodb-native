@@ -58,7 +58,9 @@ export async function testScriptFactory(
   resourceScript = resourceScript.replace('FUNCTION_STRING', `(${func.toString()})`);
   resourceScript = resourceScript.replace('SCRIPT_NAME_STRING', JSON.stringify(name));
   resourceScript = resourceScript.replace('URI_STRING', JSON.stringify(uri));
-  resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
+  if (resourceScriptPath === HEAP_RESOURCE_SCRIPT_PATH) {
+    resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
+  }
 
   return resourceScript;
 }

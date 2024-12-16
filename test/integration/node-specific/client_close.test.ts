@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { expect } from 'chai';
+
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
-describe.skip('MongoClient.close() Integration', () => {
+describe('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
 
   let config: TestConfiguration;
@@ -452,29 +454,85 @@ describe.skip('MongoClient.close() Integration', () => {
   });
 
   describe('ClientSession (Implicit)', () => {
+    let idleSessionsBeforeClose;
+    let idleSessionsAfterClose;
+
+    beforeEach(async function () {
+      const client = this.configuration.newClient();
+      await client.connect();
+      const session = client.startSession({ explicit: false });
+      session.startTransaction();
+      await client.db('db').collection('collection').insertOne({ x: 1 }, { session });
+
+      const opBefore = await client.db().admin().command({ currentOp: 1 });
+      idleSessionsBeforeClose = opBefore.inprog.filter(s => s.type === 'idleSession');
+
+      await client.close();
+      await client.connect();
+
+      const opAfter = await client.db().admin().command({ currentOp: 1 });
+      idleSessionsAfterClose = opAfter.inprog.filter(s => s.type === 'idleSession');
+
+      await client.close();
+    });
+
     describe('Server resource: LSID/ServerSession', () => {
       describe('after a clientSession is implicitly created and used', () => {
-        it.skip('the server-side ServerSession is cleaned up by client.close()', async function () {});
+        it('the server-side ServerSession is cleaned up by client.close()', async function () {
+          expect(idleSessionsBeforeClose).to.not.be.empty;
+          expect(idleSessionsAfterClose).to.be.empty;
+        });
       });
     });
 
     describe('Server resource: Transactions', () => {
       describe('after a clientSession is implicitly created and used', () => {
-        it.skip('the server-side transaction is cleaned up by client.close()', async function () {});
+        it('the server-side transaction is cleaned up by client.close()', async function () {
+          expect(idleSessionsBeforeClose[0].transaction.txnNumber).to.not.null;
+          expect(idleSessionsAfterClose).to.be.empty;
+        });
       });
     });
   });
 
   describe('ClientSession (Explicit)', () => {
+    let idleSessionsBeforeClose;
+    let idleSessionsAfterClose;
+
+    beforeEach(async function () {
+      const client = this.configuration.newClient();
+      await client.connect();
+      const session = client.startSession();
+      session.startTransaction();
+      await client.db('db').collection('collection').insertOne({ x: 1 }, { session });
+
+      const opBefore = await client.db().admin().command({ currentOp: 1 });
+      idleSessionsBeforeClose = opBefore.inprog.filter(s => s.type === 'idleSession');
+
+      await client.close();
+      await client.connect();
+
+      const opAfter = await client.db().admin().command({ currentOp: 1 });
+      idleSessionsAfterClose = opAfter.inprog.filter(s => s.type === 'idleSession');
+
+      await client.close();
+    });
+
     describe('Server resource: LSID/ServerSession', () => {
       describe('after a clientSession is created and used', () => {
-        it.skip('the server-side ServerSession is cleaned up by client.close()', async function () {});
+        it('the server-side ServerSession is cleaned up by client.close()', async function () {
+          expect(idleSessionsBeforeClose).to.not.be.empty;
+          expect(idleSessionsAfterClose).to.be.empty;
+        });
       });
     });
 
     describe('Server resource: Transactions', () => {
       describe('after a clientSession is created and used', () => {
-        it.skip('the server-side transaction is cleaned up by client.close()', async function () {});
+        it('the server-side transaction is cleaned up by client.close()', async function () {
+          expect(idleSessionsBeforeClose[0].transaction.txnNumber).to.not.null;
+          expect(idleSessionsAfterClose).to.be.empty;
+        });
       });
     });
   });
@@ -584,7 +642,47 @@ describe.skip('MongoClient.close() Integration', () => {
 
   describe('Server resource: Cursor', () => {
     describe('after cursors are created', () => {
-      it.skip('all active server-side cursors are closed by client.close()', async function () {});
+      let client;
+      let coll;
+      let cursor;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+        coll = client.db('db').collection('coll');
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        await cursor?.close();
+      });
+
+      it('all active server-side cursors are closed by client.close()', async function () {
+        const getCursors = async () => {
+          const res = await client
+            .db()
+            .admin()
+            .command({
+              aggregate: 1,
+              cursor: { batchSize: 10 },
+              pipeline: [{ $currentOp: { idleCursors: true } }]
+            });
+          return res.cursor.firstBatch.filter(
+            r => r.type === 'idleCursor' || (r.type === 'op' && r.desc === 'getMore')
+          );
+        };
+
+        await coll.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
+        cursor = await coll.find();
+
+        // assert creation
+        expect(await getCursors()).to.not.be.empty;
+
+        await client.close();
+        await client.connect();
+
+        // assert clean-up
+        expect(await getCursors()).to.be.empty;
+      });
     });
   });
 });
