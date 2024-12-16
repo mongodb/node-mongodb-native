@@ -26,6 +26,7 @@ import {
   type LogComponentSeveritiesClientOptions,
   type MongoDBLogWritable,
   MongoLogger,
+  type MongoLoggerEnvOptions,
   type MongoLoggerOptions,
   SeverityLevel
 } from './mongo_logger';
@@ -301,7 +302,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** @internal */
   __skipPingOnConnect?: boolean;
   /** @internal */
-  __internalLoggerConfig?: any;
+  __internalLoggerConfig?: MongoLoggerEnvOptions;
   /** @internal */
   __enableMongoLogger?: boolean;
 }

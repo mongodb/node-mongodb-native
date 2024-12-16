@@ -508,12 +508,11 @@ export function parseOptions(
     );
   }
 
-  const loggerFeatureFlag = '__enableMongoLogger';
-  mongoOptions[loggerFeatureFlag] = mongoOptions[loggerFeatureFlag] ?? false;
+  mongoOptions.__enableMongoLogger = mongoOptions.__enableMongoLogger ?? false;
 
   let loggerEnvOptions: MongoLoggerEnvOptions = {};
   let loggerClientOptions: MongoLoggerMongoClientOptions = {};
-  if (mongoOptions[loggerFeatureFlag]) {
+  if (mongoOptions.__enableMongoLogger) {
     loggerEnvOptions = {
       MONGODB_LOG_COMMAND: process.env.MONGODB_LOG_COMMAND,
       MONGODB_LOG_TOPOLOGY: process.env.MONGODB_LOG_TOPOLOGY,
@@ -523,7 +522,7 @@ export function parseOptions(
       MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
       MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
       MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH,
-      ...mongoOptions['__internalLoggerConfig']
+      ...mongoOptions.__internalLoggerConfig
     };
     loggerClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath,
@@ -1313,27 +1312,11 @@ export const OPTIONS = {
   mongodbLogMaxDocumentLength: { type: 'uint' },
   __enableMongoLogger: { type: 'boolean' },
   __skipPingOnConnect: { type: 'boolean' },
-  __internalLoggerConfig: { type: 'any' }
-} as Record<
-  keyof Omit<
-    MongoClientOptions,
-    '__enableMongoLogger' | '__internalLoggerConfig' | '__skipPingOnConnect'
-  >,
-  OptionDescriptor
->;
+  __internalLoggerConfig: { type: 'record' }
+} as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
   Object.entries(OPTIONS)
     .filter(([, descriptor]) => descriptor.default != null)
     .map(([k, d]) => [k, d.default])
 );
-
-/**
- * Set of permitted feature flags
- * @internal
- */
-export const FEATURE_FLAGS = new Set([
-  '__skipPingOnConnect',
-  '__enableMongoLogger',
-  '__internalLoggerConfig'
-]);

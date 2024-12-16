@@ -3,7 +3,7 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents } from '../cmap/connection';
 import type { ConnectionPoolEvents } from '../cmap/connection_pool';
 import type { ClientMetadata } from '../cmap/handshake/client_metadata';
-import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
+import { DEFAULT_OPTIONS } from '../connection_string';
 import {
   CLOSE,
   CONNECT,
@@ -251,8 +251,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
       hosts: [HostAddress.fromString('localhost:27017')],
-      ...Object.fromEntries(DEFAULT_OPTIONS.entries()),
-      ...Object.fromEntries(FEATURE_FLAGS.entries())
+      ...Object.fromEntries(DEFAULT_OPTIONS.entries())
     };
 
     if (typeof seeds === 'string') {
