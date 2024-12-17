@@ -1,17 +1,14 @@
-import type { Document } from './bson';
+import type { Document, ObjectId } from './bson';
 import {
   type ClientBulkWriteError,
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
 import type { ServerType } from './sdam/common';
-import type { TopologyVersion } from './sdam/server_description';
+import type { ServerDescription, TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
 
 /** @public */
 export type AnyError = MongoError | Error;
-
-/** @internal */
-const kErrorLabels = Symbol('errorLabels');
 
 /**
  * @internal
@@ -129,7 +126,11 @@ function isAggregateError(e: unknown): e is Error & { errors: Error[] } {
  */
 export class MongoError extends Error {
   /** @internal */
-  [kErrorLabels]: Set<string>;
+  private readonly errorLabelSet: Set<string> = new Set();
+  public get errorLabels(): string[] {
+    return Array.from(this.errorLabelSet);
+  }
+
   /**
    * This is a number in MongoServerError and a string in MongoDriverError
    * @privateRemarks
@@ -153,7 +154,6 @@ export class MongoError extends Error {
    **/
   constructor(message: string, options?: { cause?: Error }) {
     super(message, options);
-    this[kErrorLabels] = new Set();
   }
 
   /** @internal */
@@ -188,15 +188,11 @@ export class MongoError extends Error {
    * @returns returns true if the error has the provided error label
    */
   hasErrorLabel(label: string): boolean {
-    return this[kErrorLabels].has(label);
+    return this.errorLabelSet.has(label);
   }
 
   addErrorLabel(label: string): void {
-    this[kErrorLabels].add(label);
-  }
-
-  get errorLabels(): string[] {
-    return Array.from(this[kErrorLabels]);
+    this.errorLabelSet.add(label);
   }
 }
 
@@ -228,8 +224,9 @@ export class MongoServerError extends MongoError {
    **/
   constructor(message: ErrorDescription) {
     super(message.message || message.errmsg || message.$err || 'n/a');
+
     if (message.errorLabels) {
-      this[kErrorLabels] = new Set(message.errorLabels);
+      for (const label of message.errorLabels) this.addErrorLabel(label);
     }
 
     this.errorResponse = message;
@@ -337,6 +334,41 @@ export class MongoRuntimeError extends MongoDriverError {
 
   override get name(): string {
     return 'MongoRuntimeError';
+  }
+}
+
+/**
+ * An error generated when a primary server is marked stale, never directly thrown
+ *
+ * @public
+ * @category Error
+ */
+export class MongoStalePrimaryError extends MongoRuntimeError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(
+    serverDescription: ServerDescription,
+    maxSetVersion: number | null,
+    maxElectionId: ObjectId | null,
+    options?: { cause?: Error }
+  ) {
+    super(
+      `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`,
+      options
+    );
+  }
+
+  override get name(): string {
+    return 'MongoStalePrimaryError';
   }
 }
 
@@ -993,12 +1025,6 @@ export class MongoTopologyClosedError extends MongoAPIError {
   }
 }
 
-/** @internal */
-const kBeforeHandshake = Symbol('beforeHandshake');
-export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
-  return err[kBeforeHandshake] === true;
-}
-
 /** @public */
 export interface MongoNetworkErrorOptions {
   /** Indicates the timeout happened before a connection handshake completed */
@@ -1013,7 +1039,7 @@ export interface MongoNetworkErrorOptions {
  */
 export class MongoNetworkError extends MongoError {
   /** @internal */
-  [kBeforeHandshake]?: boolean;
+  public readonly beforeHandshake: boolean;
 
   /**
    * **Do not use this constructor!**
@@ -1028,10 +1054,7 @@ export class MongoNetworkError extends MongoError {
    **/
   constructor(message: string, options?: MongoNetworkErrorOptions) {
     super(message, { cause: options?.cause });
-
-    if (options && typeof options.beforeHandshake === 'boolean') {
-      this[kBeforeHandshake] = options.beforeHandshake;
-    }
+    this.beforeHandshake = !!options?.beforeHandshake;
   }
 
   override get name(): string {

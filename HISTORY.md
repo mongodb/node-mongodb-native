@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.12.0](https://github.com/mongodb/node-mongodb-native/compare/v6.11.0...v6.12.0) (2024-12-10)
+
+
+### Features
+
+* **NODE-6593:** add support for zstd@2.x ([#4346](https://github.com/mongodb/node-mongodb-native/issues/4346)) ([ea8a33f](https://github.com/mongodb/node-mongodb-native/commit/ea8a33f1c34e93dd8048ba83edca3294e474ddf5))
+* **NODE-6605:** add error message when invalidating primary ([#4340](https://github.com/mongodb/node-mongodb-native/issues/4340)) ([37613f1](https://github.com/mongodb/node-mongodb-native/commit/37613f1a726d330967012b0c007560db1cc79bd9))
+
+
+### Bug Fixes
+
+* **NODE-6583:** upgrade to BSON v6.10.1 to remove internal unbounded type cache ([#4338](https://github.com/mongodb/node-mongodb-native/issues/4338)) ([249c279](https://github.com/mongodb/node-mongodb-native/commit/249c279ee21c0635ab22be10788ffcae52ad3bb5))
+* **NODE-6600:** set object mode correctly for message chunking in SizedMessageTransform ([#4345](https://github.com/mongodb/node-mongodb-native/issues/4345)) ([5558573](https://github.com/mongodb/node-mongodb-native/commit/555857319605d72ce57c639166ce25f57739bf74))
+* **NODE-6602:** only wrap errors from SOCKS in network errors ([#4347](https://github.com/mongodb/node-mongodb-native/issues/4347)) ([ed83f36](https://github.com/mongodb/node-mongodb-native/commit/ed83f36ce17e40f0faf4bbaaeab6fa3b7f90b10a))
+
+## [6.11.0](https://github.com/mongodb/node-mongodb-native/compare/v6.10.0...v6.11.0) (2024-11-22)
+
+
+### Features
+
+* **NODE-5682:** set maxTimeMS on commands and preempt I/O ([#4174](https://github.com/mongodb/node-mongodb-native/issues/4174)) ([e4e6a5e](https://github.com/mongodb/node-mongodb-native/commit/e4e6a5e9bff4e30f67e728990012bf0e8ee3e1ff))
+* **NODE-5844:** add iscryptd to ServerDescription ([#4239](https://github.com/mongodb/node-mongodb-native/issues/4239)) ([c39d443](https://github.com/mongodb/node-mongodb-native/commit/c39d443027368f927e58fbabb88b50b8f3e2e8a8))
+* **NODE-6069:** OIDC k8s machine workflow ([#4270](https://github.com/mongodb/node-mongodb-native/issues/4270)) ([82c931c](https://github.com/mongodb/node-mongodb-native/commit/82c931c704d30f1a9555519d1ac2c9e03a2e69c4))
+* **NODE-6090:** Implement CSOT logic for connection checkout and server selection ([bd8a9f4](https://github.com/mongodb/node-mongodb-native/commit/bd8a9f44f37159c494957cbe9d343b08d98bf128))
+* **NODE-6231:** Add CSOT behaviour for retryable reads and writes ([#4186](https://github.com/mongodb/node-mongodb-native/issues/4186)) ([2ffd5eb](https://github.com/mongodb/node-mongodb-native/commit/2ffd5eb125bc4b6e444458569728e8698bc71d1a))
+* **NODE-6274:** add CSOT support to bulkWrite ([#4250](https://github.com/mongodb/node-mongodb-native/issues/4250)) ([c5a9ae5](https://github.com/mongodb/node-mongodb-native/commit/c5a9ae55f8baecd0460bef688d66336bb1b86415))
+* **NODE-6275:** Add CSOT support to GridFS ([#4246](https://github.com/mongodb/node-mongodb-native/issues/4246)) ([3cb8187](https://github.com/mongodb/node-mongodb-native/commit/3cb8187057aba0bed57da0fef7ffad20d451a7d0))
+* **NODE-6304:** add CSOT support for non-tailable cursors ([#4195](https://github.com/mongodb/node-mongodb-native/issues/4195)) ([131f6ed](https://github.com/mongodb/node-mongodb-native/commit/131f6ed63bef473b5e4ce1062c864c58a48bd092))
+* **NODE-6305:** Add CSOT support to tailable cursors ([#4218](https://github.com/mongodb/node-mongodb-native/issues/4218)) ([2398fc6](https://github.com/mongodb/node-mongodb-native/commit/2398fc6b4a13b6c615315df2a1b8b8ffb737d8c3))
+* **NODE-6312:** add error transformation for server timeouts ([#4192](https://github.com/mongodb/node-mongodb-native/issues/4192)) ([c2c0cb9](https://github.com/mongodb/node-mongodb-native/commit/c2c0cb9eb22adc2d61611d3aa965f9062f5089a0))
+* **NODE-6313:** add CSOT support to sessions and transactions ([#4199](https://github.com/mongodb/node-mongodb-native/issues/4199)) ([5f1102f](https://github.com/mongodb/node-mongodb-native/commit/5f1102f0e9cd8de908a33f615cd03a4fefc9d916))
+* **NODE-6387:** Add CSOT support to change streams ([#4256](https://github.com/mongodb/node-mongodb-native/issues/4256)) ([4588ff2](https://github.com/mongodb/node-mongodb-native/commit/4588ff2fa68cffb5f6769390d8c3eabe6926d483))
+* **NODE-6389:** add support for timeoutMS in StateMachine.execute() ([#4243](https://github.com/mongodb/node-mongodb-native/issues/4243)) ([c55f965](https://github.com/mongodb/node-mongodb-native/commit/c55f96571ec4730bdd80c2a233cfaaf035ed688d))
+* **NODE-6390:** Add timeoutMS support to auto encryption ([#4265](https://github.com/mongodb/node-mongodb-native/issues/4265)) ([55e08e7](https://github.com/mongodb/node-mongodb-native/commit/55e08e73194243e1ae4c6803429041e6b1d414e6))
+* **NODE-6391:** Add timeoutMS support to explicit encryption ([#4269](https://github.com/mongodb/node-mongodb-native/issues/4269)) ([f745b99](https://github.com/mongodb/node-mongodb-native/commit/f745b99099c3d4d66e135af612ea341ed0d9750b))
+* **NODE-6392:** add timeoutMS support to ClientEncryption helpers part 1 ([#4281](https://github.com/mongodb/node-mongodb-native/issues/4281)) ([e86f11e](https://github.com/mongodb/node-mongodb-native/commit/e86f11ed0cac1a32cb1b10d9ece3829827f4832b))
+* **NODE-6403:** add CSOT support to client bulk write ([#4261](https://github.com/mongodb/node-mongodb-native/issues/4261)) ([365d63b](https://github.com/mongodb/node-mongodb-native/commit/365d63b46551620b92c6f8979679ea38c49ae7bd))
+* **NODE-6421:** add support for timeoutMS to explain helpers ([#4268](https://github.com/mongodb/node-mongodb-native/issues/4268)) ([5b2629b](https://github.com/mongodb/node-mongodb-native/commit/5b2629be4948b1f51f5085cc0ceef6818f8fe782))
+* **NODE-6446:** deprecate legacy timeout options ([#4279](https://github.com/mongodb/node-mongodb-native/issues/4279)) ([c28608b](https://github.com/mongodb/node-mongodb-native/commit/c28608b8b19a8fbcfdc204a3fda982d52eea03a5))
+* **NODE-6551:** update bson to 6.10.0 ([#4329](https://github.com/mongodb/node-mongodb-native/issues/4329)) ([adb15fe](https://github.com/mongodb/node-mongodb-native/commit/adb15feb4e6e4e1ce0e4e35373b0b5cef8f5a320))
+
+
+### Bug Fixes
+
+* **NODE-6374:** MongoOperationTimeoutError inherits MongoRuntimeError ([#4237](https://github.com/mongodb/node-mongodb-native/issues/4237)) ([9fb896a](https://github.com/mongodb/node-mongodb-native/commit/9fb896a962a1bd5924453f0d2c43b0af8c01e4ba))
+* **NODE-6412:** read stale response from previously timed out connection ([#4273](https://github.com/mongodb/node-mongodb-native/issues/4273)) ([fd8f3bd](https://github.com/mongodb/node-mongodb-native/commit/fd8f3bd8f78960726a31d24afeb27d51c549f660))
+* **NODE-6454:** use timeoutcontext for state machine execute() cursor options ([#4291](https://github.com/mongodb/node-mongodb-native/issues/4291)) ([5dd8ee5](https://github.com/mongodb/node-mongodb-native/commit/5dd8ee5632a306346406e8856e01ac21dedef813))
+* **NODE-6469:** pool is cleared before connection checkin on error ([#4296](https://github.com/mongodb/node-mongodb-native/issues/4296)) ([06a2e2c](https://github.com/mongodb/node-mongodb-native/commit/06a2e2ce45921dfe898eefaf1fbdd461c212d512))
+* **NODE-6523:** deleteMany in gridfs passes timeoutMS to predicate, not options ([#4319](https://github.com/mongodb/node-mongodb-native/issues/4319)) ([1965ed5](https://github.com/mongodb/node-mongodb-native/commit/1965ed51296bac9149ecb077b6cafd43150a3a07))
+
+
+### Performance Improvements
+
+* **NODE-6525:** remove setPrototype and defineProperty from hot path ([#4321](https://github.com/mongodb/node-mongodb-native/issues/4321)) ([48ed47e](https://github.com/mongodb/node-mongodb-native/commit/48ed47ec192416e86762527cf3beabb4a634ac93))
+
 ## [6.10.0](https://github.com/mongodb/node-mongodb-native/compare/v6.9.0...v6.10.0) (2024-10-21)
 
 

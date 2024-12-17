@@ -38,7 +38,7 @@ import {
 } from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
-import { getSymbolFrom, topologyWithPlaceholderClient } from '../tools/utils';
+import { topologyWithPlaceholderClient } from '../tools/utils';
 
 describe('MongoErrors', () => {
   let errorClassesFromEntryPoint = Object.fromEntries(
@@ -289,21 +289,25 @@ describe('MongoErrors', () => {
   });
 
   describe('when MongoNetworkError is constructed', () => {
-    it('should only define beforeHandshake symbol if boolean option passed in', function () {
-      const errorWithOptionTrue = new MongoNetworkError('', { beforeHandshake: true });
-      expect(getSymbolFrom(errorWithOptionTrue, 'beforeHandshake', false)).to.be.a('symbol');
-
-      const errorWithOptionFalse = new MongoNetworkError('', { beforeHandshake: false });
-      expect(getSymbolFrom(errorWithOptionFalse, 'beforeHandshake', false)).to.be.a('symbol');
-
-      const errorWithBadOption = new MongoNetworkError('', {
-        // @ts-expect-error: beforeHandshake must be a boolean value
-        beforeHandshake: 'not boolean'
+    describe('without options', () => {
+      it('sets beforeHandshake to false', () => {
+        const error = new MongoNetworkError('error');
+        expect(error.beforeHandshake).to.be.false;
       });
-      expect(getSymbolFrom(errorWithBadOption, 'beforeHandshake', false)).to.be.an('undefined');
+    });
 
-      const errorWithoutOption = new MongoNetworkError('');
-      expect(getSymbolFrom(errorWithoutOption, 'beforeHandshake', false)).to.be.an('undefined');
+    describe('with options', () => {
+      it('sets beforeHandshake to false if it is nullish or false', () => {
+        const error = new MongoNetworkError('error', {});
+        expect(error.beforeHandshake).to.be.false;
+        const error2 = new MongoNetworkError('error', { beforeHandshake: false });
+        expect(error2.beforeHandshake).to.be.false;
+      });
+
+      it('sets beforeHandshake to true if it is set', () => {
+        const error = new MongoNetworkError('error', { beforeHandshake: true });
+        expect(error.beforeHandshake).to.be.true;
+      });
     });
   });
 

@@ -160,6 +160,9 @@ const testConfigBeforeHook = async function () {
 
   await client.close();
 
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const zstdVersion = require('@mongodb-js/zstd/package.json').version;
+
   const currentEnv = {
     // TODO(NODE-3714): Improve environment detection
     topology: this.configuration.topologyType,
@@ -188,7 +191,8 @@ const testConfigBeforeHook = async function () {
     ocsp: process.env.OCSP_TLS_SHOULD_SUCCEED != null && process.env.CA_FILE != null,
     socks5: MONGODB_URI.includes('proxyHost='),
     compressor: process.env.COMPRESSOR,
-    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
+    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH,
+    zstdVersion
   };
 
   console.error(inspect(currentEnv, { colors: true }));

@@ -112,7 +112,10 @@ export class ServerDescription {
     this.minRoundTripTime = options?.minRoundTripTime ?? 0;
     this.lastUpdateTime = now();
     this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? 0;
+    // NOTE: This actually builds the stack string instead of holding onto the getter and all its
+    // associated references. This is done to prevent a memory leak.
     this.error = options.error ?? null;
+    this.error?.stack;
     // TODO(NODE-2674): Preserve int64 sent from MongoDB
     this.topologyVersion = this.error?.topologyVersion ?? hello?.topologyVersion ?? null;
     this.setName = hello?.setName ?? null;

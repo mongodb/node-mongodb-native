@@ -13,7 +13,6 @@ const { setTimeout } = require('timers');
 const { ReadPreference, MongoExpiredSessionError } = require('../../mongodb');
 const { ServerType } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
-const { getSymbolFrom } = require('../../tools/utils');
 
 describe('Cursor', function () {
   before(function () {
@@ -3643,8 +3642,7 @@ describe('Cursor', function () {
               expect(doc).to.exist;
               const clonedCursor = cursor.clone();
               expect(clonedCursor.cursorOptions.session).to.not.exist;
-              const kServerSession = getSymbolFrom(clonedCursor.session, 'serverSession');
-              expect(clonedCursor.session).to.have.property(kServerSession, null); // session is brand new and has not been used
+              expect(clonedCursor.session).to.have.property('_serverSession', null); // session is brand new and has not been used
             })
             .finally(() => {
               return cursor.close();
@@ -3664,8 +3662,7 @@ describe('Cursor', function () {
               expect(doc).to.exist;
               const clonedCursor = cursor.clone();
               expect(clonedCursor.cursorOptions.session).to.not.exist;
-              const kServerSession = getSymbolFrom(clonedCursor.session, 'serverSession');
-              expect(clonedCursor.session).to.have.property(kServerSession, null); // session is brand new and has not been used
+              expect(clonedCursor.session).to.have.property('_serverSession', null); // session is brand new and has not been used
             })
             .finally(() => {
               return cursor.close();

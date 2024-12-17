@@ -4,10 +4,72 @@ const fs = require('fs');
 const path = require('path');
 const { Readable } = require('stream');
 const { pipeline } = require('stream/promises');
-const { MongoClient } = require('../../..');
-const { GridFSBucket } = require('../../..');
-// eslint-disable-next-line no-restricted-modules
-const { MONGODB_ERROR_CODES } = require('../../../lib/error');
+const child_process = require('child_process');
+
+/**
+ * The path to the MongoDB Node.js driver.
+ * This MUST be set to the directory the driver is installed in
+ * NOT the file "lib/index.js" that is the driver's export.
+ */
+const MONGODB_DRIVER_PATH = (() => {
+  let driverPath = process.env.MONGODB_DRIVER_PATH;
+  if (!driverPath?.length) {
+    driverPath = path.resolve(__dirname, '../../..');
+  }
+  return driverPath;
+})();
+
+const { MongoClient, GridFSBucket } = require(MONGODB_DRIVER_PATH);
+
+/** Grab the version from the package.json */
+const { version: MONGODB_DRIVER_VERSION } = require(path.join(MONGODB_DRIVER_PATH, 'package.json'));
+
+/**
+ * Use git to optionally determine the git revision,
+ * but the benchmarks could be run against an npm installed version so this should be allowed to fail
+ */
+const MONGODB_DRIVER_REVISION = (() => {
+  try {
+    return child_process
+      .execSync('git rev-parse --short HEAD', {
+        cwd: MONGODB_DRIVER_PATH,
+        encoding: 'utf8'
+      })
+      .trim();
+  } catch {
+    return 'unknown revision';
+  }
+})();
+
+/**
+ * Find the BSON dependency inside the driver PATH given and grab the version from the package.json.
+ */
+const MONGODB_BSON_PATH = path.join(MONGODB_DRIVER_PATH, 'node_modules', 'bson');
+const { version: MONGODB_BSON_VERSION } = require(path.join(MONGODB_BSON_PATH, 'package.json'));
+
+/**
+ * If you need to test BSON changes, you should clone, checkout and build BSON.
+ * run: `npm link` with no arguments to register the link.
+ * Then in the driver you are testing run `npm link bson` to use your local build.
+ *
+ * This will symlink the BSON into the driver's node_modules directory. So here
+ * we can find the revision of the BSON we are testing against if .git exists.
+ */
+const MONGODB_BSON_REVISION = (() => {
+  if (!fs.existsSync(path.join(MONGODB_BSON_PATH, '.git'))) {
+    return 'installed from npm';
+  }
+  try {
+    return child_process
+      .execSync('git rev-parse --short HEAD', {
+        cwd: path.join(MONGODB_BSON_PATH),
+        encoding: 'utf8'
+      })
+      .trim();
+  } catch {
+    return 'unknown revision';
+  }
+})();
 
 const DB_NAME = 'perftest';
 const COLLECTION_NAME = 'corpus';
@@ -67,7 +129,7 @@ function initCollection() {
 
 function dropCollection() {
   return this.collection.drop().catch(e => {
-    if (e.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+    if (e.code !== 26 /* NamespaceNotFound */) {
       throw e;
     }
   });
@@ -117,6 +179,12 @@ async function writeSingleByteFileToBucket() {
 module.exports = {
   MONGODB_URI,
   MONGODB_CLIENT_OPTIONS,
+  MONGODB_DRIVER_PATH,
+  MONGODB_DRIVER_VERSION,
+  MONGODB_DRIVER_REVISION,
+  MONGODB_BSON_PATH,
+  MONGODB_BSON_VERSION,
+  MONGODB_BSON_REVISION,
   makeClient,
   connectClient,
   disconnectClient,

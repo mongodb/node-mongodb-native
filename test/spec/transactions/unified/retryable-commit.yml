@@ -67,9 +67,6 @@ initialData:
 tests:
   -
     description: 'commitTransaction fails after Interrupted'
-    runOnRequirements:
-      # Serverless sets empty `codeName` on failpoint errors. Remove once CLOUDP-280424 is fixed.
-      - serverless: forbid
     operations:
       -
         object: testRunner
