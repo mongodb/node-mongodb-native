@@ -1,5 +1,7 @@
+import { once } from 'node:events';
+import { performance } from 'node:perf_hooks';
+
 import { expect } from 'chai';
-import { once } from 'events';
 import * as sinon from 'sinon';
 
 import {

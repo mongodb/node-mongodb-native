@@ -1,14 +1,15 @@
 /* Specification prose tests */
 
 import { type ChildProcess, spawn } from 'node:child_process';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { performance } from 'node:perf_hooks';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { expect } from 'chai';
-import * as os from 'os';
-import * as path from 'path';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
-import { pipeline } from 'stream/promises';
 
 import { type CommandStartedEvent } from '../../../mongodb';
 import {

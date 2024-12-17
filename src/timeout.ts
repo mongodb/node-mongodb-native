@@ -1,4 +1,5 @@
-import { clearTimeout, setTimeout } from 'timers';
+import { performance } from 'node:perf_hooks';
+import { clearTimeout, setTimeout } from 'node:timers';
 
 import { type Document } from './bson';
 import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';

@@ -1,7 +1,8 @@
-import type { Socket, SocketConnectOpts } from 'net';
-import * as net from 'net';
-import type { ConnectionOptions as TLSConnectionOpts, TLSSocket } from 'tls';
-import * as tls from 'tls';
+import type { Socket, SocketConnectOpts } from 'node:net';
+import * as net from 'node:net';
+import { performance } from 'node:perf_hooks';
+import type { ConnectionOptions as TLSConnectionOpts, TLSSocket } from 'node:tls';
+import * as tls from 'node:tls';
 
 import type { Document } from '../bson';
 import { LEGACY_HELLO_COMMAND } from '../constants';

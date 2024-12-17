@@ -1,8 +1,10 @@
+import * as crypto from 'node:crypto';
+import { performance } from 'node:perf_hooks';
+import { setTimeout } from 'node:timers/promises';
+
 import { type Binary, EJSON, UUID } from 'bson';
 import { expect } from 'chai';
-import * as crypto from 'crypto';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers/promises';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
