@@ -1,7 +1,8 @@
+import { expect } from 'chai';
 import { TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndReturnResourceInfo } from './resource_tracking_script_builder';
 
-describe.only('client.close() Integration', () => {
+describe.skip('client.close() Integration', () => {
   let config: TestConfiguration;
   beforeEach(function () {
     config = this.configuration;
@@ -21,34 +22,31 @@ describe.only('client.close() Integration', () => {
   });
 
   describe('MongoClientAuthProviders', () => {
-    describe('when MongoClientAuthProviders is instantiated', () => {
-        it('the token cache is cleaned up by client.close', () => {
+    describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
+        it('the file read is interrupted by client.close', () => {
         });
     });
   });
 
   describe('Topology', () => {
-    describe('after a Topology is explicitly created', () => {
-        it('timers are cleaned up by client.close()', () => {
-
-        });
-    });
     describe('after a Topology is created through client.connect()', () => {
-        it('timers are cleaned up by client.close()', () => {
-
+        it('server selection timers are cleaned up by client.close()', async () => {
+            await runScriptAndReturnResourceInfo(
+                'topology-clean-up', 
+                config,
+                async function run({ MongoClient, uri }) {
+                    const client = new MongoClient(uri);
+                    await client.connect();
+                    await client.close();
+                }
+            );
         });
     });
   });
 
   describe('SRVPoller', () => {
-    describe('after SRVPoller is explicitly created', () => {
-        it('timers are cleaned up by client.close()', () => {
-
-        });
-    });
-
     // SRVPoller is implicitly created after an SRV string's topology transitions to sharded
-    describe('after SRVPoller is implicitly created', () => {
+    describe('after SRVPoller is created', () => {
         it('timers are cleaned up by client.close()', () => {
 
         });
@@ -56,9 +54,9 @@ describe.only('client.close() Integration', () => {
   });
 
   describe('ClientSession', () => {
-    describe('after a clientSession is created', () => {
+    describe('after a clientSession is created and used', () => {
         it('the server-side ServerSession and transaction are cleaned up by client.close()', () => {
-
+            // must send a command to the server
         });
     });
   });
@@ -68,15 +66,16 @@ describe.only('client.close() Integration', () => {
         it('no sockets remain after client.close', () => {
 
         });
-        it('no server-side connection threads remain after client.close', () => {
-
-        });
         describe('when the TLS file read hangs', () => {
             it('the file read is interrupted by client.close', () => {
 
             });
         });
     });
+  });
+
+  describe('Server', () => {
+
   });
 
   describe('ConnectionPool', () => {
@@ -95,22 +94,23 @@ describe.only('client.close() Integration', () => {
     });
 
     describe('after a heartbeat fails', () => {
-        it('monitor interval timer is cleaned up by client.close()', () => {
+        it('the new monitor interval timer is cleaned up by client.close()', () => {
 
         });
     });
   });
 
   describe('RTTPinger', () => {
-    describe('after helloReply has a topologyVersion defined fails', () => {
-        it('rtt pinger timer is cleaned up by client.close()', () => {
-
+    describe('after entering monitor streaming mode ', () => {
+        it('the rtt pinger timer is cleaned up by client.close()', () => {
+            // helloReply has a topologyVersion defined
         });
     });
   });
 
   describe('Connection', () => {
     describe('when connection monitoring is turned on', () => {
+        // connection monitoring is by default turned on - with the exception of load-balanced mode
         it('no sockets remain after client.close', () => {
 
         });

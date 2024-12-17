@@ -117,12 +117,12 @@ export async function runScriptAndReturnResourceInfo(
   func: ResourceTestFunction
 ) {
 
-  const scriptName = `scripts/${name}.cjs`;
+  const scriptName = `${name}.cjs`;
   const scriptContent = await testScriptFactory(name, config.url(), REPORT_RESOURCE_SCRIPT_PATH, func);
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
 
   const processDiedController = new AbortController();
-  const script = fork(name);
+  const script = fork(scriptName);
 
   // Interrupt our awaiting of messages if the process crashed
   script.once('close', exitCode => {
@@ -133,11 +133,19 @@ export async function runScriptAndReturnResourceInfo(
 
   const willClose = once(script, 'close');
 
-  // make sure the process ended
-  const [exitCode] = await willClose;
-  expect(exitCode, 'process should have exited with zero').to.equal(0);
-
   const messages = on(script, 'message', { signal: processDiedController.signal });
   const report = await messages.next();
-  return report;
+  let { finalReport, originalReport } = report.value[0];
+
+ // const beforeExit = await messages.next();
+
+  // make sure the process ended
+  const [exitCode] = await willClose;
+
+  // assertions about exit status
+  expect(exitCode, 'process should have exited with zero').to.equal(0);
+
+  // assertions about clean-up
+  expect(originalReport.length).to.equal(finalReport.length);
+  // expect(beforeExitEventHappened).to.be.true; 
 }
