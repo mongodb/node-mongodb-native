@@ -249,13 +249,6 @@ export function parseOptions(
 
   const mongoOptions = Object.create(null);
 
-  // Feature flags
-  for (const flag of Object.getOwnPropertySymbols(options)) {
-    if (FEATURE_FLAGS.has(flag)) {
-      mongoOptions[flag] = options[flag];
-    }
-  }
-
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
 
   const urlOptions = new CaseInsensitiveMap<unknown[]>();
@@ -515,12 +508,11 @@ export function parseOptions(
     );
   }
 
-  const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-  mongoOptions[loggerFeatureFlag] = mongoOptions[loggerFeatureFlag] ?? false;
+  mongoOptions.__enableMongoLogger = mongoOptions.__enableMongoLogger ?? false;
 
   let loggerEnvOptions: MongoLoggerEnvOptions = {};
   let loggerClientOptions: MongoLoggerMongoClientOptions = {};
-  if (mongoOptions[loggerFeatureFlag]) {
+  if (mongoOptions.__enableMongoLogger) {
     loggerEnvOptions = {
       MONGODB_LOG_COMMAND: process.env.MONGODB_LOG_COMMAND,
       MONGODB_LOG_TOPOLOGY: process.env.MONGODB_LOG_TOPOLOGY,
@@ -530,7 +522,7 @@ export function parseOptions(
       MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
       MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
       MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH,
-      ...mongoOptions[Symbol.for('@@mdb.internalLoggerConfig')]
+      ...mongoOptions.__internalLoggerConfig
     };
     loggerClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath,
@@ -1317,7 +1309,10 @@ export const OPTIONS = {
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
-  mongodbLogMaxDocumentLength: { type: 'uint' }
+  mongodbLogMaxDocumentLength: { type: 'uint' },
+  __enableMongoLogger: { type: 'boolean' },
+  __skipPingOnConnect: { type: 'boolean' },
+  __internalLoggerConfig: { type: 'record' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
@@ -1325,13 +1320,3 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
     .filter(([, descriptor]) => descriptor.default != null)
     .map(([k, d]) => [k, d.default])
 );
-
-/**
- * Set of permitted feature flags
- * @internal
- */
-export const FEATURE_FLAGS = new Set([
-  Symbol.for('@@mdb.skipPingOnConnect'),
-  Symbol.for('@@mdb.enableMongoLogger'),
-  Symbol.for('@@mdb.internalLoggerConfig')
-]);

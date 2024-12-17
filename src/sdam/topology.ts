@@ -3,7 +3,7 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents } from '../cmap/connection';
 import type { ConnectionPoolEvents } from '../cmap/connection_pool';
 import type { ClientMetadata } from '../cmap/handshake/client_metadata';
-import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
+import { DEFAULT_OPTIONS } from '../connection_string';
 import {
   CLOSE,
   CONNECT,
@@ -153,7 +153,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   serverMonitoringMode: ServerMonitoringMode;
   /** MongoDB server API version */
   serverApi?: ServerApi;
-  [featureFlag: symbol]: any;
+  __skipPingOnConnect?: boolean;
 }
 
 /** @public */
@@ -251,8 +251,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
       hosts: [HostAddress.fromString('localhost:27017')],
-      ...Object.fromEntries(DEFAULT_OPTIONS.entries()),
-      ...Object.fromEntries(FEATURE_FLAGS.entries())
+      ...Object.fromEntries(DEFAULT_OPTIONS.entries())
     };
 
     if (typeof seeds === 'string') {
@@ -466,7 +465,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         readPreferenceServerSelector(readPreference),
         selectServerOptions
       );
-      const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
+      const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
       if (!skipPingOnConnect && this.s.credentials) {
         await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
         stateTransition(this, STATE_CONNECTED);
