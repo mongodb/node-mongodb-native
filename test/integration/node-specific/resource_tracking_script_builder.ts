@@ -15,22 +15,26 @@ export type ResourceTestFunction = (options: {
   iteration: number;
 }) => Promise<void>;
 
-const RESOURCE_SCRIPT_PATH = path.resolve(__dirname, '../../tools/fixtures/resource_script.in.js');
+const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(__dirname, '../../tools/fixtures/resource_script.in.js');
+const REPORT_RESOURCE_SCRIPT_PATH = path.resolve(__dirname, '../../tools/fixtures/close_resource_script.in.js');
 const DRIVER_SRC_PATH = JSON.stringify(path.resolve(__dirname, '../../../lib'));
 
 export async function testScriptFactory(
   name: string,
   uri: string,
-  iterations: number,
-  func: ResourceTestFunction
+  resourceScriptPath: string,
+  func: ResourceTestFunction,
+  iterations?: number,
 ) {
-  let resourceScript = await readFile(RESOURCE_SCRIPT_PATH, { encoding: 'utf8' });
+  let resourceScript = await readFile(resourceScriptPath, { encoding: 'utf8' });
 
   resourceScript = resourceScript.replace('DRIVER_SOURCE_PATH', DRIVER_SRC_PATH);
   resourceScript = resourceScript.replace('FUNCTION_STRING', `(${func.toString()})`);
   resourceScript = resourceScript.replace('NAME_STRING', JSON.stringify(name));
   resourceScript = resourceScript.replace('URI_STRING', JSON.stringify(uri));
-  resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
+  if (resourceScriptPath === HEAP_RESOURCE_SCRIPT_PATH) {
+    resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
+  }
 
   return resourceScript;
 }
@@ -57,7 +61,7 @@ export async function testScriptFactory(
  * @param options - settings for the script
  * @throws Error - if the process exits with failure
  */
-export async function runScript(
+export async function runScriptAndReturnHeapInfo(
   name: string,
   config: TestConfiguration,
   func: ResourceTestFunction,
@@ -66,7 +70,7 @@ export async function runScript(
   const scriptName = `${name}.cjs`;
   const heapsnapshotFile = `${name}.heapsnapshot.json`;
 
-  const scriptContent = await testScriptFactory(name, config.url(), iterations, func);
+  const scriptContent = await testScriptFactory(name, config.url(), HEAP_RESOURCE_SCRIPT_PATH, func, iterations);
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
 
   const processDiedController = new AbortController();
@@ -105,4 +109,35 @@ export async function runScript(
     endingMemoryUsed,
     heap
   };
+}
+
+export async function runScriptAndReturnResourceInfo(
+  name: string,
+  config: TestConfiguration,
+  func: ResourceTestFunction
+) {
+
+  const scriptName = `scripts/${name}.cjs`;
+  const scriptContent = await testScriptFactory(name, config.url(), REPORT_RESOURCE_SCRIPT_PATH, func);
+  await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
+
+  const processDiedController = new AbortController();
+  const script = fork(name);
+
+  // Interrupt our awaiting of messages if the process crashed
+  script.once('close', exitCode => {
+    if (exitCode !== 0) {
+      processDiedController.abort(new Error(`process exited with: ${exitCode}`));
+    }
+  });
+
+  const willClose = once(script, 'close');
+
+  // make sure the process ended
+  const [exitCode] = await willClose;
+  expect(exitCode, 'process should have exited with zero').to.equal(0);
+
+  const messages = on(script, 'message', { signal: processDiedController.signal });
+  const report = await messages.next();
+  return report;
 }

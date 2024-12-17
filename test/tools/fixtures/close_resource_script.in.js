@@ -14,24 +14,15 @@ const v8 = require('node:v8');
 const util = require('node:util');
 const timers = require('node:timers');
 
-const sleep = util.promisify(timers.setTimeout);
-
 const run = func;
 
-const MB = (2 ** 10) ** 2;
-
 async function main() {
-  for (let iteration = 0; iteration < iterations; iteration++) {
-    await run({ MongoClient, uri, iteration });
-    global.gc();
-  }
-
-  global.gc();
-  // Sleep b/c maybe gc will run
-  await sleep(100);
-  global.gc();
-
-  process.send({ process.report.getReport()});
+  process.on('beforeExit', (code) => {
+    process.send({beforeExit: true});
+  });
+  await run({ MongoClient, uri, iteration });
+  const report = process.report.getReport();
+  process.send({ report });
 }
 
 main()
