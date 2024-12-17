@@ -3581,7 +3581,7 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: '18'}
-            - {key: NPM_VERSION, value: latest}
+            - {key: NPM_VERSION, value: '10'}
       - func: install dependencies
       - func: run unit tests
   - name: run-unit-tests-node-20
