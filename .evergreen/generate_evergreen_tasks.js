@@ -416,7 +416,8 @@ for (const {
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const expansions = { NODE_LTS_VERSION, NPM_VERSION: NODE_LTS_VERSION === 16 ? 9 : NODE_LTS_VERSION === 18 ? 10 : 'latest' };
+    const NPM_VERSION = versions.find(({versionNumber}) => versionNumber === NODE_LTS_VERSION).npmVersion;
+    const expansions = { NODE_LTS_VERSION, NPM_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
     if (clientEncryption) {

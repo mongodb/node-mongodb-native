@@ -4842,7 +4842,7 @@ buildvariants:
     run_on: rhel80-large
     expansions:
       NODE_LTS_VERSION: 18
-      NPM_VERSION: latest
+      NPM_VERSION: 10
       CLIENT_ENCRYPTION: true
     tasks:
       - test-latest-server
@@ -5123,7 +5123,7 @@ buildvariants:
     run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 18
-      NPM_VERSION: latest
+      NPM_VERSION: 10
     tasks:
       - test-latest-server
       - test-latest-replica_set
