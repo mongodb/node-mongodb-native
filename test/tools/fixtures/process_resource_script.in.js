@@ -12,15 +12,17 @@ const process = require('node:process');
 const v8 = require('node:v8');
 const util = require('node:util');
 const timers = require('node:timers');
+const fs = require('node:fs');
+const sinon = require('sinon');
 
 const run = func;
 
 async function main() {
   process.on('beforeExit', (code) => {
-    console.log('Process beforeExit event with code: ', code);
+    process.send({ beforeExitCode: code });
   });
   const originalReport = process.report.getReport().libuv;
-  await run({ MongoClient, uri });
+  await run({ MongoClient, uri, fs, sinon });
   const finalReport = process.report.getReport().libuv;
   process.send({originalReport, finalReport});
 }

@@ -8,11 +8,19 @@ import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
+import { sleep } from '../../tools/utils';
 
-export type ResourceTestFunction = (options: {
+export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
+
+export type HeapResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
   uri: string;
   iteration: number;
+}) => Promise<void>;
+
+export type ProcessResourceTestFunction = (options: {
+  MongoClient: typeof MongoClient;
+  uri: string;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(__dirname, '../../tools/fixtures/resource_script.in.js');
@@ -40,7 +48,8 @@ export async function testScriptFactory(
 }
 
 /**
- * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script
+ * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script.
+ * This script uses heap data to collect resource information.
  *
  * **The provided function is run in an isolated Node.js process**
  *
@@ -64,7 +73,7 @@ export async function testScriptFactory(
 export async function runScriptAndReturnHeapInfo(
   name: string,
   config: TestConfiguration,
-  func: ResourceTestFunction,
+  func: HeapResourceTestFunction,
   { iterations = 100 } = {}
 ) {
   const scriptName = `${name}.cjs`;
@@ -111,10 +120,31 @@ export async function runScriptAndReturnHeapInfo(
   };
 }
 
-export async function runScriptAndReturnResourceInfo(
+
+/**
+ * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script.
+ * This script uses info from node:process to collect resource information.
+ *
+ * **The provided function is run in an isolated Node.js process**
+ *
+ * A user of this function will likely need to familiarize themselves with the surrounding scripting, but briefly:
+ * - Every MongoClient you construct should have an asyncResource attached to it like so:
+ * ```js
+ * mongoClient.asyncResource = new this.async_hooks.AsyncResource('MongoClient');
+ * ```
+ * - You can perform any number of operations and connects/closes of MongoClients
+ * - This function performs assertions that at the end of the provided function, the js event loop has been exhausted
+ *
+ * @param name - the name of the script, this defines the name of the file, it will be cleaned up if the function returns successfully
+ * @param config - `this.configuration` from your mocha config
+ * @param func - your javascript function, you can write it inline! this will stringify the function, use the references on the `this` context to get typechecking
+ * @param options - settings for the script
+ * @throws Error - if the process exits with failure or if the process' resources are not cleaned up by the provided function.
+ */
+export async function runScriptAndGetProcessInfo(
   name: string,
   config: TestConfiguration,
-  func: ResourceTestFunction
+  func: ProcessResourceTestFunction
 ) {
 
   const scriptName = `${name}.cjs`;
@@ -137,15 +167,23 @@ export async function runScriptAndReturnResourceInfo(
   const report = await messages.next();
   let { finalReport, originalReport } = report.value[0];
 
- // const beforeExit = await messages.next();
+  const nullishSleepFn = async function () {
+    await sleep(5000);
+    return null;
+  }
+
+  // in the event the beforeExit event doesn't fire, set the event value to null after waiting 5 seconds
+  const beforeExitEvent = await Promise.race([messages.next(), nullishSleepFn()]);
 
   // make sure the process ended
   const [exitCode] = await willClose;
+
+  await unlink(scriptName);
 
   // assertions about exit status
   expect(exitCode, 'process should have exited with zero').to.equal(0);
 
   // assertions about clean-up
   expect(originalReport.length).to.equal(finalReport.length);
-  // expect(beforeExitEventHappened).to.be.true; 
+  expect(beforeExitEvent).to.not.be.null;
 }
