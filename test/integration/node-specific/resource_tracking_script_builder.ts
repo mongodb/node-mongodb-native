@@ -23,8 +23,14 @@ export type ProcessResourceTestFunction = (options: {
   uri: string;
 }) => Promise<void>;
 
-const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(__dirname, '../../tools/fixtures/resource_script.in.js');
-const REPORT_RESOURCE_SCRIPT_PATH = path.resolve(__dirname, '../../tools/fixtures/close_resource_script.in.js');
+const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
+  __dirname,
+  '../../tools/fixtures/resource_script.in.js'
+);
+const REPORT_RESOURCE_SCRIPT_PATH = path.resolve(
+  __dirname,
+  '../../tools/fixtures/close_resource_script.in.js'
+);
 const DRIVER_SRC_PATH = JSON.stringify(path.resolve(__dirname, '../../../lib'));
 
 export async function testScriptFactory(
@@ -32,7 +38,7 @@ export async function testScriptFactory(
   uri: string,
   resourceScriptPath: string,
   func: ResourceTestFunction,
-  iterations?: number,
+  iterations?: number
 ) {
   let resourceScript = await readFile(resourceScriptPath, { encoding: 'utf8' });
 
@@ -79,7 +85,13 @@ export async function runScriptAndReturnHeapInfo(
   const scriptName = `${name}.cjs`;
   const heapsnapshotFile = `${name}.heapsnapshot.json`;
 
-  const scriptContent = await testScriptFactory(name, config.url(), HEAP_RESOURCE_SCRIPT_PATH, func, iterations);
+  const scriptContent = await testScriptFactory(
+    name,
+    config.url(),
+    HEAP_RESOURCE_SCRIPT_PATH,
+    func,
+    iterations
+  );
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
 
   const processDiedController = new AbortController();
@@ -120,7 +132,6 @@ export async function runScriptAndReturnHeapInfo(
   };
 }
 
-
 /**
  * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script.
  * This script uses info from node:process to collect resource information.
@@ -146,9 +157,13 @@ export async function runScriptAndGetProcessInfo(
   config: TestConfiguration,
   func: ProcessResourceTestFunction
 ) {
-
   const scriptName = `${name}.cjs`;
-  const scriptContent = await testScriptFactory(name, config.url(), REPORT_RESOURCE_SCRIPT_PATH, func);
+  const scriptContent = await testScriptFactory(
+    name,
+    config.url(),
+    REPORT_RESOURCE_SCRIPT_PATH,
+    func
+  );
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
 
   const processDiedController = new AbortController();
@@ -165,12 +180,12 @@ export async function runScriptAndGetProcessInfo(
 
   const messages = on(script, 'message', { signal: processDiedController.signal });
   const report = await messages.next();
-  let { finalReport, originalReport } = report.value[0];
+  const { finalReport, originalReport } = report.value[0];
 
   const nullishSleepFn = async function () {
     await sleep(5000);
     return null;
-  }
+  };
 
   // in the event the beforeExit event doesn't fire, set the event value to null after waiting 5 seconds
   const beforeExitEvent = await Promise.race([messages.next(), nullishSleepFn()]);

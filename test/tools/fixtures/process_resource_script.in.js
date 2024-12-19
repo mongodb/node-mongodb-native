@@ -18,7 +18,7 @@ const sinon = require('sinon');
 const run = func;
 
 async function main() {
-  process.on('beforeExit', (code) => {
+  process.on('beforeExit', code => {
     process.send({ beforeExitCode: code });
   });
   const originalReport = process.report.getReport().libuv;
@@ -26,7 +26,7 @@ async function main() {
   const intermediateReport = process.report.getReport().libuv;
   await mongoClient.close();
   const finalReport = process.report.getReport().libuv;
-  process.send({originalReport, intermediateReport, finalReport});
+  process.send({ originalReport, intermediateReport, finalReport });
 }
 
 main()
