@@ -11,7 +11,8 @@ import {
   type MongoClient,
   MongoClientBulkWriteError,
   MongoInvalidArgumentError,
-  MongoServerError
+  MongoServerError,
+  type PkFactory
 } from '../../mongodb';
 import { filterForCommands } from '../shared';
 
@@ -1164,6 +1165,212 @@ describe('CRUD Prose Spec Tests', () => {
         const count = await client.db('db').collection('coll').countDocuments();
         expect(count).to.equal(numModels);
       }
+    });
+  });
+
+  describe('16. Generated document identifiers are the first field in their document', function () {
+    // Test that the driver generates document identifiers as the first field in their document.
+    // use the command started event to check for first key of document
+    // repeat for insertOne, insertMany, updateOne, updateMany, replaceOne, legacy bulkWrite and client bulkWrite.
+
+    let client: MongoClient;
+    const commands: CommandStartedEvent[] = [];
+    let collection: Collection<{ _id?: number; name: string; age?: number }>;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      await client.connect();
+
+      await client.db('identifier-test').dropDatabase();
+      collection = await client.db('identifier-test').createCollection('collection', {
+        pkFactory: {
+          incrementingId: 1,
+          createPk() {
+            return this.incrementingId++;
+          }
+        } as PkFactory
+      });
+      commands.length = 0;
+
+      client.on('commandStarted', (event: CommandStartedEvent) => commands.push(event));
+    });
+
+    afterEach(async function () {
+      commands.length = 0;
+      await client.close();
+    });
+
+    describe('when the driver generates the _id', function () {
+      describe('insertOne', function () {
+        it('generates _id as the first field', async function () {
+          await collection.insertOne({ name: 'john doe' });
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('documents[0]._id');
+          expect(Object.keys(command.documents[0])).to.have.property('0', '_id');
+        });
+      });
+
+      describe('insertMany', function () {
+        it('generates _id as the first field', async function () {
+          await collection.insertMany([{ name: 'john doe' }, { name: 'jane doe' }]);
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('documents[0]._id');
+          expect(Object.keys(command.documents[0])).to.have.property('0', '_id');
+          expect(command).to.have.nested.property('documents[1]._id');
+          expect(Object.keys(command.documents[1])).to.have.property('0', '_id');
+        });
+      });
+
+      describe('legacy bulkWrite', function () {
+        it('generates _id as the first field in documents', async function () {
+          await collection.bulkWrite([
+            { insertOne: { document: { name: 'john doe' } } },
+            { insertOne: { document: { name: 'jane doe' } } }
+          ]);
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('documents[0]._id');
+          expect(Object.keys(command.documents[0])).to.have.property('0', '_id');
+          expect(command).to.have.nested.property('documents[1]._id');
+          expect(Object.keys(command.documents[1])).to.have.property('0', '_id');
+        });
+      });
+
+      describe('client bulkWrite', function () {
+        it('generates _id as the first field in documents', async function () {
+          await client.bulkWrite<{ 'identifier-test.collection': { _id: number; name: string } }>([
+            {
+              name: 'insertOne',
+              namespace: 'identifier-test.collection',
+              document: { name: 'john doe' }
+            },
+            {
+              name: 'insertOne',
+              namespace: 'identifier-test.collection',
+              document: { name: 'jane doe' }
+            }
+          ]);
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('ops[0].document._id');
+          expect(Object.keys(command.ops[0].document)).to.have.property('0', '_id');
+          expect(command).to.have.nested.property('ops[1].document._id');
+          expect(Object.keys(command.ops[1].document)).to.have.property('0', '_id');
+        });
+      });
+    });
+
+    describe('when the user provides the _id', function () {
+      describe('insertOne', function () {
+        it('keeps _id in its original position', async function () {
+          await collection.insertOne({ name: 'john doe', _id: 1 });
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('documents[0]._id');
+          expect(Object.keys(command.documents[0])).to.have.property('1', '_id');
+        });
+      });
+
+      describe('insertMany', function () {
+        it('keeps _id in its original position', async function () {
+          await collection.insertMany([
+            { name: 'john doe', _id: 1 },
+            { name: 'jane doe', _id: 2 }
+          ]);
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('documents[0]._id');
+          expect(Object.keys(command.documents[0])).to.have.property('1', '_id');
+          expect(command).to.have.nested.property('documents[1]._id');
+          expect(Object.keys(command.documents[1])).to.have.property('1', '_id');
+        });
+      });
+
+      describe('updateOne', function () {
+        it('keeps _id in its original position in upserted document', async function () {
+          await collection.updateOne({ name: 'john doe', _id: 1 }, { $set: {} }, { upsert: true });
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('updates[0].q._id');
+          expect(Object.keys(command.updates[0].q)).to.have.property('1', '_id');
+        });
+      });
+
+      describe('updateMany', function () {
+        it('keeps _id in its original position in upserted documents', async function () {
+          await collection.updateMany({ name: 'john doe', _id: 1 }, { $set: {} }, { upsert: true });
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('updates[0].q._id');
+          expect(Object.keys(command.updates[0].q)).to.have.property('1', '_id');
+        });
+      });
+
+      describe('replaceOne', function () {
+        it('keeps _id in its original position in filter document', async function () {
+          await collection.replaceOne(
+            { name: 'john doe', _id: 1 },
+            { name: 'john doe', age: 30 },
+            { upsert: true }
+          );
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('updates[0].q._id');
+          expect(Object.keys(command.updates[0].q)).to.have.property('1', '_id');
+        });
+
+        it('keeps _id in its original position in replacement document', async function () {
+          await collection.replaceOne(
+            { name: 'john doe' },
+            { name: 'john doe', age: 30, _id: 1 },
+            { upsert: true }
+          );
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('updates[0].u._id');
+          expect(Object.keys(command.updates[0].u)).to.have.property('2', '_id');
+        });
+      });
+
+      describe('legacy bulkWrite', function () {
+        it('keeps _id in its original position in documents', async function () {
+          await collection.bulkWrite([
+            { insertOne: { document: { name: 'john doe', _id: 1 } } },
+            { insertOne: { document: { name: 'jane doe', _id: 2 } } }
+          ]);
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('documents[0]._id');
+          expect(Object.keys(command.documents[0])).to.have.property('1', '_id');
+          expect(command).to.have.nested.property('documents[1]._id');
+          expect(Object.keys(command.documents[1])).to.have.property('1', '_id');
+        });
+      });
+
+      describe('client bulkWrite', function () {
+        it('keeps _id in its original position in documents', async function () {
+          await client.bulkWrite<{ 'identifier-test.collection': { _id: number; name: string } }>([
+            {
+              name: 'insertOne',
+              namespace: 'identifier-test.collection',
+              document: { name: 'john doe', _id: 1 }
+            },
+            {
+              name: 'insertOne',
+              namespace: 'identifier-test.collection',
+              document: { name: 'jane doe', _id: 2 }
+            }
+          ]);
+
+          const [{ command }] = commands;
+          expect(command).to.have.nested.property('ops[0].document._id');
+          expect(Object.keys(command.ops[0].document)).to.have.property('1', '_id');
+          expect(command).to.have.nested.property('ops[1].document._id');
+          expect(Object.keys(command.ops[1].document)).to.have.property('1', '_id');
+        });
+      });
     });
   });
 });
