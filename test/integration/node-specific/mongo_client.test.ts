@@ -865,8 +865,8 @@ describe('class MongoClient', function () {
         });
       });
 
-      for (const featureFlagValue of [false, undefined]) {
-        context(`when set to ${featureFlagValue}`, () => {
+      for (const optionValue of [false, undefined]) {
+        context(`when set to ${optionValue}`, () => {
           context('when logging is enabled for a component', () => {
             before(() => {
               process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
@@ -874,7 +874,7 @@ describe('class MongoClient', function () {
 
             it('does not instantiate logger', () => {
               const client = new MongoClient('mongodb://localhost:27017', {
-                __enableMongoLogger: featureFlagValue
+                __enableMongoLogger: optionValue
               });
               expect(client.mongoLogger).to.not.exist;
             });
@@ -887,7 +887,7 @@ describe('class MongoClient', function () {
 
             it('does not instantiate logger', () => {
               const client = new MongoClient('mongodb://localhost:27017', {
-                __enableMongoLogger: featureFlagValue
+                __enableMongoLogger: optionValue
               });
               expect(client.mongoLogger).to.not.exist;
             });
