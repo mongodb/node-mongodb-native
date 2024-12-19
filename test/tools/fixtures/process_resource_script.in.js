@@ -22,9 +22,11 @@ async function main() {
     process.send({ beforeExitCode: code });
   });
   const originalReport = process.report.getReport().libuv;
-  await run({ MongoClient, uri, fs, sinon });
+  const mongoClient = await run({ MongoClient, uri, fs, sinon });
+  const intermediateReport = process.report.getReport().libuv;
+  await mongoClient.close();
   const finalReport = process.report.getReport().libuv;
-  process.send({originalReport, finalReport});
+  process.send({originalReport, intermediateReport, finalReport});
 }
 
 main()
