@@ -1,42 +1,61 @@
-import { fork } from 'node:child_process';
+import { fork, spawn } from 'node:child_process';
 import { on, once } from 'node:events';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
+import * as fs from 'node:fs';
 
 import { expect } from 'chai';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
+import path = require('node:path');
 
-export type ResourceTestFunction = (options: {
+export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
+
+export type HeapResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
   uri: string;
   iteration: number;
 }) => Promise<void>;
 
-const RESOURCE_SCRIPT_PATH = path.resolve(__dirname, '../../tools/fixtures/resource_script.in.js');
+export type ProcessResourceTestFunction = (options: {
+  MongoClient: typeof MongoClient;
+  uri: string;
+}) => Promise<void>;
+
+const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
+  __dirname,
+  '../../tools/fixtures/resource_script.in.js'
+);
+const REPORT_RESOURCE_SCRIPT_PATH = path.resolve(
+  __dirname,
+  '../../tools/fixtures/process_resource_script.in.js'
+);
 const DRIVER_SRC_PATH = JSON.stringify(path.resolve(__dirname, '../../../lib'));
 
 export async function testScriptFactory(
   name: string,
   uri: string,
-  iterations: number,
-  func: ResourceTestFunction
+  resourceScriptPath: string,
+  func: ResourceTestFunction,
+  iterations?: number
 ) {
-  let resourceScript = await readFile(RESOURCE_SCRIPT_PATH, { encoding: 'utf8' });
+  let resourceScript = await readFile(resourceScriptPath, { encoding: 'utf8' });
 
   resourceScript = resourceScript.replace('DRIVER_SOURCE_PATH', DRIVER_SRC_PATH);
   resourceScript = resourceScript.replace('FUNCTION_STRING', `(${func.toString()})`);
   resourceScript = resourceScript.replace('NAME_STRING', JSON.stringify(name));
   resourceScript = resourceScript.replace('URI_STRING', JSON.stringify(uri));
-  resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
+  if (resourceScriptPath === HEAP_RESOURCE_SCRIPT_PATH) {
+    resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
+  }
 
   return resourceScript;
 }
 
 /**
- * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script
+ * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script.
+ * This script uses heap data to collect resource information.
  *
  * **The provided function is run in an isolated Node.js process**
  *
@@ -57,16 +76,22 @@ export async function testScriptFactory(
  * @param options - settings for the script
  * @throws Error - if the process exits with failure
  */
-export async function runScript(
+export async function runScriptAndReturnHeapInfo(
   name: string,
   config: TestConfiguration,
-  func: ResourceTestFunction,
+  func: HeapResourceTestFunction,
   { iterations = 100 } = {}
 ) {
   const scriptName = `${name}.cjs`;
   const heapsnapshotFile = `${name}.heapsnapshot.json`;
 
-  const scriptContent = await testScriptFactory(name, config.url(), iterations, func);
+  const scriptContent = await testScriptFactory(
+    name,
+    config.url(),
+    HEAP_RESOURCE_SCRIPT_PATH,
+    func,
+    iterations
+  );
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
 
   const processDiedController = new AbortController();
@@ -105,4 +130,68 @@ export async function runScript(
     endingMemoryUsed,
     heap
   };
+}
+
+/**
+ * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script.
+ * This script uses info from node:process to collect resource information.
+ *
+ * **The provided function is run in an isolated Node.js process**
+ *
+ * A user of this function will likely need to familiarize themselves with the surrounding scripting, but briefly:
+ * - Every MongoClient you construct should have an asyncResource attached to it like so:
+ * ```js
+ * mongoClient.asyncResource = new this.async_hooks.AsyncResource('MongoClient');
+ * ```
+ * - You can perform any number of operations and connects/closes of MongoClients
+ * - This function performs assertions that at the end of the provided function, the js event loop has been exhausted
+ *
+ * @param name - the name of the script, this defines the name of the file, it will be cleaned up if the function returns successfully
+ * @param config - `this.configuration` from your mocha config
+ * @param func - your javascript function, you can write it inline! this will stringify the function, use the references on the `this` context to get typechecking
+ * @param options - settings for the script
+ * @throws Error - if the process exits with failure or if the process' resources are not cleaned up by the provided function.
+ */
+export async function runScriptAndGetProcessInfo(
+  name: string,
+  config: TestConfiguration,
+  func: ProcessResourceTestFunction
+) {
+  const scriptName = `${name}.cjs`;
+  const scriptContent = await testScriptFactory(
+    name,
+    config.url(),
+    REPORT_RESOURCE_SCRIPT_PATH,
+    func
+  );
+  await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
+  const logFile = 'logs.txt';
+
+  const processDiedController = new AbortController();
+  const script = spawn(process.argv[0], [scriptName], { stdio: ['ignore', 'ignore', 'ignore'] });
+
+  // Interrupt our awaiting of messages if the process crashed
+  script.once('close', exitCode => {
+    if (exitCode !== 0) {
+      processDiedController.abort(new Error(`process exited with: ${exitCode}`));
+    }
+  });
+
+  const willClose = once(script, 'close');
+
+  // make sure the process ended
+  const [exitCode] = await willClose;
+
+  const formattedLogRead = '{' + fs.readFileSync(logFile, 'utf-8').slice(0, -3) + '}';
+  const messages = JSON.parse(formattedLogRead);
+
+  await unlink(scriptName);
+  await unlink('logs.txt');
+
+  // assertions about exit status
+  expect(exitCode, 'process should have exited with zero').to.equal(0);
+
+  // assertions about resource status
+  expect(messages.beforeExitHappened).to.be.true;
+  expect(messages.newResources).to.be.empty;
 }
