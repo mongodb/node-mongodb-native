@@ -610,7 +610,7 @@ describe('server selection', function () {
     });
   });
 
-  describe('server selection logging feature flagging', function () {
+  describe('willLog()', function () {
     let mockServer;
     let topology;
     let address;

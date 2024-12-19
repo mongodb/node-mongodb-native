@@ -26,6 +26,7 @@ import {
   type LogComponentSeveritiesClientOptions,
   type MongoDBLogWritable,
   MongoLogger,
+  type MongoLoggerEnvOptions,
   type MongoLoggerOptions,
   SeverityLevel
 } from './mongo_logger';
@@ -299,7 +300,11 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   mongodbLogMaxDocumentLength?: number;
 
   /** @internal */
-  [featureFlag: symbol]: any;
+  __skipPingOnConnect?: boolean;
+  /** @internal */
+  __internalLoggerConfig?: MongoLoggerEnvOptions;
+  /** @internal */
+  __enableMongoLogger?: boolean;
 }
 
 /** @public */
@@ -1006,9 +1011,6 @@ export interface MongoOptions
   tlsCRLFile?: string;
   tlsCertificateKeyFile?: string;
 
-  /** @internal */
-  [featureFlag: symbol]: any;
-
   /**
    * @internal
    * TODO: NODE-5671 - remove internal flag
@@ -1020,4 +1022,10 @@ export interface MongoOptions
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
   timeoutMS?: number;
+  /** @internal */
+  __skipPingOnConnect?: boolean;
+  /** @internal */
+  __internalLoggerConfig?: Document;
+  /** @internal */
+  __enableMongoLogger?: boolean;
 }
