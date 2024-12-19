@@ -13,7 +13,7 @@ describe('client.close() Integration', () => {
     describe('when client is being instantiated and reads a long docker file', () => {
       // our docker env detection uses fs.access which will not be aborted until after it runs
       // fs.access does not support abort signals
-      it.only('the file read is not interrupted by client.close()', async () => {
+      it('the file read is not interrupted by client.close()', async () => {
         await runScriptAndGetProcessInfo(
           'docker-read',
           config,
@@ -30,7 +30,13 @@ describe('client.close() Integration', () => {
     });
 
     describe('when client is connecting and reads a TLS long file', () => {
-      it('the file read is interrupted by client.close()', async () => {});
+      it.only('the file read is interrupted by client.close()', async () => {
+        await runScriptAndGetProcessInfo(
+          'docker-read',
+          config,
+          async function run({ MongoClient, uri }) {}
+        );
+      });
     });
   });
 
@@ -75,20 +81,19 @@ describe('client.close() Integration', () => {
 
   describe('ClientSession', () => {
     describe('after a clientSession is created and used', () => {
-      it('the server-side ServerSession and transaction are cleaned up by client.close()', async () => {
-        await runScriptAndGetProcessInfo(
-          'client-session',
-          config,
-          async function run({ MongoClient, uri }) {
-            const client = new MongoClient(uri);
+      it('the server-side ServerSession and transaction are cleaned up by client.close()', async function () {
+            const client = this.configuration.newClient();
             await client.connect();
             const session = client.startSession();
             session.startTransaction();
-            client.db('db').collection('coll').insertOne({ a: 1 });
+            await client.db('db').collection('coll').insertOne({ a: 1 }, { session });
+
+            // assert server-side session exists
+
             await session.endSession();
             await client.close();
-          }
-        );
+
+            // assert command was sent to server to end server side session
       });
     });
   });

@@ -14,25 +14,38 @@ const util = require('node:util');
 const timers = require('node:timers');
 const fs = require('node:fs');
 const sinon = require('sinon');
+let originalReport;
+const logFile = 'logs.txt';
 
 const run = func;
 
+// Returns an array containing new the resources th
+function getNewResourceArray() {
+  let currReport = process.report.getReport().libuv;
+  const originalReportAddresses = originalReport.map(resource => resource.address);
+  currReport = currReport.filter(resource =>!originalReportAddresses.includes(resource.address));
+  return currReport;
+}
+
+function log(message) {
+  // remove outer parentheses for easier parsing
+  const messageToLog = JSON.stringify(message).slice(1, -1) + ', \n'
+  fs.writeFileSync(logFile, messageToLog, { flag: 'a' });
+}
+
 async function main() {
+  originalReport = process.report.getReport().libuv;
+  console.log('please');
   process.on('beforeExit', code => {
-    process.send({ beforeExitCode: code });
+    log({ beforeExitHappened: true });
   });
-  const originalReport = process.report.getReport().libuv;
-  const mongoClient = await run({ MongoClient, uri, fs, sinon });
-  const intermediateReport = process.report.getReport().libuv;
-  await mongoClient.close();
-  const finalReport = process.report.getReport().libuv;
-  process.send({ originalReport, intermediateReport, finalReport });
+  log({newResources: getNewResourceArray()});
 }
 
 main()
   .then(() => {
-    process.exit(0);
+    log({ exitCode: 0 });
   })
   .catch(() => {
-    process.exit(1);
+    log({ exitCode: 1 });
   });

@@ -1,14 +1,14 @@
-import { fork } from 'node:child_process';
+import { fork, spawn } from 'node:child_process';
 import { on, once } from 'node:events';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
+import * as fs from 'node:fs';
 
 import { expect } from 'chai';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
-import { sleep } from '../../tools/utils';
+import path = require('node:path');
 
 export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
 
@@ -29,7 +29,7 @@ const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
 );
 const REPORT_RESOURCE_SCRIPT_PATH = path.resolve(
   __dirname,
-  '../../tools/fixtures/close_resource_script.in.js'
+  '../../tools/fixtures/process_resource_script.in.js'
 );
 const DRIVER_SRC_PATH = JSON.stringify(path.resolve(__dirname, '../../../lib'));
 
@@ -165,9 +165,10 @@ export async function runScriptAndGetProcessInfo(
     func
   );
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
+  const logFile = 'logs.txt';
 
   const processDiedController = new AbortController();
-  const script = fork(scriptName);
+  const script = spawn(process.argv[0], [scriptName], { stdio: ['ignore', 'ignore', 'ignore'] });
 
   // Interrupt our awaiting of messages if the process crashed
   script.once('close', exitCode => {
@@ -178,27 +179,19 @@ export async function runScriptAndGetProcessInfo(
 
   const willClose = once(script, 'close');
 
-  const messages = on(script, 'message', { signal: processDiedController.signal });
-  const report = await messages.next();
-  const { finalReport, originalReport } = report.value[0];
-
-  const nullishSleepFn = async function () {
-    await sleep(5000);
-    return null;
-  };
-
-  // in the event the beforeExit event doesn't fire, set the event value to null after waiting 5 seconds
-  const beforeExitEvent = await Promise.race([messages.next(), nullishSleepFn()]);
-
   // make sure the process ended
   const [exitCode] = await willClose;
 
+  const formattedLogRead = '{' + fs.readFileSync(logFile, 'utf-8').slice(0, -3) + '}';
+  const messages = JSON.parse(formattedLogRead);
+
   await unlink(scriptName);
+  await unlink('logs.txt');
 
   // assertions about exit status
   expect(exitCode, 'process should have exited with zero').to.equal(0);
 
-  // assertions about clean-up
-  expect(originalReport.length).to.equal(finalReport.length);
-  expect(beforeExitEvent).to.not.be.null;
+  // assertions about resource status
+  expect(messages.beforeExitHappened).to.be.true;
+  expect(messages.newResources).to.be.empty;
 }
