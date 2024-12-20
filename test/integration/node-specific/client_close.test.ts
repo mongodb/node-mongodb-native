@@ -1,19 +1,40 @@
 import { expect } from 'chai';
+import * as fs from 'fs';
 
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
+import { sleep } from '../../tools/utils';
 
-describe.skip('client.close() Integration', () => {
+describe.skip('MongoClient.close() Integration', () => {
+  // note: these tests are set-up in accordance of the resource ownership tree
+
   let config: TestConfiguration;
-
   beforeEach(function () {
     config = this.configuration;
   });
 
-  describe('MongoClient', () => {
-    describe('when client is being instantiated and reads a long docker file', () => {
-      // our docker env detection uses fs.access which will not be aborted until after it runs
-      // fs.access does not support abort signals
+  describe('Node.js resource: TLS File read', () => {
+    describe('when client is connecting and reads an infinite TLS file', () => {
+      it('the file read is interrupted by client.close()', async function () {
+        await runScriptAndGetProcessInfo(
+          'tls-file-read',
+          config,
+          async function run({ MongoClient, uri, log, chai }) {
+            const devZeroFilePath = '/dev/zero';
+            const client = new MongoClient(uri, { tlsCertificateKeyFile: devZeroFilePath });
+            client.connect();
+            log({ ActiveResources: process.getActiveResourcesInfo() });
+            chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+            await client.close();
+            chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+          }
+        );
+      });
+    });
+  });
+
+  describe('Node.js resource: .dockerenv file access', () => {
+    describe('when client is connecting and reads an infinite .dockerenv file', () => {
       it('the file read is not interrupted by client.close()', async () => {
         await runScriptAndGetProcessInfo(
           'docker-read',
@@ -29,35 +50,129 @@ describe.skip('client.close() Integration', () => {
         );
       });
     });
+  });
 
-    describe('when client is connecting and reads an infinite TLS file', () => {
-      it('the file read is interrupted by client.close()', async function () {
-        await runScriptAndGetProcessInfo(
-          'tls-file-read',
-          config,
-          async function run({ MongoClient, uri }) {
-            const devZeroFilePath = '/dev/zero';
-            const client = new MongoClient(uri, { tlsCertificateKeyFile: devZeroFilePath });
-            client.connect();
-            log({ ActiveResources: process.getActiveResourcesInfo() });
-            chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-            await client.close();
-            setTimeout(
-              () => chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise'),
-              1000
-            );
-          }
-        );
+  describe('MongoClientAuthProviders', () => {
+    describe('Node.js resource: Token file read', () => {
+      describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
+        it('the file read is interrupted by client.close()', async () => {});
       });
     });
   });
 
-  describe('MongoClientAuthProviders', () => {
-    describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
-      it('the file read is interrupted by client.close()', async () => {});
+  describe('Topology', () => {
+    describe('Node.js resource: Server Selection Timer', () => {
+
+    });
+
+    describe('Server', () => {
+      describe('Monitor', () => {
+        describe('MonitorInterval', () => {
+          describe('Node.js resource: Timer', () => {
+
+          });
+        });
+
+        describe('Connection Monitoring', () => {
+          // connection monitoring is by default turned on - with the exception of load-balanced mode
+          describe('Node.js resource: Socket', () => {
+          it('no sockets remain after client.close()', async () => {
+            // TODO: skip for LB mode
+            });
+          });
+          describe('Server resource: connection thread', () => {
+
+          });
+        });
+
+        describe('RTT Pinger', () => {
+          describe('Node.js resource: Timer', () => {
+
+          });
+          describe('Connection', () => {
+            describe('Node.js resource: Socket', () => {
+
+            });
+            describe('Server resource: connection thread', () => {
+
+            });
+          });
+        });
+      });
+
+      describe('ConnectionPool', () => {
+        describe('Node.js resource: minPoolSize timer', () => {
+
+        });
+
+        describe('Node.js resource: checkOut Timer', () => { // waitQueueTimeoutMS
+
+        });
+
+        describe('Connection', () => {
+          describe('Node.js resource: Socket', () => {
+
+          });
+          describe('Node.js resource: Socket', () => {
+
+          });
+        });
+      });
+    });
+
+    describe('SrvPoller', () => {
+      describe('Node.js resource: Timer', () => {
+
+      });
     });
   });
 
+  describe('ClientSession (Implicit)', () => {
+    describe('Server resource: LSID/ServerSession', () => {
+    });
+
+    describe('Server resource: Transactions', () => {
+    });
+  });
+
+  describe('ClientSession (Explicit)', () => {
+    describe('Server resource: LSID/ServerSession', () => {
+    });
+
+    describe('Server resource: Transactions', () => {
+    });
+  });
+
+  describe('AutoEncrypter', () => {
+    describe('KMS Request', () => {
+      describe('Node.js resource: TLS file read', () => {
+
+      });
+      describe('Node.js resource: Socket', () => {
+
+      });
+    });
+  });
+
+  describe('ClientEncryption', () => {
+    describe('KMS Request', () => {
+      describe('Node.js resource: TLS file read', () => {
+
+      });
+      describe('Node.js resource: Socket', () => {
+
+      });
+    });
+  });
+
+  describe('Server resource: Cursor', () => {
+    describe('after cursors are created', () => {
+      it('all active server-side cursors are closed by client.close()', async () => {});
+    });
+  });
+});
+
+describe.skip('OLD', () => {
   describe('Topology', () => {
     describe('after a Topology is created through client.connect()', () => {
       it('server selection timers are cleaned up by client.close()', async () => {
@@ -146,23 +261,6 @@ describe.skip('client.close() Integration', () => {
   });
 
   describe('Connection', () => {
-    describe('when connection monitoring is turned on', () => {
-      // connection monitoring is by default turned on - with the exception of load-balanced mode
-      it('no sockets remain after client.close()', async () => {
-        // TODO: skip for LB mode
-        await runScriptAndGetProcessInfo(
-          'connection-monitoring',
-          config,
-          async function run({ MongoClient, uri }) {
-            const client = new MongoClient(uri);
-            await client.connect();
-            await client.close();
-          }
-        );
-      });
-
-      it('no server-side connection threads remain after client.close()', async () => {});
-    });
 
     describe('when rtt monitoring is turned on', () => {
       it('no sockets remain after client.close()', async () => {});
@@ -180,12 +278,6 @@ describe.skip('client.close() Integration', () => {
       it('no sockets remain after client.close()', async () => {});
 
       it('no server-side connection threads remain after client.close()', async () => {});
-    });
-  });
-
-  describe('Cursor', () => {
-    describe('after cursors are created', () => {
-      it('all active server-side cursors are closed by client.close()', async () => {});
     });
   });
 });

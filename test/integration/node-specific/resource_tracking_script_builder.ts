@@ -21,6 +21,8 @@ export type HeapResourceTestFunction = (options: {
 export type ProcessResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
   uri: string;
+  log: (out: any) => void;
+  chai: { expect: Function };
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
