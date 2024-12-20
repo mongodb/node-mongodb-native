@@ -148,7 +148,7 @@ export class MongoDBAWS extends AuthProvider {
 
     const saslContinue = {
       saslContinue: 1,
-      conversationId: 1,
+      conversationId: saslStartResponse.conversationId,
       payload: BSON.serialize(payload, bsonOptions)
     };
 
