@@ -1,14 +1,14 @@
 import { fork, spawn } from 'node:child_process';
 import { on, once } from 'node:events';
-import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as fs from 'node:fs';
+import { readFile, unlink, writeFile } from 'node:fs/promises';
+import * as path from 'node:path';
 
 import { expect } from 'chai';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
-import path = require('node:path');
 
 export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
 
@@ -185,8 +185,8 @@ export async function runScriptAndGetProcessInfo(
   const formattedLogRead = '{' + fs.readFileSync(logFile, 'utf-8').slice(0, -3) + '}';
   const messages = JSON.parse(formattedLogRead);
 
-  await unlink(scriptName);
-  await unlink('logs.txt');
+  //await unlink(scriptName);
+  //await unlink(logFile);
 
   // assertions about exit status
   expect(exitCode, 'process should have exited with zero').to.equal(0);

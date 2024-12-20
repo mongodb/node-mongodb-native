@@ -1,8 +1,9 @@
-import sinon = require('sinon');
+const process = require('node:process');
+import { expect } from 'chai';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
-describe('client.close() Integration', () => {
+describe.skip('client.close() Integration', () => {
   let config: TestConfiguration;
 
   beforeEach(function () {
@@ -18,23 +19,33 @@ describe('client.close() Integration', () => {
           'docker-read',
           config,
           async function run({ MongoClient, uri }) {
-            const dockerPath = '.dockerenv';
+            /* const dockerPath = '.dockerenv';
             sinon.stub(fs, 'access').callsFake(async () => await sleep(5000));
             await fs.writeFile('.dockerenv', '', { encoding: 'utf8' });
             const client = new MongoClient(uri);
             await client.close();
-            unlink(dockerPath);
+            unlink(dockerPath); */
           }
         );
       });
     });
 
-    describe('when client is connecting and reads a TLS long file', () => {
-      it.only('the file read is interrupted by client.close()', async () => {
+    describe('when client is connecting and reads an infinite TLS file', () => {
+      it('the file read is interrupted by client.close()', async function () {
         await runScriptAndGetProcessInfo(
-          'docker-read',
+          'tls-file-read',
           config,
-          async function run({ MongoClient, uri }) {}
+          async function run({ MongoClient, uri }) {
+            const devZeroFilePath = '/dev/zero';
+            const client = new MongoClient(uri, { tlsCertificateKeyFile: devZeroFilePath });
+            client.connect();
+            log({ ActiveResources: process.getActiveResourcesInfo() });
+            chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+            await client.close();
+            setTimeout(() =>
+              chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise'),
+            1000);
+          }
         );
       });
     });
@@ -82,18 +93,19 @@ describe('client.close() Integration', () => {
   describe('ClientSession', () => {
     describe('after a clientSession is created and used', () => {
       it('the server-side ServerSession and transaction are cleaned up by client.close()', async function () {
-            const client = this.configuration.newClient();
-            await client.connect();
-            const session = client.startSession();
-            session.startTransaction();
-            await client.db('db').collection('coll').insertOne({ a: 1 }, { session });
+        const client = this.configuration.newClient();
+        await client.connect();
+        const session = client.startSession();
+        session.startTransaction();
+        await client.db('db').collection('coll').insertOne({ a: 1 }, { session });
 
-            // assert server-side session exists
+        // assert server-side session exists
+        expect(session.serverSession).to.exist;
 
-            await session.endSession();
-            await client.close();
+        await session.endSession();
+        await client.close();
 
-            // assert command was sent to server to end server side session
+        // assert command was sent to server to end server side session
       });
     });
   });

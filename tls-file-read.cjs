@@ -1,10 +1,18 @@
 'use strict';
 
 /* eslint-disable no-undef */
-const driverPath = DRIVER_SOURCE_PATH;
-const func = FUNCTION_STRING;
-const name = NAME_STRING;
-const uri = URI_STRING;
+const driverPath = "/Users/aditi.khare/Desktop/node-mongodb-native/lib";
+const func = (async function run({ MongoClient, uri }) {
+                    const devZeroFilePath = '/dev/zero';
+                    const client = new MongoClient(uri, { tlsCertificateKeyFile: devZeroFilePath });
+                    client.connect();
+                    log({ ActiveResources: process.getActiveResourcesInfo() });
+                    chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+                    // await client.close();
+                    setTimeout(() => chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise'), 1000);
+                });
+const name = "tls-file-read";
+const uri = "mongodb://bob:pwd123@localhost:31000/integration_tests?replicaSet=rs&authSource=admin";
 
 const { MongoClient } = require(driverPath);
 const process = require('node:process');

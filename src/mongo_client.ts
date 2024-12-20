@@ -555,6 +555,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
         options.crl ??= await fs.readFile(options.tlsCRLFile);
       }
       if (typeof options.tlsCertificateKeyFile === 'string') {
+        console.log('here');
         if (!options.key || !options.cert) {
           const contents = await fs.readFile(options.tlsCertificateKeyFile);
           options.key ??= contents;
