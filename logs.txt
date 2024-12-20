@@ -1,3 +1,0 @@
-"ActiveResources":["FSReqPromise","GetAddrInfoReqWrap","TCPSocketWrap","Timeout"], 
-"newResources":[{"type":"tcp","is_active":false,"is_referenced":true,"address":"0x0000000135e04560","localEndpoint":null,"remoteEndpoint":null,"sendBufferSize":0,"recvBufferSize":0,"writeQueueSize":0,"readable":false,"writable":false}], 
-"exitCode":0, 

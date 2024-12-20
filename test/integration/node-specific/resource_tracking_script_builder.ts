@@ -22,7 +22,7 @@ export type ProcessResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
   uri: string;
   log: (out: any) => void;
-  chai: { expect: Function };
+  chai: { expect: object };
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
@@ -48,9 +48,7 @@ export async function testScriptFactory(
   resourceScript = resourceScript.replace('FUNCTION_STRING', `(${func.toString()})`);
   resourceScript = resourceScript.replace('NAME_STRING', JSON.stringify(name));
   resourceScript = resourceScript.replace('URI_STRING', JSON.stringify(uri));
-  if (resourceScriptPath === HEAP_RESOURCE_SCRIPT_PATH) {
-    resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
-  }
+  resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
 
   return resourceScript;
 }

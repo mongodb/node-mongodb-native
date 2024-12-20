@@ -9,7 +9,6 @@ const uri = URI_STRING;
 
 const { MongoClient } = require(driverPath);
 const process = require('node:process');
-const v8 = require('node:v8');
 const util = require('node:util');
 const timers = require('node:timers');
 const fs = require('node:fs');
@@ -48,8 +47,8 @@ main()
   .then(() => {
     log({ exitCode: 0 });
   })
-  .catch(() => {
-    log({ exitCode: 1 });
+  .catch((e) => {
+    log({ exitCode: 1, error: util.inspect(e) });
   });
 
 setTimeout(() => {
