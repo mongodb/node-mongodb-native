@@ -185,8 +185,9 @@ export async function runScriptAndGetProcessInfo(
   const formattedLogRead = '{' + fs.readFileSync(logFile, 'utf-8').slice(0, -3) + '}';
   const messages = JSON.parse(formattedLogRead);
 
-  //await unlink(scriptName);
-  //await unlink(logFile);
+  // delete temporary files
+  await unlink(scriptName);
+  await unlink(logFile);
 
   // assertions about exit status
   expect(exitCode, 'process should have exited with zero').to.equal(0);

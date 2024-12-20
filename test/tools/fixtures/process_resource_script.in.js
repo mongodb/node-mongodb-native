@@ -1,6 +1,7 @@
 'use strict';
 
 /* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 const driverPath = DRIVER_SOURCE_PATH;
 const func = FUNCTION_STRING;
 const name = NAME_STRING;
@@ -13,6 +14,7 @@ const util = require('node:util');
 const timers = require('node:timers');
 const fs = require('node:fs');
 const chai = require('chai');
+const { setTimeout } = require('timers');
 
 let originalReport;
 const logFile = 'logs.txt';
@@ -53,7 +55,7 @@ main()
 setTimeout(() => {
   // this means something was in the event loop such that it hung for more than 10 seconds
   // so we kill the process
-  log({ exitCode : 99 });
+  log({ exitCode: 99 });
   process.exit(99);
   // using `unref` will ensure this setTimeout call is not a resource / does not keep the event loop running
 }, 10000).unref();

@@ -1,5 +1,5 @@
-const process = require('node:process');
 import { expect } from 'chai';
+
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
@@ -42,9 +42,10 @@ describe.skip('client.close() Integration', () => {
             log({ ActiveResources: process.getActiveResourcesInfo() });
             chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
             await client.close();
-            setTimeout(() =>
-              chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise'),
-            1000);
+            setTimeout(
+              () => chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise'),
+              1000
+            );
           }
         );
       });
