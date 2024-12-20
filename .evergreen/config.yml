@@ -1118,89 +1118,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap kms servers
       - func: run serverless tests
-  - name: run-spec-benchmark-tests-node-server
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 3600
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/results.json
-  - name: run-spec-benchmark-tests-node-server-timeoutMS-120000
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 3600
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: MONGODB_CLIENT_OPTIONS, value: '{"timeoutMS": 120000}'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/results.json
-  - name: run-spec-benchmark-tests-node-server-timeoutMS-0
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 3600
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: MONGODB_CLIENT_OPTIONS, value: '{"timeoutMS": 0}'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/results.json
-  - name: run-spec-benchmark-tests-node-server-monitorCommands-true
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 3600
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: MONGODB_CLIENT_OPTIONS, value: '{"monitorCommands": true}'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/results.json
   - name: test-gcpkms-task
     commands:
       - command: expansions.update
@@ -3560,6 +3477,111 @@ tasks:
       - func: setup aws env
       - func: remove aws-credential-providers
       - func: run aws ECS auth test
+  - name: run-spec-benchmark-tests-node-server
+    tags:
+      - run-spec-benchmark-tests
+      - performance
+    exec_timeout_secs: 3600
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: v22.11.0}
+            - {key: VERSION, value: v6.0-perf}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
+            - {key: MONGODB_CLIENT_OPTIONS, value: '{}'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run spec driver benchmarks
+      - command: perf.send
+        params:
+          file: src/results.json
+  - name: run-spec-benchmark-tests-node-server-timeoutMS-120000
+    tags:
+      - run-spec-benchmark-tests
+      - performance
+    exec_timeout_secs: 3600
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: v22.11.0}
+            - {key: VERSION, value: v6.0-perf}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
+            - {key: MONGODB_CLIENT_OPTIONS, value: '{"timeoutMS":120000}'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run spec driver benchmarks
+      - command: perf.send
+        params:
+          file: src/results.json
+  - name: run-spec-benchmark-tests-node-server-timeoutMS-0
+    tags:
+      - run-spec-benchmark-tests
+      - performance
+    exec_timeout_secs: 3600
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: v22.11.0}
+            - {key: VERSION, value: v6.0-perf}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
+            - {key: MONGODB_CLIENT_OPTIONS, value: '{"timeoutMS":0}'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run spec driver benchmarks
+      - command: perf.send
+        params:
+          file: src/results.json
+  - name: run-spec-benchmark-tests-node-server-monitorCommands-true
+    tags:
+      - run-spec-benchmark-tests
+      - performance
+    exec_timeout_secs: 3600
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: v22.11.0}
+            - {key: VERSION, value: v6.0-perf}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
+            - {key: MONGODB_CLIENT_OPTIONS, value: '{"monitorCommands":true}'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run spec driver benchmarks
+      - command: perf.send
+        params:
+          file: src/results.json
+  - name: run-spec-benchmark-tests-node-server-logging
+    tags:
+      - run-spec-benchmark-tests
+      - performance
+    exec_timeout_secs: 3600
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: v22.11.0}
+            - {key: VERSION, value: v6.0-perf}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
+            - {key: MONGODB_CLIENT_OPTIONS, value: '{"__enableMongoLogger":true,"__internalLoggerConfig":{"MONGODB_LOG_ALL":"trace","MONGODB_LOG_PATH":"stderr"}}'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run spec driver benchmarks
+      - command: perf.send
+        params:
+          file: src/results.json
   - name: run-unit-tests-node-16
     tags:
       - unit-tests
@@ -4770,14 +4792,6 @@ post:
 ignore:
   - '*.md'
 buildvariants:
-  - name: performance-tests
-    display_name: Performance Test
-    run_on: rhel90-dbx-perf-large
-    tasks:
-      - run-spec-benchmark-tests-node-server
-      - run-spec-benchmark-tests-node-server-timeoutMS-120000
-      - run-spec-benchmark-tests-node-server-timeoutMS-0
-      - run-spec-benchmark-tests-node-server-monitorCommands-true
   - name: rhel80-large-gallium
     display_name: rhel8 Node16
     run_on: rhel80-large
@@ -5410,6 +5424,15 @@ buildvariants:
       NODE_LTS_VERSION: 22
     tasks:
       - test-atlas-data-lake
+  - name: performance-tests
+    display_name: Performance Test
+    run_on: rhel90-dbx-perf-large
+    tasks:
+      - run-spec-benchmark-tests-node-server
+      - run-spec-benchmark-tests-node-server-timeoutMS-120000
+      - run-spec-benchmark-tests-node-server-timeoutMS-0
+      - run-spec-benchmark-tests-node-server-monitorCommands-true
+      - run-spec-benchmark-tests-node-server-logging
   - name: rhel8-custom-dependency-tests
     display_name: Custom Dependency Version Test
     run_on: rhel80-large
