@@ -290,6 +290,8 @@ describe.skip('MongoClient.close() Integration', () => {
                 const encryptedClient = new MongoClient(uri, encryptionOptions);
                 await encryptedClient.connect();
 
+                expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+
                 const insertPromise = encryptedClient
                   .db('db')
                   .collection('coll')
