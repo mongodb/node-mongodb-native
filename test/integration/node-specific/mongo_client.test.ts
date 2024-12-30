@@ -15,6 +15,7 @@ import {
   MongoServerSelectionError,
   ReadPreference,
   ServerDescription,
+  SeverityLevel,
   Topology
 } from '../../mongodb';
 import { runLater } from '../../tools/utils';
@@ -456,8 +457,8 @@ describe('class MongoClient', function () {
         const [findCommandStarted] = await findCommandToBeStarted;
 
         expect(findCommandStarted).to.have.property('commandName', 'find');
-        expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-        expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+        expect(client.options).to.not.have.property('__skipPingOnConnect');
+        expect(client.s.options).to.not.have.property('__skipPingOnConnect');
 
         // Assertion is redundant but it shows that no initial ping is run
         expect(findCommandStarted.commandName).to.not.equal('ping');
@@ -475,8 +476,8 @@ describe('class MongoClient', function () {
         const [insertCommandStarted] = await insertOneCommandToBeStarted;
 
         expect(insertCommandStarted).to.have.property('commandName', 'insert');
-        expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-        expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+        expect(client.options).to.not.have.property('__skipPingOnConnect');
+        expect(client.s.options).to.not.have.property('__skipPingOnConnect');
 
         // Assertion is redundant but it shows that no initial ping is run
         expect(insertCommandStarted.commandName).to.not.equal('ping');
@@ -771,6 +772,173 @@ describe('class MongoClient', function () {
             port: 27017
           });
         }
+      });
+    });
+  });
+
+  describe('internal options', function () {
+    describe('__skipPingOnConnect', () => {
+      beforeEach(function () {
+        if (process.env.AUTH !== 'auth') {
+          this.currentTest.skipReason = 'ping count relies on auth to be enabled';
+          this.skip();
+        }
+      });
+
+      const tests = [
+        // only skipInitiaPing=true will have no events upon connect
+        { description: 'should skip ping command when set to true', value: true, expectEvents: 0 },
+        {
+          description: 'should not skip ping command when set to false',
+          value: false,
+          expectEvents: 1
+        },
+        {
+          description: 'should not skip ping command when unset',
+          value: undefined,
+          expectEvents: 1
+        }
+      ];
+      for (const { description, value, expectEvents } of tests) {
+        it(description, async function () {
+          const options = value === undefined ? {} : { __skipPingOnConnect: value };
+          const client = this.configuration.newClient({}, { ...options, monitorCommands: true });
+          const events = [];
+          client.on('commandStarted', event => events.push(event));
+
+          try {
+            await client.connect();
+          } finally {
+            await client.close();
+          }
+
+          expect(events).to.have.lengthOf(expectEvents);
+          if (expectEvents > 1) {
+            for (const event of events) {
+              expect(event).to.have.property('commandName', 'ping');
+            }
+          }
+        });
+      }
+    });
+
+    // TODO(NODE-5672): Release Standardized Logger
+    describe('__enableMongoLogger', () => {
+      let cachedEnv;
+
+      before(() => {
+        cachedEnv = process.env;
+      });
+
+      after(() => {
+        process.env = cachedEnv;
+      });
+
+      context('when enabled', () => {
+        context('when logging is enabled for any component', () => {
+          before(() => {
+            process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
+          });
+
+          it('enables logging for the specified component', () => {
+            const client = new MongoClient('mongodb://localhost:27017', {
+              __enableMongoLogger: true
+            });
+            expect(client.mongoLogger?.componentSeverities).to.have.property(
+              'command',
+              SeverityLevel.EMERGENCY
+            );
+          });
+        });
+
+        context('when logging is not enabled for any component', () => {
+          before(() => {
+            process.env = {};
+          });
+
+          it('does not create logger', () => {
+            const client = new MongoClient('mongodb://localhost:27017', {
+              __enableMongoLogger: true
+            });
+            expect(client.mongoLogger).to.not.exist;
+          });
+        });
+      });
+
+      for (const optionValue of [false, undefined]) {
+        context(`when set to ${optionValue}`, () => {
+          context('when logging is enabled for a component', () => {
+            before(() => {
+              process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
+            });
+
+            it('does not instantiate logger', () => {
+              const client = new MongoClient('mongodb://localhost:27017', {
+                __enableMongoLogger: optionValue
+              });
+              expect(client.mongoLogger).to.not.exist;
+            });
+          });
+
+          context('when logging is not enabled for any component', () => {
+            before(() => {
+              process.env = {};
+            });
+
+            it('does not instantiate logger', () => {
+              const client = new MongoClient('mongodb://localhost:27017', {
+                __enableMongoLogger: optionValue
+              });
+              expect(client.mongoLogger).to.not.exist;
+            });
+          });
+        });
+      }
+    });
+
+    describe('__internalLoggerConfig', () => {
+      let cachedEnv: NodeJS.ProcessEnv;
+
+      before(() => {
+        cachedEnv = process.env;
+      });
+
+      after(() => {
+        process.env = cachedEnv;
+      });
+
+      context('when undefined', function () {
+        before(() => {
+          process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
+        });
+
+        it('falls back to environment options', function () {
+          const client = new MongoClient('mongodb://localhost:27017', {
+            __enableMongoLogger: true,
+            __internalLoggerConfig: undefined
+          });
+
+          expect(client.mongoLogger?.componentSeverities).to.have.property(
+            'command',
+            SeverityLevel.EMERGENCY
+          );
+        });
+      });
+
+      context('when defined', function () {
+        it('overrides environment options', function () {
+          const client = new MongoClient('mongodb://localhost:27017', {
+            __enableMongoLogger: true,
+            __internalLoggerConfig: {
+              MONGODB_LOG_COMMAND: SeverityLevel.ALERT
+            }
+          });
+
+          expect(client.mongoLogger?.componentSeverities).to.have.property(
+            'command',
+            SeverityLevel.ALERT
+          );
+        });
       });
     });
   });

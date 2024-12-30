@@ -31,7 +31,7 @@ describe('IPv6 Addresses', () => {
 
     ipv6Hosts = this.configuration.options.hostAddresses.map(({ port }) => `[::1]:${port}`);
     client = this.configuration.newClient(`mongodb://${ipv6Hosts.join(',')}/test`, {
-      [Symbol.for('@@mdb.skipPingOnConnect')]: true,
+      __skipPingOnConnect: true,
       maxPoolSize: 1
     });
   });
