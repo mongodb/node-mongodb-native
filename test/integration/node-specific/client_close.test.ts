@@ -41,26 +41,36 @@ describe.skip('MongoClient.close() Integration', () => {
 
   describe('MongoClientAuthProviders', () => {
     describe('Node.js resource: Token file read', () => {
+      let tokenFileEnvCache;
+
+      beforeEach(function () {
+        if (process.env.AUTH === 'auth') {
+          this.currentTest.skipReason = 'OIDC test environment requires auth disabled';
+          return this.skip();
+        }
+        tokenFileEnvCache = process.env.OIDC_TOKEN_FILE;
+      });
+
+      afterEach(function () {
+        process.env.OIDC_TOKEN_FILE = tokenFileEnvCache;
+      });
+
       describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
         it('the file read is interrupted by client.close()', async () => {
           await runScriptAndGetProcessInfo(
             'token-file-read',
             config,
-            async function run({ MongoClient, uri, log, chai }) {
+            async function run({ MongoClient, uri, chai }) {
               const infiniteFile = '/dev/zero';
-              log({ ActiveResources: process.getActiveResourcesInfo() });
-
-              // speculative authentication call to getToken() is during initial handshake
-              const client = new MongoClient(uri, {
-                authMechanismProperties: { TOKEN_RESOURCE: infiniteFile }
-              });
+              process.env.OIDC_TOKEN_FILE = infiniteFile;
+              const options = {
+                authMechanismProperties: { ENVIRONMENT: 'test' },
+                authMechanism: 'MONGODB-OIDC'
+              };
+              const client = new MongoClient(uri, options);
               client.connect();
-
-              log({ ActiveResources: process.getActiveResourcesInfo() });
-
               chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
               await client.close();
-
               chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
             }
           );
@@ -220,7 +230,7 @@ describe.skip('MongoClient.close() Integration', () => {
         describe('when KMSRequest reads an infinite TLS file', () => {
           it('the file read is interrupted by client.close()', async () => {
             await runScriptAndGetProcessInfo(
-              'tls-file-read',
+              'tls-file-read-auto-encryption',
               config,
               async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
                 const infiniteFile = '/dev/zero';
@@ -292,7 +302,7 @@ describe.skip('MongoClient.close() Integration', () => {
                 await keyVaultClient.close();
                 await encryptedClient.close();
 
-                chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+                chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
                 log({ activeResourcesAfterClose: process.getActiveResourcesInfo() });
 
                 const err = await insertPromise.catch(e => e);
@@ -316,7 +326,7 @@ describe.skip('MongoClient.close() Integration', () => {
         describe('when KMSRequest reads an infinite TLS file read', () => {
           it('the file read is interrupted by client.close()', async () => {
             await runScriptAndGetProcessInfo(
-              'tls-file-read',
+              'tls-file-read-client-encryption',
               config,
               async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
                 const infiniteFile = '/dev/zero';
@@ -345,7 +355,7 @@ describe.skip('MongoClient.close() Integration', () => {
 
                 await keyVaultClient.close();
 
-                chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+                chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
 
                 log({ activeResourcesAfterClose: process.getActiveResourcesInfo() });
 

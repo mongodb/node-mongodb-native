@@ -1,6 +1,5 @@
 import { fork, spawn } from 'node:child_process';
 import { on, once } from 'node:events';
-import * as fs from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -185,7 +184,11 @@ export async function runScriptAndGetProcessInfo(
   const [exitCode] = await willClose;
 
   // format messages from child process as an object
-  const messages = (await readFile(logFile, 'utf-8')).trim().split('\n').map(line => JSON.parse(line)).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+  const messages = (await readFile(logFile, 'utf-8'))
+    .trim()
+    .split('\n')
+    .map(line => JSON.parse(line))
+    .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
   // delete temporary files
   await unlink(scriptName);
