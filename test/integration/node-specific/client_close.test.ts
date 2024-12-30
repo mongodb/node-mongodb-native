@@ -99,11 +99,41 @@ describe.skip('MongoClient.close() Integration', () => {
 
         describe('Connection Monitoring', () => {
           describe('Node.js resource: Socket', () => {
-            it('no sockets remain after client.close()', metadata, async function () {});
+            it('no sockets remain after client.close()', metadata, async function () {
+              await runScriptAndGetProcessInfo(
+                'socket-connection-monitoring',
+                config,
+                async function run({ MongoClient, uri, log, chai }) {
+                  const client = new MongoClient(uri,  { serverMonitoringMode: 'auto' });
+                  await client.connect();
+
+                  // returns all active tcp endpoints
+                  const connectionMonitoringReport = () => process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
+                  
+                  log({report: connectionMonitoringReport() });
+                  // assert socket creation
+                  const servers = client.topology?.s.servers;
+                  for (const server of servers) {
+                    let { host, port } = server[1].s.description.hostAddress;
+                    chai.expect(connectionMonitoringReport()).to.deep.include({ host, port });
+                  }
+
+                  await client.close();
+
+                  // assert socket destruction 
+                  for (const server of servers) {
+                    let { host, port } = server[1].s.description.hostAddress;
+                    chai.expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
+                  }
+                } 
+              );
+            });
           });
 
           describe('Server resource: connection thread', () => {
-            it('no connection threads remain after client.close()', metadata, async () => {});
+            it('no connection threads remain after client.close()', metadata, async () => {
+
+            });
           });
         });
 
@@ -112,14 +142,48 @@ describe.skip('MongoClient.close() Integration', () => {
             describe('after entering monitor streaming mode ', () => {
               it('the rtt pinger timer is cleaned up by client.close()', async () => {
                 // helloReply has a topologyVersion defined
-              });
+                await runScriptAndGetProcessInfo(
+                  'socket-connection-monitoring',
+                  config,
+                  async function run({ MongoClient, uri, expect }) {
+                    const client = new MongoClient(uri,  { serverMonitoringMode: 'stream', minHeartbeatFrequencyMS: 10000 });
+                    await client.connect();
+                });
             });
           });
 
           describe('Connection', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
-                it('no sockets remain after client.close()', async () => {});
+                it('no sockets remain after client.close()', async () => {
+                  await runScriptAndGetProcessInfo(
+                  'socket-connection-monitoring',
+                  config,
+                  async function run({ MongoClient, uri, log, expect }) {
+                    const client = new MongoClient(uri,  { serverMonitoringMode: 'stream', minHeartbeatFrequencyMS: 10000 });
+                    await client.connect();
+
+                    // returns all active tcp endpoints
+                    const connectionMonitoringReport = () => process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
+                    
+                    log({report: connectionMonitoringReport() });
+                    // assert socket creation
+                    const servers = client.topology?.s.servers;
+                    for (const server of servers) {
+                      let { host, port } = server[1].s.description.hostAddress;
+                      chai.expect(connectionMonitoringReport()).to.deep.include({ host, port });
+                    }
+
+                    await client.close();
+
+                    // assert socket destruction 
+                    for (const server of servers) {
+                      let { host, port } = server[1].s.description.hostAddress;
+                      chai.expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
+                    }
+                  } 
+                );
+                });
               });
             });
 
