@@ -7,7 +7,7 @@ import * as path from 'node:path';
 import { expect } from 'chai';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
-import { type MongoClient } from '../../mongodb';
+import { type BSON, type ClientEncryption, type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 
 export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
@@ -22,7 +22,9 @@ export type ProcessResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
   uri: string;
   log: (out: any) => void;
-  chai: { expect: object };
+  chai: { expect: typeof expect };
+  ClientEncryption?: typeof ClientEncryption;
+  BSON?: typeof BSON;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
@@ -186,13 +188,13 @@ export async function runScriptAndGetProcessInfo(
   const messages = JSON.parse(formattedLogRead);
 
   // delete temporary files
-  await unlink(scriptName);
-  await unlink(logFile);
+  // await unlink(scriptName);
+  // await unlink(logFile);
 
   // assertions about exit status
   expect(exitCode, 'process should have exited with zero').to.equal(0);
 
   // assertions about resource status
   expect(messages.beforeExitHappened).to.be.true;
-  expect(messages.newResources).to.be.empty;
+  expect(messages.newLibuvResources).to.be.empty;
 }

@@ -2,10 +2,29 @@
 
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-const driverPath = DRIVER_SOURCE_PATH;
-const func = FUNCTION_STRING;
-const name = NAME_STRING;
-const uri = URI_STRING;
+const driverPath = "/Users/aditi.khare/Desktop/node-mongodb-native/lib";
+const func = (async function run({ MongoClient, uri, log, chai }) {
+                                const client = new MongoClient(uri, { serverMonitoringMode: 'auto' });
+                                await client.connect();
+                                // returns all active tcp endpoints
+                                const connectionMonitoringReport = () => process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
+                                log({ report: connectionMonitoringReport() });
+                                // assert socket creation
+                                const servers = client.topology?.s.servers;
+                                for (const server of servers) {
+                                    let { host, port } = server[1].s.description.hostAddress;
+                                    // regardless of if its active the socket should be gone from the libuv report
+                                    chai.expect(connectionMonitoringReport()).to.deep.include({ host, port });
+                                }
+                                await client.close();
+                                // assert socket destruction 
+                                for (const server of servers) {
+                                    let { host, port } = server[1].s.description.hostAddress;
+                                    chai.expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
+                                }
+                            });
+const name = "socket-connection-monitoring";
+const uri = "mongodb://bob:pwd123@localhost:27017/integration_tests?authSource=admin";
 
 const { MongoClient, ClientEncryption, BSON } = require(driverPath);
 const process = require('node:process');

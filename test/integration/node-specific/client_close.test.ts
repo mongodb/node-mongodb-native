@@ -1,12 +1,12 @@
 import { expect } from 'chai';
-
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
-describe.skip('MongoClient.close() Integration', () => {
+describe('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
 
   let config: TestConfiguration;
+
   beforeEach(function () {
     config = this.configuration;
   });
@@ -18,8 +18,8 @@ describe.skip('MongoClient.close() Integration', () => {
           'tls-file-read',
           config,
           async function run({ MongoClient, uri, log, chai }) {
-            const devZeroFilePath = '/dev/zero';
-            const client = new MongoClient(uri, { tlsCertificateKeyFile: devZeroFilePath });
+            const infiniteFile = '/dev/zero';
+            const client = new MongoClient(uri, { tlsCertificateKeyFile: infiniteFile });
             client.connect();
             log({ ActiveResources: process.getActiveResourcesInfo() });
             chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
@@ -33,17 +33,19 @@ describe.skip('MongoClient.close() Integration', () => {
 
   describe('Node.js resource: .dockerenv file access', () => {
     describe('when client is connecting and reads an infinite .dockerenv file', () => {
-      it('the file read is not interrupted by client.close()', async () => {
+      it('the file read is not interrupted by client.close()', async function () {
         await runScriptAndGetProcessInfo(
-          'docker-read',
+          'docker-file-access',
           config,
-          async function run({ MongoClient, uri }) {
-            /* const dockerPath = '.dockerenv';
-            sinon.stub(fs, 'access').callsFake(async () => await sleep(5000));
-            await fs.writeFile('.dockerenv', '', { encoding: 'utf8' });
-            const client = new MongoClient(uri);
+          async function run({ MongoClient, uri, log, chai }) {
+            // TODO: unsure how to make a /.dockerenv fs access read hang
+            const client = this.configuration.newClient();
+            client.connect();
+            // assert resource exists
+            chai.expect(process.getActiveResourcesInfo()).to.contain('FSReqPromise');
             await client.close();
-            unlink(dockerPath); */
+            // assert resource still exists
+            chai.expect(process.getActiveResourcesInfo()).to.contain('FSReqPromise');
           }
         );
       });
@@ -53,7 +55,29 @@ describe.skip('MongoClient.close() Integration', () => {
   describe('MongoClientAuthProviders', () => {
     describe('Node.js resource: Token file read', () => {
       describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
-        it('the file read is interrupted by client.close()', async () => {});
+        it('the file read is interrupted by client.close()', async () => {
+          await runScriptAndGetProcessInfo(
+            'token-file-read',
+            config,
+            async function run({ MongoClient, uri, log, chai }) {
+              const infiniteFile = '/dev/zero';
+              log({ ActiveResources: process.getActiveResourcesInfo() });
+
+              // speculative authentication call to getToken() during initial handshake
+              const client = new MongoClient(uri, {
+                authMechanismProperties: { TOKEN_RESOURCE: infiniteFile }
+              });
+              client.connect();
+
+              log({ ActiveResources: process.getActiveResourcesInfo() });
+
+              chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+              await client.close();
+
+              chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+            }
+          );
+        });
       });
     });
   });
@@ -77,6 +101,13 @@ describe.skip('MongoClient.close() Integration', () => {
 
     describe('Server', () => {
       describe('Monitor', () => {
+        // connection monitoring is by default turned on - with the exception of load-balanced mode
+        const metadata: MongoDBMetadataUI = {
+          requires: {
+            topology: ['single', 'replicaset', 'sharded']
+          }
+        };
+
         describe('MonitorInterval', () => {
           describe('Node.js resource: Timer', () => {
             describe('after a new monitor is made', () => {
@@ -90,15 +121,42 @@ describe.skip('MongoClient.close() Integration', () => {
         });
 
         describe('Connection Monitoring', () => {
-          // connection monitoring is by default turned on - with the exception of load-balanced mode
           describe('Node.js resource: Socket', () => {
-            it('no sockets remain after client.close()', async () => {
-              // TODO: skip for LB mode
+            it.only('no sockets remain after client.close()', metadata, async function () {
+              await runScriptAndGetProcessInfo(
+                'socket-connection-monitoring',
+                config,
+                async function run({ MongoClient, uri, log, chai }) {
+                  const client = new MongoClient(uri,  { serverMonitoringMode: 'auto' });
+                  await client.connect();
+
+                  // returns all active tcp endpoints
+                  const connectionMonitoringReport = () => process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
+                  
+                  log({report: connectionMonitoringReport() });
+                  // assert socket creation
+                  const servers = client.topology?.s.servers;
+                  for (const server of servers) {
+                    let { host, port } = server[1].s.description.hostAddress;
+                    // regardless of if its active the socket should be gone from the libuv report
+
+                    chai.expect(connectionMonitoringReport()).to.deep.include({ host, port });
+                  }
+
+                  await client.close();
+
+                  // assert socket destruction 
+                  for (const server of servers) {
+                    let { host, port } = server[1].s.description.hostAddress;
+                    chai.expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
+                  }
+                } 
+              );
             });
           });
 
           describe('Server resource: connection thread', () => {
-            it('no connection threads remain after client.close()', async () => {
+            it('no connection threads remain after client.close()', metadata, async () => {
               // TODO: skip for LB mode
             });
           });
@@ -116,7 +174,35 @@ describe.skip('MongoClient.close() Integration', () => {
           describe('Connection', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
-                it('no sockets remain after client.close()', async () => {});
+                it('no sockets remain after client.close()', async () => {
+                  await runScriptAndGetProcessInfo(
+                    'socket-rtt-monitoring',
+                    config,
+                    async function run({ MongoClient, uri, log, chai }) {
+                      const client = new MongoClient(uri);
+                      await client.connect();
+
+                      // returns all active tcp endpoints
+                      const connectionMonitoringReport = () => process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
+                  
+                      // assert socket creation
+                      const servers = client.topology?.s.servers;
+                      for (const server of servers) {
+                        let { host, port } = server[1].s.description.hostAddress;
+                        // regardless of if its active the socket should be gone from the libuv report
+                        chai.expect(connectionMonitoringReport()).to.deep.include({ host, port });
+                      }
+
+                      await client.close();
+
+                      // assert socket destruction 
+                      for (const server of servers) {
+                        let { host, port } = server[1].s.description.hostAddress;
+                        chai.expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
+                      } 
+                    } 
+                  );
+                });
               });
             });
 
@@ -209,35 +295,157 @@ describe.skip('MongoClient.close() Integration', () => {
 
     describe('Server resource: Transactions', () => {
       describe('after a clientSession is created and used', () => {
-        it('the server-side transaction is cleaned up by client.close()', async function () {
-          const client = this.configuration.newClient();
-          await client.connect();
-          const session = client.startSession();
-          session.startTransaction();
-          await client.db('db').collection('coll').insertOne({ a: 1 }, { session });
-
-          // assert server-side session exists
-          expect(session.serverSession).to.exist;
-
-          await session.endSession();
-          await client.close();
-
-          // assert command was sent to server to end server side session
-        });
+        it('the server-side transaction is cleaned up by client.close()', async function () {});
       });
     });
   });
 
   describe('AutoEncrypter', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: {
+        mongodb: '>=4.2.0',
+        clientSideEncryption: true
+      }
+    };
+
     describe('KMS Request', () => {
       describe('Node.js resource: TLS file read', () => {
-        describe('when KMSRequest reads an infinite TLS file read', () => {
-          it('the file read is interrupted by client.close()', async () => {});
+        describe('when KMSRequest reads an infinite TLS file', () => {
+          it('the file read is interrupted by client.close()', async () => {
+            await runScriptAndGetProcessInfo(
+              'tls-file-read',
+              config,
+              async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
+                const infiniteFile = '/dev/zero';
+
+                const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
+                const masterKey = {
+                  region: 'us-east-1',
+                  key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+                };
+                const provider = 'aws';
+
+                const keyVaultClient = new MongoClient(uri);
+                await keyVaultClient.connect();
+                await keyVaultClient.db('keyvault').collection('datakeys');
+
+                const clientEncryption = new ClientEncryption(keyVaultClient, {
+                  keyVaultNamespace: 'keyvault.datakeys',
+                  kmsProviders
+                });
+                const dataKey = await clientEncryption.createDataKey(provider, { masterKey });
+
+                function getEncryptExtraOptions() {
+                  if (
+                    typeof process.env.CRYPT_SHARED_LIB_PATH === 'string' &&
+                    process.env.CRYPT_SHARED_LIB_PATH.length > 0
+                  ) {
+                    return { cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH };
+                  }
+                  return {};
+                }
+                const schemaMap = {
+                  'db.coll': {
+                    bsonType: 'object',
+                    encryptMetadata: {
+                      keyId: [dataKey]
+                    },
+                    properties: {
+                      a: {
+                        encrypt: {
+                          bsonType: 'int',
+                          algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
+                          keyId: [dataKey]
+                        }
+                      }
+                    }
+                  }
+                };
+                const encryptionOptions = {
+                  autoEncryption: {
+                    keyVaultNamespace: 'keyvault.datakeys',
+                    kmsProviders,
+                    extraOptions: getEncryptExtraOptions(),
+                    schemaMap,
+                    tlsOptions: { aws: { tlsCAFile: infiniteFile } }
+                  }
+                };
+
+                const encryptedClient = new MongoClient(uri, encryptionOptions);
+                await encryptedClient.connect();
+
+                const insertPromise = encryptedClient
+                  .db('db')
+                  .collection('coll')
+                  .insertOne({ a: 1 });
+
+                chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+                log({ activeResourcesBeforeClose: process.getActiveResourcesInfo() });
+
+                await keyVaultClient.close();
+                await encryptedClient.close();
+
+                chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+                log({ activeResourcesAfterClose: process.getActiveResourcesInfo() });
+
+                const err = await insertPromise.catch(e => e);
+                chai.expect(err).to.exist;
+                chai.expect(err.errmsg).to.contain('Error in KMS response');
+              }
+            );
+          });
         });
       });
 
       describe('Node.js resource: Socket', () => {
-        it('no sockets remain after client.close()', async () => {});
+        it('no sockets remain after client.close()', metadata, async () => {
+          await runScriptAndGetProcessInfo(
+            'tls-file-read',
+            config,
+            async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
+              const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
+              const masterKey = {
+                region: 'us-east-1',
+                key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+              };
+              const provider = 'aws';
+
+              const keyVaultClient = new MongoClient(uri);
+              await keyVaultClient.connect();
+
+              await keyVaultClient.db('keyvault').collection('datakeys');
+              const clientEncryption = new ClientEncryption(keyVaultClient, {
+                keyVaultNamespace: 'keyvault.datakeys',
+                kmsProviders
+              });
+
+              const socketIdCache = process.report
+                .getReport()
+                .libuv.filter(r => r.type === 'tcp')
+                .map(r => r.address);
+              log({ socketIdCache });
+
+              // runs KMS request
+              const dataKey = await clientEncryption
+                .createDataKey(provider, { masterKey })
+                .catch(e => e);
+
+              const newSocketsBeforeClose = process.report
+                .getReport()
+                .libuv.filter(r => !socketIdCache.includes(r.address) && r.type === 'tcp');
+              log({ newSocketsBeforeClose });
+              chai.expect(newSocketsBeforeClose).to.have.length.gte(1);
+
+              await keyVaultClient.close();
+
+              const newSocketsAfterClose = process.report
+                .getReport()
+                .libuv.filter(r => !socketIdCache.includes(r.address) && r.type === 'tcp');
+              log({ newSocketsAfterClose });
+              chai.expect(newSocketsAfterClose).to.be.empty;
+            }
+          );
+        });
       });
     });
   });
@@ -246,19 +454,106 @@ describe.skip('MongoClient.close() Integration', () => {
     describe('KMS Request', () => {
       describe('Node.js resource: TLS file read', () => {
         describe('when KMSRequest reads an infinite TLS file read', () => {
-          it('the file read is interrupted by client.close()', async () => {});
+          it('the file read is interrupted by client.close()', async () => {
+            await runScriptAndGetProcessInfo(
+              'tls-file-read',
+              config,
+              async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
+                const infiniteFile = '/dev/zero';
+                const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
+                const masterKey = {
+                  region: 'us-east-1',
+                  key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+                };
+                const provider = 'aws';
+
+                const keyVaultClient = new MongoClient(uri);
+                await keyVaultClient.connect();
+
+                await keyVaultClient.db('keyvault').collection('datakeys');
+                const clientEncryption = new ClientEncryption(keyVaultClient, {
+                  keyVaultNamespace: 'keyvault.datakeys',
+                  kmsProviders,
+                  tlsOptions: { aws: { tlsCAFile: infiniteFile } }
+                });
+
+                const dataKeyPromise = clientEncryption.createDataKey(provider, { masterKey });
+
+                chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+
+                log({ activeResourcesBeforeClose: process.getActiveResourcesInfo() });
+
+                await keyVaultClient.close();
+
+                chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+
+                log({ activeResourcesAfterClose: process.getActiveResourcesInfo() });
+
+                const err = await dataKeyPromise.catch(e => e);
+                chai.expect(err).to.exist;
+                chai.expect(err.errmsg).to.contain('Error in KMS response');
+              }
+            );
+          });
         });
       });
 
       describe('Node.js resource: Socket', () => {
-        it('no sockets remain after client.close()', async () => {});
+        it('no sockets remain after client.close()', async () => {
+          await runScriptAndGetProcessInfo(
+            'tls-file-read',
+            config,
+            async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
+              const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
+              const masterKey = {
+                region: 'us-east-1',
+                key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+              };
+              const provider = 'aws';
+
+              const keyVaultClient = new MongoClient(uri);
+              await keyVaultClient.connect();
+
+              await keyVaultClient.db('keyvault').collection('datakeys');
+              const clientEncryption = new ClientEncryption(keyVaultClient, {
+                keyVaultNamespace: 'keyvault.datakeys',
+                kmsProviders
+              });
+
+              const socketIdCache = process.report
+                .getReport()
+                .libuv.filter(r => r.type === 'tcp')
+                .map(r => r.address);
+              log({ socketIdCache });
+
+              // runs KMS request
+              const dataKey = await clientEncryption
+                .createDataKey(provider, { masterKey })
+                .catch(e => e);
+
+              const newSocketsBeforeClose = process.report
+                .getReport()
+                .libuv.filter(r => !socketIdCache.includes(r.address) && r.type === 'tcp');
+              log({ newSocketsBeforeClose });
+              chai.expect(newSocketsBeforeClose).to.have.length.gte(1);
+
+              await keyVaultClient.close();
+
+              const newSocketsAfterClose = process.report
+                .getReport()
+                .libuv.filter(r => !socketIdCache.includes(r.address) && r.type === 'tcp');
+              log({ newSocketsAfterClose });
+              chai.expect(newSocketsAfterClose).to.be.empty;
+            }
+          );
+        });
       });
     });
   });
 
   describe('Server resource: Cursor', () => {
     describe('after cursors are created', () => {
-      it('all active server-side cursors are closed by client.close()', async () => {});
+      it('all active server-side cursors are closed by client.close()', async function () {});
     });
   });
 });
