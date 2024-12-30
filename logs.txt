@@ -1,4 +1,0 @@
-"report":[{"host":"localhost","port":27017},{"host":"localhost","port":27017}], 
-"newLibuvResources":[], 
-"exitCode":0, 
-"beforeExitHappened":true, 

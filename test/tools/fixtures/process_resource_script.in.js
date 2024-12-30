@@ -25,11 +25,12 @@ const serverType = ['tcp', 'udp'];
 function getNewLibuvResourceArray() {
   let currReport = process.report.getReport().libuv;
   const originalReportAddresses = originalReport.map(resource => resource.address);
-  currReport = currReport.filter(resource => 
-    !originalReportAddresses.includes(resource.address) &&
-    resource.is_referenced && // if a resource is unreferenced, it's not keeping the event loop open
-    (!serverType.includes(resource.type) || resource.is_active)
-);
+  currReport = currReport.filter(
+    resource =>
+      !originalReportAddresses.includes(resource.address) &&
+      resource.is_referenced && // if a resource is unreferenced, it's not keeping the event loop open
+      (!serverType.includes(resource.type) || resource.is_active)
+  );
   return currReport;
 }
 

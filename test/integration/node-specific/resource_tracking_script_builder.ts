@@ -188,8 +188,8 @@ export async function runScriptAndGetProcessInfo(
   const messages = JSON.parse(formattedLogRead);
 
   // delete temporary files
-  // await unlink(scriptName);
-  // await unlink(logFile);
+  await unlink(scriptName);
+  await unlink(logFile);
 
   // assertions about exit status
   expect(exitCode, 'process should have exited with zero').to.equal(0);

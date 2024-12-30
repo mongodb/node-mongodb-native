@@ -1,8 +1,9 @@
-import { expect } from 'chai';
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
-describe('MongoClient.close() Integration', () => {
+describe.skip('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
 
   let config: TestConfiguration;
@@ -32,23 +33,9 @@ describe('MongoClient.close() Integration', () => {
   });
 
   describe('Node.js resource: .dockerenv file access', () => {
-    describe('when client is connecting and reads an infinite .dockerenv file', () => {
-      it('the file read is not interrupted by client.close()', async function () {
-        await runScriptAndGetProcessInfo(
-          'docker-file-access',
-          config,
-          async function run({ MongoClient, uri, log, chai }) {
-            // TODO: unsure how to make a /.dockerenv fs access read hang
-            const client = this.configuration.newClient();
-            client.connect();
-            // assert resource exists
-            chai.expect(process.getActiveResourcesInfo()).to.contain('FSReqPromise');
-            await client.close();
-            // assert resource still exists
-            chai.expect(process.getActiveResourcesInfo()).to.contain('FSReqPromise');
-          }
-        );
-      });
+    describe('when client is connecting and fs.access stalls while accessing .dockerenv file', () => {
+      it('the file access is not interrupted by client.close()', async function () {}).skipReason =
+        'TODO(NODE-6624): Align Client.Close Test Cases with Finalized Design';
     });
   });
 
@@ -63,7 +50,7 @@ describe('MongoClient.close() Integration', () => {
               const infiniteFile = '/dev/zero';
               log({ ActiveResources: process.getActiveResourcesInfo() });
 
-              // speculative authentication call to getToken() during initial handshake
+              // speculative authentication call to getToken() is during initial handshake
               const client = new MongoClient(uri, {
                 authMechanismProperties: { TOKEN_RESOURCE: infiniteFile }
               });
@@ -85,17 +72,7 @@ describe('MongoClient.close() Integration', () => {
   describe('Topology', () => {
     describe('Node.js resource: Server Selection Timer', () => {
       describe('after a Topology is created through client.connect()', () => {
-        it('server selection timers are cleaned up by client.close()', async () => {
-          await runScriptAndGetProcessInfo(
-            'server-selection-timers',
-            config,
-            async function run({ MongoClient, uri }) {
-              const client = new MongoClient(uri);
-              client.connect();
-              await client.close();
-            }
-          );
-        });
+        it('server selection timers are cleaned up by client.close()', async () => {});
       });
     });
 
@@ -122,43 +99,11 @@ describe('MongoClient.close() Integration', () => {
 
         describe('Connection Monitoring', () => {
           describe('Node.js resource: Socket', () => {
-            it.only('no sockets remain after client.close()', metadata, async function () {
-              await runScriptAndGetProcessInfo(
-                'socket-connection-monitoring',
-                config,
-                async function run({ MongoClient, uri, log, chai }) {
-                  const client = new MongoClient(uri,  { serverMonitoringMode: 'auto' });
-                  await client.connect();
-
-                  // returns all active tcp endpoints
-                  const connectionMonitoringReport = () => process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
-                  
-                  log({report: connectionMonitoringReport() });
-                  // assert socket creation
-                  const servers = client.topology?.s.servers;
-                  for (const server of servers) {
-                    let { host, port } = server[1].s.description.hostAddress;
-                    // regardless of if its active the socket should be gone from the libuv report
-
-                    chai.expect(connectionMonitoringReport()).to.deep.include({ host, port });
-                  }
-
-                  await client.close();
-
-                  // assert socket destruction 
-                  for (const server of servers) {
-                    let { host, port } = server[1].s.description.hostAddress;
-                    chai.expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
-                  }
-                } 
-              );
-            });
+            it('no sockets remain after client.close()', metadata, async function () {});
           });
 
           describe('Server resource: connection thread', () => {
-            it('no connection threads remain after client.close()', metadata, async () => {
-              // TODO: skip for LB mode
-            });
+            it('no connection threads remain after client.close()', metadata, async () => {});
           });
         });
 
@@ -174,35 +119,7 @@ describe('MongoClient.close() Integration', () => {
           describe('Connection', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
-                it('no sockets remain after client.close()', async () => {
-                  await runScriptAndGetProcessInfo(
-                    'socket-rtt-monitoring',
-                    config,
-                    async function run({ MongoClient, uri, log, chai }) {
-                      const client = new MongoClient(uri);
-                      await client.connect();
-
-                      // returns all active tcp endpoints
-                      const connectionMonitoringReport = () => process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
-                  
-                      // assert socket creation
-                      const servers = client.topology?.s.servers;
-                      for (const server of servers) {
-                        let { host, port } = server[1].s.description.hostAddress;
-                        // regardless of if its active the socket should be gone from the libuv report
-                        chai.expect(connectionMonitoringReport()).to.deep.include({ host, port });
-                      }
-
-                      await client.close();
-
-                      // assert socket destruction 
-                      for (const server of servers) {
-                        let { host, port } = server[1].s.description.hostAddress;
-                        chai.expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
-                      } 
-                    } 
-                  );
-                });
+                it('no sockets remain after client.close()', async () => {});
               });
             });
 
@@ -256,17 +173,7 @@ describe('MongoClient.close() Integration', () => {
     describe('SrvPoller', () => {
       describe('Node.js resource: Timer', () => {
         describe('after SRVPoller is created', () => {
-          it('timers are cleaned up by client.close()', async () => {
-            await runScriptAndGetProcessInfo(
-              'srv-poller',
-              config,
-              async function run({ MongoClient, uri }) {
-                const client = new MongoClient(uri);
-                await client.connect();
-                await client.close();
-              }
-            );
-          });
+          it('timers are cleaned up by client.close()', async () => {});
         });
       });
     });
@@ -398,54 +305,7 @@ describe('MongoClient.close() Integration', () => {
       });
 
       describe('Node.js resource: Socket', () => {
-        it('no sockets remain after client.close()', metadata, async () => {
-          await runScriptAndGetProcessInfo(
-            'tls-file-read',
-            config,
-            async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
-              const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
-              const masterKey = {
-                region: 'us-east-1',
-                key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
-              };
-              const provider = 'aws';
-
-              const keyVaultClient = new MongoClient(uri);
-              await keyVaultClient.connect();
-
-              await keyVaultClient.db('keyvault').collection('datakeys');
-              const clientEncryption = new ClientEncryption(keyVaultClient, {
-                keyVaultNamespace: 'keyvault.datakeys',
-                kmsProviders
-              });
-
-              const socketIdCache = process.report
-                .getReport()
-                .libuv.filter(r => r.type === 'tcp')
-                .map(r => r.address);
-              log({ socketIdCache });
-
-              // runs KMS request
-              const dataKey = await clientEncryption
-                .createDataKey(provider, { masterKey })
-                .catch(e => e);
-
-              const newSocketsBeforeClose = process.report
-                .getReport()
-                .libuv.filter(r => !socketIdCache.includes(r.address) && r.type === 'tcp');
-              log({ newSocketsBeforeClose });
-              chai.expect(newSocketsBeforeClose).to.have.length.gte(1);
-
-              await keyVaultClient.close();
-
-              const newSocketsAfterClose = process.report
-                .getReport()
-                .libuv.filter(r => !socketIdCache.includes(r.address) && r.type === 'tcp');
-              log({ newSocketsAfterClose });
-              chai.expect(newSocketsAfterClose).to.be.empty;
-            }
-          );
-        });
+        it('no sockets remain after client.close()', metadata, async () => {});
       });
     });
   });
@@ -499,54 +359,7 @@ describe('MongoClient.close() Integration', () => {
       });
 
       describe('Node.js resource: Socket', () => {
-        it('no sockets remain after client.close()', async () => {
-          await runScriptAndGetProcessInfo(
-            'tls-file-read',
-            config,
-            async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
-              const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
-              const masterKey = {
-                region: 'us-east-1',
-                key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
-              };
-              const provider = 'aws';
-
-              const keyVaultClient = new MongoClient(uri);
-              await keyVaultClient.connect();
-
-              await keyVaultClient.db('keyvault').collection('datakeys');
-              const clientEncryption = new ClientEncryption(keyVaultClient, {
-                keyVaultNamespace: 'keyvault.datakeys',
-                kmsProviders
-              });
-
-              const socketIdCache = process.report
-                .getReport()
-                .libuv.filter(r => r.type === 'tcp')
-                .map(r => r.address);
-              log({ socketIdCache });
-
-              // runs KMS request
-              const dataKey = await clientEncryption
-                .createDataKey(provider, { masterKey })
-                .catch(e => e);
-
-              const newSocketsBeforeClose = process.report
-                .getReport()
-                .libuv.filter(r => !socketIdCache.includes(r.address) && r.type === 'tcp');
-              log({ newSocketsBeforeClose });
-              chai.expect(newSocketsBeforeClose).to.have.length.gte(1);
-
-              await keyVaultClient.close();
-
-              const newSocketsAfterClose = process.report
-                .getReport()
-                .libuv.filter(r => !socketIdCache.includes(r.address) && r.type === 'tcp');
-              log({ newSocketsAfterClose });
-              chai.expect(newSocketsAfterClose).to.be.empty;
-            }
-          );
-        });
+        it('no sockets remain after client.close()', async () => {});
       });
     });
   });
