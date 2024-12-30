@@ -184,8 +184,8 @@ export async function runScriptAndGetProcessInfo(
   // make sure the process ended
   const [exitCode] = await willClose;
 
-  const formattedLogRead = '{' + fs.readFileSync(logFile, 'utf-8').slice(0, -3) + '}';
-  const messages = JSON.parse(formattedLogRead);
+  // format messages from child process as an object
+  const messages = (await readFile(logFile, 'utf-8')).trim().split('\n').map(line => JSON.parse(line)).reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
   // delete temporary files
   await unlink(scriptName);

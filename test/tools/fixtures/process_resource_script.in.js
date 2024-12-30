@@ -36,7 +36,7 @@ function getNewLibuvResourceArray() {
 
 function log(message) {
   // remove outer parentheses for easier parsing
-  const messageToLog = JSON.stringify(message).slice(1, -1) + ', \n';
+  const messageToLog = JSON.stringify(message) + ' \n';
   fs.writeFileSync(logFile, messageToLog, { flag: 'a' });
 }
 
