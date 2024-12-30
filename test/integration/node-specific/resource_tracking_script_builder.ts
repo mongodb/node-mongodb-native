@@ -20,8 +20,8 @@ export type HeapResourceTestFunction = (options: {
 export type ProcessResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
   uri: string;
-  log: (out: any) => void;
-  chai: { expect: typeof expect };
+  log?: (out: any) => void;
+  expect: typeof expect;
   ClientEncryption?: typeof ClientEncryption;
   BSON?: typeof BSON;
 }) => Promise<void>;
@@ -47,7 +47,7 @@ export async function testScriptFactory(
 
   resourceScript = resourceScript.replace('DRIVER_SOURCE_PATH', DRIVER_SRC_PATH);
   resourceScript = resourceScript.replace('FUNCTION_STRING', `(${func.toString()})`);
-  resourceScript = resourceScript.replace('NAME_STRING', JSON.stringify(name));
+  resourceScript = resourceScript.replace('SCRIPT_NAME_STRING', JSON.stringify(name));
   resourceScript = resourceScript.replace('URI_STRING', JSON.stringify(uri));
   resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
 
@@ -140,11 +140,11 @@ export async function runScriptAndReturnHeapInfo(
  * **The provided function is run in an isolated Node.js process**
  *
  * A user of this function will likely need to familiarize themselves with the surrounding scripting, but briefly:
- * - Every MongoClient you construct should have an asyncResource attached to it like so:
- * ```js
- * mongoClient.asyncResource = new this.async_hooks.AsyncResource('MongoClient');
- * ```
- * - You can perform any number of operations and connects/closes of MongoClients
+ * - Many MongoClient operations (construction, connection, commands) can result in resources that keep the JS event loop running.
+ *   - Timers
+ *   - Active Sockets
+ *   - File Read Hangs
+ *
  * - This function performs assertions that at the end of the provided function, the js event loop has been exhausted
  *
  * @param name - the name of the script, this defines the name of the file, it will be cleaned up if the function returns successfully
@@ -168,15 +168,7 @@ export async function runScriptAndGetProcessInfo(
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
   const logFile = 'logs.txt';
 
-  const processDiedController = new AbortController();
   const script = spawn(process.argv[0], [scriptName], { stdio: ['ignore', 'ignore', 'ignore'] });
-
-  // Interrupt our awaiting of messages if the process crashed
-  script.once('close', exitCode => {
-    if (exitCode !== 0) {
-      processDiedController.abort(new Error(`process exited with: ${exitCode}`));
-    }
-  });
 
   const willClose = once(script, 'close');
 

@@ -18,14 +18,13 @@ describe.skip('MongoClient.close() Integration', () => {
         await runScriptAndGetProcessInfo(
           'tls-file-read',
           config,
-          async function run({ MongoClient, uri, log, chai }) {
+          async function run({ MongoClient, uri, expect }) {
             const infiniteFile = '/dev/zero';
             const client = new MongoClient(uri, { tlsCertificateKeyFile: infiniteFile });
             client.connect();
-            log({ ActiveResources: process.getActiveResourcesInfo() });
-            chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+            expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
             await client.close();
-            chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+            expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
           }
         );
       });
@@ -60,7 +59,7 @@ describe.skip('MongoClient.close() Integration', () => {
           await runScriptAndGetProcessInfo(
             'token-file-read',
             config,
-            async function run({ MongoClient, uri, chai }) {
+            async function run({ MongoClient, uri, expect }) {
               const infiniteFile = '/dev/zero';
               process.env.OIDC_TOKEN_FILE = infiniteFile;
               const options = {
@@ -69,9 +68,9 @@ describe.skip('MongoClient.close() Integration', () => {
               };
               const client = new MongoClient(uri, options);
               client.connect();
-              chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+              expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
               await client.close();
-              chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+              expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
             }
           );
         });
@@ -232,7 +231,7 @@ describe.skip('MongoClient.close() Integration', () => {
             await runScriptAndGetProcessInfo(
               'tls-file-read-auto-encryption',
               config,
-              async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
+              async function run({ MongoClient, uri, expect, ClientEncryption, BSON }) {
                 const infiniteFile = '/dev/zero';
 
                 const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
@@ -296,18 +295,16 @@ describe.skip('MongoClient.close() Integration', () => {
                   .collection('coll')
                   .insertOne({ a: 1 });
 
-                chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-                log({ activeResourcesBeforeClose: process.getActiveResourcesInfo() });
+                expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
 
                 await keyVaultClient.close();
                 await encryptedClient.close();
 
-                chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-                log({ activeResourcesAfterClose: process.getActiveResourcesInfo() });
+                expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
 
                 const err = await insertPromise.catch(e => e);
-                chai.expect(err).to.exist;
-                chai.expect(err.errmsg).to.contain('Error in KMS response');
+                expect(err).to.exist;
+                expect(err.errmsg).to.contain('Error in KMS response');
               }
             );
           });
@@ -328,7 +325,7 @@ describe.skip('MongoClient.close() Integration', () => {
             await runScriptAndGetProcessInfo(
               'tls-file-read-client-encryption',
               config,
-              async function run({ MongoClient, uri, log, chai, ClientEncryption, BSON }) {
+              async function run({ MongoClient, uri, expect, ClientEncryption, BSON }) {
                 const infiniteFile = '/dev/zero';
                 const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
                 const masterKey = {
@@ -349,19 +346,15 @@ describe.skip('MongoClient.close() Integration', () => {
 
                 const dataKeyPromise = clientEncryption.createDataKey(provider, { masterKey });
 
-                chai.expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-
-                log({ activeResourcesBeforeClose: process.getActiveResourcesInfo() });
+                expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
 
                 await keyVaultClient.close();
 
-                chai.expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-
-                log({ activeResourcesAfterClose: process.getActiveResourcesInfo() });
+                expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
 
                 const err = await dataKeyPromise.catch(e => e);
-                chai.expect(err).to.exist;
-                chai.expect(err.errmsg).to.contain('Error in KMS response');
+                expect(err).to.exist;
+                expect(err.errmsg).to.contain('Error in KMS response');
               }
             );
           });
