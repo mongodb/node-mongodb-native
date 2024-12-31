@@ -20,6 +20,9 @@ const logFile = 'logs.txt';
 
 const run = func;
 
+const { promisify } = require('node:util');
+const sleep = promisify(setTimeout);
+
 /**
  *
  * Returns an array containing the new resources created after script started.
@@ -71,7 +74,7 @@ async function main() {
   process.on('beforeExit', () => {
     log({ beforeExitHappened: true });
   });
-  await run({ MongoClient, uri, log, expect, ClientEncryption, BSON });
+  await run({ MongoClient, uri, log, expect, ClientEncryption, BSON, sleep });
   log({ newLibuvResources: getNewLibuvResourceArray() });
 }
 

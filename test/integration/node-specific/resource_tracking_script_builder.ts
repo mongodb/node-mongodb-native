@@ -24,6 +24,7 @@ export type ProcessResourceTestFunction = (options: {
   expect: typeof expect;
   ClientEncryption?: typeof ClientEncryption;
   BSON?: typeof BSON;
+  sleep?: typeof Promise;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
