@@ -20,9 +20,6 @@ const logFile = 'logs.txt';
 
 const run = func;
 
-const { promisify } = require('node:util');
-const sleep = promisify(setTimeout);
-
 /**
  *
  * Returns an array containing the new resources created after script started.
@@ -74,19 +71,21 @@ async function main() {
   process.on('beforeExit', () => {
     log({ beforeExitHappened: true });
   });
-  await run({ MongoClient, uri, log, expect, ClientEncryption, BSON, sleep });
+  await run({ MongoClient, uri, log, expect, ClientEncryption, BSON });
   log({ newLibuvResources: getNewLibuvResourceArray() });
 }
 
 main()
   .then(() => {})
   .catch(e => {
-    log({ exitCode: 1, error: util.inspect(e) });
+    log({ exitCode: 1, error: { message: e.message, stack: e.stack } });
   });
 
 setTimeout(() => {
   // this means something was in the event loop such that it hung for more than 10 seconds
   // so we kill the process
+  log({ newLibuvResources: getNewLibuvResourceArray() });
+  log({ exitCode: 99, error: { message: 'Process timed out: resources remain in the event loop.' } });
   process.exit(99);
   // using `unref` will ensure this setTimeout call is not a resource / does not keep the event loop running
 }, 10000).unref();

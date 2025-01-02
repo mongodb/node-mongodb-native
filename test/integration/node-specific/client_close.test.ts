@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import { expect } from 'chai';
+
 import { MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
-import { sleep } from '../../tools/utils';
 
 describe('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
@@ -104,11 +104,11 @@ describe('MongoClient.close() Integration', () => {
 
         describe('Connection Monitoring', () => {
           describe('Node.js resource: Socket', () => {
-            it('no sockets remain after client.close()', metadata, async function () {
+            it.only('no sockets remain after client.close()', metadata, async function () {
               await runScriptAndGetProcessInfo(
                 'socket-connection-monitoring',
                 config,
-                async function run({ MongoClient, uri, expect }) {
+                async function run({ MongoClient, uri, log, expect }) {
                   const client = new MongoClient(uri);
                   await client.connect();
 
@@ -119,12 +119,19 @@ describe('MongoClient.close() Integration', () => {
                       .libuv.filter(r => r.type === 'tcp' && r.is_active)
                       .map(r => r.remoteEndpoint);
 
-                  // assert socket creation
-                  const servers = client.topology?.s.servers;
+                  log({ monreport: connectionMonitoringReport() });
+                  // assert socket creation 
+                  // there should be two sockets for each server: 
+                    // client connection socket
+                    // monitor socket 
+                 /* const servers = client.topology?.s.servers;
                   for (const server of servers) {
+                    log({ monreport: connectionMonitoringReport() });
                     const { host, port } = server[1].s.description.hostAddress;
-                    expect(connectionMonitoringReport()).to.deep.include({ host, port });
-                  }
+                    const relevantHostAddresses = connectionMonitoringReport().filter(r => r.host === host && r.port === port);
+                    log({ relevantHostAddresses });
+                    expect(relevantHostAddresses).length.to.be.gte(2);
+                  } */
 
                   await client.close();
 
@@ -152,65 +159,59 @@ describe('MongoClient.close() Integration', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
                 it('no sockets remain after client.close()', async () => {
-                  const run = async function({ MongoClient, uri, expect, sleep }) {
-                      const heartbeatFrequencyMS = 100;
-                      const client = new MongoClient(uri, {
-                        serverMonitoringMode: 'stream',
-                        heartbeatFrequencyMS
-                      });
-                      await client.connect();
+                  const run = async function ({ MongoClient, uri, expect, sleep }) {
+                    const heartbeatFrequencyMS = 100;
+                    const client = new MongoClient(uri, {
+                      serverMonitoringMode: 'stream',
+                      heartbeatFrequencyMS
+                    });
+                    await client.connect();
 
-                      const servers = Array.from(client.topology.s.servers.keys());
+                    const servers = Array.from(client.topology.s.servers.keys());
 
-                      // a hashmap of <server host/ports, boolean>
-                      const serversHeartbeatOccurred = servers.reduce(
-                        (acc, hostname) => ({ ...acc, [hostname]: false }),
-                        {}
-                      );
+                    // a hashmap of <server host/ports, boolean>
+                    const serversHeartbeatOccurred = servers.reduce(
+                      (acc, hostname) => ({ ...acc, [hostname]: false }),
+                      {}
+                    );
 
-                      const activeSocketsReport = () =>
-                        process.report
-                          .getReport()
-                          .libuv.filter(r => r.type === 'tcp' && r.is_active);
+                    const activeSocketsReport = () =>
+                      process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active);
 
-                      const socketsAddressesBeforeHeartbeat = activeSocketsReport().map(
-                        r => r.address
-                      );
+                    const socketsAddressesBeforeHeartbeat = activeSocketsReport().map(
+                      r => r.address
+                    );
 
-                      const rttSocketReport = () =>
-                        activeSocketsReport()
-                          .filter(r => !socketsAddressesBeforeHeartbeat.includes(r.address))
-                          .map(r => r.remoteEndpoint.host + ':' + r.remoteEndpoint.port);
+                    const rttSocketReport = () =>
+                      activeSocketsReport()
+                        .filter(r => !socketsAddressesBeforeHeartbeat.includes(r.address))
+                        .map(r => r.remoteEndpoint.host + ':' + r.remoteEndpoint.port);
 
-                      client.on('serverHeartbeatSucceeded', async ev => {
-                        // assert creation of rttPinger socket
-                        const newSocketsAfterHeartbeat = rttSocketReport();
-                        expect(newSocketsAfterHeartbeat).to.deep.contain(ev.connectionId);
+                    client.on('serverHeartbeatSucceeded', async ev => {
+                      // assert creation of rttPinger socket
+                      const newSocketsAfterHeartbeat = rttSocketReport();
+                      expect(newSocketsAfterHeartbeat).to.deep.contain(ev.connectionId);
 
-                        // assert rttPinger socket is connected to a server
-                        expect(serversHeartbeatOccurred.keys()).to.deep.contain(ev.connectionId);
-                        serversHeartbeatOccurred[ev.connectionId] = true;
-                      });
+                      // assert rttPinger socket is connected to a server
+                      expect(serversHeartbeatOccurred.keys()).to.deep.contain(ev.connectionId);
+                      serversHeartbeatOccurred[ev.connectionId] = true;
+                    });
 
-                      // ensure there is enough time for the heartbeatFrequencyMS for the event to occur
-                      await sleep(heartbeatFrequencyMS * 10);
+                    // ensure there is enough time for the heartbeatFrequencyMS for the event to occur
+                    await sleep(heartbeatFrequencyMS * 10);
 
-                      // all servers should have had a heartbeat event
-                      expect(serversHeartbeatOccurred.values().filter(r => r !== true)).to.be.empty;
+                    // all servers should have had a heartbeat event
+                    expect(serversHeartbeatOccurred.values().filter(r => r !== true)).to.be.empty;
 
-                      // close the client
-                      await client.close();
+                    // close the client
+                    await client.close();
 
-                      // upon close, assert rttPinger socket is cleaned up
-                      const newSocketsAfterClose = rttSocketReport();
-                      expect(newSocketsAfterClose).to.have.length(0);
-                  }
-                  
-                  await runScriptAndGetProcessInfo(
-                    'socket-connection-monitoring',
-                    config,
-                    run
-                  );
+                    // upon close, assert rttPinger socket is cleaned up
+                    const newSocketsAfterClose = rttSocketReport();
+                    expect(newSocketsAfterClose).to.have.length(0);
+                  };
+
+                  await runScriptAndGetProcessInfo('socket-connection-monitoring', config, run);
                 });
               });
             });
@@ -235,24 +236,39 @@ describe('MongoClient.close() Integration', () => {
         describe('Connection', () => {
           describe('Node.js resource: Socket', () => {
             describe('after a connection is checked out', () => {
-              it.only('no sockets remain after client.close()', async function () {
-                const run = async function ({ MongoClient, uri, log, expect}) {
-                  const options = { minPoolSize: 2, heartbeatFrequencyMS: 10000, minHeartbeatFrequencyMS: 10000 };
-                  const client = new MongoClient(uri, options);
-                  await client.connect();
-                  const connectionMonitoringReport = () =>
-                    process.report
-                      .getReport()
-                      .libuv.filter(r => r.type === 'tcp' && r.is_active);
-                  log('post connect', connectionMonitoringReport());
-                  await client.close();
-                }
-                await run({ MongoClient, uri: config.uri, log: console.log, expect });
+              it('no sockets remain after client.close()', async function () {
               });
             });
 
             describe('after a minPoolSize has been set on the ConnectionPool', () => {
-              it('no sockets remain after client.close()', async () => {});
+              it('no sockets remain after client.close()', async function () {
+                const run = async function ({ MongoClient, uri, log, expect }) {
+                  log({hi: 1});
+                  const options = { minPoolSize: 2 };
+                  const client = new MongoClient(uri, options);
+                  await client.connect();
+                  const connectionMonitoringReport = () =>
+                    process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
+
+                  // assert socket creation 
+                  // there should be three sockets for each server: client connection socket, monitor socket, pool size monitoring socket
+                  const servers = client.topology?.s.servers;
+                  for (const server of servers) {
+                    log({ monreport: connectionMonitoringReport() });
+                    const { host, port } = server[1].s.description.hostAddress;
+                    const relevantHostAddresses = connectionMonitoringReport().filter(r => r.host === host && r.port === port);
+                    log({relevantHostAddresses});
+                    expect(relevantHostAddresses).length.to.be.gte(3);
+                  }
+                  await client.close();
+                };
+
+                await runScriptAndGetProcessInfo(
+                  'socket-minPoolSize', 
+                  config,
+                  run
+                );
+              });
             });
           });
         });

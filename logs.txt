@@ -1,0 +1,15 @@
+{"monreport":[{"host":"localhost","port":31000},{"host":"localhost","port":31001},{"host":"localhost","port":31002},{"host":"localhost","port":31003},{"host":"localhost","port":31000}]} 
+{"relevantHostAddresses":[{"host":"localhost","port":31000},{"host":"localhost","port":31000}]} 
+{"monreport":[{"host":"localhost","port":31000},{"host":"localhost","port":31001},{"host":"localhost","port":31002},{"host":"localhost","port":31003},{"host":"localhost","port":31000}]} 
+{"relevantHostAddresses":[{"host":"localhost","port":31001}]} 
+{"exitCode":1,"error":"AssertionError: expected [ { host: 'localhost', port: 31001 } ] to have a length at least 2 but got 1\n    at run (/Users/aditi.khare/Desktop/node-mongodb-native/socket-connection-monitoring.cjs:24:80)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async main (/Users/aditi.khare/Desktop/node-mongodb-native/socket-connection-monitoring.cjs:103:3) {\n  showDiff: true,\n  actual: 1,\n  expected: 2\n}"} 
+{"monreport":[{"host":"localhost","port":31000},{"host":"localhost","port":31001},{"host":"localhost","port":31002},{"host":"localhost","port":31003},{"host":"localhost","port":31000}]} 
+{"relevantHostAddresses":[{"host":"localhost","port":31000},{"host":"localhost","port":31000}]} 
+{"monreport":[{"host":"localhost","port":31000},{"host":"localhost","port":31001},{"host":"localhost","port":31002},{"host":"localhost","port":31003},{"host":"localhost","port":31000}]} 
+{"relevantHostAddresses":[{"host":"localhost","port":31001}]} 
+{"exitCode":1,"error":"AssertionError: expected [ { host: 'localhost', port: 31001 } ] to have a length at least 2 but got 1\n    at run (/Users/aditi.khare/Desktop/node-mongodb-native/socket-connection-monitoring.cjs:24:80)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async main (/Users/aditi.khare/Desktop/node-mongodb-native/socket-connection-monitoring.cjs:103:3) {\n  showDiff: true,\n  actual: 1,\n  expected: 2\n}"} 
+{"exitCode":1,"error":"ReferenceError: servers is not defined\n    at run (/Users/aditi.khare/Desktop/node-mongodb-native/socket-connection-monitoring.cjs:28:54)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async main (/Users/aditi.khare/Desktop/node-mongodb-native/socket-connection-monitoring.cjs:103:3)"} 
+{"beforeExitHappened":true} 
+{"monreport":[{"host":"localhost","port":31000},{"host":"localhost","port":31001},{"host":"localhost","port":31002},{"host":"localhost","port":31003},{"host":"localhost","port":31000}]} 
+{"exitCode":1,"error":"ReferenceError: servers is not defined\n    at run (/Users/aditi.khare/Desktop/node-mongodb-native/socket-connection-monitoring.cjs:29:54)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async main (/Users/aditi.khare/Desktop/node-mongodb-native/socket-connection-monitoring.cjs:104:3)"} 
+{"beforeExitHappened":true} 
