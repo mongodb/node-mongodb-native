@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
+import { expect } from 'chai';
+import { MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
+import { sleep } from '../../tools/utils';
 
 describe('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
@@ -105,7 +108,7 @@ describe('MongoClient.close() Integration', () => {
               await runScriptAndGetProcessInfo(
                 'socket-connection-monitoring',
                 config,
-                async function run({ MongoClient, uri, log, expect }) {
+                async function run({ MongoClient, uri, expect }) {
                   const client = new MongoClient(uri);
                   await client.connect();
 
@@ -116,7 +119,6 @@ describe('MongoClient.close() Integration', () => {
                       .libuv.filter(r => r.type === 'tcp' && r.is_active)
                       .map(r => r.remoteEndpoint);
 
-                  log({ report: connectionMonitoringReport() });
                   // assert socket creation
                   const servers = client.topology?.s.servers;
                   for (const server of servers) {
@@ -150,7 +152,7 @@ describe('MongoClient.close() Integration', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
                 it('no sockets remain after client.close()', async () => {
-                  const run = async function({ MongoClient, uri, log, expect, sleep }) {
+                  const run = async function({ MongoClient, uri, expect, sleep }) {
                       const heartbeatFrequencyMS = 100;
                       const client = new MongoClient(uri, {
                         serverMonitoringMode: 'stream',
@@ -233,7 +235,20 @@ describe('MongoClient.close() Integration', () => {
         describe('Connection', () => {
           describe('Node.js resource: Socket', () => {
             describe('after a connection is checked out', () => {
-              it('no sockets remain after client.close()', async () => {});
+              it.only('no sockets remain after client.close()', async function () {
+                const run = async function ({ MongoClient, uri, log, expect}) {
+                  const options = { minPoolSize: 2, heartbeatFrequencyMS: 10000, minHeartbeatFrequencyMS: 10000 };
+                  const client = new MongoClient(uri, options);
+                  await client.connect();
+                  const connectionMonitoringReport = () =>
+                    process.report
+                      .getReport()
+                      .libuv.filter(r => r.type === 'tcp' && r.is_active);
+                  log('post connect', connectionMonitoringReport());
+                  await client.close();
+                }
+                await run({ MongoClient, uri: config.uri, log: console.log, expect });
+              });
             });
 
             describe('after a minPoolSize has been set on the ConnectionPool', () => {
