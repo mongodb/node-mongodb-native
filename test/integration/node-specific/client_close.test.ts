@@ -31,13 +31,6 @@ describe('MongoClient.close() Integration', () => {
     });
   });
 
-  describe('Node.js resource: .dockerenv file access', () => {
-    describe('when client is connecting and fs.access stalls while accessing .dockerenv file', () => {
-      it('the file access is not interrupted by client.close()', async function () {}).skipReason =
-        'TODO(NODE-6624): Align Client.Close Test Cases with Finalized Design';
-    });
-  });
-
   describe('MongoClientAuthProviders', () => {
     describe('Node.js resource: Token file read', () => {
       let tokenFileEnvCache;
@@ -387,56 +380,6 @@ describe('MongoClient.close() Integration', () => {
 
       describe('Node.js resource: Socket', () => {
         it('no sockets remain after client.close()', metadata, async () => {});
-      });
-    });
-  });
-
-  describe('ClientEncryption', () => {
-    describe('KMS Request', () => {
-      describe('Node.js resource: TLS file read', () => {
-        describe('when KMSRequest reads an infinite TLS file read', () => {
-          it('the file read is interrupted by client.close()', async () => {
-            await runScriptAndGetProcessInfo(
-              'tls-file-read-client-encryption',
-              config,
-              async function run({ MongoClient, uri, expect, ClientEncryption, BSON }) {
-                const infiniteFile = '/dev/zero';
-                const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
-                const masterKey = {
-                  region: 'us-east-1',
-                  key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
-                };
-                const provider = 'aws';
-
-                const keyVaultClient = new MongoClient(uri);
-                await keyVaultClient.connect();
-
-                await keyVaultClient.db('keyvault').collection('datakeys');
-                const clientEncryption = new ClientEncryption(keyVaultClient, {
-                  keyVaultNamespace: 'keyvault.datakeys',
-                  kmsProviders,
-                  tlsOptions: { aws: { tlsCAFile: infiniteFile } }
-                });
-
-                const dataKeyPromise = clientEncryption.createDataKey(provider, { masterKey });
-
-                expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-
-                await keyVaultClient.close();
-
-                expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-
-                const err = await dataKeyPromise.catch(e => e);
-                expect(err).to.exist;
-                expect(err.errmsg).to.contain('Error in KMS response');
-              }
-            );
-          });
-        });
-      });
-
-      describe('Node.js resource: Socket', () => {
-        it('no sockets remain after client.close()', async () => {});
       });
     });
   });
