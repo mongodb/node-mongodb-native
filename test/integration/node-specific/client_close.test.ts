@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
@@ -20,12 +19,14 @@ describe.skip('MongoClient.close() Integration', () => {
           config,
           async function run({ MongoClient, uri, expect }) {
             const infiniteFile = '/dev/zero';
-            const client = new MongoClient(uri, { tlsCertificateKeyFile: infiniteFile });
-            client.connect();
+            const client = new MongoClient(uri, { tls: true, tlsCertificateKeyFile: infiniteFile });
+            const connectPromise = client.connect();
             expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
             await client.close();
             expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-          }
+            const err = await connectPromise.catch(e => e);
+            expect(err).to.exist;
+          } 
         );
       });
     });
@@ -74,7 +75,7 @@ describe.skip('MongoClient.close() Integration', () => {
   describe('Topology', () => {
     describe('Node.js resource: Server Selection Timer', () => {
       describe('after a Topology is created through client.connect()', () => {
-        it('server selection timers are cleaned up by client.close()', async () => {});
+        it.skip('server selection timers are cleaned up by client.close()', async () => {});
       });
     });
 
@@ -90,25 +91,25 @@ describe.skip('MongoClient.close() Integration', () => {
         describe('MonitorInterval', () => {
           describe('Node.js resource: Timer', () => {
             describe('after a new monitor is made', () => {
-              it('monitor interval timer is cleaned up by client.close()', async () => {});
+              it.skip('monitor interval timer is cleaned up by client.close()', async () => {});
             });
 
             describe('after a heartbeat fails', () => {
-              it('the new monitor interval timer is cleaned up by client.close()', async () => {});
+              it.skip('the new monitor interval timer is cleaned up by client.close()', async () => {});
             });
           });
         });
 
         describe('Connection Monitoring', () => {
           describe('Node.js resource: Socket', () => {
-            it('no sockets remain after client.close()', metadata, async function () {});
+            it.skip('no sockets remain after client.close()', metadata, async function () {});
           });
         });
 
         describe('RTT Pinger', () => {
           describe('Node.js resource: Timer', () => {
             describe('after entering monitor streaming mode ', () => {
-              it('the rtt pinger timer is cleaned up by client.close()', async () => {
+              it.skip('the rtt pinger timer is cleaned up by client.close()', async () => {
                 // helloReply has a topologyVersion defined
               });
             });
@@ -117,7 +118,7 @@ describe.skip('MongoClient.close() Integration', () => {
           describe('Connection', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
-                it('no sockets remain after client.close()', async () => {});
+                it.skip('no sockets remain after client.close()', async () => {});
               });
             });
           });
@@ -127,25 +128,25 @@ describe.skip('MongoClient.close() Integration', () => {
       describe('ConnectionPool', () => {
         describe('Node.js resource: minPoolSize timer', () => {
           describe('after new connection pool is created', () => {
-            it('the minPoolSize timer is cleaned up by client.close()', async () => {});
+            it.skip('the minPoolSize timer is cleaned up by client.close()', async () => {});
           });
         });
 
         describe('Node.js resource: checkOut Timer', () => {
           // waitQueueTimeoutMS
           describe('after new connection pool is created', () => {
-            it('the wait queue timer is cleaned up by client.close()', async () => {});
+            it.skip('the wait queue timer is cleaned up by client.close()', async () => {});
           });
         });
 
         describe('Connection', () => {
           describe('Node.js resource: Socket', () => {
             describe('after a connection is checked out', () => {
-              it('no sockets remain after client.close()', async () => {});
+              it.skip('no sockets remain after client.close()', async () => {});
             });
 
             describe('after a minPoolSize has been set on the ConnectionPool', () => {
-              it('no sockets remain after client.close()', async () => {});
+              it.skip('no sockets remain after client.close()', async () => {});
             });
           });
         });
@@ -155,7 +156,7 @@ describe.skip('MongoClient.close() Integration', () => {
     describe('SrvPoller', () => {
       describe('Node.js resource: Timer', () => {
         describe('after SRVPoller is created', () => {
-          it('timers are cleaned up by client.close()', async () => {});
+          it.skip('timers are cleaned up by client.close()', async () => {});
         });
       });
     });
@@ -164,13 +165,13 @@ describe.skip('MongoClient.close() Integration', () => {
   describe('ClientSession (Implicit)', () => {
     describe('Server resource: LSID/ServerSession', () => {
       describe('after a clientSession is implicitly created and used', () => {
-        it('the server-side ServerSession is cleaned up by client.close()', async function () {});
+        it.skip('the server-side ServerSession is cleaned up by client.close()', async function () {});
       });
     });
 
     describe('Server resource: Transactions', () => {
       describe('after a clientSession is implicitly created and used', () => {
-        it('the server-side transaction is cleaned up by client.close()', async function () {});
+        it.skip('the server-side transaction is cleaned up by client.close()', async function () {});
       });
     });
   });
@@ -178,13 +179,13 @@ describe.skip('MongoClient.close() Integration', () => {
   describe('ClientSession (Explicit)', () => {
     describe('Server resource: LSID/ServerSession', () => {
       describe('after a clientSession is created and used', () => {
-        it('the server-side ServerSession is cleaned up by client.close()', async function () {});
+        it.skip('the server-side ServerSession is cleaned up by client.close()', async function () {});
       });
     });
 
     describe('Server resource: Transactions', () => {
       describe('after a clientSession is created and used', () => {
-        it('the server-side transaction is cleaned up by client.close()', async function () {});
+        it.skip('the server-side transaction is cleaned up by client.close()', async function () {});
       });
     });
   });
@@ -287,14 +288,14 @@ describe.skip('MongoClient.close() Integration', () => {
       });
 
       describe('Node.js resource: Socket', () => {
-        it('no sockets remain after client.close()', metadata, async () => {});
+        it.skip('no sockets remain after client.close()', metadata, async () => {});
       });
     });
   });
 
   describe('Server resource: Cursor', () => {
     describe('after cursors are created', () => {
-      it('all active server-side cursors are closed by client.close()', async function () {});
+      it.skip('all active server-side cursors are closed by client.close()', async function () {});
     });
   });
 });

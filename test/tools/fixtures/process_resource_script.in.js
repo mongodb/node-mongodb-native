@@ -78,12 +78,14 @@ async function main() {
 main()
   .then(() => {})
   .catch(e => {
-    log({ exitCode: 1, error: util.inspect(e) });
+    log({ exitCode: 1, error: { message: e.message, stack: e.stack } });
   });
 
 setTimeout(() => {
   // this means something was in the event loop such that it hung for more than 10 seconds
   // so we kill the process
+  log({ newLibuvResources: getNewLibuvResourceArray() });
+  log({ exitCode: 99, error: { message: 'Process timed out: resources remain in the event loop.' } });
   process.exit(99);
   // using `unref` will ensure this setTimeout call is not a resource / does not keep the event loop running
 }, 10000).unref();

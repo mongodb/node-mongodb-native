@@ -3,7 +3,7 @@ import { on, once } from 'node:events';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { expect } from 'chai';
+import { AssertionError, expect } from 'chai';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { type BSON, type ClientEncryption, type MongoClient } from '../../mongodb';
@@ -187,7 +187,11 @@ export async function runScriptAndGetProcessInfo(
   await unlink(logFile);
 
   // assertions about exit status
-  expect(exitCode, 'process should have exited with zero').to.equal(0);
+  if (exitCode) { 
+    const assertionError = new AssertionError(messages.error.message); 
+    assertionError.stack = messages.error.stack + new Error().stack.slice('Error'.length); 
+    throw assertionError; 
+  }
 
   // assertions about resource status
   expect(messages.beforeExitHappened).to.be.true;
