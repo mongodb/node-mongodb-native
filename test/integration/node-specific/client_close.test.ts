@@ -142,10 +142,6 @@ describe('MongoClient.close() Integration', () => {
               );
             });
           });
-
-          describe('Server resource: connection thread', () => {
-            it('no connection threads remain after client.close()', metadata, async () => {});
-          });
         });
 
         describe('RTT Pinger', () => {
@@ -223,12 +219,6 @@ describe('MongoClient.close() Integration', () => {
                 });
               });
             });
-
-            describe('Server resource: connection thread', () => {
-              describe('when rtt monitoring is turned on', () => {
-                it('no server-side connection threads remain after client.close()', async () => {});
-              });
-            });
           });
         });
       });
@@ -255,16 +245,6 @@ describe('MongoClient.close() Integration', () => {
 
             describe('after a minPoolSize has been set on the ConnectionPool', () => {
               it('no sockets remain after client.close()', async () => {});
-            });
-          });
-
-          describe('Server-side resource: Connection thread', () => {
-            describe('after a connection is checked out', () => {
-              it('no connection threads remain after client.close()', async () => {});
-            });
-
-            describe('after a minPoolSize has been set on the ConnectionPool', () => {
-              it('no connection threads remain after client.close()', async () => {});
             });
           });
         });
