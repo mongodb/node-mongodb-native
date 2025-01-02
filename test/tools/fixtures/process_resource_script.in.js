@@ -16,13 +16,13 @@ const { expect } = require('chai');
 const { setTimeout } = require('timers');
 
 let originalReport;
-const logFile = 'logs.txt';
+const logFile = scriptName + '.logs.txt';
 
 const run = func;
 
 /**
  *
- * Returns an array containing the new resources created after script started.
+ * Returns an array containing the new libuv resources created after script started.
  * A new resource is something that will keep the event loop running.
  *
  * In order to be counted as a new resource, a resource MUST:
@@ -59,6 +59,27 @@ function getNewLibuvResourceArray() {
   return currReport;
 }
 
+/**
+ * Returns an object of the new resources created after script started.
+ *
+ *
+ * In order to be counted as a new resource, a resource MUST either:
+ * - Meet the criteria to be returned by our helper utility `getNewLibuvResourceArray()`
+ * OR
+ * - Be returned by `process.getActiveResourcesInfo()
+ *
+ * The reason we are using both methods to detect active resources is:
+ * - `process.report.getReport().libuv` does not detect active requests (such as timers or file reads) accurately
+ * - `process.getActiveResourcesInfo()` does not contain enough server information we need for our assertions
+ *
+ */
+function getNewResources() {
+  return {
+    libuvResources: getNewLibuvResourceArray(),
+    activeResources: process.getActiveResourcesInfo()
+  };
+}
+
 // A log function for debugging
 function log(message) {
   // remove outer parentheses for easier parsing
@@ -72,20 +93,24 @@ async function main() {
     log({ beforeExitHappened: true });
   });
   await run({ MongoClient, uri, log, expect, ClientEncryption, BSON });
-  log({ newLibuvResources: getNewLibuvResourceArray() });
 }
 
 main()
   .then(() => {})
   .catch(e => {
-    log({ exitCode: 1, error: { message: e.message, stack: e.stack } });
+    log({ error: { message: e.message, stack: e.stack, resources: getNewResources() } });
+    process.exit(1);
   });
 
 setTimeout(() => {
   // this means something was in the event loop such that it hung for more than 10 seconds
   // so we kill the process
-  log({ newLibuvResources: getNewLibuvResourceArray() });
-  log({ exitCode: 99, error: { message: 'Process timed out: resources remain in the event loop.' } });
+  log({
+    error: {
+      message: 'Process timed out: resources remain in the event loop',
+      resources: getNewResources()
+    }
+  });
   process.exit(99);
   // using `unref` will ensure this setTimeout call is not a resource / does not keep the event loop running
 }, 10000).unref();
