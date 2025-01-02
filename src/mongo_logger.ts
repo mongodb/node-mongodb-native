@@ -1,4 +1,5 @@
 import { inspect, promisify } from 'util';
+import { isUint8Array } from 'util/types';
 
 import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
 import type { CommandStartedEvent } from './cmap/command_monitoring_events';
@@ -421,13 +422,44 @@ export function stringifyWithMaxLen(
 ): string {
   let strToTruncate = '';
 
+  let currentLength = 0;
+  const maxDocumentLengthEnsurer = function maxDocumentLengthEnsurer(key: string, value: any) {
+    if (currentLength >= maxDocumentLength) {
+      return undefined;
+    }
+
+    currentLength += key.length + 4;
+
+    if (typeof value === 'string') {
+      currentLength += value.length;
+    } else if (typeof value === 'number' || typeof value === 'bigint') {
+      currentLength += 20;
+    } else if (typeof value === 'boolean') {
+      currentLength += value ? 4 : 5;
+    } else if (value != null && typeof value === 'object' && '_bsontype' in value) {
+      if (isUint8Array(value.buffer)) {
+        currentLength += (value.buffer.byteLength + value.buffer.byteLength * 0.5) | 0;
+      } else if (value._bsontype === 'Binary') {
+        currentLength += (value.position + value.position * 0.3) | 0;
+      } else if (value._bsontype === 'Code') {
+        currentLength += value.code.length;
+      }
+    }
+
+    return value;
+  };
+
   if (typeof value === 'string') {
     strToTruncate = value;
   } else if (typeof value === 'function') {
     strToTruncate = value.name;
   } else {
     try {
-      strToTruncate = EJSON.stringify(value, options);
+      if (maxDocumentLength !== 0) {
+        strToTruncate = EJSON.stringify(value, maxDocumentLengthEnsurer, 0, options);
+      } else {
+        strToTruncate = EJSON.stringify(value, options);
+      }
     } catch (e) {
       strToTruncate = `Extended JSON serialization failed with: ${e.message}`;
     }
