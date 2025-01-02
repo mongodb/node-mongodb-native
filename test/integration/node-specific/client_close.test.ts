@@ -26,7 +26,7 @@ describe.skip('MongoClient.close() Integration', () => {
             expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
             const err = await connectPromise.catch(e => e);
             expect(err).to.exist;
-          } 
+          }
         );
       });
     });

@@ -166,7 +166,7 @@ export async function runScriptAndGetProcessInfo(
     func
   );
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
-  const logFile = 'logs.txt';
+  const logFile = name + '.logs.txt';
 
   const script = spawn(process.argv[0], [scriptName], { stdio: ['ignore', 'ignore', 'ignore'] });
 
@@ -187,10 +187,12 @@ export async function runScriptAndGetProcessInfo(
   await unlink(logFile);
 
   // assertions about exit status
-  if (exitCode) { 
-    const assertionError = new AssertionError(messages.error.message); 
-    assertionError.stack = messages.error.stack + new Error().stack.slice('Error'.length); 
-    throw assertionError; 
+  if (exitCode) {
+    const assertionError = new AssertionError(
+      messages.error.message + '\n\t' + JSON.stringify(messages.error.resources)
+    );
+    assertionError.stack = messages.error.stack + new Error().stack.slice('Error'.length);
+    throw assertionError;
   }
 
   // assertions about resource status
