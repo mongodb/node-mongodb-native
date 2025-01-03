@@ -189,7 +189,7 @@ export async function runScriptAndGetProcessInfo(
   // assertions about exit status
   if (exitCode) {
     const assertionError = new AssertionError(
-      messages.error.message + '\n\t' + JSON.stringify(messages.error.resources)
+      messages.error.message + '\n\t' + JSON.stringify(messages.error.resources, undefined, 2)
     );
     assertionError.stack = messages.error.stack + new Error().stack.slice('Error'.length);
     throw assertionError;
