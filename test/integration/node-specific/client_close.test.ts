@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { expect } from 'chai';
+import { MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
@@ -103,43 +105,46 @@ describe('MongoClient.close() Integration', () => {
         describe('Connection Monitoring', () => {
           describe('Node.js resource: Socket', () => {
             it.only('no sockets remain after client.close()', metadata, async function () {
-              await runScriptAndGetProcessInfo(
+              const run = async function({ MongoClient, uri, log, expect }) {
+                const client = new MongoClient(uri);
+                await client.connect();
+
+                // returns all active tcp endpoints
+                const connectionMonitoringReport = () =>
+                  process.report
+                    .getReport()
+                    .libuv.filter(r => r.type === 'tcp' && r.is_active)
+                    .map(r => r.remoteEndpoint);
+
+                // assert socket creation 
+                // there should be two sockets for each server: 
+                  // client connection socket
+                  // monitor socket 
+                log(connectionMonitoringReport());
+                const servers = client.topology?.s.servers;
+                for (const server of servers) {
+                  const { host, port } = server[1].s.description.hostAddress;
+                  log('MONITOR OF ', host, port, ':\n', server[1].monitor.address);
+                  const relevantHostAddresses = connectionMonitoringReport().filter(r => r.host === host && r.port === port);
+                  //log({ relevantHostAddresses });
+                  // expect(relevantHostAddresses).length.to.be.gte(2);
+                } 
+
+                await client.close();
+
+                // assert socket destruction
+                for (const server of servers) {
+                  const { host, port } = server[1].s.description.hostAddress;
+                  expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
+                }
+              };
+              /* await runScriptAndGetProcessInfo(
                 'socket-connection-monitoring',
                 config,
-                async function run({ MongoClient, uri, log, expect }) {
-                  const client = new MongoClient(uri);
-                  await client.connect();
+                run
+              ); */
 
-                  // returns all active tcp endpoints
-                  const connectionMonitoringReport = () =>
-                    process.report
-                      .getReport()
-                      .libuv.filter(r => r.type === 'tcp' && r.is_active)
-                      .map(r => r.remoteEndpoint);
-
-                  log({ monreport: connectionMonitoringReport() });
-                  // assert socket creation 
-                  // there should be two sockets for each server: 
-                    // client connection socket
-                    // monitor socket 
-                 /* const servers = client.topology?.s.servers;
-                  for (const server of servers) {
-                    log({ monreport: connectionMonitoringReport() });
-                    const { host, port } = server[1].s.description.hostAddress;
-                    const relevantHostAddresses = connectionMonitoringReport().filter(r => r.host === host && r.port === port);
-                    log({ relevantHostAddresses });
-                    expect(relevantHostAddresses).length.to.be.gte(2);
-                  } */
-
-                  await client.close();
-
-                  // assert socket destruction
-                  for (const server of servers) {
-                    const { host, port } = server[1].s.description.hostAddress;
-                    expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
-                  }
-                }
-              );
+              await run({ MongoClient, uri: config.uri, log: console.log, expect });
             });
           });
         });
