@@ -4,7 +4,7 @@ import { MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
-describe('MongoClient.close() Integration', () => {
+describe.only('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
 
   let config: TestConfiguration;
@@ -104,8 +104,8 @@ describe('MongoClient.close() Integration', () => {
 
         describe('Connection Monitoring', () => {
           describe('Node.js resource: Socket', () => {
-            it.only('no sockets remain after client.close()', metadata, async function () {
-              const run = async function({ MongoClient, uri, log, expect }) {
+            it('no sockets remain after client.close()', metadata, async function () {
+              const run = async function({ MongoClient, uri, expect }) {
                 const client = new MongoClient(uri);
                 await client.connect();
 
@@ -117,17 +117,10 @@ describe('MongoClient.close() Integration', () => {
                     .map(r => r.remoteEndpoint);
 
                 // assert socket creation 
-                // there should be two sockets for each server: 
-                  // client connection socket
-                  // monitor socket 
-                log(connectionMonitoringReport());
                 const servers = client.topology?.s.servers;
                 for (const server of servers) {
                   const { host, port } = server[1].s.description.hostAddress;
-                  log('MONITOR OF ', host, port, ':\n', server[1].monitor.address);
-                  const relevantHostAddresses = connectionMonitoringReport().filter(r => r.host === host && r.port === port);
-                  //log({ relevantHostAddresses });
-                  // expect(relevantHostAddresses).length.to.be.gte(2);
+                  expect(connectionMonitoringReport()).to.deep.include({host, port});
                 } 
 
                 await client.close();
@@ -138,13 +131,11 @@ describe('MongoClient.close() Integration', () => {
                   expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
                 }
               };
-              /* await runScriptAndGetProcessInfo(
+              await runScriptAndGetProcessInfo(
                 'socket-connection-monitoring',
                 config,
                 run
-              ); */
-
-              await run({ MongoClient, uri: config.uri, log: console.log, expect });
+              );
             });
           });
         });
@@ -162,7 +153,7 @@ describe('MongoClient.close() Integration', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
                 it('no sockets remain after client.close()', async () => {
-                  const run = async function ({ MongoClient, uri, expect, sleep }) {
+                  const run = async ({ MongoClient, uri, expect, sleep }) => {
                     const heartbeatFrequencyMS = 100;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
@@ -214,7 +205,7 @@ describe('MongoClient.close() Integration', () => {
                     expect(newSocketsAfterClose).to.have.length(0);
                   };
 
-                  await runScriptAndGetProcessInfo('socket-connection-monitoring', config, run);
+                  await runScriptAndGetProcessInfo('socket-connection-rtt-monitoring', config, run);
                 });
               });
             });

@@ -17,6 +17,7 @@ const { setTimeout } = require('timers');
 
 let originalReport;
 const logFile = scriptName + '.logs.txt';
+const sleep = promisify(setTimeout);
 
 const run = func;
 
@@ -92,7 +93,8 @@ async function main() {
   process.on('beforeExit', () => {
     log({ beforeExitHappened: true });
   });
-  await run({ MongoClient, uri, log, expect, ClientEncryption, BSON });
+  await run({ MongoClient, uri, log, expect, ClientEncryption, BSON, sleep });
+  log({ newResources: getNewResources() });
 }
 
 main()
