@@ -93,6 +93,7 @@ async function main() {
     log({ beforeExitHappened: true });
   });
   await run({ MongoClient, uri, log, expect, ClientEncryption, BSON });
+  log({ newResources: getNewResources() });
 }
 
 main()

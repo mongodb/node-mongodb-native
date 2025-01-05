@@ -197,5 +197,5 @@ export async function runScriptAndGetProcessInfo(
 
   // assertions about resource status
   expect(messages.beforeExitHappened).to.be.true;
-  expect(messages.newLibuvResources).to.be.empty;
+  expect(messages.newResources).to.be.empty;
 }
