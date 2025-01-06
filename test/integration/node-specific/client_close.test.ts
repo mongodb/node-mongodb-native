@@ -113,15 +113,15 @@ describe.only('MongoClient.close() Integration', () => {
                 const connectionMonitoringReport = () =>
                   process.report
                     .getReport()
-                    .libuv.filter(r => r.type === 'tcp' && r.is_active)
+                    .libuv.filter(r => r.type === 'tcp')
                     .map(r => r.remoteEndpoint);
 
-                // assert socket creation 
+                // assert socket creation
                 const servers = client.topology?.s.servers;
                 for (const server of servers) {
                   const { host, port } = server[1].s.description.hostAddress;
                   expect(connectionMonitoringReport()).to.deep.include({host, port});
-                } 
+                }
 
                 await client.close();
 
@@ -153,7 +153,7 @@ describe.only('MongoClient.close() Integration', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
                 it('no sockets remain after client.close()', async () => {
-                  const run = async ({ MongoClient, uri, expect, sleep }) => {
+                  const run = async ({ MongoClient, uri, log, expect, sleep }) => {
                     const heartbeatFrequencyMS = 100;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
@@ -161,48 +161,40 @@ describe.only('MongoClient.close() Integration', () => {
                     });
                     await client.connect();
 
-                    const servers = Array.from(client.topology.s.servers.keys());
-
-                    // a hashmap of <server host/ports, boolean>
-                    const serversHeartbeatOccurred = servers.reduce(
-                      (acc, hostname) => ({ ...acc, [hostname]: false }),
-                      {}
-                    );
-
                     const activeSocketsReport = () =>
-                      process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active);
+                      process.report.getReport().libuv.filter(r => r.type === 'tcp');
 
                     const socketsAddressesBeforeHeartbeat = activeSocketsReport().map(
                       r => r.address
                     );
 
-                    const rttSocketReport = () =>
+                    const activeSocketsAfterHeartbeat = () =>
                       activeSocketsReport()
                         .filter(r => !socketsAddressesBeforeHeartbeat.includes(r.address))
                         .map(r => r.remoteEndpoint.host + ':' + r.remoteEndpoint.port);
 
-                    client.on('serverHeartbeatSucceeded', async ev => {
-                      // assert creation of rttPinger socket
-                      const newSocketsAfterHeartbeat = rttSocketReport();
-                      expect(newSocketsAfterHeartbeat).to.deep.contain(ev.connectionId);
+                    // set of servers whose hearbeats have occurred
+                    const heartbeatOccurredSet = new Set();
 
-                      // assert rttPinger socket is connected to a server
-                      expect(serversHeartbeatOccurred.keys()).to.deep.contain(ev.connectionId);
-                      serversHeartbeatOccurred[ev.connectionId] = true;
-                    });
+                    client.on('serverHeartbeatSucceeded', async ev => heartbeatOccurredSet.add(ev.connectionId));
 
-                    // ensure there is enough time for the heartbeatFrequencyMS for the event to occur
+                    // ensure there is enough time for the events to occur
                     await sleep(heartbeatFrequencyMS * 10);
 
-                    // all servers should have had a heartbeat event
-                    expect(serversHeartbeatOccurred.values().filter(r => r !== true)).to.be.empty;
+                    // all servers should have had a heartbeat event and had a new socket created for rtt pinger
+                    log(heartbeatOccurredSet);
+                    const servers = client.topology.s.servers
+                    for (const server of servers) {
+                      expect(heartbeatOccurredSet).to.deep.contain(server[0]);
+                      expect(activeSocketsAfterHeartbeat()).to.deep.contain(server[0]);
+                    }
 
                     // close the client
                     await client.close();
 
-                    // upon close, assert rttPinger socket is cleaned up
-                    const newSocketsAfterClose = rttSocketReport();
-                    expect(newSocketsAfterClose).to.have.length(0);
+                    // upon close, assert rttPinger sockets are cleaned up
+                    const activeSocketsAfterClose = activeSocketsAfterHeartbeat();
+                    expect(activeSocketsAfterClose).to.have.length(0);
                   };
 
                   await runScriptAndGetProcessInfo('socket-connection-rtt-monitoring', config, run);
@@ -235,30 +227,30 @@ describe.only('MongoClient.close() Integration', () => {
             });
 
             describe('after a minPoolSize has been set on the ConnectionPool', () => {
-              it('no sockets remain after client.close()', async function () {
+              it.only('no sockets remain after client.close()', async function () {
                 const run = async function ({ MongoClient, uri, log, expect }) {
                   log({hi: 1});
                   const options = { minPoolSize: 2 };
                   const client = new MongoClient(uri, options);
                   await client.connect();
                   const connectionMonitoringReport = () =>
-                    process.report.getReport().libuv.filter(r => r.type === 'tcp' && r.is_active).map(r => r.remoteEndpoint);
+                    process.report.getReport().libuv.filter(r => r.type === 'tcp').map(r => r.remoteEndpoint);
 
-                  // assert socket creation 
-                  // there should be three sockets for each server: client connection socket, monitor socket, pool size monitoring socket
+                  // assert socket creation
+                  // there should be a client connection socket for each server, one monitor socket total, and one pool size monitoring socket total
                   const servers = client.topology?.s.servers;
+
                   for (const server of servers) {
-                    log({ monreport: connectionMonitoringReport() });
                     const { host, port } = server[1].s.description.hostAddress;
                     const relevantHostAddresses = connectionMonitoringReport().filter(r => r.host === host && r.port === port);
-                    log({relevantHostAddresses});
                     expect(relevantHostAddresses).length.to.be.gte(3);
                   }
+
                   await client.close();
                 };
 
                 await runScriptAndGetProcessInfo(
-                  'socket-minPoolSize', 
+                  'socket-minPoolSize',
                   config,
                   run
                 );

@@ -8,7 +8,6 @@ import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { type BSON, type ClientEncryption, type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
-import { sleep } from '../../tools/utils';
 
 export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
 
@@ -25,7 +24,6 @@ export type ProcessResourceTestFunction = (options: {
   expect: typeof expect;
   ClientEncryption?: typeof ClientEncryption;
   BSON?: typeof BSON;
-  sleep?: typeof sleep;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
@@ -170,7 +168,7 @@ export async function runScriptAndGetProcessInfo(
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
   const logFile = name + '.logs.txt';
 
-  const script = spawn(process.argv[0], [scriptName], { stdio: ['ignore', 'ignore', 'ignore'] });
+  const script = spawn(process.execPath, [scriptName], { stdio: ['ignore', 'ignore', 'ignore'] });
 
   const willClose = once(script, 'close');
 
@@ -186,14 +184,14 @@ export async function runScriptAndGetProcessInfo(
 
   // delete temporary files
   await unlink(scriptName);
-  await unlink(logFile);
+  // await unlink(logFile);
 
   // assertions about exit status
   if (exitCode) {
     const assertionError = new AssertionError(
-      messages.error.message + '\n\t' + JSON.stringify(messages.error.resources, undefined, 2)
+      messages.error?.message + '\n\t' + JSON.stringify(messages.error?.resources, undefined, 2)
     );
-    assertionError.stack = messages.error.stack + new Error().stack.slice('Error'.length);
+    assertionError.stack = messages.error?.stack + new Error().stack.slice('Error'.length);
     throw assertionError;
   }
 
