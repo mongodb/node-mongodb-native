@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { expect } from 'chai';
-import { MongoClient } from '../../mongodb';
+import sinon = require('sinon');
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
+import { ConnectionPool, MongoClient } from '../../mongodb';
 
 describe.only('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
@@ -93,7 +93,9 @@ describe.only('MongoClient.close() Integration', () => {
         describe('MonitorInterval', () => {
           describe('Node.js resource: Timer', () => {
             describe('after a new monitor is made', () => {
-              it.skip('monitor interval timer is cleaned up by client.close()', async () => {});
+              it.skip('monitor interval timer is cleaned up by client.close()', async () => {
+
+              });
             });
 
             describe('after a heartbeat fails', () => {
@@ -105,7 +107,7 @@ describe.only('MongoClient.close() Integration', () => {
         describe('Connection Monitoring', () => {
           describe('Node.js resource: Socket', () => {
             it('no sockets remain after client.close()', metadata, async function () {
-              const run = async function({ MongoClient, uri, expect }) {
+              const run = async function ({ MongoClient, uri, expect }) {
                 const client = new MongoClient(uri);
                 await client.connect();
 
@@ -116,11 +118,11 @@ describe.only('MongoClient.close() Integration', () => {
                     .libuv.filter(r => r.type === 'tcp')
                     .map(r => r.remoteEndpoint);
 
-                // assert socket creation
                 const servers = client.topology?.s.servers;
+                // assert socket creation
                 for (const server of servers) {
                   const { host, port } = server[1].s.description.hostAddress;
-                  expect(connectionMonitoringReport()).to.deep.include({host, port});
+                  expect(connectionMonitoringReport()).to.deep.include({ host, port });
                 }
 
                 await client.close();
@@ -131,11 +133,7 @@ describe.only('MongoClient.close() Integration', () => {
                   expect(connectionMonitoringReport()).to.not.deep.include({ host, port });
                 }
               };
-              await runScriptAndGetProcessInfo(
-                'socket-connection-monitoring',
-                config,
-                run
-              );
+              await runScriptAndGetProcessInfo('socket-connection-monitoring', config, run);
             });
           });
         });
@@ -143,8 +141,29 @@ describe.only('MongoClient.close() Integration', () => {
         describe('RTT Pinger', () => {
           describe('Node.js resource: Timer', () => {
             describe('after entering monitor streaming mode ', () => {
-              it.skip('the rtt pinger timer is cleaned up by client.close()', async () => {
-                // helloReply has a topologyVersion defined
+              it.only('the rtt pinger timer is cleaned up by client.close()', async () => {
+                const run = async ({ MongoClient, uri, log, expect, sleep }) => {
+                  const heartbeatFrequencyMS = 10000;
+                  const client = new MongoClient(uri, {
+                    serverMonitoringMode: 'stream',
+                    heartbeatFrequencyMS
+                  });
+                  await client.connect();
+
+
+                  client.on('serverHeartbeatSucceeded', async ev => log({ hearbeatHappened: ev.connectionId }));
+
+                  // ensure there is enough time for the events to occur
+                  await sleep(heartbeatFrequencyMS * 10);
+
+                  // close the client
+                  await client.close();
+
+                  // upon close, assert timers are cleaned up
+
+                };
+
+                await runScriptAndGetProcessInfo('socket-connection-rtt-monitoring', config, run);
               });
             });
           });
@@ -153,7 +172,7 @@ describe.only('MongoClient.close() Integration', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
                 it('no sockets remain after client.close()', async () => {
-                  const run = async ({ MongoClient, uri, log, expect, sleep }) => {
+                  const run = async ({ MongoClient, uri, expect, sleep }) => {
                     const heartbeatFrequencyMS = 100;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
@@ -171,19 +190,20 @@ describe.only('MongoClient.close() Integration', () => {
                     const activeSocketsAfterHeartbeat = () =>
                       activeSocketsReport()
                         .filter(r => !socketsAddressesBeforeHeartbeat.includes(r.address))
-                        .map(r => r.remoteEndpoint.host + ':' + r.remoteEndpoint.port);
+                        .map(r => r.remoteEndpoint?.host + ':' + r.remoteEndpoint?.port);
 
                     // set of servers whose hearbeats have occurred
                     const heartbeatOccurredSet = new Set();
 
-                    client.on('serverHeartbeatSucceeded', async ev => heartbeatOccurredSet.add(ev.connectionId));
+                    client.on('serverHeartbeatSucceeded', async ev =>
+                      heartbeatOccurredSet.add(ev.connectionId)
+                    );
 
                     // ensure there is enough time for the events to occur
                     await sleep(heartbeatFrequencyMS * 10);
 
                     // all servers should have had a heartbeat event and had a new socket created for rtt pinger
-                    log(heartbeatOccurredSet);
-                    const servers = client.topology.s.servers
+                    const servers = client.topology.s.servers;
                     for (const server of servers) {
                       expect(heartbeatOccurredSet).to.deep.contain(server[0]);
                       expect(activeSocketsAfterHeartbeat()).to.deep.contain(server[0]);
@@ -221,39 +241,31 @@ describe.only('MongoClient.close() Integration', () => {
 
         describe('Connection', () => {
           describe('Node.js resource: Socket', () => {
-            describe('after a connection is checked out', () => {
-              it('no sockets remain after client.close()', async function () {
-              });
-            });
-
             describe('after a minPoolSize has been set on the ConnectionPool', () => {
-              it.only('no sockets remain after client.close()', async function () {
-                const run = async function ({ MongoClient, uri, log, expect }) {
-                  log({hi: 1});
-                  const options = { minPoolSize: 2 };
+              it('no sockets remain after client.close()', async function () {
+                const run = async function ({ MongoClient, uri, expect }) {
+                  const connectionMonitoringReport = () =>
+                    process.report.getReport().libuv.filter(r => r.type === 'tcp');
+
+                  // assert no sockets to start with
+                  expect(connectionMonitoringReport()).to.have.length(0);
+                  const options = { minPoolSize: 1 };
                   const client = new MongoClient(uri, options);
                   await client.connect();
-                  const connectionMonitoringReport = () =>
-                    process.report.getReport().libuv.filter(r => r.type === 'tcp').map(r => r.remoteEndpoint);
 
-                  // assert socket creation
-                  // there should be a client connection socket for each server, one monitor socket total, and one pool size monitoring socket total
-                  const servers = client.topology?.s.servers;
-
-                  for (const server of servers) {
-                    const { host, port } = server[1].s.description.hostAddress;
-                    const relevantHostAddresses = connectionMonitoringReport().filter(r => r.host === host && r.port === port);
-                    expect(relevantHostAddresses).length.to.be.gte(3);
-                  }
+                  // regardless of pool size: there should be a client connection socket for each server, and one monitor socket total
+                  // with minPoolSize = 1, there should be one or more extra active sockets
+                  expect(connectionMonitoringReport()).to.have.length.gte(
+                    client.topology?.s.servers.size + 2
+                  );
 
                   await client.close();
+
+                  // assert socket clean-up
+                  expect(connectionMonitoringReport()).to.have.length(0);
                 };
 
-                await runScriptAndGetProcessInfo(
-                  'socket-minPoolSize',
-                  config,
-                  run
-                );
+                await runScriptAndGetProcessInfo('socket-minPoolSize', config, run);
               });
             });
           });
@@ -313,10 +325,10 @@ describe.only('MongoClient.close() Integration', () => {
             await runScriptAndGetProcessInfo(
               'tls-file-read-auto-encryption',
               config,
-              async function run({ MongoClient, uri, expect, ClientEncryption, BSON }) {
+              async function run({ MongoClient, uri, expect, mongodb }) {
                 const infiniteFile = '/dev/zero';
 
-                const kmsProviders = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
+                const kmsProviders = mongodb.BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
                 const masterKey = {
                   region: 'us-east-1',
                   key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
@@ -327,7 +339,7 @@ describe.only('MongoClient.close() Integration', () => {
                 await keyVaultClient.connect();
                 await keyVaultClient.db('keyvault').collection('datakeys');
 
-                const clientEncryption = new ClientEncryption(keyVaultClient, {
+                const clientEncryption = new mongodb.ClientEncryption(keyVaultClient, {
                   keyVaultNamespace: 'keyvault.datakeys',
                   kmsProviders
                 });

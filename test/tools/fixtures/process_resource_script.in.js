@@ -7,11 +7,13 @@ const func = FUNCTION_STRING;
 const scriptName = SCRIPT_NAME_STRING;
 const uri = URI_STRING;
 
-const { MongoClient, ClientEncryption, BSON } = require(driverPath);
+const mongodb = require(driverPath);
+const { MongoClient } = mongodb;
 const process = require('node:process');
 const util = require('node:util');
 const timers = require('node:timers');
 const fs = require('node:fs');
+const sinon = require('sinon');
 const { expect } = require('chai');
 const { setTimeout } = require('timers');
 
@@ -29,7 +31,6 @@ const run = func;
  * In order to be counted as a new resource, a resource MUST:
  * - Must NOT share an address with a libuv resource that existed at the start of script
  * - Must be referenced. See [here](https://nodejs.org/api/timers.html#timeoutref) for more context.
- * - Must NOT be an inactive server
  *
  * We're using the following tool to track resources: `process.report.getReport().libuv`
  * For more context, see documentation for [process.report.getReport()](https://nodejs.org/api/report.html), and [libuv](https://docs.libuv.org/en/v1.x/handle.html).
@@ -41,7 +42,6 @@ function getNewLibuvResourceArray() {
 
   /**
    * @typedef {Object} LibuvResource
-   * @property {boolean} is_active Is the resource active? For a socket, this means it is allowing I/O. For a timer, this means a timer is has not expired.
    * @property {string} type What is the resource type? For example, 'tcp' | 'timer' | 'udp' | 'tty'... (See more in [docs](https://docs.libuv.org/en/v1.x/handle.html)).
    * @property {boolean} is_referenced Is the resource keeping the JS event loop active?
    *
@@ -51,8 +51,7 @@ function getNewLibuvResourceArray() {
     const serverType = ['tcp', 'udp'];
     return (
       !originalReportAddresses.includes(resource.address) &&
-      resource.is_referenced && // if a resource is unreferenced, it's not keeping the event loop open
-      (!serverType.includes(resource.type) || resource.is_active)
+      resource.is_referenced // if a resource is unreferenced, it's not keeping the event loop open
     );
   }
 
@@ -93,7 +92,7 @@ async function main() {
   process.on('beforeExit', () => {
     log({ beforeExitHappened: true });
   });
-  await run({ MongoClient, uri, log, expect, ClientEncryption, BSON, sleep });
+  await run({ MongoClient, uri, log, expect, mongodb, sleep, sinon });
   log({ newResources: getNewResources() });
 }
 

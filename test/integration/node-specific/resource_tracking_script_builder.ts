@@ -6,8 +6,11 @@ import * as path from 'node:path';
 import { AssertionError, expect } from 'chai';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
-import { type BSON, type ClientEncryption, type MongoClient } from '../../mongodb';
+import type * as mongodb from '../../mongodb';
+import { type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
+import { type sleep } from '../../tools/utils';
+import * as sinon from 'sinon';
 
 export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
 
@@ -22,8 +25,9 @@ export type ProcessResourceTestFunction = (options: {
   uri: string;
   log?: (out: any) => void;
   expect: typeof expect;
-  ClientEncryption?: typeof ClientEncryption;
-  BSON?: typeof BSON;
+  mongodb: typeof mongodb;
+  sleep?: typeof sleep;
+  sinon: typeof sinon;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
@@ -197,5 +201,6 @@ export async function runScriptAndGetProcessInfo(
 
   // assertions about resource status
   expect(messages.beforeExitHappened).to.be.true;
-  expect(messages.newResources).to.be.empty;
+  expect(messages.newResources.libuvResources).to.be.empty;
+  expect(messages.newResources.activeResources).to.be.empty;
 }
