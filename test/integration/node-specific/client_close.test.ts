@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import sinon = require('sinon');
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
-import { ConnectionPool, MongoClient } from '../../mongodb';
 
 describe.only('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
@@ -93,8 +91,30 @@ describe.only('MongoClient.close() Integration', () => {
         describe('MonitorInterval', () => {
           describe('Node.js resource: Timer', () => {
             describe('after a new monitor is made', () => {
-              it.skip('monitor interval timer is cleaned up by client.close()', async () => {
+              it('monitor interval timer is cleaned up by client.close()', async function () {
+                const run = async function ({ MongoClient, uri, expect, sleep, getTimerCount }) {
+                  const heartbeatFrequencyMS = 2000;
+                  const client = new MongoClient(uri, { heartbeatFrequencyMS });
+                  let heartbeatHappened = false;
+                  client.on('serverHeartbeatSucceeded', () => heartbeatHappened = true);
+                  await client.connect();
+                  await sleep(heartbeatFrequencyMS * 2.5);
+                  expect(heartbeatHappened).to.be.true;
 
+                  function getMonitorTimer(servers) {
+                    for (const server of servers) {
+                      return server[1]?.monitor.monitorId.timerId;
+                    }
+                  };
+                  const servers = client.topology.s.servers;
+                  expect(getMonitorTimer(servers)).to.exist;
+                  await client.close();
+                  expect(getMonitorTimer(servers)).to.not.exist;
+
+                  expect(getTimerCount()).to.equal(0);
+                };
+
+                await runScriptAndGetProcessInfo('timer-monitor-interval', config, run);
               });
             });
 
@@ -141,29 +161,36 @@ describe.only('MongoClient.close() Integration', () => {
         describe('RTT Pinger', () => {
           describe('Node.js resource: Timer', () => {
             describe('after entering monitor streaming mode ', () => {
-              it.only('the rtt pinger timer is cleaned up by client.close()', async () => {
-                const run = async ({ MongoClient, uri, log, expect, sleep }) => {
-                  const heartbeatFrequencyMS = 10000;
+              it('the rtt pinger timer is cleaned up by client.close()', async function () {
+                const run = async function ({ MongoClient, uri, expect, sleep, getTimerCount }) {
+                  const heartbeatFrequencyMS = 2000;
                   const client = new MongoClient(uri, {
                     serverMonitoringMode: 'stream',
                     heartbeatFrequencyMS
                   });
                   await client.connect();
 
+                  let heartbeatHappened = false;
+                  client.on('serverHeartbeatSucceeded', () => heartbeatHappened = true);
+                  await sleep(heartbeatFrequencyMS * 2.5);
+                  expect(heartbeatHappened).to.be.true;
 
-                  client.on('serverHeartbeatSucceeded', async ev => log({ hearbeatHappened: ev.connectionId }));
+                  function getRttTimer(servers) {
+                    for (const server of servers) {
+                      return server[1]?.monitor.rttPinger.monitorId;
+                    }
+                  };
 
-                  // ensure there is enough time for the events to occur
-                  await sleep(heartbeatFrequencyMS * 10);
+                  const servers = client.topology.s.servers;
+                  expect(getRttTimer(servers)).to.exist;
 
-                  // close the client
                   await client.close();
+                  expect(getRttTimer(servers)).to.not.exist;
 
-                  // upon close, assert timers are cleaned up
-
+                  expect(getTimerCount()).to.equal(0);
                 };
 
-                await runScriptAndGetProcessInfo('socket-connection-rtt-monitoring', config, run);
+                await runScriptAndGetProcessInfo('timer-rtt-monitor', config, run);
               });
             });
           });
@@ -228,14 +255,60 @@ describe.only('MongoClient.close() Integration', () => {
       describe('ConnectionPool', () => {
         describe('Node.js resource: minPoolSize timer', () => {
           describe('after new connection pool is created', () => {
-            it.skip('the minPoolSize timer is cleaned up by client.close()', async () => {});
+            it('the minPoolSize timer is cleaned up by client.close()', async function () {
+              const run = async function ({ MongoClient, uri, expect, getTimerCount }) {
+                const client = new MongoClient(uri, { minPoolSize: 1 });
+                let minPoolSizeTimerCreated = false;
+                client.on('connectionPoolReady', () => (minPoolSizeTimerCreated = true));
+                await client.connect();
+
+                expect(minPoolSizeTimerCreated).to.be.true;
+
+                const servers = client.topology?.s.servers;
+
+                // note: minPoolSizeCheckFrequencyMS = 100 ms by client, so this test has a chance of being flaky
+                for (const server of servers) {
+                  const minPoolSizeTimer = server[1].pool.minPoolSizeTimer;
+                  expect(minPoolSizeTimer).to.exist;
+                  break;
+                }
+
+                await client.close();
+                expect(getTimerCount()).to.equal(0);
+              };
+              await runScriptAndGetProcessInfo('timer-min-pool-size', config, run);
+            });
           });
         });
 
         describe('Node.js resource: checkOut Timer', () => {
           // waitQueueTimeoutMS
           describe('after new connection pool is created', () => {
-            it.skip('the wait queue timer is cleaned up by client.close()', async () => {});
+            it('the wait queue timer is cleaned up by client.close()', async function () {
+              const run = async function ({ MongoClient, uri, expect, sinon, mongodb, getTimerCount }) {
+                const waitQueueTimeoutMS = 999999;
+                const client = new MongoClient(uri, { minPoolSize: 1, waitQueueTimeoutMS });
+
+                sinon.spy(mongodb.Timeout, 'expires');
+                const timeoutContextSpy = sinon.spy(mongodb.TimeoutContext, 'create');
+                // TODO delay promise.race non-timeout promise
+
+                await client
+                  .db('db')
+                  .collection('collection')
+                  .insertOne({ x: 1 })
+                  .catch(e => e);
+
+                expect(timeoutContextSpy.getCalls()).to.have.length.greaterThanOrEqual(1);
+                expect(mongodb.Timeout.expires).to.have.been.calledWith(999999);
+
+                await client.close();
+                expect(getTimerCount()).to.equal(0);
+                sinon.restore();
+              };
+
+              await runScriptAndGetProcessInfo('timer-check-out', config, run);
+            });
           });
         });
 

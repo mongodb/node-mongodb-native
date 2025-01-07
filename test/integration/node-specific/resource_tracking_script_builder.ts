@@ -4,13 +4,13 @@ import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { AssertionError, expect } from 'chai';
+import type * as sinon from 'sinon';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import type * as mongodb from '../../mongodb';
 import { type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { type sleep } from '../../tools/utils';
-import * as sinon from 'sinon';
 
 export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
 
@@ -25,9 +25,10 @@ export type ProcessResourceTestFunction = (options: {
   uri: string;
   log?: (out: any) => void;
   expect: typeof expect;
-  mongodb: typeof mongodb;
+  mongodb?: typeof mongodb;
   sleep?: typeof sleep;
-  sinon: typeof sinon;
+  sinon?: typeof sinon;
+  getTimerCount?: () => Number;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(

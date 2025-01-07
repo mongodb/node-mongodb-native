@@ -50,8 +50,7 @@ function getNewLibuvResourceArray() {
   function isNewLibuvResource(resource) {
     const serverType = ['tcp', 'udp'];
     return (
-      !originalReportAddresses.includes(resource.address) &&
-      resource.is_referenced // if a resource is unreferenced, it's not keeping the event loop open
+      !originalReportAddresses.includes(resource.address) && resource.is_referenced // if a resource is unreferenced, it's not keeping the event loop open
     );
   }
 
@@ -80,6 +79,11 @@ function getNewResources() {
   };
 }
 
+/**
+ * @returns Number of active timers in event loop
+ */
+const getTimerCount = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
+
 // A log function for debugging
 function log(message) {
   // remove outer parentheses for easier parsing
@@ -92,7 +96,7 @@ async function main() {
   process.on('beforeExit', () => {
     log({ beforeExitHappened: true });
   });
-  await run({ MongoClient, uri, log, expect, mongodb, sleep, sinon });
+  await run({ MongoClient, uri, log, expect, mongodb, sleep, sinon, getTimerCount });
   log({ newResources: getNewResources() });
 }
 
