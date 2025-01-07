@@ -173,7 +173,7 @@ export async function runScriptAndGetProcessInfo(
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
   const logFile = name + '.logs.txt';
 
-  const script = spawn(process.execPath, [scriptName], { stdio: ['ignore', 'ignore', 'ignore'] });
+  const script = spawn(process.execPath, [scriptName], { stdio: ['ignore', 'ignore', 'inherit'] });
 
   const willClose = once(script, 'close');
 
