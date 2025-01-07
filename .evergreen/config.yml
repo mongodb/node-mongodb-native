@@ -1383,7 +1383,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1400,7 +1399,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1417,7 +1415,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -1434,7 +1431,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1451,7 +1447,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1468,7 +1463,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -1485,7 +1479,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1502,7 +1495,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1519,7 +1511,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -1536,7 +1527,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1553,7 +1543,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1570,7 +1559,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -1587,7 +1575,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1604,7 +1591,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1621,7 +1607,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -1638,7 +1623,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1655,7 +1639,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1672,7 +1655,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -1689,7 +1671,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1706,7 +1687,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1723,7 +1703,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -1740,7 +1719,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1757,7 +1735,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1774,7 +1751,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -1791,7 +1767,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -1808,7 +1783,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
@@ -1825,7 +1799,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
@@ -3860,7 +3833,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -3878,7 +3850,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -3896,7 +3867,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
@@ -3914,7 +3884,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -3932,7 +3901,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -3950,7 +3918,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
@@ -3968,7 +3935,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -3986,7 +3952,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -4004,7 +3969,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
@@ -4022,7 +3986,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -4040,7 +4003,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -4058,7 +4020,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
@@ -4076,7 +4037,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -4094,7 +4054,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -4112,7 +4071,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
@@ -4130,7 +4088,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -4148,7 +4105,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -4166,7 +4122,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
@@ -4184,7 +4139,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -4202,7 +4156,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -4220,7 +4173,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
@@ -4238,7 +4190,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -4256,7 +4207,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -4274,7 +4224,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
@@ -4292,7 +4241,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
@@ -4310,7 +4258,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
@@ -4328,7 +4275,6 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '4.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
