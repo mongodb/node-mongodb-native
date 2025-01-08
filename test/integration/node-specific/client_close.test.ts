@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+const { expect } = require('chai');
+import * as sinon from 'sinon';
+const mongodb = require('../../mongodb');
+const { MongoClient } = mongodb;
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
+import { sleep } from '../../tools/utils';
 
 describe.only('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
@@ -91,7 +96,7 @@ describe.only('MongoClient.close() Integration', () => {
         describe('MonitorInterval', () => {
           describe('Node.js resource: Timer', () => {
             describe('after a new monitor is made', () => {
-              it('monitor interval timer is cleaned up by client.close()', async function () {
+              it('monitor interval timer is cleaned up by client.close()',  metadata, async function () {
                 const run = async function ({ MongoClient, uri, expect, sleep, getTimerCount }) {
                   const heartbeatFrequencyMS = 2000;
                   const client = new MongoClient(uri, { heartbeatFrequencyMS });
@@ -119,7 +124,7 @@ describe.only('MongoClient.close() Integration', () => {
             });
 
             describe('after a heartbeat fails', () => {
-              it.skip('the new monitor interval timer is cleaned up by client.close()', async () => {});
+              it.skip('the new monitor interval timer is cleaned up by client.close()', metadata, async () => {});
             });
           });
         });
@@ -161,7 +166,7 @@ describe.only('MongoClient.close() Integration', () => {
         describe('RTT Pinger', () => {
           describe('Node.js resource: Timer', () => {
             describe('after entering monitor streaming mode ', () => {
-              it('the rtt pinger timer is cleaned up by client.close()', async function () {
+              it('the rtt pinger timer is cleaned up by client.close()', metadata, async function () {
                 const run = async function ({ MongoClient, uri, expect, sleep, getTimerCount }) {
                   const heartbeatFrequencyMS = 2000;
                   const client = new MongoClient(uri, {
@@ -198,7 +203,7 @@ describe.only('MongoClient.close() Integration', () => {
           describe('Connection', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
-                it('no sockets remain after client.close()', async () => {
+                it('no sockets remain after client.close()', metadata, async () => {
                   const run = async ({ MongoClient, uri, expect, sleep }) => {
                     const heartbeatFrequencyMS = 100;
                     const client = new MongoClient(uri, {
@@ -266,14 +271,17 @@ describe.only('MongoClient.close() Integration', () => {
 
                 const servers = client.topology?.s.servers;
 
-                // note: minPoolSizeCheckFrequencyMS = 100 ms by client, so this test has a chance of being flaky
-                for (const server of servers) {
-                  const minPoolSizeTimer = server[1].pool.minPoolSizeTimer;
-                  expect(minPoolSizeTimer).to.exist;
-                  break;
+
+                function getMinPoolSizeTimer(servers) {
+                  for (const server of servers) {
+                    return server[1].pool.minPoolSizeTimer;
+                  }
                 }
+                // note: minPoolSizeCheckFrequencyMS = 100 ms by client, so this test has a chance of being flaky
+                expect(getMinPoolSizeTimer(servers)).to.exist;
 
                 await client.close();
+                expect(getMinPoolSizeTimer(servers)).to.not.exist;
                 expect(getTimerCount()).to.equal(0);
               };
               await runScriptAndGetProcessInfo('timer-min-pool-size', config, run);
@@ -285,29 +293,30 @@ describe.only('MongoClient.close() Integration', () => {
           // waitQueueTimeoutMS
           describe('after new connection pool is created', () => {
             it('the wait queue timer is cleaned up by client.close()', async function () {
-              const run = async function ({ MongoClient, uri, expect, sinon, mongodb, getTimerCount }) {
-                const waitQueueTimeoutMS = 999999;
+              // note: this test is not called in a separate process since it requires stubbing internal function
+              const run = async function ({ MongoClient, uri, expect, sinon, sleep, mongodb, getTimerCount }) {
+                const waitQueueTimeoutMS = 999;
                 const client = new MongoClient(uri, { minPoolSize: 1, waitQueueTimeoutMS });
+                const timeoutStartedSpy = sinon.spy(mongodb.Timeout, 'expires');
+                let checkoutTimeoutStarted = false;
 
-                sinon.spy(mongodb.Timeout, 'expires');
-                const timeoutContextSpy = sinon.spy(mongodb.TimeoutContext, 'create');
-                // TODO delay promise.race non-timeout promise
+                // make waitQueue hang so check out timer isn't cleared and check that the timeout has started
+                sinon.stub(mongodb.ConnectionPool.prototype, 'processWaitQueue').callsFake(async () => {
+                  checkoutTimeoutStarted = timeoutStartedSpy.getCalls().map(r => r.args).filter(r => r.includes(999)) ? true : false;
+                });
 
-                await client
-                  .db('db')
-                  .collection('collection')
-                  .insertOne({ x: 1 })
-                  .catch(e => e);
+                client.db('db').collection('collection').insertOne({ x: 1 }).catch(e => e);
 
-                expect(timeoutContextSpy.getCalls()).to.have.length.greaterThanOrEqual(1);
-                expect(mongodb.Timeout.expires).to.have.been.calledWith(999999);
+                // don't allow entire checkout timer to elapse to ensure close is called mid-timeout
+                await sleep(waitQueueTimeoutMS / 2);
+                expect(checkoutTimeoutStarted).to.be.true;
 
                 await client.close();
                 expect(getTimerCount()).to.equal(0);
-                sinon.restore();
               };
 
-              await runScriptAndGetProcessInfo('timer-check-out', config, run);
+              const getTimerCount = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
+              await run({ MongoClient, uri: config.uri, sleep, sinon, expect, mongodb, getTimerCount});
             });
           });
         });
@@ -348,8 +357,32 @@ describe.only('MongoClient.close() Integration', () => {
 
     describe('SrvPoller', () => {
       describe('Node.js resource: Timer', () => {
+        // srv polling is not available for load-balanced mode
+        const metadata: MongoDBMetadataUI = {
+          requires: {
+            topology: ['single', 'replicaset', 'sharded']
+          }
+        };
         describe('after SRVPoller is created', () => {
-          it.skip('timers are cleaned up by client.close()', async () => {});
+          it.only('timers are cleaned up by client.close()', metadata, async () => {
+            const run = async function ({ MongoClient, uri, expect, sinon, getTimerCount }) {
+              const dns = require('dns');
+
+              sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => uri);
+              sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => uri);
+
+              const srvUri = uri.replace('mongodb://', 'mongodb+srv://');
+              const client = new MongoClient(srvUri);
+              await client.connect();
+
+
+              await client.close();
+              expect(getTimerCount()).to.equal(0);
+            };
+
+            const getTimerCount = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
+            await run({ MongoClient, uri: config.uri, sleep, sinon, expect, mongodb, getTimerCount});
+          });
         });
       });
     });

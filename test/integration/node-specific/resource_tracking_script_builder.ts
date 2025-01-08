@@ -188,7 +188,7 @@ export async function runScriptAndGetProcessInfo(
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
   // delete temporary files
-  await unlink(scriptName);
+  // await unlink(scriptName);
   // await unlink(logFile);
 
   // assertions about exit status
