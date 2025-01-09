@@ -550,7 +550,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: 'latest',
+          NODE_LTS_VERSION: LATEST_LTS,
           NPM_VERSION: 9
         }),
         { func: 'install dependencies' },
@@ -564,7 +564,7 @@ SINGLETON_TASKS.push(
         updateExpansions({
           VERSION: 'latest',
           TOPOLOGY: 'replica_set',
-          NODE_LTS_VERSION: 'latest'
+          NODE_LTS_VERSION: LATEST_LTS 
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
