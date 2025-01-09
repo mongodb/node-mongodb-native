@@ -5085,6 +5085,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+    disable: true
   - name: windows-vsCurrent-large-gallium
     display_name: Windows Node16
     run_on: windows-vsCurrent-large

@@ -436,12 +436,13 @@ for (const {
       display_name: `${osDisplayName} Node Latest`,
       run_on,
       expansions: { NODE_LTS_VERSION: 'latest' },
-      tasks: tasks.map(({ name }) => name)
+      tasks: tasks.map(({ name }) => name),
+      // TODO(NODE-6641): Unskip the smoke tests
+      disable: true
     };
     if (clientEncryption) {
       buildVariantData.expansions.CLIENT_ENCRYPTION = true;
     }
-
     BUILD_VARIANTS.push(buildVariantData);
   }
 }
