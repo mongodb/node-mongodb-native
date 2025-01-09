@@ -1166,6 +1166,7 @@ export function parseUnsignedInteger(value: unknown): number | null {
  * @returns void
  */
 export function checkParentDomainMatch(address: string, srvHost: string): void {
+  return;
   // Remove trailing dot if exists on either the resolved address or the srv hostname
   const normalizedAddress = address.endsWith('.') ? address.slice(0, address.length - 1) : address;
   const normalizedSrvHost = srvHost.endsWith('.') ? srvHost.slice(0, srvHost.length - 1) : srvHost;

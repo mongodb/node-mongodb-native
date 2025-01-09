@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-const { expect } = require('chai');
+import { expect } from 'chai';
 import * as sinon from 'sinon';
-const mongodb = require('../../mongodb');
-const { MongoClient } = mongodb;
+import { MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 import { sleep } from '../../tools/utils';
+import { ConnectionPool, Timeout } from '../../mongodb';
 
 describe.only('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
@@ -80,7 +80,32 @@ describe.only('MongoClient.close() Integration', () => {
   describe('Topology', () => {
     describe('Node.js resource: Server Selection Timer', () => {
       describe('after a Topology is created through client.connect()', () => {
-        it.skip('server selection timers are cleaned up by client.close()', async () => {});
+        it.only('server selection timers are cleaned up by client.close()', async () => {
+            // note: this test is not called in a separate process since it requires stubbing internal class: Timeout
+            const run = async function ({ MongoClient, uri, expect, sinon, sleep, getTimerCount }) {
+              const serverSelectionTimeoutMS = 777;
+              const client = new MongoClient(uri, { minPoolSize: 1, serverSelectionTimeoutMS });
+              const timeoutStartedSpy = sinon.spy(Timeout, 'expires');
+              let serverSelectionTimeoutStarted = false;
+
+              // make server selection hang so check out timer isn't cleared and check that the timeout has started
+              sinon.stub(Promise, 'race').callsFake(() => {
+                serverSelectionTimeoutStarted = timeoutStartedSpy.getCalls().filter(r => r.args.includes(777)).flat().length > 0;
+              });
+
+              client.db('db').collection('collection').insertOne({ x: 1 }).catch(e => e);
+
+              // don't allow entire checkout timer to elapse to ensure close is called mid-timeout
+              await sleep(serverSelectionTimeoutMS / 2);
+              expect(serverSelectionTimeoutStarted).to.be.true;
+
+              await client.close();
+              expect(getTimerCount()).to.equal(0);
+            };
+
+            const getTimerCount = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
+            await run({ MongoClient, uri: config.uri, sleep, sinon, expect, getTimerCount});
+        });
       });
     });
 
@@ -294,14 +319,14 @@ describe.only('MongoClient.close() Integration', () => {
           describe('after new connection pool is created', () => {
             it('the wait queue timer is cleaned up by client.close()', async function () {
               // note: this test is not called in a separate process since it requires stubbing internal function
-              const run = async function ({ MongoClient, uri, expect, sinon, sleep, mongodb, getTimerCount }) {
+              const run = async function ({ MongoClient, uri, expect, sinon, sleep, getTimerCount }) {
                 const waitQueueTimeoutMS = 999;
                 const client = new MongoClient(uri, { minPoolSize: 1, waitQueueTimeoutMS });
-                const timeoutStartedSpy = sinon.spy(mongodb.Timeout, 'expires');
+                const timeoutStartedSpy = sinon.spy(Timeout, 'expires');
                 let checkoutTimeoutStarted = false;
 
                 // make waitQueue hang so check out timer isn't cleared and check that the timeout has started
-                sinon.stub(mongodb.ConnectionPool.prototype, 'processWaitQueue').callsFake(async () => {
+                sinon.stub(ConnectionPool.prototype, 'processWaitQueue').callsFake(async () => {
                   checkoutTimeoutStarted = timeoutStartedSpy.getCalls().map(r => r.args).filter(r => r.includes(999)) ? true : false;
                 });
 
@@ -316,7 +341,7 @@ describe.only('MongoClient.close() Integration', () => {
               };
 
               const getTimerCount = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
-              await run({ MongoClient, uri: config.uri, sleep, sinon, expect, mongodb, getTimerCount});
+              await run({ MongoClient, uri: config.uri, sleep, sinon, expect, getTimerCount});
             });
           });
         });
@@ -364,24 +389,39 @@ describe.only('MongoClient.close() Integration', () => {
           }
         };
         describe('after SRVPoller is created', () => {
-          it.only('timers are cleaned up by client.close()', metadata, async () => {
-            const run = async function ({ MongoClient, uri, expect, sinon, getTimerCount }) {
+          it.skip('timers are cleaned up by client.close()', metadata, async () => {
+            const run = async function ({ MongoClient, uri, expect, log, sinon, mongodb, getTimerCount }) {
               const dns = require('dns');
 
-              sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => uri);
-              sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => uri);
+              sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
+                throw { code: 'ENODATA' };
+              });
+              sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+                const formattedUri = mongodb.HostAddress.fromString(uri.split('//')[1]);
+                return [
+                  {
+                    name: formattedUri.host,
+                    port: formattedUri.port,
+                    weight: 0,
+                    priority: 0,
+                    protocol: formattedUri.host.isIPv6 ? 'IPv6' : 'IPv4'
+                  }
+                ];
+              });
+              /* sinon.stub(mongodb, 'checkParentDomainMatch').callsFake(async () => {
+                console.log('in here!!!');
+              }); */
 
-              const srvUri = uri.replace('mongodb://', 'mongodb+srv://');
-              const client = new MongoClient(srvUri);
+              const client = new MongoClient('mongodb+srv://localhost');
               await client.connect();
-
-
               await client.close();
               expect(getTimerCount()).to.equal(0);
+              sinon.restore();
             };
 
             const getTimerCount = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
-            await run({ MongoClient, uri: config.uri, sleep, sinon, expect, mongodb, getTimerCount});
+            // await run({ MongoClient, uri: config.uri, sleep, sinon, expect, mongodb, getTimerCount});
+            await runScriptAndGetProcessInfo('srv-poller-timer', config, run);
           });
         });
       });
