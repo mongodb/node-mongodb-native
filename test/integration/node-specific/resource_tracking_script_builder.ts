@@ -5,6 +5,7 @@ import * as path from 'node:path';
 
 import { AssertionError, expect } from 'chai';
 import type * as sinon from 'sinon';
+import type * as timers from 'timers';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import type * as mongodb from '../../mongodb';
@@ -28,7 +29,8 @@ export type ProcessResourceTestFunction = (options: {
   mongodb?: typeof mongodb;
   sleep?: typeof sleep;
   sinon?: typeof sinon;
-  getTimerCount?: () => Number;
+  getTimerCount?: () => number;
+  timers?: typeof timers;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(

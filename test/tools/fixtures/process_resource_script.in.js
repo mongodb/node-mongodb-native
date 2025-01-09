@@ -11,15 +11,16 @@ const mongodb = require(driverPath);
 const { MongoClient } = mongodb;
 const process = require('node:process');
 const util = require('node:util');
-const timers = require('node:timers');
 const fs = require('node:fs');
 const sinon = require('sinon');
 const { expect } = require('chai');
-const { setTimeout } = require('timers');
+const timers = require('node:timers');
+const { setTimeout } = timers;
 
 let originalReport;
 const logFile = scriptName + '.logs.txt';
 const sleep = util.promisify(setTimeout);
+
 const run = func;
 
 /**
@@ -64,7 +65,7 @@ function getNewLibuvResourceArray() {
  * In order to be counted as a new resource, a resource MUST either:
  * - Meet the criteria to be returned by our helper utility `getNewLibuvResourceArray()`
  * OR
- * - Be returned by `process.getActiveResourcesInfo()
+ * - Be returned by `process.getActiveResourcesInfo() and is not 'TTYWrap'
  *
  * The reason we are using both methods to detect active resources is:
  * - `process.report.getReport().libuv` does not detect active requests (such as timers or file reads) accurately
@@ -74,7 +75,7 @@ function getNewLibuvResourceArray() {
 function getNewResources() {
   return {
     libuvResources: getNewLibuvResourceArray(),
-    activeResources: process.getActiveResourcesInfo()
+    activeResources: process.getActiveResourcesInfo().filter(r => r !== 'TTYWrap')
   };
 }
 
