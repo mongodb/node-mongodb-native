@@ -1,4 +1,4 @@
-import { Readable, Transform } from 'stream';
+import { Readable } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
 import { type OnDemandDocumentDeserializeOptions } from '../cmap/wire_protocol/on_demand/document';
@@ -496,33 +496,10 @@ export abstract class AbstractCursor<
   }
 
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
-    if (options?.transform) {
-      const transform = options.transform;
-      const readable = new ReadableCursorStream(this);
-
-      const transformedStream = readable.pipe(
-        new Transform({
-          objectMode: true,
-          highWaterMark: 1,
-          transform(chunk, _, callback) {
-            try {
-              const transformed = transform(chunk);
-              callback(undefined, transformed);
-            } catch (err) {
-              callback(err);
-            }
-          }
-        })
-      );
-
-      // Bubble errors to transformed stream, because otherwise no way
-      // to handle this error.
-      readable.on('error', err => transformedStream.emit('error', err));
-
-      return transformedStream;
-    }
-
-    return new ReadableCursorStream(this);
+    const transform = options?.transform ?? (doc => doc);
+    return Readable.from(this, { autoDestroy: false, highWaterMark: 1, objectMode: true }).map(
+      transform
+    );
   }
 
   async hasNext(): Promise<boolean> {
@@ -1059,87 +1036,6 @@ export abstract class AbstractCursor<
   /** @internal */
   protected throwIfInitialized() {
     if (this.initialized) throw new MongoCursorInUseError();
-  }
-}
-
-class ReadableCursorStream extends Readable {
-  private _cursor: AbstractCursor;
-  private _readInProgress = false;
-
-  constructor(cursor: AbstractCursor) {
-    super({
-      objectMode: true,
-      autoDestroy: false,
-      highWaterMark: 1
-    });
-    this._cursor = cursor;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override _read(size: number): void {
-    if (!this._readInProgress) {
-      this._readInProgress = true;
-      this._readNext();
-    }
-  }
-
-  override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
-    this._cursor.close().then(
-      () => callback(error),
-      closeError => callback(closeError)
-    );
-  }
-
-  private _readNext() {
-    if (this._cursor.id === Long.ZERO) {
-      this.push(null);
-      return;
-    }
-
-    this._cursor.next().then(
-      result => {
-        if (result == null) {
-          this.push(null);
-        } else if (this.destroyed) {
-          this._cursor.close().then(undefined, squashError);
-        } else {
-          if (this.push(result)) {
-            return this._readNext();
-          }
-
-          this._readInProgress = false;
-        }
-      },
-      err => {
-        // NOTE: This is questionable, but we have a test backing the behavior. It seems the
-        //       desired behavior is that a stream ends cleanly when a user explicitly closes
-        //       a client during iteration. Alternatively, we could do the "right" thing and
-        //       propagate the error message by removing this special case.
-        if (err.message.match(/server is closed/)) {
-          this._cursor.close().then(undefined, squashError);
-          return this.push(null);
-        }
-
-        // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
-        //       to be "operation was interrupted", where a cursor has been closed but there is an
-        //       active getMore in-flight. This used to check if the cursor was killed but once
-        //       that changed to happen in cleanup legitimate errors would not destroy the
-        //       stream. There are change streams test specifically test these cases.
-        if (err.message.match(/operation was interrupted/)) {
-          return this.push(null);
-        }
-
-        // NOTE: The two above checks on the message of the error will cause a null to be pushed
-        //       to the stream, thus closing the stream before the destroy call happens. This means
-        //       that either of those error messages on a change stream will not get a proper
-        //       'error' event to be emitted (the error passed to destroy). Change stream resumability
-        //       relies on that error event to be emitted to create its new cursor and thus was not
-        //       working on 4.4 servers because the error emitted on failover was "interrupted at
-        //       shutdown" while on 5.0+ it is "The server is in quiesce mode and will shut down".
-        //       See NODE-4475.
-        return this.destroy(err);
-      }
-    );
   }
 }
 

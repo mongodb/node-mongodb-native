@@ -1495,7 +1495,7 @@ describe('Cursor', function () {
     }
   });
 
-  it('does not auto destroy streams', function (done) {
+  it('does not auto destroy streams', async function () {
     const docs = [];
 
     for (var i = 0; i < 10; i++) {
@@ -1503,32 +1503,26 @@ describe('Cursor', function () {
     }
 
     const configuration = this.configuration;
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      db.createCollection('does_not_autodestroy_streams', (err, collection) => {
-        expect(err).to.not.exist;
+    const db = client.db(configuration.db);
+    const collection = await db.createCollection('does_not_autodestroy_streams');
 
-        collection.insertMany(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+    await collection.insertMany(docs, configuration.writeConcernMax());
 
-          const cursor = collection.find();
-          const stream = cursor.stream();
-          stream.on('close', () => {
-            expect.fail('extra close event must not be called');
-          });
-          stream.on('end', () => {
-            client.close();
-            done();
-          });
-          stream.on('data', doc => {
-            expect(doc).to.exist;
-          });
-          stream.resume();
-        });
-      });
+    const cursor = collection.find();
+    const stream = cursor.stream();
+
+    const end$ = once(stream, 'end');
+    const close$ = once(stream, 'close').then(() => {
+      expect.fail('extra close event must not be called');
     });
+
+    stream.resume();
+
+    await Promise.race([end$, close$]);
+
+    await client.close();
   });
 
   it('should be able to stream documents', {
@@ -2321,7 +2315,7 @@ describe('Cursor', function () {
             .find()
             .withReadPreference('notsecondary');
           test.ok(false);
-        } catch (err) {} // eslint-disable-line
+        } catch (err) { } // eslint-disable-line
 
         db.collection('shouldFailToSetReadPreferenceOnCursor')
           .find()

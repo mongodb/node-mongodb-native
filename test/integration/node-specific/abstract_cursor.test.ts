@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
-import { Transform } from 'stream';
 import { inspect } from 'util';
 
 import {
@@ -299,14 +298,8 @@ describe('class AbstractCursor', function () {
     });
 
     it('propagates errors to transform stream', async function () {
-      const transform = new Transform({
-        transform(data, encoding, callback) {
-          callback(null, data);
-        }
-      });
-
       // MongoServerError: unknown operator: $bar
-      const stream = collection.find({ foo: { $bar: 25 } }).stream({ transform });
+      const stream = collection.find({ foo: { $bar: 25 } }).stream({ transform: doc => doc });
 
       const error: Error | null = await new Promise(resolve => {
         stream.on('error', error => resolve(error));
