@@ -20,7 +20,6 @@ const { setTimeout } = require('timers');
 let originalReport;
 const logFile = scriptName + '.logs.txt';
 const sleep = util.promisify(setTimeout);
-
 const run = func;
 
 /**
