@@ -3662,7 +3662,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: latest}
+            - {key: NODE_LTS_VERSION, value: '22'}
             - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
       - func: check resource management
@@ -3676,7 +3676,7 @@ tasks:
           updates:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: NODE_LTS_VERSION, value: latest}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: check resource management feature integration
