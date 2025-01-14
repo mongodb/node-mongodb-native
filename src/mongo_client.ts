@@ -26,6 +26,7 @@ import {
   type LogComponentSeveritiesClientOptions,
   type MongoDBLogWritable,
   MongoLogger,
+  type MongoLoggerEnvOptions,
   type MongoLoggerOptions,
   SeverityLevel
 } from './mongo_logger';
@@ -299,7 +300,11 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   mongodbLogMaxDocumentLength?: number;
 
   /** @internal */
-  [featureFlag: symbol]: any;
+  __skipPingOnConnect?: boolean;
+  /** @internal */
+  __internalLoggerConfig?: MongoLoggerEnvOptions;
+  /** @internal */
+  __enableMongoLogger?: boolean;
 }
 
 /** @public */
@@ -333,9 +338,6 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
   open(mongoClient: MongoClient): void;
 };
 
-/** @internal */
-const kOptions = Symbol('options');
-
 /**
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
  * @public
@@ -367,20 +369,22 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /**
    * The consolidate, parsed, transformed and merged options.
-   * @internal
    */
-  [kOptions]: MongoOptions;
+  public readonly options: Readonly<
+    Omit<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert'>
+  > &
+    Pick<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert'>;
 
   constructor(url: string, options?: MongoClientOptions) {
     super();
 
-    this[kOptions] = parseOptions(url, this, options);
+    this.options = parseOptions(url, this, options);
 
-    const shouldSetLogger = Object.values(
-      this[kOptions].mongoLoggerOptions.componentSeverities
-    ).some(value => value !== SeverityLevel.OFF);
+    const shouldSetLogger = Object.values(this.options.mongoLoggerOptions.componentSeverities).some(
+      value => value !== SeverityLevel.OFF
+    );
     this.mongoLogger = shouldSetLogger
-      ? new MongoLogger(this[kOptions].mongoLoggerOptions)
+      ? new MongoLogger(this.options.mongoLoggerOptions)
       : undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -389,7 +393,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     // The internal state
     this.s = {
       url,
-      bsonOptions: resolveBSONOptions(this[kOptions]),
+      bsonOptions: resolveBSONOptions(this.options),
       namespace: ns('admin'),
       hasBeenClosed: false,
       sessionPool: new ServerSessionPool(this),
@@ -397,16 +401,16 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       authProviders: new MongoClientAuthProviders(),
 
       get options() {
-        return client[kOptions];
+        return client.options;
       },
       get readConcern() {
-        return client[kOptions].readConcern;
+        return client.options.readConcern;
       },
       get writeConcern() {
-        return client[kOptions].writeConcern;
+        return client.options.writeConcern;
       },
       get readPreference() {
-        return client[kOptions].readPreference;
+        return client.options.readPreference;
       },
       get isMongoClient(): true {
         return true;
@@ -428,15 +432,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /** @internal */
   private checkForNonGenuineHosts() {
-    const documentDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
+    const documentDBHostnames = this.options.hosts.filter((hostAddress: HostAddress) =>
       isHostMatch(DOCUMENT_DB_CHECK, hostAddress.host)
     );
-    const srvHostIsDocumentDB = isHostMatch(DOCUMENT_DB_CHECK, this[kOptions].srvHost);
+    const srvHostIsDocumentDB = isHostMatch(DOCUMENT_DB_CHECK, this.options.srvHost);
 
-    const cosmosDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
+    const cosmosDBHostnames = this.options.hosts.filter((hostAddress: HostAddress) =>
       isHostMatch(COSMOS_DB_CHECK, hostAddress.host)
     );
-    const srvHostIsCosmosDB = isHostMatch(COSMOS_DB_CHECK, this[kOptions].srvHost);
+    const srvHostIsCosmosDB = isHostMatch(COSMOS_DB_CHECK, this.options.srvHost);
 
     if (documentDBHostnames.length !== 0 || srvHostIsDocumentDB) {
       this.mongoLogger?.info('client', DOCUMENT_DB_MSG);
@@ -445,28 +449,23 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     }
   }
 
-  /** @see MongoOptions */
-  get options(): Readonly<MongoOptions> {
-    return Object.freeze({ ...this[kOptions] });
-  }
-
   get serverApi(): Readonly<ServerApi | undefined> {
-    return this[kOptions].serverApi && Object.freeze({ ...this[kOptions].serverApi });
+    return this.options.serverApi && Object.freeze({ ...this.options.serverApi });
   }
   /**
    * Intended for APM use only
    * @internal
    */
   get monitorCommands(): boolean {
-    return this[kOptions].monitorCommands;
+    return this.options.monitorCommands;
   }
   set monitorCommands(value: boolean) {
-    this[kOptions].monitorCommands = value;
+    this.options.monitorCommands = value;
   }
 
   /** @internal */
   get autoEncrypter(): AutoEncrypter | undefined {
-    return this[kOptions].autoEncrypter;
+    return this.options.autoEncrypter;
   }
 
   get readConcern(): ReadConcern | undefined {
@@ -551,7 +550,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       return this;
     }
 
-    const options = this[kOptions];
+    const options = this.options;
 
     if (options.tls) {
       if (typeof options.tlsCAFile === 'string') {
@@ -685,7 +684,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
     topology.close();
 
-    const { encrypter } = this[kOptions];
+    const { encrypter } = this.options;
     if (encrypter) {
       await encrypter.close(this, force);
     }
@@ -706,7 +705,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     }
 
     // Copy the options and add out internal override of the not shared flag
-    const finalOptions = Object.assign({}, this[kOptions], options);
+    const finalOptions = Object.assign({}, this.options, options);
 
     // Return the db object
     const db = new Db(this, dbName, finalOptions);
@@ -748,7 +747,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       this,
       this.s.sessionPool,
       { explicit: true, ...options },
-      this[kOptions]
+      this.options
     );
     this.s.activeSessions.add(session);
     session.once('ended', () => {
@@ -1012,9 +1011,6 @@ export interface MongoOptions
   tlsCRLFile?: string;
   tlsCertificateKeyFile?: string;
 
-  /** @internal */
-  [featureFlag: symbol]: any;
-
   /**
    * @internal
    * TODO: NODE-5671 - remove internal flag
@@ -1026,4 +1022,10 @@ export interface MongoOptions
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
   timeoutMS?: number;
+  /** @internal */
+  __skipPingOnConnect?: boolean;
+  /** @internal */
+  __internalLoggerConfig?: Document;
+  /** @internal */
+  __enableMongoLogger?: boolean;
 }

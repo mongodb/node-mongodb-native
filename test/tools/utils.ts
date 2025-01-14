@@ -120,18 +120,6 @@ export function getEncryptExtraOptions(): {
   return {};
 }
 
-export function getSymbolFrom(target: any, symbolName: any, assertExists = true) {
-  const symbol = Object.getOwnPropertySymbols(target).filter(
-    s => s.toString() === `Symbol(${symbolName})`
-  )[0];
-
-  if (assertExists && !symbol) {
-    throw new Error(`Did not find Symbol(${symbolName}) on ${target}`);
-  }
-
-  return symbol;
-}
-
 export function getEnvironmentalOptions() {
   const options = {};
   if (process.env.MONGODB_API_VERSION) {

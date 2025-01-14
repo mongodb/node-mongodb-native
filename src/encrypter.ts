@@ -8,9 +8,6 @@ import { MongoClient, type MongoClientOptions } from './mongo_client';
 import { type Callback } from './utils';
 
 /** @internal */
-const kInternalClient = Symbol('internalClient');
-
-/** @internal */
 export interface EncrypterOptions {
   autoEncryption: AutoEncryptionOptions;
   maxPoolSize?: number;
@@ -18,7 +15,7 @@ export interface EncrypterOptions {
 
 /** @internal */
 export class Encrypter {
-  [kInternalClient]: MongoClient | null;
+  private internalClient: MongoClient | null;
   bypassAutoEncryption: boolean;
   needsConnecting: boolean;
   autoEncrypter: AutoEncrypter;
@@ -28,7 +25,7 @@ export class Encrypter {
       throw new MongoInvalidArgumentError('Option "autoEncryption" must be specified');
     }
     // initialize to null, if we call getInternalClient, we may set this it is important to not overwrite those function calls.
-    this[kInternalClient] = null;
+    this.internalClient = null;
 
     this.bypassAutoEncryption = !!options.autoEncryption.bypassAutoEncryption;
     this.needsConnecting = false;
@@ -60,8 +57,7 @@ export class Encrypter {
   }
 
   getInternalClient(client: MongoClient, uri: string, options: MongoClientOptions): MongoClient {
-    // TODO(NODE-4144): Remove new variable for type narrowing
-    let internalClient = this[kInternalClient];
+    let internalClient = this.internalClient;
     if (internalClient == null) {
       const clonedOptions: MongoClientOptions = {};
 
@@ -77,7 +73,7 @@ export class Encrypter {
       clonedOptions.minPoolSize = 0;
 
       internalClient = new MongoClient(uri, clonedOptions);
-      this[kInternalClient] = internalClient;
+      this.internalClient = internalClient;
 
       for (const eventName of MONGO_CLIENT_EVENTS) {
         for (const listener of client.listeners(eventName)) {
@@ -95,8 +91,7 @@ export class Encrypter {
   }
 
   async connectInternalClient(): Promise<void> {
-    // TODO(NODE-4144): Remove new variable for type narrowing
-    const internalClient = this[kInternalClient];
+    const internalClient = this.internalClient;
     if (this.needsConnecting && internalClient != null) {
       this.needsConnecting = false;
       await internalClient.connect();
@@ -114,7 +109,7 @@ export class Encrypter {
     } catch (autoEncrypterError) {
       error = autoEncrypterError;
     }
-    const internalClient = this[kInternalClient];
+    const internalClient = this.internalClient;
     if (internalClient != null && client !== internalClient) {
       return await internalClient.close(force);
     }

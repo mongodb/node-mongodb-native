@@ -3,7 +3,7 @@ import * as v8 from 'node:v8';
 import { expect } from 'chai';
 
 import { sleep } from '../../tools/utils';
-import { runScript } from './resource_tracking_script_builder';
+import { runScriptAndReturnHeapInfo } from './resource_tracking_script_builder';
 
 /**
  * This 5MB range is selected arbitrarily and should likely be raised if failures are seen intermittently.
@@ -38,7 +38,7 @@ describe('Driver Resources', () => {
         return;
       }
       try {
-        const res = await runScript(
+        const res = await runScriptAndReturnHeapInfo(
           'no_resource_leak_connect_close',
           this.configuration,
           async function run({ MongoClient, uri }) {

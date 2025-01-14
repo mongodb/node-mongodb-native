@@ -128,7 +128,7 @@ BASE_TASKS.push({
     { func: 'bootstrap mongo-orchestration' },
     { func: 'run x509 auth tests' }
   ]
-})
+});
 
 // manually added tasks
 TASKS.push(
@@ -416,7 +416,10 @@ for (const {
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const expansions = { NODE_LTS_VERSION, NPM_VERSION: NODE_LTS_VERSION === 16 ? 9 : 'latest' };
+    const NPM_VERSION = versions.find(
+      ({ versionNumber }) => versionNumber === NODE_LTS_VERSION
+    ).npmVersion;
+    const expansions = { NODE_LTS_VERSION, NPM_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
     if (clientEncryption) {
@@ -433,12 +436,13 @@ for (const {
       display_name: `${osDisplayName} Node Latest`,
       run_on,
       expansions: { NODE_LTS_VERSION: 'latest' },
-      tasks: tasks.map(({ name }) => name)
+      tasks: tasks.map(({ name }) => name),
+      // TODO(NODE-6641): Unskip the smoke tests
+      disable: true
     };
     if (clientEncryption) {
       buildVariantData.expansions.CLIENT_ENCRYPTION = true;
     }
-
     BUILD_VARIANTS.push(buildVariantData);
   }
 }
@@ -534,7 +538,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: "v16.20.2",
+          NODE_LTS_VERSION: 'v16.20.2',
           NPM_VERSION: 9
         }),
         { func: 'install dependencies' },
@@ -546,7 +550,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: 'latest',
+          NODE_LTS_VERSION: LATEST_LTS,
           NPM_VERSION: 9
         }),
         { func: 'install dependencies' },
@@ -560,7 +564,7 @@ SINGLETON_TASKS.push(
         updateExpansions({
           VERSION: 'latest',
           TOPOLOGY: 'replica_set',
-          NODE_LTS_VERSION: 'latest'
+          NODE_LTS_VERSION: LATEST_LTS 
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
@@ -586,7 +590,7 @@ function* makeTypescriptTasks() {
         { func: 'install dependencies' },
         { func: 'compile driver' }
       ]
-    }
+    };
   }
   function makeCheckTypesTask(TS_VERSION, TYPES_VERSION) {
     return {
@@ -602,10 +606,10 @@ function* makeTypescriptTasks() {
         { func: 'install dependencies' },
         { func: 'check types' }
       ]
-    }
+    };
   }
 
-  const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1)
+  const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1);
   yield makeCheckTypesTask('next', typesVersion);
   yield makeCheckTypesTask('current', typesVersion);
 
@@ -664,7 +668,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         NODE_LTS_VERSION: LOWEST_LTS,
         NPM_VERSION: 9,
         VERSION: version,
-        TOPOLOGY: 'replica_set',
+        TOPOLOGY: 'replica_set'
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
@@ -712,6 +716,58 @@ const coverageTask = {
 
 SINGLETON_TASKS.push(coverageTask);
 SINGLETON_TASKS.push(...customDependencyTests);
+
+function addPerformanceTasks() {
+  const makePerfTask = (name, MONGODB_CLIENT_OPTIONS) => ({
+    name,
+    tags: ['run-spec-benchmark-tests', 'performance'],
+    exec_timeout_secs: 3600,
+    commands: [
+      updateExpansions({
+        NODE_LTS_VERSION: 'v22.11.0',
+        VERSION: 'v6.0-perf',
+        TOPOLOGY: 'server',
+        AUTH: 'noauth',
+        MONGODB_CLIENT_OPTIONS: JSON.stringify(MONGODB_CLIENT_OPTIONS)
+      }),
+      ...[
+        'install dependencies',
+        'bootstrap mongo-orchestration',
+        'run spec driver benchmarks'
+      ].map(func => ({ func })),
+      {
+        command: 'perf.send',
+        params: { file: 'src/results.json' }
+      }
+    ]
+  });
+
+  const tasks = [
+    makePerfTask('run-spec-benchmark-tests-node-server', {}),
+    makePerfTask('run-spec-benchmark-tests-node-server-timeoutMS-120000', { timeoutMS: 120000 }),
+    makePerfTask('run-spec-benchmark-tests-node-server-timeoutMS-0', { timeoutMS: 0 }),
+    makePerfTask('run-spec-benchmark-tests-node-server-monitorCommands-true', {
+      monitorCommands: true
+    }),
+    makePerfTask('run-spec-benchmark-tests-node-server-logging', {
+      __enableMongoLogger: true,
+      __internalLoggerConfig: {
+        MONGODB_LOG_ALL: 'trace',
+        MONGODB_LOG_PATH: 'stderr'
+      }
+    })
+  ];
+
+  TASKS.push(...tasks);
+
+  BUILD_VARIANTS.push({
+    name: 'performance-tests',
+    display_name: 'Performance Test',
+    run_on: 'rhel90-dbx-perf-large',
+    tasks: tasks.map(({ name }) => name)
+  });
+}
+addPerformanceTasks();
 
 BUILD_VARIANTS.push({
   name: 'rhel8-custom-dependency-tests',

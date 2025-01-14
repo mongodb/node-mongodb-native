@@ -24,7 +24,7 @@ import {
   TopologyType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { getSymbolFrom, topologyWithPlaceholderClient } from '../../tools/utils';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Topology (unit)', function () {
   let client, topology;
@@ -354,8 +354,7 @@ describe('Topology (unit)', function () {
       afterEach(() => {
         // The srv event starts a monitor that we need to clean up
         for (const [, server] of topology.s.servers) {
-          const kMonitorId = getSymbolFrom(server.monitor, 'monitorId');
-          server.monitor[kMonitorId].stop();
+          server.monitor.monitorId.stop();
         }
       });
 
