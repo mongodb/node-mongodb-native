@@ -17,6 +17,7 @@ import {
   MongoDBAWS,
   type MongoDBNamespace,
   type MongoDBResponseConstructor,
+  MongoError,
   MongoMissingCredentialsError,
   MongoServerError,
   setDifference
@@ -116,10 +117,17 @@ describe('MONGODB-AWS', function () {
       sinon.restore();
     });
 
-    it.only('should use conversationId returned by saslStart in saslContinue', async function () {
+    it('should use conversationId returned by saslStart in saslContinue', async function () {
       client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
 
-      await client.db('aws').collection('aws_test').estimatedDocumentCount();
+      const err = await client
+        .db('aws')
+        .collection('aws_test')
+        .estimatedDocumentCount()
+        .catch(e => e);
+
+      // Expecting the saslContinue to fail since we changed the conversationId
+      expect(err).to.be.instanceof(MongoError);
 
       expect(saslStartResult).to.not.be.undefined;
       expect(saslContinue).to.not.be.undefined;
