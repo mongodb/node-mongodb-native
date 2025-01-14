@@ -4,7 +4,7 @@
 
 const driverPath = DRIVER_SOURCE_PATH;
 const func = FUNCTION_STRING;
-const name = NAME_STRING;
+const name = SCRIPT_NAME_STRING;
 const uri = URI_STRING;
 const iterations = ITERATIONS_STRING;
 
