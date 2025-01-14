@@ -80,9 +80,11 @@ export class CommandStartedEvent {
   get command(): Document {
     if (this._command) return this._command;
     if (!this._commandRef) return {};
+    console.log(this._commandRef);
     const cmd = extractCommand(this._commandRef);
     const sensitive = isSensitive(this.commandName, cmd);
     this._command = maybeRedact(sensitive, cmd);
+    delete this._commandRef;
 
     return this._command;
   }
