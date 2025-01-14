@@ -57,8 +57,8 @@ export class CommandStartedEvent {
 
     // TODO: remove in major revision, this is not spec behavior
     if (SENSITIVE_COMMANDS.has(commandName)) {
-      this.commandObj = {};
-      this.commandObj[commandName] = true;
+      this._command = {};
+      this._command[commandName] = true;
     } else {
       this._commandRef = command;
     }
@@ -83,7 +83,6 @@ export class CommandStartedEvent {
     const cmd = extractCommand(this._commandRef);
     const sensitive = isSensitive(this.commandName, cmd);
     this._command = maybeRedact(sensitive, cmd);
-    delete this._commandRef;
 
     return this._command;
   }
