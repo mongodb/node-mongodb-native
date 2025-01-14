@@ -530,7 +530,9 @@ export class OpMsgRequest {
       typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
 
+  buffers?: Buffer[];
   toBin(): Buffer[] {
+    if (this.buffers) return this.buffers;
     const buffers: Buffer[] = [];
     let flags = 0;
 
@@ -562,7 +564,7 @@ export class OpMsgRequest {
     header.writeInt32LE(0, 8); // responseTo
     header.writeInt32LE(OP_MSG, 12); // opCode
     header.writeUInt32LE(flags, 16); // flags
-    return buffers;
+    return (this.buffers ??= buffers);
   }
 
   /**

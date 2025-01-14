@@ -254,12 +254,17 @@ const OP_QUERY_KEYS = [
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof OpMsgRequest) {
-    const cmd = deserialize(serialize(command.command));
+    const bin = command.toBin();
+    const bsonBuffer = bin[2];
+    const docSeq = bin[3];
+    const cmd = deserialize(bsonBuffer);
     // For OP_MSG with payload type 1 we need to pull the documents
     // array out of the document sequence for monitoring.
+    // FIXME: Inaccurate for now
     if (command.command.ops instanceof DocumentSequence && cmd.ops) {
       cmd.ops = cmd.ops.documents;
     }
+    // FIXME: Inaccurate for now
     if (command.command.nsInfo instanceof DocumentSequence && cmd.nsInfo) {
       cmd.nsInfo = cmd.nsInfo.documents;
     }
