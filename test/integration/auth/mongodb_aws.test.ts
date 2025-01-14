@@ -128,7 +128,7 @@ describe('MONGODB-AWS', function () {
 
       // Expecting the saslContinue to fail since we changed the conversationId
       expect(err).to.be.instanceof(MongoServerError);
-      expect(err.messsage).to.match(/Mismatched conversation id/);
+      expect(err.message).to.match(/Mismatched conversation id/);
 
       expect(saslStartResult).to.not.be.undefined;
       expect(saslContinue).to.not.be.undefined;
