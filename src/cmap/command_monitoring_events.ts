@@ -171,7 +171,10 @@ export class CommandSucceededEvent {
       this._namespace,
       this._replyRef
     );
-    return this._reply;
+
+    delete this._replyRef;
+
+    return this._reply ?? {};
   }
 }
 
