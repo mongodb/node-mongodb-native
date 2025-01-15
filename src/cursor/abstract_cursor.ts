@@ -61,6 +61,10 @@ export interface CursorStreamOptions {
 /** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
+function removeActiveCursor(this: AbstractCursor) {
+  this.client.s.activeCursors.delete(this);
+}
+
 /**
  * @public
  * @experimental
@@ -260,6 +264,10 @@ export abstract class AbstractCursor<
       throw new MongoRuntimeError('Cursor must be constructed with MongoClient');
     }
     this.cursorClient = client;
+
+    this.cursorClient.s.activeCursors.add(this);
+    this.once('close', removeActiveCursor);
+
     this.cursorNamespace = namespace;
     this.cursorId = null;
     this.initialized = false;
@@ -825,6 +833,11 @@ export abstract class AbstractCursor<
     this.isKilled = false;
     this.initialized = false;
 
+    this.cursorClient.s.activeCursors.add(this);
+    if (!this.listeners('close').includes(removeActiveCursor)) {
+      this.once('close', removeActiveCursor);
+    }
+
     const session = this.cursorSession;
     if (session) {
       // We only want to end this session if we created it, and it hasn't ended yet
@@ -1008,14 +1021,16 @@ export abstract class AbstractCursor<
     } catch (error) {
       squashError(error);
     } finally {
-      if (session?.owner === this) {
-        await session.endSession({ error });
+      try {
+        if (session?.owner === this) {
+          await session.endSession({ error });
+        }
+        if (!session?.inTransaction()) {
+          maybeClearPinnedConnection(session, { error });
+        }
+      } finally {
+        this.emitClose();
       }
-      if (!session?.inTransaction()) {
-        maybeClearPinnedConnection(session, { error });
-      }
-
-      this.emitClose();
     }
   }
 

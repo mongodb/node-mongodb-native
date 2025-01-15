@@ -4,6 +4,7 @@ import * as net from 'net';
 import * as sinon from 'sinon';
 
 import {
+  type Collection,
   type CommandFailedEvent,
   type CommandStartedEvent,
   type CommandSucceededEvent,
@@ -31,7 +32,6 @@ describe('class MongoClient', function () {
   afterEach(async () => {
     sinon.restore();
     await client?.close();
-    // @ts-expect-error: Put this variable back to undefined to force tests to make their own client
     client = undefined;
   });
 
@@ -567,7 +567,44 @@ describe('class MongoClient', function () {
     });
   });
 
-  context('#close()', () => {
+  describe('active cursors', function () {
+    let client: MongoClient;
+    let collection: Collection<{ _id: number }>;
+    const kills = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      collection = client.db('activeCursors').collection('activeCursors');
+      await collection.drop().catch(() => null);
+      await collection.insertMany(Array.from({ length: 50 }, (_, _id) => ({ _id })));
+
+      kills.length = 0;
+      client.on('commandStarted', ev => ev.commandName === 'killCursors' && kills.push(ev));
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('are tracked upon creation and removed upon exhaustion', async () => {
+      const cursors = Array.from({ length: 30 }, (_, skip) =>
+        collection.find({}, { skip, batchSize: 1 })
+      );
+      expect(client.s.activeCursors).to.have.lengthOf(30);
+      await Promise.all(cursors.map(c => c.toArray()));
+      expect(client.s.activeCursors).to.have.lengthOf(0);
+      expect(kills).to.have.lengthOf(0);
+    });
+
+    it('are removed from tracking if exhausted in first batch', async () => {
+      const cursors = Array.from({ length: 30 }, () => collection.find());
+      expect(client.s.activeCursors).to.have.lengthOf(30);
+      await Promise.all(cursors.map(c => c.next())); // only one document pulled from each.
+      expect(client.s.activeCursors).to.have.lengthOf(0);
+    });
+  });
+
+  describe('#close()', () => {
     let client: MongoClient;
     let db: Db;
 
@@ -702,7 +739,7 @@ describe('class MongoClient', function () {
       expect(endEvents[0]).to.have.property('reply', undefined); // noReponse: true
     });
 
-    context('when server selection would return no servers', () => {
+    describe('when server selection would return no servers', () => {
       const serverDescription = new ServerDescription('a:1');
 
       it('short circuits and does not end sessions', async () => {
@@ -720,6 +757,31 @@ describe('class MongoClient', function () {
 
         expect(startedEvents).to.be.empty;
         expect(client.s.sessionPool.sessions).to.have.lengthOf(1);
+      });
+    });
+
+    describe('active cursors', function () {
+      let collection: Collection<{ _id: number }>;
+      const kills = [];
+
+      beforeEach(async () => {
+        collection = client.db('test').collection('activeCursors');
+        await collection.drop().catch(() => null);
+        await collection.insertMany(Array.from({ length: 50 }, (_, _id) => ({ _id })));
+
+        kills.length = 0;
+        client.on('commandStarted', ev => ev.commandName === 'killCursors' && kills.push(ev));
+      });
+
+      it('are all closed', async () => {
+        const cursors = Array.from({ length: 30 }, (_, skip) =>
+          collection.find({}, { skip, batchSize: 1 })
+        );
+        await Promise.all(cursors.map(c => c.next()));
+        expect(client.s.activeCursors).to.have.lengthOf(30);
+        await client.close();
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        expect(kills).to.have.lengthOf(30);
       });
     });
   });
