@@ -72,7 +72,8 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
     const options = {
       ...this.findOptions, // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
-      session
+      session,
+      signal: this.signal
     };
 
     if (options.explain) {

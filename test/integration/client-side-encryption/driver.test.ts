@@ -831,12 +831,12 @@ describe('CSOT', function () {
   describe('State machine', function () {
     const stateMachine = new StateMachine({} as any);
 
-    const timeoutContext = () => {
-      return new CSOTTimeoutContext({
+    const timeoutContext = () => ({
+      timeoutContext: new CSOTTimeoutContext({
         timeoutMS: 1000,
         serverSelectionTimeoutMS: 30000
-      });
-    };
+      })
+    });
 
     const timeoutMS = 1000;
 
@@ -1001,7 +1001,7 @@ describe('CSOT', function () {
 
             const { result: error } = await measureDuration(() =>
               stateMachine
-                .fetchKeys(client, 'test.test', BSON.serialize({}), timeoutContext)
+                .fetchKeys(client, 'test.test', BSON.serialize({}), { timeoutContext })
                 .catch(e => e)
             );
             expect(error).to.be.instanceOf(MongoOperationTimeoutError);

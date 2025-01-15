@@ -27,6 +27,7 @@ import {
   MongoRuntimeError
 } from './error';
 import type { MongoClient } from './mongo_client';
+import { type Abortable } from './mongo_types';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
 import { ReadConcern } from './read_concern';
@@ -1349,19 +1350,24 @@ export const randomBytes = promisify(crypto.randomBytes);
  * @param ee - An event emitter that may emit `ev`
  * @param name - An event name to wait for
  */
-export async function once<T>(ee: EventEmitter, name: string): Promise<T> {
+export async function once<T>(ee: EventEmitter, name: string, options?: Abortable): Promise<T> {
+  options?.signal?.throwIfAborted();
+
   const { promise, resolve, reject } = promiseWithResolvers<T>();
   const onEvent = (data: T) => resolve(data);
   const onError = (error: Error) => reject(error);
+  const abortListener = addAbortListener(options?.signal, function () {
+    reject(this.reason);
+  });
 
   ee.once(name, onEvent).once('error', onError);
+
   try {
-    const res = await promise;
-    ee.off('error', onError);
-    return res;
-  } catch (error) {
+    return await promise;
+  } finally {
     ee.off(name, onEvent);
-    throw error;
+    ee.off('error', onError);
+    abortListener?.[kDispose]();
   }
 }
 
@@ -1467,4 +1473,18 @@ export function decorateDecryptionResult(
 
     decorateDecryptionResult(decrypted[k], originalValue, false);
   }
+}
+
+export const kDispose: unique symbol = (Symbol.dispose as any) ?? Symbol('dispose');
+export interface Disposable {
+  [kDispose](): void;
+}
+
+export function addAbortListener(
+  signal: AbortSignal | undefined | null,
+  listener: (this: AbortSignal, event: Event) => void
+): Disposable | undefined {
+  if (signal == null) return;
+  signal.addEventListener('abort', listener, { once: true });
+  return { [kDispose]: () => signal.removeEventListener('abort', listener) };
 }

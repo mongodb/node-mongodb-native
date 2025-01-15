@@ -64,7 +64,10 @@ export async function executeOperation<
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
+  // Like CSOT, an operation signal interruption does not relate to auto-connect
+  operation.options.signal?.throwIfAborted();
   const topology = await autoConnect(client);
+  operation.options.signal?.throwIfAborted();
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
@@ -198,7 +201,8 @@ async function tryOperation<
   let server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    timeoutContext
+    timeoutContext,
+    signal: operation.options.signal
   });
 
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
@@ -260,7 +264,8 @@ async function tryOperation<
       server = await topology.selectServer(selector, {
         session,
         operationName: operation.commandName,
-        previousServer
+        previousServer,
+        signal: operation.options.signal
       });
 
       if (hasWriteAspect && !supportsRetryableWrites(server)) {

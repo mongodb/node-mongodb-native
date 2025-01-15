@@ -81,7 +81,12 @@ describe('StateMachine', function () {
       a: new Long('0'),
       b: new Int32(0)
     };
-    const options = { promoteLongs: false, promoteValues: false };
+    const options = {
+      promoteLongs: false,
+      promoteValues: false,
+      signal: undefined,
+      timeoutMS: undefined
+    };
     const serializedCommand = serialize(command);
     const stateMachine = new StateMachine({} as any);
 
@@ -493,7 +498,7 @@ describe('StateMachine', function () {
           });
 
           await stateMachine
-            .fetchKeys(client, 'keyVault', BSON.serialize({ a: 1 }), context)
+            .fetchKeys(client, 'keyVault', BSON.serialize({ a: 1 }), { timeoutContext: context })
             .catch(e => squashError(e));
 
           const { timeoutContext } = findSpy.getCalls()[0].args[1] as FindOptions;
@@ -535,7 +540,7 @@ describe('StateMachine', function () {
           });
           await sleep(300);
           await stateMachine
-            .markCommand(client, 'keyVault', BSON.serialize({ a: 1 }), timeoutContext)
+            .markCommand(client, 'keyVault', BSON.serialize({ a: 1 }), { timeoutContext })
             .catch(e => squashError(e));
           expect(dbCommandSpy.getCalls()[0].args[1].timeoutMS).to.not.be.undefined;
           expect(dbCommandSpy.getCalls()[0].args[1].timeoutMS).to.be.lessThanOrEqual(205);
@@ -576,7 +581,9 @@ describe('StateMachine', function () {
             });
             await sleep(300);
             await stateMachine
-              .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }), context)
+              .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }), {
+                timeoutContext: context
+              })
               .catch(e => squashError(e));
             const [_filter, { timeoutContext }] = listCollectionsSpy.getCalls()[0].args;
             expect(timeoutContext).to.exist;

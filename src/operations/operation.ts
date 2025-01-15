@@ -1,4 +1,5 @@
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
+import { type Abortable } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -59,7 +60,7 @@ export abstract class AbstractOperation<TResult = any> {
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
 
-  options: OperationOptions;
+  options: OperationOptions & Abortable;
 
   /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
@@ -68,7 +69,7 @@ export abstract class AbstractOperation<TResult = any> {
 
   static aspects?: Set<symbol>;
 
-  constructor(options: OperationOptions = {}) {
+  constructor(options: OperationOptions & Abortable = {}) {
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
       : (ReadPreference.fromOptions(options) ?? ReadPreference.primary);
