@@ -1,7 +1,6 @@
 import { inspect, promisify } from 'util';
 
 import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
-import type { CommandStartedEvent } from './cmap/command_monitoring_events';
 import type {
   ConnectionCheckedInEvent,
   ConnectionCheckedOutEvent,
@@ -297,6 +296,19 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
   return s0Num < s1Num ? -1 : s0Num > s1Num ? 1 : 0;
 }
 
+export type LoggableCommandStartedEvent = {
+  commandObj?: Document;
+  requestId: number;
+  databaseName: string;
+  commandName: string;
+  command?: Document;
+  address: string;
+  connectionId?: string | number;
+  serverConnectionId: bigint | null;
+  serviceId?: ObjectId;
+  name: typeof COMMAND_STARTED;
+};
+
 /**
  * @internal
  * Must be separate from Events API due to differences in spec requirements for logging a command success
@@ -385,7 +397,7 @@ export type LoggableEvent =
   | ServerSelectionFailedEvent
   | ServerSelectionSucceededEvent
   | WaitingForSuitableServerEvent
-  | CommandStartedEvent
+  | LoggableCommandStartedEvent
   | LoggableCommandSucceededEvent
   | LoggableCommandFailedEvent
   | ConnectionPoolCreatedEvent
@@ -476,7 +488,10 @@ function attachServerSelectionFields(
 
 function attachCommandFields(
   log: Record<string, any>,
-  commandEvent: CommandStartedEvent | LoggableCommandSucceededEvent | LoggableCommandFailedEvent
+  commandEvent:
+    | LoggableCommandStartedEvent
+    | LoggableCommandSucceededEvent
+    | LoggableCommandFailedEvent
 ) {
   log.commandName = commandEvent.commandName;
   log.requestId = commandEvent.requestId;

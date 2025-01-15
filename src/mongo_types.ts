@@ -16,6 +16,7 @@ import type {
 import { type CommandStartedEvent } from './cmap/command_monitoring_events';
 import {
   type LoggableCommandFailedEvent,
+  type LoggableCommandStartedEvent,
   type LoggableCommandSucceededEvent,
   type LoggableServerHeartbeatFailedEvent,
   type LoggableServerHeartbeatStartedEvent,
@@ -460,11 +461,13 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     }
     if (connectionEstablished) {
       const loggableCommandEvent:
-        | CommandStartedEvent
+        | LoggableCommandStartedEvent
         | LoggableCommandFailedEvent
         | LoggableCommandSucceededEvent = {
         databaseName: databaseName,
-        ...args[0]
+        ...args[0],
+        command: args[0]?.command,
+        reply: args[0]?.reply
       };
       this.mongoLogger?.debug(MongoLoggableComponent.COMMAND, loggableCommandEvent);
     }

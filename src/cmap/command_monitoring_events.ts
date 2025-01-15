@@ -60,6 +60,7 @@ export class CommandStartedEvent {
       this._command = {};
       this._command[commandName] = true;
     } else {
+      this._command = undefined;
       this._commandRef = command;
     }
 
@@ -78,12 +79,12 @@ export class CommandStartedEvent {
   }
 
   get command(): Document {
-    if (this._command) return this._command;
-    if (!this._commandRef) return {};
-    console.log(this._commandRef);
+    if (this._command != null) return this._command;
+    if (this._commandRef == null) return {};
     const cmd = extractCommand(this._commandRef);
     const sensitive = isSensitive(this.commandName, cmd);
     this._command = maybeRedact(sensitive, cmd);
+    // Delete reference to _commandRef for security and memory management reasons
     delete this._commandRef;
 
     return this._command;
@@ -107,7 +108,7 @@ export class CommandSucceededEvent {
   requestId: number;
   duration: number;
   commandName: string;
-  private _reply: unknown;
+  private _reply?: Document;
   private _replyRef?: Document | undefined;
   private _commandIsLegacyFind: boolean;
   private _commandIsOpMsg: boolean;
@@ -160,9 +161,10 @@ export class CommandSucceededEvent {
     return !!this.serviceId;
   }
 
-  get reply(): unknown {
-    if (this._reply) return this._reply;
+  get reply(): Document {
+    if (this._reply != null) return this._reply;
     if (this.sensitive) this._reply = {};
+    if (this._replyRef == null) return {};
     this._reply = extractReply(
       this._commandIsOpMsg,
       this._commandIsLegacyFind,
@@ -372,7 +374,7 @@ function extractReply(
   isLegacyFind: boolean,
   namespace?: string,
   reply?: Document
-) {
+): typeof reply {
   if (!reply) {
     return reply;
   }
