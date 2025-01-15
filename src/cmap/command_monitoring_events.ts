@@ -6,7 +6,7 @@ import {
   LEGACY_HELLO_COMMAND,
   LEGACY_HELLO_COMMAND_CAMEL_CASE
 } from '../constants';
-import { calculateDurationInMs, deepCopy } from '../utils';
+import { calculateDurationInMs } from '../utils';
 import {
   DocumentSequence,
   OpMsgRequest,
@@ -276,7 +276,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       result = { find: collectionName(command) };
       Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
         if (command.query[key] != null) {
-          result[LEGACY_FIND_QUERY_MAP[key]] = deepCopy(command.query[key]);
+          result[LEGACY_FIND_QUERY_MAP[key]] = { ...command.query[key] };
         }
       });
     }
@@ -284,7 +284,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
       const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
       if (command[legacyKey] != null) {
-        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deepCopy(command[legacyKey]);
+        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
       }
     });
 
@@ -304,19 +304,13 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     return result;
   }
 
-  const clonedQuery: Record<string, unknown> = {};
-  const clonedCommand: Record<string, unknown> = {};
+  let clonedQuery: Record<string, unknown> = {};
+  const clonedCommand: Record<string, unknown> = { ...command };
   if (command.query) {
-    for (const k in command.query) {
-      clonedQuery[k] = deepCopy(command.query[k]);
-    }
+    clonedQuery = { ...command.query };
     clonedCommand.query = clonedQuery;
   }
 
-  for (const k in command) {
-    if (k === 'query') continue;
-    clonedCommand[k] = deepCopy((command as unknown as Record<string, unknown>)[k]);
-  }
   return command.query ? clonedQuery : clonedCommand;
 }
 
