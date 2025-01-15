@@ -254,7 +254,7 @@ const OP_QUERY_KEYS = [
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof OpMsgRequest) {
-    const cmd = deepCopy(command.command);
+    const cmd = { ...command.command };
     // For OP_MSG with payload type 1 we need to pull the documents
     // array out of the document sequence for monitoring.
     if (cmd.ops instanceof DocumentSequence) {
@@ -326,7 +326,7 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   }
 
   if (command instanceof OpMsgRequest) {
-    return deepCopy(reply.result ? reply.result : reply);
+    return reply.result ? reply.result : reply;
   }
 
   // is this a legacy find command?
@@ -334,14 +334,14 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
     return {
       ok: 1,
       cursor: {
-        id: deepCopy(reply.cursorId),
+        id: reply.cursorId,
         ns: namespace(command),
-        firstBatch: deepCopy(reply.documents)
+        firstBatch: reply.documents
       }
     };
   }
 
-  return deepCopy(reply.result ? reply.result : reply);
+  return reply.result ? reply.result : reply;
 }
 
 function extractConnectionDetails(connection: Connection) {
