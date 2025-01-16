@@ -288,19 +288,6 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       }
     });
 
-    OP_QUERY_KEYS.forEach(key => {
-      if (command[key]) {
-        result[key] = command[key];
-      }
-    });
-
-    if (command.pre32Limit != null) {
-      result.limit = command.pre32Limit;
-    }
-
-    if (command.query.$explain) {
-      return { explain: result };
-    }
     return result;
   }
 
