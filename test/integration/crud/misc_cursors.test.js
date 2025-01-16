@@ -1608,62 +1608,38 @@ describe('Cursor', function () {
     }
   });
 
-  it('immediately destroying a stream prevents the query from executing', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('immediately destroying a stream prevents the query from executing', async function () {
+    var i = 0,
+      docs = [{ b: 2 }, { b: 3 }];
 
-    test: function (done) {
-      var i = 0,
-        docs = [{ b: 2 }, { b: 3 }],
-        doneCalled = 0;
+    const configuration = this.configuration;
+    await client.connect();
 
-      const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+    const db = client.db(configuration.db);
+    const collection = db.collection(
+      'immediately_destroying_a_stream_prevents_the_query_from_executing'
+    );
+    // insert all docs
+    await collection.insertMany(docs, configuration.writeConcernMax());
 
-        const db = client.db(configuration.db);
-        db.createCollection(
-          'immediately_destroying_a_stream_prevents_the_query_from_executing',
-          (err, collection) => {
-            expect(err).to.not.exist;
+    const cursor = collection.find();
+    const stream = cursor.stream();
 
-            // insert all docs
-            collection.insertMany(docs, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
+    stream.on('data', function () {
+      i++;
+    });
 
-              const cursor = collection.find();
-              const stream = cursor.stream();
+    const close$ = once(stream, 'close').then(async () => {
+      expect(i).to.equal(0);
+      expect(cursor.closed).to.be.true;
+    });
+    const error$ = once(stream, 'error').catch(e => {
+      throw e;
+    });
 
-              stream.on('data', function () {
-                i++;
-              });
+    stream.destroy();
 
-              cursor.once('close', testDone('close'));
-              stream.once('error', testDone('error'));
-
-              stream.destroy();
-
-              function testDone() {
-                return err => {
-                  ++doneCalled;
-
-                  if (doneCalled === 1) {
-                    expect(err).to.not.exist;
-                    test.strictEqual(0, i);
-                    test.strictEqual(true, cursor.closed);
-                    done();
-                  }
-                };
-              }
-            });
-          }
-        );
-      });
-    }
+    await Promise.race([close$, error$]);
   });
 
   it('removes session when cloning an find cursor', async function () {

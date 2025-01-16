@@ -285,8 +285,7 @@ describe('class AbstractCursor', function () {
     const docs = [{ count: 0 }];
 
     beforeEach(async function () {
-      client = this.configuration.newClient();
-
+      client = this.configuration.newClient({}, { monitorCommands: true });
       collection = client.db('abstract_cursor_integration').collection('test');
 
       await collection.insertMany(docs);
@@ -300,6 +299,10 @@ describe('class AbstractCursor', function () {
     it('propagates errors to transform stream', async function () {
       // MongoServerError: unknown operator: $bar
       const stream = collection.find({ foo: { $bar: 25 } }).stream({ transform: doc => doc });
+
+      stream.on('data', () => {
+        // do nothing
+      });
 
       const error: Error | null = await new Promise(resolve => {
         stream.on('error', error => resolve(error));

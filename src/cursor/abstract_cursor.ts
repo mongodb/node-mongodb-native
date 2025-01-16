@@ -497,9 +497,13 @@ export abstract class AbstractCursor<
 
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
     const transform = options?.transform ?? (doc => doc);
-    return Readable.from(this, { autoDestroy: false, highWaterMark: 1, objectMode: true }).map(
-      transform
-    );
+    const stream = Readable.from(this, {
+      autoDestroy: false,
+      highWaterMark: 1,
+      objectMode: true
+    }).map(transform);
+    stream.on('close', () => this.close() as any);
+    return stream;
   }
 
   async hasNext(): Promise<boolean> {
