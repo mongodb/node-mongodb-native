@@ -10,7 +10,7 @@ const sinon = require('sinon');
 const { Writable } = require('stream');
 const { once, on } = require('events');
 const { setTimeout } = require('timers');
-const { ReadPreference, MongoExpiredSessionError } = require('../../mongodb');
+const { ReadPreference } = require('../../mongodb');
 const { ServerType } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
 
@@ -1872,7 +1872,7 @@ describe('Cursor', function () {
     expect(cursor).to.have.property('closed', true);
 
     const error = await rejectedEarlyBecauseClientClosed;
-    expect(error).to.be.instanceOf(MongoExpiredSessionError);
+    expect(error).to.be.null; // TODO: is this API or just "how it behaved at the time"
   });
 
   it('shouldAwaitData', {
