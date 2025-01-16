@@ -37,31 +37,22 @@ describe('Driver Resources', () => {
       if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
         return;
       }
-      try {
-        const res = await runScriptAndReturnHeapInfo(
-          'no_resource_leak_connect_close',
-          this.configuration,
-          async function run({ MongoClient, uri }) {
-            const mongoClient = new MongoClient(uri, { minPoolSize: 100 });
-            await mongoClient.connect();
-            // Any operations will reproduce the issue found in v5.0.0/v4.13.0
-            // it would seem the MessageStream has to be used?
-            await mongoClient.db().command({ ping: 1 });
-            await mongoClient.close();
-          }
-        );
-        startingMemoryUsed = res.startingMemoryUsed;
-        endingMemoryUsed = res.endingMemoryUsed;
-        heap = res.heap;
-      } catch (error) {
-        // We don't expect the process execution to ever fail,
-        // leaving helpful debugging if we see this in CI
-        console.log(`runScript error message: ${error.message}`);
-        console.log(`runScript error stack: ${error.stack}`);
-        console.log(`runScript error cause: ${error.cause}`);
-        // Fail the test
-        this.test?.error(error);
-      }
+      const res = await runScriptAndReturnHeapInfo(
+        'no_resource_leak_connect_close',
+        this.configuration,
+        async function run({ MongoClient, uri }) {
+          const mongoClient = new MongoClient(uri, { minPoolSize: 100 });
+          await mongoClient.connect();
+          // Any operations will reproduce the issue found in v5.0.0/v4.13.0
+          // it would seem the MessageStream has to be used?
+          await mongoClient.db().command({ ping: 1 });
+          await mongoClient.close();
+        }
+      );
+
+      startingMemoryUsed = res.startingMemoryUsed;
+      endingMemoryUsed = res.endingMemoryUsed;
+      heap = res.heap;
     });
 
     describe('ending memory usage', () => {
