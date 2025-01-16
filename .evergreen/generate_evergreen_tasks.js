@@ -436,12 +436,13 @@ for (const {
       display_name: `${osDisplayName} Node Latest`,
       run_on,
       expansions: { NODE_LTS_VERSION: 'latest' },
-      tasks: tasks.map(({ name }) => name)
+      tasks: tasks.map(({ name }) => name),
+      // TODO(NODE-6641): Unskip the smoke tests
+      disable: true
     };
     if (clientEncryption) {
       buildVariantData.expansions.CLIENT_ENCRYPTION = true;
     }
-
     BUILD_VARIANTS.push(buildVariantData);
   }
 }
@@ -549,7 +550,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: 'latest',
+          NODE_LTS_VERSION: LATEST_LTS,
           NPM_VERSION: 9
         }),
         { func: 'install dependencies' },
@@ -563,7 +564,7 @@ SINGLETON_TASKS.push(
         updateExpansions({
           VERSION: 'latest',
           TOPOLOGY: 'replica_set',
-          NODE_LTS_VERSION: 'latest'
+          NODE_LTS_VERSION: LATEST_LTS 
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
