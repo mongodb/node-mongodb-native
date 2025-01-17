@@ -125,7 +125,7 @@ export class CommandSucceededEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
+    this.reply = maybeRedact(commandName, cmd, extractReply(reply));
     this.serverConnectionId = serverConnectionId;
   }
 
@@ -214,7 +214,6 @@ const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMM
 
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
-const namespace = (command: OpQueryRequest) => command.ns;
 const collectionName = (command: OpQueryRequest) => command.ns.split('.')[1];
 const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ||
@@ -241,15 +240,6 @@ const LEGACY_FIND_OPTIONS_MAP = {
   numberToReturn: 'batchSize',
   returnFieldSelector: 'projection'
 } as const;
-
-const OP_QUERY_KEYS = [
-  'tailable',
-  'oplogReplay',
-  'noCursorTimeout',
-  'awaitData',
-  'partial',
-  'exhaust'
-] as const;
 
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
@@ -301,25 +291,9 @@ function extractCommand(command: WriteProtocolMessageType): Document {
   return command.query ? clonedQuery : clonedCommand;
 }
 
-function extractReply(command: WriteProtocolMessageType, reply?: Document) {
+function extractReply(reply?: Document) {
   if (!reply) {
     return reply;
-  }
-
-  if (command instanceof OpMsgRequest) {
-    return reply.result ? reply.result : reply;
-  }
-
-  // is this a legacy find command?
-  if (command.query && command.query.$query != null) {
-    return {
-      ok: 1,
-      cursor: {
-        id: reply.cursorId,
-        ns: namespace(command),
-        firstBatch: reply.documents
-      }
-    };
   }
 
   return reply.result ? reply.result : reply;
