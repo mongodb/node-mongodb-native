@@ -12,6 +12,7 @@ import {
   type AutoEncryptionOptions,
   ClientEncryption,
   type Collection,
+  type ConnectionClosedEvent,
   type Db,
   FindCursor,
   ListCollectionsCursor,
@@ -400,21 +401,31 @@ describe('AbortSignal support', () => {
           let controller: AbortController;
           let signal: AbortSignal;
           let cursor: AbstractCursor<{ a: number }>;
+          let checkedOutId;
+          const waitForConnectionClosed = async () => {
+            for await (const [ev] of events.on(client, 'connectionClosed')) {
+              if ((ev as ConnectionClosedEvent).connectionId === checkedOutId) return ev;
+            }
+          };
 
           beforeEach(async function () {
+            checkedOutId = undefined;
             controller = new AbortController();
             signal = controller.signal;
             cursor = method(filter, { signal });
           });
 
           afterEach(async function () {
+            checkedOutId = undefined;
             sinon.restore();
             await cursor?.close();
           });
 
           it(`rejects ${cursorAPI.toString()}`, async () => {
             await db.command({ ping: 1 }, { readPreference: 'primary' }); // fill the connection pool with 1 connection.
+            const connectionClosed = waitForConnectionClosed();
 
+            client.on('connectionCheckedOut', ev => (checkedOutId = ev.connectionId));
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             for (const [, server] of client.topology.s.servers) {
@@ -435,6 +446,8 @@ describe('AbortSignal support', () => {
             const result = await willBeResultBlocked;
 
             expect(result).to.be.instanceOf(DOMException);
+
+            await connectionClosed;
           });
         }
 
@@ -461,25 +474,38 @@ describe('AbortSignal support', () => {
               }
             });
 
+            checkedOutId = undefined;
             controller = new AbortController();
             signal = controller.signal;
             cursor = method(filter, { signal });
           });
 
+          let checkedOutId;
+          const waitForConnectionClosed = async () => {
+            for await (const [ev] of events.on(client, 'connectionClosed')) {
+              if ((ev as ConnectionClosedEvent).connectionId === checkedOutId) return ev;
+            }
+          };
+
           afterEach(async function () {
+            checkedOutId = undefined;
             await clearFailPoint(this.configuration);
             await cursor?.close();
           });
 
           it(`rejects ${cursorAPI.toString()}`, async () => {
             await db.command({ ping: 1 }, { readPreference: 'primary' }); // fill the connection pool with 1 connection.
+            const connectionClosed = waitForConnectionClosed();
 
+            client.on('connectionCheckedOut', ev => (checkedOutId = ev.connectionId));
             client.on('commandStarted', e => e.commandName === cursorName && controller.abort());
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             const result = await willBeResultBlocked;
 
             expect(result).to.be.instanceOf(DOMException);
+
+            await connectionClosed;
           });
         }
 

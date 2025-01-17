@@ -704,21 +704,21 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const drainEvent = once<void>(this.socket, 'drain', options);
     const timeout = options?.timeoutContext?.timeoutForSocketWrite;
-    if (timeout) {
-      try {
-        return await Promise.race([drainEvent, timeout]);
-      } catch (error) {
-        let err = error;
-        if (TimeoutError.is(error)) {
-          err = new MongoOperationTimeoutError('Timed out at socket write');
-          this.cleanup(err);
-        }
-        throw error;
-      } finally {
-        timeout.clear();
+    const drained = timeout ? Promise.race([drainEvent, timeout]) : drainEvent;
+    try {
+      return await drained;
+    } catch (writeError) {
+      if (TimeoutError.is(writeError)) {
+        const timeoutError = new MongoOperationTimeoutError('Timed out at socket write');
+        this.onError(timeoutError);
+        throw timeoutError;
+      } else if (writeError === options.signal?.reason) {
+        this.onError(writeError);
       }
+      throw writeError;
+    } finally {
+      timeout?.clear();
     }
-    return await drainEvent;
   }
 
   /**
@@ -748,16 +748,17 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
       }
     } catch (readError) {
-      const err = readError;
       if (TimeoutError.is(readError)) {
-        const error = new MongoOperationTimeoutError(
+        const timeoutError = new MongoOperationTimeoutError(
           `Timed out during socket read (${readError.duration}ms)`
         );
         this.dataEvents = null;
-        this.onError(error);
-        throw error;
+        this.onError(timeoutError);
+        throw timeoutError;
+      } else if (readError === options.signal?.reason) {
+        this.onError(readError);
       }
-      throw err;
+      throw readError;
     } finally {
       this.dataEvents = null;
       this.messageStream.pause();
