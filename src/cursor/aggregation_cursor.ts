@@ -74,7 +74,8 @@ export class AggregationCursor<TSchema = any> extends ExplainableCursor<TSchema>
     const options = {
       ...this.aggregateOptions,
       ...this.cursorOptions,
-      session
+      session,
+      signal: this.signal
     };
     if (options.explain) {
       try {

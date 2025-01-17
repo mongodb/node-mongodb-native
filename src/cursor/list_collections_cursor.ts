@@ -38,7 +38,8 @@ export class ListCollectionsCursor<
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,
       ...this.options,
-      session
+      session,
+      signal: this.signal
     });
 
     const response = await executeOperation(this.parent.client, operation, this.timeoutContext);
