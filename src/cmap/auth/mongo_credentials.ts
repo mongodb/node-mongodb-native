@@ -6,6 +6,7 @@ import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError
 } from '../../error';
+import type { AWSCredentialProvider } from './aws_temporary_credentials';
 import { GSSAPICanonicalizationValue } from './gssapi';
 import type { OIDCCallbackFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
@@ -68,6 +69,8 @@ export interface AuthMechanismProperties extends Document {
   ALLOWED_HOSTS?: string[];
   /** The resource token for OIDC auth in Azure and GCP. */
   TOKEN_RESOURCE?: string;
+  /** A custom AWS credential provider to use. */
+  AWS_CREDENTIAL_PROVIDER?: AWSCredentialProvider;
 }
 
 /** @public */

@@ -6,6 +6,7 @@ import {
 import * as net from 'net';
 
 import { deserialize, type Document, serialize } from '../bson';
+import { type AWSCredentialProvider } from '../cmap/auth/aws_temporary_credentials';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { kDecorateResult } from '../constants';
 import { getMongoDBClientEncryption } from '../deps';
@@ -153,6 +154,7 @@ export class AutoEncrypter {
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
+  _awsCredentialProvider?: AWSCredentialProvider;
 
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
@@ -328,6 +330,11 @@ export class AutoEncrypter {
    * This function is a no-op when bypassSpawn is set or the crypt shared library is used.
    */
   async init(): Promise<MongoClient | void> {
+    // This is handled during init() as the auto encrypter is instantiated during the client's
+    // parseOptions() call, so the client doesn't have its options set at that point.
+    this._awsCredentialProvider =
+      this._client.options.credentials?.mechanismProperties.AWS_CREDENTIAL_PROVIDER;
+
     if (this._bypassMongocryptdAndCryptShared || this.cryptSharedLibVersionInfo) {
       return;
     }
@@ -439,7 +446,7 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._awsCredentialProvider);
   }
 
   /**
