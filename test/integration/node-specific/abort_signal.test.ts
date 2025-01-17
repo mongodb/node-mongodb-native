@@ -187,7 +187,7 @@ describe('AbortSignal support', () => {
             expect(result).to.not.be.instanceOf(Error);
           });
 
-          it(`rejects ${cursorAPI.toString()} when aborted after start but before await`, async () => {
+          it(`aborts in-flight ${cursorAPI.toString()} when aborted after start but before await`, async () => {
             const willBeResultBlocked = /* await */ iterateUntilDocumentOrError(
               cursor,
               cursorAPI,
