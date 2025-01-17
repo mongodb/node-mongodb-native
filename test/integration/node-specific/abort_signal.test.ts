@@ -415,7 +415,6 @@ describe('AbortSignal support', () => {
           it(`rejects ${cursorAPI.toString()}`, async () => {
             await db.command({ ping: 1 }, { readPreference: 'primary' }); // fill the connection pool with 1 connection.
 
-            // client.once('commandStarted', () => controller.abort());
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             for (const [, server] of client.topology.s.servers) {
