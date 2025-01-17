@@ -245,35 +245,51 @@ describe('AbortSignal support', () => {
           client.on('commandStarted', e => commandsStarted.push(e));
         });
 
+        const waitForKillCursors = async () => {
+          for await (const [ev] of events.on(client, 'commandStarted')) {
+            if (ev.commandName === 'killCursors') return ev;
+          }
+        };
+
         afterEach(async () => {
           await cursor?.close();
           sinon.restore();
         });
 
         it(`rejects for-await on the next iteration`, async () => {
-          let didLoop = false;
+          let loop = 0;
           let thrownError;
 
           try {
             for await (const _ of cursor) {
-              if (didLoop) controller.abort();
-              didLoop = true;
+              if (loop) controller.abort();
+              loop += 1;
             }
           } catch (error) {
             thrownError = error;
           }
 
           expect(thrownError).to.be.instanceOf(DOMException);
+          expect(loop).to.equal(2);
+        });
+
+        it('does not run more than one getMore and kills the cursor', async () => {
+          const killCursors = waitForKillCursors();
+          try {
+            let loop = 0;
+            for await (const _ of cursor) {
+              if (loop) controller.abort();
+              loop += 1;
+            }
+          } catch {
+            //ignore;
+          }
+
           // Check that we didn't run two getMore before inspecting the state of the signal.
           // If we didn't check _after_ re-entering our asyncIterator on `yield`,
           // we may have called .next()->.fetchBatch() etc. without preventing that work from being done
           expect(commandsStarted.map(e => e.commandName)).to.deep.equal([cursorName, 'getMore']);
-          await sleep(10);
-          expect(commandsStarted.map(e => e.commandName)).to.deep.equal([
-            cursorName,
-            'getMore',
-            'killCursors'
-          ]);
+          await killCursors;
         });
       });
 
