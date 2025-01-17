@@ -702,7 +702,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     if (this.socket.write(buffer)) return;
 
-    const drainEvent = once<void>(this.socket, 'drain', { signal: options.signal });
+    const drainEvent = once<void>(this.socket, 'drain', options);
     const timeout = options?.timeoutContext?.timeoutForSocketWrite;
     if (timeout) {
       try {
