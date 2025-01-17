@@ -6,7 +6,7 @@ import {
   LEGACY_HELLO_COMMAND,
   LEGACY_HELLO_COMMAND_CAMEL_CASE
 } from '../constants';
-import { calculateDurationInMs, deepCopy } from '../utils';
+import { calculateDurationInMs } from '../utils';
 import {
   DocumentSequence,
   OpMsgRequest,
@@ -125,7 +125,7 @@ export class CommandSucceededEvent {
     this.requestId = command.requestId;
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
-    this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
+    this.reply = maybeRedact(commandName, cmd, extractReply(reply));
     this.serverConnectionId = serverConnectionId;
   }
 
@@ -214,7 +214,6 @@ const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMM
 
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
-const namespace = (command: OpQueryRequest) => command.ns;
 const collectionName = (command: OpQueryRequest) => command.ns.split('.')[1];
 const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ||
@@ -242,19 +241,10 @@ const LEGACY_FIND_OPTIONS_MAP = {
   returnFieldSelector: 'projection'
 } as const;
 
-const OP_QUERY_KEYS = [
-  'tailable',
-  'oplogReplay',
-  'noCursorTimeout',
-  'awaitData',
-  'partial',
-  'exhaust'
-] as const;
-
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof OpMsgRequest) {
-    const cmd = deepCopy(command.command);
+    const cmd = { ...command.command };
     // For OP_MSG with payload type 1 we need to pull the documents
     // array out of the document sequence for monitoring.
     if (cmd.ops instanceof DocumentSequence) {
@@ -276,7 +266,7 @@ function extractCommand(command: WriteProtocolMessageType): Document {
       result = { find: collectionName(command) };
       Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
         if (command.query[key] != null) {
-          result[LEGACY_FIND_QUERY_MAP[key]] = deepCopy(command.query[key]);
+          result[LEGACY_FIND_QUERY_MAP[key]] = { ...command.query[key] };
         }
       });
     }
@@ -284,64 +274,29 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
       const legacyKey = key as keyof typeof LEGACY_FIND_OPTIONS_MAP;
       if (command[legacyKey] != null) {
-        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = deepCopy(command[legacyKey]);
+        result[LEGACY_FIND_OPTIONS_MAP[legacyKey]] = command[legacyKey];
       }
     });
 
-    OP_QUERY_KEYS.forEach(key => {
-      if (command[key]) {
-        result[key] = command[key];
-      }
-    });
-
-    if (command.pre32Limit != null) {
-      result.limit = command.pre32Limit;
-    }
-
-    if (command.query.$explain) {
-      return { explain: result };
-    }
     return result;
   }
 
-  const clonedQuery: Record<string, unknown> = {};
-  const clonedCommand: Record<string, unknown> = {};
+  let clonedQuery: Record<string, unknown> = {};
+  const clonedCommand: Record<string, unknown> = { ...command };
   if (command.query) {
-    for (const k in command.query) {
-      clonedQuery[k] = deepCopy(command.query[k]);
-    }
+    clonedQuery = { ...command.query };
     clonedCommand.query = clonedQuery;
   }
 
-  for (const k in command) {
-    if (k === 'query') continue;
-    clonedCommand[k] = deepCopy((command as unknown as Record<string, unknown>)[k]);
-  }
   return command.query ? clonedQuery : clonedCommand;
 }
 
-function extractReply(command: WriteProtocolMessageType, reply?: Document) {
+function extractReply(reply?: Document) {
   if (!reply) {
     return reply;
   }
 
-  if (command instanceof OpMsgRequest) {
-    return deepCopy(reply.result ? reply.result : reply);
-  }
-
-  // is this a legacy find command?
-  if (command.query && command.query.$query != null) {
-    return {
-      ok: 1,
-      cursor: {
-        id: deepCopy(reply.cursorId),
-        ns: namespace(command),
-        firstBatch: deepCopy(reply.documents)
-      }
-    };
-  }
-
-  return deepCopy(reply.result ? reply.result : reply);
+  return reply.result ? reply.result : reply;
 }
 
 function extractConnectionDetails(connection: Connection) {
