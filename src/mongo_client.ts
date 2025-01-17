@@ -5,6 +5,7 @@ import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
+import { type AWSCredentialProvider } from './cmap/auth/aws_temporary_credentials';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
@@ -298,6 +299,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogMaxDocumentLength?: number;
+  /**
+   * A custom AWS SDK credentials provider to use instead of the default.
+   */
+  awsCredentialsProvider?: AWSCredentialProvider;
 
   /** @internal */
   __skipPingOnConnect?: boolean;

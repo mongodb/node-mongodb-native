@@ -3,6 +3,7 @@ import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
 
 import type { Document } from './bson';
+import { type AWSCredentialProvider } from './cmap/auth/aws_temporary_credentials';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
 import { addContainerMetadata, makeClientMetadata } from './cmap/handshake/client_metadata';
@@ -730,6 +731,14 @@ export const OPTIONS = {
   },
   autoSelectFamilyAttemptTimeout: {
     type: 'uint'
+  },
+  awsCredentialsProvider: {
+    transform({ values: [value] }): AWSCredentialProvider {
+      if (typeof value === 'function') {
+        return value as AWSCredentialProvider;
+      }
+      throw new MongoParseError(`Option awsCredentialProvider must be a function, got ${value}`);
+    }
   },
   bsonRegExp: {
     type: 'boolean'
