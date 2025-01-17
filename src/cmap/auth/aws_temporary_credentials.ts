@@ -21,6 +21,9 @@ export interface AWSTempCredentials {
   Expiration?: Date;
 }
 
+/** @public **/
+export type AWSCredentialProvider = () => Promise<AWSCredentials>;
+
 /**
  * @internal
  *
@@ -41,7 +44,20 @@ export abstract class AWSTemporaryCredentialProvider {
 
 /** @internal */
 export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
-  private _provider?: () => Promise<AWSCredentials>;
+  private _provider?: AWSCredentialProvider;
+
+  /**
+   * Create the SDK credentials provider.
+   * @param credentialsProvider - The credentials provider.
+   */
+  constructor(credentialsProvider?: AWSCredentialProvider) {
+    super();
+
+    if (credentialsProvider) {
+      this._provider = credentialsProvider;
+    }
+  }
+
   /**
    * The AWS SDK caches credentials automatically and handles refresh when the credentials have expired.
    * To ensure this occurs, we need to cache the `provider` returned by the AWS sdk and re-use it when fetching credentials.

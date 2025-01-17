@@ -15,6 +15,7 @@ import {
   type UUID
 } from '../bson';
 import { type AnyBulkWriteOperation, type BulkWriteResult } from '../bulk/common';
+import { type AWSCredentialProvider } from '../cmap/auth/aws_temporary_credentials';
 import { type ProxyOptions } from '../cmap/connection';
 import { type Collection } from '../collection';
 import { type FindCursor } from '../cursor/find_cursor';
@@ -82,6 +83,9 @@ export class ClientEncryption {
   _mongoCrypt: MongoCrypt;
 
   /** @internal */
+  _awsCredentialProvider?: AWSCredentialProvider;
+
+  /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {
     const encryption = getMongoDBClientEncryption();
     if ('kModuleError' in encryption) {
@@ -125,6 +129,8 @@ export class ClientEncryption {
     this._kmsProviders = options.kmsProviders || {};
     const { timeoutMS } = resolveTimeoutOptions(client, options);
     this._timeoutMS = timeoutMS;
+    this._awsCredentialProvider =
+      client.options.credentials?.mechanismProperties.AWS_CREDENTIAL_PROVIDER;
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -712,7 +718,7 @@ export class ClientEncryption {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._awsCredentialProvider);
   }
 
   static get libmongocryptVersion() {
