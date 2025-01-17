@@ -104,7 +104,7 @@ describe('AbortSignal support', () => {
         [Symbol.asyncIterator]: []
       };
 
-      async function captureCursorAPIResult(cursor, cursorAPI, args) {
+      async function iterateUntilDocumentOrError(cursor, cursorAPI, args) {
         try {
           const apiReturnValue = cursor[cursorAPI](...args);
           return isAsyncGenerator(apiReturnValue)
@@ -159,7 +159,7 @@ describe('AbortSignal support', () => {
 
         for (const [cursorAPI, { value: args }] of getAllProps(cursorAPIs)) {
           it(`rejects ${cursorAPI.toString()}`, async () => {
-            const result = await captureCursorAPIResult(cursor, cursorAPI, args);
+            const result = await iterateUntilDocumentOrError(cursor, cursorAPI, args);
             expect(result).to.be.instanceOf(DOMException);
           });
         }
@@ -182,13 +182,17 @@ describe('AbortSignal support', () => {
 
         for (const [cursorAPI, { value: args }] of getAllProps(cursorAPIs)) {
           it(`resolves ${cursorAPI.toString()} without Error`, async () => {
-            const result = await captureCursorAPIResult(cursor, cursorAPI, args);
+            const result = await iterateUntilDocumentOrError(cursor, cursorAPI, args);
             controller.abort();
             expect(result).to.not.be.instanceOf(Error);
           });
 
           it(`rejects ${cursorAPI.toString()} when aborted after start but before await`, async () => {
-            const willBeResultBlocked = /* await */ captureCursorAPIResult(cursor, cursorAPI, args);
+            const willBeResultBlocked = /* await */ iterateUntilDocumentOrError(
+              cursor,
+              cursorAPI,
+              args
+            );
 
             controller.abort();
             const result = await willBeResultBlocked;
@@ -197,12 +201,12 @@ describe('AbortSignal support', () => {
           });
 
           it(`rejects ${cursorAPI.toString()} on the subsequent call`, async () => {
-            const result = await captureCursorAPIResult(cursor, cursorAPI, args);
+            const result = await iterateUntilDocumentOrError(cursor, cursorAPI, args);
             expect(result).to.not.be.instanceOf(Error);
 
             controller.abort();
 
-            const error = await captureCursorAPIResult(cursor, cursorAPI, args);
+            const error = await iterateUntilDocumentOrError(cursor, cursorAPI, args);
             expect(error).to.be.instanceOf(DOMException);
           });
         }
@@ -298,7 +302,7 @@ describe('AbortSignal support', () => {
           });
 
           it(`rejects ${cursorAPI.toString()}`, metadata, async () => {
-            const willBeResult = captureCursorAPIResult(cursor, cursorAPI, args);
+            const willBeResult = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             await sleep(3);
             expect(
@@ -357,8 +361,8 @@ describe('AbortSignal support', () => {
             const checkoutSucceededFirst = events.once(client, 'connectionCheckedOut');
             const checkoutStartedBlocked = events.once(client, 'connectionCheckOutStarted');
 
-            const _ = captureCursorAPIResult(cursor, cursorAPI, args);
-            const willBeResultBlocked = captureCursorAPIResult(cursor, cursorAPI, args);
+            const _ = iterateUntilDocumentOrError(cursor, cursorAPI, args);
+            const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             await checkoutSucceededFirst;
             await checkoutStartedBlocked;
@@ -396,7 +400,7 @@ describe('AbortSignal support', () => {
             await db.command({ ping: 1 }, { readPreference: 'primary' }); // fill the connection pool with 1 connection.
 
             // client.once('commandStarted', () => controller.abort());
-            const willBeResultBlocked = captureCursorAPIResult(cursor, cursorAPI, args);
+            const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             for (const [, server] of client.topology.s.servers) {
               //@ts-expect-error: private property
@@ -456,7 +460,7 @@ describe('AbortSignal support', () => {
             await db.command({ ping: 1 }, { readPreference: 'primary' }); // fill the connection pool with 1 connection.
 
             client.on('commandStarted', e => e.commandName === cursorName && controller.abort());
-            const willBeResultBlocked = captureCursorAPIResult(cursor, cursorAPI, args);
+            const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             const result = await willBeResultBlocked;
 
@@ -608,7 +612,7 @@ describe('AbortSignal support', () => {
               });
 
               it(`rejects ${cursorAPI.toString()}`, fleMetadata, async () => {
-                const willBeResultBlocked = captureCursorAPIResult(cursor, cursorAPI, args);
+                const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
                 const stub = sinon
                   .stub(client.options.autoEncrypter, 'encrypt')
@@ -646,7 +650,7 @@ describe('AbortSignal support', () => {
               });
 
               it(`rejects ${cursorAPI.toString()}`, fleMetadata, async () => {
-                const willBeResultBlocked = captureCursorAPIResult(cursor, cursorAPI, args);
+                const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
                 const stub = sinon
                   .stub(client.options.autoEncrypter, 'decrypt')
