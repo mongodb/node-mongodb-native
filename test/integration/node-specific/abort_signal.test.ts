@@ -3,14 +3,11 @@ import { TLSSocket } from 'node:tls';
 import * as util from 'node:util';
 
 import { expect } from 'chai';
-import * as semver from 'semver';
 import * as sinon from 'sinon';
 
 import {
   type AbstractCursor,
   AggregationCursor,
-  type AutoEncryptionOptions,
-  ClientEncryption,
   type Collection,
   type ConnectionClosedEvent,
   type Db,

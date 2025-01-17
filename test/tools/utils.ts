@@ -710,14 +710,7 @@ export function findLast(
   thisArg?: any
 ): unknown | undefined {
   if (typeof array.findLast === 'function') return array.findLast(predicate, thisArg);
-
-  for (let i = array.length - 1; i >= 0; i--) {
-    if (predicate.call(thisArg, array[i], i, array)) {
-      return array[i];
-    }
-  }
-
-  return undefined;
+  return array.slice().reverse().find(predicate, thisArg);
 }
 
 // Node.js 16 doesn't make this global, but it can still be obtained.
