@@ -128,10 +128,11 @@ export { ReadPreferenceMode } from './read_preference';
 export { ServerType, TopologyType } from './sdam/common';
 
 // Helper classes
+export type { AWSCredentialProvider } from './cmap/auth/aws_temporary_credentials';
+export type { AWSCredentials } from './deps';
 export { ReadConcern } from './read_concern';
 export { ReadPreference } from './read_preference';
 export { WriteConcern } from './write_concern';
-
 // events
 export {
   CommandFailedEvent,

@@ -1,4 +1,5 @@
 import type { Binary } from '../../bson';
+import { type AWSCredentialProvider } from '../../cmap/auth/aws_temporary_credentials';
 import { loadAWSCredentials } from './aws';
 import { loadAzureCredentials } from './azure';
 import { loadGCPCredentials } from './gcp';
@@ -176,11 +177,14 @@ export function isEmptyCredentials(
  *
  * @internal
  */
-export async function refreshKMSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
+export async function refreshKMSCredentials(
+  kmsProviders: KMSProviders,
+  awsProvider?: AWSCredentialProvider
+): Promise<KMSProviders> {
   let finalKMSProviders = kmsProviders;
 
   if (isEmptyCredentials('aws', kmsProviders)) {
-    finalKMSProviders = await loadAWSCredentials(finalKMSProviders);
+    finalKMSProviders = await loadAWSCredentials(finalKMSProviders, awsProvider);
   }
 
   if (isEmptyCredentials('gcp', kmsProviders)) {
