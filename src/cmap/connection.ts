@@ -474,10 +474,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         );
       }
 
-      for await (const response of this.readMany({
-        timeoutContext: options.timeoutContext,
-        signal: options.signal
-      })) {
+      for await (const response of this.readMany(options)) {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
