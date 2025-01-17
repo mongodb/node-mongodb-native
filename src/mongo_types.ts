@@ -477,31 +477,26 @@ export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
 /** @public */
 export type Abortable = {
   /**
-   * When provided the corresponding `AbortController` can be used to cancel an asynchronous action.
+   * When provided, the corresponding `AbortController` can be used to abort an asynchronous action.
    *
-   * The driver will convert the abort event into a promise rejection with an error that has the name `'AbortError'`.
-   *
-   * The cause of the error will be set to `signal.reason`
+   * The `signal.reason` value is used as the error thrown.
    *
    * @example
    * ```js
    * const controller = new AbortController();
    * const { signal } = controller;
-   * req,on('close', () => controller.abort(new Error('Request aborted by user')));
+   * req.on('close', () => controller.abort(new Error('Request aborted by user')));
    *
    * try {
    *   const res = await fetch('...', { signal });
-   *   await collection.insertOne(await res.json(), { signal });
+   *   await collection.findOne(await res.json(), { signal });
    * catch (error) {
+   *   // depends on abort reason used, but by default this is true.
    *   if (error.name === 'AbortError') {
-   *     // error is MongoAbortError or DOMException,
-   *     // both represent the signal being aborted
-   *     error.cause === signal.reason; // true
+   *     error === signal.reason; // true
    *   }
    * }
    * ```
-   *
-   * @see MongoAbortError
    */
   signal?: AbortSignal | undefined;
 };
