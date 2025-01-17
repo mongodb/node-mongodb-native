@@ -215,8 +215,18 @@ describe('AbortSignal support', () => {
         let signal: AbortSignal;
         let cursor: AbstractCursor<{ a: number }>;
         const commandsStarted = [];
+        let waitForKillCursors;
 
         beforeEach(async function () {
+          waitForKillCursors =
+            this.configuration.topologyType === 'LoadBalanced'
+              ? async () => null
+              : async () => {
+                  for await (const [ev] of events.on(client, 'commandStarted')) {
+                    if (ev.commandName === 'killCursors') return ev;
+                  }
+                };
+
           commandsStarted.length = 0;
           const utilClient = this.configuration.newClient();
           try {
@@ -242,12 +252,6 @@ describe('AbortSignal support', () => {
           cursor = method(filter, { signal, batchSize: 1 });
           client.on('commandStarted', e => commandsStarted.push(e));
         });
-
-        const waitForKillCursors = async () => {
-          for await (const [ev] of events.on(client, 'commandStarted')) {
-            if (ev.commandName === 'killCursors') return ev;
-          }
-        };
 
         afterEach(async () => {
           await cursor?.close();
@@ -398,36 +402,30 @@ describe('AbortSignal support', () => {
           let controller: AbortController;
           let signal: AbortSignal;
           let cursor: AbstractCursor<{ a: number }>;
-          let checkedOutId;
-          const waitForConnectionClosed = async () => {
-            for await (const [ev] of events.on(client, 'connectionClosed')) {
-              if ((ev as ConnectionClosedEvent).connectionId === checkedOutId) return ev;
-            }
-          };
 
           beforeEach(async function () {
-            checkedOutId = undefined;
             controller = new AbortController();
             signal = controller.signal;
             cursor = method(filter, { signal });
           });
 
           afterEach(async function () {
-            checkedOutId = undefined;
             sinon.restore();
             await cursor?.close();
           });
 
           it(`rejects ${cursorAPI.toString()}`, async () => {
             await db.command({ ping: 1 }, { readPreference: 'primary' }); // fill the connection pool with 1 connection.
-            const connectionClosed = waitForConnectionClosed();
 
-            client.on('connectionCheckedOut', ev => (checkedOutId = ev.connectionId));
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
+
+            let cursorCommandSocket;
 
             for (const [, server] of client.topology.s.servers) {
               //@ts-expect-error: private property
               for (const connection of server.pool.connections) {
+                //@ts-expect-error: private property
+                cursorCommandSocket = connection.socket;
                 //@ts-expect-error: private property
                 const stub = sinon.stub(connection.socket, 'write').callsFake(function (...args) {
                   controller.abort();
@@ -444,7 +442,7 @@ describe('AbortSignal support', () => {
 
             expect(result).to.be.instanceOf(DOMException);
 
-            await connectionClosed;
+            expect(cursorCommandSocket).to.have.property('destroyed', true);
           });
         }
 
@@ -471,30 +469,28 @@ describe('AbortSignal support', () => {
               }
             });
 
-            checkedOutId = undefined;
             controller = new AbortController();
             signal = controller.signal;
             cursor = method(filter, { signal });
           });
 
-          let checkedOutId;
-          const waitForConnectionClosed = async () => {
-            for await (const [ev] of events.on(client, 'connectionClosed')) {
-              if ((ev as ConnectionClosedEvent).connectionId === checkedOutId) return ev;
-            }
-          };
-
           afterEach(async function () {
-            checkedOutId = undefined;
             await clearFailPoint(this.configuration);
             await cursor?.close();
           });
 
           it(`rejects ${cursorAPI.toString()}`, async () => {
             await db.command({ ping: 1 }, { readPreference: 'primary' }); // fill the connection pool with 1 connection.
-            const connectionClosed = waitForConnectionClosed();
 
-            client.on('connectionCheckedOut', ev => (checkedOutId = ev.connectionId));
+            let cursorCommandSocket;
+            for (const [, server] of client.topology.s.servers) {
+              //@ts-expect-error: private property
+              for (const connection of server.pool.connections) {
+                //@ts-expect-error: private property
+                cursorCommandSocket = connection.socket;
+              }
+            }
+
             client.on('commandStarted', e => e.commandName === cursorName && controller.abort());
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
@@ -502,7 +498,7 @@ describe('AbortSignal support', () => {
 
             expect(result).to.be.instanceOf(DOMException);
 
-            await connectionClosed;
+            expect(cursorCommandSocket).to.have.property('destroyed', true);
           });
         }
 
