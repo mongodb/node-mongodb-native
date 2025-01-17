@@ -69,6 +69,8 @@ export class MongoClientAuthProviders {
     let provider;
     if (name === AuthMechanism.MONGODB_OIDC) {
       provider = providerFunction(this.getWorkflow(authMechanismProperties));
+    } else if (name === AuthMechanism.MONGODB_AWS) {
+      provider = providerFunction(authMechanismProperties.AWS_CREDENTIAL_PROVIDER);
     } else {
       provider = providerFunction();
     }
