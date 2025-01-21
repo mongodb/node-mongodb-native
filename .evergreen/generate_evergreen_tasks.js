@@ -70,7 +70,7 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
-      updateExpansions({ NPM_VERSION: 9, VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth }),
+      updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
       { func: 'bootstrap kms servers' },

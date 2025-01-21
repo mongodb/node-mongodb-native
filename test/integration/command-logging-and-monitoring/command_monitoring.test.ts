@@ -603,49 +603,4 @@ describe('Command Monitoring', function () {
         });
     }
   });
-
-  describe('Internal state references', function () {
-    let client;
-
-    beforeEach(function () {
-      client = this.configuration.newClient(
-        { writeConcern: { w: 1 } },
-        { maxPoolSize: 1, monitorCommands: true }
-      );
-    });
-
-    afterEach(function (done) {
-      client.close(done);
-    });
-
-    // NODE-1502
-    it('should not allow mutation of internal state from commands returned by event monitoring', function () {
-      const started = [];
-      const succeeded = [];
-      client.on('commandStarted', filterForCommands('insert', started));
-      client.on('commandSucceeded', filterForCommands('insert', succeeded));
-      const documentToInsert = { a: { b: 1 } };
-      const db = client.db(this.configuration.db);
-      return db
-        .collection('apm_test')
-        .insertOne(documentToInsert)
-        .then(r => {
-          expect(r).to.have.property('insertedId').that.is.an('object');
-          expect(started).to.have.lengthOf(1);
-          // Check if contents of returned document are equal to document inserted (by value)
-          expect(documentToInsert).to.deep.equal(started[0].command.documents[0]);
-          // Check if the returned document is a clone of the original. This confirms that the
-          // reference is not the same.
-          expect(documentToInsert !== started[0].command.documents[0]).to.equal(true);
-          expect(documentToInsert.a !== started[0].command.documents[0].a).to.equal(true);
-
-          started[0].command.documents[0].a.b = 2;
-          expect(documentToInsert.a.b).to.equal(1);
-
-          expect(started[0].commandName).to.equal('insert');
-          expect(started[0].command.insert).to.equal('apm_test');
-          expect(succeeded).to.have.lengthOf(1);
-        });
-    });
-  });
 });

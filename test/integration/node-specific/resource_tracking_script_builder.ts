@@ -37,7 +37,7 @@ export type ProcessResourceTestFunction = (options: {
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
   __dirname,
-  '../../tools/fixtures/resource_script.in.js'
+  '../../tools/fixtures/heap_resource_script.in.js'
 );
 const REPORT_RESOURCE_SCRIPT_PATH = path.resolve(
   __dirname,
