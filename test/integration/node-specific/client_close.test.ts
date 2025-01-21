@@ -123,7 +123,7 @@ describe('MongoClient.close() Integration', () => {
                   const run = async function ({ MongoClient, uri, expect, getTimerCount }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient(uri, { heartbeatFrequencyMS });
-                    const heartbeatPromise = client.once('serverHeartbeatSucceeded');
+                    const heartbeatPromise = client.once('serverHeartbeatSucceeded', v => v);
                     await client.connect();
                     await heartbeatPromise;
 
@@ -155,7 +155,7 @@ describe('MongoClient.close() Integration', () => {
                   const run = async function ({ MongoClient, expect, getTimerCount }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient('mongodb://fakeUri', { heartbeatFrequencyMS });
-                    const heartbeatPromise = client.once('serverHeartbeatFailed');
+                    const heartbeatPromise = client.once('serverHeartbeatFailed', v => v);
                     client.connect();
                     await heartbeatPromise;
 
@@ -219,7 +219,7 @@ describe('MongoClient.close() Integration', () => {
                       heartbeatFrequencyMS
                     });
                     await client.connect();
-                    await client.once('serverHeartbeatSucceeded');
+                    await client.once('serverHeartbeatSucceeded', v => v);
 
                     function getRttTimer(servers) {
                       for (const [, server] of servers) {
@@ -324,67 +324,63 @@ describe('MongoClient.close() Integration', () => {
 
         describe('Node.js resource: checkOut Timer', () => {
           describe('after new connection pool is created', () => {
+            let utilClient;
+            const waitQueueTimeoutMS = 1515;
+
+            beforeEach(async function () {
+              // configure failPoint
+              utilClient = this.configuration.newClient();
+              await utilClient.connect();
+              const failPoint = {
+                configureFailPoint: 'failCommand',
+                mode: { times: 1 },
+                data: {
+                  appName: 'waitQueueTestClient',
+                  blockConnection: true,
+                  blockTimeMS: waitQueueTimeoutMS * 3,
+                  failCommands: ['insert']
+                }
+              };
+              await utilClient.db('admin').command(failPoint);
+            });
+
+            afterEach(async function () {
+              await utilClient.db().admin().command({
+                configureFailPoint: 'failCommand',
+                mode: 'off'
+              });
+              await utilClient.close();
+            });
+
             it('the wait queue timer is cleaned up by client.close()', async function () {
-              const run = async function ({
-                MongoClient,
-                uri,
-                expect,
-                sinon,
-                sleep,
-                getTimerCount,
-                timers
-              }) {
+              const run = async function ({ MongoClient, uri, expect, sleep, getTimerCount }) {
                 const waitQueueTimeoutMS = 1515;
-
-                // configure failPoint
-                const utilClient = new MongoClient(uri);
-                await utilClient.connect();
-                const failPoint = {
-                  configureFailPoint: 'failCommand',
-                  mode: { times: 1 },
-                  data: {
-                    blockConnection: true,
-                    blockTimeMS: waitQueueTimeoutMS * 3,
-                    failCommands: ['insert']
-                  }
-                };
-                await utilClient.db('admin').command(failPoint);
-
-                const timeoutStartedSpy = sinon.spy(timers, 'setTimeout');
 
                 const client = new MongoClient(uri, {
                   maxPoolSize: 1,
-                  waitQueueTimeoutMS
+                  waitQueueTimeoutMS,
+                  appName: 'waitQueueTestClient'
                 });
                 const insertPromise = client
                   .db('db')
                   .collection('collection')
                   .insertOne({ x: 1 })
                   .catch(e => e);
+                await client.once('commandStarted', v => v);
+
                 client
                   .db('db')
                   .collection('collection')
                   .insertOne({ x: 1 })
                   .catch(e => e);
+                await client.once('commandStarted', v => v);
 
                 // don't allow entire checkout timer to elapse to ensure close is called mid-timeout
                 await sleep(waitQueueTimeoutMS / 2);
-                const checkoutTimeoutStarted =
-                  timeoutStartedSpy
-                    .getCalls()
-                    .filter(r => r.args.includes(waitQueueTimeoutMS))
-                    .flat().length > 0;
-                expect(checkoutTimeoutStarted).to.be.true;
 
+                expect(getTimerCount()).to.not.equal(0);
                 await client.close();
                 expect(getTimerCount()).to.equal(0);
-                // un-configure failpoint
-                await utilClient.db().admin().command({
-                  configureFailPoint: 'failCommand',
-                  mode: 'off'
-                });
-
-                await utilClient.close();
 
                 const err = await insertPromise;
                 expect(err).to.be.instanceOf(Error);

@@ -12,7 +12,6 @@ const { MongoClient } = mongodb;
 const process = require('node:process');
 const util = require('node:util');
 const fs = require('node:fs');
-const sinon = require('sinon');
 const { expect } = require('chai');
 const timers = require('node:timers');
 const { setTimeout } = timers;
@@ -111,7 +110,7 @@ async function main() {
   process.on('beforeExit', () => {
     log({ beforeExitHappened: true });
   });
-  await run({ MongoClient, uri, log, expect, mongodb, sleep, sinon, getTimerCount });
+  await run({ MongoClient, uri, log, expect, mongodb, sleep, getTimerCount });
   log({ newResources: getNewResources() });
 }
 
