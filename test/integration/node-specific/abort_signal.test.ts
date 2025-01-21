@@ -9,7 +9,6 @@ import {
   type AbstractCursor,
   AggregationCursor,
   type Collection,
-  type ConnectionClosedEvent,
   type Db,
   FindCursor,
   ListCollectionsCursor,
