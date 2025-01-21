@@ -84,6 +84,21 @@ function getNewResources() {
  */
 const getTimerCount = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
 
+/**
+ * @returns Array of socket resources in the event loop
+ */
+const getSockets = () => process.report.getReport().libuv.filter(r => r.type === 'tcp');
+
+/**
+ * @returns Array of remote endpoints of socket resources in the event loop
+ * @example [{ host: 'localhost', port: 27020 }, { host: 'localhost', port: 27107 }]
+ */
+const getSocketEndpoints = () =>
+  process.report
+    .getReport()
+    .libuv.filter(r => r.type === 'tcp')
+    .map(r => r.remoteEndpoint);
+
 // A log function for debugging
 function log(message) {
   // remove outer parentheses for easier parsing

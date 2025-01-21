@@ -23,7 +23,7 @@ export type HeapResourceTestFunction = (options: {
 
 export type ProcessResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
-  uri: string;
+  uri?: string;
   log?: (out: any) => void;
   expect: typeof expect;
   mongodb?: typeof mongodb;
@@ -31,6 +31,8 @@ export type ProcessResourceTestFunction = (options: {
   sinon?: typeof sinon;
   getTimerCount?: () => number;
   timers?: typeof timers;
+  getSocketReport?: () => { host: string; port: string };
+  getSocketEndpointReport?: () => any;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
