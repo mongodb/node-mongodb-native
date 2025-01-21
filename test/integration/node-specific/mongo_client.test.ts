@@ -783,6 +783,24 @@ describe('class MongoClient', function () {
         expect(client.s.activeCursors).to.have.lengthOf(0);
         expect(kills).to.have.lengthOf(30);
       });
+
+      it('creating cursors after close adds to activeCursors', async () => {
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        await client.close();
+        collection.find({});
+        expect(client.s.activeCursors).to.have.lengthOf(1);
+      });
+
+      it('rewinding cursors after close adds to activeCursors', async () => {
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        const cursor = collection.find({}, { batchSize: 1 });
+        await cursor.next();
+        expect(client.s.activeCursors).to.have.lengthOf(1);
+        await client.close();
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        cursor.rewind();
+        expect(client.s.activeCursors).to.have.lengthOf(1);
+      });
     });
   });
 
