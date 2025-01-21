@@ -1,7 +1,24 @@
 import { inspect, promisify } from 'util';
 import { isUint8Array } from 'util/types';
 
-import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
+import {
+  type Binary,
+  type BSONRegExp,
+  type BSONSymbol,
+  type Code,
+  type DBRef,
+  type Decimal128,
+  type Document,
+  type Double,
+  EJSON,
+  type EJSONOptions,
+  type Int32,
+  type Long,
+  type MaxKey,
+  type MinKey,
+  type ObjectId,
+  type Timestamp
+} from './bson';
 import type { CommandStartedEvent } from './cmap/command_monitoring_events';
 import type {
   ConnectionCheckedInEvent,
@@ -414,6 +431,20 @@ export interface LogConvertible extends Record<string, any> {
   toLog(): Record<string, any>;
 }
 
+type BSONObject =
+  | BSONRegExp
+  | BSONSymbol
+  | Code
+  | DBRef
+  | Decimal128
+  | Double
+  | Int32
+  | Long
+  | MaxKey
+  | MinKey
+  | ObjectId
+  | Timestamp
+  | Binary;
 /** @internal */
 export function stringifyWithMaxLen(
   value: any,
@@ -427,22 +458,98 @@ export function stringifyWithMaxLen(
     if (currentLength >= maxDocumentLength) {
       return undefined;
     }
+    // Account for root document
+    if (key === '') {
+      // Account for starting brace
+      currentLength += 1;
+      return value;
+    }
 
+    // +4 accounts for 2 quotation marks, colon and comma after value
     currentLength += key.length + 4;
 
     if (typeof value === 'string') {
-      currentLength += value.length;
+      // +2 accounts for quotes
+      currentLength += value.length + 2;
     } else if (typeof value === 'number' || typeof value === 'bigint') {
-      currentLength += 20;
+      currentLength += String(value).length;
     } else if (typeof value === 'boolean') {
       currentLength += value ? 4 : 5;
+    } else if ('buffer' in value && isUint8Array(value.buffer)) {
+      // Handle binData
+      currentLength += (value.buffer.byteLength + value.buffer.byteLength * 0.5) | 0;
     } else if (value != null && typeof value === 'object' && '_bsontype' in value) {
-      if (isUint8Array(value.buffer)) {
-        currentLength += (value.buffer.byteLength + value.buffer.byteLength * 0.5) | 0;
-      } else if (value._bsontype === 'Binary') {
-        currentLength += (value.position + value.position * 0.3) | 0;
-      } else if (value._bsontype === 'Code') {
-        currentLength += value.code.length;
+      const v = value as BSONObject;
+      if (v._bsontype === 'Binary') {
+        // This is an estimate based on the fact that the base64 is approximately 1.3x the length of
+        // the actual binary sequence
+        // Also accounting for stringified fields before the binary sequence and the fields after
+        // the binary sequence
+        currentLength += (value.position + value.position * 0.3 + 22 + 17) | 0;
+      } else if (v._bsontype === 'Code') {
+        // '{"$code":"<code>"}' or '{"$code":"<code>","$scope":<scope>}'
+        // TODO: Account for scope?
+        if (v.scope == null) {
+          currentLength += v.code.length + 10 + 2;
+        } else {
+          // Ignoring actual scope object
+          currentLength += v.code.length + 10 + 11;
+        }
+      } else if (v._bsontype === 'Decimal128') {
+        // TODO: Is this worth doing here?
+        currentLength += value.toExtendedJSON().length;
+      } else if (v._bsontype === 'Double') {
+        // Doesn't account for representing integers as <value>.0
+        if ('value' in v && typeof v.value === 'number') currentLength += String(v.value).length;
+      } else if (v._bsontype === 'Int32') {
+        if ('value' in v && typeof v.value === 'number') currentLength += String(v.value).length;
+      } else if (v._bsontype === 'Long') {
+        if ('toString' in v && typeof v.toString === 'function') {
+          currentLength += v.toString().length;
+        }
+      } else if (v._bsontype === 'MaxKey' || v._bsontype === 'MinKey') {
+        // '{"$maxKey":1}' or '{"$minKey":1}'
+        currentLength += 13;
+      } else if (v._bsontype === 'ObjectId') {
+        // '{"$oid":"XXXXXXXXXXXXXXXXXXXXXXXX"}'
+        currentLength += 35;
+      } else if (
+        v._bsontype === 'BSONRegExp' &&
+        'pattern' in v &&
+        typeof v.pattern === 'string' &&
+        'options' in v &&
+        typeof v.options === 'string'
+      ) {
+        // '{"$regularExpression":{"pattern":"<pattern>","options":"<options>"}}'
+        currentLength += 34 + v.pattern.length + 13 + v.options.length + 3;
+      } else if (v._bsontype === 'BSONSymbol' && 'value' in v && v.value === 'string') {
+        // '{"$symbol": "<value>"}'
+        currentLength += 12 + v.value.length + 2;
+      } else if (
+        v._bsontype === 'Timestamp' &&
+        't' in v &&
+        typeof v.t === 'string' &&
+        'i' in v &&
+        typeof v.i === 'string'
+      ) {
+        currentLength += 19 + String(v.t).length + 5 + String(v.i).length + 2;
+      } else if (v._bsontype === 'DBRef') {
+        // '{"$ref":"<collection>","$id":<stringified oid>}' or '{"$ref":"<collection>","$id":<stringified oid>,"$db":"test"}'
+        currentLength += 9;
+        // account for collection
+        if ('collection' in v) {
+          currentLength += v.collection.length + 1;
+        }
+
+        // account for db if present
+        if ('db' in v && typeof v.db === 'string') {
+          currentLength += 8 + v.db.length + 2;
+        }
+
+        // account for oid if present
+        if ('oid' in v) {
+          currentLength += 35;
+        }
       }
     }
 
