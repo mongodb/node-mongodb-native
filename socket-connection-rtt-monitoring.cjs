@@ -2,10 +2,36 @@
 
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-const driverPath = DRIVER_SOURCE_PATH;
-const func = FUNCTION_STRING;
-const scriptName = SCRIPT_NAME_STRING;
-const uri = URI_STRING;
+const driverPath = "/Users/aditi.khare/Desktop/node-mongodb-native/lib";
+const func = (async ({ MongoClient, uri, expect, getSockets }) => {
+                                        const heartbeatFrequencyMS = 100;
+                                        const client = new MongoClient(uri, {
+                                            serverMonitoringMode: 'stream',
+                                            heartbeatFrequencyMS
+                                        });
+                                        await client.connect();
+                                        const socketsAddressesBeforeHeartbeat = getSockets().map(r => r.address);
+                                        const activeSocketsAfterHeartbeat = () => getSockets()
+                                            .filter(r => !socketsAddressesBeforeHeartbeat.includes(r.address))
+                                            .map(r => r.remoteEndpoint?.host + ':' + r.remoteEndpoint?.port);
+                                        // set of servers whose hearbeats have occurred
+                                        const heartbeatOccurredSet = new Set();
+                                        const servers = client.topology.s.servers;
+                                        while (heartbeatOccurredSet.size < servers.size) {
+                                            await client.once('serverHeartbeatSucceeded', async (ev) => heartbeatOccurredSet.add(ev.connectionId));
+                                        }
+                                        // all servers should have had a heartbeat event and had a new socket created for rtt pinger
+                                        for (const [server,] of servers) {
+                                            expect(activeSocketsAfterHeartbeat()).to.deep.contain(server[0]);
+                                        }
+                                        // close the client
+                                        await client.close();
+                                        // upon close, assert rttPinger sockets are cleaned up
+                                        const activeSocketsAfterClose = activeSocketsAfterHeartbeat();
+                                        expect(activeSocketsAfterClose).to.have.lengthOf(0);
+                                    });
+const scriptName = "socket-connection-rtt-monitoring";
+const uri = "mongodb://bob:pwd123@localhost:31000/integration_tests?replicaSet=rs&authSource=admin";
 
 const mongodb = require(driverPath);
 const { MongoClient } = mongodb;

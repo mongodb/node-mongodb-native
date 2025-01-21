@@ -2,7 +2,7 @@
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
-describe('MongoClient.close() Integration', () => {
+describe.only('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
 
   let config: TestConfiguration;
@@ -120,10 +120,11 @@ describe('MongoClient.close() Integration', () => {
                 'monitor interval timer is cleaned up by client.close()',
                 metadata,
                 async function () {
-                  const run = async function ({ MongoClient, uri, expect, getTimerCount }) {
+                  const run = async function ({ MongoClient, uri, expect, getTimerCount, mongodb }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient(uri, { heartbeatFrequencyMS });
-                    const heartbeatPromise = client.once('serverHeartbeatSucceeded', v => v);
+                    const { heartbeatPromise, resolve } = mongodb.promiseWithResolvers();
+                    client.once('serverHeartbeatSucceeded', () => resolve());
                     await client.connect();
                     await heartbeatPromise;
 
@@ -212,14 +213,16 @@ describe('MongoClient.close() Integration', () => {
                 'the rtt pinger timer is cleaned up by client.close()',
                 metadata,
                 async function () {
-                  const run = async function ({ MongoClient, uri, expect, getTimerCount }) {
+                  const run = async function ({ MongoClient, uri, expect, getTimerCount, mongodb }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
                       heartbeatFrequencyMS
                     });
                     await client.connect();
-                    await client.once('serverHeartbeatSucceeded', v => v);
+                    const { heartbeatPromise, resolve } = mongodb.promiseWithResolvers();
+                    client.once('serverHeartbeatSucceeded', () => resolve());
+                    await heartbeatPromise;
 
                     function getRttTimer(servers) {
                       for (const [, server] of servers) {
@@ -245,7 +248,7 @@ describe('MongoClient.close() Integration', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
                 it('no sockets remain after client.close()', metadata, async () => {
-                  const run = async ({ MongoClient, uri, expect, getSockets }) => {
+                  const run = async ({ MongoClient, uri, expect, getSockets, mongodb }) => {
                     const heartbeatFrequencyMS = 100;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
@@ -263,15 +266,18 @@ describe('MongoClient.close() Integration', () => {
                     // set of servers whose hearbeats have occurred
                     const heartbeatOccurredSet = new Set();
 
-                    while (heartbeatOccurredSet.size < client.topology.s.servers.batchSize) {
-                      await client.once('serverHeartbeatSucceeded', async ev =>
-                        heartbeatOccurredSet.add(ev.connectionId)
-                      );
+                    const servers = client.topology.s.servers;
+                    while (heartbeatOccurredSet.size < servers.size) {
+                      const { heartbeatPromise, resolve } = mongodb.promiseWithResolvers();
+                      client.once('serverHeartbeatSucceeded', (ev) => {
+                        heartbeatOccurredSet.add(ev.connectionId);
+                        resolve();
+                      });
+                      await heartbeatPromise;
                     }
 
                     // all servers should have had a heartbeat event and had a new socket created for rtt pinger
-                    const servers = client.topology.s.servers;
-                    for (const server of servers) {
+                    for (const [server,] of servers) {
                       expect(activeSocketsAfterHeartbeat()).to.deep.contain(server[0]);
                     }
 
@@ -428,7 +434,7 @@ describe('MongoClient.close() Integration', () => {
         const metadata: MongoDBMetadataUI = {
           requires: {
             predicate: () =>
-              process.env.ATLAS_SRV_REPL ? 'Skipped: this test requires an SRV environment' : true
+              process.env.ATLAS_SRV_REPL ? true : 'Skipped: this test requires an SRV environment'
           }
         };
 
