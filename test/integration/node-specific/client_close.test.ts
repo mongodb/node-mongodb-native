@@ -2,7 +2,7 @@
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
-describe.skip('MongoClient.close() Integration', () => {
+describe('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
 
   let config: TestConfiguration;
@@ -75,44 +75,29 @@ describe.skip('MongoClient.close() Integration', () => {
   describe('Topology', () => {
     describe('Node.js resource: Server Selection Timer', () => {
       describe('after a Topology is created through client.connect()', () => {
-        it('server selection timers are cleaned up by client.close()', async () => {
-          const run = async function ({
-            MongoClient,
-            uri,
-            expect,
-            sinon,
-            sleep,
-            mongodb,
-            getTimerCount,
-            timers
-          }) {
+        const metadata: MongoDBMetadataUI = { requires: { topology: 'replicaset' } };
+
+        it('server selection timers are cleaned up by client.close()', metadata, async () => {
+          const run = async function ({ MongoClient, uri, expect, sleep, mongodb, getTimerCount }) {
             const serverSelectionTimeoutMS = 2222;
-            const client = new MongoClient(uri, { minPoolSize: 1, serverSelectionTimeoutMS });
-            const timeoutStartedSpy = sinon.spy(timers, 'setTimeout');
-            let serverSelectionTimeoutStarted = false;
-
-            // make server selection hang so check out timer isn't cleared and check that the timeout has started
-            sinon.stub(Promise, 'race').callsFake(async ([_serverPromise, timeout]) => {
-              serverSelectionTimeoutStarted =
-                timeoutStartedSpy
-                  .getCalls()
-                  .filter(r => r.args.includes(serverSelectionTimeoutMS))
-                  .flat().length > 0;
-              await timeout;
+            const client = new MongoClient(uri, {
+              minPoolSize: 1,
+              serverSelectionTimeoutMS,
+              readPreference: new mongodb.ReadPreference('secondary', [
+                { something: 'that does not exist' }
+              ])
             });
-
             const insertPromise = client.db('db').collection('collection').insertOne({ x: 1 });
 
             // don't allow entire server selection timer to elapse to ensure close is called mid-timeout
             await sleep(serverSelectionTimeoutMS / 2);
-            expect(serverSelectionTimeoutStarted).to.be.true;
 
             expect(getTimerCount()).to.not.equal(0);
             await client.close();
             expect(getTimerCount()).to.equal(0);
 
             const err = await insertPromise.catch(e => e);
-            expect(err).to.be.instanceOf(mongodb.MongoServerSelectionError);
+            expect(err).to.be.instanceOf(mongodb.MongoTopologyClosedError);
           };
           await runScriptAndGetProcessInfo('timer-server-selection', config, run);
         });
