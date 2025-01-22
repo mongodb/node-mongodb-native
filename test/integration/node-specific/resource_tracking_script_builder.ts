@@ -1,5 +1,6 @@
 import { fork, spawn } from 'node:child_process';
 import { on, once } from 'node:events';
+import { openSync, statSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -31,7 +32,7 @@ export type ProcessResourceTestFunction = (options: {
   timers?: typeof timers;
   getSocketReport?: () => { host: string; port: string };
   getSocketEndpointReport?: () => any;
-  promiseWithResolvers?: () => any;
+  once?: () => typeof once;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
@@ -176,7 +177,10 @@ export async function runScriptAndGetProcessInfo(
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
   const logFile = name + '.logs.txt';
 
-  const script = spawn(process.execPath, [scriptName], { stdio: ['ignore', 'ignore', 'inherit'] });
+  const stdErrFile = 'err.out';
+  const script = spawn(process.execPath, [scriptName], {
+    stdio: ['ignore', 'ignore', openSync(stdErrFile, 'w')]
+  });
 
   const willClose = once(script, 'close');
 
@@ -190,9 +194,12 @@ export async function runScriptAndGetProcessInfo(
     .map(line => JSON.parse(line))
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
+  const stdErrSize = statSync(stdErrFile).size;
+
   // delete temporary files
   await unlink(scriptName);
-  await unlink(logFile);
+  // await unlink(logFile);
+  await unlink(stdErrFile);
 
   // assertions about exit status
   if (exitCode) {
@@ -202,6 +209,9 @@ export async function runScriptAndGetProcessInfo(
     assertionError.stack = messages.error?.stack + new Error().stack.slice('Error'.length);
     throw assertionError;
   }
+
+  // assertion about error output
+  expect(stdErrSize).to.equal(0);
 
   // assertions about resource status
   expect(messages.beforeExitHappened).to.be.true;

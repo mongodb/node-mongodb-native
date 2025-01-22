@@ -120,22 +120,16 @@ describe.skip('MongoClient.close() Integration', () => {
                 'monitor interval timer is cleaned up by client.close()',
                 metadata,
                 async function () {
-                  const run = async function ({
-                    MongoClient,
-                    uri,
-                    expect,
-                    getTimerCount,
-                    promiseWithResolvers
-                  }) {
+                  const run = async function ({ MongoClient, uri, expect, getTimerCount, once }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient(uri, { heartbeatFrequencyMS });
-                    const { promise, resolve } = promiseWithResolvers();
-                    client.once('serverHeartbeatSucceeded', () => resolve());
+                    const willBeHeartbeatSucceeded = once(client, 'serverHeartbeatSucceeded');
                     await client.connect();
-                    await promise;
+                    await willBeHeartbeatSucceeded;
 
                     function monitorTimersExist(servers) {
                       for (const [, server] of servers) {
+                        // the current expected behavior is that timerId is set to undefined once it expires or is interrupted
                         if (server?.monitor.monitorId.timerId === undefined) {
                           return false;
                         }
@@ -159,18 +153,12 @@ describe.skip('MongoClient.close() Integration', () => {
                 'the new monitor interval timer is cleaned up by client.close()',
                 metadata,
                 async () => {
-                  const run = async function ({
-                    MongoClient,
-                    expect,
-                    getTimerCount,
-                    promiseWithResolvers
-                  }) {
+                  const run = async function ({ MongoClient, expect, getTimerCount, once }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient('mongodb://fakeUri', { heartbeatFrequencyMS });
-                    const { promise, resolve } = promiseWithResolvers();
-                    client.once('serverHeartbeatFailed', () => resolve());
+                    const willBeHeartbeatFailed = once(client, 'serverHeartbeatFailed');
                     client.connect();
-                    await promise;
+                    await willBeHeartbeatFailed;
 
                     function getMonitorTimer(servers) {
                       for (const [, server] of servers) {
@@ -180,6 +168,7 @@ describe.skip('MongoClient.close() Integration', () => {
                     const servers = client.topology.s.servers;
                     expect(getMonitorTimer(servers)).to.exist;
                     await client.close();
+                    // the current expected behavior is that timerId is set to undefined once it expires or is interrupted
                     expect(getMonitorTimer(servers)).to.not.exist;
 
                     expect(getTimerCount()).to.equal(0);
@@ -225,22 +214,14 @@ describe.skip('MongoClient.close() Integration', () => {
                 'the rtt pinger timer is cleaned up by client.close()',
                 metadata,
                 async function () {
-                  const run = async function ({
-                    MongoClient,
-                    uri,
-                    expect,
-                    getTimerCount,
-                    promiseWithResolvers
-                  }) {
+                  const run = async function ({ MongoClient, uri, expect, getTimerCount, once }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
                       heartbeatFrequencyMS
                     });
                     await client.connect();
-                    const { promise, resolve } = promiseWithResolvers();
-                    client.once('serverHeartbeatSucceeded', () => resolve());
-                    await promise;
+                    await once(client, 'serverHeartbeatSucceeded');
 
                     function getRttTimer(servers) {
                       for (const [, server] of servers) {
@@ -266,13 +247,7 @@ describe.skip('MongoClient.close() Integration', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
                 it('no sockets remain after client.close()', metadata, async () => {
-                  const run = async ({
-                    MongoClient,
-                    uri,
-                    expect,
-                    getSockets,
-                    promiseWithResolvers
-                  }) => {
+                  const run = async ({ MongoClient, uri, expect, getSockets, once, log }) => {
                     const heartbeatFrequencyMS = 500;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
@@ -288,12 +263,9 @@ describe.skip('MongoClient.close() Integration', () => {
                     const servers = client.topology.s.servers;
 
                     while (heartbeatOccurredSet.size < servers.size) {
-                      const { promise, resolve } = promiseWithResolvers();
-                      client.once('serverHeartbeatSucceeded', ev => {
-                        heartbeatOccurredSet.add(ev.connectionId);
-                        resolve();
-                      });
-                      await promise;
+                      const ev = await once(client, 'serverHeartbeatSucceeded');
+                      log({ ev: ev[0] });
+                      heartbeatOccurredSet.add(ev[0].connectionId);
                     }
 
                     const activeSocketsAfterHeartbeat = () =>
@@ -309,6 +281,7 @@ describe.skip('MongoClient.close() Integration', () => {
                     // close the client
                     await client.close();
 
+                    log({ socketsAfterClose: getSockets() });
                     // upon close, assert rttPinger sockets are cleaned up
                     const activeSocketsAfterClose = activeSocketsAfterHeartbeat();
                     expect(activeSocketsAfterClose).to.have.lengthOf(0);
@@ -456,24 +429,19 @@ describe.skip('MongoClient.close() Integration', () => {
     describe('SrvPoller', () => {
       describe('Node.js resource: Timer', () => {
         // requires an srv environment that can transition to sharded
-        const metadata: MongoDBMetadataUI = {
-          requires: {
-            predicate: () =>
-              process.env.ATLAS_SRV_REPL ? true : 'Skipped: this test requires an SRV environment'
-          }
-        };
+        const metadata: MongoDBMetadataUI = { requires: { topology: 'sharded' } };
 
         describe('after SRVPoller is created', () => {
           it('timers are cleaned up by client.close()', metadata, async () => {
-            const run = async function ({ MongoClient, uri, expect, getTimerCount }) {
-              const client = new MongoClient(uri);
+            const run = async function ({ MongoClient, expect, getTimerCount }) {
+              const SRV_CONNECTION_STRING = `mongodb+srv://test1.test.build.10gen.cc`;
+              // 27018 localhost.test.build.10gen.cc.
+              // 27017 localhost.test.build.10gen.cc.
+
+              const client = new MongoClient(SRV_CONNECTION_STRING);
               await client.connect();
-              const description = client.topology.s.description;
-              // simulate transition to sharded
-              client.topology.emit('topologyDescriptionChanged', description, {
-                ...description,
-                type: 'Sharded'
-              });
+              // the current expected behavior is that _timeout is set to undefined until SRV polling starts
+              // then _timeout is set to undefined again when SRV polling stops
               expect(client.topology.s.srvPoller._timeout).to.exist;
               await client.close();
               expect(getTimerCount()).to.equal(0);

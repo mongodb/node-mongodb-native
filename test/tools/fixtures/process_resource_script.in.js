@@ -15,6 +15,7 @@ const fs = require('node:fs');
 const { expect } = require('chai');
 const timers = require('node:timers');
 const { setTimeout } = timers;
+const { once } = require('node:events');
 
 let originalReport;
 const logFile = scriptName + '.logs.txt';
@@ -71,10 +72,11 @@ function getNewLibuvResourceArray() {
  * - `process.getActiveResourcesInfo()` does not contain enough server information we need for our assertions
  *
  */
+
 function getNewResources() {
   return {
     libuvResources: getNewLibuvResourceArray(),
-    activeResources: process.getActiveResourcesInfo().filter(r => r !== 'TTYWrap')
+    activeResources: process.getActiveResourcesInfo()
   };
 }
 
@@ -98,16 +100,6 @@ const getSocketEndpoints = () =>
     .libuv.filter(r => r.type === 'tcp')
     .map(r => r.remoteEndpoint);
 
-function promiseWithResolvers() {
-  let resolve;
-  let reject;
-  const promise = new Promise((promiseResolve, promiseReject) => {
-    resolve = promiseResolve;
-    reject = promiseReject;
-  });
-  return { promise, resolve, reject };
-}
-
 // A log function for debugging
 function log(message) {
   // remove outer parentheses for easier parsing
@@ -130,7 +122,7 @@ async function main() {
     getTimerCount,
     getSockets,
     getSocketEndpoints,
-    promiseWithResolvers
+    once
   });
   log({ newResources: getNewResources() });
 }
