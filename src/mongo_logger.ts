@@ -481,14 +481,12 @@ export function stringifyWithMaxLen(
     } else if (value != null && typeof value === 'object' && '_bsontype' in value) {
       const v = value as BSONObject;
       if (v._bsontype === 'Binary') {
-        // This is an estimate based on the fact that the base64 is approximately 1.3x the length of
-        // the actual binary sequence
-        // Also accounting for stringified fields before the binary sequence and the fields after
-        // the binary sequence
-        currentLength += (value.position + value.position * 0.3 + 22 + 17) | 0;
+        // '{"$binary":{"base64":"<base64 string>","subType":"XX"}}'
+        // This is an estimate based on the fact that the base64 is approximately 1.33x the length of
+        // the actual binary sequence https://en.wikipedia.org/wiki/Base64
+        currentLength += (22 + value.position + value.position * 0.33 + 18) | 0;
       } else if (v._bsontype === 'Code') {
         // '{"$code":"<code>"}' or '{"$code":"<code>","$scope":<scope>}'
-        // TODO: Account for scope?
         if (v.scope == null) {
           currentLength += v.code.length + 10 + 2;
         } else {
@@ -496,7 +494,6 @@ export function stringifyWithMaxLen(
           currentLength += v.code.length + 10 + 11;
         }
       } else if (v._bsontype === 'Decimal128') {
-        // TODO: Is this worth doing here?
         currentLength += value.toExtendedJSON().length;
       } else if (v._bsontype === 'Double') {
         // Doesn't account for representing integers as <value>.0
