@@ -33,7 +33,7 @@ export interface AggregationCursorOptions extends AbstractCursorOptions, Aggrega
 export class AggregationCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   public readonly pipeline: Document[];
   /** @internal */
-  private aggregateOptions: AggregateOptions;
+  private aggregateOptions: AggregateOptions & Abortable;
 
   /** @internal */
   constructor(

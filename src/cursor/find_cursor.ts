@@ -9,6 +9,7 @@ import {
   validateExplainTimeoutOptions
 } from '../explain';
 import type { MongoClient } from '../mongo_client';
+import { type Abortable } from '../mongo_types';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, type CountOptions } from '../operations/count';
 import { executeOperation } from '../operations/execute_operation';
@@ -36,14 +37,14 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   /** @internal */
   private numReturned = 0;
   /** @internal */
-  private readonly findOptions: FindOptions;
+  private readonly findOptions: FindOptions & Abortable;
 
   /** @internal */
   constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
     filter: Document = {},
-    options: FindOptions = {}
+    options: FindOptions & Abortable = {}
   ) {
     super(client, namespace, options);
 

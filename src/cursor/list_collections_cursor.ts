@@ -1,5 +1,6 @@
 import type { Document } from '../bson';
 import type { Db } from '../db';
+import { type Abortable } from '../mongo_types';
 import { executeOperation } from '../operations/execute_operation';
 import {
   type CollectionInfo,
@@ -17,9 +18,9 @@ export class ListCollectionsCursor<
 > extends AbstractCursor<T> {
   parent: Db;
   filter: Document;
-  options?: ListCollectionsOptions;
+  options?: ListCollectionsOptions & Abortable;
 
-  constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
+  constructor(db: Db, filter: Document, options?: ListCollectionsOptions & Abortable) {
     super(db.client, db.s.namespace, options);
     this.parent = db;
     this.filter = filter;
