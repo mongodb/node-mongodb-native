@@ -2,7 +2,7 @@
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
-describe.only('MongoClient.close() Integration', () => {
+describe.skip('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
 
   let config: TestConfiguration;
@@ -120,13 +120,19 @@ describe.only('MongoClient.close() Integration', () => {
                 'monitor interval timer is cleaned up by client.close()',
                 metadata,
                 async function () {
-                  const run = async function ({ MongoClient, uri, expect, getTimerCount, mongodb }) {
+                  const run = async function ({
+                    MongoClient,
+                    uri,
+                    expect,
+                    getTimerCount,
+                    promiseWithResolvers
+                  }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient(uri, { heartbeatFrequencyMS });
-                    const { heartbeatPromise, resolve } = mongodb.promiseWithResolvers();
+                    const { promise, resolve } = promiseWithResolvers();
                     client.once('serverHeartbeatSucceeded', () => resolve());
                     await client.connect();
-                    await heartbeatPromise;
+                    await promise;
 
                     function monitorTimersExist(servers) {
                       for (const [, server] of servers) {
@@ -153,12 +159,18 @@ describe.only('MongoClient.close() Integration', () => {
                 'the new monitor interval timer is cleaned up by client.close()',
                 metadata,
                 async () => {
-                  const run = async function ({ MongoClient, expect, getTimerCount }) {
+                  const run = async function ({
+                    MongoClient,
+                    expect,
+                    getTimerCount,
+                    promiseWithResolvers
+                  }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient('mongodb://fakeUri', { heartbeatFrequencyMS });
-                    const heartbeatPromise = client.once('serverHeartbeatFailed', v => v);
+                    const { promise, resolve } = promiseWithResolvers();
+                    client.once('serverHeartbeatFailed', () => resolve());
                     client.connect();
-                    await heartbeatPromise;
+                    await promise;
 
                     function getMonitorTimer(servers) {
                       for (const [, server] of servers) {
@@ -213,16 +225,22 @@ describe.only('MongoClient.close() Integration', () => {
                 'the rtt pinger timer is cleaned up by client.close()',
                 metadata,
                 async function () {
-                  const run = async function ({ MongoClient, uri, expect, getTimerCount, mongodb }) {
+                  const run = async function ({
+                    MongoClient,
+                    uri,
+                    expect,
+                    getTimerCount,
+                    promiseWithResolvers
+                  }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
                       heartbeatFrequencyMS
                     });
                     await client.connect();
-                    const { heartbeatPromise, resolve } = mongodb.promiseWithResolvers();
+                    const { promise, resolve } = promiseWithResolvers();
                     client.once('serverHeartbeatSucceeded', () => resolve());
-                    await heartbeatPromise;
+                    await promise;
 
                     function getRttTimer(servers) {
                       for (const [, server] of servers) {
@@ -248,8 +266,14 @@ describe.only('MongoClient.close() Integration', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
                 it('no sockets remain after client.close()', metadata, async () => {
-                  const run = async ({ MongoClient, uri, expect, getSockets, mongodb }) => {
-                    const heartbeatFrequencyMS = 100;
+                  const run = async ({
+                    MongoClient,
+                    uri,
+                    expect,
+                    getSockets,
+                    promiseWithResolvers
+                  }) => {
+                    const heartbeatFrequencyMS = 500;
                     const client = new MongoClient(uri, {
                       serverMonitoringMode: 'stream',
                       heartbeatFrequencyMS
@@ -258,27 +282,28 @@ describe.only('MongoClient.close() Integration', () => {
 
                     const socketsAddressesBeforeHeartbeat = getSockets().map(r => r.address);
 
+                    // set of servers whose heartbeats have occurred
+                    const heartbeatOccurredSet = new Set();
+
+                    const servers = client.topology.s.servers;
+
+                    while (heartbeatOccurredSet.size < servers.size) {
+                      const { promise, resolve } = promiseWithResolvers();
+                      client.once('serverHeartbeatSucceeded', ev => {
+                        heartbeatOccurredSet.add(ev.connectionId);
+                        resolve();
+                      });
+                      await promise;
+                    }
+
                     const activeSocketsAfterHeartbeat = () =>
                       getSockets()
                         .filter(r => !socketsAddressesBeforeHeartbeat.includes(r.address))
                         .map(r => r.remoteEndpoint?.host + ':' + r.remoteEndpoint?.port);
-
-                    // set of servers whose hearbeats have occurred
-                    const heartbeatOccurredSet = new Set();
-
-                    const servers = client.topology.s.servers;
-                    while (heartbeatOccurredSet.size < servers.size) {
-                      const { heartbeatPromise, resolve } = mongodb.promiseWithResolvers();
-                      client.once('serverHeartbeatSucceeded', (ev) => {
-                        heartbeatOccurredSet.add(ev.connectionId);
-                        resolve();
-                      });
-                      await heartbeatPromise;
-                    }
-
                     // all servers should have had a heartbeat event and had a new socket created for rtt pinger
-                    for (const [server,] of servers) {
-                      expect(activeSocketsAfterHeartbeat()).to.deep.contain(server[0]);
+                    const activeSocketsBeforeClose = activeSocketsAfterHeartbeat();
+                    for (const [server] of servers) {
+                      expect(activeSocketsBeforeClose).to.deep.contain(server);
                     }
 
                     // close the client

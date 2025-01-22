@@ -98,6 +98,16 @@ const getSocketEndpoints = () =>
     .libuv.filter(r => r.type === 'tcp')
     .map(r => r.remoteEndpoint);
 
+function promiseWithResolvers() {
+  let resolve;
+  let reject;
+  const promise = new Promise((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, resolve, reject };
+}
+
 // A log function for debugging
 function log(message) {
   // remove outer parentheses for easier parsing
@@ -110,7 +120,18 @@ async function main() {
   process.on('beforeExit', () => {
     log({ beforeExitHappened: true });
   });
-  await run({ MongoClient, uri, log, expect, mongodb, sleep, getTimerCount, getSockets, getSocketEndpoints });
+  await run({
+    MongoClient,
+    uri,
+    log,
+    expect,
+    mongodb,
+    sleep,
+    getTimerCount,
+    getSockets,
+    getSocketEndpoints,
+    promiseWithResolvers
+  });
   log({ newResources: getNewResources() });
 }
 

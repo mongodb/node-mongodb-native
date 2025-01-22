@@ -31,6 +31,7 @@ export type ProcessResourceTestFunction = (options: {
   timers?: typeof timers;
   getSocketReport?: () => { host: string; port: string };
   getSocketEndpointReport?: () => any;
+  promiseWithResolvers?: () => any;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
