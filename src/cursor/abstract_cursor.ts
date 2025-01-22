@@ -871,6 +871,7 @@ export abstract class AbstractCursor<
     this.isClosed = false;
     this.isKilled = false;
     this.initialized = false;
+    this.hasEmittedClose = false;
     this.trackCursor();
 
     // We only want to end this session if we created it, and it hasn't ended yet
