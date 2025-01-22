@@ -468,96 +468,71 @@ export function stringifyWithMaxLen(
     // +4 accounts for 2 quotation marks, colon and comma after value
     currentLength += key.length + 4;
 
-    if (typeof value === 'string') {
-      // +2 accounts for quotes
-      currentLength += value.length + 2;
-    } else if (typeof value === 'number' || typeof value === 'bigint') {
-      currentLength += String(value).length;
-    } else if (typeof value === 'boolean') {
-      currentLength += value ? 4 : 5;
-    } else if (
-      value != null &&
-      typeof value === 'object' &&
-      'buffer' in value &&
-      isUint8Array(value.buffer)
-    ) {
-      // Handle binData
-      currentLength += (value.buffer.byteLength + value.buffer.byteLength * 0.5) | 0;
-    } else if (value != null && typeof value === 'object' && '_bsontype' in value) {
-      const v = value as BSONObject;
-      if (v._bsontype === 'Binary') {
-        // '{"$binary":{"base64":"<base64 string>","subType":"XX"}}'
-        // This is an estimate based on the fact that the base64 is approximately 1.33x the length of
-        // the actual binary sequence https://en.wikipedia.org/wiki/Base64
-        currentLength += (22 + value.position + value.position * 0.33 + 18) | 0;
-      } else if (v._bsontype === 'Code') {
-        // '{"$code":"<code>"}' or '{"$code":"<code>","$scope":<scope>}'
-        if (v.scope == null) {
-          currentLength += v.code.length + 10 + 2;
-        } else {
-          // Ignoring actual scope object, so this undercounts
-          currentLength += v.code.length + 10 + 11;
-        }
-      } else if (v._bsontype === 'Decimal128') {
-        currentLength += value.toExtendedJSON().length;
-      } else if (v._bsontype === 'Double') {
-        // Doesn't account for representing integers as <value>.0
-        if ('value' in v && typeof v.value === 'number') currentLength += String(v.value).length;
-      } else if (v._bsontype === 'Int32') {
-        if ('value' in v && typeof v.value === 'number') currentLength += String(v.value).length;
-      } else if (v._bsontype === 'Long') {
-        if ('toString' in v && typeof v.toString === 'function') {
-          currentLength += v.toString().length;
-        }
-      } else if (v._bsontype === 'MaxKey' || v._bsontype === 'MinKey') {
-        // '{"$maxKey":1}' or '{"$minKey":1}'
-        currentLength += 13;
-      } else if (v._bsontype === 'ObjectId') {
-        // '{"$oid":"XXXXXXXXXXXXXXXXXXXXXXXX"}'
-        currentLength += 35;
-      } else if (
-        v._bsontype === 'BSONRegExp' &&
-        'pattern' in v &&
-        typeof v.pattern === 'string' &&
-        'options' in v &&
-        typeof v.options === 'string'
-      ) {
-        // '{"$regularExpression":{"pattern":"<pattern>","options":"<options>"}}'
-        currentLength += 34 + v.pattern.length + 13 + v.options.length + 3;
-      } else if (v._bsontype === 'BSONSymbol' && 'value' in v && v.value === 'string') {
-        // '{"$symbol": "<value>"}'
-        currentLength += 12 + v.value.length + 2;
-      } else if (
-        v._bsontype === 'Timestamp' &&
-        't' in v &&
-        typeof v.t === 'string' &&
-        'i' in v &&
-        typeof v.i === 'string'
-      ) {
-        currentLength += 19 + String(v.t).length + 5 + String(v.i).length + 2;
-      } else if (v._bsontype === 'DBRef') {
-        // TODO: Handle fields property; currently undercounts
-        // '{"$ref":"<collection>","$id":<stringified oid>}' or '{"$ref":"<collection>","$id":<stringified oid>,"$db":"test"}'
-        currentLength += 9;
-        // account for collection
-        if ('collection' in v) {
-          currentLength += v.collection.length + 1;
-        }
+    if (value == null) return value;
 
-        // account for db if present
-        if ('db' in v && typeof v.db === 'string') {
-          currentLength += 8 + v.db.length + 2;
+    switch (typeof value) {
+      case 'string':
+        // +2 accounts for quotes
+        currentLength += value.length + 2;
+        break;
+      case 'number':
+      case 'bigint':
+        currentLength += String(value).length;
+        break;
+      case 'boolean':
+        currentLength += value ? 4 : 5;
+        break;
+      case 'object':
+        if ('buffer' in value && isUint8Array(value.buffer)) {
+          // Handle binData
+          currentLength += (value.buffer.byteLength + value.buffer.byteLength * 0.5) | 0;
+        } else if ('_bsontype' in value) {
+          const v = value as BSONObject;
+          switch (v._bsontype) {
+            case 'Int32':
+              currentLength += String(v.value).length;
+              break;
+            case 'Double':
+              // Doesn't account for representing integers as <value>.0
+              currentLength += String(v.value).length;
+              break;
+            case 'Long':
+              currentLength += v.toString().length;
+              break;
+            case 'ObjectId':
+              // '{"$oid":"XXXXXXXXXXXXXXXXXXXXXXXX"}'
+              currentLength += 35;
+              break;
+            case 'MaxKey':
+            case 'MinKey':
+              // '{"$maxKey":1}' or '{"$minKey":1}'
+              currentLength += 13;
+              break;
+            case 'Binary':
+              // '{"$binary":{"base64":"<base64 string>","subType":"XX"}}'
+              // This is an estimate based on the fact that the base64 is approximately 1.33x the length of
+              // the actual binary sequence https://en.wikipedia.org/wiki/Base64
+              currentLength += (22 + value.position + value.position * 0.33 + 18) | 0;
+              break;
+            case 'Timestamp':
+              currentLength += 19 + String(v.t).length + 5 + String(v.i).length + 2;
+              break;
+            case 'Code':
+              // '{"$code":"<code>"}' or '{"$code":"<code>","$scope":<scope>}'
+              if (v.scope == null) {
+                currentLength += v.code.length + 10 + 2;
+              } else {
+                // Ignoring actual scope object, so this undercounts by a significant amount
+                currentLength += v.code.length + 10 + 11;
+              }
+              break;
+            case 'BSONRegExp':
+              // '{"$regularExpression":{"pattern":"<pattern>","options":"<options>"}}'
+              currentLength += 34 + v.pattern.length + 13 + v.options.length + 3;
+              break;
+          }
         }
-
-        // account for oid if present
-        if ('oid' in v) {
-          currentLength += 35;
-        }
-      } else {
-        // Unknown BSON type, handle same as plain objects
-      }
     }
-
     return value;
   };
 
