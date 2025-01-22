@@ -475,7 +475,12 @@ export function stringifyWithMaxLen(
       currentLength += String(value).length;
     } else if (typeof value === 'boolean') {
       currentLength += value ? 4 : 5;
-    } else if ('buffer' in value && isUint8Array(value.buffer)) {
+    } else if (
+      value != null &&
+      typeof value === 'object' &&
+      'buffer' in value &&
+      isUint8Array(value.buffer)
+    ) {
       // Handle binData
       currentLength += (value.buffer.byteLength + value.buffer.byteLength * 0.5) | 0;
     } else if (value != null && typeof value === 'object' && '_bsontype' in value) {
@@ -490,7 +495,7 @@ export function stringifyWithMaxLen(
         if (v.scope == null) {
           currentLength += v.code.length + 10 + 2;
         } else {
-          // Ignoring actual scope object
+          // Ignoring actual scope object, so this undercounts
           currentLength += v.code.length + 10 + 11;
         }
       } else if (v._bsontype === 'Decimal128') {
@@ -531,6 +536,7 @@ export function stringifyWithMaxLen(
       ) {
         currentLength += 19 + String(v.t).length + 5 + String(v.i).length + 2;
       } else if (v._bsontype === 'DBRef') {
+        // TODO: Handle fields property; currently undercounts
         // '{"$ref":"<collection>","$id":<stringified oid>}' or '{"$ref":"<collection>","$id":<stringified oid>,"$db":"test"}'
         currentLength += 9;
         // account for collection
@@ -547,6 +553,8 @@ export function stringifyWithMaxLen(
         if ('oid' in v) {
           currentLength += 35;
         }
+      } else {
+        // Unknown BSON type, handle same as plain objects
       }
     }
 
