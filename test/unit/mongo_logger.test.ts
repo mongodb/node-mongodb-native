@@ -1,4 +1,16 @@
-import { EJSON, ObjectId } from 'bson';
+import {
+  BSONRegExp,
+  BSONSymbol,
+  Code,
+  DBRef,
+  Double,
+  EJSON,
+  Int32,
+  Long,
+  MaxKey,
+  MinKey,
+  ObjectId
+} from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Readable, Writable } from 'stream';
@@ -1610,5 +1622,187 @@ describe('class MongoLogger', function () {
         }
       });
     }
+  });
+});
+
+describe('stringifyWithMaxLen', function () {
+  let returnVal: string;
+
+  describe('when stringifying a string field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        a: 'aaa',
+        b: 'bbb'
+      };
+
+      returnVal = stringifyWithMaxLen(doc, 13);
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a number field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        a: 1000,
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 12);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a bigint field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        a: 1000n,
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 12);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON Code field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new Code('console.log();'),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 34);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON Decimal128 field', function () {});
+
+  describe('when stringifying a BSON Double field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new Double(123.1),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 13);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON Int32 field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new Int32(123),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 11);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON Long field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new Long(123),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 11);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON MaxKey field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new MaxKey(),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 21);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON MinKey field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new MinKey(),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 21);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON ObjectId field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new ObjectId(),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 43);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON BSONRegExp field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new BSONRegExp('testRegex', 'is'),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 69);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON BSONSymbol field', function () {
+    it('does not prematurely redact the next key', function () {
+      const doc = {
+        c: new BSONSymbol('testSymbol'),
+        b: 'bbb'
+      };
+      returnVal = stringifyWithMaxLen(doc, 32);
+
+      expect(returnVal).to.contain('"b...');
+    });
+  });
+
+  describe('when stringifying a BSON DBRef field', function () {
+    describe('when db, collection, oid and fields are defined', function () {
+      // TODO
+    });
+
+    describe('when db, collection and oid are defined', function () {
+      it('does not prematurely redact the next key', function () {
+        const oid = new ObjectId();
+        const doc = {
+          c: new DBRef('coll', oid, 'db'),
+          b: 'bbb'
+        };
+        returnVal = stringifyWithMaxLen(doc, 76);
+
+        expect(returnVal).to.contain('"b...');
+      });
+    });
+
+    describe('when collection and oid are defined', function () {
+      it('does not prematurely redact the next key', function () {
+        const oid = new ObjectId();
+        const doc = {
+          c: new DBRef('coll', oid),
+          b: 'bbb'
+        };
+        returnVal = stringifyWithMaxLen(doc, 65);
+
+        expect(returnVal).to.contain('"b...');
+      });
+    });
   });
 });
