@@ -25,7 +25,7 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { supportsRetryableWrites } from '../utils';
+import { abortable, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -65,9 +65,7 @@ export async function executeOperation<
   }
 
   // Like CSOT, an operation signal interruption does not relate to auto-connect
-  operation.options.signal?.throwIfAborted();
-  const topology = await autoConnect(client);
-  operation.options.signal?.throwIfAborted();
+  const topology = await abortable(autoConnect(client), operation.options);
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.

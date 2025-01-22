@@ -42,6 +42,7 @@ import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { isTransactionCommand } from '../transactions';
 import {
+  abortable,
   type EventEmitterWithState,
   makeStateMachine,
   maxWireVersion,
@@ -345,7 +346,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError instanceof MongoError &&
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
-        await this.pool.reauthenticate(conn);
+        await abortable(this.pool.reauthenticate(conn), options);
         try {
           const res = await conn.command(ns, cmd, options, responseType);
           throwIfWriteConcernError(res);

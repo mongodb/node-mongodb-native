@@ -1475,11 +1475,28 @@ export function decorateDecryptionResult(
   }
 }
 
+/** @internal */
 export const kDispose: unique symbol = (Symbol.dispose as any) ?? Symbol('dispose');
+
+/** @internal */
 export interface Disposable {
   [kDispose](): void;
 }
 
+/**
+ * A utility that helps with writing listener code idiomatically
+ *
+ * @example
+ * ```js
+ * using listener = addAbortListener(signal, function () {
+ *   console.log('aborted', this.reason);
+ * });
+ * ```
+ *
+ * @param signal - if exists adds an abort listener
+ * @param listener - the listener to be added to signal
+ * @returns A disposable that will remove the abort listener
+ */
 export function addAbortListener(
   signal: AbortSignal | undefined | null,
   listener: (this: AbortSignal, event: Event) => void
@@ -1487,4 +1504,40 @@ export function addAbortListener(
   if (signal == null) return;
   signal.addEventListener('abort', listener, { once: true });
   return { [kDispose]: () => signal.removeEventListener('abort', listener) };
+}
+
+/**
+ * Takes a promise and races it with a promise wrapping the abort event of the optionally provided signal.
+ * The given promise is _always_ ordered before the signal's abort promise.
+ * When given an already rejected promise and an already aborted signal, the promise's rejection takes precedence.
+ *
+ * This is useful **ONLY** when you do not care about cancelling the operation represented by `promise`.
+ * Proper cancellation must be implemented by the promise returning API.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race
+ *
+ * @param promise - A promise to discard if the signal aborts
+ * @param options - An options object carrying an optional signal
+ */
+export async function abortable<T>(
+  promise: Promise<T>,
+  { signal }: { signal?: AbortSignal }
+): Promise<T> {
+  if (signal == null) {
+    return await promise;
+  }
+
+  const { promise: aborted, reject } = promiseWithResolvers<never>();
+
+  const abortListener = signal.aborted
+    ? reject(signal.reason)
+    : addAbortListener(signal, function () {
+        reject(this.reason);
+      });
+
+  try {
+    return await Promise.race([promise, aborted]);
+  } finally {
+    abortListener?.[kDispose]();
+  }
 }

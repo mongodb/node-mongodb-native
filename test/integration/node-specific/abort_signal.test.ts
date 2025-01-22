@@ -9,11 +9,13 @@ import {
   type AbstractCursor,
   AggregationCursor,
   type Collection,
+  Connection,
   type Db,
   FindCursor,
   ListCollectionsCursor,
   type Log,
   type MongoClient,
+  MongoServerError,
   promiseWithResolvers,
   ReadPreference,
   setDifference,
@@ -542,6 +544,160 @@ describe('AbortSignal support', () => {
         .on('close', resolve);
 
       expect(await promise.catch(error => error)).to.be.instanceOf(DOMException);
+    });
+  });
+
+  describe('when auto connecting and the signal aborts', () => {
+    let client: MongoClient;
+    let db: Db;
+    let collection: Collection<{ a: number; ssn: string }>;
+    const logs: Log[] = [];
+    let connectStarted;
+    let controller: AbortController;
+    let signal: AbortSignal;
+    let cursor: AbstractCursor<{ a: number }>;
+
+    describe('when connect succeeds', () => {
+      beforeEach(async function () {
+        logs.length = 0;
+
+        const promise = promiseWithResolvers<void>();
+        connectStarted = promise.promise;
+
+        client = this.configuration.newClient(
+          {},
+          {
+            __enableMongoLogger: true,
+            __internalLoggerConfig: { MONGODB_LOG_SERVER_SELECTION: 'debug' },
+            mongodbLogPath: {
+              write: log => {
+                if (log.c === 'serverSelection' && log.operation === 'ping') {
+                  controller.abort();
+                  promise.resolve();
+                }
+                logs.push(log);
+              }
+            },
+            serverSelectionTimeoutMS: 1000
+          }
+        );
+        db = client.db('abortSignal');
+        collection = db.collection('support');
+
+        controller = new AbortController();
+        signal = controller.signal;
+
+        cursor = collection.find({}, { signal });
+      });
+
+      afterEach(async function () {
+        logs.length = 0;
+        await client?.close();
+      });
+
+      it('escapes auto connect without interrupting it', async () => {
+        const toArray = cursor.toArray().catch(error => error);
+        await connectStarted;
+        expect(await toArray).to.be.instanceOf(DOMException);
+        await sleep(1100);
+        expect(client.topology).to.exist;
+        expect(client.topology.description).to.have.property('type').not.equal('Unknown');
+      });
+    });
+
+    describe('when connect fails', () => {
+      beforeEach(async function () {
+        logs.length = 0;
+
+        const promise = promiseWithResolvers<void>();
+        connectStarted = promise.promise;
+
+        client = this.configuration.newClient('mongodb://iLoveJavaScript', {
+          __enableMongoLogger: true,
+          __internalLoggerConfig: { MONGODB_LOG_SERVER_SELECTION: 'debug' },
+          mongodbLogPath: {
+            write: log => {
+              if (log.c === 'serverSelection' && log.operation === 'ping') {
+                controller.abort();
+                promise.resolve();
+              }
+              logs.push(log);
+            }
+          },
+          serverSelectionTimeoutMS: 200,
+          maxPoolSize: 1
+        });
+        db = client.db('abortSignal');
+        collection = db.collection('support');
+
+        controller = new AbortController();
+        signal = controller.signal;
+
+        cursor = collection.find({}, { signal });
+      });
+
+      afterEach(async function () {
+        logs.length = 0;
+        await client?.close();
+      });
+
+      it('escapes auto connect without interrupting it', async () => {
+        const toArray = cursor.toArray().catch(error => error);
+        await connectStarted;
+        expect(await toArray).to.be.instanceOf(DOMException);
+        await sleep(500);
+        expect(client.topology).to.exist;
+        expect(client.topology.description).to.have.property('type', 'Unknown');
+        expect(findLast(logs, l => l.failure.includes('ENOTFOUND'))).to.exist;
+      });
+    });
+  });
+
+  describe('when reauthenticating and the signal aborts', () => {
+    let client: MongoClient;
+    let collection: Collection;
+    let cursor;
+    let controller: AbortController;
+    let signal: AbortSignal;
+
+    class ReAuthenticationError extends MongoServerError {
+      override code = 391; // reauth code.
+    }
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      await client.connect();
+
+      const db = client.db('abortSignal');
+      collection = db.collection('support');
+
+      controller = new AbortController();
+      signal = controller.signal;
+
+      cursor = collection.find({}, { signal });
+
+      const commandStub = sinon.stub(Connection.prototype, 'command').callsFake(async function (
+        ...args
+      ) {
+        if (args[1].find != null) {
+          sinon.restore();
+          controller.abort();
+          throw new ReAuthenticationError({});
+        }
+        return commandStub.wrappedMethod.apply(this, args);
+      });
+    });
+
+    afterEach(async function () {
+      logs.length = 0;
+      await client?.close();
+    });
+
+    it('escapes reauth without interrupting it', async () => {
+      const checkIn = events.once(client, 'connectionCheckedIn');
+      const toArray = cursor.toArray().catch(error => error);
+      expect(await toArray).to.be.instanceOf(DOMException);
+      await checkIn; // checks back in despite the abort
     });
   });
 
