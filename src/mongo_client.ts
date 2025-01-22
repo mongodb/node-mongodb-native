@@ -367,7 +367,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /** @internal */
   private connectionLock?: Promise<this>;
   /** @internal */
-  private closeLock?: Promise<void>
+  private closeLock?: Promise<void>;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -642,14 +642,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   async close(force = false): Promise<void> {
     if (this.closeLock) {
       return await this.closeLock;
-    } 
+    }
 
     try {
       this.closeLock = this._close(force);
       await this.closeLock;
     } finally {
       // release
-      this.connectionLock = undefined;
+      this.closeLock = undefined;
     }
   }
 

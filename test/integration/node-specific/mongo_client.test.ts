@@ -722,6 +722,22 @@ describe('class MongoClient', function () {
         expect(client.s.sessionPool.sessions).to.have.lengthOf(1);
       });
     });
+
+    context('concurrent calls', () => {
+      context('when two concurrent calls to close() occur', () => {
+        it('no error is thrown', async function () {
+          expect(() => Promise.all([client.close(), client.close()])).to.not.throw;
+        });
+      });
+
+      context('when more than two concurrent calls to close() occur', () => {
+        it('no error is thrown', async function () {
+          expect(() =>
+            Promise.all([client.close(), client.close(), client.close(), client.close()])
+          ).to.not.throw;
+        });
+      });
+    });
   });
 
   context('when connecting', function () {
