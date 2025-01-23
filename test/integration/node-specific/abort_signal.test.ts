@@ -653,7 +653,7 @@ describe('AbortSignal support', () => {
     });
   });
 
-  describe('when reauthenticating and the signal aborts', () => {
+  describe('when reauthenticating and the signal aborts', { requires: { auth: 'enabled' } }, () => {
     let client: MongoClient;
     let collection: Collection;
     let cursor;
@@ -693,7 +693,7 @@ describe('AbortSignal support', () => {
       await client?.close();
     });
 
-    it('escapes reauth without interrupting it', async () => {
+    it('escapes reauth without interrupting it', { requires: { auth: 'enabled' } }, async () => {
       const checkIn = events.once(client, 'connectionCheckedIn');
       const toArray = cursor.toArray().catch(error => error);
       expect(await toArray).to.be.instanceOf(DOMException);
