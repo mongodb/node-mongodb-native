@@ -1,13 +1,17 @@
 import { fork, spawn } from 'node:child_process';
 import { on, once } from 'node:events';
+import { openSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { AssertionError, expect } from 'chai';
+import type * as timers from 'timers';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
-import { type BSON, type ClientEncryption, type MongoClient } from '../../mongodb';
+import type * as mongodb from '../../mongodb';
+import { type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
+import { type sleep } from '../../tools/utils';
 
 export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
 
@@ -19,11 +23,16 @@ export type HeapResourceTestFunction = (options: {
 
 export type ProcessResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
-  uri: string;
+  uri?: string;
   log?: (out: any) => void;
   expect: typeof expect;
-  ClientEncryption?: typeof ClientEncryption;
-  BSON?: typeof BSON;
+  mongodb?: typeof mongodb;
+  sleep?: typeof sleep;
+  getTimerCount?: () => number;
+  timers?: typeof timers;
+  getSocketReport?: () => { host: string; port: string };
+  getSocketEndpointReport?: () => any;
+  once?: () => typeof once;
 }) => Promise<void>;
 
 const HEAP_RESOURCE_SCRIPT_PATH = path.resolve(
@@ -168,7 +177,10 @@ export async function runScriptAndGetProcessInfo(
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
   const logFile = name + '.logs.txt';
 
-  const script = spawn(process.execPath, [scriptName], { stdio: ['ignore', 'ignore', 'inherit'] });
+  const stdErrFile = 'err.out';
+  const script = spawn(process.execPath, [scriptName], {
+    stdio: ['ignore', 'ignore', openSync(stdErrFile, 'w')]
+  });
 
   const willClose = once(script, 'close');
 
@@ -182,20 +194,27 @@ export async function runScriptAndGetProcessInfo(
     .map(line => JSON.parse(line))
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
+  const stdErrSize = await readFile(stdErrFile, { encoding: 'utf8' });
+
   // delete temporary files
   await unlink(scriptName);
   await unlink(logFile);
+  await unlink(stdErrFile);
 
   // assertions about exit status
   if (exitCode) {
     const assertionError = new AssertionError(
-      messages.error.message + '\n\t' + JSON.stringify(messages.error.resources, undefined, 2)
+      messages.error?.message + '\n\t' + JSON.stringify(messages.error?.resources, undefined, 2)
     );
-    assertionError.stack = messages.error.stack + new Error().stack.slice('Error'.length);
+    assertionError.stack = messages.error?.stack + new Error().stack.slice('Error'.length);
     throw assertionError;
   }
 
   // assertions about resource status
   expect(messages.beforeExitHappened).to.be.true;
-  expect(messages.newResources).to.be.empty;
+  expect(messages.newResources.libuvResources).to.be.empty;
+  expect(messages.newResources.activeResources).to.be.empty;
+
+  // assertion about error output
+  expect(stdErrSize).to.be.empty;
 }
