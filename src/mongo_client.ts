@@ -324,6 +324,11 @@ export interface MongoClientPrivate {
    * - used to notify the leak checker in our tests if test author forgot to clean up explicit sessions
    */
   readonly activeSessions: Set<ClientSession>;
+  /**
+   * We keep a reference to the cursors that are created from this client.
+   * - used to track and close all cursors in client.close().
+   *   Cursor's in this set are ones that still need to have their close method invoked (no other conditions are considered)
+   */
   readonly activeCursors: Set<AbstractCursor>;
   readonly sessionPool: ServerSessionPool;
   readonly options: MongoOptions;
