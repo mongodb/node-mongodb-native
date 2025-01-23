@@ -357,36 +357,34 @@ describe.skip('MongoClient.close() Integration', () => {
             });
 
             it('the wait queue timer is cleaned up by client.close()', async function () {
-              const run = async function ({ MongoClient, uri, expect, sleep, getTimerCount }) {
+              const run = async function ({ MongoClient, uri, expect, getTimerCount, once }) {
                 const waitQueueTimeoutMS = 1515;
 
                 const client = new MongoClient(uri, {
                   maxPoolSize: 1,
                   waitQueueTimeoutMS,
-                  appName: 'waitQueueTestClient'
+                  appName: 'waitQueueTestClient',
+                  monitorCommands: true
                 });
-                const insertPromise = client
-                  .db('db')
-                  .collection('collection')
-                  .insertOne({ x: 1 })
-                  .catch(e => e);
-                await client.once('commandStarted', v => v);
-
                 client
                   .db('db')
                   .collection('collection')
                   .insertOne({ x: 1 })
                   .catch(e => e);
-                await client.once('commandStarted', v => v);
+                await once(client, 'connectionCheckedOut');
 
-                // don't allow entire checkout timer to elapse to ensure close is called mid-timeout
-                await sleep(waitQueueTimeoutMS / 2);
+                const blockedInsert = client
+                  .db('db')
+                  .collection('collection')
+                  .insertOne({ x: 1 })
+                  .catch(e => e);
+                await once(client, 'connectionCheckOutStarted');
 
                 expect(getTimerCount()).to.not.equal(0);
                 await client.close();
                 expect(getTimerCount()).to.equal(0);
 
-                const err = await insertPromise;
+                const err = await blockedInsert;
                 expect(err).to.be.instanceOf(Error);
                 expect(err.message).to.contain(
                   'Timed out while checking out a connection from connection pool'
