@@ -1,6 +1,5 @@
 import {
   BSONRegExp,
-  BSONSymbol,
   Code,
   DBRef,
   Double,
