@@ -484,21 +484,24 @@ export type Abortable = {
    * @remarks
    * **NOTE:** Currently, aborting an in-progress operation causes the in-use Connection to close.
    * If signals are aborted at a high rate it will cause many connections that are otherwise healthy
-   * to be discarded. We plan to mitigate this in a future release, please follow NODE-6062.
+   * to be discarded. We plan to mitigate this in a future release, please follow NODE-6062 (`timeoutMS` expiration suffers the same limitation).
+   *
+   * AbortSignals are likely a best fit for human interactive interruption (ex. ctrl-C) where the frequency
+   * of cancellation is reasonably low. If a signal is programmatically aborted for 100s of operations you can empty
+   * the driver's connection pool.
    *
    * @example
    * ```js
    * const controller = new AbortController();
    * const { signal } = controller;
-   * req.on('close', () => controller.abort(new Error('Request aborted by user')));
+   * process.on('SIGINT', () => controller.abort(new Error('^C pressed')));
    *
    * try {
    *   const res = await fetch('...', { signal });
    *   await collection.findOne(await res.json(), { signal });
    * catch (error) {
-   *   // depends on abort reason used, but by default this is true.
-   *   if (error.name === 'AbortError') {
-   *     error === signal.reason; // true
+   *   if (error === signal.reason) {
+   *     // signal abort error handling
    *   }
    * }
    * ```
