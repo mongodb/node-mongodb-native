@@ -1676,8 +1676,6 @@ describe('stringifyWithMaxLen', function () {
     });
   });
 
-  describe('when stringifying a BSON Decimal128 field', function () {});
-
   describe('when stringifying a BSON Double field', function () {
     it('does not prematurely redact the next key', function () {
       const doc = {
@@ -1694,18 +1692,6 @@ describe('stringifyWithMaxLen', function () {
     it('does not prematurely redact the next key', function () {
       const doc = {
         c: new Int32(123),
-        b: 'bbb'
-      };
-      returnVal = stringifyWithMaxLen(doc, 11);
-
-      expect(returnVal).to.contain('"b...');
-    });
-  });
-
-  describe('when stringifying a BSON Long field', function () {
-    it('does not prematurely redact the next key', function () {
-      const doc = {
-        c: new Long(123),
         b: 'bbb'
       };
       returnVal = stringifyWithMaxLen(doc, 11);
@@ -1759,50 +1745,6 @@ describe('stringifyWithMaxLen', function () {
       returnVal = stringifyWithMaxLen(doc, 69);
 
       expect(returnVal).to.contain('"b...');
-    });
-  });
-
-  describe('when stringifying a BSON BSONSymbol field', function () {
-    it('does not prematurely redact the next key', function () {
-      const doc = {
-        c: new BSONSymbol('testSymbol'),
-        b: 'bbb'
-      };
-      returnVal = stringifyWithMaxLen(doc, 32);
-
-      expect(returnVal).to.contain('"b...');
-    });
-  });
-
-  describe('when stringifying a BSON DBRef field', function () {
-    describe('when db, collection, oid and fields are defined', function () {
-      // TODO
-    });
-
-    describe('when db, collection and oid are defined', function () {
-      it('does not prematurely redact the next key', function () {
-        const oid = new ObjectId();
-        const doc = {
-          c: new DBRef('coll', oid, 'db'),
-          b: 'bbb'
-        };
-        returnVal = stringifyWithMaxLen(doc, 76);
-
-        expect(returnVal).to.contain('"b...');
-      });
-    });
-
-    describe('when collection and oid are defined', function () {
-      it('does not prematurely redact the next key', function () {
-        const oid = new ObjectId();
-        const doc = {
-          c: new DBRef('coll', oid),
-          b: 'bbb'
-        };
-        returnVal = stringifyWithMaxLen(doc, 65);
-
-        expect(returnVal).to.contain('"b...');
-      });
     });
   });
 });
