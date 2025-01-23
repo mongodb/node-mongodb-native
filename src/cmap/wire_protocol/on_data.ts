@@ -22,10 +22,8 @@ type PendingPromises = Omit<
  */
 export function onData(
   emitter: EventEmitter,
-  { timeoutContext, signal }: { timeoutContext?: TimeoutContext } & Abortable
+  { timeoutContext }: { timeoutContext?: TimeoutContext }
 ) {
-  signal?.throwIfAborted();
-
   // Setup pending events and pending promise lists
   /**
    * When the caller has not yet called .next(), we store the
@@ -93,9 +91,6 @@ export function onData(
   // Adding event handlers
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
-  const abortListener = addAbortListener(signal, function () {
-    errorHandler(this.reason);
-  });
 
   const timeoutForSocketRead = timeoutContext?.timeoutForSocketRead;
   timeoutForSocketRead?.throwIfExpired();
@@ -121,7 +116,6 @@ export function onData(
     // Adding event handlers
     emitter.off('data', eventHandler);
     emitter.off('error', errorHandler);
-    abortListener?.[kDispose]();
     finished = true;
     timeoutForSocketRead?.clear();
     const doneResult = { value: undefined, done: finished } as const;
