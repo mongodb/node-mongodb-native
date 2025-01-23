@@ -493,8 +493,9 @@ export function stringifyWithMaxLen(
               currentLength += String(v.value).length;
               break;
             case 'Double':
-              // Doesn't account for representing integers as <value>.0
-              currentLength += String(v.value).length;
+              // Account for representing integers as <value>.0
+              currentLength +=
+                (v.value | 0) === v.value ? String(v.value).length + 2 : String(v.value).length;
               break;
             case 'Long':
               currentLength += v.toString().length;
@@ -515,6 +516,7 @@ export function stringifyWithMaxLen(
               currentLength += (22 + value.position + value.position * 0.33 + 18) | 0;
               break;
             case 'Timestamp':
+              // '{"$timestamp":{"t":<t>,"i":<i>}}'
               currentLength += 19 + String(v.t).length + 5 + String(v.i).length + 2;
               break;
             case 'Code':

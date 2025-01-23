@@ -1623,8 +1623,6 @@ describe('class MongoLogger', function () {
 });
 
 describe('stringifyWithMaxLen', function () {
-  let returnVal: string;
-
   describe('when stringifying a string field', function () {
     it('does not prematurely redact the next key', function () {
       const doc = {
@@ -1632,7 +1630,7 @@ describe('stringifyWithMaxLen', function () {
         b: 'bbb'
       };
 
-      returnVal = stringifyWithMaxLen(doc, 13);
+      const returnVal = stringifyWithMaxLen(doc, 13);
       expect(returnVal).to.contain('"b...');
     });
   });
@@ -1643,7 +1641,7 @@ describe('stringifyWithMaxLen', function () {
         a: 1000,
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 12);
+      const returnVal = stringifyWithMaxLen(doc, 12);
 
       expect(returnVal).to.contain('"b...');
     });
@@ -1655,7 +1653,7 @@ describe('stringifyWithMaxLen', function () {
         a: 1000n,
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 12);
+      const returnVal = stringifyWithMaxLen(doc, 12);
 
       expect(returnVal).to.contain('"b...');
     });
@@ -1667,7 +1665,7 @@ describe('stringifyWithMaxLen', function () {
         c: new Code('console.log();'),
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 34);
+      const returnVal = stringifyWithMaxLen(doc, 34);
 
       expect(returnVal).to.contain('"b...');
     });
@@ -1679,7 +1677,7 @@ describe('stringifyWithMaxLen', function () {
         c: new Double(123.1),
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 13);
+      const returnVal = stringifyWithMaxLen(doc, 13);
 
       expect(returnVal).to.contain('"b...');
     });
@@ -1691,7 +1689,7 @@ describe('stringifyWithMaxLen', function () {
         c: new Int32(123),
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 11);
+      const returnVal = stringifyWithMaxLen(doc, 11);
 
       expect(returnVal).to.contain('"b...');
     });
@@ -1703,7 +1701,7 @@ describe('stringifyWithMaxLen', function () {
         c: new MaxKey(),
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 21);
+      const returnVal = stringifyWithMaxLen(doc, 21);
 
       expect(returnVal).to.contain('"b...');
     });
@@ -1715,7 +1713,7 @@ describe('stringifyWithMaxLen', function () {
         c: new MinKey(),
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 21);
+      const returnVal = stringifyWithMaxLen(doc, 21);
 
       expect(returnVal).to.contain('"b...');
     });
@@ -1727,7 +1725,7 @@ describe('stringifyWithMaxLen', function () {
         c: new ObjectId(),
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 43);
+      const returnVal = stringifyWithMaxLen(doc, 43);
 
       expect(returnVal).to.contain('"b...');
     });
@@ -1739,7 +1737,7 @@ describe('stringifyWithMaxLen', function () {
         c: new BSONRegExp('testRegex', 'is'),
         b: 'bbb'
       };
-      returnVal = stringifyWithMaxLen(doc, 69);
+      const returnVal = stringifyWithMaxLen(doc, 69);
 
       expect(returnVal).to.contain('"b...');
     });
