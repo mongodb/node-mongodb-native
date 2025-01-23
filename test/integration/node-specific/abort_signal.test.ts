@@ -648,7 +648,7 @@ describe('AbortSignal support', () => {
         await sleep(500);
         expect(client.topology).to.exist;
         expect(client.topology.description).to.have.property('type', 'Unknown');
-        expect(findLast(logs, l => l.failure.includes('ENOTFOUND'))).to.exist;
+        expect(findLast(logs, l => l.message.includes('Server selection failed'))).to.exist;
       });
     });
   });
