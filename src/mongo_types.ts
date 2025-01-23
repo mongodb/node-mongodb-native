@@ -477,6 +477,7 @@ export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
 /** @public */
 export type Abortable = {
   /**
+   * @experimental
    * When provided, the corresponding `AbortController` can be used to abort an asynchronous action.
    *
    * The `signal.reason` value is used as the error thrown.
