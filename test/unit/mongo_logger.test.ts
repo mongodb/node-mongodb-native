@@ -4,7 +4,6 @@ import {
   Double,
   EJSON,
   Int32,
-  Long,
   MaxKey,
   MinKey,
   ObjectId
