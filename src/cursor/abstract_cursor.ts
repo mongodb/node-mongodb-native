@@ -213,12 +213,11 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-    TSchema = any,
-    CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
-  >
+  TSchema = any,
+  CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
+>
   extends TypedEventEmitter<CursorEvents>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
@@ -247,6 +246,8 @@ export abstract class AbstractCursor<
   protected readonly cursorOptions: InternalAbstractCursorOptions;
   /** @internal */
   protected timeoutContext?: CursorTimeoutContext;
+
+  private close$?: Promise<void>;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -667,7 +668,12 @@ export abstract class AbstractCursor<
    * Frees any client-side resources used by the cursor.
    */
   async close(options?: { timeoutMS?: number }): Promise<void> {
-    await this.cleanup(options?.timeoutMS);
+    try {
+      this.close$ ??= this.cleanup(options?.timeoutMS);
+      await this.close$;
+    } finally {
+      this.close$ = undefined;
+    }
   }
 
   /**
