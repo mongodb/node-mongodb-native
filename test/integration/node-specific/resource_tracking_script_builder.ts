@@ -1,6 +1,6 @@
 import { fork, spawn } from 'node:child_process';
 import { on, once } from 'node:events';
-import { openSync, statSync } from 'node:fs';
+import { openSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -194,11 +194,11 @@ export async function runScriptAndGetProcessInfo(
     .map(line => JSON.parse(line))
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
-  const stdErrSize = statSync(stdErrFile).size;
+  const stdErrSize = await readFile(stdErrFile, { encoding: 'utf8' });
 
   // delete temporary files
   await unlink(scriptName);
-  // await unlink(logFile);
+  await unlink(logFile);
   await unlink(stdErrFile);
 
   // assertions about exit status
@@ -210,11 +210,11 @@ export async function runScriptAndGetProcessInfo(
     throw assertionError;
   }
 
-  // assertion about error output
-  expect(stdErrSize).to.equal(0);
-
   // assertions about resource status
   expect(messages.beforeExitHappened).to.be.true;
   expect(messages.newResources.libuvResources).to.be.empty;
   expect(messages.newResources.activeResources).to.be.empty;
+
+  // assertion about error output
+  expect(stdErrSize).to.be.empty;
 }
