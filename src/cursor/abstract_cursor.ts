@@ -668,12 +668,7 @@ export abstract class AbstractCursor<
    * Frees any client-side resources used by the cursor.
    */
   async close(options?: { timeoutMS?: number }): Promise<void> {
-    try {
-      this.close$ ??= this.cleanup(options?.timeoutMS);
-      await this.close$;
-    } finally {
-      this.close$ = undefined;
-    }
+    return await this.cleanup(options?.timeoutMS);
   }
 
   /**
@@ -1007,7 +1002,16 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
+
   private async cleanup(timeoutMS?: number, error?: Error) {
+    try {
+      this.close$ ??= this._cleanup(timeoutMS, error);
+      await this.close$;
+    } finally {
+      this.close$ = undefined;
+    }
+  }
+  private async _cleanup(timeoutMS?: number, error?: Error) {
     this.abortListener?.[kDispose]();
     this.isClosed = true;
     const session = this.cursorSession;
