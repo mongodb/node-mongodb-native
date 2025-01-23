@@ -88,6 +88,10 @@ describe('MONGODB-AWS', function () {
         options: CommandOptions,
         responseType?: MongoDBResponseConstructor
       ) {
+        if (command.saslContinue != null) {
+          saslContinue = { ...command };
+        }
+
         const result = await commandStub.wrappedMethod.call(
           this,
           ns,
@@ -96,15 +100,10 @@ describe('MONGODB-AWS', function () {
           responseType
         );
 
-        if (command.saslStart != null && command.mechanism === 'MONGODB-AWS') {
+        if (command.saslStart != null) {
           // Modify the result of the saslStart to check if the saslContinue uses it
           result.conversationId = 999;
           saslStartResult = { ...result };
-        }
-
-        if (command.saslContinue != null) {
-          console.log('saving saslContinue');
-          saslContinue = { ...command };
         }
 
         return result;
@@ -112,6 +111,7 @@ describe('MONGODB-AWS', function () {
     });
 
     afterEach(function () {
+      commandStub.restore();
       sinon.restore();
     });
 
@@ -123,7 +123,6 @@ describe('MONGODB-AWS', function () {
         .collection('aws_test')
         .estimatedDocumentCount()
         .catch(e => e);
-      console.log(err);
 
       // Expecting the saslContinue to fail since we changed the conversationId
       expect(err).to.be.instanceof(MongoServerError);
