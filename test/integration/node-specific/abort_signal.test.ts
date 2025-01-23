@@ -337,7 +337,7 @@ describe('AbortSignal support', () => {
             const start = performance.now();
             const result = await willBeResult;
             const end = performance.now();
-            expect(end - start).to.be.lessThan(1000); // should be way less than 5s server selection timeout
+            expect(end - start).to.be.lessThan(10); // should be way less than 5s server selection timeout
 
             expect(result).to.be.instanceOf(DOMException);
           });
@@ -387,7 +387,11 @@ describe('AbortSignal support', () => {
             await checkoutStartedBlocked;
 
             controller.abort();
+
+            const start = performance.now();
             const result = await willBeResultBlocked;
+            const end = performance.now();
+            expect(end - start).to.be.lessThan(10);
 
             expect(result).to.be.instanceOf(DOMException);
           });
@@ -439,7 +443,10 @@ describe('AbortSignal support', () => {
               }
             }
 
+            const start = performance.now();
             const result = await willBeResultBlocked;
+            const end = performance.now();
+            expect(end - start).to.be.lessThan(10);
 
             expect(result).to.be.instanceOf(DOMException);
 
@@ -495,7 +502,10 @@ describe('AbortSignal support', () => {
             client.on('commandStarted', e => e.commandName === cursorName && controller.abort());
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
+            const start = performance.now();
             const result = await willBeResultBlocked;
+            const end = performance.now();
+            expect(end - start).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
             expect(result).to.be.instanceOf(DOMException);
 
@@ -543,7 +553,12 @@ describe('AbortSignal support', () => {
         .on('error', reject)
         .on('close', resolve);
 
-      expect(await promise.catch(error => error)).to.be.instanceOf(DOMException);
+      const start = performance.now();
+      const result = await promise.catch(error => error);
+      const end = performance.now();
+      expect(end - start).to.be.lessThan(10);
+
+      expect(result).to.be.instanceOf(DOMException);
     });
   });
 
@@ -784,7 +799,10 @@ describe('AbortSignal support', () => {
         ev => ev.commandName === 'aggregate' && sleep(10).then(() => controller.abort())
       );
 
+      const start = performance.now();
       const result = await collection.countDocuments({}, { signal }).catch(error => error);
+      const end = performance.now();
+      expect(end - start).to.be.lessThan(260); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
     });
@@ -818,10 +836,13 @@ describe('AbortSignal support', () => {
       client.on(
         'commandStarted',
         // Abort a bit after find has started:
-        ev => ev.commandName === 'find' && sleep(10).then(() => controller.abort())
+        ev => ev.commandName === 'find' && sleep(1).then(() => controller.abort())
       );
 
+      const start = performance.now();
       const result = await collection.findOne({}, { signal }).catch(error => error);
+      const end = performance.now();
+      expect(end - start).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
     });
@@ -855,10 +876,13 @@ describe('AbortSignal support', () => {
       client.on(
         'commandStarted',
         // Abort a bit after ping has started:
-        ev => ev.commandName === 'ping' && sleep(10).then(() => controller.abort())
+        ev => ev.commandName === 'ping' && sleep(1).then(() => controller.abort())
       );
 
+      const start = performance.now();
       const result = await db.command({ ping: 1 }, { signal }).catch(error => error);
+      const end = performance.now();
+      expect(end - start).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
     });
