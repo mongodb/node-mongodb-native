@@ -223,10 +223,10 @@ describe('AbortSignal support', () => {
             this.configuration.topologyType === 'LoadBalanced'
               ? async () => null
               : async () => {
-                for await (const [ev] of events.on(client, 'commandStarted')) {
-                  if (ev.commandName === 'killCursors') return ev;
-                }
-              };
+                  for await (const [ev] of events.on(client, 'commandStarted')) {
+                    if (ev.commandName === 'killCursors') return ev;
+                  }
+                };
 
           commandsStarted.length = 0;
           const utilClient = this.configuration.newClient();
@@ -444,6 +444,7 @@ describe('AbortSignal support', () => {
             expect(result).to.be.instanceOf(DOMException);
 
             expect(cursorCommandSocket).to.have.property('destroyed', false);
+            expect(cursor.closed).to.be.true;
           });
         }
 
@@ -493,6 +494,8 @@ describe('AbortSignal support', () => {
             }
 
             client.on('commandStarted', e => e.commandName === cursorName && controller.abort());
+            let commandFailed = false;
+            client.on('commandFailed', e => e.commandName === cursorName && (commandFailed = true));
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             const result = await willBeResultBlocked;
@@ -500,6 +503,8 @@ describe('AbortSignal support', () => {
             expect(result).to.be.instanceOf(DOMException);
 
             expect(cursorCommandSocket).to.have.property('destroyed', false);
+            expect(cursor.closed).to.be.true;
+            expect(commandFailed).to.be.true;
           });
         }
 

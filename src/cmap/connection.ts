@@ -119,8 +119,8 @@ export interface ProxyOptions {
 /** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
-  StreamDescriptionOptions,
-  ProxyOptions {
+    StreamDescriptionOptions,
+    ProxyOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -517,10 +517,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options.documentsReturnedIn == null || !options.raw
         ? options
         : {
-          ...options,
-          raw: false,
-          fieldsAsRaw: { [options.documentsReturnedIn]: true }
-        };
+            ...options,
+            raw: false,
+            fieldsAsRaw: { [options.documentsReturnedIn]: true }
+          };
 
     /** MongoDBResponse instance or subclass */
     let document: MongoDBResponse | undefined = undefined;
@@ -688,9 +688,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
         ? command
         : new OpCompressedRequest(command, {
-          agreedCompressor: options.agreedCompressor ?? 'none',
-          zlibCompressionLevel: options.zlibCompressionLevel ?? 0
-        });
+            agreedCompressor: options.agreedCompressor ?? 'none',
+            zlibCompressionLevel: options.zlibCompressionLevel ?? 0
+          });
 
     const buffer = Buffer.concat(await finalCommand.toBin());
 

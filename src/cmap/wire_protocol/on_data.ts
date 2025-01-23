@@ -1,8 +1,7 @@
 import { type EventEmitter } from 'events';
 
-import { type Abortable } from '../../mongo_types';
 import { type TimeoutContext } from '../../timeout';
-import { addAbortListener, kDispose, List, promiseWithResolvers } from '../../utils';
+import { List, promiseWithResolvers } from '../../utils';
 
 /**
  * @internal
