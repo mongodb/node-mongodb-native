@@ -85,9 +85,7 @@ describe('DNS timeout errors', () => {
         .onFirstCall()
         .rejects(new DNSTimeoutError())
         .onSecondCall()
-        .rejects(new DNSTimeoutError())
-        .onThirdCall()
-        .callsFake(restoreDNS('resolveSrv'));
+        .rejects(new DNSTimeoutError());
     });
 
     afterEach(async function () {
@@ -97,6 +95,7 @@ describe('DNS timeout errors', () => {
     it('throws timeout error', metadata, async () => {
       const error = await client.connect().catch(error => error);
       expect(error).to.be.instanceOf(DNSTimeoutError);
+      expect(stub).to.have.been.calledTwice;
     });
   });
 
@@ -107,9 +106,7 @@ describe('DNS timeout errors', () => {
         .onFirstCall()
         .rejects(new DNSTimeoutError())
         .onSecondCall()
-        .rejects(new DNSTimeoutError())
-        .onThirdCall()
-        .callsFake(restoreDNS('resolveTxt'));
+        .rejects(new DNSTimeoutError());
     });
 
     afterEach(async function () {
