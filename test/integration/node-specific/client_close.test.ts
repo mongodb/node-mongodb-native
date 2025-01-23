@@ -455,15 +455,21 @@ describe('MongoClient.close() Integration', () => {
     let utilClient;
     let session;
 
-    const metadata: MongoDBMetadataUI = { requires: { topology: ['replicaset', 'sharded'] } };
+    const metadata: MongoDBMetadataUI = {
+      requires: {
+        topology: ['replicaset', 'sharded'],
+        mongodb: '>=5.0' // currentOp requires 5.0 and above
+      }
+    };
 
     beforeEach(async function () {
       client = this.configuration.newClient();
       utilClient = this.configuration.newClient();
       await client.connect();
+      const collection = client.db('db').collection('collection');
       session = client.startSession({ explicit: false });
       session.startTransaction();
-      await client.db('db').collection('collection').insertOne({ x: 1 }, { session });
+      await collection.insertOne({ x: 1 }, { session });
 
       const opBefore = await utilClient.db().admin().command({ currentOp: 1 });
       idleSessionsBeforeClose = opBefore.inprog.filter(s => s.type === 'idleSession');
@@ -522,9 +528,10 @@ describe('MongoClient.close() Integration', () => {
       client = this.configuration.newClient();
       utilClient = this.configuration.newClient();
       await client.connect();
+      const collection = client.db('db').collection('collection');
       session = client.startSession();
       session.startTransaction();
-      await client.db('db').collection('collection').insertOne({ x: 1 }, { session });
+      await collection.insertOne({ x: 1 }, { session });
 
       const opBefore = await utilClient.db().admin().command({ currentOp: 1 });
       idleSessionsBeforeClose = opBefore.inprog.filter(s => s.type === 'idleSession');
@@ -698,7 +705,7 @@ describe('MongoClient.close() Integration', () => {
             .admin()
             .command({
               aggregate: 1,
-              cursor: { batchSize: 10 },
+              cursor: {},
               pipeline: [{ $currentOp: { idleCursors: true } }]
             });
           return res.cursor.firstBatch.filter(
