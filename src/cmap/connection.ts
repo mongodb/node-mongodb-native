@@ -493,9 +493,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *sendCommand(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions,
+    options: CommandOptions & Abortable,
     responseType?: MongoDBResponseConstructor
   ) {
+    options?.signal?.throwIfAborted();
+
     const message = this.prepareCommand(ns.db, command, options);
     let started = 0;
     if (this.shouldEmitAndLogCommand) {
@@ -611,10 +613,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {},
+    options: CommandOptions & Abortable = {},
     responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     this.throwIfAborted();
+    options.signal?.throwIfAborted();
+
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
       if (options.timeoutContext?.csotEnabled()) {
         if (MongoDBResponse.is(document)) {

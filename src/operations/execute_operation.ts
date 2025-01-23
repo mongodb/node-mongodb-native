@@ -64,8 +64,10 @@ export async function executeOperation<
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
-  // Like CSOT, an operation signal interruption does not relate to auto-connect
-  const topology = await abortable(autoConnect(client), operation.options);
+  const topology =
+    client.topology == null
+      ? await abortable(autoConnect(client), operation.options)
+      : client.topology;
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
