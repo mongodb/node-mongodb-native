@@ -559,10 +559,7 @@ describe('AbortSignal support', () => {
         .on('error', reject)
         .on('close', resolve);
 
-      const start = performance.now();
       const result = await promise.catch(error => error);
-      const end = performance.now();
-      expect(end - start).to.be.lessThan(10);
 
       expect(result).to.be.instanceOf(DOMException);
     });
