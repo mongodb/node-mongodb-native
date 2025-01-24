@@ -333,6 +333,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       }
     }
 
+    let reauthPromise: Promise<void> | null = null;
+
     try {
       try {
         const res = await conn.command(ns, cmd, options, responseType);
@@ -346,7 +348,14 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError instanceof MongoError &&
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
-        await abortable(this.pool.reauthenticate(conn), options);
+        reauthPromise = this.pool.reauthenticate(conn).catch(error => {
+          reauthPromise = null;
+          throw error;
+        });
+
+        await abortable(reauthPromise, options);
+        reauthPromise = null; // only reachable if reauth succeeds
+
         try {
           const res = await conn.command(ns, cmd, options, responseType);
           throwIfWriteConcernError(res);
@@ -360,7 +369,14 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     } finally {
       this.decrementOperationCount();
       if (session?.pinnedConnection !== conn) {
-        this.pool.checkIn(conn);
+        if (reauthPromise != null) {
+          // The reauth promise only exists if it hasn't thrown.
+          void reauthPromise.finally(() => {
+            this.pool.checkIn(conn);
+          });
+        } else {
+          this.pool.checkIn(conn);
+        }
       }
     }
   }

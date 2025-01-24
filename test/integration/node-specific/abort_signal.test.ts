@@ -11,6 +11,7 @@ import {
   Code,
   type Collection,
   Connection,
+  ConnectionPool,
   type Db,
   FindCursor,
   ListCollectionsCursor,
@@ -721,6 +722,14 @@ describe('AbortSignal support', () => {
     let controller: AbortController;
     let signal: AbortSignal;
 
+    const msOutOfPool = async () => {
+      await events.once(client, 'connectionCheckedOut');
+      const start = performance.now();
+      await events.once(client, 'connectionCheckedIn');
+      const end = performance.now();
+      return end - start;
+    };
+
     class ReAuthenticationError extends MongoServerError {
       override code = 391; // reauth code.
     }
@@ -741,7 +750,7 @@ describe('AbortSignal support', () => {
         ...args
       ) {
         if (args[1].find != null) {
-          sinon.restore();
+          commandStub.restore();
           controller.abort();
           throw new ReAuthenticationError({});
         }
@@ -750,15 +759,58 @@ describe('AbortSignal support', () => {
     });
 
     afterEach(async function () {
+      sinon.restore();
       logs.length = 0;
       await client?.close();
     });
 
-    it('escapes reauth without interrupting it', { requires: { auth: 'enabled' } }, async () => {
-      const checkIn = events.once(client, 'connectionCheckedIn');
-      const toArray = cursor.toArray().catch(error => error);
-      expect(await toArray).to.be.instanceOf(DOMException);
-      await checkIn; // checks back in despite the abort
+    describe('if reauth succeeds', () => {
+      beforeEach(() => {
+        sinon.stub(ConnectionPool.prototype, 'reauthenticate').callsFake(async function () {
+          return sleep(1000);
+        });
+      });
+
+      it(
+        'escapes reauth without interrupting it and checks in the connection after reauth completes',
+        { requires: { auth: 'enabled' } },
+        async () => {
+          const checkIn = msOutOfPool();
+
+          const start = performance.now();
+          const toArray = await cursor.toArray().catch(error => error);
+          const end = performance.now();
+          expect(end - start).to.be.lessThan(260);
+
+          expect(toArray).to.be.instanceOf(DOMException);
+          expect(await checkIn).to.be.greaterThan(1000); // checks back in despite the abort
+        }
+      );
+    });
+
+    describe('if reauth throws', () => {
+      beforeEach(() => {
+        sinon.stub(ConnectionPool.prototype, 'reauthenticate').callsFake(async function () {
+          await sleep(1000);
+          throw new Error();
+        });
+      });
+
+      it(
+        'escapes reauth without interrupting it and checks in the connection after reauth completes',
+        { requires: { auth: 'enabled' } },
+        async () => {
+          const checkIn = msOutOfPool();
+
+          const start = performance.now();
+          const toArray = await cursor.toArray().catch(error => error);
+          const end = performance.now();
+          expect(end - start).to.be.lessThan(260);
+
+          expect(toArray).to.be.instanceOf(DOMException);
+          expect(await checkIn).to.be.greaterThan(1000); // checks back in despite the abort
+        }
+      );
     });
   });
 
