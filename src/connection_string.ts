@@ -52,6 +52,27 @@ const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSe
 const LB_DIRECT_CONNECTION_ERROR =
   'loadBalanced option not supported when directConnection is provided';
 
+function retryDNSTimeoutFor(api: 'resolveSrv'): (a: string) => Promise<dns.SrvRecord[]>;
+function retryDNSTimeoutFor(api: 'resolveTxt'): (a: string) => Promise<string[][]>;
+function retryDNSTimeoutFor(
+  api: 'resolveSrv' | 'resolveTxt'
+): (a: string) => Promise<dns.SrvRecord[] | string[][]> {
+  return async function dnsReqRetryTimeout(lookupAddress: string) {
+    try {
+      return await dns.promises[api](lookupAddress);
+    } catch (firstDNSError) {
+      if (firstDNSError.code === dns.TIMEOUT) {
+        return await dns.promises[api](lookupAddress);
+      } else {
+        throw firstDNSError;
+      }
+    }
+  };
+}
+
+const resolveSrv = retryDNSTimeoutFor('resolveSrv');
+const resolveTxt = retryDNSTimeoutFor('resolveTxt');
+
 /**
  * Lookup a `mongodb+srv` connection string, combine the parts and reparse it as a normal
  * connection string.
@@ -67,14 +88,13 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
   // Asynchronously start TXT resolution so that we do not have to wait until
   // the SRV record is resolved before starting a second DNS query.
   const lookupAddress = options.srvHost;
-  const txtResolutionPromise = dns.promises.resolveTxt(lookupAddress);
+  const txtResolutionPromise = resolveTxt(lookupAddress);
 
   txtResolutionPromise.then(undefined, squashError); // rejections will be handled later
 
+  const hostname = `_${options.srvServiceName}._tcp.${lookupAddress}`;
   // Resolve the SRV record and use the result as the list of hosts to connect to.
-  const addresses = await dns.promises.resolveSrv(
-    `_${options.srvServiceName}._tcp.${lookupAddress}`
-  );
+  const addresses = await resolveSrv(hostname);
 
   if (addresses.length === 0) {
     throw new MongoAPIError('No addresses found at host');
