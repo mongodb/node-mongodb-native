@@ -722,6 +722,42 @@ describe('class MongoClient', function () {
         expect(client.s.sessionPool.sessions).to.have.lengthOf(1);
       });
     });
+
+    context('concurrent calls', () => {
+      context('when two concurrent calls to close() occur', () => {
+        it('no error is thrown', async function () {
+          expect(() => Promise.all([client.close(), client.close()])).to.not.throw;
+        });
+      });
+
+      context('when more than two concurrent calls to close() occur', () => {
+        it('no error is thrown', async function () {
+          expect(() =>
+            Promise.all([client.close(), client.close(), client.close(), client.close()])
+          ).to.not.throw;
+        });
+      });
+
+      it('when connect rejects lock is released regardless', async function () {
+        await client.connect();
+        expect(client.topology?.isConnected()).to.be.true;
+
+        const closeStub = sinon.stub(client, 'close');
+        closeStub.onFirstCall().rejects(new Error('cannot close'));
+
+        // first call rejected to simulate a close failure
+        const error = await client.close().catch(error => error);
+        expect(error).to.match(/cannot close/);
+
+        expect(client.topology?.isConnected()).to.be.true;
+        closeStub.restore();
+
+        // second call should close
+        await client.close();
+
+        expect(client.topology).to.be.undefined;
+      });
+    });
   });
 
   context('when connecting', function () {
