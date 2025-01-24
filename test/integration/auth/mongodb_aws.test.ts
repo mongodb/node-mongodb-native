@@ -17,7 +17,6 @@ import {
   MongoDBAWS,
   type MongoDBNamespace,
   type MongoDBResponseConstructor,
-  MongoError,
   MongoMissingCredentialsError,
   MongoServerError,
   setDifference
