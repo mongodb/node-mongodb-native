@@ -9,9 +9,14 @@ import * as sinon from 'sinon';
 import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import {
   AWSTemporaryCredentialProvider,
+  type CommandOptions,
+  Connection,
+  type Document,
   MongoAWSError,
   type MongoClient,
   MongoDBAWS,
+  type MongoDBNamespace,
+  type MongoDBResponseConstructor,
   MongoMissingCredentialsError,
   MongoServerError,
   setDifference
@@ -59,6 +64,76 @@ describe('MONGODB-AWS', function () {
 
     expect(result).to.not.be.instanceOf(MongoServerError);
     expect(result).to.be.a('number');
+  });
+
+  describe('ConversationId', function () {
+    let commandStub: sinon.SinonStub<
+      [
+        ns: MongoDBNamespace,
+        command: Document,
+        options?: CommandOptions,
+        responseType?: MongoDBResponseConstructor
+      ],
+      Promise<any>
+    >;
+
+    let saslStartResult, saslContinue;
+
+    beforeEach(function () {
+      // spy on connection.command, filter for saslStart and saslContinue commands
+      commandStub = sinon.stub(Connection.prototype, 'command').callsFake(async function (
+        ns: MongoDBNamespace,
+        command: Document,
+        options: CommandOptions,
+        responseType?: MongoDBResponseConstructor
+      ) {
+        if (command.saslContinue != null) {
+          saslContinue = { ...command };
+        }
+
+        const result = await commandStub.wrappedMethod.call(
+          this,
+          ns,
+          command,
+          options,
+          responseType
+        );
+
+        if (command.saslStart != null) {
+          // Modify the result of the saslStart to check if the saslContinue uses it
+          result.conversationId = 999;
+          saslStartResult = { ...result };
+        }
+
+        return result;
+      });
+    });
+
+    afterEach(function () {
+      commandStub.restore();
+      sinon.restore();
+    });
+
+    it('should use conversationId returned by saslStart in saslContinue', async function () {
+      client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
+
+      const err = await client
+        .db('aws')
+        .collection('aws_test')
+        .estimatedDocumentCount()
+        .catch(e => e);
+
+      // Expecting the saslContinue to fail since we changed the conversationId
+      expect(err).to.be.instanceof(MongoServerError);
+      expect(err.message).to.match(/Mismatched conversation id/);
+
+      expect(saslStartResult).to.not.be.undefined;
+      expect(saslContinue).to.not.be.undefined;
+
+      expect(saslStartResult).to.have.property('conversationId', 999);
+
+      expect(saslContinue).to.have.property('conversationId').equal(saslStartResult.conversationId);
+    });
   });
 
   it('should allow empty string in authMechanismProperties.AWS_SESSION_TOKEN to override AWS_SESSION_TOKEN environment variable', function () {
