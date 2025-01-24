@@ -483,9 +483,11 @@ export type Abortable = {
    * The `signal.reason` value is used as the error thrown.
    *
    * @remarks
-   * **NOTE:** Currently, aborting an in-progress operation causes the in-use Connection (e.g, during socket read or write) to close.
-   * If signals are aborted at a high rate it will cause many connections that are otherwise healthy
-   * to be discarded. We plan to mitigate this in a future release, please follow NODE-6062 (`timeoutMS` expiration suffers the same limitation).
+   * **NOTE:** If an abort signal aborts an operation while the driver is writing to the underlying
+   * socket or reading the response from the server, the socket will be closed.
+   * If signals are aborted at a high rate during socket read/writes this can lead to a high rate of connection reestablishment.
+   *
+   * We plan to mitigate this in a future release, please follow NODE-6062 (`timeoutMS` expiration suffers the same limitation).
    *
    * AbortSignals are likely a best fit for human interactive interruption (ex. ctrl-C) where the frequency
    * of cancellation is reasonably low. If a signal is programmatically aborted for 100s of operations you can empty
