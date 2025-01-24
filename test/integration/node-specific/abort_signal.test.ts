@@ -715,7 +715,11 @@ describe('AbortSignal support', () => {
     });
   });
 
-  describe('when reauthenticating and the signal aborts', { requires: { auth: 'enabled' } }, () => {
+  const reauthMetadata: MongoDBMetadataUI = {
+    requires: { auth: 'enabled', topology: '!load-balanced' }
+  };
+
+  describe('when reauthenticating and the signal aborts', () => {
     let client: MongoClient;
     let collection: Collection;
     let cursor;
@@ -773,7 +777,7 @@ describe('AbortSignal support', () => {
 
       it(
         'escapes reauth without interrupting it and checks in the connection after reauth completes',
-        { requires: { auth: 'enabled' } },
+        reauthMetadata,
         async () => {
           const checkIn = msOutOfPool();
 
@@ -798,7 +802,7 @@ describe('AbortSignal support', () => {
 
       it(
         'escapes reauth without interrupting it and checks in the connection after reauth completes',
-        { requires: { auth: 'enabled' } },
+        reauthMetadata,
         async () => {
           const checkIn = msOutOfPool();
 
