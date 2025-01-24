@@ -657,7 +657,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     }
   }
 
-  async _close(force = false): Promise<void> {
+  /* @internal */
+  private async _close(force = false): Promise<void> {
     // There's no way to set hasBeenClosed back to false
     Object.defineProperty(this.s, 'hasBeenClosed', {
       value: true,
