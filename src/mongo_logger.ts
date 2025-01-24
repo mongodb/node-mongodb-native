@@ -466,6 +466,8 @@ export function stringifyWithMaxLen(
     }
 
     // +4 accounts for 2 quotation marks, colon and comma after value
+    // Note that this potentially undercounts since it does not account for escape sequences which
+    // will have an additional backslash added to them once passed through JSON.stringify.
     currentLength += key.length + 4;
 
     if (value == null) return value;
@@ -473,6 +475,7 @@ export function stringifyWithMaxLen(
     switch (typeof value) {
       case 'string':
         // +2 accounts for quotes
+        // Note that this potentially undercounts similarly to the key length calculation
         currentLength += value.length + 2;
         break;
       case 'number':
@@ -483,9 +486,9 @@ export function stringifyWithMaxLen(
         currentLength += value ? 4 : 5;
         break;
       case 'object':
-        if ('buffer' in value && isUint8Array(value.buffer)) {
+        if (isUint8Array(value)) {
           // Handle binData
-          currentLength += (value.buffer.byteLength + value.buffer.byteLength * 0.5) | 0;
+          currentLength += (value.byteLength + value.byteLength * 0.5) | 0;
         } else if ('_bsontype' in value) {
           const v = value as BSONObject;
           switch (v._bsontype) {
