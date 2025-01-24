@@ -1,4 +1,5 @@
 import { type AuthProvider } from './cmap/auth/auth_provider';
+import { type AWSCredentialProvider } from './cmap/auth/aws_temporary_credentials';
 import { GSSAPI } from './cmap/auth/gssapi';
 import { type AuthMechanismProperties } from './cmap/auth/mongo_credentials';
 import { MongoDBAWS } from './cmap/auth/mongodb_aws';
@@ -13,8 +14,11 @@ import { X509 } from './cmap/auth/x509';
 import { MongoInvalidArgumentError } from './error';
 
 /** @internal */
-const AUTH_PROVIDERS = new Map<AuthMechanism | string, (workflow?: Workflow) => AuthProvider>([
-  [AuthMechanism.MONGODB_AWS, () => new MongoDBAWS()],
+const AUTH_PROVIDERS = new Map<AuthMechanism | string, (param?: any) => AuthProvider>([
+  [
+    AuthMechanism.MONGODB_AWS,
+    (credentialProvider?: AWSCredentialProvider) => new MongoDBAWS(credentialProvider)
+  ],
   [
     AuthMechanism.MONGODB_CR,
     () => {
@@ -65,6 +69,8 @@ export class MongoClientAuthProviders {
     let provider;
     if (name === AuthMechanism.MONGODB_OIDC) {
       provider = providerFunction(this.getWorkflow(authMechanismProperties));
+    } else if (name === AuthMechanism.MONGODB_AWS) {
+      provider = providerFunction(authMechanismProperties.AWS_CREDENTIAL_PROVIDER);
     } else {
       provider = providerFunction();
     }
