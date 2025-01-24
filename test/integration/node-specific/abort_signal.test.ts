@@ -8,6 +8,7 @@ import * as sinon from 'sinon';
 import {
   type AbstractCursor,
   AggregationCursor,
+  Code,
   type Collection,
   Connection,
   type Db,
@@ -555,6 +556,48 @@ describe('AbortSignal support', () => {
 
       const start = performance.now();
       const result = await promise.catch(error => error);
+      const end = performance.now();
+      expect(end - start).to.be.lessThan(10);
+
+      expect(result).to.be.instanceOf(DOMException);
+    });
+  });
+
+  describe.only('cursor $where example', () => {
+    beforeEach(async function () {
+      const utilClient = this.configuration.newClient();
+      try {
+        const collection = utilClient.db('abortSignal').collection('support');
+        await collection.drop({}).catch(() => null);
+        await collection.insertMany([
+          { a: 1, ssn: '0000-00-0001' },
+          { a: 2, ssn: '0000-00-0002' },
+          { a: 3, ssn: '0000-00-0003' }
+        ]);
+      } finally {
+        await utilClient.close();
+      }
+    });
+
+    it('follows expected stream error handling', async () => {
+      const controller = new AbortController();
+      const { signal } = controller;
+      const cursor = collection.find(
+        {
+          $where: function () {
+            while (true);
+          }
+        },
+        { signal, batchSize: 1, serializeFunctions: true }
+      );
+
+      client.on(
+        'commandStarted',
+        ev => ev.commandName === 'find' && sleep(2).then(() => controller.abort())
+      );
+
+      const start = performance.now();
+      const result = await cursor.toArray().catch(error => error);
       const end = performance.now();
       expect(end - start).to.be.lessThan(10);
 
