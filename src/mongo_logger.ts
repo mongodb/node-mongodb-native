@@ -486,7 +486,12 @@ export function stringifyWithMaxLen(
         currentLength += value ? 4 : 5;
         break;
       case 'object':
-        if ('_bsontype' in value) {
+        if (isUint8Array(value)) {
+          // '{"$binary":{"base64":"<base64 string>","subType":"XX"}}'
+          // This is an estimate based on the fact that the base64 is approximately 1.33x the length of
+          // the actual binary sequence https://en.wikipedia.org/wiki/Base64
+          currentLength += (22 + value.byteLength + value.byteLength * 0.33 + 18) | 0;
+        } else if ('_bsontype' in value) {
           const v = value as BSONObject;
           switch (v._bsontype) {
             case 'Int32':
