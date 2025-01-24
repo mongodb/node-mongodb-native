@@ -430,10 +430,14 @@ describe('MongoClient.close() Integration', () => {
           it.skip('timers are cleaned up by client.close()', metadata, async () => {
             const run = async function ({ MongoClient, expect, getTimerCount }) {
               const SRV_CONNECTION_STRING = `mongodb+srv://test1.test.build.10gen.cc`;
+
               // 27018 localhost.test.build.10gen.cc.
               // 27017 localhost.test.build.10gen.cc.
 
-              const client = new MongoClient(SRV_CONNECTION_STRING);
+              const client = new MongoClient(SRV_CONNECTION_STRING, {
+                serverSelectionTimeoutMS: 2000,
+                tls: false
+              });
               await client.connect();
               // the current expected behavior is that _timeout is set to undefined until SRV polling starts
               // then _timeout is set to undefined again when SRV polling stops
@@ -689,7 +693,7 @@ describe('MongoClient.close() Integration', () => {
         client = this.configuration.newClient();
         utilClient = this.configuration.newClient();
         await client.connect();
-        coll = client.db('db').collection('coll');
+        coll = await client.db('db').createCollection('coll', { capped: true, size: 1_000_000 });
       });
 
       afterEach(async function () {
@@ -714,8 +718,13 @@ describe('MongoClient.close() Integration', () => {
         };
 
         await coll.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
-        await coll.insertMany([{ d: 4 }, { e: 5 }, { f: 3 }]);
-        cursor = await coll.find();
+        cursor = await coll.find(
+          {},
+          {
+            tailable: true,
+            awaitData: true
+          }
+        );
         await cursor.next();
 
         // assert creation
