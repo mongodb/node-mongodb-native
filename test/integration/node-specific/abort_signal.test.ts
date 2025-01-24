@@ -452,6 +452,7 @@ describe('AbortSignal support', () => {
             expect(result).to.be.instanceOf(DOMException);
 
             expect(cursorCommandSocket).to.have.property('destroyed', true);
+            expect(cursor.closed).to.be.true;
           });
         }
 
@@ -501,6 +502,8 @@ describe('AbortSignal support', () => {
             }
 
             client.on('commandStarted', e => e.commandName === cursorName && controller.abort());
+            let commandFailed = false;
+            client.on('commandFailed', e => e.commandName === cursorName && (commandFailed = true));
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
             const start = performance.now();
@@ -511,6 +514,8 @@ describe('AbortSignal support', () => {
             expect(result).to.be.instanceOf(DOMException);
 
             expect(cursorCommandSocket).to.have.property('destroyed', true);
+            expect(cursor.closed).to.be.true;
+            expect(commandFailed).to.be.true;
           });
         }
 
@@ -563,7 +568,7 @@ describe('AbortSignal support', () => {
     });
   });
 
-  describe.only('cursor $where example', () => {
+  describe('cursor $where example', () => {
     beforeEach(async function () {
       const utilClient = this.configuration.newClient();
       try {
@@ -579,16 +584,17 @@ describe('AbortSignal support', () => {
       }
     });
 
-    it('follows expected stream error handling', async () => {
+    it('throws an error from the cursor and ends the operation', async function () {
       const controller = new AbortController();
       const { signal } = controller;
       const cursor = collection.find(
         {
-          $where: function () {
+          //@ts-expect-error: our types do not support Code which should be fixed.
+          $where: new Code(function () {
             while (true);
-          }
+          })
         },
-        { signal, batchSize: 1, serializeFunctions: true }
+        { signal, batchSize: 1 }
       );
 
       client.on(
