@@ -286,7 +286,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   public async command(
     ns: MongoDBNamespace,
     cmd: Document,
-    paramOpts: ServerCommandOptions,
+    { ...options }: ServerCommandOptions,
     responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     if (ns.db == null || typeof ns === 'string') {
@@ -297,12 +297,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       throw new MongoServerClosedError();
     }
 
-    // Clone the options
-    const options = {
-      ...paramOpts,
-      wireProtocolCommand: false,
-      directConnection: this.topology.s.options.directConnection
-    };
+    options.directConnection = this.topology.s.options.directConnection;
 
     // There are cases where we need to flag the read preference not to get sent in
     // the command, such as pre-5.0 servers attempting to perform an aggregate write

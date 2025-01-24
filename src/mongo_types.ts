@@ -483,7 +483,7 @@ export type Abortable = {
    * The `signal.reason` value is used as the error thrown.
    *
    * @remarks
-   * **NOTE:** Currently, aborting an in-progress operation causes the in-use Connection to close.
+   * **NOTE:** Currently, aborting an in-progress operation causes the in-use Connection (e.g, during socket read or write) to close.
    * If signals are aborted at a high rate it will cause many connections that are otherwise healthy
    * to be discarded. We plan to mitigate this in a future release, please follow NODE-6062 (`timeoutMS` expiration suffers the same limitation).
    *

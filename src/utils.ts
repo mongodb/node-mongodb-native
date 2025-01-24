@@ -1511,8 +1511,8 @@ export function addAbortListener(
  * The given promise is _always_ ordered before the signal's abort promise.
  * When given an already rejected promise and an already aborted signal, the promise's rejection takes precedence.
  *
- * This is useful **ONLY** when you do not care about cancelling the operation represented by `promise`.
- * Proper cancellation must be implemented by the promise returning API.
+ * Any asynchronous processing in `promise` will continue even after the abort signal has fired,
+ * but control will be returned to the caller
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race
  *
