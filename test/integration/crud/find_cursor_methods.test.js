@@ -251,7 +251,7 @@ describe('Find Cursor', function () {
     });
   });
 
-  context('#rewind', function () {
+  describe('#rewind', function () {
     it('should rewind a cursor', async function () {
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({});
@@ -333,6 +333,25 @@ describe('Find Cursor', function () {
 
           session.endSession(done);
         });
+      }
+    });
+
+    it('emits close after rewind', async () => {
+      let cursor;
+      try {
+        const coll = client.db().collection('abstract_cursor');
+        cursor = coll.find({}, { batchSize: 1 });
+        const closes = [];
+        cursor.on('close', () => closes.push('close'));
+        const doc0 = await cursor.next();
+        await cursor.close();
+        cursor.rewind();
+        const doc1 = await cursor.next();
+        await cursor.close();
+        expect(doc0).to.deep.equal(doc1); // make sure rewind happened
+        expect(closes).to.have.lengthOf(2);
+      } finally {
+        await cursor.close();
       }
     });
   });

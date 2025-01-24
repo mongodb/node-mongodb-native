@@ -61,6 +61,10 @@ export interface CursorStreamOptions {
 /** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
+function removeActiveCursor(this: AbstractCursor) {
+  this.client.s.activeCursors.delete(this);
+}
+
 /**
  * @public
  * @experimental
@@ -352,6 +356,7 @@ export abstract class AbstractCursor<
     };
 
     this.timeoutContext = options.timeoutContext;
+    this.trackCursor();
   }
 
   /**
@@ -429,6 +434,14 @@ export abstract class AbstractCursor<
   /** @internal */
   async asyncDispose() {
     await this.close();
+  }
+
+  /** Adds cursor to client's tracking so it will be closed by MongoClient.close() */
+  private trackCursor() {
+    this.cursorClient.s.activeCursors.add(this);
+    if (!this.listeners('close').includes(removeActiveCursor)) {
+      this.once('close', removeActiveCursor);
+    }
   }
 
   /** Returns current buffered documents length */
@@ -824,16 +837,15 @@ export abstract class AbstractCursor<
     this.isClosed = false;
     this.isKilled = false;
     this.initialized = false;
+    this.hasEmittedClose = false;
+    this.trackCursor();
 
-    const session = this.cursorSession;
-    if (session) {
-      // We only want to end this session if we created it, and it hasn't ended yet
-      if (session.explicit === false) {
-        if (!session.hasEnded) {
-          session.endSession().then(undefined, squashError);
-        }
-        this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
+    // We only want to end this session if we created it, and it hasn't ended yet
+    if (this.cursorSession.explicit === false) {
+      if (!this.cursorSession.hasEnded) {
+        this.cursorSession.endSession().then(undefined, squashError);
       }
+      this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
     }
   }
 
@@ -969,7 +981,6 @@ export abstract class AbstractCursor<
   /** @internal */
   private async cleanup(timeoutMS?: number, error?: Error) {
     this.isClosed = true;
-    const session = this.cursorSession;
     const timeoutContextForKillCursors = (): CursorTimeoutContext | undefined => {
       if (timeoutMS != null) {
         this.timeoutContext?.clear();
@@ -991,7 +1002,7 @@ export abstract class AbstractCursor<
         !this.cursorId.isZero() &&
         this.cursorNamespace &&
         this.selectedServer &&
-        !session.hasEnded
+        !this.cursorSession.hasEnded
       ) {
         this.isKilled = true;
         const cursorId = this.cursorId;
@@ -1000,7 +1011,7 @@ export abstract class AbstractCursor<
         await executeOperation(
           this.cursorClient,
           new KillCursorsOperation(cursorId, this.cursorNamespace, this.selectedServer, {
-            session
+            session: this.cursorSession
           }),
           timeoutContextForKillCursors()
         );
@@ -1008,14 +1019,16 @@ export abstract class AbstractCursor<
     } catch (error) {
       squashError(error);
     } finally {
-      if (session?.owner === this) {
-        await session.endSession({ error });
+      try {
+        if (this.cursorSession?.owner === this) {
+          await this.cursorSession.endSession({ error });
+        }
+        if (!this.cursorSession?.inTransaction()) {
+          maybeClearPinnedConnection(this.cursorSession, { error });
+        }
+      } finally {
+        this.emitClose();
       }
-      if (!session?.inTransaction()) {
-        maybeClearPinnedConnection(session, { error });
-      }
-
-      this.emitClose();
     }
   }
 
