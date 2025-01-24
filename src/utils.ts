@@ -621,43 +621,6 @@ export function isRecord(
   return true;
 }
 
-/**
- * Make a deep copy of an object
- *
- * NOTE: This is not meant to be the perfect implementation of a deep copy,
- * but instead something that is good enough for the purposes of
- * command monitoring.
- */
-export function deepCopy<T>(value: T): T {
-  if (value == null) {
-    return value;
-  } else if (Array.isArray(value)) {
-    return value.map(item => deepCopy(item)) as unknown as T;
-  } else if (isRecord(value)) {
-    const res = {} as any;
-    for (const key in value) {
-      res[key] = deepCopy(value[key]);
-    }
-    return res;
-  }
-
-  const ctor = (value as any).constructor;
-  if (ctor) {
-    switch (ctor.name.toLowerCase()) {
-      case 'date':
-        return new ctor(Number(value));
-      case 'map':
-        return new Map(value as any) as unknown as T;
-      case 'set':
-        return new Set(value as any) as unknown as T;
-      case 'buffer':
-        return Buffer.from(value as unknown as Buffer) as unknown as T;
-    }
-  }
-
-  return value;
-}
-
 type ListNode<T> = {
   value: T;
   next: ListNode<T> | HeadNode<T>;
