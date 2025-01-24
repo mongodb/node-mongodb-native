@@ -25,7 +25,7 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { supportsRetryableWrites } from '../utils';
+import { abortable, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -64,7 +64,10 @@ export async function executeOperation<
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
-  const topology = await autoConnect(client);
+  const topology =
+    client.topology == null
+      ? await abortable(autoConnect(client), operation.options)
+      : client.topology;
 
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
@@ -198,7 +201,8 @@ async function tryOperation<
   let server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    timeoutContext
+    timeoutContext,
+    signal: operation.options.signal
   });
 
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
@@ -260,7 +264,8 @@ async function tryOperation<
       server = await topology.selectServer(selector, {
         session,
         operationName: operation.commandName,
-        previousServer
+        previousServer,
+        signal: operation.options.signal
       });
 
       if (hasWriteAspect && !supportsRetryableWrites(server)) {

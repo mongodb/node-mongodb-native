@@ -14,6 +14,7 @@ import type { Db } from './db';
 import { MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
+  Abortable,
   Filter,
   Flatten,
   OptionalUnlessRequiredId,
@@ -505,7 +506,7 @@ export class Collection<TSchema extends Document = Document> {
   async findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
   async findOne(
     filter: Filter<TSchema>,
-    options: Omit<FindOptions, 'timeoutMode'>
+    options: Omit<FindOptions, 'timeoutMode'> & Abortable
   ): Promise<WithId<TSchema> | null>;
 
   // allow an override of the schema.
@@ -513,12 +514,12 @@ export class Collection<TSchema extends Document = Document> {
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
   async findOne<T = TSchema>(
     filter: Filter<TSchema>,
-    options?: Omit<FindOptions, 'timeoutMode'>
+    options?: Omit<FindOptions, 'timeoutMode'> & Abortable
   ): Promise<T | null>;
 
   async findOne(
     filter: Filter<TSchema> = {},
-    options: FindOptions = {}
+    options: FindOptions & Abortable = {}
   ): Promise<WithId<TSchema> | null> {
     const cursor = this.find(filter, options).limit(-1).batchSize(1);
     const res = await cursor.next();
@@ -532,9 +533,15 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter predicate. If unspecified, then all documents in the collection will match the predicate
    */
   find(): FindCursor<WithId<TSchema>>;
-  find(filter: Filter<TSchema>, options?: FindOptions): FindCursor<WithId<TSchema>>;
-  find<T extends Document>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
-  find(filter: Filter<TSchema> = {}, options: FindOptions = {}): FindCursor<WithId<TSchema>> {
+  find(filter: Filter<TSchema>, options?: FindOptions & Abortable): FindCursor<WithId<TSchema>>;
+  find<T extends Document>(
+    filter: Filter<TSchema>,
+    options?: FindOptions & Abortable
+  ): FindCursor<T>;
+  find(
+    filter: Filter<TSchema> = {},
+    options: FindOptions & Abortable = {}
+  ): FindCursor<WithId<TSchema>> {
     return new FindCursor<WithId<TSchema>>(
       this.client,
       this.s.namespace,
@@ -792,7 +799,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async countDocuments(
     filter: Filter<TSchema> = {},
-    options: CountDocumentsOptions = {}
+    options: CountDocumentsOptions & Abortable = {}
   ): Promise<number> {
     const pipeline = [];
     pipeline.push({ $match: filter });
@@ -1006,7 +1013,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   aggregate<T extends Document = Document>(
     pipeline: Document[] = [],
-    options?: AggregateOptions
+    options?: AggregateOptions & Abortable
   ): AggregationCursor<T> {
     if (!Array.isArray(pipeline)) {
       throw new MongoInvalidArgumentError(

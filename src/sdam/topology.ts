@@ -31,15 +31,17 @@ import {
 } from '../error';
 import type { MongoClient, ServerApi } from '../mongo_client';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
-import { TypedEventEmitter } from '../mongo_types';
+import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { Timeout, TimeoutContext, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
+  addAbortListener,
   type Callback,
   type EventEmitterWithState,
   HostAddress,
+  kDispose,
   List,
   makeStateMachine,
   now,
@@ -525,7 +527,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    */
   async selectServer(
     selector: string | ReadPreference | ServerSelector,
-    options: SelectServerOptions
+    options: SelectServerOptions & Abortable
   ): Promise<Server> {
     let serverSelector;
     if (typeof selector !== 'function') {
@@ -602,6 +604,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       previousServer: options.previousServer
     };
 
+    const abortListener = addAbortListener(options.signal, function () {
+      waitQueueMember.cancelled = true;
+      reject(this.reason);
+    });
+
     this.waitQueue.push(waitQueueMember);
     processWaitQueue(this);
 
@@ -647,6 +654,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       // Other server selection error
       throw error;
     } finally {
+      abortListener?.[kDispose]();
       if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
     }
   }
