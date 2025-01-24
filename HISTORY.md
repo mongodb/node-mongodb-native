@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.13.0](https://github.com/mongodb/node-mongodb-native/compare/v6.12.0...v6.13.0) (2025-01-24)
+
+
+### Features
+
+* **NODE-6451:** retry SRV and TXT lookup for DNS timeout errors ([#4375](https://github.com/mongodb/node-mongodb-native/issues/4375)) ([fd902d3](https://github.com/mongodb/node-mongodb-native/commit/fd902d31d5cb65100f1c8b6f8811886b44ba19d5))
+
+
+### Performance Improvements
+
+* **NODE-6452:** Optimize CommandStartedEvent and CommandSucceededEvent constructors ([#4371](https://github.com/mongodb/node-mongodb-native/issues/4371)) ([41b066b](https://github.com/mongodb/node-mongodb-native/commit/41b066b2b286879085b05a58c0486aa1d24303bc))
+* **NODE-6616:** shortcircuit logging ejson.stringify ([#4377](https://github.com/mongodb/node-mongodb-native/issues/4377)) ([c1bcf0d](https://github.com/mongodb/node-mongodb-native/commit/c1bcf0de991096975a5151bf780faa9803ddd765))
+
 ## [6.12.0](https://github.com/mongodb/node-mongodb-native/compare/v6.11.0...v6.12.0) (2024-12-10)
 
 
