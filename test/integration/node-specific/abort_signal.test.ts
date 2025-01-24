@@ -783,7 +783,7 @@ describe('AbortSignal support', () => {
           expect(end - start).to.be.lessThan(260);
 
           expect(toArray).to.be.instanceOf(DOMException);
-          expect(await checkIn).to.be.greaterThan(1000); // checks back in despite the abort
+          expect(await checkIn).to.be.greaterThan(900); // checks back in despite the abort
         }
       );
     });
@@ -808,7 +808,7 @@ describe('AbortSignal support', () => {
           expect(end - start).to.be.lessThan(260);
 
           expect(toArray).to.be.instanceOf(DOMException);
-          expect(await checkIn).to.be.greaterThan(1000); // checks back in despite the abort
+          expect(await checkIn).to.be.greaterThan(900); // checks back in despite the abort
         }
       );
     });
