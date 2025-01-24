@@ -486,10 +486,7 @@ export function stringifyWithMaxLen(
         currentLength += value ? 4 : 5;
         break;
       case 'object':
-        if (isUint8Array(value)) {
-          // Handle binData
-          currentLength += (value.byteLength + value.byteLength * 0.5) | 0;
-        } else if ('_bsontype' in value) {
+        if ('_bsontype' in value) {
           const v = value as BSONObject;
           switch (v._bsontype) {
             case 'Int32':
