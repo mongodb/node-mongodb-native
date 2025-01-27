@@ -345,13 +345,6 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
 This script uses aws secrets manager to fetch credentials.  Make sure you are logged into AWS and have your profile set correctly.
 
-
-Use AWS secrets manager to fetch credentials that enable usage of the Atlas API:
-
-```bash
-bash ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/serverless
-```
-
 1. Run the setup-serverless script:
 
 ```bash
@@ -365,11 +358,9 @@ source secrets-export.sh
 source serverless.env
 ```
 
-3. Comment out the line in `.evergreen/run-serverless-tests.sh` that sources `install-dependencies.sh`.
+3. Comment out the line in `.evergreen/run-serverless-tests.sh` that sources `install-dependencies.sh` (this downloads node and npm and is only used in CI).
 
 4. Run the `.evergreen/run-serverless-tests.sh` script directly to test serverless instances from your local machine.
-
-> Hint: If the test script fails with an error along the lines of `Uncaught TypeError: Cannot read properties of undefined (reading 'processId')`, ensure you do **not** have the `FAKE_MONGODB_SERVICE_ID` environment variable set.
 
 ### Load Balanced
 

@@ -13,7 +13,6 @@ import {
   type WriteConcernSettings
 } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
-import { ServerlessFilter } from './filters/serverless_filter';
 
 interface ProxyParams {
   proxyHost?: string;
@@ -100,7 +99,7 @@ export class TestConfiguration {
     this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
-    this.isServerless = !!ServerlessFilter.isServerless;
+    this.isServerless = !!process.env.SERVERLESS;
     this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.buildInfo = context.buildInfo;
     this.serverApi = context.serverApi;
@@ -118,11 +117,11 @@ export class TestConfiguration {
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
         ? {
-            proxyHost: url.searchParams.get('proxyHost'),
-            proxyPort: Number(url.searchParams.get('proxyPort')),
-            proxyUsername: url.searchParams.get('proxyUsername'),
-            proxyPassword: url.searchParams.get('proxyPassword')
-          }
+          proxyHost: url.searchParams.get('proxyHost'),
+          proxyPort: Number(url.searchParams.get('proxyPort')),
+          proxyUsername: url.searchParams.get('proxyUsername'),
+          proxyPassword: url.searchParams.get('proxyPassword')
+        }
         : undefined
     };
     if (url.username) {
