@@ -240,6 +240,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @event */
   static readonly TIMEOUT = TIMEOUT;
 
+  private get closeSignal() {
+    return this.client.closeSignal;
+  }
+
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
@@ -329,7 +333,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     if (options.srvHost && !options.loadBalanced) {
       this.s.srvPoller =
         options.srvPoller ??
-        new SrvPoller({
+        new SrvPoller(this, {
           heartbeatFrequencyMS: this.s.heartbeatFrequencyMS,
           srvHost: options.srvHost,
           srvMaxHosts: options.srvMaxHosts,
@@ -456,7 +460,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       // TODO(NODE-6448): auto-connect ignores timeoutMS; potential future feature
       timeoutMS: undefined,
       serverSelectionTimeoutMS,
-      waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
+      waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS,
+      closeSignal: this.closeSignal
     });
     const selectServerOptions = {
       operationName: 'ping',
@@ -562,7 +567,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     let timeout;
     if (options.timeoutContext) timeout = options.timeoutContext.serverSelectionTimeout;
     else {
-      timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
+      timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0, this.closeSignal);
     }
 
     const isSharded = this.description.type === TopologyType.Sharded;

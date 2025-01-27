@@ -393,13 +393,17 @@ export class AutoEncrypter {
     context.ns = ns;
     context.document = cmd;
 
-    const stateMachine = new StateMachine({
-      promoteValues: false,
-      promoteLongs: false,
-      proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
-    });
+    const stateMachine = new StateMachine(
+      {
+        promoteValues: false,
+        promoteLongs: false,
+        proxyOptions: this._proxyOptions,
+        tlsOptions: this._tlsOptions,
+        socketOptions: autoSelectSocketOptions(this._client.s.options)
+      },
+      undefined,
+      this._client.closeSignal
+    );
 
     return deserialize(await stateMachine.execute(this, context, options), {
       promoteValues: false,
@@ -420,12 +424,16 @@ export class AutoEncrypter {
 
     context.id = this._contextCounter++;
 
-    const stateMachine = new StateMachine({
-      ...options,
-      proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
-    });
+    const stateMachine = new StateMachine(
+      {
+        ...options,
+        proxyOptions: this._proxyOptions,
+        tlsOptions: this._tlsOptions,
+        socketOptions: autoSelectSocketOptions(this._client.s.options)
+      },
+      undefined,
+      this._client.closeSignal
+    );
 
     return await stateMachine.execute(this, context, options);
   }
@@ -438,7 +446,7 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._client.closeSignal);
   }
 
   /**

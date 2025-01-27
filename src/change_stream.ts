@@ -680,7 +680,8 @@ export class ChangeStream<
     if (this.options.timeoutMS != null) {
       this.timeoutContext = new CSOTTimeoutContext({
         timeoutMS: this.options.timeoutMS,
-        serverSelectionTimeoutMS
+        serverSelectionTimeoutMS,
+        closeSignal: this.cursor.client.closeSignal
       });
     }
   }

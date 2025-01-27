@@ -935,7 +935,8 @@ export abstract class AbstractCursor<
       this.timeoutContext ??= new CursorTimeoutContext(
         TimeoutContext.create({
           serverSelectionTimeoutMS: this.client.s.options.serverSelectionTimeoutMS,
-          timeoutMS: this.cursorOptions.timeoutMS
+          timeoutMS: this.cursorOptions.timeoutMS,
+          closeSignal: this.client.closeSignal
         }),
         this
       );
@@ -1024,7 +1025,8 @@ export abstract class AbstractCursor<
         return new CursorTimeoutContext(
           TimeoutContext.create({
             serverSelectionTimeoutMS: this.client.s.options.serverSelectionTimeoutMS,
-            timeoutMS
+            timeoutMS,
+            closeSignal: this.client.closeSignal
           }),
           this
         );
@@ -1208,7 +1210,7 @@ export class CursorTimeoutContext extends TimeoutContext {
     public timeoutContext: TimeoutContext,
     public owner: symbol | AbstractCursor
   ) {
-    super();
+    super({ closeSignal: timeoutContext.closeSignal });
   }
   override get serverSelectionTimeout(): Timeout | null {
     return this.timeoutContext.serverSelectionTimeout;

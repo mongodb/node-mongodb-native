@@ -16,7 +16,7 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
-import { HostAddress, ns, promiseWithResolvers } from '../utils';
+import { addAbortSignalToStream, HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext } from './auth/auth_provider';
 import { AuthMechanism } from './auth/providers';
 import {
@@ -35,12 +35,15 @@ import {
 /** @public */
 export type Stream = Socket | TLSSocket;
 
-export async function connect(options: ConnectionOptions): Promise<Connection> {
+export async function connect(
+  options: ConnectionOptions,
+  closeSignal: AbortSignal
+): Promise<Connection> {
   let connection: Connection | null = null;
   try {
-    const socket = await makeSocket(options);
+    const socket = await makeSocket(options, closeSignal);
     connection = makeConnection(options, socket);
-    await performInitialHandshake(connection, options);
+    await performInitialHandshake(connection, options, closeSignal);
     return connection;
   } catch (error) {
     connection?.destroy();
@@ -84,7 +87,8 @@ function checkSupportedServer(hello: Document, options: ConnectionOptions) {
 
 export async function performInitialHandshake(
   conn: Connection,
-  options: ConnectionOptions
+  options: ConnectionOptions,
+  closeSignal: AbortSignal
 ): Promise<void> {
   const credentials = options.credentials;
 
@@ -103,7 +107,7 @@ export async function performInitialHandshake(
   const authContext = new AuthContext(conn, credentials, options);
   conn.authContext = authContext;
 
-  const handshakeDoc = await prepareHandshakeDocument(authContext);
+  const handshakeDoc = await prepareHandshakeDocument(authContext, closeSignal);
 
   // @ts-expect-error: TODO(NODE-5141): The options need to be filtered properly, Connection options differ from Command options
   const handshakeOptions: CommandOptions = { ...options, raw: false };
@@ -161,7 +165,7 @@ export async function performInitialHandshake(
     }
 
     try {
-      await provider.auth(authContext);
+      await provider.auth(authContext, closeSignal);
     } catch (error) {
       if (error instanceof MongoError) {
         error.addErrorLabel(MongoErrorLabel.HandshakeError);
@@ -217,7 +221,8 @@ export interface HandshakeDocument extends Document {
  * This function is only exposed for testing purposes.
  */
 export async function prepareHandshakeDocument(
-  authContext: AuthContext
+  authContext: AuthContext,
+  closeSignal: AbortSignal
 ): Promise<HandshakeDocument> {
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
@@ -250,7 +255,7 @@ export async function prepareHandshakeDocument(
           `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
         );
       }
-      return await provider.prepare(handshakeDoc, authContext);
+      return await provider.prepare(handshakeDoc, authContext, closeSignal);
     }
     const provider = authContext.options.authProviders.getOrCreateProvider(
       credentials.mechanism,
@@ -259,7 +264,7 @@ export async function prepareHandshakeDocument(
     if (!provider) {
       throw new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`);
     }
-    return await provider.prepare(handshakeDoc, authContext);
+    return await provider.prepare(handshakeDoc, authContext, closeSignal);
   }
   return handshakeDoc;
 }
@@ -345,7 +350,10 @@ function parseSslOptions(options: MakeConnectionOptions): TLSConnectionOpts {
   return result;
 }
 
-export async function makeSocket(options: MakeConnectionOptions): Promise<Stream> {
+export async function makeSocket(
+  options: MakeConnectionOptions,
+  closeSignal: AbortSignal
+): Promise<Stream> {
   const useTLS = options.tls ?? false;
   const noDelay = options.noDelay ?? true;
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
@@ -355,10 +363,13 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
 
   if (options.proxyHost != null) {
     // Currently, only Socks5 is supported.
-    return await makeSocks5Connection({
-      ...options,
-      connectTimeoutMS // Should always be present for Socks5
-    });
+    return await makeSocks5Connection(
+      {
+        ...options,
+        connectTimeoutMS // Should always be present for Socks5
+      },
+      closeSignal
+    );
   }
 
   if (useTLS) {
@@ -375,6 +386,8 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   } else {
     socket = net.createConnection(parseConnectOptions(options));
   }
+
+  addAbortSignalToStream(closeSignal, socket);
 
   socket.setKeepAlive(true, 300000);
   socket.setTimeout(connectTimeoutMS);
@@ -445,19 +458,25 @@ function loadSocks() {
   return socks;
 }
 
-async function makeSocks5Connection(options: MakeConnectionOptions): Promise<Stream> {
+async function makeSocks5Connection(
+  options: MakeConnectionOptions,
+  closeSignal: AbortSignal
+): Promise<Stream> {
   const hostAddress = HostAddress.fromHostPort(
     options.proxyHost ?? '', // proxyHost is guaranteed to set here
     options.proxyPort ?? 1080
   );
 
   // First, connect to the proxy server itself:
-  const rawSocket = await makeSocket({
-    ...options,
-    hostAddress,
-    tls: false,
-    proxyHost: undefined
-  });
+  const rawSocket = await makeSocket(
+    {
+      ...options,
+      hostAddress,
+      tls: false,
+      proxyHost: undefined
+    },
+    closeSignal
+  );
 
   const destination = parseConnectOptions(options) as net.TcpNetConnectOpts;
   if (typeof destination.host !== 'string' || typeof destination.port !== 'number') {
@@ -494,5 +513,5 @@ async function makeSocks5Connection(options: MakeConnectionOptions): Promise<Str
 
   // Finally, now treat the resulting duplex stream as the
   // socket over which we send and receive wire protocol messages:
-  return await makeSocket({ ...options, existingSocket, proxyHost: undefined });
+  return await makeSocket({ ...options, existingSocket, proxyHost: undefined }, closeSignal);
 }

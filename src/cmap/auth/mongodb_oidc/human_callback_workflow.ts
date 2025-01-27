@@ -21,8 +21,8 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
   /**
    * Instantiate the human callback workflow.
    */
-  constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
-    super(cache, callback);
+  constructor(cache: TokenCache, callback: OIDCCallbackFunction, closeSignal: AbortSignal) {
+    super(cache, callback, closeSignal);
   }
 
   /**
@@ -125,7 +125,7 @@ export class HumanCallbackWorkflow extends CallbackWorkflow {
     if (refreshToken) {
       params.refreshToken = refreshToken;
     }
-    const timeout = Timeout.expires(HUMAN_TIMEOUT_MS);
+    const timeout = Timeout.expires(HUMAN_TIMEOUT_MS, this.closeSignal);
     try {
       return await Promise.race([this.executeAndValidateCallback(params), timeout]);
     } catch (error) {

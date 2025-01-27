@@ -47,7 +47,8 @@ export abstract class AuthProvider {
    */
   async prepare(
     handshakeDoc: HandshakeDocument,
-    _authContext: AuthContext
+    _authContext: AuthContext,
+    _closeSignal: AbortSignal
   ): Promise<HandshakeDocument> {
     return handshakeDoc;
   }
@@ -57,19 +58,19 @@ export abstract class AuthProvider {
    *
    * @param context - A shared context for authentication flow
    */
-  abstract auth(context: AuthContext): Promise<void>;
+  abstract auth(context: AuthContext, closeSignal: AbortSignal): Promise<void>;
 
   /**
    * Reauthenticate.
    * @param context - The shared auth context.
    */
-  async reauth(context: AuthContext): Promise<void> {
+  async reauth(context: AuthContext, closeSignal: AbortSignal): Promise<void> {
     if (context.reauthenticating) {
       throw new MongoRuntimeError('Reauthentication already in progress.');
     }
     try {
       context.reauthenticating = true;
-      await this.auth(context);
+      await this.auth(context, closeSignal);
     } finally {
       context.reauthenticating = false;
     }

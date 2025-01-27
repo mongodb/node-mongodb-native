@@ -3,7 +3,7 @@ import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
-import { clearTimeout, setTimeout } from 'timers';
+import { type Readable, type Writable } from 'stream';
 import * as url from 'url';
 import { URL } from 'url';
 import { promisify } from 'util';
@@ -36,7 +36,7 @@ import { ServerType } from './sdam/common';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
 import type { ClientSession } from './sessions';
-import { type TimeoutContextOptions } from './timeout';
+import { clearOnAbortTimeout, type TimeoutContextOptions } from './timeout';
 import { WriteConcern } from './write_concern';
 
 /**
@@ -497,10 +497,17 @@ export function resolveTimeoutOptions<T extends Partial<TimeoutContextOptions>>(
   Pick<
     MongoClient['s']['options'],
     'timeoutMS' | 'serverSelectionTimeoutMS' | 'waitQueueTimeoutMS' | 'socketTimeoutMS'
-  > {
+  > & { closeSignal: AbortSignal } {
   const { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS, timeoutMS } =
     client.s.options;
-  return { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS, timeoutMS, ...options };
+  return {
+    socketTimeoutMS,
+    serverSelectionTimeoutMS,
+    waitQueueTimeoutMS,
+    timeoutMS,
+    ...options,
+    closeSignal: client.closeSignal
+  };
 }
 /**
  * Merge inherited properties from parent into options, prioritizing values from options,
@@ -1174,29 +1181,32 @@ interface RequestOptions {
  */
 export function get(
   url: URL | string,
-  options: http.RequestOptions = {}
+  options: http.RequestOptions = {},
+  closeSignal: AbortSignal
 ): Promise<{ body: string; status: number | undefined }> {
   return new Promise((resolve, reject) => {
-    /* eslint-disable prefer-const */
-    let timeoutId: NodeJS.Timeout;
     const request = http
       .get(url, options, response => {
         response.setEncoding('utf8');
         let body = '';
         response.on('data', chunk => (body += chunk));
         response.on('end', () => {
-          clearTimeout(timeoutId);
+          timeoutId.clearTimeout();
           resolve({ status: response.statusCode, body });
         });
       })
       .on('error', error => {
-        clearTimeout(timeoutId);
+        timeoutId.clearTimeout();
         reject(error);
       })
       .end();
-    timeoutId = setTimeout(() => {
-      request.destroy(new MongoNetworkTimeoutError(`request timed out after 10 seconds`));
-    }, 10000);
+    const timeoutId = clearOnAbortTimeout(
+      () => {
+        request.destroy(new MongoNetworkTimeoutError(`request timed out after 10 seconds`));
+      },
+      10000,
+      closeSignal
+    );
   });
 }
 
@@ -1440,8 +1450,6 @@ export function decorateDecryptionResult(
 
 /** @internal */
 export const kDispose: unique symbol = (Symbol.dispose as any) ?? Symbol('dispose');
-
-/** @internal */
 export interface Disposable {
   [kDispose](): void;
 }
@@ -1461,12 +1469,55 @@ export interface Disposable {
  * @returns A disposable that will remove the abort listener
  */
 export function addAbortListener(
+  signal: AbortSignal,
+  listener: (this: AbortSignal, event: Event) => void
+): Disposable;
+export function addAbortListener(
+  signal: undefined | null,
+  listener: (this: AbortSignal, event: Event) => void
+): undefined;
+export function addAbortListener(
+  signal: AbortSignal | undefined | null,
+  listener: (this: AbortSignal, event: Event) => void
+): Disposable | undefined;
+export function addAbortListener(
   signal: AbortSignal | undefined | null,
   listener: (this: AbortSignal, event: Event) => void
 ): Disposable | undefined {
   if (signal == null) return;
   signal.addEventListener('abort', listener, { once: true });
   return { [kDispose]: () => signal.removeEventListener('abort', listener) };
+}
+
+/** replace with AbortSignal.any() */
+export function anySignal(signals: Iterable<AbortSignal>): Required<Abortable> & Disposable {
+  const resultController = new AbortController();
+  const resultSignal = resultController.signal;
+
+  const disposables: Disposable[] = [];
+
+  for (const signal of signals) {
+    if (signal.aborted) {
+      resultController.abort(signal.reason);
+      for (const dispose of disposables) dispose[kDispose]();
+      disposables.length = 0;
+      break;
+    }
+
+    disposables.push(
+      addAbortListener(signal, function () {
+        resultController.abort(this.reason);
+      })
+    );
+  }
+
+  return {
+    signal: resultSignal,
+    [kDispose]: () => {
+      for (const dispose of disposables) dispose[kDispose]();
+      disposables.length = 0;
+    }
+  };
 }
 
 /**
@@ -1503,4 +1554,25 @@ export async function abortable<T>(
   } finally {
     abortListener?.[kDispose]();
   }
+}
+
+export function addAbortSignalToStream(
+  signal: AbortSignal | undefined,
+  stream: Writable | Readable
+) {
+  if (signal == null) {
+    return;
+  }
+
+  if (signal.aborted) {
+    stream.destroy(signal.reason);
+    return;
+  }
+
+  const abortListener = addAbortListener(signal, function () {
+    stream.off('close', abortListener[kDispose]).off('error', abortListener[kDispose]);
+    stream.destroy(this.reason);
+  });
+  // not nearly as complex as node's eos() but... do we need all that?? sobbing emoji.
+  stream.once('close', abortListener[kDispose]).once('error', abortListener[kDispose]);
 }

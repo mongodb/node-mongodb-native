@@ -1,5 +1,4 @@
 import { type Readable, Transform, type TransformCallback } from 'stream';
-import { clearTimeout, setTimeout } from 'timers';
 
 import {
   type BSONSerializeOptions,
@@ -37,7 +36,7 @@ import { type Abortable, type CancellationToken, TypedEventEmitter } from '../mo
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
-import { type TimeoutContext, TimeoutError } from '../timeout';
+import { type MongoDBTimeoutWrap, type TimeoutContext, TimeoutError } from '../timeout';
 import {
   BufferPool,
   calculateDurationInMs,
@@ -187,7 +186,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public serverApi?: ServerApi;
   public helloOk = false;
   public authContext?: AuthContext;
-  public delayedTimeoutId: NodeJS.Timeout | null = null;
+  public delayedTimeoutId: MongoDBTimeoutWrap | null = null;
   public generation: number;
   public accessToken?: string;
   public readonly description: Readonly<StreamDescription>;
@@ -313,11 +312,18 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   private onTimeout() {
-    this.delayedTimeoutId = setTimeout(() => {
+    // this.delayedTimeoutId = clearOnAbortTimeout(
+    //   () => {
+
+    //   },
+    //   1,
+    //   this.closeSignal
+    // );
+    queueMicrotask(() => {
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
       this.cleanup(new MongoNetworkTimeoutError(message, { beforeHandshake }));
-    }, 1).unref(); // No need for this timer to hold the event loop open
+    });
   }
 
   public destroy(): void {
@@ -786,7 +792,7 @@ export class SizedMessageTransform extends Transform {
 
   override _transform(chunk: Buffer, encoding: unknown, callback: TransformCallback): void {
     if (this.connection.delayedTimeoutId != null) {
-      clearTimeout(this.connection.delayedTimeoutId);
+      this.connection.delayedTimeoutId.clearTimeout();
       this.connection.delayedTimeoutId = null;
     }
 

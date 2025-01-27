@@ -3,7 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { type Document } from './bson';
 import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
 import { type ClientSession } from './sessions';
-import { csotMin, noop } from './utils';
+import { addAbortListener, csotMin, kDispose, noop, promiseWithResolvers } from './utils';
 
 /** @internal */
 export class TimeoutError extends Error {
@@ -24,6 +24,46 @@ export class TimeoutError extends Error {
   }
 }
 
+/** @internal */
+export type MongoDBTimeoutWrap = { id: NodeJS.Timeout; clearTimeout(): void };
+export function clearOnAbortTimeout(
+  cb: () => void,
+  ms: number,
+  closeSignal: AbortSignal
+): MongoDBTimeoutWrap {
+  if (closeSignal == null) throw new Error('!!!');
+  // eslint-disable-next-line no-restricted-syntax
+  const id = setTimeout(() => {
+    abortListener[kDispose]();
+    return cb();
+  }, ms);
+
+  if ('unref' in id && typeof id.unref === 'function') {
+    id.unref();
+  }
+
+  const abortListener = addAbortListener(closeSignal, function clearId() {
+    // eslint-disable-next-line no-restricted-syntax
+    clearTimeout(id);
+  });
+
+  return {
+    id,
+    clearTimeout() {
+      abortListener[kDispose]();
+      // eslint-disable-next-line no-restricted-syntax
+      clearTimeout(id);
+    }
+  };
+}
+
+/** The signal will clear the timeout if aborted */
+export async function sleep(ms: number, closeSignal: AbortSignal) {
+  const { resolve, promise } = promiseWithResolvers<void>();
+  clearOnAbortTimeout(resolve, ms, closeSignal);
+  return await promise;
+}
+
 type Executor = ConstructorParameters<typeof Promise<never>>[0];
 type Reject = Parameters<ConstructorParameters<typeof Promise<never>>[0]>[1];
 /**
@@ -33,7 +73,7 @@ type Reject = Parameters<ConstructorParameters<typeof Promise<never>>[0]>[1];
  * if interacted with exclusively through its public API
  * */
 export class Timeout extends Promise<never> {
-  private id?: NodeJS.Timeout;
+  private id?: MongoDBTimeoutWrap;
 
   public readonly start: number;
   public ended: number | null = null;
@@ -54,10 +94,11 @@ export class Timeout extends Promise<never> {
   /** Create a new timeout that expires in `duration` ms */
   private constructor(
     executor: Executor = () => null,
-    options?: { duration: number; unref?: true; rejection?: Error }
+    options:
+      | { duration: number; closeSignal: AbortSignal; rejection?: Error }
+      | { duration: 0; closeSignal: null; rejection?: Error }
   ) {
     const duration = options?.duration ?? 0;
-    const unref = !!options?.unref;
     const rejection = options?.rejection;
 
     if (duration < 0) {
@@ -75,15 +116,17 @@ export class Timeout extends Promise<never> {
     this.start = Math.trunc(performance.now());
 
     if (rejection == null && this.duration > 0) {
-      this.id = setTimeout(() => {
-        this.ended = Math.trunc(performance.now());
-        this.timedOut = true;
-        reject(new TimeoutError(`Expired after ${duration}ms`, { duration }));
-      }, this.duration);
-      if (typeof this.id.unref === 'function' && unref) {
-        // Ensure we do not keep the Node.js event loop running
-        this.id.unref();
-      }
+      if (options.closeSignal == null) throw new Error('incorrect timer use detected!');
+
+      this.id = clearOnAbortTimeout(
+        () => {
+          this.ended = Math.trunc(performance.now());
+          this.timedOut = true;
+          reject(new TimeoutError(`Expired after ${duration}ms`, { duration }));
+        },
+        this.duration,
+        options.closeSignal
+      );
     } else if (rejection != null) {
       this.ended = Math.trunc(performance.now());
       this.timedOut = true;
@@ -95,7 +138,7 @@ export class Timeout extends Promise<never> {
    * Clears the underlying timeout. This method is idempotent
    */
   clear(): void {
-    clearTimeout(this.id);
+    this.id?.clearTimeout();
     this.id = undefined;
     this.timedOut = false;
     this.cleared = true;
@@ -105,12 +148,24 @@ export class Timeout extends Promise<never> {
     if (this.timedOut) throw new TimeoutError('Timed out', { duration: this.duration });
   }
 
-  public static expires(duration: number, unref?: true): Timeout {
-    return new Timeout(undefined, { duration, unref });
+  public static expires(duration: number, closeSignal: AbortSignal): Timeout {
+    return new Timeout(undefined, { duration, closeSignal });
   }
 
-  static override reject(rejection?: Error): Timeout {
-    return new Timeout(undefined, { duration: 0, unref: true, rejection });
+  static override reject(rejection?: Error | undefined): Timeout {
+    return new Timeout(undefined, { duration: 0, closeSignal: null, rejection });
+  }
+
+  ref() {
+    if (this.id != null && 'ref' in this.id && typeof this.id.ref === 'function') {
+      this.id.ref();
+    }
+  }
+
+  unref() {
+    if (this.id != null && 'unref' in this.id && typeof this.id.unref === 'function') {
+      this.id.unref();
+    }
   }
 }
 
@@ -124,6 +179,7 @@ export type LegacyTimeoutContextOptions = {
   serverSelectionTimeoutMS: number;
   waitQueueTimeoutMS: number;
   socketTimeoutMS?: number;
+  closeSignal: AbortSignal;
 };
 
 /** @internal */
@@ -131,6 +187,7 @@ export type CSOTTimeoutContextOptions = {
   timeoutMS: number;
   serverSelectionTimeoutMS: number;
   socketTimeoutMS?: number;
+  closeSignal: AbortSignal;
 };
 
 function isLegacyTimeoutContextOptions(v: unknown): v is LegacyTimeoutContextOptions {
@@ -157,6 +214,11 @@ function isCSOTTimeoutContextOptions(v: unknown): v is CSOTTimeoutContextOptions
 
 /** @internal */
 export abstract class TimeoutContext {
+  closeSignal: AbortSignal;
+  constructor(options: { closeSignal: AbortSignal }) {
+    this.closeSignal = options.closeSignal;
+  }
+
   static create(options: TimeoutContextOptions): TimeoutContext {
     if (options.session?.timeoutContext != null) return options.session?.timeoutContext;
     if (isCSOTTimeoutContextOptions(options)) return new CSOTTimeoutContext(options);
@@ -204,7 +266,7 @@ export class CSOTTimeoutContext extends TimeoutContext {
   public start: number;
 
   constructor(options: CSOTTimeoutContextOptions) {
-    super();
+    super(options);
     this.start = Math.trunc(performance.now());
 
     this.timeoutMS = options.timeoutMS;
@@ -241,10 +303,10 @@ export class CSOTTimeoutContext extends TimeoutContext {
         serverSelectionTimeoutMS !== 0 &&
         csotMin(remainingTimeMS, serverSelectionTimeoutMS) === serverSelectionTimeoutMS;
       if (usingServerSelectionTimeoutMS) {
-        this._serverSelectionTimeout = Timeout.expires(serverSelectionTimeoutMS);
+        this._serverSelectionTimeout = Timeout.expires(serverSelectionTimeoutMS, this.closeSignal);
       } else {
         if (remainingTimeMS > 0 && Number.isFinite(remainingTimeMS)) {
-          this._serverSelectionTimeout = Timeout.expires(remainingTimeMS);
+          this._serverSelectionTimeout = Timeout.expires(remainingTimeMS, this.closeSignal);
         } else {
           this._serverSelectionTimeout = null;
         }
@@ -274,14 +336,14 @@ export class CSOTTimeoutContext extends TimeoutContext {
   get timeoutForSocketWrite(): Timeout | null {
     const { remainingTimeMS } = this;
     if (!Number.isFinite(remainingTimeMS)) return null;
-    if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
+    if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS, this.closeSignal);
     return Timeout.reject(new MongoOperationTimeoutError('Timed out before socket write'));
   }
 
   get timeoutForSocketRead(): Timeout | null {
     const { remainingTimeMS } = this;
     if (!Number.isFinite(remainingTimeMS)) return null;
-    if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS);
+    if (remainingTimeMS > 0) return Timeout.expires(remainingTimeMS, this.closeSignal);
     return Timeout.reject(new MongoOperationTimeoutError('Timed out before socket read'));
   }
 
@@ -317,14 +379,20 @@ export class CSOTTimeoutContext extends TimeoutContext {
   clone(): CSOTTimeoutContext {
     const timeoutContext = new CSOTTimeoutContext({
       timeoutMS: this.timeoutMS,
-      serverSelectionTimeoutMS: this.serverSelectionTimeoutMS
+      serverSelectionTimeoutMS: this.serverSelectionTimeoutMS,
+      closeSignal: this.closeSignal
     });
     timeoutContext.start = this.start;
     return timeoutContext;
   }
 
   override refreshed(): CSOTTimeoutContext {
-    return new CSOTTimeoutContext(this);
+    return new CSOTTimeoutContext({
+      timeoutMS: this.timeoutMS,
+      serverSelectionTimeoutMS: this.serverSelectionTimeoutMS,
+      socketTimeoutMS: this.socketTimeoutMS,
+      closeSignal: this.closeSignal
+    });
   }
 
   override addMaxTimeMSToCommand(command: Document, options: { omitMaxTimeMS?: boolean }): void {
@@ -344,7 +412,7 @@ export class LegacyTimeoutContext extends TimeoutContext {
   clearServerSelectionTimeout: boolean;
 
   constructor(options: LegacyTimeoutContextOptions) {
-    super();
+    super(options);
     this.options = options;
     this.clearServerSelectionTimeout = true;
   }
@@ -355,13 +423,13 @@ export class LegacyTimeoutContext extends TimeoutContext {
 
   get serverSelectionTimeout(): Timeout | null {
     if (this.options.serverSelectionTimeoutMS != null && this.options.serverSelectionTimeoutMS > 0)
-      return Timeout.expires(this.options.serverSelectionTimeoutMS);
+      return Timeout.expires(this.options.serverSelectionTimeoutMS, this.closeSignal);
     return null;
   }
 
   get connectionCheckoutTimeout(): Timeout | null {
     if (this.options.waitQueueTimeoutMS != null && this.options.waitQueueTimeoutMS > 0)
-      return Timeout.expires(this.options.waitQueueTimeoutMS);
+      return Timeout.expires(this.options.waitQueueTimeoutMS, this.closeSignal);
     return null;
   }
 

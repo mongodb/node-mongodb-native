@@ -1,9 +1,10 @@
 import * as dns from 'dns';
-import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoRuntimeError } from '../error';
 import { TypedEventEmitter } from '../mongo_types';
+import { clearOnAbortTimeout, type MongoDBTimeoutWrap } from '../timeout';
 import { checkParentDomainMatch, HostAddress, noop, squashError } from '../utils';
+import { type Topology } from './topology';
 
 /**
  * @internal
@@ -42,18 +43,25 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   generation: number;
   srvMaxHosts: number;
   srvServiceName: string;
-  _timeout?: NodeJS.Timeout;
+  _timeout?: MongoDBTimeoutWrap;
 
   /** @event */
   static readonly SRV_RECORD_DISCOVERY = 'srvRecordDiscovery' as const;
 
-  constructor(options: SrvPollerOptions) {
+  private topology: Topology;
+  get closeSignal() {
+    return this.topology.client.closeSignal;
+  }
+
+  constructor(topology: Topology, options: SrvPollerOptions) {
     super();
     this.on('error', noop);
 
     if (!options || !options.srvHost) {
       throw new MongoRuntimeError('Options for SrvPoller must exist and include srvHost');
     }
+
+    this.topology = topology;
 
     this.srvHost = options.srvHost;
     this.srvMaxHosts = options.srvMaxHosts ?? 0;
@@ -83,7 +91,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
 
   stop(): void {
     if (this._timeout) {
-      clearTimeout(this._timeout);
+      this._timeout.clearTimeout();
       this.generation += 1;
       this._timeout = undefined;
     }
@@ -92,12 +100,16 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   // TODO(NODE-4994): implement new logging logic for SrvPoller failures
   schedule(): void {
     if (this._timeout) {
-      clearTimeout(this._timeout);
+      this._timeout.clearTimeout();
     }
 
-    this._timeout = setTimeout(() => {
-      this._poll().then(undefined, squashError);
-    }, this.intervalMS);
+    this._timeout = clearOnAbortTimeout(
+      () => {
+        this._poll().then(undefined, squashError);
+      },
+      this.intervalMS,
+      this.closeSignal
+    );
   }
 
   success(srvRecords: dns.SrvRecord[]): void {

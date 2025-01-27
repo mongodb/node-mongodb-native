@@ -1,8 +1,7 @@
-import { setTimeout } from 'timers/promises';
-
 import { type Document } from '../../../bson';
 import { MongoMissingCredentialsError } from '../../../error';
-import { ns } from '../../../utils';
+import { sleep } from '../../../timeout';
+import { abortable, ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
 import {
@@ -37,14 +36,16 @@ export abstract class CallbackWorkflow implements Workflow {
   cache: TokenCache;
   callback: OIDCCallbackFunction;
   lastExecutionTime: number;
+  closeSignal: AbortSignal;
 
   /**
    * Instantiate the callback workflow.
    */
-  constructor(cache: TokenCache, callback: OIDCCallbackFunction) {
+  constructor(cache: TokenCache, callback: OIDCCallbackFunction, closeSignal: AbortSignal) {
     this.cache = cache;
     this.callback = this.withLock(callback);
     this.lastExecutionTime = Date.now() - THROTTLE_MS;
+    this.closeSignal = closeSignal;
   }
 
   /**
@@ -160,13 +161,13 @@ export abstract class CallbackWorkflow implements Workflow {
       // previous lock, only the current callback's value would get returned.
       await lock;
       lock = lock
-
         .catch(() => null)
-
         .then(async () => {
           const difference = Date.now() - this.lastExecutionTime;
           if (difference <= THROTTLE_MS) {
-            await setTimeout(THROTTLE_MS - difference, { signal: params.timeoutContext });
+            await abortable(sleep(THROTTLE_MS - difference, this.closeSignal), {
+              signal: params.timeoutContext
+            });
           }
           this.lastExecutionTime = Date.now();
           return await callback(params);

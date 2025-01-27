@@ -618,6 +618,7 @@ export type {
   CSOTTimeoutContextOptions,
   LegacyTimeoutContext,
   LegacyTimeoutContextOptions,
+  MongoDBTimeoutWrap,
   Timeout,
   TimeoutContext,
   TimeoutContextOptions

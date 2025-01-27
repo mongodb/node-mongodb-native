@@ -1,3 +1,4 @@
+import { setMaxListeners } from 'events';
 import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
@@ -378,6 +379,17 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   private closeLock?: Promise<void>;
 
   /**
+   * A controller to abort upon client close
+   * @internal
+   */
+  private closeController: AbortController;
+
+  /** @internal */
+  public get closeSignal() {
+    return this.closeController.signal;
+  }
+
+  /**
    * The consolidate, parsed, transformed and merged options.
    */
   public readonly options: Readonly<
@@ -388,6 +400,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   constructor(url: string, options?: MongoClientOptions) {
     super();
     this.on('error', noop);
+
+    this.closeController = new AbortController();
+    setMaxListeners(10_000, this.closeController.signal);
 
     this.options = parseOptions(url, this, options);
 
@@ -410,7 +425,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       sessionPool: new ServerSessionPool(this),
       activeSessions: new Set(),
       activeCursors: new Set(),
-      authProviders: new MongoClientAuthProviders(),
+      authProviders: new MongoClientAuthProviders(this),
 
       get options() {
         return client.options;
@@ -566,18 +581,25 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       return this;
     }
 
+    if (this.s.hasBeenClosed && this.closeController.signal.aborted) {
+      this.closeController = new AbortController();
+      setMaxListeners(10_000, this.closeController.signal);
+    }
+
     const options = this.options;
 
     if (options.tls) {
       if (typeof options.tlsCAFile === 'string') {
-        options.ca ??= await fs.readFile(options.tlsCAFile);
+        options.ca ??= await fs.readFile(options.tlsCAFile, { signal: this.closeSignal });
       }
       if (typeof options.tlsCRLFile === 'string') {
-        options.crl ??= await fs.readFile(options.tlsCRLFile);
+        options.crl ??= await fs.readFile(options.tlsCRLFile, { signal: this.closeSignal });
       }
       if (typeof options.tlsCertificateKeyFile === 'string') {
         if (!options.key || !options.cert) {
-          const contents = await fs.readFile(options.tlsCertificateKeyFile);
+          const contents = await fs.readFile(options.tlsCertificateKeyFile, {
+            signal: this.closeSignal
+          });
           options.key ??= contents;
           options.cert ??= contents;
         }
@@ -669,6 +691,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /* @internal */
   private async _close(force = false): Promise<void> {
+    this.closeController.abort();
     // There's no way to set hasBeenClosed back to false
     Object.defineProperty(this.s, 'hasBeenClosed', {
       value: true,
@@ -677,52 +700,55 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       writable: false
     });
 
-    const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
-    this.s.activeCursors.clear();
+      const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
+      this.s.activeCursors.clear();
 
-    await Promise.all(activeCursorCloses);
+      await Promise.all(activeCursorCloses);
 
-    const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
-    this.s.activeSessions.clear();
+      const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
+      this.s.activeSessions.clear();
 
-    await Promise.all(activeSessionEnds);
+      await Promise.all(activeSessionEnds);
 
-    if (this.topology == null) {
-      return;
-    }
+      if (this.topology == null) {
+        return;
+      }
 
-    // If we would attempt to select a server and get nothing back we short circuit
-    // to avoid the server selection timeout.
-    const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
-    const topologyDescription = this.topology.description;
-    const serverDescriptions = Array.from(topologyDescription.servers.values());
-    const servers = selector(topologyDescription, serverDescriptions);
-    if (servers.length !== 0) {
-      const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
-      if (endSessions.length !== 0) {
-        try {
-          await executeOperation(
-            this,
-            new RunAdminCommandOperation(
-              { endSessions },
-              { readPreference: ReadPreference.primaryPreferred, noResponse: true }
-            )
-          );
-        } catch (error) {
-          squashError(error);
+      // If we would attempt to select a server and get nothing back we short circuit
+      // to avoid the server selection timeout.
+      const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
+      const topologyDescription = this.topology.description;
+      const serverDescriptions = Array.from(topologyDescription.servers.values());
+      const servers = selector(topologyDescription, serverDescriptions);
+      if (servers.length !== 0) {
+        const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
+        if (endSessions.length !== 0) {
+          try {
+            await executeOperation(
+              this,
+              new RunAdminCommandOperation(
+                { endSessions },
+                { readPreference: ReadPreference.primaryPreferred, noResponse: true }
+              )
+            );
+          } catch (error) {
+            squashError(error);
+          }
         }
       }
-    }
 
-    // clear out references to old topology
-    const topology = this.topology;
-    this.topology = undefined;
+      // clear out references to old topology
+      const topology = this.topology;
+      this.topology = undefined;
 
-    topology.close();
+      topology.close();
 
-    const { encrypter } = this.options;
-    if (encrypter) {
-      await encrypter.close(this, force);
+      const { encrypter } = this.options;
+      if (encrypter) {
+        await encrypter.close(this, force);
+      }
+    } finally {
+      // ignore
     }
   }
 

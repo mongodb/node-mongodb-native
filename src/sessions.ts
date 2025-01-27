@@ -212,6 +212,10 @@ export class ClientSession
     return this.serverSession?.id;
   }
 
+  private get closeSignal() {
+    return this.client.closeSignal;
+  }
+
   get serverSession(): ServerSession {
     let serverSession = this._serverSession;
     if (serverSession == null) {
@@ -516,7 +520,8 @@ export class ClientSession
         ? TimeoutContext.create({
             serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
             socketTimeoutMS: this.clientOptions.socketTimeoutMS,
-            timeoutMS
+            timeoutMS,
+            closeSignal: this.closeSignal
           })
         : null);
 
@@ -623,7 +628,8 @@ export class ClientSession
         ? TimeoutContext.create({
             timeoutMS,
             serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS
+            socketTimeoutMS: this.clientOptions.socketTimeoutMS,
+            closeSignal: this.client.closeSignal
           })
         : null;
 
@@ -739,7 +745,8 @@ export class ClientSession
         ? TimeoutContext.create({
             timeoutMS,
             serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS
+            socketTimeoutMS: this.clientOptions.socketTimeoutMS,
+            closeSignal: this.client.closeSignal
           })
         : null;
 

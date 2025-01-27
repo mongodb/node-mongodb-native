@@ -123,6 +123,14 @@
       {
         "selector": "CallExpression[callee.property.name='removeAllListeners'][arguments.length=0]",
         "message": "removeAllListeners can remove error listeners leading to uncaught errors"
+      },
+      {
+        "selector": "CallExpression[callee.name='setTimeout']",
+        "message": "setTimeout must be abortable"
+      },
+      {
+        "selector": "CallExpression[callee.name='clearTimeout']",
+        "message": "clearTimeout must remove abort listener"
       }
     ],
     "@typescript-eslint/no-unused-vars": "error",

@@ -19,6 +19,7 @@ import { type Abortable } from '../mongo_types';
 import { Timeout, type TimeoutContext, TimeoutError } from '../timeout';
 import {
   addAbortListener,
+  addAbortSignalToStream,
   BufferPool,
   kDispose,
   MongoDBCollectionNamespace,
@@ -185,10 +186,15 @@ export type StateMachineOptions = {
  */
 // TODO(DRIVERS-2671): clarify CSOT behavior for FLE APIs
 export class StateMachine {
+  closeSignal: AbortSignal;
+
   constructor(
     private options: StateMachineOptions,
-    private bsonOptions = pluckBSONSerializeOptions(options)
-  ) {}
+    private bsonOptions = pluckBSONSerializeOptions(options),
+    closeSignal: AbortSignal
+  ) {
+    this.closeSignal = closeSignal;
+  }
 
   /**
    * Executes the state machine according to the specification
@@ -450,7 +456,7 @@ export class StateMachine {
       await (options?.timeoutContext?.csotEnabled()
         ? Promise.all([
             willResolveKmsRequest,
-            Timeout.expires(options.timeoutContext?.remainingTimeMS)
+            Timeout.expires(options.timeoutContext.remainingTimeMS, this.closeSignal)
           ])
         : willResolveKmsRequest);
     } catch (error) {
