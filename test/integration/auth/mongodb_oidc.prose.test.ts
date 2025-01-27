@@ -550,7 +550,7 @@ describe('OIDC Auth Spec Tests', function () {
       describe('4.4 Speculative Authentication should be ignored on Reauthentication', function () {
         let utilClient: MongoClient;
         const callbackSpy = sinon.spy(createCallback());
-        const commands = [];
+        const saslStarts = [];
         // - Create an OIDC configured client.
         // - Populate the *Client Cache* with a valid access token to enforce Speculative Authentication.
         // - Perform an `insert` operation that succeeds.
@@ -584,9 +584,8 @@ describe('OIDC Auth Spec Tests', function () {
             monitorCommands: true
           });
           client.on('commandStarted', event => {
-            console.log(event);
             if (event.commandName === 'saslStart') {
-              commands.push(event);
+              saslStarts.push(event);
             }
           });
           const provider = client.s.authProviders.getOrCreateProvider('MONGODB-OIDC', {
@@ -595,11 +594,13 @@ describe('OIDC Auth Spec Tests', function () {
           const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
             encoding: 'utf8'
           });
+
           provider.workflow.cache.put({ accessToken: token });
           collection = client.db('test').collection('test');
+
           await collection.insertOne({ name: 'test' });
           expect(callbackSpy).to.not.have.been.called;
-          expect(commands).to.be.empty;
+          expect(saslStarts).to.be.empty;
 
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
@@ -607,6 +608,7 @@ describe('OIDC Auth Spec Tests', function () {
             },
             retryReads: false
           });
+
           await utilClient
             .db()
             .admin()
@@ -633,7 +635,7 @@ describe('OIDC Auth Spec Tests', function () {
         it('successfully authenticates', async function () {
           await collection.insertOne({ name: 'test' });
           expect(callbackSpy).to.have.been.calledOnce;
-          expect(commands.length).to.equal(1);
+          expect(saslStarts.length).to.equal(1);
         });
       });
     });
