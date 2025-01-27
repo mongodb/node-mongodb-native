@@ -117,11 +117,11 @@ export class TestConfiguration {
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
         ? {
-          proxyHost: url.searchParams.get('proxyHost'),
-          proxyPort: Number(url.searchParams.get('proxyPort')),
-          proxyUsername: url.searchParams.get('proxyUsername'),
-          proxyPassword: url.searchParams.get('proxyPassword')
-        }
+            proxyHost: url.searchParams.get('proxyHost'),
+            proxyPort: Number(url.searchParams.get('proxyPort')),
+            proxyUsername: url.searchParams.get('proxyUsername'),
+            proxyPassword: url.searchParams.get('proxyPassword')
+          }
         : undefined
     };
     if (url.username) {
