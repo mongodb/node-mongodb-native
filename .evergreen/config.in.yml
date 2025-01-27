@@ -238,27 +238,13 @@ functions:
           . ./set-temp-creds.sh
           popd
 
-          MONGODB_URI="${MONGODB_URI}" \
-          AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
-          MONGODB_API_VERSION="${MONGODB_API_VERSION}"
-
           export MONGODB_API_VERSION="${MONGODB_API_VERSION}"
           export AUTH="auth"
           export SSL="ssl"
-          export SERVERLESS="1"
-          export SERVERLESS_ATLAS_USER="${SERVERLESS_ATLAS_USER}"
-          export SERVERLESS_ATLAS_PASSWORD="${SERVERLESS_ATLAS_PASSWORD}"
-          export SERVERLESS_URI="${SERVERLESS_URI}"
+          export TEST_CSFLE=true
 
-          echo "setting SERVERLESS_URI: $SERVERLESS_URI"
-
-          export MONGODB_URI="${SERVERLESS_URI}"
-          export SINGLE_MONGOS_LB_URI="${SERVERLESS_URI}"
-
-          # Setting MULTI_MONGOS to the SERVERLESS_URI is intentional
-          # LB tests pick one host out of the comma separated list
-          # so just passing the one host is equivalent
-          export MULTI_MONGOS_LB_URI="${SERVERLESS_URI}"
+          source secrets-export.sh
+          source serverless.env
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-serverless-tests.sh
 
@@ -1427,32 +1413,24 @@ task_groups:
     setup_group_timeout_secs: 1800 # 30 minutes
     setup_group:
       - func: "fetch source"
-      - command: shell.exec
+      - command: subprocess.exec
         params:
-          shell: bash
-          script: |
-            ${PREPARE_SHELL}
-            set +o xtrace
-            LOADBALANCED=ON \
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
-            SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
-            SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
-              bash ${DRIVERS_TOOLS}/.evergreen/serverless/create-instance.sh
-      - command: expansions.update
-        params:
-          file: serverless-expansion.yml
+          working_dir: "src"
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          args:
+            - .evergreen/setup-serverless.sh
+
     teardown_group:
       - func: "upload test results"
-      - command: shell.exec
+      - command: subprocess.exec
         params:
-          script: |
-            ${PREPARE_SHELL}
-            set +o xtrace
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
-            SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
-            SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
-            SERVERLESS_INSTANCE_NAME=${SERVERLESS_INSTANCE_NAME} \
-              bash ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
+          working_dir: "src"
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
+            
     tasks:
       - ".serverless"
 

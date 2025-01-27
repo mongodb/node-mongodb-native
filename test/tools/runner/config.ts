@@ -13,6 +13,7 @@ import {
   type WriteConcernSettings
 } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
+import { ServerlessFilter } from './filters/serverless_filter';
 
 interface ProxyParams {
   proxyHost?: string;
@@ -86,7 +87,6 @@ export class TestConfiguration {
   serverApi?: ServerApi;
   activeResources: number;
   isSrv: boolean;
-  serverlessCredentials: { username: string | undefined; password: string | undefined };
 
   constructor(
     private uri: string,
@@ -100,7 +100,7 @@ export class TestConfiguration {
     this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
-    this.isServerless = !!process.env.SERVERLESS;
+    this.isServerless = !!ServerlessFilter.isServerless;
     this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.buildInfo = context.buildInfo;
     this.serverApi = context.serverApi;
