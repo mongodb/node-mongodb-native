@@ -12,7 +12,7 @@ import {
   MongoTailableCursorError
 } from '../error';
 import type { MongoClient } from '../mongo_client';
-import { TypedEventEmitter } from '../mongo_types';
+import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
@@ -22,7 +22,13 @@ import { type AsyncDisposable, configureResourceManagement } from '../resource_m
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type CSOTTimeoutContext, type Timeout, TimeoutContext } from '../timeout';
-import { type MongoDBNamespace, squashError } from '../utils';
+import {
+  addAbortListener,
+  type Disposable,
+  kDispose,
+  type MongoDBNamespace,
+  squashError
+} from '../utils';
 
 /**
  * @internal
@@ -247,12 +253,14 @@ export abstract class AbstractCursor<
 
   /** @internal */
   protected deserializationOptions: OnDemandDocumentDeserializeOptions;
+  protected signal: AbortSignal | undefined;
+  private abortListener: Disposable | undefined;
 
   /** @internal */
   protected constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
-    options: AbstractCursorOptions = {}
+    options: AbstractCursorOptions & Abortable = {}
   ) {
     super();
 
@@ -352,6 +360,11 @@ export abstract class AbstractCursor<
     };
 
     this.timeoutContext = options.timeoutContext;
+    this.signal = options.signal;
+    this.abortListener = addAbortListener(
+      this.signal,
+      () => void this.close().then(undefined, squashError)
+    );
   }
 
   /**
@@ -455,6 +468,8 @@ export abstract class AbstractCursor<
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
+    this.signal?.throwIfAborted();
+
     if (this.closed) {
       return;
     }
@@ -481,6 +496,8 @@ export abstract class AbstractCursor<
         }
 
         yield document;
+
+        this.signal?.throwIfAborted();
       }
     } finally {
       // Only close the cursor if it has not already been closed. This finally clause handles
@@ -496,9 +513,16 @@ export abstract class AbstractCursor<
   }
 
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
+    const readable = new ReadableCursorStream(this);
+    const abortListener = addAbortListener(this.signal, function () {
+      readable.destroy(this.reason);
+    });
+    readable.once('end', () => {
+      abortListener?.[kDispose]();
+    });
+
     if (options?.transform) {
       const transform = options.transform;
-      const readable = new ReadableCursorStream(this);
 
       const transformedStream = readable.pipe(
         new Transform({
@@ -522,10 +546,12 @@ export abstract class AbstractCursor<
       return transformedStream;
     }
 
-    return new ReadableCursorStream(this);
+    return readable;
   }
 
   async hasNext(): Promise<boolean> {
+    this.signal?.throwIfAborted();
+
     if (this.cursorId === Long.ZERO) {
       return false;
     }
@@ -551,6 +577,8 @@ export abstract class AbstractCursor<
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
   async next(): Promise<TSchema | null> {
+    this.signal?.throwIfAborted();
+
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
@@ -581,6 +609,8 @@ export abstract class AbstractCursor<
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
   async tryNext(): Promise<TSchema | null> {
+    this.signal?.throwIfAborted();
+
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
@@ -620,6 +650,8 @@ export abstract class AbstractCursor<
    * @deprecated - Will be removed in a future release. Use for await...of instead.
    */
   async forEach(iterator: (doc: TSchema) => boolean | void): Promise<void> {
+    this.signal?.throwIfAborted();
+
     if (typeof iterator !== 'function') {
       throw new MongoInvalidArgumentError('Argument "iterator" must be a function');
     }
@@ -645,6 +677,8 @@ export abstract class AbstractCursor<
    * cursor.rewind() can be used to reset the cursor.
    */
   async toArray(): Promise<TSchema[]> {
+    this.signal?.throwIfAborted();
+
     const array: TSchema[] = [];
     // at the end of the loop (since readBufferedDocuments is called) the buffer will be empty
     // then, the 'await of' syntax will run a getMore call
@@ -968,6 +1002,7 @@ export abstract class AbstractCursor<
 
   /** @internal */
   private async cleanup(timeoutMS?: number, error?: Error) {
+    this.abortListener?.[kDispose]();
     this.isClosed = true;
     const session = this.cursorSession;
     const timeoutContextForKillCursors = (): CursorTimeoutContext | undefined => {

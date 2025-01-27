@@ -521,6 +521,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
    * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
    *
+   * @remarks
+   * The driver will look up corresponding SRV and TXT records if the connection string starts with `mongodb+srv://`.
+   * If those look ups throw a DNS Timeout error, the driver will retry the look up once.
+   *
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   async connect(): Promise<this> {
@@ -726,6 +730,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    *
    * @remarks
    * The programmatically provided options take precedence over the URI options.
+   *
+   * @remarks
+   * The driver will look up corresponding SRV and TXT records if the connection string starts with `mongodb+srv://`.
+   * If those look ups throw a DNS Timeout error, the driver will retry the look up once.
    *
    * @see https://www.mongodb.com/docs/manual/reference/connection-string/
    */

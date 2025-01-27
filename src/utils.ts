@@ -27,6 +27,7 @@ import {
   MongoRuntimeError
 } from './error';
 import type { MongoClient } from './mongo_client';
+import { type Abortable } from './mongo_types';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
 import { ReadConcern } from './read_concern';
@@ -1312,19 +1313,24 @@ export const randomBytes = promisify(crypto.randomBytes);
  * @param ee - An event emitter that may emit `ev`
  * @param name - An event name to wait for
  */
-export async function once<T>(ee: EventEmitter, name: string): Promise<T> {
+export async function once<T>(ee: EventEmitter, name: string, options?: Abortable): Promise<T> {
+  options?.signal?.throwIfAborted();
+
   const { promise, resolve, reject } = promiseWithResolvers<T>();
   const onEvent = (data: T) => resolve(data);
   const onError = (error: Error) => reject(error);
+  const abortListener = addAbortListener(options?.signal, function () {
+    reject(this.reason);
+  });
 
   ee.once(name, onEvent).once('error', onError);
+
   try {
-    const res = await promise;
-    ee.off('error', onError);
-    return res;
-  } catch (error) {
+    return await promise;
+  } finally {
     ee.off(name, onEvent);
-    throw error;
+    ee.off('error', onError);
+    abortListener?.[kDispose]();
   }
 }
 
@@ -1429,5 +1435,72 @@ export function decorateDecryptionResult(
     }
 
     decorateDecryptionResult(decrypted[k], originalValue, false);
+  }
+}
+
+/** @internal */
+export const kDispose: unique symbol = (Symbol.dispose as any) ?? Symbol('dispose');
+
+/** @internal */
+export interface Disposable {
+  [kDispose](): void;
+}
+
+/**
+ * A utility that helps with writing listener code idiomatically
+ *
+ * @example
+ * ```js
+ * using listener = addAbortListener(signal, function () {
+ *   console.log('aborted', this.reason);
+ * });
+ * ```
+ *
+ * @param signal - if exists adds an abort listener
+ * @param listener - the listener to be added to signal
+ * @returns A disposable that will remove the abort listener
+ */
+export function addAbortListener(
+  signal: AbortSignal | undefined | null,
+  listener: (this: AbortSignal, event: Event) => void
+): Disposable | undefined {
+  if (signal == null) return;
+  signal.addEventListener('abort', listener, { once: true });
+  return { [kDispose]: () => signal.removeEventListener('abort', listener) };
+}
+
+/**
+ * Takes a promise and races it with a promise wrapping the abort event of the optionally provided signal.
+ * The given promise is _always_ ordered before the signal's abort promise.
+ * When given an already rejected promise and an already aborted signal, the promise's rejection takes precedence.
+ *
+ * Any asynchronous processing in `promise` will continue even after the abort signal has fired,
+ * but control will be returned to the caller
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race
+ *
+ * @param promise - A promise to discard if the signal aborts
+ * @param options - An options object carrying an optional signal
+ */
+export async function abortable<T>(
+  promise: Promise<T>,
+  { signal }: { signal?: AbortSignal }
+): Promise<T> {
+  if (signal == null) {
+    return await promise;
+  }
+
+  const { promise: aborted, reject } = promiseWithResolvers<never>();
+
+  const abortListener = signal.aborted
+    ? reject(signal.reason)
+    : addAbortListener(signal, function () {
+        reject(this.reason);
+      });
+
+  try {
+    return await Promise.race([promise, aborted]);
+  } finally {
+    abortListener?.[kDispose]();
   }
 }
