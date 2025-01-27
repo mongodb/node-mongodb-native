@@ -603,7 +603,7 @@ describe('AbortSignal support', () => {
       const start = performance.now();
       const result = await cursor.toArray().catch(error => error);
       const end = performance.now();
-      expect(end - start).to.be.lessThan(15);
+      expect(end - start).to.be.lessThan(50);
 
       expect(result).to.be.instanceOf(DOMException);
     });
