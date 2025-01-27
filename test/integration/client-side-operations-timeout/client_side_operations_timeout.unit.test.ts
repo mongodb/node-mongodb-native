@@ -138,7 +138,7 @@ describe('CSOT spec unit tests', function () {
             timeoutMS: 500,
             serverSelectionTimeoutMS: 30000
           });
-          const err = await stateMachine.kmsRequest(request, timeoutContext).catch(e => e);
+          const err = await stateMachine.kmsRequest(request, { timeoutContext }).catch(e => e);
           expect(err).to.be.instanceOf(MongoOperationTimeoutError);
           expect(err.errmsg).to.equal('KMS request timed out');
         });

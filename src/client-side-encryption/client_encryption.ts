@@ -225,7 +225,7 @@ export class ClientEncryption {
       TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }));
 
     const dataKey = deserialize(
-      await stateMachine.execute(this, context, timeoutContext)
+      await stateMachine.execute(this, context, { timeoutContext })
     ) as DataKey;
 
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
@@ -293,7 +293,9 @@ export class ClientEncryption {
       resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS })
     );
 
-    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context, timeoutContext));
+    const { v: dataKeys } = deserialize(
+      await stateMachine.execute(this, context, { timeoutContext })
+    );
     if (dataKeys.length === 0) {
       return {};
     }
@@ -696,7 +698,7 @@ export class ClientEncryption {
         ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
         : undefined;
 
-    const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
+    const { v } = deserialize(await stateMachine.execute(this, context, { timeoutContext }));
 
     return v;
   }
@@ -780,7 +782,7 @@ export class ClientEncryption {
       this._timeoutMS != null
         ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
         : undefined;
-    const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
+    const { v } = deserialize(await stateMachine.execute(this, context, { timeoutContext }));
     return v;
   }
 }

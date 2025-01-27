@@ -8,7 +8,7 @@ import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_command_cursor';
 import { MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
-import type { TODO_NODE_3286 } from './mongo_types';
+import type { Abortable, TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import { CollectionsOperation } from './operations/collections';
 import {
@@ -273,7 +273,7 @@ export class Db {
    * @param command - The command to run
    * @param options - Optional settings for the command
    */
-  async command(command: Document, options?: RunCommandOptions): Promise<Document> {
+  async command(command: Document, options?: RunCommandOptions & Abortable): Promise<Document> {
     // Intentionally, we do not inherit options from parent for this operation.
     return await executeOperation(
       this.client,
@@ -284,7 +284,8 @@ export class Db {
           ...resolveBSONOptions(options),
           timeoutMS: options?.timeoutMS ?? this.timeoutMS,
           session: options?.session,
-          readPreference: options?.readPreference
+          readPreference: options?.readPreference,
+          signal: options?.signal
         })
       )
     );
@@ -351,22 +352,25 @@ export class Db {
    */
   listCollections(
     filter: Document,
-    options: Exclude<ListCollectionsOptions, 'nameOnly'> & { nameOnly: true }
+    options: Exclude<ListCollectionsOptions, 'nameOnly'> & { nameOnly: true } & Abortable
   ): ListCollectionsCursor<Pick<CollectionInfo, 'name' | 'type'>>;
   listCollections(
     filter: Document,
-    options: Exclude<ListCollectionsOptions, 'nameOnly'> & { nameOnly: false }
+    options: Exclude<ListCollectionsOptions, 'nameOnly'> & { nameOnly: false } & Abortable
   ): ListCollectionsCursor<CollectionInfo>;
   listCollections<
     T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
       | Pick<CollectionInfo, 'name' | 'type'>
       | CollectionInfo
-  >(filter?: Document, options?: ListCollectionsOptions): ListCollectionsCursor<T>;
+  >(filter?: Document, options?: ListCollectionsOptions & Abortable): ListCollectionsCursor<T>;
   listCollections<
     T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
       | Pick<CollectionInfo, 'name' | 'type'>
       | CollectionInfo
-  >(filter: Document = {}, options: ListCollectionsOptions = {}): ListCollectionsCursor<T> {
+  >(
+    filter: Document = {},
+    options: ListCollectionsOptions & Abortable = {}
+  ): ListCollectionsCursor<T> {
     return new ListCollectionsCursor<T>(this, filter, resolveOptions(this, options));
   }
 
