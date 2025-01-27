@@ -576,6 +576,13 @@ describe('OIDC Auth Spec Tests', function () {
         // - Assert there were `SaslStart` commands executed.
         // - Close the client.
         beforeEach(async function () {
+          utilClient = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: createCallback()
+            },
+            retryReads: false
+          });
+
           client = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: callbackSpy
@@ -588,6 +595,7 @@ describe('OIDC Auth Spec Tests', function () {
               saslStarts.push(event);
             }
           });
+
           const provider = client.s.authProviders.getOrCreateProvider('MONGODB-OIDC', {
             OIDC_CALLBACK: callbackSpy
           }) as MongoDBOIDC;
@@ -597,17 +605,20 @@ describe('OIDC Auth Spec Tests', function () {
 
           provider.workflow.cache.put({ accessToken: token });
           collection = client.db('test').collection('test');
+        });
 
+        afterEach(async function () {
+          await utilClient.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          await utilClient.close();
+        });
+
+        it('successfully authenticates', async function () {
           await collection.insertOne({ name: 'test' });
           expect(callbackSpy).to.not.have.been.called;
           expect(saslStarts).to.be.empty;
-
-          utilClient = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: createCallback()
-            },
-            retryReads: false
-          });
 
           await utilClient
             .db()
@@ -622,17 +633,7 @@ describe('OIDC Auth Spec Tests', function () {
                 errorCode: 391
               }
             });
-        });
 
-        afterEach(async function () {
-          await utilClient.db().admin().command({
-            configureFailPoint: 'failCommand',
-            mode: 'off'
-          });
-          await utilClient.close();
-        });
-
-        it('successfully authenticates', async function () {
           await collection.insertOne({ name: 'test' });
           expect(callbackSpy).to.have.been.calledOnce;
           expect(saslStarts.length).to.equal(1);
