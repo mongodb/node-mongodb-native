@@ -820,6 +820,8 @@ describe('class MongoClient', function () {
         await client.close();
 
         expect(client.topology).to.be.undefined;
+      });
+    });
 
     describe('active cursors', function () {
       let collection: Collection<{ _id: number }>;
