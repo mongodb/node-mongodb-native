@@ -11,6 +11,7 @@ import { kDecorateResult } from '../constants';
 import { getMongoDBClientEncryption } from '../deps';
 import { MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
+import { type Abortable } from '../mongo_types';
 import { MongoDBCollectionNamespace } from '../utils';
 import { autoSelectSocketOptions } from './client_encryption';
 import * as cryptoCallbacks from './crypto_callbacks';
@@ -372,8 +373,10 @@ export class AutoEncrypter {
   async encrypt(
     ns: string,
     cmd: Document,
-    options: CommandOptions = {}
+    options: CommandOptions & Abortable = {}
   ): Promise<Document | Uint8Array> {
+    options.signal?.throwIfAborted();
+
     if (this._bypassEncryption) {
       // If `bypassAutoEncryption` has been specified, don't encrypt
       return cmd;
@@ -398,7 +401,7 @@ export class AutoEncrypter {
       socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
-    return deserialize(await stateMachine.execute(this, context, options.timeoutContext), {
+    return deserialize(await stateMachine.execute(this, context, options), {
       promoteValues: false,
       promoteLongs: false
     });
@@ -407,7 +410,12 @@ export class AutoEncrypter {
   /**
    * Decrypt a command response
    */
-  async decrypt(response: Uint8Array, options: CommandOptions = {}): Promise<Uint8Array> {
+  async decrypt(
+    response: Uint8Array,
+    options: CommandOptions & Abortable = {}
+  ): Promise<Uint8Array> {
+    options.signal?.throwIfAborted();
+
     const context = this._mongocrypt.makeDecryptionContext(response);
 
     context.id = this._contextCounter++;
@@ -419,11 +427,7 @@ export class AutoEncrypter {
       socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
-    return await stateMachine.execute(
-      this,
-      context,
-      options.timeoutContext?.csotEnabled() ? options.timeoutContext : undefined
-    );
+    return await stateMachine.execute(this, context, options);
   }
 
   /**

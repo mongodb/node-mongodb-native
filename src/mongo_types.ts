@@ -474,6 +474,44 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
 /** @public */
 export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
 
+/** @public */
+export type Abortable = {
+  /**
+   * @experimental
+   * When provided, the corresponding `AbortController` can be used to abort an asynchronous action.
+   *
+   * The `signal.reason` value is used as the error thrown.
+   *
+   * @remarks
+   * **NOTE:** If an abort signal aborts an operation while the driver is writing to the underlying
+   * socket or reading the response from the server, the socket will be closed.
+   * If signals are aborted at a high rate during socket read/writes this can lead to a high rate of connection reestablishment.
+   *
+   * We plan to mitigate this in a future release, please follow NODE-6062 (`timeoutMS` expiration suffers the same limitation).
+   *
+   * AbortSignals are likely a best fit for human interactive interruption (ex. ctrl-C) where the frequency
+   * of cancellation is reasonably low. If a signal is programmatically aborted for 100s of operations you can empty
+   * the driver's connection pool.
+   *
+   * @example
+   * ```js
+   * const controller = new AbortController();
+   * const { signal } = controller;
+   * process.on('SIGINT', () => controller.abort(new Error('^C pressed')));
+   *
+   * try {
+   *   const res = await fetch('...', { signal });
+   *   await collection.findOne(await res.json(), { signal });
+   * catch (error) {
+   *   if (error === signal.reason) {
+   *     // signal abort error handling
+   *   }
+   * }
+   * ```
+   */
+  signal?: AbortSignal | undefined;
+};
+
 /**
  * Helper types for dot-notation filter attributes
  */

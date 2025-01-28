@@ -1,6 +1,24 @@
 import { inspect, promisify } from 'util';
+import { isUint8Array } from 'util/types';
 
-import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
+import {
+  type Binary,
+  type BSONRegExp,
+  type BSONSymbol,
+  type Code,
+  type DBRef,
+  type Decimal128,
+  type Document,
+  type Double,
+  EJSON,
+  type EJSONOptions,
+  type Int32,
+  type Long,
+  type MaxKey,
+  type MinKey,
+  type ObjectId,
+  type Timestamp
+} from './bson';
 import type { CommandStartedEvent } from './cmap/command_monitoring_events';
 import type {
   ConnectionCheckedInEvent,
@@ -413,6 +431,20 @@ export interface LogConvertible extends Record<string, any> {
   toLog(): Record<string, any>;
 }
 
+type BSONObject =
+  | BSONRegExp
+  | BSONSymbol
+  | Code
+  | DBRef
+  | Decimal128
+  | Double
+  | Int32
+  | Long
+  | MaxKey
+  | MinKey
+  | ObjectId
+  | Timestamp
+  | Binary;
 /** @internal */
 export function stringifyWithMaxLen(
   value: any,
@@ -421,13 +453,107 @@ export function stringifyWithMaxLen(
 ): string {
   let strToTruncate = '';
 
+  let currentLength = 0;
+  const maxDocumentLengthEnsurer = function maxDocumentLengthEnsurer(key: string, value: any) {
+    if (currentLength >= maxDocumentLength) {
+      return undefined;
+    }
+    // Account for root document
+    if (key === '') {
+      // Account for starting brace
+      currentLength += 1;
+      return value;
+    }
+
+    // +4 accounts for 2 quotation marks, colon and comma after value
+    // Note that this potentially undercounts since it does not account for escape sequences which
+    // will have an additional backslash added to them once passed through JSON.stringify.
+    currentLength += key.length + 4;
+
+    if (value == null) return value;
+
+    switch (typeof value) {
+      case 'string':
+        // +2 accounts for quotes
+        // Note that this potentially undercounts similarly to the key length calculation
+        currentLength += value.length + 2;
+        break;
+      case 'number':
+      case 'bigint':
+        currentLength += String(value).length;
+        break;
+      case 'boolean':
+        currentLength += value ? 4 : 5;
+        break;
+      case 'object':
+        if (isUint8Array(value)) {
+          // '{"$binary":{"base64":"<base64 string>","subType":"XX"}}'
+          // This is an estimate based on the fact that the base64 is approximately 1.33x the length of
+          // the actual binary sequence https://en.wikipedia.org/wiki/Base64
+          currentLength += (22 + value.byteLength + value.byteLength * 0.33 + 18) | 0;
+        } else if ('_bsontype' in value) {
+          const v = value as BSONObject;
+          switch (v._bsontype) {
+            case 'Int32':
+              currentLength += String(v.value).length;
+              break;
+            case 'Double':
+              // Account for representing integers as <value>.0
+              currentLength +=
+                (v.value | 0) === v.value ? String(v.value).length + 2 : String(v.value).length;
+              break;
+            case 'Long':
+              currentLength += v.toString().length;
+              break;
+            case 'ObjectId':
+              // '{"$oid":"XXXXXXXXXXXXXXXXXXXXXXXX"}'
+              currentLength += 35;
+              break;
+            case 'MaxKey':
+            case 'MinKey':
+              // '{"$maxKey":1}' or '{"$minKey":1}'
+              currentLength += 13;
+              break;
+            case 'Binary':
+              // '{"$binary":{"base64":"<base64 string>","subType":"XX"}}'
+              // This is an estimate based on the fact that the base64 is approximately 1.33x the length of
+              // the actual binary sequence https://en.wikipedia.org/wiki/Base64
+              currentLength += (22 + value.position + value.position * 0.33 + 18) | 0;
+              break;
+            case 'Timestamp':
+              // '{"$timestamp":{"t":<t>,"i":<i>}}'
+              currentLength += 19 + String(v.t).length + 5 + String(v.i).length + 2;
+              break;
+            case 'Code':
+              // '{"$code":"<code>"}' or '{"$code":"<code>","$scope":<scope>}'
+              if (v.scope == null) {
+                currentLength += v.code.length + 10 + 2;
+              } else {
+                // Ignoring actual scope object, so this undercounts by a significant amount
+                currentLength += v.code.length + 10 + 11;
+              }
+              break;
+            case 'BSONRegExp':
+              // '{"$regularExpression":{"pattern":"<pattern>","options":"<options>"}}'
+              currentLength += 34 + v.pattern.length + 13 + v.options.length + 3;
+              break;
+          }
+        }
+    }
+    return value;
+  };
+
   if (typeof value === 'string') {
     strToTruncate = value;
   } else if (typeof value === 'function') {
     strToTruncate = value.name;
   } else {
     try {
-      strToTruncate = EJSON.stringify(value, options);
+      if (maxDocumentLength !== 0) {
+        strToTruncate = EJSON.stringify(value, maxDocumentLengthEnsurer, 0, options);
+      } else {
+        strToTruncate = EJSON.stringify(value, options);
+      }
     } catch (e) {
       strToTruncate = `Extended JSON serialization failed with: ${e.message}`;
     }

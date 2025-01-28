@@ -15,8 +15,15 @@ import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
+import { type Abortable } from '../mongo_types';
 import { Timeout, type TimeoutContext, TimeoutError } from '../timeout';
-import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '../utils';
+import {
+  addAbortListener,
+  BufferPool,
+  kDispose,
+  MongoDBCollectionNamespace,
+  promiseWithResolvers
+} from '../utils';
 import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
@@ -189,7 +196,7 @@ export class StateMachine {
   async execute(
     executor: StateMachineExecutable,
     context: MongoCryptContext,
-    timeoutContext?: TimeoutContext
+    options: { timeoutContext?: TimeoutContext } & Abortable
   ): Promise<Uint8Array> {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
@@ -199,6 +206,7 @@ export class StateMachine {
     let result: Uint8Array | null = null;
 
     while (context.state !== MONGOCRYPT_CTX_DONE && context.state !== MONGOCRYPT_CTX_ERROR) {
+      options.signal?.throwIfAborted();
       debug(`[context#${context.id}] ${stateToString.get(context.state) || context.state}`);
 
       switch (context.state) {
@@ -214,7 +222,7 @@ export class StateMachine {
             metaDataClient,
             context.ns,
             filter,
-            timeoutContext
+            options
           );
           if (collInfo) {
             context.addMongoOperationResponse(collInfo);
@@ -235,9 +243,9 @@ export class StateMachine {
           // When we are using the shared library, we don't have a mongocryptd manager.
           const markedCommand: Uint8Array = mongocryptdManager
             ? await mongocryptdManager.withRespawn(
-                this.markCommand.bind(this, mongocryptdClient, context.ns, command, timeoutContext)
+                this.markCommand.bind(this, mongocryptdClient, context.ns, command, options)
               )
-            : await this.markCommand(mongocryptdClient, context.ns, command, timeoutContext);
+            : await this.markCommand(mongocryptdClient, context.ns, command, options);
 
           context.addMongoOperationResponse(markedCommand);
           context.finishMongoOperation();
@@ -246,12 +254,7 @@ export class StateMachine {
 
         case MONGOCRYPT_CTX_NEED_MONGO_KEYS: {
           const filter = context.nextMongoOperation();
-          const keys = await this.fetchKeys(
-            keyVaultClient,
-            keyVaultNamespace,
-            filter,
-            timeoutContext
-          );
+          const keys = await this.fetchKeys(keyVaultClient, keyVaultNamespace, filter, options);
 
           if (keys.length === 0) {
             // See docs on EMPTY_V
@@ -273,7 +276,7 @@ export class StateMachine {
         }
 
         case MONGOCRYPT_CTX_NEED_KMS: {
-          await Promise.all(this.requests(context, timeoutContext));
+          await Promise.all(this.requests(context, options));
           context.finishKMSRequests();
           break;
         }
@@ -315,11 +318,13 @@ export class StateMachine {
    * @param kmsContext - A C++ KMS context returned from the bindings
    * @returns A promise that resolves when the KMS reply has be fully parsed
    */
-  async kmsRequest(request: MongoCryptKMSRequest, timeoutContext?: TimeoutContext): Promise<void> {
+  async kmsRequest(
+    request: MongoCryptKMSRequest,
+    options?: { timeoutContext?: TimeoutContext } & Abortable
+  ): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
-    const socketOptions = autoSelectSocketOptions(this.options.socketOptions || {});
-    const options: tls.ConnectionOptions & {
+    const socketOptions: tls.ConnectionOptions & {
       host: string;
       port: number;
       autoSelectFamily?: boolean;
@@ -328,7 +333,7 @@ export class StateMachine {
       host: parsedUrl[0],
       servername: parsedUrl[0],
       port,
-      ...socketOptions
+      ...autoSelectSocketOptions(this.options.socketOptions || {})
     };
     const message = request.message;
     const buffer = new BufferPool();
@@ -363,7 +368,7 @@ export class StateMachine {
           throw error;
         }
         try {
-          await this.setTlsOptions(providerTlsOptions, options);
+          await this.setTlsOptions(providerTlsOptions, socketOptions);
         } catch (err) {
           throw onerror(err);
         }
@@ -380,23 +385,25 @@ export class StateMachine {
       .once('close', () => rejectOnNetSocketError(onclose()))
       .once('connect', () => resolveOnNetSocketConnect());
 
+    let abortListener;
+
     try {
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
         const netSocketOptions = {
+          ...socketOptions,
           host: this.options.proxyOptions.proxyHost,
-          port: this.options.proxyOptions.proxyPort || 1080,
-          ...socketOptions
+          port: this.options.proxyOptions.proxyPort || 1080
         };
         netSocket.connect(netSocketOptions);
         await willConnect;
 
         try {
           socks ??= loadSocks();
-          options.socket = (
+          socketOptions.socket = (
             await socks.SocksClient.createConnection({
               existing_socket: netSocket,
               command: 'connect',
-              destination: { host: options.host, port: options.port },
+              destination: { host: socketOptions.host, port: socketOptions.port },
               proxy: {
                 // host and port are ignored because we pass existing_socket
                 host: 'iLoveJavaScript',
@@ -412,7 +419,7 @@ export class StateMachine {
         }
       }
 
-      socket = tls.connect(options, () => {
+      socket = tls.connect(socketOptions, () => {
         socket.write(message);
       });
 
@@ -421,6 +428,11 @@ export class StateMachine {
         reject: rejectOnTlsSocketError,
         resolve
       } = promiseWithResolvers<void>();
+
+      abortListener = addAbortListener(options?.signal, function () {
+        destroySockets();
+        rejectOnTlsSocketError(this.reason);
+      });
 
       socket
         .once('error', err => rejectOnTlsSocketError(onerror(err)))
@@ -436,8 +448,11 @@ export class StateMachine {
             resolve();
           }
         });
-      await (timeoutContext?.csotEnabled()
-        ? Promise.all([willResolveKmsRequest, Timeout.expires(timeoutContext?.remainingTimeMS)])
+      await (options?.timeoutContext?.csotEnabled()
+        ? Promise.all([
+            willResolveKmsRequest,
+            Timeout.expires(options.timeoutContext?.remainingTimeMS)
+          ])
         : willResolveKmsRequest);
     } catch (error) {
       if (error instanceof TimeoutError)
@@ -446,16 +461,17 @@ export class StateMachine {
     } finally {
       // There's no need for any more activity on this socket at this point.
       destroySockets();
+      abortListener?.[kDispose]();
     }
   }
 
-  *requests(context: MongoCryptContext, timeoutContext?: TimeoutContext) {
+  *requests(context: MongoCryptContext, options?: { timeoutContext?: TimeoutContext } & Abortable) {
     for (
       let request = context.nextKMSRequest();
       request != null;
       request = context.nextKMSRequest()
     ) {
-      yield this.kmsRequest(request, timeoutContext);
+      yield this.kmsRequest(request, options);
     }
   }
 
@@ -516,14 +532,16 @@ export class StateMachine {
     client: MongoClient,
     ns: string,
     filter: Document,
-    timeoutContext?: TimeoutContext
+    options?: { timeoutContext?: TimeoutContext } & Abortable
   ): Promise<Uint8Array | null> {
     const { db } = MongoDBCollectionNamespace.fromString(ns);
 
     const cursor = client.db(db).listCollections(filter, {
       promoteLongs: false,
       promoteValues: false,
-      timeoutContext: timeoutContext && new CursorTimeoutContext(timeoutContext, Symbol())
+      timeoutContext:
+        options?.timeoutContext && new CursorTimeoutContext(options?.timeoutContext, Symbol()),
+      signal: options?.signal
     });
 
     // There is always exactly zero or one matching documents, so this should always exhaust the cursor
@@ -547,17 +565,30 @@ export class StateMachine {
     client: MongoClient,
     ns: string,
     command: Uint8Array,
-    timeoutContext?: TimeoutContext
+    options?: { timeoutContext?: TimeoutContext } & Abortable
   ): Promise<Uint8Array> {
     const { db } = MongoDBCollectionNamespace.fromString(ns);
     const bsonOptions = { promoteLongs: false, promoteValues: false };
     const rawCommand = deserialize(command, bsonOptions);
 
+    const commandOptions: {
+      timeoutMS?: number;
+      signal?: AbortSignal;
+    } = {
+      timeoutMS: undefined,
+      signal: undefined
+    };
+
+    if (options?.timeoutContext?.csotEnabled()) {
+      commandOptions.timeoutMS = options.timeoutContext.remainingTimeMS;
+    }
+    if (options?.signal) {
+      commandOptions.signal = options.signal;
+    }
+
     const response = await client.db(db).command(rawCommand, {
       ...bsonOptions,
-      ...(timeoutContext?.csotEnabled()
-        ? { timeoutMS: timeoutContext?.remainingTimeMS }
-        : undefined)
+      ...commandOptions
     });
 
     return serialize(response, this.bsonOptions);
@@ -575,17 +606,30 @@ export class StateMachine {
     client: MongoClient,
     keyVaultNamespace: string,
     filter: Uint8Array,
-    timeoutContext?: TimeoutContext
+    options?: { timeoutContext?: TimeoutContext } & Abortable
   ): Promise<Array<DataKey>> {
     const { db: dbName, collection: collectionName } =
       MongoDBCollectionNamespace.fromString(keyVaultNamespace);
 
+    const commandOptions: {
+      timeoutContext?: CursorTimeoutContext;
+      signal?: AbortSignal;
+    } = {
+      timeoutContext: undefined,
+      signal: undefined
+    };
+
+    if (options?.timeoutContext != null) {
+      commandOptions.timeoutContext = new CursorTimeoutContext(options.timeoutContext, Symbol());
+    }
+    if (options?.signal != null) {
+      commandOptions.signal = options.signal;
+    }
+
     return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
-      .find(deserialize(filter), {
-        timeoutContext: timeoutContext && new CursorTimeoutContext(timeoutContext, Symbol())
-      })
+      .find(deserialize(filter), commandOptions)
       .toArray();
   }
 }

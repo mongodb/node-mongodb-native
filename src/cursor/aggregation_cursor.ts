@@ -8,6 +8,7 @@ import {
   validateExplainTimeoutOptions
 } from '../explain';
 import type { MongoClient } from '../mongo_client';
+import { type Abortable } from '../mongo_types';
 import { AggregateOperation, type AggregateOptions } from '../operations/aggregate';
 import { executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
@@ -32,14 +33,14 @@ export interface AggregationCursorOptions extends AbstractCursorOptions, Aggrega
 export class AggregationCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   public readonly pipeline: Document[];
   /** @internal */
-  private aggregateOptions: AggregateOptions;
+  private aggregateOptions: AggregateOptions & Abortable;
 
   /** @internal */
   constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
-    options: AggregateOptions = {}
+    options: AggregateOptions & Abortable = {}
   ) {
     super(client, namespace, options);
 
@@ -73,7 +74,8 @@ export class AggregationCursor<TSchema = any> extends ExplainableCursor<TSchema>
     const options = {
       ...this.aggregateOptions,
       ...this.cursorOptions,
-      session
+      session,
+      signal: this.signal
     };
     if (options.explain) {
       try {

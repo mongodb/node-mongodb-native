@@ -2,6 +2,7 @@ import type { Binary, Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { type CursorTimeoutContext, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
+import { type Abortable } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
@@ -10,7 +11,9 @@ import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
+export interface ListCollectionsOptions
+  extends Omit<CommandOperationOptions, 'writeConcern'>,
+    Abortable {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
   /** Since 4.0: If true and nameOnly is true, allows a user without the required privilege (i.e. listCollections action on the database) to run the command when access control is enforced. */
