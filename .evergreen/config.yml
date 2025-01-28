@@ -4477,9 +4477,6 @@ task_groups:
             AZUREKMS_VMNAME_PREFIX: NODE_DRIVER
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
-      - command: expansions.update
-        params:
-          file: src/testazurekms-expansions.yml
     teardown_group:
       - command: expansions.update
         params:
@@ -4487,7 +4484,6 @@ task_groups:
       - command: subprocess.exec
         params:
           binary: bash
-          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
     tasks:
