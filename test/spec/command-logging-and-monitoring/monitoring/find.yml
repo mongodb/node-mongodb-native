@@ -1,6 +1,6 @@
 description: "find"
 
-schemaVersion: "1.1"
+schemaVersion: "1.15"
 
 createEntities:
   - client:
@@ -56,6 +56,7 @@ tests:
                   firstBatch:
                     -  { _id: 1, x: 11 }
               commandName: find
+              databaseName: *databaseName
 
   - description: "A successful find with options"
     operations:
@@ -98,6 +99,7 @@ tests:
                     - { x: 33 }
                     - { x: 22 }
               commandName: find
+              databaseName: *databaseName
 
   - description: "A successful find with showRecordId and returnKey"
     operations:
@@ -131,6 +133,7 @@ tests:
                     - { _id: 4 }
                     - { _id: 5 }
               commandName: find
+              databaseName: *databaseName
 
   - description: "A successful find with a getMore"
     operations:
@@ -162,6 +165,7 @@ tests:
                     - { _id: 2, x: 22 }
                     - { _id: 3, x: 33 }
               commandName: find
+              databaseName: *databaseName
           - commandStartedEvent:
               command:
                 getMore: { $$type: [ int, long ] }
@@ -179,6 +183,7 @@ tests:
                     - { _id: 4, x: 44 }
                     - { _id: 5, x: 55 }
               commandName: getMore
+              databaseName: *databaseName
 
   - description: "A successful find event with a getmore and the server kills the cursor (<= 4.4)"
     runOnRequirements:
@@ -216,6 +221,7 @@ tests:
                     - { _id: 2, x: 22 }
                     - { _id: 3, x: 33 }
               commandName: find
+              databaseName: *databaseName
           - commandStartedEvent:
               command:
                 getMore: { $$type: [ int, long ] }
@@ -232,6 +238,7 @@ tests:
                   nextBatch:
                     - { _id: 4, x: 44 }
               commandName: getMore
+              databaseName: *databaseName
 
   - description: "A failed find event"
     operations:
@@ -252,3 +259,4 @@ tests:
               databaseName: *databaseName
           - commandFailedEvent:
               commandName: find
+              databaseName: *databaseName
