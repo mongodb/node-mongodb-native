@@ -724,22 +724,49 @@ describe('class MongoClient', function () {
     });
 
     context('concurrent calls', () => {
+      let topologyClosedSpy;
+      beforeEach(async function () {
+        await client.connect();
+        const coll = client.db('db').collection('concurrentCalls');
+        const session = client.startSession();
+        await coll.findOne({}, { session: session });
+        topologyClosedSpy = sinon.spy(Topology.prototype, 'close');
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+      });
+
       context('when two concurrent calls to close() occur', () => {
-        it('no error is thrown', async function () {
-          expect(() => Promise.all([client.close(), client.close()])).to.not.throw;
+        it('does not throw', async function () {
+          await Promise.all([client.close(), client.close()]);
+        });
+
+        it('clean-up logic is performed only once', async function () {
+          await Promise.all([client.close(), client.close()]);
+          expect(topologyClosedSpy).to.have.been.calledOnce;
         });
       });
 
       context('when more than two concurrent calls to close() occur', () => {
-        it('no error is thrown', async function () {
-          expect(() =>
-            Promise.all([client.close(), client.close(), client.close(), client.close()])
-          ).to.not.throw;
+        it('does not throw', async function () {
+          await Promise.all([client.close(), client.close(), client.close(), client.close()]);
+        });
+
+        it('clean-up logic is performed only once', async function () {
+          await client.connect();
+          await Promise.all([
+            client.close(),
+            client.close(),
+            client.close(),
+            client.close(),
+            client.close()
+          ]);
+          expect(topologyClosedSpy).to.have.been.calledOnce;
         });
       });
 
       it('when connect rejects lock is released regardless', async function () {
-        await client.connect();
         expect(client.topology?.isConnected()).to.be.true;
 
         const closeStub = sinon.stub(client, 'close');
