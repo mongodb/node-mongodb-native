@@ -556,4 +556,47 @@ describe('class AbstractCursor', function () {
       );
     });
   });
+
+  describe('cursor tracking', () => {
+    let client: MongoClient;
+    let collection: Collection;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      collection = client.db('activeCursors').collection('activeCursors');
+      await collection.drop().catch(() => null);
+      await collection.insertMany(Array.from({ length: 50 }, (_, i) => ({ i })));
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('adds itself to a set upon construction', () => {
+      collection.find({}, { batchSize: 1 });
+      expect(client.s.activeCursors).to.have.lengthOf(1);
+    });
+
+    it('adds itself to a set upon rewind', async () => {
+      const cursor = collection.find({}, { batchSize: 1 });
+      await cursor.next();
+      expect(client.s.activeCursors).to.have.lengthOf(1);
+      await cursor.close();
+      expect(client.s.activeCursors).to.have.lengthOf(0);
+      cursor.rewind();
+      expect(client.s.activeCursors).to.have.lengthOf(1);
+    });
+
+    it('does not add more than one close listener', async () => {
+      const cursor = collection.find({}, { batchSize: 1 });
+      await cursor.next();
+      expect(cursor.listeners('close')).to.have.lengthOf(1);
+      await cursor.close();
+      expect(cursor.listeners('close')).to.have.lengthOf(0);
+      cursor.rewind();
+      cursor.rewind();
+      cursor.rewind();
+      expect(cursor.listeners('close')).to.have.lengthOf(1);
+    });
+  });
 });

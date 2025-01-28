@@ -33,7 +33,7 @@ import {
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
-import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { type Abortable, type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
@@ -438,7 +438,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   private async *sendWire(
     message: WriteProtocolMessageType,
-    options: CommandOptions,
+    options: CommandOptions & Abortable,
     responseType?: MongoDBResponseConstructor
   ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
@@ -453,7 +453,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       await this.writeCommand(message, {
         agreedCompressor: this.description.compressor ?? 'none',
         zlibCompressionLevel: this.description.zlibCompressionLevel,
-        timeoutContext: options.timeoutContext
+        timeoutContext: options.timeoutContext,
+        signal: options.signal
       });
 
       if (options.noResponse || message.moreToCome) {
@@ -473,7 +474,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         );
       }
 
-      for await (const response of this.readMany({ timeoutContext: options.timeoutContext })) {
+      for await (const response of this.readMany(options)) {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
@@ -492,9 +493,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *sendCommand(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions,
+    options: CommandOptions & Abortable,
     responseType?: MongoDBResponseConstructor
   ) {
+    options?.signal?.throwIfAborted();
+
     const message = this.prepareCommand(ns.db, command, options);
     let started = 0;
     if (this.shouldEmitAndLogCommand) {
@@ -610,10 +613,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {},
+    options: CommandOptions & Abortable = {},
     responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     this.throwIfAborted();
+    options.signal?.throwIfAborted();
+
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
       if (options.timeoutContext?.csotEnabled()) {
         if (MongoDBResponse.is(document)) {
@@ -676,7 +681,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       agreedCompressor?: CompressorName;
       zlibCompressionLevel?: number;
       timeoutContext?: TimeoutContext;
-    }
+    } & Abortable
   ): Promise<void> {
     const finalCommand =
       options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
@@ -701,23 +706,23 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     if (this.socket.write(buffer)) return;
 
-    const drainEvent = once<void>(this.socket, 'drain');
+    const drainEvent = once<void>(this.socket, 'drain', options);
     const timeout = options?.timeoutContext?.timeoutForSocketWrite;
-    if (timeout) {
-      try {
-        return await Promise.race([drainEvent, timeout]);
-      } catch (error) {
-        let err = error;
-        if (TimeoutError.is(error)) {
-          err = new MongoOperationTimeoutError('Timed out at socket write');
-          this.cleanup(err);
-        }
-        throw error;
-      } finally {
-        timeout.clear();
+    const drained = timeout ? Promise.race([drainEvent, timeout]) : drainEvent;
+    try {
+      return await drained;
+    } catch (writeError) {
+      if (TimeoutError.is(writeError)) {
+        const timeoutError = new MongoOperationTimeoutError('Timed out at socket write');
+        this.onError(timeoutError);
+        throw timeoutError;
+      } else if (writeError === options.signal?.reason) {
+        this.onError(writeError);
       }
+      throw writeError;
+    } finally {
+      timeout?.clear();
     }
-    return await drainEvent;
   }
 
   /**
@@ -729,9 +734,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    *
    * Note that `for-await` loops call `return` automatically when the loop is exited.
    */
-  private async *readMany(options: {
-    timeoutContext?: TimeoutContext;
-  }): AsyncGenerator<OpMsgResponse | OpReply> {
+  private async *readMany(
+    options: {
+      timeoutContext?: TimeoutContext;
+    } & Abortable
+  ): AsyncGenerator<OpMsgResponse | OpReply> {
     try {
       this.dataEvents = onData(this.messageStream, options);
       this.messageStream.resume();
@@ -745,16 +752,17 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
       }
     } catch (readError) {
-      const err = readError;
       if (TimeoutError.is(readError)) {
-        const error = new MongoOperationTimeoutError(
+        const timeoutError = new MongoOperationTimeoutError(
           `Timed out during socket read (${readError.duration}ms)`
         );
         this.dataEvents = null;
-        this.onError(error);
-        throw error;
+        this.onError(timeoutError);
+        throw timeoutError;
+      } else if (readError === options.signal?.reason) {
+        this.onError(readError);
       }
-      throw err;
+      throw readError;
     } finally {
       this.dataEvents = null;
       this.messageStream.pause();

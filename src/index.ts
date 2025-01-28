@@ -430,6 +430,7 @@ export type {
   SeverityLevel
 } from './mongo_logger';
 export type {
+  Abortable,
   CommonEvents,
   EventsDescription,
   GenericListener,

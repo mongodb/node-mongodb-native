@@ -18,6 +18,7 @@ import type { ClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
+import { type AbstractCursor } from './cursor/abstract_cursor';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
@@ -323,6 +324,12 @@ export interface MongoClientPrivate {
    * - used to notify the leak checker in our tests if test author forgot to clean up explicit sessions
    */
   readonly activeSessions: Set<ClientSession>;
+  /**
+   * We keep a reference to the cursors that are created from this client.
+   * - used to track and close all cursors in client.close().
+   *   Cursors in this set are ones that still need to have their close method invoked (no other conditions are considered)
+   */
+  readonly activeCursors: Set<AbstractCursor>;
   readonly sessionPool: ServerSessionPool;
   readonly options: MongoOptions;
   readonly readConcern?: ReadConcern;
@@ -400,6 +407,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       hasBeenClosed: false,
       sessionPool: new ServerSessionPool(this),
       activeSessions: new Set(),
+      activeCursors: new Set(),
       authProviders: new MongoClientAuthProviders(),
 
       get options() {
@@ -666,6 +674,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       configurable: false,
       writable: false
     });
+
+    const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
+    this.s.activeCursors.clear();
+
+    await Promise.all(activeCursorCloses);
 
     const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
     this.s.activeSessions.clear();

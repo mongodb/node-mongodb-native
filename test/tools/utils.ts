@@ -622,7 +622,7 @@ export async function clearFailPoint(configuration: TestConfiguration, url = con
 
 export async function makeMultiBatchWrite(
   configuration: TestConfiguration
-): Promise<AnyClientBulkWriteModel[]> {
+): Promise<AnyClientBulkWriteModel<any>[]> {
   const { maxBsonObjectSize, maxMessageSizeBytes } = await configuration.hello();
 
   const length = maxMessageSizeBytes / maxBsonObjectSize + 1;
@@ -637,10 +637,10 @@ export async function makeMultiBatchWrite(
 
 export async function makeMultiResponseBatchModelArray(
   configuration: TestConfiguration
-): Promise<AnyClientBulkWriteModel[]> {
+): Promise<AnyClientBulkWriteModel<any>[]> {
   const { maxBsonObjectSize } = await configuration.hello();
   const namespace = `foo.${new BSON.ObjectId().toHexString()}`;
-  const models: AnyClientBulkWriteModel[] = [
+  const models: AnyClientBulkWriteModel<any>[] = [
     {
       name: 'updateOne',
       namespace,
@@ -693,3 +693,35 @@ export function mergeTestMetadata(
     }
   };
 }
+
+export function findLast<T, S extends T>(
+  array: T[],
+  predicate: (value: T, index: number, array: T[]) => value is S,
+  thisArg?: any
+): S | undefined;
+export function findLast<T>(
+  array: T[],
+  predicate: (value: T, index: number, array: T[]) => boolean,
+  thisArg?: any
+): T | undefined;
+export function findLast(
+  array: unknown[],
+  predicate: (value: unknown, index: number, array: unknown[]) => boolean,
+  thisArg?: any
+): unknown | undefined {
+  if (typeof array.findLast === 'function') return array.findLast(predicate, thisArg);
+  return array.slice().reverse().find(predicate, thisArg);
+}
+
+// Node.js 16 doesn't make this global, but it can still be obtained.
+export const DOMException: {
+  new: (
+    message?: string,
+    nameOrOptions?: string | { name?: string; cause?: unknown }
+  ) => DOMException;
+} = (() => {
+  if (globalThis.DOMException != null) return globalThis.DOMException;
+  const ac = new AbortController();
+  ac.abort();
+  return ac.signal.reason.constructor;
+})();
