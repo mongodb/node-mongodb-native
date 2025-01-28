@@ -470,10 +470,14 @@ describe('MongoClient.close() Integration', () => {
       client = this.configuration.newClient();
       utilClient = this.configuration.newClient();
       await client.connect();
-      const collection = client.db('db').collection('collection');
+      const collection = await client.db('db').createCollection('collection');
+      console.log('createCollection done');
       session = client.startSession({ explicit: false });
+      console.log('startSession done');
       session.startTransaction();
+      console.log('startTransaction done');
       await collection.insertOne({ x: 1 }, { session });
+      console.log('insert done');
 
       const opBefore = await utilClient.db().admin().command({ currentOp: 1 });
       idleSessionsBeforeClose = opBefore.inprog.filter(s => s.type === 'idleSession');
@@ -532,7 +536,7 @@ describe('MongoClient.close() Integration', () => {
       client = this.configuration.newClient();
       utilClient = this.configuration.newClient();
       await client.connect();
-      const collection = client.db('db').collection('collection');
+      const collection = await client.db('db').createCollection('collection');
       session = client.startSession();
       session.startTransaction();
       await collection.insertOne({ x: 1 }, { session });
