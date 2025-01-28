@@ -389,7 +389,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
     options?: ReplaceOptions
-  ): Promise<UpdateResult<TSchema> | Document> {
+  ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
       new ReplaceOneOperation(
