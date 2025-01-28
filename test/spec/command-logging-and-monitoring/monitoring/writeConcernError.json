@@ -1,9 +1,9 @@
 {
   "description": "writeConcernError",
-  "schemaVersion": "1.13",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
-      "minServerVersion": "4.1.0",
+      "minServerVersion": "4.3.1",
       "topologies": [
         "replicaset"
       ],
@@ -66,11 +66,11 @@
                 "failCommands": [
                   "insert"
                 ],
+                "errorLabels": [
+                  "RetryableWriteError"
+                ],
                 "writeConcernError": {
-                  "code": 91,
-                  "errorLabels": [
-                    "RetryableWriteError"
-                  ]
+                  "code": 91
                 }
               }
             }
@@ -112,11 +112,11 @@
                 "reply": {
                   "ok": 1,
                   "n": 1,
+                  "errorLabels": [
+                    "RetryableWriteError"
+                  ],
                   "writeConcernError": {
-                    "code": 91,
-                    "errorLabels": [
-                      "RetryableWriteError"
-                    ]
+                    "code": 91
                   }
                 },
                 "commandName": "insert"
