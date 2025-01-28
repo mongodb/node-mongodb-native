@@ -1116,28 +1116,10 @@ tasks:
         type: setup
         params:
           binary: bash
-          add_expansions_to_env: true
           env:
             DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
-            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
-            GCPKMS_ZONE: ${GCPKMS_ZONE}
-            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
           args:
-            - src/.evergreen/setup-gcp-testing.sh
-      - command: subprocess.exec
-        type: test
-        params:
-          working_dir: src
-          binary: bash
-          env:
-            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
-            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
-            GCPKMS_ZONE: ${GCPKMS_ZONE}
-            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
-            GCPKMS_CMD: env EXPECTED_GCPKMS_OUTCOME=success bash src/.evergreen/run-gcp-kms-tests.sh
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh
+            - src/.evergreen/run-deployed-gcp-kms-tests.sh
   - name: test-gcpkms-fail-task
     commands:
       - command: expansions.update
