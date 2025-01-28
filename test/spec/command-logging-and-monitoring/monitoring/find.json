@@ -1,6 +1,6 @@
 {
   "description": "find",
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.15",
   "createEntities": [
     {
       "client": {
@@ -103,7 +103,8 @@
                     ]
                   }
                 },
-                "commandName": "find"
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
               }
             }
           ]
@@ -198,7 +199,8 @@
                     ]
                   }
                 },
-                "commandName": "find"
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
               }
             }
           ]
@@ -262,7 +264,8 @@
                     ]
                   }
                 },
-                "commandName": "find"
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
               }
             }
           ]
@@ -338,7 +341,8 @@
                     ]
                   }
                 },
-                "commandName": "find"
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
               }
             },
             {
@@ -376,7 +380,8 @@
                     ]
                   }
                 },
-                "commandName": "getMore"
+                "commandName": "getMore",
+                "databaseName": "command-monitoring-tests"
               }
             }
           ]
@@ -464,7 +469,8 @@
                     ]
                   }
                 },
-                "commandName": "find"
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
               }
             },
             {
@@ -498,7 +504,8 @@
                     ]
                   }
                 },
-                "commandName": "getMore"
+                "commandName": "getMore",
+                "databaseName": "command-monitoring-tests"
               }
             }
           ]
@@ -539,7 +546,8 @@
             },
             {
               "commandFailedEvent": {
-                "commandName": "find"
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
               }
             }
           ]

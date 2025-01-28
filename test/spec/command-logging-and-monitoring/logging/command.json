@@ -93,6 +93,7 @@
               "component": "command",
               "data": {
                 "message": "Command succeeded",
+                "databaseName": "logging-tests",
                 "commandName": "ping",
                 "reply": {
                   "$$type": "string"
@@ -177,6 +178,7 @@
               "component": "command",
               "data": {
                 "message": "Command failed",
+                "databaseName": "logging-tests",
                 "commandName": "find",
                 "failure": {
                   "$$exists": true

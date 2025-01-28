@@ -1,8 +1,8 @@
 description: "writeConcernError"
-schemaVersion: "1.13"
+schemaVersion: "1.4"
 runOnRequirements:
   -
-    minServerVersion: 4.1.0
+    minServerVersion: "4.3.1" # failCommand errorLabels option
     topologies:
       - replicaset
     serverless: "forbid"
@@ -41,9 +41,9 @@ tests:
             mode: { times: 1 }
             data:
               failCommands: [ insert ]
+              errorLabels: [ RetryableWriteError ]
               writeConcernError:
                 code: 91 # ShutdownInProgress
-                errorLabels: [RetryableWriteError]
       - name: insertOne
         object: *collection
         arguments:
@@ -63,7 +63,8 @@ tests:
               reply:
                 ok: 1
                 n: 1
-                writeConcernError: { code: 91, errorLabels: [ "RetryableWriteError" ] }
+                errorLabels: [ "RetryableWriteError" ]
+                writeConcernError: { code: 91 }
               commandName: insert
           - commandStartedEvent:
               command:
