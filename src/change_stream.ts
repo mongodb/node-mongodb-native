@@ -22,7 +22,7 @@ import type { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerSessionId } from './sessions';
 import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
-import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
+import { filterOptions, getTopology, type MongoDBNamespace, noop, squashError } from './utils';
 
 const CHANGE_STREAM_OPTIONS = [
   'resumeAfter',
