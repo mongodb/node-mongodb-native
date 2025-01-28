@@ -31,6 +31,9 @@ about the types of tests and how to run them.
     - [Load Balanced](#load-balanced)
     - [Client-Side Field-Level Encryption (CSFLE)](#client-side-field-level-encryption-csfle)
       - [KMIP FLE support tests](#kmip-fle-support-tests)
+    - [Deployed KMS Tests](#deployed-kms-tests)
+      - [Azure KMS](#azure-kms)
+      - [GCP KMS](#gcp-kms)
     - [Deployed Atlas Tests](#deployed-atlas-tests)
       - [Launching an Atlas Cluster](#launching-an-atlas-cluster)
       - [Search Indexes](#search-indexes)
@@ -634,6 +637,63 @@ The following steps will walk you through how to run the tests for CSFLE.
    ```sh
    npx mocha --config test/mocha_mongodb.json test/integration/client-side-encryption/
    ```
+
+### Deployed KMS Tests
+
+CSFLE supports automatic KMS credential fetching for Azure, GCP and AWS.  In order to e2e test GCP and Azure, we must run the tests on an actual GCP or Azure host (our ).  This is supported by drivers-evergreen-tools.
+
+The basic idea is to
+
+1. Provision an Azure or GCP server.
+2. Set up a cluster on the server.
+3. Copy the driver and tests to the server and run the tests on the server.
+4. Copy the results back.
+
+All of this is handled in the csfle/azurekms and csfle/gcpkms folders in drivers-evergreen-tools.
+
+> [!IMPORTANT]
+> Azure VMs and GCP VMs must be destroyed with their corresponding `teardown.sh` scripts.
+
+#### Azure KMS
+
+1. Provision an Azure server.  You must set the `AZUREKMS_VMNAME_PREFIX` variable: 
+
+```bash
+export AZUREKMS_VMNAME_PREFIX: "NODE_DRIVER"
+bash ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
+```
+
+2. Comment out the following line in `run-deployed-azure-kms-tests.sh`:
+
+```bash
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
+```
+
+3. Run the tests:
+
+```bash
+bash .evergreen/run-deployed-azure-kms-tests.sh
+```
+
+#### GCP KMS
+
+1. Provision an GCP server.
+
+```bash
+bash ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
+```
+
+1. Comment out the following line in `run-deployed-gcp-kms-tests.sh`:
+
+```bash
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
+```
+
+3. Run the tests:
+
+```bash
+bash .evergreen/run-deployed-gcp-kms-tests.sh
+```
 
 ### Deployed Atlas Tests
 

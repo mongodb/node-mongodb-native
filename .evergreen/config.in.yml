@@ -1197,9 +1197,10 @@ tasks:
         type: setup
         params:
           binary: bash
-          add_expansions_to_env: true
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           args:
-            - src/.evergreen/copy-driver-to-azure-and-run.sh
+            - src/.evergreen/run-deployed-azure-kms-tests.sh
 
   - name: "test-azurekms-fail-task"
     commands:
@@ -1426,21 +1427,11 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
-      - command: expansions.update
-        # Load the GCPKMS_GCLOUD, GCPKMS_INSTANCE, GCPKMS_REGION, and GCPKMS_ZONE expansions.
-        params:
-          file: src/testgcpkms-expansions.yml
 
     teardown_group:
       - command: subprocess.exec
         params:
           binary: bash
-          add_expansions_to_env: true
-          env:
-            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
-            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
-            GCPKMS_ZONE: ${GCPKMS_ZONE}
-            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
     tasks:
@@ -1459,10 +1450,6 @@ task_groups:
             AZUREKMS_VMNAME_PREFIX: "NODE_DRIVER"
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
-      - command: expansions.update
-        # Load AZUREKMS_VMNAME into the expansions.
-        params:
-          file: src/testazurekms-expansions.yml
 
     teardown_group:
       # Load expansions again. The setup task may have failed before running `expansions.update`.
@@ -1472,7 +1459,6 @@ task_groups:
       - command: subprocess.exec
         params:
           binary: bash
-          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
     tasks:

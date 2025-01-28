@@ -1152,9 +1152,10 @@ tasks:
         type: setup
         params:
           binary: bash
-          add_expansions_to_env: true
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           args:
-            - src/.evergreen/copy-driver-to-azure-and-run.sh
+            - src/.evergreen/run-deployed-azure-kms-tests.sh
   - name: test-azurekms-fail-task
     commands:
       - command: expansions.update
@@ -4455,19 +4456,10 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
-      - command: expansions.update
-        params:
-          file: src/testgcpkms-expansions.yml
     teardown_group:
       - command: subprocess.exec
         params:
           binary: bash
-          add_expansions_to_env: true
-          env:
-            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
-            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
-            GCPKMS_ZONE: ${GCPKMS_ZONE}
-            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
     tasks:
