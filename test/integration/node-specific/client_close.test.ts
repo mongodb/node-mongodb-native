@@ -461,7 +461,8 @@ describe('MongoClient.close() Integration', () => {
 
     const metadata: MongoDBMetadataUI = {
       requires: {
-        topology: ['replicaset', 'sharded']
+        topology: ['replicaset', 'sharded'],
+        mongodb: '>=4.2'
       }
     };
 
@@ -532,7 +533,8 @@ describe('MongoClient.close() Integration', () => {
 
     const metadata: MongoDBMetadataUI = {
       requires: {
-        topology: ['replicaset', 'sharded']
+        topology: ['replicaset', 'sharded'],
+        mongodb: '>=4.2'
       }
     };
 
