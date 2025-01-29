@@ -373,6 +373,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   override readonly mongoLogger: MongoLogger | undefined;
   /** @internal */
   private connectionLock?: Promise<this>;
+  /** @internal */
+  private closeLock?: Promise<void>;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -650,6 +652,21 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * @param force - Force close, emitting no events
    */
   async close(force = false): Promise<void> {
+    if (this.closeLock) {
+      return await this.closeLock;
+    }
+
+    try {
+      this.closeLock = this._close(force);
+      await this.closeLock;
+    } finally {
+      // release
+      this.closeLock = undefined;
+    }
+  }
+
+  /* @internal */
+  private async _close(force = false): Promise<void> {
     // There's no way to set hasBeenClosed back to false
     Object.defineProperty(this.s, 'hasBeenClosed', {
       value: true,

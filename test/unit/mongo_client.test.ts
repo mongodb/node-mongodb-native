@@ -1223,4 +1223,22 @@ describe('MongoClient', function () {
       });
     });
   });
+
+  describe('closeLock', function () {
+    let client;
+
+    beforeEach(async function () {
+      client = new MongoClient('mongodb://blah');
+    });
+
+    it('when client.close is pending, client.closeLock is set', () => {
+      client.close();
+      expect(client.closeLock).to.be.instanceOf(Promise);
+    });
+
+    it('when client.close is not pending, client.closeLock is not set', async () => {
+      await client.close();
+      expect(client.closeLock).to.be.undefined;
+    });
+  });
 });
