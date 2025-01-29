@@ -5,13 +5,39 @@ about the types of tests and how to run them.
 
 ## Table of Contents
 
-- [About the Tests](#about-the-tests)
-- [Running the Tests Locally](#running-the-tests-locally)
-- [Running the Tests in Evergreen](#running-the-tests-in-evergreen)
-- [Using a Pre-Release Version of a Dependent Library](#using-a-pre-release-version-of-a-dependent-library)
-- [Manually Testing the Driver](#manually-testing-the-driver)
-- [Writing Tests](#writing-tests)
-- [Testing with Special Environments](#testing-with-special-environments)
+- [MongoDB Node Driver Test Automation](#mongodb-node-driver-test-automation)
+  - [Table of Contents](#table-of-contents)
+  - [About the Tests](#about-the-tests)
+    - [Spec Tests](#spec-tests)
+  - [Running the Tests Locally](#running-the-tests-locally)
+    - [Testing With Authorization-Enabled](#testing-with-authorization-enabled)
+    - [Testing Different MongoDB Topologies](#testing-different-mongodb-topologies)
+    - [Running Individual Tests](#running-individual-tests)
+  - [Running the Tests in Evergreen](#running-the-tests-in-evergreen)
+    - [Manually Kicking Off Evergreen Builds](#manually-kicking-off-evergreen-builds)
+      - [Evergreen UI](#evergreen-ui)
+      - [Evergreen CLI](#evergreen-cli)
+        - [Setup](#setup)
+        - [Running the Build](#running-the-build)
+  - [Using a Pre-Release Version of a Dependent Library](#using-a-pre-release-version-of-a-dependent-library)
+  - [Manually Testing the Driver](#manually-testing-the-driver)
+  - [Writing Tests](#writing-tests)
+    - [Framework](#framework)
+    - [Skipping Tests](#skipping-tests)
+  - [Running Benchmarks](#running-benchmarks)
+    - [Configuration](#configuration)
+  - [Testing with Special Environments](#testing-with-special-environments)
+    - [Serverless](#serverless)
+    - [Load Balanced](#load-balanced)
+    - [Client-Side Field-Level Encryption (CSFLE)](#client-side-field-level-encryption-csfle)
+      - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
+        - [Point mongosh to the driver](#point-mongosh-to-the-driver)
+        - [Run specific package tests](#run-specific-package-tests)
+      - [KMIP FLE support tests](#kmip-fle-support-tests)
+    - [Deployed KMS Tests](#deployed-kms-tests)
+      - [Azure KMS](#azure-kms)
+      - [GCP KMS](#gcp-kms)
+    - [TODO Special Env Sections](#todo-special-env-sections)
 
 ## About the Tests
 
@@ -23,16 +49,16 @@ tests will be skipped.
 
 Below is a summary of the types of test automation in this repo.
 
-| Type of Test            | Test Location       | About the Tests                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | How to Run Tests                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ----------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit                    | `/test/unit`        | The unit tests test individual pieces of code, typically functions. These tests do **not** interact with a real database, so mocks are used instead. <br><br>The unit test directory mirrors the `/src` directory structure with test file names matching the source file names of the code they test.                                                                                                                                                                                          | `npm run check:unit`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Integration             | `/test/integration` | The integration tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. <br><br> The integration test directory follows the `test/spec` directory structure representing the different functional areas of the driver. <br><br> **Note:** The `.gitkeep` files are intentionally left to ensure that this directory structure is preserved even as the actual test files are moved around. | `npm run check:test`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Benchmark               | `/test/benchmarks`  | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance.                                                                                                                                                                                                                                                                                                                                                                                | `npm run check:bench`                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Specialized Environment | `/test/manual`      | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br><br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests have a special Evergreen configuration and run in isolation from the other tests.                                                                                                                                                  | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OCSP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization |
-| TypeScript Definition   | `/test/types`       | The TypeScript definition tests verify the type definitions are correct.                                                                                                                                                                                                                                                                                                                                                                                                                        | `npm run check:tsd`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| GitHub Actions          | `/test/action`      | Tests that run as GitHub Actions such as dependency checking.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Currently, only `npm run check:dependencies` but could be expanded to more in the future.                                                                                                                                                                                                                                                                                                                                                                          |
-| Code Examples           | `/test/integration/node-specific/examples`    | Code examples that are also paired with tests that show they are working examples.                                                                                                                                                                                                                                                                                                                                                                                                              | Currently, `npm run check:lambda` to test the AWS Lambda example with default auth and `npm run check:lambda:aws` to test the AWS Lambda example with AWS auth.                                                                                                                                                                                                                                                                                                    |
-| Explicit Resource Management           | `/test/explicit-resource-management`    | Tests that use explicit resource management with the driver's disposable resources.                                                                                                                                                                                                                                                                                                                                                                                                             | `bash .evergreen/run-resource-management-feature-integration.sh`                                                                                                                                                                                                                                                                                      |
+| Type of Test                 | Test Location                              | About the Tests                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | How to Run Tests                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit                         | `/test/unit`                               | The unit tests test individual pieces of code, typically functions. These tests do **not** interact with a real database, so mocks are used instead. <br><br>The unit test directory mirrors the `/src` directory structure with test file names matching the source file names of the code they test.                                                                                                                                                                                          | `npm run check:unit`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Integration                  | `/test/integration`                        | The integration tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. <br><br> The integration test directory follows the `test/spec` directory structure representing the different functional areas of the driver. <br><br> **Note:** The `.gitkeep` files are intentionally left to ensure that this directory structure is preserved even as the actual test files are moved around. | `npm run check:test`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Benchmark                    | `/test/benchmarks`                         | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance.                                                                                                                                                                                                                                                                                                                                                                                | `npm run check:bench`                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Specialized Environment      | `/test/manual`                             | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br><br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests have a special Evergreen configuration and run in isolation from the other tests.                                                                                                                                                  | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OCSP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization |
+| TypeScript Definition        | `/test/types`                              | The TypeScript definition tests verify the type definitions are correct.                                                                                                                                                                                                                                                                                                                                                                                                                        | `npm run check:tsd`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| GitHub Actions               | `/test/action`                             | Tests that run as GitHub Actions such as dependency checking.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Currently, only `npm run check:dependencies` but could be expanded to more in the future.                                                                                                                                                                                                                                                                                                                                                                         |
+| Code Examples                | `/test/integration/node-specific/examples` | Code examples that are also paired with tests that show they are working examples.                                                                                                                                                                                                                                                                                                                                                                                                              | Currently, `npm run check:lambda` to test the AWS Lambda example with default auth and `npm run check:lambda:aws` to test the AWS Lambda example with AWS auth.                                                                                                                                                                                                                                                                                                   |
+| Explicit Resource Management | `/test/explicit-resource-management`       | Tests that use explicit resource management with the driver's disposable resources.                                                                                                                                                                                                                                                                                                                                                                                                             | `bash .evergreen/run-resource-management-feature-integration.sh`                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ### Spec Tests
 
@@ -295,6 +321,33 @@ When you run the benchmarks verify that the BSON version has been picked by the 
 - bson: 6.10.1 (installed from npm): (.../mongodb/node_modules/bson)
 ```
 
+## Secrets
+
+Secrets needed for testing in special environments are managed in a drivers-wide AWS secrets manager vault.
+
+drivers-evergreen-tools contains scripts that can fetch secrets from secrets manager for local use and use in CI in the [.evergreen/secrets_handling folder](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/secrets_handling/README.md).
+
+Local use of secrets manager requires:
+
+- the AWS SDK installed
+- an AWS profile with access to the AWS vault has been configured
+
+(see instructions in the secrets handling readme).
+
+Here's an example usage of the tooling in drivers-evergreen-tools that configures credentials for CSFLE:
+
+```bash
+bash ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/csfle
+source secrets-export.sh
+```
+
+1. The `setup-secrets` script authenticates with AWS, fetches credentials and writes them to a bash file called `secrets-export.sh`.
+2. The setup-secrets accepts a space separated list of all the vaults from which to fetch credentials.  in this case, we fetch credentials from the `drivers/csfle` vault.
+3. Source `secrets-export.sh` to load the credentials into the environment.
+
+> [!IMPORTANT]
+> Make sure `secrets-export.sh` is in the .gitignore of any Github repo you might be using these tools in to avoid leaking credentials.  This is already done for this repo.
+
 ## Testing with Special Environments
 
 In order to test some features, you will need to generate and set a specialized group of environment variables. The subsections below will walk you through how to generate and set the environment variables for these features.
@@ -303,7 +356,7 @@ We recommend using a different terminal for each specialized environment to avoi
 
 Before you begin any of the subsections below, clone the [drivers-evergreen-tools repo](https://github.com/mongodb-labs/drivers-evergreen-tools.git).
 
-We recommend creating an environment variable named `DRIVERS_TOOLS` that stores the path to your local copy of the `driver-evergreen-tools` repo:
+We recommend creating an environment variable named `DRIVERS_TOOLS` that stores the path to your local copy of the `driver-evergreen-tools` repo (code examples in this section will assume this has been done):
 
 ```sh
 export DRIVERS_TOOLS="/path/to/your/copy/of/drivers-evergreen-tools"
@@ -313,71 +366,27 @@ export DRIVERS_TOOLS="/path/to/your/copy/of/drivers-evergreen-tools"
 
 The following steps will walk you through how to create and test a MongoDB Serverless instance.
 
-1. Create the following environment variables using a command like:
+> [!IMPORTANT]
+> If you set up an Atlas cluster for local use, you MUST delete it when you are finished with it using the [delete-instance script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/delete-instance.sh).
 
-   ```sh
-   export PROJECT="node-driver"
-   ```
+This script uses aws secrets manager to fetch credentials.  Make sure you are logged into AWS and have your profile set correctly.
 
-   > **Note:** MongoDB employees can pull these values from the Evergreen project's configuration.
+1. Run the setup-serverless script:
 
-   | Variable Name                | Description                                                                                                      |
-   | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-   | `Project`                    | The name of the Evergreen project where the tests will be run (e.g., `mongo-node-driver-next`)                   |
-   | `SERVERLESS_DRIVERS_GROUP`   | The Atlas organization where you will be creating the serverless instance                                        |
-   | `SERVERLESS_API_PUBLIC_KEY`  | The [Atlas API Public Key][atlas-api-key] for the organization where you will be creating a serverless instance  |
-   | `SERVERLESS_API_PRIVATE_KEY` | The [Atlas API Private Key][atlas-api-key] for the organization where you will be creating a serverless instance |
-   | `SERVERLESS_ATLAS_USER`      | The [SCRAM username][scram-auth] for the Atlas user who has permission to create a serverless instance           |
-   | `SERVERLESS_ATLAS_PASSWORD`  | The [SCRAM password][scram-auth] for the Atlas user who has permission to create a serverless instance           |
+```bash
+bash .evergreen/setup-serverless.sh
+```
 
-   _**Remember**_ some of these are sensitive credentials, so keep them safe and only put them in your environment when you need them.
+2. Source the expansions and secrets:
 
-1. Run the [create-instance][create-instance-script] script:
+```bash
+source secrets-export.sh
+source serverless.env
+```
 
-   ```sh
-   $DRIVERS_TOOLS/.evergreen/serverless/create-instance.sh
-   ```
+3. Comment out the line in `.evergreen/run-serverless-tests.sh` that sources `install-dependencies.sh` (this downloads node and npm and is only used in CI).
 
-   The script will take a few minutes to run. When it is finished, a new file named `serverless-expansion.yml` will be created in the current working directory. The file will contain information about an Evergreen expansion:
-
-   ```yml
-   MONGODB_URI: xxx
-   MONGODB_SRV_URI: xxx
-   SERVERLESS_INSTANCE_NAME: xxx
-   SSL: xxx
-   AUTH: xxx
-   TOPOLOGY: xxx
-   SERVERLESS: xxx
-   SERVERLESS_URI: xxx
-   ```
-
-1. Generate a sourceable environment file from `serverless-expansion.yml` by running the following command:
-
-   ```sh
-   cat serverless-expansion.yml | sed 's/: /=/g' > serverless.env
-   ```
-
-   A new file named `serverless.env` is automatically created.
-
-1. Update the following variables in `serverless.env`, so that they are equivalent to what our Evergreen builds do:
-
-   - Change `MONGODB_URI` to have the same value as `SERVERLESS_URI`.
-   - Add `SINGLE_MONGOS_LB_URI` and set it to the value of `SERVERLESS_URI`.
-   - Add `MULTI_MONGOS_LB_URI` and set it to the value of `SERVERLESS_URI`.
-
-1. Source the environment variables using a command like `source serverless.env`.
-
-1. Export **each** of the environment variables that were created in `serverless.env`. For example:
-
-   ```sh
-   export SINGLE_MONGOS_LB_URI
-   ```
-
-1. Comment out the line in `.evergreen/run-serverless-tests.sh` that sources `install-dependencies.sh`.
-
-1. Run the `.evergreen/run-serverless-tests.sh` script directly to test serverless instances from your local machine.
-
-> Hint: If the test script fails with an error along the lines of `Uncaught TypeError: Cannot read properties of undefined (reading 'processId')`, ensure you do **not** have the `FAKE_MONGODB_SERVICE_ID` environment variable set.
+4. Run the `.evergreen/run-serverless-tests.sh` script directly to test serverless instances from your local machine.
 
 ### Load Balanced
 
@@ -499,15 +508,15 @@ The following steps will walk you through how to run the tests for CSFLE.
    ```
    > **Note:** MongoDB employees can pull these values from the Evergreen project's configuration.
 
-   | Variable Name          |Description                                                      |
-   | -----------------------|---------------------------------------------------------------- |
-   | `AWS_ACCESS_KEY_ID`    | The AWS access key ID used to generate KMS messages             |
-   | `AWS_SECRET_ACCESS_KEY`| The AWS secret access key used to generate KMS messages         |
-   | `AWS_REGION`           | The AWS region where the KMS resides (e.g., `us-east-1`)        |
-   | `AWS_CMK_ID`           | The Customer Master Key for the KMS                             |
-   | `CSFLE_KMS_PROVIDERS`  | The raw EJSON description of the KMS providers. An example of the format is provided below.                                                                          |
-   | `KMIP_TLS_CA_FILE`     | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem|
-   | `KMIP_TLS_CERT_FILE`   | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem |
+   | Variable Name           | Description                                                                                 |
+   | ----------------------- | ------------------------------------------------------------------------------------------- |
+   | `AWS_ACCESS_KEY_ID`     | The AWS access key ID used to generate KMS messages                                         |
+   | `AWS_SECRET_ACCESS_KEY` | The AWS secret access key used to generate KMS messages                                     |
+   | `AWS_REGION`            | The AWS region where the KMS resides (e.g., `us-east-1`)                                    |
+   | `AWS_CMK_ID`            | The Customer Master Key for the KMS                                                         |
+   | `CSFLE_KMS_PROVIDERS`   | The raw EJSON description of the KMS providers. An example of the format is provided below. |
+   | `KMIP_TLS_CA_FILE`      | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem                     |
+   | `KMIP_TLS_CERT_FILE`    | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem                 |
 
    The value of the `CSFLE_KMS_PROVIDERS` variable will have the following format:
 
@@ -662,6 +671,63 @@ lerna run test --scope @mongosh/service-provider-server
    ```sh
    npx mocha --config test/mocha_mongodb.json test/integration/client-side-encryption/
    ```
+
+### Deployed KMS Tests
+
+CSFLE supports automatic KMS credential fetching for Azure, GCP and AWS.  In order to e2e test GCP and Azure, we must run the tests on an actual GCP or Azure host (our ).  This is supported by drivers-evergreen-tools.
+
+The basic idea is to
+
+1. Provision an Azure or GCP server.
+2. Set up a cluster on the server.
+3. Copy the driver and tests to the server and run the tests on the server.
+4. Copy the results back.
+
+All of this is handled in the csfle/azurekms and csfle/gcpkms folders in drivers-evergreen-tools.
+
+> [!IMPORTANT]
+> Azure VMs and GCP VMs must be destroyed with their corresponding `teardown.sh` scripts.
+
+#### Azure KMS
+
+1. Provision an Azure server.  You must set the `AZUREKMS_VMNAME_PREFIX` variable: 
+
+```bash
+export AZUREKMS_VMNAME_PREFIX: "NODE_DRIVER"
+bash ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
+```
+
+2. Comment out the following line in `run-deployed-azure-kms-tests.sh`:
+
+```bash
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
+```
+
+3. Run the tests:
+
+```bash
+bash .evergreen/run-deployed-azure-kms-tests.sh
+```
+
+#### GCP KMS
+
+1. Provision an GCP server.
+
+```bash
+bash ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
+```
+
+1. Comment out the following line in `run-deployed-gcp-kms-tests.sh`:
+
+```bash
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
+```
+
+3. Run the tests:
+
+```bash
+bash .evergreen/run-deployed-gcp-kms-tests.sh
+```
 
 ### TODO Special Env Sections
 

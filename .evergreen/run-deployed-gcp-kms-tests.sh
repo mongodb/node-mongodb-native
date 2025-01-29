@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 source "${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/secrets-export.sh"
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 # Assert required environment variables are present without printing them
 if [ -z ${GCPKMS_GCLOUD+omitted} ]; then echo "GCPKMS_GCLOUD is unset" && exit 1; fi
@@ -9,8 +10,6 @@ if [ -z ${GCPKMS_ZONE+omitted} ]; then echo "GCPKMS_ZONE is unset" && exit 1; fi
 if [ -z ${GCPKMS_INSTANCENAME+omitted} ]; then echo "GCPKMS_INSTANCENAME is unset" && exit 1; fi
 
 set -o errexit
-
-source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 export GCPKMS_SRC=node-driver-source.tgz
 export GCPKMS_DST=$GCPKMS_INSTANCENAME:
@@ -28,3 +27,6 @@ echo "decompressing node driver tar on gcp ... begin"
 export GCPKMS_CMD="tar -xzf $GCPKMS_SRC"
 "${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh"
 echo "decompressing node driver tar on gcp ... end"
+
+export GCPKMS_CMD="env EXPECTED_GCPKMS_OUTCOME=success bash src/.evergreen/run-gcp-kms-tests.sh"
+bash ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh
