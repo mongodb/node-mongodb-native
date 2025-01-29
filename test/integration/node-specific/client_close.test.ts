@@ -461,8 +461,7 @@ describe('MongoClient.close() Integration', () => {
 
     const metadata: MongoDBMetadataUI = {
       requires: {
-        topology: ['replicaset', 'sharded'],
-        mongodb: '>=5.0' // currentOp requires 5.0 and above
+        topology: ['replicaset', 'sharded']
       }
     };
 
@@ -470,14 +469,15 @@ describe('MongoClient.close() Integration', () => {
       client = this.configuration.newClient();
       utilClient = this.configuration.newClient();
       await client.connect();
+      await client
+        .db('db')
+        .collection('collection')
+        ?.drop()
+        .catch(() => null);
       const collection = await client.db('db').createCollection('collection');
-      console.log('createCollection done');
       session = client.startSession({ explicit: false });
-      console.log('startSession done');
       session.startTransaction();
-      console.log('startTransaction done');
       await collection.insertOne({ x: 1 }, { session });
-      console.log('insert done');
 
       const opBefore = await utilClient.db().admin().command({ currentOp: 1 });
       idleSessionsBeforeClose = opBefore.inprog.filter(s => s.type === 'idleSession');
@@ -530,12 +530,21 @@ describe('MongoClient.close() Integration', () => {
     let utilClient;
     let session;
 
-    const metadata: MongoDBMetadataUI = { requires: { topology: ['replicaset', 'sharded'] } };
+    const metadata: MongoDBMetadataUI = {
+      requires: {
+        topology: ['replicaset', 'sharded']
+      }
+    };
 
     beforeEach(async function () {
       client = this.configuration.newClient();
       utilClient = this.configuration.newClient();
       await client.connect();
+      await client
+        .db('db')
+        .collection('collection')
+        ?.drop()
+        .catch(() => null);
       const collection = await client.db('db').createCollection('collection');
       session = client.startSession();
       session.startTransaction();
@@ -697,7 +706,7 @@ describe('MongoClient.close() Integration', () => {
         client = this.configuration.newClient();
         utilClient = this.configuration.newClient();
         await client.connect();
-        coll = await client.db('db').createCollection('coll', { capped: true, size: 1_000_000 });
+        coll = await client.db('db').collection('coll', { capped: true, size: 1_000_000 });
       });
 
       afterEach(async function () {
