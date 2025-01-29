@@ -120,6 +120,7 @@ export { CURSOR_FLAGS, CursorTimeoutMode } from './cursor/abstract_cursor';
 export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { ServerApiVersion } from './mongo_client';
+export { MongoLoggableComponent, SeverityLevel } from './mongo_logger';
 export { ReturnDocument } from './operations/find_and_modify';
 export { ProfilingLevel } from './operations/set_profiling_level';
 export { ReadConcernLevel } from './read_concern';
@@ -422,12 +423,10 @@ export type {
   LoggableServerHeartbeatStartedEvent,
   LoggableServerHeartbeatSucceededEvent,
   MongoDBLogWritable,
-  MongoLoggableComponent,
   MongoLogger,
   MongoLoggerEnvOptions,
   MongoLoggerMongoClientOptions,
-  MongoLoggerOptions,
-  SeverityLevel
+  MongoLoggerOptions
 } from './mongo_logger';
 export type {
   Abortable,
