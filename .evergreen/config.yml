@@ -4627,9 +4627,9 @@ task_groups:
             MONGODB_VERSION: '7.0'
             LAMBDA_STACK_NAME: dbx-node-lambda
             CLUSTER_PREFIX: dbx-node-lambda
-            VAULT_NAME: atlas
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+            - atlas
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
