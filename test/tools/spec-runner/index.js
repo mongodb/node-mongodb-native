@@ -16,6 +16,7 @@ const {
 } = require('../../mongodb');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
 const { ClientSideEncryptionFilter } = require('../runner/filters/client_encryption_filter');
+const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -57,7 +58,7 @@ function translateClientOptions(options) {
       }
 
       if (options.autoEncryptOpts.kmsProviders) {
-        const kmsProviders = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
+        const kmsProviders = getCSFLEKMSProviders();
         if (options.autoEncryptOpts.kmsProviders.local) {
           kmsProviders.local = options.autoEncryptOpts.kmsProviders.local;
         }
@@ -83,8 +84,8 @@ function translateClientOptions(options) {
           };
           options.autoEncryption.tlsOptions = {
             kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           };
         }
@@ -93,8 +94,8 @@ function translateClientOptions(options) {
           kmsProviders['local:name2'] = options.autoEncryptOpts.kmsProviders['local:name2'];
           options.autoEncryption.tlsOptions = {
             'local:name2': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           };
         }

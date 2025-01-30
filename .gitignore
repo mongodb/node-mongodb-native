@@ -104,3 +104,5 @@ mo-expansion.yml
 expansions.sh
 
 .drivers-tools/
+
+crypt-shared.sh

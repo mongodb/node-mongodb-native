@@ -19,9 +19,10 @@ const { ClientEncryption } = require('../../../src/client-side-encryption/client
 const {
   ClientSideEncryptionFilter
 } = require('../../tools/runner/filters/client_encryption_filter');
+const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
-  const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
+  const result = getCSFLEKMSProviders();
   if (localKey) {
     result.local = { key: localKey };
   }
@@ -863,8 +864,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           kmsProviders: customKmsProviders,
           tlsOptions: {
             kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           },
           extraOptions: getEncryptExtraOptions()
@@ -875,8 +876,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           kmsProviders: invalidKmsProviders,
           tlsOptions: {
             kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           },
           extraOptions: getEncryptExtraOptions()
@@ -1371,16 +1372,16 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     beforeEach(async function () {
       const tlsCaOptions = {
         aws: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE
         },
         azure: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE
         },
         gcp: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE
         },
         kmip: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE
         }
       };
       const clientNoTlsOptions = {
@@ -1394,20 +1395,20 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
         tlsOptions: {
           aws: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
           },
           azure: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
           },
           gcp: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
           },
           kmip: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
           }
         },
         extraOptions: getEncryptExtraOptions()
@@ -1752,32 +1753,32 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           },
           tlsOptions: {
             'aws:no_client_cert': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE
             },
             'azure:no_client_cert': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE
             },
             'gcp:no_client_cert': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE
             },
             'kmip:no_client_cert': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE
             },
             'aws:with_tls': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             },
             'azure:with_tls': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             },
             'gcp:with_tls': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             },
             'kmip:with_tls': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           },
           keyVaultNamespace: 'db.keys'
@@ -2354,8 +2355,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               kmsProviders: getKmsProviders(),
               tlsOptions: {
                 kmip: {
-                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                  tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+                  tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
                 }
               },
               extraOptions: getEncryptExtraOptions(),
@@ -2379,8 +2380,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               kmsProviders: getKmsProviders(),
               tlsOptions: {
                 kmip: {
-                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                  tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+                  tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
                 }
               },
               extraOptions: getEncryptExtraOptions(),

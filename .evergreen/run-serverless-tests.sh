@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+source secrets-export.sh
+source serverless.env
+
+# next, set up FLE
+export TEST_CSFLE=true
+source .evergreen/setup-fle.sh
+
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 if [ -z ${SERVERLESS+omitted} ]; then echo "SERVERLESS is unset" && exit 1; fi

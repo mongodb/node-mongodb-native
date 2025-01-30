@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
@@ -497,7 +498,7 @@ describe.skip('MongoClient.close() Integration', () => {
               async function run({ MongoClient, uri, expect, mongodb }) {
                 const infiniteFile = '/dev/zero';
 
-                const kmsProviders = mongodb.BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
+                const kmsProviders = getCSFLEKMSProviders();
                 const masterKey = {
                   region: 'us-east-1',
                   key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'

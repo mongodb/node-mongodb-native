@@ -105,7 +105,9 @@ BASE_TASKS.push({
       TOPOLOGY: 'server',
       REQUIRE_API_VERSION: '1',
       MONGODB_API_VERSION: '1',
-      AUTH: 'auth'
+      AUTH: 'auth',
+      TEST_CSFLE: 'true',
+      CLIENT_ENCRYPTION: 'true'
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
@@ -146,7 +148,9 @@ TASKS.push(
           VERSION: ver,
           TOPOLOGY: 'sharded_cluster',
           AUTH: 'auth',
-          LOAD_BALANCER: 'true'
+          LOAD_BALANCER: 'true',
+          CLIENT_ENCRYPTION: 'false',
+          TEST_CSFLE: 'false'
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
@@ -208,7 +212,7 @@ TASKS.push(
         { func: 'run socks5 tests' }
       ]
     }
-  ]
+    ]
 );
 
 TASKS.push({
@@ -219,7 +223,9 @@ TASKS.push({
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
-      COMPRESSOR: 'snappy'
+      COMPRESSOR: 'snappy',
+      CLIENT_ENCRYPTION: 'false',
+      TEST_CSFLE: 'false'
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
@@ -235,7 +241,9 @@ TASKS.push({
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
-      COMPRESSOR: 'zstd'
+      COMPRESSOR: 'zstd',
+      CLIENT_ENCRYPTION: 'false',
+      TEST_CSFLE: 'false'
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
@@ -257,7 +265,9 @@ TASKS.push({
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
-      COMPRESSOR: 'zstd'
+      COMPRESSOR: 'zstd',
+      CLIENT_ENCRYPTION: 'false',
+      TEST_CSFLE: 'false'
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
@@ -422,9 +432,8 @@ for (const {
     const expansions = { NODE_LTS_VERSION, NPM_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
-    if (clientEncryption) {
-      expansions.CLIENT_ENCRYPTION = true;
-    }
+    expansions.CLIENT_ENCRYPTION = String(!!clientEncryption)
+    expansions.TEST_CSFLE = expansions.CLIENT_ENCRYPTION
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
   }
@@ -668,7 +677,8 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         NODE_LTS_VERSION: LOWEST_LTS,
         NPM_VERSION: 9,
         VERSION: version,
-        TOPOLOGY: 'replica_set'
+        TOPOLOGY: 'replica_set',
+        CLIENT_ENCRYPTION: true
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
