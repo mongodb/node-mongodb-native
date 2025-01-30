@@ -4650,9 +4650,9 @@ task_groups:
         params:
           working_dir: src
           binary: bash
-          add_expansions_to_env: true
           env:
             MONGODB_VERSION: '7.0'
+            CLUSTER_PREFIX: dbx-node-search-indexes
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
@@ -4663,7 +4663,6 @@ task_groups:
         params:
           working_dir: src
           binary: bash
-          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
     setup_group_can_fail_task: true
