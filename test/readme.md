@@ -717,7 +717,7 @@ The URI of the cluster is available in the `atlas-expansions.yml` file.
 
 #### Deployed Lambda Tests
 
-TODO
+TODO(NODE-6698): Update deployed lambda test section.
 
 ### TODO Special Env Sections
 
