@@ -4,7 +4,11 @@ import { expect } from 'chai';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptCreateEncryptedCollectionError } from '../../../src/client-side-encryption/errors';
-import { getCSFLEKMSProviders, kmsCredentialsPresent, missingKeys } from '../../csfle-kms-providers';
+import {
+  getCSFLEKMSProviders,
+  kmsCredentialsPresent,
+  missingKeys
+} from '../../csfle-kms-providers';
 import { Collection, type Db, MongoServerError } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
@@ -36,7 +40,8 @@ describe('21. Automatic Data Encryption Keys', () => {
 
       if (!kmsCredentialsPresent) {
         if (this.currentTest) {
-          this.currentTest.skipReason = 'This test requires FLE environment variables.  Missing keys: ' + missingKeys;
+          this.currentTest.skipReason =
+            'This test requires FLE environment variables.  Missing keys: ' + missingKeys;
         }
         return this.currentTest?.skip();
       }

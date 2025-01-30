@@ -1,26 +1,26 @@
 'use strict';
 
 const csfleKMSProviders = {
-    "aws": {
-        "accessKeyId": process.env.FLE_AWS_KEY,
-        "secretAccessKey": process.env.FLE_AWS_SECRET
-    },
-    "azure": {
-        "tenantId": process.env.FLE_AZURE_TENANTID,
-        "clientId": process.env.FLE_AZURE_CLIENTID,
-        "clientSecret": process.env.FLE_AZURE_CLIENTSECRET
-    },
-    "gcp": {
-        "email": process.env.FLE_GCP_EMAIL,
-        "privateKey": process.env.FLE_GCP_PRIVATEKEY
-    },
-    "local": {
-        "key": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk"
-    },
-    "kmip": {
-        "endpoint": "localhost:5698"
-    }
-}
+  aws: {
+    accessKeyId: process.env.FLE_AWS_KEY,
+    secretAccessKey: process.env.FLE_AWS_SECRET
+  },
+  azure: {
+    tenantId: process.env.FLE_AZURE_TENANTID,
+    clientId: process.env.FLE_AZURE_CLIENTID,
+    clientSecret: process.env.FLE_AZURE_CLIENTSECRET
+  },
+  gcp: {
+    email: process.env.FLE_GCP_EMAIL,
+    privateKey: process.env.FLE_GCP_PRIVATEKEY
+  },
+  local: {
+    key: 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk'
+  },
+  kmip: {
+    endpoint: 'localhost:5698'
+  }
+};
 
 function getCSFLEKMSProviders() {
   return JSON.parse(JSON.stringify(csfleKMSProviders));
@@ -36,10 +36,8 @@ const keys = [
   'FLE_GCP_PRIVATEKEY'
 ];
 
-const isInEnvironment = key => (typeof process.env[key] === 'string' && process.env[key].length > 0)
-const missingKeys = keys
-  .filter(key => !isInEnvironment(key))
-  .join(',');
+const isInEnvironment = key => typeof process.env[key] === 'string' && process.env[key].length > 0;
+const missingKeys = keys.filter(key => !isInEnvironment(key)).join(',');
 
 module.exports = {
   getCSFLEKMSProviders,
