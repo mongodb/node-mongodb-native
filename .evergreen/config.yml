@@ -3517,7 +3517,7 @@ tasks:
             - {key: VERSION, value: v6.0-perf}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
-            - {key: MONGODB_CLIENT_OPTIONS, value: '{"__enableMongoLogger":true,"__internalLoggerConfig":{"MONGODB_LOG_ALL":"trace","MONGODB_LOG_PATH":"stderr"}}'}
+            - {key: MONGODB_CLIENT_OPTIONS, value: '{"mongodbLogPath":"stderr","mongodbLogComponentSeverities":{"default":"trace"}}'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks

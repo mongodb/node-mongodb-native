@@ -850,9 +850,7 @@ describe('Connection String', function () {
 
     context('when option is `stderr`', function () {
       it('it is accessible through mongoLogger.logDestination', function () {
-        const client = new MongoClient('mongodb://a/?mongodbLogPath=stderr', {
-          __enableMongoLogger: true
-        });
+        const client = new MongoClient('mongodb://a/?mongodbLogPath=stderr');
         const log: Log = { t: new Date(), c: 'ConnectionStringStdErr', s: 'error' };
         client.options.mongoLoggerOptions.logDestination.write(log);
         const logLine = inspect(log, { breakLength: Infinity, compact: true });
@@ -862,9 +860,7 @@ describe('Connection String', function () {
 
     context('when option is `stdout`', function () {
       it('it is accessible through mongoLogger.logDestination', function () {
-        const client = new MongoClient('mongodb://a/?mongodbLogPath=stdout', {
-          __enableMongoLogger: true
-        });
+        const client = new MongoClient('mongodb://a/?mongodbLogPath=stdout');
         const log: Log = { t: new Date(), c: 'ConnectionStringStdOut', s: 'error' };
         client.options.mongoLoggerOptions.logDestination.write(log);
         const logLine = inspect(log, { breakLength: Infinity, compact: true });
@@ -874,10 +870,9 @@ describe('Connection String', function () {
 
     context('when option is invalid', function () {
       it('should throw error at construction', function () {
-        expect(
-          () =>
-            new MongoClient('mongodb://a/?mongodbLogPath=stdnothing', { __enableMongoLogger: true })
-        ).to.throw(MongoAPIError);
+        expect(() => new MongoClient('mongodb://a/?mongodbLogPath=stdnothing')).to.throw(
+          MongoAPIError
+        );
       });
     });
   });
@@ -919,7 +914,6 @@ describe('Connection String', function () {
             }
           };
           new MongoClient(uri, {
-            __enableMongoLogger: true,
             mongodbLogPath: stream
           });
 

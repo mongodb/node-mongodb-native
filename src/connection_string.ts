@@ -22,13 +22,7 @@ import {
   type ServerApi,
   ServerApiVersion
 } from './mongo_client';
-import {
-  MongoLoggableComponent,
-  MongoLogger,
-  type MongoLoggerEnvOptions,
-  type MongoLoggerMongoClientOptions,
-  SeverityLevel
-} from './mongo_logger';
+import { MongoLoggableComponent, MongoLogger, SeverityLevel } from './mongo_logger';
 import { ReadConcern, type ReadConcernLevel } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import { ServerMonitoringMode } from './sdam/monitor';
@@ -528,12 +522,8 @@ export function parseOptions(
     );
   }
 
-  mongoOptions.__enableMongoLogger = mongoOptions.__enableMongoLogger ?? false;
-
-  let loggerEnvOptions: MongoLoggerEnvOptions = {};
-  let loggerClientOptions: MongoLoggerMongoClientOptions = {};
-  if (mongoOptions.__enableMongoLogger) {
-    loggerEnvOptions = {
+  mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
+    {
       MONGODB_LOG_COMMAND: process.env.MONGODB_LOG_COMMAND,
       MONGODB_LOG_TOPOLOGY: process.env.MONGODB_LOG_TOPOLOGY,
       MONGODB_LOG_SERVER_SELECTION: process.env.MONGODB_LOG_SERVER_SELECTION,
@@ -541,18 +531,13 @@ export function parseOptions(
       MONGODB_LOG_CLIENT: process.env.MONGODB_LOG_CLIENT,
       MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
       MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
-      MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH,
-      ...mongoOptions.__internalLoggerConfig
-    };
-    loggerClientOptions = {
+      MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH
+    },
+    {
       mongodbLogPath: mongoOptions.mongodbLogPath,
       mongodbLogComponentSeverities: mongoOptions.mongodbLogComponentSeverities,
       mongodbLogMaxDocumentLength: mongoOptions.mongodbLogMaxDocumentLength
-    };
-  }
-  mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
-    loggerEnvOptions,
-    loggerClientOptions
+    }
   );
 
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
@@ -1232,6 +1217,50 @@ export const OPTIONS = {
     default: 0,
     type: 'int'
   },
+  mongodbLogPath: {
+    transform({ values: [value] }) {
+      if (
+        !(
+          (typeof value === 'string' && ['stderr', 'stdout'].includes(value)) ||
+          (value &&
+            typeof value === 'object' &&
+            'write' in value &&
+            typeof value.write === 'function')
+        )
+      ) {
+        throw new MongoAPIError(
+          `Option 'mongodbLogPath' must be of type 'stderr' | 'stdout' | MongoDBLogWritable`
+        );
+      }
+      return value;
+    }
+  },
+  mongodbLogComponentSeverities: {
+    transform({ values: [value] }) {
+      if (typeof value !== 'object' || !value) {
+        throw new MongoAPIError(`Option 'mongodbLogComponentSeverities' must be a non-null object`);
+      }
+      for (const [k, v] of Object.entries(value)) {
+        if (typeof v !== 'string' || typeof k !== 'string') {
+          throw new MongoAPIError(
+            `User input for option 'mongodbLogComponentSeverities' object cannot include a non-string key or value`
+          );
+        }
+        if (!Object.values(MongoLoggableComponent).some(val => val === k) && k !== 'default') {
+          throw new MongoAPIError(
+            `User input for option 'mongodbLogComponentSeverities' contains invalid key: ${k}`
+          );
+        }
+        if (!Object.values(SeverityLevel).some(val => val === v)) {
+          throw new MongoAPIError(
+            `Option 'mongodbLogComponentSeverities' does not support ${v} as a value for ${k}`
+          );
+        }
+      }
+      return value;
+    }
+  },
+  mongodbLogMaxDocumentLength: { type: 'uint' },
   // Custom types for modifying core behavior
   connectionType: { type: 'any' },
   srvPoller: { type: 'any' },
@@ -1273,66 +1302,7 @@ export const OPTIONS = {
     deprecated:
       'useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
   } as OptionDescriptor,
-  // MongoLogger
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogPath: {
-    transform({ values: [value] }) {
-      if (
-        !(
-          (typeof value === 'string' && ['stderr', 'stdout'].includes(value)) ||
-          (value &&
-            typeof value === 'object' &&
-            'write' in value &&
-            typeof value.write === 'function')
-        )
-      ) {
-        throw new MongoAPIError(
-          `Option 'mongodbLogPath' must be of type 'stderr' | 'stdout' | MongoDBLogWritable`
-        );
-      }
-      return value;
-    }
-  },
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogComponentSeverities: {
-    transform({ values: [value] }) {
-      if (typeof value !== 'object' || !value) {
-        throw new MongoAPIError(`Option 'mongodbLogComponentSeverities' must be a non-null object`);
-      }
-      for (const [k, v] of Object.entries(value)) {
-        if (typeof v !== 'string' || typeof k !== 'string') {
-          throw new MongoAPIError(
-            `User input for option 'mongodbLogComponentSeverities' object cannot include a non-string key or value`
-          );
-        }
-        if (!Object.values(MongoLoggableComponent).some(val => val === k) && k !== 'default') {
-          throw new MongoAPIError(
-            `User input for option 'mongodbLogComponentSeverities' contains invalid key: ${k}`
-          );
-        }
-        if (!Object.values(SeverityLevel).some(val => val === v)) {
-          throw new MongoAPIError(
-            `Option 'mongodbLogComponentSeverities' does not support ${v} as a value for ${k}`
-          );
-        }
-      }
-      return value;
-    }
-  },
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogMaxDocumentLength: { type: 'uint' },
-  __enableMongoLogger: { type: 'boolean' },
-  __skipPingOnConnect: { type: 'boolean' },
-  __internalLoggerConfig: { type: 'record' }
+  __skipPingOnConnect: { type: 'boolean' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
