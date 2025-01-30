@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { expect } from 'chai';
 
+import { type Collection, type FindCursor, type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
@@ -699,16 +700,24 @@ describe('MongoClient.close() Integration', () => {
 
   describe('Server resource: Cursor', () => {
     describe('after cursors are created', () => {
-      let client;
-      let coll;
-      let cursor;
-      let utilClient;
+      let client: MongoClient;
+      let coll: Collection;
+      let cursor: FindCursor;
+      let utilClient: MongoClient;
 
       beforeEach(async function () {
         client = this.configuration.newClient();
         utilClient = this.configuration.newClient();
         await client.connect();
-        coll = await client.db('db').collection('coll', { capped: true, size: 1_000_000 });
+        await client
+          .db('db')
+          .collection('coll')
+          ?.drop()
+          .catch(() => null);
+        coll = await client
+          .db('db')
+          .createCollection('coll', { capped: true, size: 1_000, max: 4 });
+        await coll.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
       });
 
       afterEach(async function () {
@@ -717,7 +726,7 @@ describe('MongoClient.close() Integration', () => {
         await cursor?.close();
       });
 
-      it.skip('all active server-side cursors are closed by client.close()', async function () {
+      it('all active server-side cursors are closed by client.close()', async function () {
         const getCursors = async () => {
           const res = await utilClient
             .db()
@@ -732,8 +741,7 @@ describe('MongoClient.close() Integration', () => {
           );
         };
 
-        await coll.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
-        cursor = await coll.find(
+        cursor = coll.find(
           {},
           {
             tailable: true,
