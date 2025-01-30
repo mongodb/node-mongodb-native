@@ -699,6 +699,12 @@ describe('MongoClient.close() Integration', () => {
   });
 
   describe('Server resource: Cursor', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: {
+        mongodb: '>=4.2.0'
+      }
+    };
+
     describe('after cursors are created', () => {
       let client: MongoClient;
       let coll: Collection;
@@ -726,38 +732,42 @@ describe('MongoClient.close() Integration', () => {
         await cursor?.close();
       });
 
-      it('all active server-side cursors are closed by client.close()', async function () {
-        const getCursors = async () => {
-          const res = await utilClient
-            .db()
-            .admin()
-            .command({
-              aggregate: 1,
-              cursor: {},
-              pipeline: [{ $currentOp: { idleCursors: true } }]
-            });
-          return res.cursor.firstBatch.filter(
-            r => r.type === 'idleCursor' || (r.type === 'op' && r.desc === 'getMore')
+      it(
+        'all active server-side cursors are closed by client.close()',
+        metadata,
+        async function () {
+          const getCursors = async () => {
+            const res = await utilClient
+              .db()
+              .admin()
+              .command({
+                aggregate: 1,
+                cursor: {},
+                pipeline: [{ $currentOp: { idleCursors: true } }]
+              });
+            return res.cursor.firstBatch.filter(
+              r => r.type === 'idleCursor' || (r.type === 'op' && r.desc === 'getMore')
+            );
+          };
+
+          cursor = coll.find(
+            {},
+            {
+              tailable: true,
+              awaitData: true
+            }
           );
-        };
+          await cursor.next();
 
-        cursor = coll.find(
-          {},
-          {
-            tailable: true,
-            awaitData: true
-          }
-        );
-        await cursor.next();
+          // assert creation
+          expect(await getCursors()).to.not.be.empty;
 
-        // assert creation
-        expect(await getCursors()).to.not.be.empty;
+          await client.close();
 
-        await client.close();
-
-        // assert clean-up
-        expect(await getCursors()).to.be.empty;
-      });
+          // assert clean-up
+          expect(await getCursors()).to.be.empty;
+        }
+      );
     });
   });
 });
