@@ -26,18 +26,23 @@ about the types of tests and how to run them.
     - [Skipping Tests](#skipping-tests)
   - [Running Benchmarks](#running-benchmarks)
     - [Configuration](#configuration)
+  - [Secrets](#secrets)
   - [Testing with Special Environments](#testing-with-special-environments)
     - [Serverless](#serverless)
     - [Load Balanced](#load-balanced)
     - [Client-Side Field-Level Encryption (CSFLE)](#client-side-field-level-encryption-csfle)
-      - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
-        - [Point mongosh to the driver](#point-mongosh-to-the-driver)
-        - [Run specific package tests](#run-specific-package-tests)
       - [KMIP FLE support tests](#kmip-fle-support-tests)
     - [Deployed KMS Tests](#deployed-kms-tests)
       - [Azure KMS](#azure-kms)
       - [GCP KMS](#gcp-kms)
+    - [Deployed Atlas Tests](#deployed-atlas-tests)
+      - [Launching an Atlas Cluster](#launching-an-atlas-cluster)
+      - [Search Indexes](#search-indexes)
+      - [Deployed Lambda Tests](#deployed-lambda-tests)
     - [TODO Special Env Sections](#todo-special-env-sections)
+  - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
+    - [Point mongosh to the driver](#point-mongosh-to-the-driver)
+    - [Run specific package tests](#run-specific-package-tests)
 
 ## About the Tests
 
@@ -594,44 +599,6 @@ The following steps will walk you through how to run the tests for CSFLE.
 
    To run the functional tests using the crypt shared library instead of `mongocryptd`, download the appropriate version of the crypt shared library for the enterprise server version [here](https://www.mongodb.com/download-center/enterprise/releases) and then set the location of it in the environment variable `CRYPT_SHARED_LIB_PATH`.
 
-#### Testing driver changes with mongosh
-
-These steps require `mongosh` to be available locally. Clone it from GitHub.
-
-`mongosh` uses a `lerna` monorepo. As a result, `mongosh` contains multiple references to the `mongodb` package
-in their `package.json`s.
-
-Set up `mongosh` by following the steps in the `mongosh` readme.
-
-##### Point mongosh to the driver
-
-mongosh contains a script that does this. To use the script, create an environment
- variable `REPLACE_PACKAGE` that contains a string in the form
-`mongodb:<path to your local instance of the driver>`. The package replacement script will replace
-all occurrences of `mongodb` with the local path of your driver.
-
-An alternative, which can be useful for
-testing a release, is to first run `npm pack` on the driver. This generates a tarball containing all the code
-that would be uploaded to `npm` if it were released. Then, set the environment variable `REPLACE_PACKAGE`
-with the full path to the file.
-
-Once the environment variable is set, run replace package in `mongosh` with:
-```sh
-npm run replace:package
-```
-
-##### Run specific package tests
-
-`mongosh`'s readme documents how to run its tests. Most likely, it isn't necessary to run all of mongosh's
-tests. The `mongosh` readme also documents how to run tests for a particular scope. The scopes are
-listed in the `generate_mongosh_tasks.js` evergreen generation script.
-
-For example, to run the `service-provider-server` package, run the following command in `mongosh`:
-
-```shell
-lerna run test --scope @mongosh/service-provider-server
-```
-
 #### KMIP FLE support tests
 
 1. Install `virtualenv`:
@@ -729,6 +696,29 @@ source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 bash .evergreen/run-deployed-gcp-kms-tests.sh
 ```
 
+
+### Deployed Atlas Tests
+
+#### Launching an Atlas Cluster
+
+Using drivers evergreen tools, run the `setup-atlas-cluster` script.  You must also set the CLUSTER_PREFIX environment variable.
+
+```bash
+CLUSTER_PREFIX=dbx-node-lambda bash ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+```
+
+The URI of the cluster is available in the `atlas-expansions.yml` file.
+
+#### Search Indexes
+
+1. Set up an Atlas cluster, as outlined in the "Launching an Atlas Cluster" section.
+2. Add the URI of the cluster to the environment as the MONGODB_URI environment variable.
+3. Run the tests with `npm run check:search-indexes`.
+
+#### Deployed Lambda Tests
+
+TODO(NODE-6698): Update deployed lambda test section.
+
 ### TODO Special Env Sections
 
 - Kerberos
@@ -755,3 +745,41 @@ bash .evergreen/run-deployed-gcp-kms-tests.sh
 [npm-csfle]: https://www.npmjs.com/package/mongodb-client-encryption
 [atlas-api-key]: https://docs.atlas.mongodb.com/tutorial/configure-api-access/organization/create-one-api-key
 [scram-auth]: https://docs.atlas.mongodb.com/security-add-mongodb-users/#database-user-authentication
+
+## Testing driver changes with mongosh
+
+These steps require `mongosh` to be available locally. Clone it from GitHub.
+
+`mongosh` uses a `lerna` monorepo. As a result, `mongosh` contains multiple references to the `mongodb` package
+in their `package.json`s.
+
+Set up `mongosh` by following the steps in the `mongosh` readme.
+
+### Point mongosh to the driver
+
+mongosh contains a script that does this. To use the script, create an environment
+ variable `REPLACE_PACKAGE` that contains a string in the form
+`mongodb:<path to your local instance of the driver>`. The package replacement script will replace
+all occurrences of `mongodb` with the local path of your driver.
+
+An alternative, which can be useful for
+testing a release, is to first run `npm pack` on the driver. This generates a tarball containing all the code
+that would be uploaded to `npm` if it were released. Then, set the environment variable `REPLACE_PACKAGE`
+with the full path to the file.
+
+Once the environment variable is set, run replace package in `mongosh` with:
+```sh
+npm run replace:package
+```
+
+### Run specific package tests
+
+`mongosh`'s readme documents how to run its tests. Most likely, it isn't necessary to run all of mongosh's
+tests. The `mongosh` readme also documents how to run tests for a particular scope. The scopes are
+listed in the `generate_mongosh_tasks.js` evergreen generation script.
+
+For example, to run the `service-provider-server` package, run the following command in `mongosh`:
+
+```shell
+lerna run test --scope @mongosh/service-provider-server
+```

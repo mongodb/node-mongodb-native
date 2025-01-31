@@ -16,7 +16,6 @@ import {
   MongoServerSelectionError,
   ReadPreference,
   ServerDescription,
-  SeverityLevel,
   Topology
 } from '../../mongodb';
 import { runLater } from '../../tools/utils';
@@ -929,7 +928,7 @@ describe('class MongoClient', function () {
       });
 
       const tests = [
-        // only skipInitiaPing=true will have no events upon connect
+        // only skipInitialPing=true will have no events upon connect
         { description: 'should skip ping command when set to true', value: true, expectEvents: 0 },
         {
           description: 'should not skip ping command when set to false',
@@ -963,126 +962,6 @@ describe('class MongoClient', function () {
           }
         });
       }
-    });
-
-    // TODO(NODE-5672): Release Standardized Logger
-    describe('__enableMongoLogger', () => {
-      let cachedEnv;
-
-      before(() => {
-        cachedEnv = process.env;
-      });
-
-      after(() => {
-        process.env = cachedEnv;
-      });
-
-      context('when enabled', () => {
-        context('when logging is enabled for any component', () => {
-          before(() => {
-            process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
-          });
-
-          it('enables logging for the specified component', () => {
-            const client = new MongoClient('mongodb://localhost:27017', {
-              __enableMongoLogger: true
-            });
-            expect(client.mongoLogger?.componentSeverities).to.have.property(
-              'command',
-              SeverityLevel.EMERGENCY
-            );
-          });
-        });
-
-        context('when logging is not enabled for any component', () => {
-          before(() => {
-            process.env = {};
-          });
-
-          it('does not create logger', () => {
-            const client = new MongoClient('mongodb://localhost:27017', {
-              __enableMongoLogger: true
-            });
-            expect(client.mongoLogger).to.not.exist;
-          });
-        });
-      });
-
-      for (const optionValue of [false, undefined]) {
-        context(`when set to ${optionValue}`, () => {
-          context('when logging is enabled for a component', () => {
-            before(() => {
-              process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
-            });
-
-            it('does not instantiate logger', () => {
-              const client = new MongoClient('mongodb://localhost:27017', {
-                __enableMongoLogger: optionValue
-              });
-              expect(client.mongoLogger).to.not.exist;
-            });
-          });
-
-          context('when logging is not enabled for any component', () => {
-            before(() => {
-              process.env = {};
-            });
-
-            it('does not instantiate logger', () => {
-              const client = new MongoClient('mongodb://localhost:27017', {
-                __enableMongoLogger: optionValue
-              });
-              expect(client.mongoLogger).to.not.exist;
-            });
-          });
-        });
-      }
-    });
-
-    describe('__internalLoggerConfig', () => {
-      let cachedEnv: NodeJS.ProcessEnv;
-
-      before(() => {
-        cachedEnv = process.env;
-      });
-
-      after(() => {
-        process.env = cachedEnv;
-      });
-
-      context('when undefined', function () {
-        before(() => {
-          process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
-        });
-
-        it('falls back to environment options', function () {
-          const client = new MongoClient('mongodb://localhost:27017', {
-            __enableMongoLogger: true,
-            __internalLoggerConfig: undefined
-          });
-
-          expect(client.mongoLogger?.componentSeverities).to.have.property(
-            'command',
-            SeverityLevel.EMERGENCY
-          );
-        });
-      });
-
-      context('when defined', function () {
-        it('overrides environment options', function () {
-          const client = new MongoClient('mongodb://localhost:27017', {
-            __enableMongoLogger: true,
-            __internalLoggerConfig: {
-              MONGODB_LOG_COMMAND: SeverityLevel.ALERT
-            }
-          });
-
-          expect(client.mongoLogger?.componentSeverities).to.have.property(
-            'command',
-            SeverityLevel.ALERT
-          );
-        });
-      });
     });
   });
 });

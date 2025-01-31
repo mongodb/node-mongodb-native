@@ -61,8 +61,7 @@ describe('AbortSignal support', () => {
       {
         monitorCommands: true,
         appName: 'abortSignalClient',
-        __enableMongoLogger: true,
-        __internalLoggerConfig: { MONGODB_LOG_SERVER_SELECTION: 'debug' },
+        mongodbLogComponentSeverities: { serverSelection: 'debug' },
         mongodbLogPath: { write: log => logs.push(log) },
         serverSelectionTimeoutMS: 10_000,
         maxPoolSize: 1
@@ -629,8 +628,7 @@ describe('AbortSignal support', () => {
         client = this.configuration.newClient(
           {},
           {
-            __enableMongoLogger: true,
-            __internalLoggerConfig: { MONGODB_LOG_SERVER_SELECTION: 'debug' },
+            mongodbLogComponentSeverities: { serverSelection: 'debug' },
             mongodbLogPath: {
               write: log => {
                 if (log.c === 'serverSelection' && log.operation === 'ping') {
@@ -675,8 +673,7 @@ describe('AbortSignal support', () => {
         connectStarted = promise.promise;
 
         client = this.configuration.newClient('mongodb://iLoveJavaScript', {
-          __enableMongoLogger: true,
-          __internalLoggerConfig: { MONGODB_LOG_SERVER_SELECTION: 'debug' },
+          mongodbLogComponentSeverities: { serverSelection: 'debug' },
           mongodbLogPath: {
             write: log => {
               if (log.c === 'serverSelection' && log.operation === 'ping') {

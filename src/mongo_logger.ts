@@ -77,7 +77,11 @@ import type {
 } from './sdam/server_selection_events';
 import { HostAddress, isPromiseLike, parseUnsignedInteger } from './utils';
 
-/** @internal */
+/**
+ * @public
+ * Severity levels align with unix syslog.
+ * Most typical driver functions will log to debug.
+ */
 export const SeverityLevel = Object.freeze({
   EMERGENCY: 'emergency',
   ALERT: 'alert',
@@ -93,7 +97,7 @@ export const SeverityLevel = Object.freeze({
 
 /** @internal */
 export const DEFAULT_MAX_DOCUMENT_LENGTH = 1000;
-/** @internal */
+/** @public */
 export type SeverityLevel = (typeof SeverityLevel)[keyof typeof SeverityLevel];
 
 /** @internal */
@@ -131,7 +135,7 @@ export const SEVERITY_LEVEL_MAP = new SeverityLevelMap([
   [SeverityLevel.TRACE, 8]
 ]);
 
-/** @internal */
+/** @public */
 export const MongoLoggableComponent = Object.freeze({
   COMMAND: 'command',
   TOPOLOGY: 'topology',
@@ -140,7 +144,7 @@ export const MongoLoggableComponent = Object.freeze({
   CLIENT: 'client'
 } as const);
 
-/** @internal */
+/** @public */
 export type MongoLoggableComponent =
   (typeof MongoLoggableComponent)[keyof typeof MongoLoggableComponent];
 
@@ -164,13 +168,13 @@ export interface MongoLoggerEnvOptions {
   MONGODB_LOG_PATH?: string;
 }
 
-/** @internal */
+/** @public */
 export interface LogComponentSeveritiesClientOptions {
   /** Optional severity level for command component */
   command?: SeverityLevel;
   /** Optional severity level for topology component */
   topology?: SeverityLevel;
-  /** Optionsl severity level for server selection component */
+  /** Optional severity level for server selection component */
   serverSelection?: SeverityLevel;
   /** Optional severity level for connection component */
   connection?: SeverityLevel;
@@ -292,7 +296,7 @@ function resolveSeverityConfiguration(
   );
 }
 
-/** @internal */
+/** @public */
 export interface Log extends Record<string, any> {
   t: Date;
   c: MongoLoggableComponent;
@@ -301,10 +305,27 @@ export interface Log extends Record<string, any> {
 }
 
 /**
- * @internal
- * TODO: NODE-5671 - remove internal flag and add API comments
+ * @public
+ *
+ * A custom destination for structured logging messages.
  */
 export interface MongoDBLogWritable {
+  /**
+   * This function will be called for every enabled log message.
+   *
+   * It can be sync or async:
+   * - If it is synchronous it will block the driver from proceeding until this method returns.
+   * - If it is asynchronous the driver will not await the returned promise. It will attach fulfillment handling (`.then`).
+   *   If the promise rejects the logger will write an error message to stderr and stop functioning.
+   *   If the promise resolves the driver proceeds to the next log message (or waits for new ones to occur).
+   *
+   * Tips:
+   * - We recommend writing an async `write` function that _never_ rejects.
+   *   Instead handle logging errors as necessary to your use case and make the write function a noop, until it can be recovered.
+   * - The Log messages are structured but **subject to change** since the intended purpose is informational.
+   *   Program against this defensively and err on the side of stringifying whatever is passed in to write in some form or another.
+   *
+   */
   write(log: Log): PromiseLike<unknown> | unknown;
 }
 

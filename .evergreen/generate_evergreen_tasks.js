@@ -564,7 +564,7 @@ SINGLETON_TASKS.push(
         updateExpansions({
           VERSION: 'latest',
           TOPOLOGY: 'replica_set',
-          NODE_LTS_VERSION: LATEST_LTS 
+          NODE_LTS_VERSION: LATEST_LTS
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
@@ -750,11 +750,8 @@ function addPerformanceTasks() {
       monitorCommands: true
     }),
     makePerfTask('run-spec-benchmark-tests-node-server-logging', {
-      __enableMongoLogger: true,
-      __internalLoggerConfig: {
-        MONGODB_LOG_ALL: 'trace',
-        MONGODB_LOG_PATH: 'stderr'
-      }
+      mongodbLogPath: 'stderr',
+      mongodbLogComponentSeverities: { default: 'trace' }
     })
   ];
 

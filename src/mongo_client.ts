@@ -27,7 +27,6 @@ import {
   type LogComponentSeveritiesClientOptions,
   type MongoDBLogWritable,
   MongoLogger,
-  type MongoLoggerEnvOptions,
   type MongoLoggerOptions,
   SeverityLevel
 } from './mongo_logger';
@@ -279,33 +278,29 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   proxyPassword?: string;
   /** Instructs the driver monitors to use a specific monitoring mode */
   serverMonitoringMode?: ServerMonitoringMode;
+  /**
+   * @public
+   * Specifies the destination of the driver's logging. The default is stderr.
+   */
+  mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  /**
+   * @public
+   * Enable logging level per component or use `default` to control any unset components.
+   */
+  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
+  /**
+   * @public
+   * All BSON documents are stringified to EJSON. This controls the maximum length of those strings.
+   * It is defaulted to 1000.
+   */
+  mongodbLogMaxDocumentLength?: number;
 
   /** @internal */
   srvPoller?: SrvPoller;
   /** @internal */
   connectionType?: typeof Connection;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogMaxDocumentLength?: number;
-
   /** @internal */
   __skipPingOnConnect?: boolean;
-  /** @internal */
-  __internalLoggerConfig?: MongoLoggerEnvOptions;
-  /** @internal */
-  __enableMongoLogger?: boolean;
 }
 
 /** @public */
@@ -1062,8 +1057,4 @@ export interface MongoOptions
   timeoutMS?: number;
   /** @internal */
   __skipPingOnConnect?: boolean;
-  /** @internal */
-  __internalLoggerConfig?: Document;
-  /** @internal */
-  __enableMongoLogger?: boolean;
 }
