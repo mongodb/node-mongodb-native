@@ -105,6 +105,8 @@ export interface AutoEncryptionOptions {
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
   tlsOptions?: CSFLEKMSTlsOptions;
+  /** Optional custom credential provider to use for KMS requests. */
+  awsCredentialProvider?: AWSCredentialProvider;
 }
 
 /**
@@ -239,6 +241,7 @@ export class AutoEncrypter {
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
+    this._awsCredentialProvider = options.awsCredentialProvider;
 
     const mongoCryptOptions: MongoCryptOptions = {
       enableMultipleCollinfo: true,
@@ -330,11 +333,6 @@ export class AutoEncrypter {
    * This function is a no-op when bypassSpawn is set or the crypt shared library is used.
    */
   async init(): Promise<MongoClient | void> {
-    // This is handled during init() as the auto encrypter is instantiated during the client's
-    // parseOptions() call, so the client doesn't have its options set at that point.
-    this._awsCredentialProvider =
-      this._client.options.credentials?.mechanismProperties.AWS_CREDENTIAL_PROVIDER;
-
     if (this._bypassMongocryptdAndCryptShared || this.cryptSharedLibVersionInfo) {
       return;
     }
