@@ -191,11 +191,14 @@ const compareInputToSpec = (input, expected, message) => {
   expect(input, message).to.equal(expected);
 };
 
+const closeSignal = new AbortController().signal;
+
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   checkOut: async function (op) {
     const timeoutContext = TimeoutContext.create({
       serverSelectionTimeoutMS: 0,
-      waitQueueTimeoutMS: threadContext.pool.options.waitQueueTimeoutMS
+      waitQueueTimeoutMS: threadContext.pool.options.waitQueueTimeoutMS,
+      closeSignal
     });
     const connection: Connection = await ConnectionPool.prototype.checkOut.call(
       threadContext.pool,
@@ -470,8 +473,6 @@ export function runCmapTestSuite(
         client: MongoClient;
 
       beforeEach(async function () {
-        let utilClient: MongoClient;
-
         const skipDescription = options?.testsToSkip?.find(
           ({ description }) => description === test.description
         );
@@ -486,12 +487,9 @@ export function runCmapTestSuite(
           }
         }
 
-        if (this.configuration.isLoadBalanced) {
-          // The util client can always point at the single mongos LB frontend.
-          utilClient = this.configuration.newClient(this.configuration.singleMongosLoadBalancerUri);
-        } else {
-          utilClient = this.configuration.newClient();
-        }
+        const utilClient = this.configuration.isLoadBalanced
+          ? this.configuration.newClient(this.configuration.singleMongosLoadBalancerUri)
+          : this.configuration.newClient();
 
         await utilClient.connect();
 
@@ -499,7 +497,7 @@ export function runCmapTestSuite(
 
         const someRequirementMet =
           !allRequirements.length ||
-          (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
+          (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements));
 
         if (!someRequirementMet) {
           await utilClient.close();

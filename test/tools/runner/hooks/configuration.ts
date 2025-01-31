@@ -153,6 +153,11 @@ const testConfigBeforeHook = async function () {
     .command({ getParameter: '*' })
     .catch(error => ({ noReply: error }));
 
+  context.shards =
+    context.topologyType === 'sharded'
+      ? await client.db('config').collection('shards').find({}).toArray()
+      : [];
+
   this.configuration = new TestConfiguration(
     loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
     context

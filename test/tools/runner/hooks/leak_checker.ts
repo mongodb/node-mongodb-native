@@ -2,6 +2,7 @@
 import { expect } from 'chai';
 import * as chalk from 'chalk';
 import * as net from 'net';
+import * as tls from 'tls';
 
 import { MongoClient, ServerSessionPool } from '../../../mongodb';
 
@@ -141,8 +142,10 @@ const leakCheckerAfterEach = async function () {
 };
 
 const TRACE_SOCKETS = process.env.TRACE_SOCKETS === 'true' ? true : false;
-const kSocketId = Symbol('socketId');
+const kSocketId = '___socketId';
+const kStack = '___stack';
 const originalCreateConnection = net.createConnection;
+const originalTLSConnect = tls.connect;
 let socketCounter = 0n;
 
 const socketLeakCheckBeforeAll = function socketLeakCheckBeforeAll() {
@@ -150,6 +153,16 @@ const socketLeakCheckBeforeAll = function socketLeakCheckBeforeAll() {
   net.createConnection = options => {
     const socket = originalCreateConnection(options);
     socket[kSocketId] = socketCounter.toString().padStart(5, '0');
+    socket[kStack] = new Error('').stack;
+    socketCounter++;
+    return socket;
+  };
+
+  // @ts-expect-error: Typescript says this is readonly, but it is not at runtime
+  tls.connect = function (options) {
+    const socket = originalTLSConnect(options);
+    socket[kSocketId] = socketCounter.toString().padStart(5, '0');
+    socket[kStack] = new Error('').stack;
     socketCounter++;
     return socket;
   };

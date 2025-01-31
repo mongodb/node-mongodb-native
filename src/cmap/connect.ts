@@ -389,6 +389,7 @@ export async function makeSocket(
 
   addAbortSignalToStream(closeSignal, socket);
 
+  socket.unref();
   socket.setKeepAlive(true, 300000);
   socket.setTimeout(connectTimeoutMS);
   socket.setNoDelay(noDelay);

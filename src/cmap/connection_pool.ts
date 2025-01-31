@@ -413,6 +413,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     if (!this.checkedOut.has(connection)) {
       return;
     }
+
+    connection.unref();
     const poolClosed = this.closed;
     const stale = this.connectionIsStale(connection);
     const willDestroy = !!(poolClosed || stale || connection.closed);
@@ -788,6 +790,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         );
 
         this.waitQueue.shift();
+        connection.ref();
         waitQueueMember.resolve(connection);
       }
     }

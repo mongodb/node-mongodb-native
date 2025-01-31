@@ -384,20 +384,13 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   }
 
   // connecting does an implicit `hello`
-  (async () => {
+  const makeMonitoringConnection = async () => {
     const socket = await makeSocket(monitor.connectOptions, monitor.closeSignal);
     const connection = makeConnection(monitor.connectOptions, socket);
     // The start time is after socket creation but before the handshake
     start = now();
     try {
       await performInitialHandshake(connection, monitor.connectOptions, monitor.closeSignal);
-      return connection;
-    } catch (error) {
-      connection.destroy();
-      throw error;
-    }
-  })().then(
-    connection => {
       if (isInCloseState(monitor)) {
         connection.destroy();
         return;
@@ -417,15 +410,16 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
           useStreamingProtocol(monitor, connection.hello?.topologyVersion)
         )
       );
-
-      callback(undefined, connection.hello);
-    },
-    error => {
+      return connection.hello;
+    } catch (error) {
+      connection.destroy();
       monitor.connection = null;
       awaited = false;
-      onHeartbeatFailed(error);
+      throw error;
     }
-  );
+  };
+
+  makeMonitoringConnection().then(callback.bind(undefined, undefined), onHeartbeatFailed);
 }
 
 function monitorServer(monitor: Monitor) {

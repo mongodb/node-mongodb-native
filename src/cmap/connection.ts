@@ -298,6 +298,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     );
   }
 
+  unref() {
+    this.socket.unref();
+  }
+
+  ref() {
+    this.socket.ref();
+  }
+
   public markAvailable(): void {
     this.lastUseTime = now();
   }
@@ -353,7 +361,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       return;
     }
 
-    this.socket.destroy();
+    if (!this.socket.destroyed) this.socket.destroy();
     this.error = error;
 
     this.dataEvents?.throw(error).then(undefined, squashError);

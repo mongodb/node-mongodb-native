@@ -17,7 +17,6 @@
   "recursive": true,
   "timeout": 60000,
   "failZero": true,
-  "reporter": "test/tools/reporter/mongodb_reporter.js",
   "sort": true,
   "color": true,
   "ignore": [

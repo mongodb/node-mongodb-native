@@ -13,8 +13,8 @@ SHARDED_DIR=${SHARDED_DIR:-$DATA_DIR/sharded_cluster}
 
 if [[ $1 == "replica_set" ]]; then
     mkdir -p $REPLICASET_DIR # user / password
-    mlaunch init --dir $REPLICASET_DIR --ipv6 --auth --username "bob" --password "pwd123" --replicaset --nodes 3 --arbiter --name rs --port 31000 --enableMajorityReadConcern --setParameter enableTestCommands=1
-    echo "mongodb://bob:pwd123@localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs"
+    mlaunch init --dir $REPLICASET_DIR --ipv6 --auth --username "bob" --password "pwd123" --replicaset --nodes 3 --arbiter --name "repl0" --port 27017 --enableMajorityReadConcern --setParameter enableTestCommands=1
+    echo "mongodb://bob:pwd123@localhost:27017,localhost:27018,localhost:27019/?replicaSet=repl0"
 elif [[ $1 == "sharded_cluster" ]]; then
     mkdir -p $SHARDED_DIR
     mlaunch init --dir $SHARDED_DIR --ipv6 --auth --username "bob" --password "pwd123" --replicaset --nodes 3 --name rs --port 51000 --enableMajorityReadConcern --setParameter enableTestCommands=1 --sharded 1 --mongos 2

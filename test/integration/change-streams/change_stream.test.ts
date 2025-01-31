@@ -18,6 +18,7 @@ import {
   MongoChangeStreamError,
   type MongoClient,
   MongoServerError,
+  promiseWithResolvers,
   ReadPreference,
   type ResumeToken
 } from '../../mongodb';
@@ -62,6 +63,7 @@ describe('Change Streams', function () {
     await csDb.createCollection('test').catch(() => null);
     collection = csDb.collection('test');
     changeStream = collection.watch();
+    changeStream.once('error', error => this.error(error));
   });
 
   afterEach(async () => {
@@ -695,10 +697,18 @@ describe('Change Streams', function () {
     async test() {
       await initIteratorMode(changeStream);
 
+      const { promise, resolve, reject } = promiseWithResolvers<void>();
+
       const outStream = new PassThrough({ objectMode: true });
 
-      // @ts-expect-error: transform requires a Document return type
-      changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
+      const csStream = changeStream
+        // @ts-expect-error: transform requires a Document return type
+        .stream({ transform: JSON.stringify });
+
+      csStream.once('error', reject).pipe(outStream).once('error', reject);
+
+      outStream.on('close', resolve);
+      csStream.on('close', resolve);
 
       const willBeData = once(outStream, 'data');
 
@@ -709,6 +719,8 @@ describe('Change Streams', function () {
       expect(parsedEvent).to.have.nested.property('fullDocument.a', 1);
 
       outStream.destroy();
+      csStream.destroy();
+      await promise;
     }
   });
 

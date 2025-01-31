@@ -829,12 +829,14 @@ describe('CSOT', function () {
   });
 
   describe('State machine', function () {
-    const stateMachine = new StateMachine({} as any);
+    const signal = new AbortController().signal;
+    const stateMachine = new StateMachine({} as any, undefined, signal);
 
     const timeoutContext = () => ({
       timeoutContext: new CSOTTimeoutContext({
         timeoutMS: 1000,
-        serverSelectionTimeoutMS: 30000
+        serverSelectionTimeoutMS: 30000,
+        closeSignal: signal
       })
     });
 

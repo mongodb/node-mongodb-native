@@ -1872,7 +1872,7 @@ describe('Cursor', function () {
     expect(cursor).to.have.property('closed', true);
 
     const error = await rejectedEarlyBecauseClientClosed;
-    expect(error).to.be.null; // TODO(NODE-6632): This should throw again after the client signal aborts the in-progress next call
+    expect(error).to.be.instanceOf(Error); // TODO: Whatever the MongoClient aborts with.
   });
 
   it('shouldAwaitData', {

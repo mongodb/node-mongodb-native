@@ -691,14 +691,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /* @internal */
   private async _close(force = false): Promise<void> {
-    this.closeController.abort();
-    // There's no way to set hasBeenClosed back to false
-    Object.defineProperty(this.s, 'hasBeenClosed', {
-      value: true,
-      enumerable: true,
-      configurable: false,
-      writable: false
-    });
+    try {
+      this.closeController.abort();
+      // There's no way to set hasBeenClosed back to false
+      Object.defineProperty(this.s, 'hasBeenClosed', {
+        value: true,
+        enumerable: true,
+        configurable: false,
+        writable: false
+      });
 
       const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
       this.s.activeCursors.clear();
