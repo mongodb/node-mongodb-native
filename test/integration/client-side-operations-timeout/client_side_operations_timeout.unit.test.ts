@@ -110,7 +110,8 @@ describe('CSOT spec unit tests', function () {
 
   describe('Client side encryption', function () {
     describe('KMS requests', function () {
-      const stateMachine = new StateMachine({} as any);
+      const closeSignal = new AbortController().signal;
+      const stateMachine = new StateMachine({} as any, undefined, closeSignal);
       const request = {
         addResponse: _response => {},
         status: {
@@ -137,7 +138,7 @@ describe('CSOT spec unit tests', function () {
           const timeoutContext = new CSOTTimeoutContext({
             timeoutMS: 500,
             serverSelectionTimeoutMS: 30000,
-            closeSignal: new AbortController().signal
+            closeSignal
           });
           const err = await stateMachine.kmsRequest(request, { timeoutContext }).catch(e => e);
           expect(err).to.be.instanceOf(MongoOperationTimeoutError);

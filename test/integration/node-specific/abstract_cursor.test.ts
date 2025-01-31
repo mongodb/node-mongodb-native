@@ -416,7 +416,11 @@ describe('class AbstractCursor', function () {
       client.on('commandStarted', filterForCommands('killCursors', commands));
 
       collection = client.db('abstract_cursor_integration').collection('test');
-      internalContext = TimeoutContext.create({ timeoutMS: 1000, serverSelectionTimeoutMS: 2000 });
+      internalContext = TimeoutContext.create({
+        timeoutMS: 1000,
+        serverSelectionTimeoutMS: 2000,
+        closeSignal: new AbortController().signal
+      });
 
       context = new CursorTimeoutContext(internalContext, Symbol());
 

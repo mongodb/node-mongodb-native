@@ -374,6 +374,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     try {
       timeout?.throwIfExpired();
+      timeout?.ref();
       return await (timeout ? Promise.race([promise, timeout]) : promise);
     } catch (error) {
       if (TimeoutError.is(error)) {
@@ -399,6 +400,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       throw error;
     } finally {
+      timeout?.unref();
       abortListener?.[kDispose]();
       timeout?.clear();
     }

@@ -10,7 +10,7 @@ const sinon = require('sinon');
 const { Writable } = require('stream');
 const { once, on } = require('events');
 const { setTimeout } = require('timers');
-const { ReadPreference } = require('../../mongodb');
+const { ReadPreference, MongoClientClosedError } = require('../../mongodb');
 const { ServerType } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
 
@@ -1861,18 +1861,25 @@ describe('Cursor', function () {
     // insert only 2 docs in capped coll of 3
     await collection.insertMany([{ a: 1 }, { a: 1 }]);
 
-    const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS: 2000 });
+    const maxAwaitTimeMS = 5000;
+
+    const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS });
 
     await cursor.next();
     await cursor.next();
     // will block for maxAwaitTimeMS (except we are closing the client)
     const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
 
+    const start = performance.now();
     await client.close();
+    const end = performance.now();
+
     expect(cursor).to.have.property('closed', true);
 
+    expect(end - start, "close returns before cursor's await time").to.be.lessThan(maxAwaitTimeMS);
+
     const error = await rejectedEarlyBecauseClientClosed;
-    expect(error).to.be.instanceOf(Error); // TODO: Whatever the MongoClient aborts with.
+    expect(error).to.be.instanceOf(MongoClientClosedError);
   });
 
   it('shouldAwaitData', {

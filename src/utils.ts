@@ -1571,7 +1571,7 @@ export function addAbortSignalToStream(
 
   const abortListener = addAbortListener(signal, function () {
     stream.off('close', abortListener[kDispose]).off('error', abortListener[kDispose]);
-    stream.destroy(this.reason);
+    if (!stream.destroyed) stream.destroy(this.reason);
   });
   // not nearly as complex as node's eos() but... do we need all that?? sobbing emoji.
   stream.once('close', abortListener[kDispose]).once('error', abortListener[kDispose]);

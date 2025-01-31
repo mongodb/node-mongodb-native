@@ -39,7 +39,7 @@ export function clearOnAbortTimeout(
   }, ms);
 
   if ('unref' in id && typeof id.unref === 'function') {
-    id.unref();
+    // id.unref();
   }
 
   const abortListener = addAbortListener(closeSignal, function clearId() {
@@ -116,7 +116,9 @@ export class Timeout extends Promise<never> {
     this.start = Math.trunc(performance.now());
 
     if (rejection == null && this.duration > 0) {
-      if (options.closeSignal == null) throw new Error('incorrect timer use detected!');
+      if (options.closeSignal == null) {
+        throw new Error('You must provide a close signal to timeoutContext');
+      }
 
       this.id = clearOnAbortTimeout(
         () => {

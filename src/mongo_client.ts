@@ -22,7 +22,7 @@ import { MONGO_CLIENT_EVENTS } from './constants';
 import { type AbstractCursor } from './cursor/abstract_cursor';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
-import { MongoInvalidArgumentError } from './error';
+import { MongoClientClosedError, MongoInvalidArgumentError } from './error';
 import { MongoClientAuthProviders } from './mongo_client_auth_providers';
 import {
   type LogComponentSeveritiesClientOptions,
@@ -692,7 +692,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /* @internal */
   private async _close(force = false): Promise<void> {
     try {
-      this.closeController.abort();
       // There's no way to set hasBeenClosed back to false
       Object.defineProperty(this.s, 'hasBeenClosed', {
         value: true,
@@ -700,6 +699,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
         configurable: false,
         writable: false
       });
+
+      if (this.options.maxPoolSize === 1) {
+        // If maxPoolSize is 1 we won't be able to run anything
+        // unless we interrupt whatever is using the one connection.
+        this.closeController.abort(new MongoClientClosedError());
+      }
 
       const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
       this.s.activeCursors.clear();
@@ -749,7 +754,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
         await encrypter.close(this, force);
       }
     } finally {
-      // ignore
+      if (!this.closeController.signal.aborted) {
+        this.closeController.abort(new MongoClientClosedError());
+      }
     }
   }
 

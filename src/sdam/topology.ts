@@ -621,6 +621,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     try {
       timeout?.throwIfExpired();
+      timeout?.ref();
       const server = await (timeout ? Promise.race([serverPromise, timeout]) : serverPromise);
       if (options.timeoutContext?.csotEnabled() && server.description.minRoundTripTime !== 0) {
         options.timeoutContext.minRoundTripTime = server.description.minRoundTripTime;
@@ -661,6 +662,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       // Other server selection error
       throw error;
     } finally {
+      timeout?.unref();
       abortListener?.[kDispose]();
       if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
     }

@@ -387,6 +387,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   const makeMonitoringConnection = async () => {
     const socket = await makeSocket(monitor.connectOptions, monitor.closeSignal);
     const connection = makeConnection(monitor.connectOptions, socket);
+    connection.unref();
     // The start time is after socket creation but before the handshake
     start = now();
     try {
@@ -447,15 +448,11 @@ function monitorServer(monitor: Monitor) {
 
       // if the check indicates streaming is supported, immediately reschedule monitoring
       if (useStreamingProtocol(monitor, hello?.topologyVersion)) {
-        clearOnAbortTimeout(
-          () => {
-            if (!isInCloseState(monitor)) {
-              monitor.monitorId?.wake();
-            }
-          },
-          0,
-          monitor.closeSignal
-        );
+        queueMicrotask(() => {
+          if (!isInCloseState(monitor)) {
+            monitor.monitorId?.wake();
+          }
+        });
       }
 
       done();
@@ -554,6 +551,7 @@ export class RTTPinger {
     if (connection == null) {
       connect(this.monitor.connectOptions, this.closeSignal).then(
         connection => {
+          connection.unref();
           this.measureAndReschedule(start, connection);
         },
         () => {

@@ -112,21 +112,20 @@ describe('URI', function () {
     );
   });
 
-  it('should correctly translate uri options', {
-    metadata: { requires: { topology: 'replicaset' } },
-    test: function (done) {
+  it(
+    'should correctly translate uri options',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       const config = this.configuration;
       const uri = `mongodb://${config.host}:${config.port}/${config.db}?replicaSet=${config.replicasetName}`;
 
       const client = this.configuration.newClient(uri);
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        expect(client).to.exist;
-        expect(client.options.replicaSet).to.exist.and.equal(config.replicasetName);
-        client.close(done);
-      });
+      await client.connect();
+      expect(client).to.exist;
+      expect(client.options.replicaSet).to.exist.and.equal(config.replicasetName);
+      await client.close();
     }
-  });
+  );
 
   it('should generate valid credentials with X509', {
     metadata: { requires: { topology: 'single' } },
