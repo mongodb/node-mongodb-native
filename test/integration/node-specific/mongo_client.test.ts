@@ -4,6 +4,7 @@ import * as net from 'net';
 import * as sinon from 'sinon';
 
 import {
+  type Collection,
   type CommandFailedEvent,
   type CommandStartedEvent,
   type CommandSucceededEvent,
@@ -15,7 +16,6 @@ import {
   MongoServerSelectionError,
   ReadPreference,
   ServerDescription,
-  SeverityLevel,
   Topology
 } from '../../mongodb';
 import { runLater } from '../../tools/utils';
@@ -31,7 +31,6 @@ describe('class MongoClient', function () {
   afterEach(async () => {
     sinon.restore();
     await client?.close();
-    // @ts-expect-error: Put this variable back to undefined to force tests to make their own client
     client = undefined;
   });
 
@@ -567,7 +566,44 @@ describe('class MongoClient', function () {
     });
   });
 
-  context('#close()', () => {
+  describe('active cursors', function () {
+    let client: MongoClient;
+    let collection: Collection<{ _id: number }>;
+    const kills = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      collection = client.db('activeCursors').collection('activeCursors');
+      await collection.drop().catch(() => null);
+      await collection.insertMany(Array.from({ length: 50 }, (_, _id) => ({ _id })));
+
+      kills.length = 0;
+      client.on('commandStarted', ev => ev.commandName === 'killCursors' && kills.push(ev));
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('are tracked upon creation and removed upon exhaustion', async () => {
+      const cursors = Array.from({ length: 30 }, (_, skip) =>
+        collection.find({}, { skip, batchSize: 1 })
+      );
+      expect(client.s.activeCursors).to.have.lengthOf(30);
+      await Promise.all(cursors.map(c => c.toArray()));
+      expect(client.s.activeCursors).to.have.lengthOf(0);
+      expect(kills).to.have.lengthOf(0);
+    });
+
+    it('are removed from tracking if exhausted in first batch', async () => {
+      const cursors = Array.from({ length: 30 }, () => collection.find());
+      expect(client.s.activeCursors).to.have.lengthOf(30);
+      await Promise.all(cursors.map(c => c.next())); // only one document pulled from each.
+      expect(client.s.activeCursors).to.have.lengthOf(0);
+    });
+  });
+
+  describe('#close()', () => {
     let client: MongoClient;
     let db: Db;
 
@@ -702,7 +738,7 @@ describe('class MongoClient', function () {
       expect(endEvents[0]).to.have.property('reply', undefined); // noReponse: true
     });
 
-    context('when server selection would return no servers', () => {
+    describe('when server selection would return no servers', () => {
       const serverDescription = new ServerDescription('a:1');
 
       it('short circuits and does not end sessions', async () => {
@@ -720,6 +756,112 @@ describe('class MongoClient', function () {
 
         expect(startedEvents).to.be.empty;
         expect(client.s.sessionPool.sessions).to.have.lengthOf(1);
+      });
+    });
+
+    context('concurrent calls', () => {
+      let topologyClosedSpy;
+      beforeEach(async function () {
+        await client.connect();
+        const coll = client.db('db').collection('concurrentCalls');
+        const session = client.startSession();
+        await coll.findOne({}, { session: session });
+        topologyClosedSpy = sinon.spy(Topology.prototype, 'close');
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+      });
+
+      context('when two concurrent calls to close() occur', () => {
+        it('does not throw', async function () {
+          await Promise.all([client.close(), client.close()]);
+        });
+
+        it('clean-up logic is performed only once', async function () {
+          await Promise.all([client.close(), client.close()]);
+          expect(topologyClosedSpy).to.have.been.calledOnce;
+        });
+      });
+
+      context('when more than two concurrent calls to close() occur', () => {
+        it('does not throw', async function () {
+          await Promise.all([client.close(), client.close(), client.close(), client.close()]);
+        });
+
+        it('clean-up logic is performed only once', async function () {
+          await client.connect();
+          await Promise.all([
+            client.close(),
+            client.close(),
+            client.close(),
+            client.close(),
+            client.close()
+          ]);
+          expect(topologyClosedSpy).to.have.been.calledOnce;
+        });
+      });
+
+      it('when connect rejects lock is released regardless', async function () {
+        expect(client.topology?.isConnected()).to.be.true;
+
+        const closeStub = sinon.stub(client, 'close');
+        closeStub.onFirstCall().rejects(new Error('cannot close'));
+
+        // first call rejected to simulate a close failure
+        const error = await client.close().catch(error => error);
+        expect(error).to.match(/cannot close/);
+
+        expect(client.topology?.isConnected()).to.be.true;
+        closeStub.restore();
+
+        // second call should close
+        await client.close();
+
+        expect(client.topology).to.be.undefined;
+      });
+    });
+
+    describe('active cursors', function () {
+      let collection: Collection<{ _id: number }>;
+      const kills = [];
+
+      beforeEach(async () => {
+        collection = client.db('test').collection('activeCursors');
+        await collection.drop().catch(() => null);
+        await collection.insertMany(Array.from({ length: 50 }, (_, _id) => ({ _id })));
+
+        kills.length = 0;
+        client.on('commandStarted', ev => ev.commandName === 'killCursors' && kills.push(ev));
+      });
+
+      it('are all closed', async () => {
+        const cursors = Array.from({ length: 30 }, (_, skip) =>
+          collection.find({}, { skip, batchSize: 1 })
+        );
+        await Promise.all(cursors.map(c => c.next()));
+        expect(client.s.activeCursors).to.have.lengthOf(30);
+        await client.close();
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        expect(kills).to.have.lengthOf(30);
+      });
+
+      it('creating cursors after close adds to activeCursors', async () => {
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        await client.close();
+        collection.find({});
+        expect(client.s.activeCursors).to.have.lengthOf(1);
+      });
+
+      it('rewinding cursors after close adds to activeCursors', async () => {
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        const cursor = collection.find({}, { batchSize: 1 });
+        await cursor.next();
+        expect(client.s.activeCursors).to.have.lengthOf(1);
+        await client.close();
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        cursor.rewind();
+        expect(client.s.activeCursors).to.have.lengthOf(1);
       });
     });
   });
@@ -786,7 +928,7 @@ describe('class MongoClient', function () {
       });
 
       const tests = [
-        // only skipInitiaPing=true will have no events upon connect
+        // only skipInitialPing=true will have no events upon connect
         { description: 'should skip ping command when set to true', value: true, expectEvents: 0 },
         {
           description: 'should not skip ping command when set to false',
@@ -820,126 +962,6 @@ describe('class MongoClient', function () {
           }
         });
       }
-    });
-
-    // TODO(NODE-5672): Release Standardized Logger
-    describe('__enableMongoLogger', () => {
-      let cachedEnv;
-
-      before(() => {
-        cachedEnv = process.env;
-      });
-
-      after(() => {
-        process.env = cachedEnv;
-      });
-
-      context('when enabled', () => {
-        context('when logging is enabled for any component', () => {
-          before(() => {
-            process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
-          });
-
-          it('enables logging for the specified component', () => {
-            const client = new MongoClient('mongodb://localhost:27017', {
-              __enableMongoLogger: true
-            });
-            expect(client.mongoLogger?.componentSeverities).to.have.property(
-              'command',
-              SeverityLevel.EMERGENCY
-            );
-          });
-        });
-
-        context('when logging is not enabled for any component', () => {
-          before(() => {
-            process.env = {};
-          });
-
-          it('does not create logger', () => {
-            const client = new MongoClient('mongodb://localhost:27017', {
-              __enableMongoLogger: true
-            });
-            expect(client.mongoLogger).to.not.exist;
-          });
-        });
-      });
-
-      for (const optionValue of [false, undefined]) {
-        context(`when set to ${optionValue}`, () => {
-          context('when logging is enabled for a component', () => {
-            before(() => {
-              process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
-            });
-
-            it('does not instantiate logger', () => {
-              const client = new MongoClient('mongodb://localhost:27017', {
-                __enableMongoLogger: optionValue
-              });
-              expect(client.mongoLogger).to.not.exist;
-            });
-          });
-
-          context('when logging is not enabled for any component', () => {
-            before(() => {
-              process.env = {};
-            });
-
-            it('does not instantiate logger', () => {
-              const client = new MongoClient('mongodb://localhost:27017', {
-                __enableMongoLogger: optionValue
-              });
-              expect(client.mongoLogger).to.not.exist;
-            });
-          });
-        });
-      }
-    });
-
-    describe('__internalLoggerConfig', () => {
-      let cachedEnv: NodeJS.ProcessEnv;
-
-      before(() => {
-        cachedEnv = process.env;
-      });
-
-      after(() => {
-        process.env = cachedEnv;
-      });
-
-      context('when undefined', function () {
-        before(() => {
-          process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
-        });
-
-        it('falls back to environment options', function () {
-          const client = new MongoClient('mongodb://localhost:27017', {
-            __enableMongoLogger: true,
-            __internalLoggerConfig: undefined
-          });
-
-          expect(client.mongoLogger?.componentSeverities).to.have.property(
-            'command',
-            SeverityLevel.EMERGENCY
-          );
-        });
-      });
-
-      context('when defined', function () {
-        it('overrides environment options', function () {
-          const client = new MongoClient('mongodb://localhost:27017', {
-            __enableMongoLogger: true,
-            __internalLoggerConfig: {
-              MONGODB_LOG_COMMAND: SeverityLevel.ALERT
-            }
-          });
-
-          expect(client.mongoLogger?.componentSeverities).to.have.property(
-            'command',
-            SeverityLevel.ALERT
-          );
-        });
-      });
     });
   });
 });

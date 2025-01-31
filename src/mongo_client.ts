@@ -18,6 +18,7 @@ import type { ClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
+import { type AbstractCursor } from './cursor/abstract_cursor';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
@@ -26,7 +27,6 @@ import {
   type LogComponentSeveritiesClientOptions,
   type MongoDBLogWritable,
   MongoLogger,
-  type MongoLoggerEnvOptions,
   type MongoLoggerOptions,
   SeverityLevel
 } from './mongo_logger';
@@ -278,33 +278,29 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   proxyPassword?: string;
   /** Instructs the driver monitors to use a specific monitoring mode */
   serverMonitoringMode?: ServerMonitoringMode;
+  /**
+   * @public
+   * Specifies the destination of the driver's logging. The default is stderr.
+   */
+  mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  /**
+   * @public
+   * Enable logging level per component or use `default` to control any unset components.
+   */
+  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
+  /**
+   * @public
+   * All BSON documents are stringified to EJSON. This controls the maximum length of those strings.
+   * It is defaulted to 1000.
+   */
+  mongodbLogMaxDocumentLength?: number;
 
   /** @internal */
   srvPoller?: SrvPoller;
   /** @internal */
   connectionType?: typeof Connection;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogMaxDocumentLength?: number;
-
   /** @internal */
   __skipPingOnConnect?: boolean;
-  /** @internal */
-  __internalLoggerConfig?: MongoLoggerEnvOptions;
-  /** @internal */
-  __enableMongoLogger?: boolean;
 }
 
 /** @public */
@@ -323,6 +319,12 @@ export interface MongoClientPrivate {
    * - used to notify the leak checker in our tests if test author forgot to clean up explicit sessions
    */
   readonly activeSessions: Set<ClientSession>;
+  /**
+   * We keep a reference to the cursors that are created from this client.
+   * - used to track and close all cursors in client.close().
+   *   Cursors in this set are ones that still need to have their close method invoked (no other conditions are considered)
+   */
+  readonly activeCursors: Set<AbstractCursor>;
   readonly sessionPool: ServerSessionPool;
   readonly options: MongoOptions;
   readonly readConcern?: ReadConcern;
@@ -366,6 +368,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   override readonly mongoLogger: MongoLogger | undefined;
   /** @internal */
   private connectionLock?: Promise<this>;
+  /** @internal */
+  private closeLock?: Promise<void>;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -398,6 +402,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       hasBeenClosed: false,
       sessionPool: new ServerSessionPool(this),
       activeSessions: new Set(),
+      activeCursors: new Set(),
       authProviders: new MongoClientAuthProviders(),
 
       get options() {
@@ -642,6 +647,21 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * @param force - Force close, emitting no events
    */
   async close(force = false): Promise<void> {
+    if (this.closeLock) {
+      return await this.closeLock;
+    }
+
+    try {
+      this.closeLock = this._close(force);
+      await this.closeLock;
+    } finally {
+      // release
+      this.closeLock = undefined;
+    }
+  }
+
+  /* @internal */
+  private async _close(force = false): Promise<void> {
     // There's no way to set hasBeenClosed back to false
     Object.defineProperty(this.s, 'hasBeenClosed', {
       value: true,
@@ -649,6 +669,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       configurable: false,
       writable: false
     });
+
+    const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
+    this.s.activeCursors.clear();
+
+    await Promise.all(activeCursorCloses);
 
     const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
     this.s.activeSessions.clear();
@@ -1032,8 +1057,4 @@ export interface MongoOptions
   timeoutMS?: number;
   /** @internal */
   __skipPingOnConnect?: boolean;
-  /** @internal */
-  __internalLoggerConfig?: Document;
-  /** @internal */
-  __enableMongoLogger?: boolean;
 }
