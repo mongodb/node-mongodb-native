@@ -1,5 +1,9 @@
-{
-  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json",
+'use strict';
+
+const [major] = process.versions.node.split('.');
+
+/** @type {import("mocha").MochaOptions} */
+module.exports = {
   "require": [
     "source-map-support/register",
     "ts-node/register",
@@ -15,5 +19,6 @@
   "failZero": true,
   "reporter": "test/tools/reporter/mongodb_reporter.js",
   "sort": true,
-  "color": true
+  "color": true,
+  "node-option": Number(major) >= 23 ? ['no-experimental-strip-types'] : undefined
 }

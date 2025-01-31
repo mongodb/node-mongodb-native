@@ -442,8 +442,6 @@ for (const {
       run_on,
       expansions: { NODE_LTS_VERSION: 'latest' },
       tasks: tasks.map(({ name }) => name),
-      // TODO(NODE-6641): Unskip the smoke tests
-      disable: true
     };
     if (clientEncryption) {
       buildVariantData.expansions.CLIENT_ENCRYPTION = true;
