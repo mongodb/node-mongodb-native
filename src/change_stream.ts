@@ -951,12 +951,10 @@ export class ChangeStream<
 
   /** @internal */
   private _endStream(): void {
-    const cursorStream = this.cursorStream;
-    if (cursorStream) {
-      ['data', 'close', 'end', 'error'].forEach(event => cursorStream.removeAllListeners(event));
-      cursorStream.destroy();
-    }
-
+    this.cursorStream?.removeAllListeners('data');
+    this.cursorStream?.removeAllListeners('close');
+    this.cursorStream?.removeAllListeners('end');
+    this.cursorStream?.destroy();
     this.cursorStream = undefined;
   }
 

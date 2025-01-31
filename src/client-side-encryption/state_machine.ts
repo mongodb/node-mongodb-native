@@ -338,17 +338,7 @@ export class StateMachine {
     const message = request.message;
     const buffer = new BufferPool();
 
-    const netSocket: net.Socket = new net.Socket();
-    let socket: tls.TLSSocket;
-
-    function destroySockets() {
-      for (const sock of [socket, netSocket]) {
-        if (sock) {
-          sock.removeAllListeners();
-          sock.destroy();
-        }
-      }
-    }
+    const socket = new net.Socket();
 
     function onerror(cause: Error) {
       return new MongoCryptError('KMS request failed', { cause });
@@ -380,7 +370,8 @@ export class StateMachine {
       reject: rejectOnNetSocketError,
       resolve: resolveOnNetSocketConnect
     } = promiseWithResolvers<void>();
-    netSocket
+
+    socket
       .once('error', err => rejectOnNetSocketError(onerror(err)))
       .once('close', () => rejectOnNetSocketError(onclose()))
       .once('connect', () => resolveOnNetSocketConnect());
@@ -394,14 +385,14 @@ export class StateMachine {
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         };
-        netSocket.connect(netSocketOptions);
+        socketOptions.socket = socket.connect(netSocketOptions);
         await willConnect;
 
         try {
           socks ??= loadSocks();
           socketOptions.socket = (
             await socks.SocksClient.createConnection({
-              existing_socket: netSocket,
+              existing_socket: socket,
               command: 'connect',
               destination: { host: socketOptions.host, port: socketOptions.port },
               proxy: {
@@ -419,7 +410,7 @@ export class StateMachine {
         }
       }
 
-      socket = tls.connect(socketOptions, () => {
+      tls.connect(socketOptions, () => {
         socket.write(message);
       });
 
@@ -430,7 +421,7 @@ export class StateMachine {
       } = promiseWithResolvers<void>();
 
       abortListener = addAbortListener(options?.signal, function () {
-        destroySockets();
+        socket.destroy();
         rejectOnTlsSocketError(this.reason);
       });
 
@@ -455,12 +446,13 @@ export class StateMachine {
           ])
         : willResolveKmsRequest);
     } catch (error) {
-      if (error instanceof TimeoutError)
+      if (TimeoutError.is(error)) {
         throw new MongoOperationTimeoutError('KMS request timed out');
+      }
       throw error;
     } finally {
       // There's no need for any more activity on this socket at this point.
-      destroySockets();
+      socket.destroy();
       abortListener?.[kDispose]();
     }
   }
