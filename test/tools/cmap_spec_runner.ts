@@ -295,6 +295,7 @@ export class ThreadContext {
     poolOptions: Partial<ConnectionPoolOptions> = {},
     contextOptions: { injectPoolStats: boolean }
   ) {
+    this.poolEventsEventEmitter.on('error', () => null);
     this.#poolOptions = poolOptions;
     this.#hostAddress = hostAddress;
     this.#server = server;

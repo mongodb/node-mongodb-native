@@ -44,6 +44,7 @@ import {
   kDispose,
   List,
   makeStateMachine,
+  noop,
   now,
   ns,
   promiseWithResolvers,
@@ -248,6 +249,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     options: TopologyOptions
   ) {
     super();
+    this.on('error', noop);
 
     this.client = client;
     // Options should only be undefined in tests, MongoClient will always have defined options

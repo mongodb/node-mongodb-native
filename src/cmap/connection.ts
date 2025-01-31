@@ -46,6 +46,7 @@ import {
   HostAddress,
   maxWireVersion,
   type MongoDBNamespace,
+  noop,
   now,
   once,
   squashError,
@@ -229,6 +230,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
+    this.on('error', noop);
 
     this.socket = stream;
     this.id = options.id;

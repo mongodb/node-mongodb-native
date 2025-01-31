@@ -27,6 +27,7 @@ import {
   type Disposable,
   kDispose,
   type MongoDBNamespace,
+  noop,
   squashError
 } from '../utils';
 
@@ -267,6 +268,7 @@ export abstract class AbstractCursor<
     options: AbstractCursorOptions & Abortable = {}
   ) {
     super();
+    this.on('error', noop);
 
     if (!client.s.isMongoClient) {
       throw new MongoRuntimeError('Cursor must be constructed with MongoClient');

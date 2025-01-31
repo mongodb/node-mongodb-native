@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { on } from 'events';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
+import { finished } from 'stream/promises';
 
 import {
   Collection,
@@ -238,7 +238,7 @@ describe('CRUD API', function () {
   });
 
   context('when creating a cursor with find', () => {
-    let collection;
+    let collection: Collection;
 
     beforeEach(async () => {
       collection = client.db().collection('t');
@@ -307,13 +307,14 @@ describe('CRUD API', function () {
 
     describe('#stream()', () => {
       it('creates a node stream that emits data events', async () => {
-        const count = 0;
-        const cursor = makeCursor();
-        const stream = cursor.stream();
-        on(stream, 'data');
-        cursor.once('close', function () {
-          expect(count).to.equal(2);
+        let count = 0;
+        const stream = makeCursor().stream();
+        const willFinish = finished(stream, { cleanup: true });
+        stream.on('data', () => {
+          count++;
         });
+        await willFinish;
+        expect(count).to.equal(2);
       });
     });
 

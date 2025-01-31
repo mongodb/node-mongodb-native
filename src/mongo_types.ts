@@ -24,6 +24,7 @@ import {
   type MongoLogger
 } from './mongo_logger';
 import type { Sort } from './sort';
+import { noop } from './utils';
 
 /** @internal */
 export type TODO_NODE_3286 = any;
@@ -472,7 +473,12 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
 }
 
 /** @public */
-export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
+export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {
+  constructor(...args: any[]) {
+    super(...args);
+    this.on('error', noop);
+  }
+}
 
 /** @public */
 export type Abortable = {

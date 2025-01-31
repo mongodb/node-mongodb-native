@@ -858,6 +858,7 @@ describe('Change Stream prose tests', function () {
         expect(err).to.not.exist;
         coll = client.db('integration_tests').collection('setupAfterTest');
         const changeStream = coll.watch();
+        changeStream.on('error', done);
         waitForStarted(changeStream, () => {
           coll.insertOne({ x: 1 }, { writeConcern: { w: 'majority', j: true } }, err => {
             expect(err).to.not.exist;
@@ -932,6 +933,7 @@ describe('Change Stream prose tests', function () {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
+        changeStream.on('error', done);
         this.defer(() => changeStream.close());
 
         changeStream.on('change', change => {

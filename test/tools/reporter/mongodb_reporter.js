@@ -103,7 +103,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
       catchErr(test => this.testEnd(test))
     );
 
-    process.prependListener('SIGINT', () => this.end(true));
+    process.prependOnceListener('SIGINT', () => this.end(true));
   }
 
   start() {}
@@ -135,7 +135,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
           let endTime = test.endTime;
           endTime = endTime ? endTime.toISOString() : 0;
 
-          let error = test.error;
+          let error = test.err;
           let failure = error
             ? {
                 type: error.constructor.name,
@@ -250,7 +250,6 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
    */
   fail(test, error) {
     if (REPORT_TO_STDIO) console.log(chalk.red(`⨯ ${test.fullTitle()} -- ${error.message}`));
-    test.error = error;
   }
 
   /**

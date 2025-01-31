@@ -66,9 +66,13 @@ maybeDescribe('examples(change-stream):', function () {
       // Start Changestream Example 1
       const collection = db.collection('inventory');
       const changeStream = collection.watch();
-      changeStream.on('change', next => {
-        // process next document
-      });
+      changeStream
+        .on('change', next => {
+          // process next document
+        })
+        .once('error', () => {
+          // handle error
+        });
       // End Changestream Example 1
 
       const changeStreamIterator = collection.watch();
@@ -113,9 +117,13 @@ maybeDescribe('examples(change-stream):', function () {
       // Start Changestream Example 2
       const collection = db.collection('inventory');
       const changeStream = collection.watch([], { fullDocument: 'updateLookup' });
-      changeStream.on('change', next => {
-        // process next document
-      });
+      changeStream
+        .on('change', next => {
+          // process next document
+        })
+        .once('error', error => {
+          // handle error
+        });
       // End Changestream Example 2
 
       // Start Changestream Example 2 Alternative
@@ -151,15 +159,23 @@ maybeDescribe('examples(change-stream):', function () {
       const changeStream = collection.watch();
 
       let newChangeStream;
-      changeStream.once('change', next => {
-        const resumeToken = changeStream.resumeToken;
-        changeStream.close();
+      changeStream
+        .once('change', next => {
+          const resumeToken = changeStream.resumeToken;
+          changeStream.close();
 
-        newChangeStream = collection.watch([], { resumeAfter: resumeToken });
-        newChangeStream.on('change', next => {
-          processChange(next);
+          newChangeStream = collection.watch([], { resumeAfter: resumeToken });
+          newChangeStream
+            .on('change', next => {
+              processChange(next);
+            })
+            .once('error', error => {
+              // handle error
+            });
+        })
+        .once('error', error => {
+          // handle error
         });
-      });
       // End Changestream Example 3
 
       // Start Changestream Example 3 Alternative
@@ -200,9 +216,13 @@ maybeDescribe('examples(change-stream):', function () {
 
       const collection = db.collection('inventory');
       const changeStream = collection.watch(pipeline);
-      changeStream.on('change', next => {
-        // process next document
-      });
+      changeStream
+        .on('change', next => {
+          // process next document
+        })
+        .once('error', error => {
+          // handle error
+        });
       // End Changestream Example 4
 
       // Start Changestream Example 4 Alternative

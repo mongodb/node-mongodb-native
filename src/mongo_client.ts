@@ -58,6 +58,7 @@ import {
   hostMatchesWildcards,
   isHostMatch,
   type MongoDBNamespace,
+  noop,
   ns,
   resolveOptions,
   squashError
@@ -386,6 +387,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   constructor(url: string, options?: MongoClientOptions) {
     super();
+    this.on('error', noop);
 
     this.options = parseOptions(url, this, options);
 

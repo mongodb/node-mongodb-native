@@ -34,6 +34,7 @@ import {
   kDispose,
   List,
   makeCounter,
+  noop,
   now,
   promiseWithResolvers
 } from '../utils';
@@ -200,6 +201,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   constructor(server: Server, options: ConnectionPoolOptions) {
     super();
+    this.on('error', noop);
 
     this.options = Object.freeze({
       connectionType: Connection,
