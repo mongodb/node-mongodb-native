@@ -1039,9 +1039,7 @@ export abstract class AbstractCursor<
         this.selectedServer &&
         !this.cursorSession.hasEnded
       ) {
-        this.isKilled = true;
         const cursorId = this.cursorId;
-        this.cursorId = Long.ZERO;
 
         await executeOperation(
           this.cursorClient,
@@ -1061,6 +1059,8 @@ export abstract class AbstractCursor<
         if (!this.cursorSession?.inTransaction()) {
           maybeClearPinnedConnection(this.cursorSession, { error });
         }
+        this.cursorId = Long.ZERO;
+        this.isKilled = true;
       } finally {
         this.emitClose();
       }
