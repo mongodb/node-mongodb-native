@@ -8,11 +8,10 @@ import { Decimal128, type Document, Double, Long, type MongoClient } from '../..
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptError } from '../../../src/client-side-encryption/errors';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 
 const getKmsProviders = () => {
-  const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
-    local: unknown;
-  };
+  const result = getCSFLEKMSProviders();
 
   return { local: result.local };
 };

@@ -2,7 +2,8 @@ import { expect } from 'chai';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { type Binary, EJSON, Int32, Long } from '../../mongodb';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+import { type Binary, Int32, Long } from '../../mongodb';
 
 const metaData: MongoDBMetadataUI = {
   requires: {
@@ -17,10 +18,8 @@ const metaData: MongoDBMetadataUI = {
   }
 };
 
-const getKmsProviders = (): { local: { key: string } } => {
-  const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
-    local: { key: string };
-  };
+const getKmsProviders = (): { local: { key: Buffer } } => {
+  const result = getCSFLEKMSProviders();
 
   return { local: result.local };
 };

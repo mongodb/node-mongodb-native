@@ -130,123 +130,40 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
 
   "run tests":
-    - command: shell.exec
+    - command: ec2.assume_role
+      params:
+        role_arn: ${OIDC_AWS_ROLE_ARN}
+    - command: subprocess.exec
       type: test
       params:
-        silent: true
-        working_dir: "src"
-        script: |
-          if [ -n "${CLIENT_ENCRYPTION}" ]; then
-            cat <<EOT > prepare_client_encryption.sh
-            export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
-            export RUN_WITH_MONGOCRYPTD=${RUN_WITH_MONGOCRYPTD}
-            export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
-            export FLE_AWS_KEY2='${FLE_AWS_KEY2}'
-            export FLE_AWS_SECRET2='${FLE_AWS_SECRET2}'
-            export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
-            export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
-            export AWS_REGION='${AWS_REGION}'
-            export AWS_CMK_ID='${AWS_CMK_ID}'
-            export AWS_DEFAULT_REGION='us-east-1'
-            export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
-            export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
-          EOT
-          fi
-    - command: shell.exec
-      type: test
-      params:
+        env:
+          TEST_CSFLE: "true"
+        add_expansions_to_env: true
         working_dir: "src"
         timeout_secs: 300
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-
-          if [ -n "${CLIENT_ENCRYPTION}" ]; then
-            # Disable xtrace (just in case it was accidentally set).
-            set +x
-            . ./prepare_client_encryption.sh
-            rm -f ./prepare_client_encryption.sh
-          fi
-
-          export VERSION=${VERSION}
-          export DRIVERS_TOOLS=${DRIVERS_TOOLS}
-
-          if [ -z "${RUN_WITH_MONGOCRYPTD}" ]; then
-            # Set up crypt shared lib if we don't want to use mongocryptd
-            source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
-            echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
-          else
-            echo "CRYPT_SHARED_LIB_PATH not set; using mongocryptd"
-          fi
-
-          TEST_NPM_SCRIPT="${TEST_NPM_SCRIPT|check:integration-coverage}" \
-          MONGODB_URI="${MONGODB_URI}" \
-          AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
-          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          SKIP_DEPS=${SKIP_DEPS|1} \
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+        binary: bash
+        args: 
+          - .evergreen/run-tests.sh
 
   "run serverless tests":
     - command: timeout.update
       params:
         exec_timeout_secs: 1800
-    - command: shell.exec
+    - command: ec2.assume_role
+      params:
+        role_arn: ${OIDC_AWS_ROLE_ARN}
+    - command: subprocess.exec
       type: test
       params:
-        silent: true
-        working_dir: src
-        script: |
-          cat <<EOT > prepare_client_encryption.sh
-            export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
-            export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
-            export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
-            export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
-            export FLE_AWS_KEY2='${FLE_AWS_KEY2}'
-            export FLE_AWS_SECRET2='${FLE_AWS_SECRET2}'
-            export AWS_REGION='${AWS_REGION}'
-            export AWS_CMK_ID='${AWS_CMK_ID}'
-            export AWS_DEFAULT_REGION='us-east-1'
-            export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
-            export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
-          EOT
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: src
         timeout_secs: 300
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-
-          # Disable xtrace (just in case it was accidentally set).
-          set +x
-          source ./prepare_client_encryption.sh
-          rm -f ./prepare_client_encryption.sh
-
-          export VERSION=${VERSION}
-          export DRIVERS_TOOLS=${DRIVERS_TOOLS}
-
-          source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
-
-          echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
-
-          # Get access to the AWS temporary credentials:
-          echo "adding temporary AWS credentials to environment"
-          # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
-          pushd "$DRIVERS_TOOLS"/.evergreen/csfle
-          . ./activate-kmstlsvenv.sh
-          . ./set-temp-creds.sh
-          popd
-
-          export MONGODB_API_VERSION="${MONGODB_API_VERSION}"
-          export AUTH="auth"
-          export SSL="ssl"
-          export TEST_CSFLE=true
-
-          source secrets-export.sh
-          source serverless.env
-
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-serverless-tests.sh
+        working_dir: src
+        binary: bash
+        env: 
+          AUTH: 'auth'
+          SSL: 'ssl'
+        add_expansions_to_env: true
+        args: 
+          - .evergreen/run-serverless-tests.sh
 
   "start-load-balancer":
     - command: shell.exec
@@ -264,43 +181,26 @@ functions:
           bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh stop
 
   "run-lb-tests":
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
-        shell: bash
+        add_expansions_to_env: true
+        binary: bash
         working_dir: src
         timeout_secs: 300
-        script: |
-          ${PREPARE_SHELL}
-
-          MONGODB_URI="${MONGODB_URI}" \
-          AUTH=${AUTH} \
-          SSL=${SSL} \
-          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          SINGLE_MONGOS_LB_URI="${SINGLE_MONGOS_LB_URI}" \
-          MULTI_MONGOS_LB_URI="${MULTI_MONGOS_LB_URI}" \
-          TOPOLOGY="${TOPOLOGY}" \
-          SKIP_DEPS=${SKIP_DEPS|1} \
-          LOAD_BALANCER="${LOAD_BALANCER}" \
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+        args:
+          - .evergreen/run-tests.sh
 
   "run-compression-tests":
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
+        binary: bash
         working_dir: src
         timeout_secs: 300
-        script: |
-          ${PREPARE_SHELL}
-
-          MONGODB_URI="${MONGODB_URI}" \
-          AUTH=${AUTH} \
-          SSL=${SSL} \
-          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          TOPOLOGY="${TOPOLOGY}" \
-          COMPRESSOR="${COMPRESSOR}" \
-          SKIP_DEPS=${SKIP_DEPS|1} \
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-tests.sh
 
   "install package":
     - command: shell.exec
@@ -492,44 +392,17 @@ functions:
           - .evergreen/run-atlas-tests.sh
 
   "run socks5 tests":
-    - command: shell.exec
+    - command: ec2.assume_role
+      params:
+        role_arn: ${OIDC_AWS_ROLE_ARN}
+    - command: subprocess.exec
       type: test
       params:
-        silent: true
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          cat <<EOT > prepare_client_encryption.sh
-          export CLIENT_ENCRYPTION='${CLIENT_ENCRYPTION}'
-          export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
-          export FLE_AWS_KEY2='${FLE_AWS_KEY2}'
-          export FLE_AWS_SECRET2='${FLE_AWS_SECRET2}'
-          export AWS_REGION='${AWS_REGION}'
-          export AWS_CMK_ID='${AWS_CMK_ID}'
-          export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
-          export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
-          EOT
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-
-          export PYTHON_BINARY=$([ "Windows_NT" = "$OS" ] && echo "/cygdrive/c/python/python38/python.exe" || echo "/opt/mongodbtoolchain/v3/bin/python3")
-          export PROJECT_DIRECTORY="$(pwd)"
-          export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
-          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
-          export MONGODB_URI="${MONGODB_URI}"
-          export TEST_SOCKS5_CSFLE="${TEST_SOCKS5_CSFLE}"
-          export SSL="${SSL}"
-
-          # Disable xtrace (just in case it was accidentally set).
-          set +x
-          . ./prepare_client_encryption.sh
-          rm -f ./prepare_client_encryption.sh
-
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-socks5-tests.sh
+        add_expansions_to_env: true
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/run-socks5-tests.sh
 
   "run kerberos tests":
     - command: subprocess.exec
@@ -939,46 +812,17 @@ functions:
             --fault revoked
 
   "run custom csfle tests":
-    - command: shell.exec
+    - command: ec2.assume_role
+      params:
+        role_arn: ${OIDC_AWS_ROLE_ARN}
+    - command: subprocess.exec
       type: test
       params:
-        silent: true
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          cat <<EOT > prepare_client_encryption.sh
-          export CLIENT_ENCRYPTION='${CLIENT_ENCRYPTION}'
-          export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
-          export FLE_AWS_KEY2='${FLE_AWS_KEY2}'
-          export FLE_AWS_SECRET2='${FLE_AWS_SECRET2}'
-          export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
-          export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
-          export AWS_REGION='${AWS_REGION}'
-          export AWS_CMK_ID='${AWS_CMK_ID}'
-          EOT
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        timeout_secs: 60
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-
-          # Disable xtrace (just in case it was accidentally set).
-          set +x
-          source ./prepare_client_encryption.sh
-          rm -f ./prepare_client_encryption.sh
-
-          export VERSION=${VERSION}
-          export DRIVERS_TOOLS=${DRIVERS_TOOLS}
-
-          source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
-          export MONGODB_URI="${MONGODB_URI}"
-
-          echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
-
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+        working_dir: src
+        add_expansions_to_env: true
+        binary: bash
+        args:
+          - .evergreen/run-custom-csfle-tests.sh
 
   "run lambda handler example tests":
     - command: subprocess.exec

@@ -1,4 +1,4 @@
-import { type Binary, EJSON, UUID } from 'bson';
+import { UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
 import * as sinon from 'sinon';
@@ -6,6 +6,7 @@ import { setTimeout } from 'timers/promises';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   BSON,
   type Collection,
@@ -37,12 +38,8 @@ const metadata: MongoDBMetadataUI = {
   }
 };
 
-const getLocalKmsProvider = (): { local: { key: Binary } } => {
-  const { local } = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as {
-    local: { key: Binary };
-    [key: string]: unknown;
-  };
-
+const getLocalKmsProvider = (): { local: { key: Buffer } } => {
+  const { local } = getCSFLEKMSProviders();
   return { local };
 };
 
@@ -52,41 +49,6 @@ describe('Client Side Encryption Functional', function () {
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-
-  it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
-    const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
-    if (typeof CSFLE_KMS_PROVIDERS === 'string') {
-      /**
-       * The shape of CSFLE_KMS_PROVIDERS is as follows:
-       *
-       * ```ts
-       * interface CSFLE_kms_providers {
-       *    aws: {
-       *      accessKeyId: string;
-       *      secretAccessKey: string;
-       *   };
-       *   azure: {
-       *     tenantId: string;
-       *     clientId: string;
-       *     clientSecret: string;
-       *   };
-       *   gcp: {
-       *     email: string;
-       *     privateKey: string;
-       *   };
-       *   local: {
-       *     // EJSON handle converting this, its actually the canonical -> { $binary: { base64: string; subType: string } }
-       *     // **NOTE**: The dollar sign has to be escaped when using this as an ENV variable
-       *     key: Binary;
-       *   }
-       * }
-       * ```
-       */
-      expect(() => EJSON.parse(CSFLE_KMS_PROVIDERS)).to.not.throw(SyntaxError);
-    } else {
-      this.skip();
-    }
-  });
 
   describe('Collection', metadata, function () {
     describe('#bulkWrite()', metadata, function () {
@@ -640,10 +602,8 @@ describe('Range Explicit Encryption with JS native types', function () {
     }
   };
 
-  const getKmsProviders = (): { local: { key: string } } => {
-    const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
-      local: { key: string };
-    };
+  const getKmsProviders = (): { local: { key: Buffer } } => {
+    const result = getCSFLEKMSProviders();
 
     return { local: result.local };
   };
@@ -1135,7 +1095,7 @@ describe('CSOT', function () {
       };
 
       beforeEach(async function () {
-        local_key = { local: EJSON.parse(process.env.CSFLE_KMS_PROVIDERS).local };
+        local_key = { local: getCSFLEKMSProviders().local };
         client = this.configuration.newClient({ timeoutMS });
         await client.connect();
         await client.db('keyvault').createCollection('datakeys');

@@ -31,7 +31,6 @@ about the types of tests and how to run them.
     - [Serverless](#serverless)
     - [Load Balanced](#load-balanced)
     - [Client-Side Field-Level Encryption (CSFLE)](#client-side-field-level-encryption-csfle)
-      - [KMIP FLE support tests](#kmip-fle-support-tests)
     - [Deployed KMS Tests](#deployed-kms-tests)
       - [Azure KMS](#azure-kms)
       - [GCP KMS](#gcp-kms)
@@ -501,143 +500,39 @@ The following steps will walk you through how to start and test a load balancer.
 The following steps will walk you through how to run the tests for CSFLE.
 
 1. Install [MongoDB Client Encryption][npm-csfle] if you haven't already:
-   ```sh
-   npm install mongodb-client-encryption
-   ```
-   > **Note:** if developing changes in `mongodb-client-encryption`,
-   you can link it locally using `etc/tooling/fle.sh`.
+```bash
+npm install mongodb-client-encryption
+```
+> [!NOTE] 
+> If developing changes in `mongodb-client-encryption`, you can link it locally using `etc/tooling/fle.sh`.
 
-1. Create the following environment variables using a command like:
-   ```sh
-   export AWS_REGION="us-east-1"
-   ```
-   > **Note:** MongoDB employees can pull these values from the Evergreen project's configuration.
+2. Load FLE credentials and download crypt_shared
 
-   | Variable Name           | Description                                                                                 |
-   | ----------------------- | ------------------------------------------------------------------------------------------- |
-   | `AWS_ACCESS_KEY_ID`     | The AWS access key ID used to generate KMS messages                                         |
-   | `AWS_SECRET_ACCESS_KEY` | The AWS secret access key used to generate KMS messages                                     |
-   | `AWS_REGION`            | The AWS region where the KMS resides (e.g., `us-east-1`)                                    |
-   | `AWS_CMK_ID`            | The Customer Master Key for the KMS                                                         |
-   | `CSFLE_KMS_PROVIDERS`   | The raw EJSON description of the KMS providers. An example of the format is provided below. |
-   | `KMIP_TLS_CA_FILE`      | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem                     |
-   | `KMIP_TLS_CERT_FILE`    | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem                 |
+This must be run inside a bash or zsh shell.
 
-   The value of the `CSFLE_KMS_PROVIDERS` variable will have the following format:
+```bash
+source .evergreen/setup-fle.sh
+```
 
-   ```
-   interface CSFLE_kms_providers {
-      aws: {
-         accessKeyId: string;
-         secretAccessKey: string;
-      };
-      azure: {
-         tenantId: string;
-         clientId: string;
-         clientSecret: string;
-      };
-      gcp: {
-         email: string;
-         privateKey: string;
-      };
-      local: {
-         // EJSON handle converting this, its actually the canonical -> { $binary: { base64: string; subType: string } }
-         // **NOTE**: The dollar sign has to be escaped when using this as an ENV variable
-         key: Binary;
-      }
-   }
-   ```
-1. Start the KMIP servers:
+> [!NOTE]
+> By default, `setup-fle.sh` installs crypt_shared.  If you want to test with mongocryptd instead, set the RUN_WITH_MONGOCRYPTD environment variable before 
+> sourcing `setup-fle.sh`. 
 
-   ```sh
-   DRIVERS_TOOLS="/path/to/mongodb-labs/drivers-evergreen-tools" .evergreen/run-kms-servers.sh
-   ```
 
-1. Ensure default `~/.aws/config` is present:
+3. Start the KMS and KMIP servers:
 
-   ```
-   [default]
-   aws_access_key_id=AWS_ACCESS_KEY_ID
-   aws_secret_access_key=AWS_SECRET_ACCESS_KEY
-   ```
+```bash
+bash .evergreen/run-kms-servers.sh
+bash .evergreen/run-kmip-server.sh &
+```
 
-1. Set temporary AWS credentials
+4. Run the functional tests:
+```bash
+export TEST_CSFLE=true
+npm run check:test
+```
 
-   ```
-   source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/activate-kmstlsvenv.sh
-   source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/set-temp-creds.sh
-   ```
-
-   Alternatively, for fish users, the following script can be substituted for `set-temp-creds.sh`:
-
-   ```fish
-   function set_aws_creds
-         set PYTHON_SCRIPT "\
-   import boto3
-   client = boto3.client('sts')
-   credentials = client.get_session_token()['Credentials']
-   print (credentials['AccessKeyId'] + ' ' + credentials['SecretAccessKey'] + ' ' + credentials['SessionToken'])"
-
-         echo $PYTHON_SCRIPT | python3 -
-   end
-
-   set CREDS (set_aws_creds)
-
-   set CSFLE_AWS_TEMP_ACCESS_KEY_ID (echo $CREDS | awk '{print $1}')
-   set CSFLE_AWS_TEMP_SECRET_ACCESS_KEY (echo $CREDS | awk '{print $2}')
-   set CSFLE_AWS_TEMP_SESSION_TOKEN (echo $CREDS | awk '{print $3}')
-
-   set -e CREDS
-   ```
-
-1. Run the functional tests:
-   ```sh
-   npm run check:test
-   ```
-
-   The output of the tests will include sections like "Client-Side Encryption Corpus", "Client-Side Encryption Functional", "Client-Side Encryption Prose Tests", and "Client-Side Encryption".
-
-   To run the functional tests using the crypt shared library instead of `mongocryptd`, download the appropriate version of the crypt shared library for the enterprise server version [here](https://www.mongodb.com/download-center/enterprise/releases) and then set the location of it in the environment variable `CRYPT_SHARED_LIB_PATH`.
-
-#### KMIP FLE support tests
-
-1. Install `virtualenv`:
-   ```sh
-   pip install virtualenv
-   ```
-2. Source the `./activate-kmstlsvenv.sh` script in driver evergreen tools `.evergreen/csfle/activate-kmstlsvenv.sh`
-    - This will install all the dependencies needed to run a Python kms_kmip simulated server
-3. In four separate terminals, launch the following:
-   ```sh
-   ./kmstlsvenv/bin/python3 -u kms_kmip_server.py` # by default it always runs on port 5698
-   ```
-   ```sh
-   ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000
-   ```
-   ```sh
-   ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001
-   ```
-   ```sh
-   ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert
-   ```
-4. Set the following environment variables:
-    ```sh
-    export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
-    export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
-    ```
-5. Install the FLE lib:
-   ```sh
-   npm i --no-save mongodb-client-encryption
-   ```
-6. Launch a MongoDB server
-7. Run the full suite:
-   ```sh
-   npm run check:test
-   ```
-   or more specifically
-   ```sh
-   npx mocha --config test/mocha_mongodb.json test/integration/client-side-encryption/
-   ```
+The output of the tests will include sections like "Client-Side Encryption Corpus", "Client-Side Encryption Functional", "Client-Side Encryption Prose Tests", and "Client-Side Encryption".
 
 ### Deployed KMS Tests
 
