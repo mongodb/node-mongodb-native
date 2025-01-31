@@ -4,8 +4,6 @@ const [major] = process.versions.node.split('.');
 
 /** @type {import("mocha").MochaOptions} */
 module.exports = {
-  $schema:
-    'https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json',
   require: ['test/integration/node-specific/examples/setup.js'],
   extension: ['js'],
   ui: 'test/tools/runner/metadata_ui.js',

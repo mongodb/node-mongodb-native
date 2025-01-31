@@ -4,8 +4,6 @@ const [major] = process.versions.node.split('.');
 
 /** @type {import("mocha").MochaOptions} */
 module.exports = {
-  $schema:
-    'https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json',
   require: [
     'source-map-support/register',
     'ts-node/register',
