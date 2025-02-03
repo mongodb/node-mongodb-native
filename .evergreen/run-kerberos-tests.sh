@@ -27,7 +27,7 @@ USER=$(node -p "encodeURIComponent(process.env.PRINCIPAL)")
 export MONGODB_URI="mongodb://${USER}@${SASL_HOST}/${GSSAPI_DB}?authMechanism=GSSAPI"
 
 set -o xtrace
-# npm install kerberos@2.0.1
+npm install kerberos@2.0.1
 npm run check:kerberos
 
 set +o xtrace

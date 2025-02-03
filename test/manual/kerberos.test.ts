@@ -218,7 +218,7 @@ describe('Kerberos', function () {
         if (!expectedError) {
           expect.fail('Expected connect with invalid SERVICE_HOST to fail');
         }
-        expect(expectedError.message).to.match(/GSS failure|UNKNOWN_SERVER/);
+        expect(expectedError.message).to.match(/GSS failure|UNKNOWN_SERVER|Server not found in Kerberos database/);
       });
     });
 
