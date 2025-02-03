@@ -34,7 +34,7 @@ describe('Kerberos', function () {
     client = null;
   });
 
-  let krb5Uri = process.env.MONGODB_URI;
+  const krb5Uri = process.env.MONGODB_URI;
   const host = process.env.SASL_HOST;
 
   if (!process.env.PRINCIPAL) {
@@ -218,7 +218,9 @@ describe('Kerberos', function () {
         if (!expectedError) {
           expect.fail('Expected connect with invalid SERVICE_HOST to fail');
         }
-        expect(expectedError.message).to.match(/GSS failure|UNKNOWN_SERVER|Server not found in Kerberos database/);
+        expect(expectedError.message).to.match(
+          /GSS failure|UNKNOWN_SERVER|Server not found in Kerberos database/
+        );
       });
     });
 

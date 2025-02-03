@@ -14,9 +14,9 @@ echo "Writing keytab"
 # DON'T PRINT KEYTAB TO STDOUT
 set +o verbose
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo ${KAYTAB_BASE64_AES} | base64 -D >"$(pwd)/.evergreen/drivers.keytab"
+    echo ${KEYTAB_BASE64_AES} | base64 -D >"$(pwd)/.evergreen/drivers.keytab"
 else
-    echo ${KAYTAB_BASE64_AES} | base64 -d >"$(pwd)/.evergreen/drivers.keytab"
+    echo ${KEYTAB_BASE64_AES} | base64 -D >"$(pwd)/.evergreen/drivers.keytab"
 fi
 echo "Running kdestroy"
 kdestroy -A
