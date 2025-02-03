@@ -704,6 +704,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
         // If maxPoolSize is 1 we won't be able to run anything
         // unless we interrupt whatever is using the one connection.
         this.closeController.abort(new MongoClientClosedError());
+        this.closeController = new AbortController();
       }
 
       const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());

@@ -16,7 +16,7 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
-import { addAbortSignalToStream, HostAddress, ns, promiseWithResolvers } from '../utils';
+import { HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext } from './auth/auth_provider';
 import { AuthMechanism } from './auth/providers';
 import {
@@ -386,8 +386,6 @@ export async function makeSocket(
   } else {
     socket = net.createConnection(parseConnectOptions(options));
   }
-
-  addAbortSignalToStream(closeSignal, socket);
 
   socket.unref();
   socket.setKeepAlive(true, 300000);

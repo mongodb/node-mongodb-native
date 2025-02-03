@@ -1555,24 +1555,3 @@ export async function abortable<T>(
     abortListener?.[kDispose]();
   }
 }
-
-export function addAbortSignalToStream(
-  signal: AbortSignal | undefined,
-  stream: Writable | Readable
-) {
-  if (signal == null) {
-    return;
-  }
-
-  if (signal.aborted) {
-    stream.destroy(signal.reason);
-    return;
-  }
-
-  const abortListener = addAbortListener(signal, function () {
-    stream.off('close', abortListener[kDispose]).off('error', abortListener[kDispose]);
-    if (!stream.destroyed) stream.destroy(this.reason);
-  });
-  // not nearly as complex as node's eos() but... do we need all that?? sobbing emoji.
-  stream.once('close', abortListener[kDispose]).once('error', abortListener[kDispose]);
-}
