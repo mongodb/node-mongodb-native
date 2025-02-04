@@ -398,6 +398,7 @@ function updateRsFromPrimary(
     } else {
       // Stale primary
       // replace serverDescription with a default ServerDescription of type "Unknown"
+      console.log(`marking newly discovered primary: ${serverDescription.address} as stale`);
       serverDescriptions.set(
         serverDescription.address,
         new ServerDescription(serverDescription.address, undefined, {
@@ -416,6 +417,7 @@ function updateRsFromPrimary(
           compareObjectId(maxElectionId, electionId) > 0
         ) {
           // this primary is stale, we must remove it
+          console.log(`marking newly discovered primary: ${serverDescription.address} as stale`);
           serverDescriptions.set(
             serverDescription.address,
             new ServerDescription(serverDescription.address, undefined, {
@@ -441,11 +443,19 @@ function updateRsFromPrimary(
   // We've heard from the primary. Is it the same primary as before?
   for (const [address, server] of serverDescriptions) {
     if (server.type === ServerType.RSPrimary && server.address !== serverDescription.address) {
+      console.log(
+        `server.address: ${server.address}; serverDescription.address: ${serverDescription.address}`
+      );
       // Reset old primary's type to Unknown.
       serverDescriptions.set(
         address,
         new ServerDescription(server.address, undefined, {
-          error: new MongoStalePrimaryError(serverDescription, maxSetVersion, maxElectionId)
+          error: new MongoStalePrimaryError(
+            serverDescription,
+            maxSetVersion,
+            maxElectionId,
+            'primary marked stale due to discovery of newer primary'
+          )
         })
       );
 

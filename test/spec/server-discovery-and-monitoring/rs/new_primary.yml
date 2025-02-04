@@ -63,7 +63,8 @@ phases: [
                 "a:27017": {
 
                     type: "Unknown",
-                    setName:
+                    setName:,
+                    error: "primary marked stale due to discovery of newer primary"
                 },
 
                 "b:27017": {
