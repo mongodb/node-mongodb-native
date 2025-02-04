@@ -360,13 +360,7 @@ functions:
         binary: bash
         working_dir: src
         env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          KRB5_KEYTAB: ${gssapi_auth_keytab_base64}
-          KRB5_NEW_KEYTAB: ${gssapi_auth_new_keytab_base64}
-          KRB5_PRINCIPAL: ${gssapi_auth_principal}
-          MONGODB_URI: ${gssapi_auth_mongodb_uri}
-          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
         args:
           - .evergreen/run-kerberos-tests.sh
   run ldap tests:

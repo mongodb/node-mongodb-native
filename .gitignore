@@ -106,3 +106,5 @@ expansions.sh
 .drivers-tools/
 
 crypt_shared.sh
+
+*keytab

@@ -38,6 +38,7 @@ about the types of tests and how to run them.
       - [Launching an Atlas Cluster](#launching-an-atlas-cluster)
       - [Search Indexes](#search-indexes)
       - [Deployed Lambda Tests](#deployed-lambda-tests)
+    - [Kerberos Tests](#kerberos-tests)
     - [TODO Special Env Sections](#todo-special-env-sections)
   - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
     - [Point mongosh to the driver](#point-mongosh-to-the-driver)
@@ -614,9 +615,12 @@ The URI of the cluster is available in the `atlas-expansions.yml` file.
 
 TODO(NODE-6698): Update deployed lambda test section.
 
+### Kerberos Tests
+
+Run `.evergreen/run-kerberos-tests.sh`.
+
 ### TODO Special Env Sections
 
-- Kerberos
 - AWS Authentication
 - TLS
 - Atlas Data Lake
