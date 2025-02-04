@@ -15,6 +15,15 @@ AUTH=${AUTH:-noauth}
 MONGODB_URI=${MONGODB_URI:-}
 TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:integration-coverage}
 COMPRESSOR=${COMPRESSOR:-}
+SKIP_DEPS=${SKIP_DEPS:-true}
+
+if [ "${CLIENT_ENCRYPTION}" == "true" ]; then
+  export RUN_WITH_MONGOCRYPTD
+  source .evergreen/setup-fle.sh
+elif [ "${CLIENT_ENCRYPTION}" != "false" ]; then
+  echo "Invalid configuration for CLIENT_ENCRYPTION: ${CLIENT_ENCRYPTION}"
+  exit 1
+fi
 
 # ssl setup
 SSL=${SSL:-nossl}
@@ -38,20 +47,6 @@ if [ "$COMPRESSOR" != "" ]; then
   else
     export MONGODB_URI="${MONGODB_URI}/?compressors=${COMPRESSOR}"
   fi
-fi
-
-# only run FLE tets on hosts we explicitly choose to test on
-if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
-  unset AWS_ACCESS_KEY_ID;
-  unset AWS_SECRET_ACCESS_KEY;
-else
-  pushd "$DRIVERS_TOOLS/.evergreen/csfle"
-  . ./activate-kmstlsvenv.sh
-  # Get access to the AWS temporary credentials:
-  echo "adding temporary AWS credentials to environment"
-  # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
-  source set-temp-creds.sh
-  popd
 fi
 
 npm install @mongodb-js/zstd

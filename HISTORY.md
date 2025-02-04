@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.13.0](https://github.com/mongodb/node-mongodb-native/compare/v6.12.0...v6.13.0) (2025-01-30)
+
+
+### Features
+
+* **NODE-5672:** support standardized logging ([#4387](https://github.com/mongodb/node-mongodb-native/issues/4387)) ([d1b2453](https://github.com/mongodb/node-mongodb-native/commit/d1b2453daeed50cd9edd5b8a631789a36429d6b2))
+* **NODE-6258:** add signal support to find and aggregate ([#4364](https://github.com/mongodb/node-mongodb-native/issues/4364)) ([73def18](https://github.com/mongodb/node-mongodb-native/commit/73def18d3fa0aea1fdd5122088493f948addaa42))
+* **NODE-6451:** retry SRV and TXT lookup for DNS timeout errors ([#4375](https://github.com/mongodb/node-mongodb-native/issues/4375)) ([fd902d3](https://github.com/mongodb/node-mongodb-native/commit/fd902d31d5cb65100f1c8b6f8811886b44ba19d5))
+* **NODE-6633:** MongoClient.close closes active cursors ([#4372](https://github.com/mongodb/node-mongodb-native/issues/4372)) ([654069f](https://github.com/mongodb/node-mongodb-native/commit/654069fc1750b6c3336f1002e3d3fb18bbc1451d))
+
+
+### Bug Fixes
+
+* **NODE-5225:** concurrent MongoClient.close() calls each attempt to close the client ([#4376](https://github.com/mongodb/node-mongodb-native/issues/4376)) ([9419af7](https://github.com/mongodb/node-mongodb-native/commit/9419af7b3bcbf134d0740c4282f83d1d5a717418))
+* **NODE-6340:** OIDC reauth uses caches speculative auth result ([#4379](https://github.com/mongodb/node-mongodb-native/issues/4379)) ([8b2b7fd](https://github.com/mongodb/node-mongodb-native/commit/8b2b7fdc6366ee9b6b595daf074d6b88362df5e6))
+
+
+### Performance Improvements
+
+* **NODE-6452:** Optimize CommandStartedEvent and CommandSucceededEvent constructors ([#4371](https://github.com/mongodb/node-mongodb-native/issues/4371)) ([41b066b](https://github.com/mongodb/node-mongodb-native/commit/41b066b2b286879085b05a58c0486aa1d24303bc))
+* **NODE-6616:** shortcircuit logging ejson.stringify ([#4377](https://github.com/mongodb/node-mongodb-native/issues/4377)) ([c1bcf0d](https://github.com/mongodb/node-mongodb-native/commit/c1bcf0de991096975a5151bf780faa9803ddd765))
+
 ## [6.12.0](https://github.com/mongodb/node-mongodb-native/compare/v6.11.0...v6.12.0) (2024-12-10)
 
 
