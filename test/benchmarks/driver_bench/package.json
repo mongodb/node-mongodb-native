@@ -1,0 +1,11 @@
+{
+  "name": "driver_bench",
+  "version": "1.0.0",
+  "scripts": {
+    "prestart": "tsc",
+    "start": "node lib/main.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0"
+  }
+}
