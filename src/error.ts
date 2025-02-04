@@ -362,7 +362,6 @@ export class MongoStalePrimaryError extends MongoRuntimeError {
     message?: string,
     options?: { cause?: Error }
   ) {
-    console.log(message);
     super(
       message ??
         `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`,
