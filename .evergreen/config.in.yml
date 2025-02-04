@@ -142,7 +142,7 @@ functions:
         working_dir: "src"
         timeout_secs: 300
         binary: bash
-        args: 
+        args:
           - .evergreen/run-tests.sh
 
   "run serverless tests":
@@ -158,11 +158,11 @@ functions:
         timeout_secs: 300
         working_dir: src
         binary: bash
-        env: 
+        env:
           AUTH: 'auth'
           SSL: 'ssl'
         add_expansions_to_env: true
-        args: 
+        args:
           - .evergreen/run-serverless-tests.sh
 
   "start-load-balancer":
@@ -882,6 +882,23 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
+
+  # TEMP!
+  "run new spec driver benchmarks":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          MONGODB_URI: ${MONGODB_URI}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_CLIENT_OPTIONS: ${MONGODB_CLIENT_OPTIONS}
+          NEW_BENCH: "true"
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
+
   "run x509 auth tests":
     - command: subprocess.exec
       type: test
@@ -1191,7 +1208,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
-            
+
     tasks:
       - ".serverless"
 

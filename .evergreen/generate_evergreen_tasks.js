@@ -212,7 +212,7 @@ TASKS.push(
         { func: 'run socks5 tests' }
       ]
     }
-    ]
+  ]
 );
 
 TASKS.push({
@@ -432,8 +432,8 @@ for (const {
     const expansions = { NODE_LTS_VERSION, NPM_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
-    expansions.CLIENT_ENCRYPTION = String(!!clientEncryption)
-    expansions.TEST_CSFLE = expansions.CLIENT_ENCRYPTION
+    expansions.CLIENT_ENCRYPTION = String(!!clientEncryption);
+    expansions.TEST_CSFLE = expansions.CLIENT_ENCRYPTION;
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
   }
@@ -752,6 +752,28 @@ function addPerformanceTasks() {
     ]
   });
 
+  // temp
+  const makePerfTaskNEW = (name, MONGODB_CLIENT_OPTIONS) => ({
+    name,
+    tags: ['run-spec-benchmark-tests', 'performance'],
+    exec_timeout_secs: 3600,
+    commands: [
+      updateExpansions({
+        NODE_LTS_VERSION: 'v22.11.0',
+        VERSION: 'v6.0-perf',
+        TOPOLOGY: 'server',
+        AUTH: 'noauth',
+        MONGODB_CLIENT_OPTIONS: JSON.stringify(MONGODB_CLIENT_OPTIONS)
+      }),
+      ...[
+        'install dependencies',
+        'bootstrap mongo-orchestration',
+        'run new spec driver benchmarks'
+      ].map(func => ({ func }))
+      // No perf send! just testing
+    ]
+  });
+
   const tasks = [
     makePerfTask('run-spec-benchmark-tests-node-server', {}),
     makePerfTask('run-spec-benchmark-tests-node-server-timeoutMS-120000', { timeoutMS: 120000 }),
@@ -762,7 +784,8 @@ function addPerformanceTasks() {
     makePerfTask('run-spec-benchmark-tests-node-server-logging', {
       mongodbLogPath: 'stderr',
       mongodbLogComponentSeverities: { default: 'trace' }
-    })
+    }),
+    makePerfTaskNEW('run-spec-benchmark-tests-node-server-new', {})
   ];
 
   TASKS.push(...tasks);
