@@ -376,6 +376,19 @@ function updateRsFromPrimary(
   maxSetVersion: number | null = null,
   maxElectionId: ObjectId | null = null
 ): [TopologyType, string | null, number | null, ObjectId | null] {
+  const setVersionElectionIdMismatch = (
+    serverDescription: ServerDescription,
+    maxSetVersion: number | null,
+    maxElectionId: ObjectId | null
+  ) => {
+    return (
+      `primary marked stale due to electionId/setVersion mismatch:` +
+      ` server setVersion: ${serverDescription.setVersion},` +
+      ` server electionId: ${serverDescription.electionId},` +
+      ` topology setVersion: ${maxSetVersion},` +
+      ` topology electionId: ${maxElectionId}`
+    );
+  };
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
     serverDescriptions.delete(serverDescription.address);
@@ -401,7 +414,9 @@ function updateRsFromPrimary(
       serverDescriptions.set(
         serverDescription.address,
         new ServerDescription(serverDescription.address, undefined, {
-          error: new MongoStalePrimaryError(serverDescription, maxSetVersion, maxElectionId)
+          error: new MongoStalePrimaryError(
+            setVersionElectionIdMismatch(serverDescription, maxSetVersion, maxElectionId)
+          )
         })
       );
 
@@ -419,7 +434,9 @@ function updateRsFromPrimary(
           serverDescriptions.set(
             serverDescription.address,
             new ServerDescription(serverDescription.address, undefined, {
-              error: new MongoStalePrimaryError(serverDescription, maxSetVersion, maxElectionId)
+              error: new MongoStalePrimaryError(
+                setVersionElectionIdMismatch(serverDescription, maxSetVersion, maxElectionId)
+              )
             })
           );
 
@@ -446,9 +463,6 @@ function updateRsFromPrimary(
         address,
         new ServerDescription(server.address, undefined, {
           error: new MongoStalePrimaryError(
-            serverDescription,
-            maxSetVersion,
-            maxElectionId,
             'primary marked stale due to discovery of newer primary'
           )
         })
