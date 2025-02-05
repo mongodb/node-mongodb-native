@@ -135,15 +135,9 @@ export function metrics(test_name: string, result: number, count: number) {
  * For use in setup/teardown mostly.
  */
 export class DriverTester {
-  private utilClient: mongodb.MongoClient;
   public client: mongodb.MongoClient;
   constructor() {
-    this.utilClient = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
     this.client = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
-  }
-
-  private get ns() {
-    return this.utilClient.db(DB_NAME).collection(COLLECTION_NAME);
   }
 
   public get db() {
@@ -159,15 +153,21 @@ export class DriverTester {
   }
 
   async drop() {
-    await this.ns.drop().catch(() => null);
-    await this.utilClient
-      .db(DB_NAME)
-      .dropDatabase()
-      .catch(() => null);
+    const utilClient = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
+    const db = utilClient.db(DB_NAME);
+    const collection = db.collection(COLLECTION_NAME);
+    await collection.drop().catch(() => null);
+    await db.dropDatabase().catch(() => null);
+    utilClient.close();
   }
 
   async create() {
-    await this.utilClient.db(DB_NAME).createCollection(COLLECTION_NAME);
+    const utilClient = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
+    try {
+      await utilClient.db(DB_NAME).createCollection(COLLECTION_NAME);
+    } finally {
+      utilClient.close();
+    }
   }
 
   async load(filePath: string, type: 'json' | 'string' | 'buffer'): Promise<any> {
@@ -180,14 +180,20 @@ export class DriverTester {
   }
 
   async insertManyOf(document: Record<string, any>, length: number, addId = false) {
-    await this.ns.insertMany(
-      Array.from({ length }, (_, _id) => ({ ...(addId ? { _id } : {}), ...document })) as any[]
-    );
+    const utilClient = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
+    const db = utilClient.db(DB_NAME);
+    const collection = db.collection(COLLECTION_NAME);
+    try {
+      await collection.insertMany(
+        Array.from({ length }, (_, _id) => ({ ...(addId ? { _id } : {}), ...document })) as any[]
+      );
+    } finally {
+      utilClient.close();
+    }
   }
 
   async close() {
     await this.client.close();
-    await this.utilClient.close();
   }
 }
 
