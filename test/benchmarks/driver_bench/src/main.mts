@@ -30,14 +30,11 @@ export const alphabetically = (a: unknown, b: unknown) => {
 
 /** Find every mjs file in the suites folder */
 async function getBenchmarks(): Promise<{
-  tests: Record<string, Record<string, { benchFile: string } & Record<string, any>>>;
+  tests: Record<string, Record<string, string>>;
   total: number;
 }> {
   let total = 0;
-  const tests: Record<
-    string,
-    Record<string, { benchFile: string } & Record<string, any>>
-  > = Object.create(null);
+  const tests: Record<string, Record<string, string>> = Object.create(null);
   const suites = await fs.readdir(path.join(__dirname, 'suites'));
   suites.sort(alphabetically);
 
@@ -48,7 +45,7 @@ async function getBenchmarks(): Promise<{
     for (const benchmark of benchmarks) {
       if (!benchmark.endsWith('.mjs')) continue;
       tests[suite] ??= Object.create(null);
-      tests[suite][benchmark] = { benchFile: path.join('suites', suite, benchmark) };
+      tests[suite][benchmark] = path.join('suites', suite, benchmark);
       total += 1;
     }
   }
@@ -89,7 +86,7 @@ const results = [];
 for (const [suite, benchmarks] of Object.entries(tests)) {
   console.group(snakeToCamel(suite));
 
-  for (const [benchmark, { benchFile }] of Object.entries(benchmarks)) {
+  for (const [benchmark, benchFile] of Object.entries(benchmarks)) {
     console.log(snakeToCamel(path.basename(benchmark, '.mjs')));
 
     const runner = child_process.fork(runnerPath, [benchFile], { stdio: 'inherit' });
