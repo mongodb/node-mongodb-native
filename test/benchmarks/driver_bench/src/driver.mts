@@ -166,7 +166,7 @@ export class DriverTester {
     try {
       await utilClient.db(DB_NAME).createCollection(COLLECTION_NAME);
     } finally {
-      utilClient.close();
+      await utilClient.close();
     }
   }
 
@@ -188,7 +188,7 @@ export class DriverTester {
         Array.from({ length }, (_, _id) => ({ ...(addId ? { _id } : {}), ...document })) as any[]
       );
     } finally {
-      utilClient.close();
+      await utilClient.close();
     }
   }
 
