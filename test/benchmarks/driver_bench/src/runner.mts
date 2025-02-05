@@ -69,7 +69,7 @@ do {
   if (totalDuration < ONE_MIN) continue;
 
   // 100 runs OR five minutes
-  if (count > 100 || totalDuration > FIVE_MIN) break;
+  if (count >= 100 || totalDuration >= FIVE_MIN) break;
 
   // count exceeds data space, we never intend to have more than a million data points let alone 10M
   if (count === data.length) break;
@@ -91,18 +91,11 @@ const medianExecution = durations[percentileIndex(50, count)];
 const megabytesPerSecond = benchmark.taskSize / medianExecution;
 
 console.log(
-  '   ',
-  benchmarkName,
-  'finished in',
-  totalDuration,
-  'sec and ran',
-  count,
-  'iterations.',
-  'median exec time',
-  medianExecution,
-  'sec',
-  megabytesPerSecond,
-  'mb/sec'
+  ' '.repeat(3),
+  ...['total time:', totalDuration, 'sec,'],
+  ...['ran:', count, 'times,'],
+  ...['time per run:', medianExecution, 'sec,'],
+  ...['throughput:', megabytesPerSecond, 'mb/sec']
 );
 
 await fs.writeFile(

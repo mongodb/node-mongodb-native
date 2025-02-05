@@ -18,12 +18,22 @@ import {
 } from './driver.mjs';
 
 const __dirname = import.meta.dirname;
-const alphabetically = (a: string, b: string) => String.prototype.localeCompare.call(a, b);
+
+export const alphabetically = (a: unknown, b: unknown) => {
+  const res = `${a}`.localeCompare(`${b}`, 'en-US', {
+    usage: 'sort',
+    numeric: true,
+    ignorePunctuation: false
+  });
+  return res < 0 ? -1 : res > 0 ? 1 : 0;
+};
 
 /** Find every mjs file in the suites folder */
-async function getBenchmarks(): Promise<
-  Record<string, Record<string, { benchFile: string } & Record<string, any>>>
-> {
+async function getBenchmarks(): Promise<{
+  tests: Record<string, Record<string, { benchFile: string } & Record<string, any>>>;
+  total: number;
+}> {
+  let total = 0;
   const tests: Record<
     string,
     Record<string, { benchFile: string } & Record<string, any>>
@@ -39,14 +49,20 @@ async function getBenchmarks(): Promise<
       if (!benchmark.endsWith('.mjs')) continue;
       tests[suite] ??= Object.create(null);
       tests[suite][benchmark] = { benchFile: path.join('suites', suite, benchmark) };
+      total += 1;
     }
   }
-  return tests;
+  return { tests, total };
 }
 
 const hw = os.cpus();
 const ram = os.totalmem() / 1024 ** 3;
 const platform = { name: hw[0].model, cores: hw.length, ram: `${ram}GB` };
+
+const { tests, total } = await getBenchmarks();
+
+const earliest = new Date(Date.now() + total * 60 * 1000); // plus one min per bench
+const latest = new Date(Date.now() + total * 6 * 60 * 1000); // plus six min per bench (if we overshoot the 5 min limit)
 
 const systemInfo = () =>
   [
@@ -56,6 +72,8 @@ const systemInfo = () =>
     `- os: ${process.platform} (${os.release()})`,
     `- ram: ${platform.ram}`,
     `- node: ${process.version}`,
+    `- running ${total} benchmarks`,
+    `  - finishes soonest: ${earliest.toLocaleTimeString('en-US', { timeZoneName: 'short' })} latest ${latest.toLocaleTimeString('en-US', { timeZoneName: 'short' })}`,
     `- driver: ${MONGODB_DRIVER_VERSION} (${MONGODB_DRIVER_REVISION}): ${MONGODB_DRIVER_PATH}`,
     `  - options ${util.inspect(MONGODB_CLIENT_OPTIONS)}`,
     `- bson: ${MONGODB_BSON_VERSION} (${MONGODB_BSON_REVISION}): (${MONGODB_BSON_PATH})\n`
@@ -63,7 +81,6 @@ const systemInfo = () =>
 
 console.log(systemInfo());
 
-const tests = await getBenchmarks();
 const runnerPath = path.join(__dirname, 'runner.mjs');
 
 const results = [];
