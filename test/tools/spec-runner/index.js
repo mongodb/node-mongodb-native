@@ -163,21 +163,11 @@ function generateTopologyTests(testSuites, testContext, filter) {
     }
 
     const beforeEachFilter = async function () {
-      let utilClient;
-      if (this.configuration.isLoadBalanced) {
-        // The util client can always point at the single mongos LB frontend.
-        utilClient = this.configuration.newClient(this.configuration.singleMongosLoadBalancerUri);
-      } else {
-        utilClient = this.configuration.newClient();
-      }
-
-      await utilClient.connect();
-
       const allRequirements = runOn.map(legacyRunOnToRunOnRequirement);
 
       const someRequirementMet =
         allRequirements.length === 0 ||
-        (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
+        (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements));
 
       let shouldRun = someRequirementMet;
 
@@ -213,7 +203,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
         }
       }
 
-      await utilClient.close();
       if (csfleFilterError) {
         throw csfleFilterError;
       }

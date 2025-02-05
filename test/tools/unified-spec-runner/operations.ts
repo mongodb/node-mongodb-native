@@ -257,6 +257,8 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
   const changeStream: ChangeStream = watchable.watch(pipeline, args);
   //@ts-expect-error: private method
   await changeStream.cursor.cursorInit();
+  //@ts-expect-error: private method
+  changeStream._setIsIterator();
   return changeStream;
 });
 

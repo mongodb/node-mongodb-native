@@ -110,6 +110,10 @@ export class GridFSBucketWriteStream extends Writable {
   /** @internal */
   timeoutContext?: CSOTTimeoutContext;
 
+  private get closeSignal() {
+    return this.bucket.s.db.client.closeSignal;
+  }
+
   /**
    * @param bucket - Handle for this stream's corresponding bucket
    * @param filename - The value of the 'filename' key in the files doc
@@ -147,7 +151,8 @@ export class GridFSBucketWriteStream extends Writable {
       this.timeoutContext = new CSOTTimeoutContext({
         timeoutMS: options.timeoutMS,
         serverSelectionTimeoutMS: resolveTimeoutOptions(this.bucket.s.db.client, {})
-          .serverSelectionTimeoutMS
+          .serverSelectionTimeoutMS,
+        closeSignal: this.closeSignal
       });
   }
 

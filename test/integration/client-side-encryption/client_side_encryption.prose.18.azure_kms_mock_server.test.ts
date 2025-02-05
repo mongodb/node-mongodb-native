@@ -30,6 +30,8 @@ const metadata: MongoDBMetadataUI = {
   }
 };
 
+const closeSignal = new AbortController().signal;
+
 context('Azure KMS Mock Server Tests', function () {
   context('Case 1: Success', metadata, function () {
     // 	Do not set an ``X-MongoDB-HTTP-TestParams`` header.
@@ -44,7 +46,7 @@ context('Azure KMS Mock Server Tests', function () {
     // 5. The token will have a resource of ``"https://vault.azure.net"``
 
     it('returns a properly formatted access token', async () => {
-      const credentials = await fetchAzureKMSToken(new KMSRequestOptions());
+      const credentials = await fetchAzureKMSToken(new KMSRequestOptions(), closeSignal);
       expect(credentials).to.have.property('accessToken', 'magic-cookie');
     });
   });
@@ -59,7 +61,10 @@ context('Azure KMS Mock Server Tests', function () {
     // The test case should ensure that this error condition is handled gracefully.
 
     it('returns an error', async () => {
-      const error = await fetchAzureKMSToken(new KMSRequestOptions('empty-json')).catch(e => e);
+      const error = await fetchAzureKMSToken(
+        new KMSRequestOptions('empty-json'),
+        closeSignal
+      ).catch(e => e);
 
       expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
@@ -74,7 +79,9 @@ context('Azure KMS Mock Server Tests', function () {
     // The test case should ensure that this error condition is handled gracefully.
 
     it('returns an error', async () => {
-      const error = await fetchAzureKMSToken(new KMSRequestOptions('bad-json')).catch(e => e);
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('bad-json'), closeSignal).catch(
+        e => e
+      );
 
       expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
@@ -89,7 +96,9 @@ context('Azure KMS Mock Server Tests', function () {
     // 2. The response body is unspecified.
     // The test case should ensure that this error condition is handled gracefully.
     it('returns an error', async () => {
-      const error = await fetchAzureKMSToken(new KMSRequestOptions('404')).catch(e => e);
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('404'), closeSignal).catch(
+        e => e
+      );
 
       expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
@@ -104,7 +113,9 @@ context('Azure KMS Mock Server Tests', function () {
     // 2. The response body is unspecified.
     // The test case should ensure that this error condition is handled gracefully.
     it('returns an error', async () => {
-      const error = await fetchAzureKMSToken(new KMSRequestOptions('500')).catch(e => e);
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('500'), closeSignal).catch(
+        e => e
+      );
 
       expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
@@ -117,7 +128,9 @@ context('Azure KMS Mock Server Tests', function () {
     // The HTTP response from the ``fake_azure`` server will take at least 1000 seconds
     // to complete. The request should fail with a timeout.
     it('returns an error after the request times out', async () => {
-      const error = await fetchAzureKMSToken(new KMSRequestOptions('slow')).catch(e => e);
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('slow'), closeSignal).catch(
+        e => e
+      );
 
       expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });

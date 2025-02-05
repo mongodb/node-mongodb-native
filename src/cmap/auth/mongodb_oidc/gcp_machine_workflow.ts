@@ -26,24 +26,34 @@ export class GCPMachineWorkflow extends MachineWorkflow {
   /**
    * Get the token from the environment.
    */
-  async getToken(credentials?: MongoCredentials): Promise<AccessToken> {
+  async getToken(
+    credentials: MongoCredentials | undefined,
+    closeSignal: AbortSignal
+  ): Promise<AccessToken> {
     const tokenAudience = credentials?.mechanismProperties.TOKEN_RESOURCE;
     if (!tokenAudience) {
       throw new MongoGCPError(TOKEN_RESOURCE_MISSING_ERROR);
     }
-    return await getGcpTokenData(tokenAudience);
+    return await getGcpTokenData(tokenAudience, closeSignal);
   }
 }
 
 /**
  * Hit the GCP endpoint to get the token data.
  */
-async function getGcpTokenData(tokenAudience: string): Promise<AccessToken> {
+async function getGcpTokenData(
+  tokenAudience: string,
+  closeSignal: AbortSignal
+): Promise<AccessToken> {
   const url = new URL(GCP_BASE_URL);
   url.searchParams.append('audience', tokenAudience);
-  const response = await get(url, {
-    headers: GCP_HEADERS
-  });
+  const response = await get(
+    url,
+    {
+      headers: GCP_HEADERS
+    },
+    closeSignal
+  );
   if (response.status !== 200) {
     throw new MongoGCPError(
       `Status code ${response.status} returned from the GCP endpoint. Response body: ${response.body}`

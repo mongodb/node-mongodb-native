@@ -53,6 +53,7 @@ export {
   MongoClientBulkWriteCursorError,
   MongoClientBulkWriteError,
   MongoClientBulkWriteExecutionError,
+  MongoClientClosedError,
   MongoCompatibilityError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
@@ -617,6 +618,7 @@ export type {
   CSOTTimeoutContextOptions,
   LegacyTimeoutContext,
   LegacyTimeoutContextOptions,
+  MongoDBTimeoutWrap,
   Timeout,
   TimeoutContext,
   TimeoutContextOptions

@@ -70,19 +70,15 @@ describe('Sessions Spec', function () {
         await test.setup(this.configuration);
       });
 
-      it('should send endSessions for multiple sessions', function (done) {
+      it('should send endSessions for multiple sessions', async function () {
         const client = test.client;
         const sessions = [client.startSession(), client.startSession()].map(s => s.id);
 
-        client.close(err => {
-          expect(err).to.not.exist;
-          expect(test.commands.started).to.have.length(1);
-          expect(test.commands.started[0].commandName).to.equal('endSessions');
-          expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
-          expect(client.s.activeSessions.size).to.equal(0);
-
-          done();
-        });
+        await client.close();
+        expect(test.commands.started).to.have.lengthOf(1);
+        expect(test.commands.started[0].commandName).to.equal('endSessions');
+        expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
+        expect(client.s.activeSessions.size).to.equal(0);
       });
     });
 

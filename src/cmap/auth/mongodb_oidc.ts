@@ -106,12 +106,20 @@ export interface Workflow {
   /**
    * Each workflow should specify the correct custom behaviour for reauthentication.
    */
-  reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void>;
+  reauthenticate(
+    connection: Connection,
+    credentials: MongoCredentials,
+    closeSignal: AbortSignal
+  ): Promise<void>;
 
   /**
    * Get the document to add for speculative authentication.
    */
-  speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document>;
+  speculativeAuth(
+    connection: Connection,
+    credentials: MongoCredentials,
+    closeSignal: AbortSignal
+  ): Promise<Document>;
 }
 
 /** @internal */
@@ -141,14 +149,14 @@ export class MongoDBOIDC extends AuthProvider {
   /**
    * Authenticate using OIDC
    */
-  override async auth(authContext: AuthContext): Promise<void> {
+  override async auth(authContext: AuthContext, closeSignal: AbortSignal): Promise<void> {
     const { connection, reauthenticating, response } = authContext;
     if (response?.speculativeAuthenticate?.done && !reauthenticating) {
       return;
     }
     const credentials = getCredentials(authContext);
     if (reauthenticating) {
-      await this.workflow.reauthenticate(connection, credentials);
+      await this.workflow.reauthenticate(connection, credentials, closeSignal);
     } else {
       await this.workflow.execute(connection, credentials, response);
     }
@@ -159,11 +167,12 @@ export class MongoDBOIDC extends AuthProvider {
    */
   override async prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext
+    authContext: AuthContext,
+    closeSignal: AbortSignal
   ): Promise<HandshakeDocument> {
     const { connection } = authContext;
     const credentials = getCredentials(authContext);
-    const result = await this.workflow.speculativeAuth(connection, credentials);
+    const result = await this.workflow.speculativeAuth(connection, credentials, closeSignal);
     return { ...handshakeDoc, ...result };
   }
 }

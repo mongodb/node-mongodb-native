@@ -1,3 +1,4 @@
+import { type MongoClient } from '.';
 import { type AuthProvider } from './cmap/auth/auth_provider';
 import { GSSAPI } from './cmap/auth/gssapi';
 import { type AuthMechanismProperties } from './cmap/auth/mongo_credentials';
@@ -37,6 +38,11 @@ const AUTH_PROVIDERS = new Map<AuthMechanism | string, (workflow?: Workflow) => 
  * @internal
  */
 export class MongoClientAuthProviders {
+  client: MongoClient;
+  constructor(client: MongoClient) {
+    this.client = client;
+  }
+
   private existingProviders: Map<AuthMechanism | string, AuthProvider> = new Map();
 
   /**
@@ -80,10 +86,15 @@ export class MongoClientAuthProviders {
     if (authMechanismProperties.OIDC_HUMAN_CALLBACK) {
       return new HumanCallbackWorkflow(
         new TokenCache(),
-        authMechanismProperties.OIDC_HUMAN_CALLBACK
+        authMechanismProperties.OIDC_HUMAN_CALLBACK,
+        this.client.closeSignal
       );
     } else if (authMechanismProperties.OIDC_CALLBACK) {
-      return new AutomatedCallbackWorkflow(new TokenCache(), authMechanismProperties.OIDC_CALLBACK);
+      return new AutomatedCallbackWorkflow(
+        new TokenCache(),
+        authMechanismProperties.OIDC_CALLBACK,
+        this.client.closeSignal
+      );
     } else {
       const environment = authMechanismProperties.ENVIRONMENT;
       const workflow = OIDC_WORKFLOWS.get(environment)?.();

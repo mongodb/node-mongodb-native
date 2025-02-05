@@ -664,6 +664,8 @@ export class ChangeStream<
     this.isClosed = false;
     this.mode = false;
 
+    this.on('error', () => null);
+
     // Listen for any `change` listeners being added to ChangeStream
     this.on('newListener', eventName => {
       if (eventName === 'change' && this.cursor && this.listenerCount('change') === 0) {
@@ -680,7 +682,8 @@ export class ChangeStream<
     if (this.options.timeoutMS != null) {
       this.timeoutContext = new CSOTTimeoutContext({
         timeoutMS: this.options.timeoutMS,
-        serverSelectionTimeoutMS
+        serverSelectionTimeoutMS,
+        closeSignal: this.cursor.client.closeSignal
       });
     }
   }

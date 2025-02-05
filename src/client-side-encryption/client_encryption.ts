@@ -214,11 +214,15 @@ export class ClientEncryption {
       keyMaterial
     });
 
-    const stateMachine = new StateMachine({
-      proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
-    });
+    const stateMachine = new StateMachine(
+      {
+        proxyOptions: this._proxyOptions,
+        tlsOptions: this._tlsOptions,
+        socketOptions: autoSelectSocketOptions(this._client.s.options)
+      },
+      undefined,
+      this._client.closeSignal
+    );
 
     const timeoutContext =
       options?.timeoutContext ??
@@ -283,11 +287,15 @@ export class ClientEncryption {
     }
     const filterBson = serialize(filter);
     const context = this._mongoCrypt.makeRewrapManyDataKeyContext(filterBson, keyEncryptionKeyBson);
-    const stateMachine = new StateMachine({
-      proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
-    });
+    const stateMachine = new StateMachine(
+      {
+        proxyOptions: this._proxyOptions,
+        tlsOptions: this._tlsOptions,
+        socketOptions: autoSelectSocketOptions(this._client.s.options)
+      },
+      undefined,
+      this._client.closeSignal
+    );
 
     const timeoutContext = TimeoutContext.create(
       resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS })
@@ -687,11 +695,15 @@ export class ClientEncryption {
     const valueBuffer = serialize({ v: value });
     const context = this._mongoCrypt.makeExplicitDecryptionContext(valueBuffer);
 
-    const stateMachine = new StateMachine({
-      proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
-    });
+    const stateMachine = new StateMachine(
+      {
+        proxyOptions: this._proxyOptions,
+        tlsOptions: this._tlsOptions,
+        socketOptions: autoSelectSocketOptions(this._client.s.options)
+      },
+      undefined,
+      this._client.closeSignal
+    );
 
     const timeoutContext =
       this._timeoutMS != null
@@ -712,7 +724,7 @@ export class ClientEncryption {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._client.closeSignal);
   }
 
   static get libmongocryptVersion() {
@@ -771,11 +783,15 @@ export class ClientEncryption {
     }
 
     const valueBuffer = serialize({ v: value });
-    const stateMachine = new StateMachine({
-      proxyOptions: this._proxyOptions,
-      tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
-    });
+    const stateMachine = new StateMachine(
+      {
+        proxyOptions: this._proxyOptions,
+        tlsOptions: this._tlsOptions,
+        socketOptions: autoSelectSocketOptions(this._client.s.options)
+      },
+      undefined,
+      this._client.closeSignal
+    );
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
     const timeoutContext =

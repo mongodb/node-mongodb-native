@@ -1,6 +1,5 @@
-import { setTimeout } from 'timers/promises';
-
 import { type Document } from '../../../bson';
+import { sleep } from '../../../timeout';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
@@ -21,7 +20,10 @@ export interface AccessToken {
 }
 
 /** @internal */
-export type OIDCTokenFunction = (credentials: MongoCredentials) => Promise<AccessToken>;
+export type OIDCTokenFunction = (
+  credentials: MongoCredentials,
+  closeSignal: AbortSignal
+) => Promise<AccessToken>;
 
 /**
  * Common behaviour for OIDC machine workflows.
@@ -44,8 +46,12 @@ export abstract class MachineWorkflow implements Workflow {
   /**
    * Execute the workflow. Gets the token from the subclass implementation.
    */
-  async execute(connection: Connection, credentials: MongoCredentials): Promise<void> {
-    const token = await this.getTokenFromCacheOrEnv(connection, credentials);
+  async execute(
+    connection: Connection,
+    credentials: MongoCredentials,
+    closeSignal: AbortSignal
+  ): Promise<void> {
+    const token = await this.getTokenFromCacheOrEnv(connection, credentials, closeSignal);
     const command = finishCommandDocument(token);
     await connection.command(ns(credentials.source), command, undefined);
   }
@@ -54,7 +60,11 @@ export abstract class MachineWorkflow implements Workflow {
    * Reauthenticate on a machine workflow just grabs the token again since the server
    * has said the current access token is invalid or expired.
    */
-  async reauthenticate(connection: Connection, credentials: MongoCredentials): Promise<void> {
+  async reauthenticate(
+    connection: Connection,
+    credentials: MongoCredentials,
+    closeSignal: AbortSignal
+  ): Promise<void> {
     if (this.cache.hasAccessToken) {
       // Reauthentication implies the token has expired.
       if (connection.accessToken === this.cache.getAccessToken()) {
@@ -69,18 +79,22 @@ export abstract class MachineWorkflow implements Workflow {
         connection.accessToken = this.cache.getAccessToken();
       }
     }
-    await this.execute(connection, credentials);
+    await this.execute(connection, credentials, closeSignal);
   }
 
   /**
    * Get the document to add for speculative authentication.
    */
-  async speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+  async speculativeAuth(
+    connection: Connection,
+    credentials: MongoCredentials,
+    closeSignal: AbortSignal
+  ): Promise<Document> {
     // The spec states only cached access tokens can use speculative auth.
     if (!this.cache.hasAccessToken) {
       return {};
     }
-    const token = await this.getTokenFromCacheOrEnv(connection, credentials);
+    const token = await this.getTokenFromCacheOrEnv(connection, credentials, closeSignal);
     const document = finishCommandDocument(token);
     document.db = credentials.source;
     return { speculativeAuthenticate: document };
@@ -91,12 +105,13 @@ export abstract class MachineWorkflow implements Workflow {
    */
   private async getTokenFromCacheOrEnv(
     connection: Connection,
-    credentials: MongoCredentials
+    credentials: MongoCredentials,
+    closeSignal: AbortSignal
   ): Promise<string> {
     if (this.cache.hasAccessToken) {
       return this.cache.getAccessToken();
     } else {
-      const token = await this.callback(credentials);
+      const token = await this.callback(credentials, closeSignal);
       this.cache.put({ accessToken: token.access_token, expiresInSeconds: token.expires_in });
       // Put the access token on the connection as well.
       connection.accessToken = token.access_token;
@@ -110,7 +125,10 @@ export abstract class MachineWorkflow implements Workflow {
    */
   private withLock(callback: OIDCTokenFunction): OIDCTokenFunction {
     let lock: Promise<any> = Promise.resolve();
-    return async (credentials: MongoCredentials): Promise<AccessToken> => {
+    return async (
+      credentials: MongoCredentials,
+      closeSignal: AbortSignal
+    ): Promise<AccessToken> => {
       // We do this to ensure that we would never return the result of the
       // previous lock, only the current callback's value would get returned.
       await lock;
@@ -121,10 +139,10 @@ export abstract class MachineWorkflow implements Workflow {
         .then(async () => {
           const difference = Date.now() - this.lastExecutionTime;
           if (difference <= THROTTLE_MS) {
-            await setTimeout(THROTTLE_MS - difference);
+            await sleep(THROTTLE_MS - difference, closeSignal);
           }
           this.lastExecutionTime = Date.now();
-          return await callback(credentials);
+          return await callback(credentials, closeSignal);
         });
       return await lock;
     };
@@ -133,5 +151,5 @@ export abstract class MachineWorkflow implements Workflow {
   /**
    * Get the token from the environment or endpoint.
    */
-  abstract getToken(credentials: MongoCredentials): Promise<AccessToken>;
+  abstract getToken(credentials: MongoCredentials, closeSignal: AbortSignal): Promise<AccessToken>;
 }

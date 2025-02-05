@@ -12,7 +12,6 @@ import {
   type DbOptions,
   type Document,
   getMongoDBClientEncryption,
-  type MongoClient,
   ReturnDocument
 } from '../../mongodb';
 import { shouldRunServerlessTest } from '../../tools/utils';
@@ -33,11 +32,7 @@ export function log(message: unknown, ...optionalParameters: unknown[]): void {
   if (ENABLE_UNIFIED_TEST_LOGGING) console.warn(message, ...optionalParameters);
 }
 
-export async function topologySatisfies(
-  ctx: Mocha.Context,
-  r: RunOnRequirement,
-  utilClient: MongoClient
-): Promise<boolean> {
+export async function topologySatisfies(ctx: Mocha.Context, r: RunOnRequirement): Promise<boolean> {
   const config = ctx.configuration;
   let ok = true;
 
@@ -57,10 +52,10 @@ export async function topologySatisfies(
     }
 
     if (r.topologies.includes('sharded-replicaset') && topologyType === 'sharded') {
-      const shards = await utilClient.db('config').collection('shards').find({}).toArray();
-      ok &&= shards.length > 0 && shards.every(shard => shard.host.split(',').length > 1);
+      ok &&=
+        config.shards.length > 0 && config.shards.every(shard => shard.host.split(',').length > 1);
       if (!ok && skipReason == null) {
-        skipReason = `requires sharded-replicaset but shards.length=${shards.length}`;
+        skipReason = `requires sharded-replicaset but shards.length=${config.shards.length}`;
       }
     } else {
       if (!topologyType) throw new AssertionError(`Topology undiscovered: ${config.topologyType}`);
@@ -155,11 +150,11 @@ export async function topologySatisfies(
   return ok;
 }
 
-export async function isAnyRequirementSatisfied(ctx, requirements, client) {
+export async function isAnyRequirementSatisfied(ctx, requirements) {
   const skipTarget = ctx.currentTest || ctx.test;
   const skipReasons = [];
   for (const requirement of requirements) {
-    const met = await topologySatisfies(ctx, requirement, client);
+    const met = await topologySatisfies(ctx, requirement);
     if (met) {
       return true;
     }

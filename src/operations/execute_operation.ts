@@ -108,7 +108,8 @@ export async function executeOperation<
     session,
     serverSelectionTimeoutMS: client.s.options.serverSelectionTimeoutMS,
     waitQueueTimeoutMS: client.s.options.waitQueueTimeoutMS,
-    timeoutMS: operation.options.timeoutMS
+    timeoutMS: operation.options.timeoutMS,
+    closeSignal: client.closeSignal
   });
 
   try {

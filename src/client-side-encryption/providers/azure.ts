@@ -30,9 +30,9 @@ interface AzureTokenCacheEntry extends AccessToken {
 export class AzureCredentialCache {
   cachedToken: AzureTokenCacheEntry | null = null;
 
-  async getToken(): Promise<AccessToken> {
+  async getToken(closeSignal: AbortSignal): Promise<AccessToken> {
     if (this.cachedToken == null || this.needsRefresh(this.cachedToken)) {
-      this.cachedToken = await this._getToken();
+      this.cachedToken = await this._getToken(closeSignal);
     }
 
     return { accessToken: this.cachedToken.accessToken };
@@ -53,8 +53,8 @@ export class AzureCredentialCache {
   /**
    * exposed for testing
    */
-  _getToken(): Promise<AzureTokenCacheEntry> {
-    return fetchAzureKMSToken();
+  _getToken(closeSignal: AbortSignal): Promise<AzureTokenCacheEntry> {
+    return fetchAzureKMSToken(undefined, closeSignal);
   }
 }
 
@@ -156,11 +156,12 @@ export function prepareRequest(options: AzureKMSRequestOptions): {
  * [prose test 18](https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/tests#azure-imds-credentials)
  */
 export async function fetchAzureKMSToken(
-  options: AzureKMSRequestOptions = {}
+  options: AzureKMSRequestOptions = {},
+  closeSignal: AbortSignal
 ): Promise<AzureTokenCacheEntry> {
   const { headers, url } = prepareRequest(options);
   try {
-    const response = await get(url, { headers });
+    const response = await get(url, { headers }, closeSignal);
     return await parseResponse(response);
   } catch (error) {
     if (error instanceof MongoNetworkTimeoutError) {
@@ -175,7 +176,10 @@ export async function fetchAzureKMSToken(
  *
  * @throws Will reject with a `MongoCryptError` if the http request fails or the http response is malformed.
  */
-export async function loadAzureCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
-  const azure = await tokenCache.getToken();
+export async function loadAzureCredentials(
+  kmsProviders: KMSProviders,
+  closeSignal: AbortSignal
+): Promise<KMSProviders> {
+  const azure = await tokenCache.getToken(closeSignal);
   return { ...kmsProviders, azure };
 }

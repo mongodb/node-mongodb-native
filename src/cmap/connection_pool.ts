@@ -1,5 +1,3 @@
-import { clearTimeout, setTimeout } from 'timers';
-
 import type { ObjectId } from '../bson';
 import {
   APM_EVENTS,
@@ -27,7 +25,12 @@ import {
 } from '../error';
 import { type Abortable, CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { type TimeoutContext, TimeoutError } from '../timeout';
+import {
+  clearOnAbortTimeout,
+  type MongoDBTimeoutWrap,
+  type TimeoutContext,
+  TimeoutError
+} from '../timeout';
 import {
   addAbortListener,
   type Callback,
@@ -125,7 +128,20 @@ export type ConnectionPoolEvents = {
  * @internal
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
-  public options: Readonly<ConnectionPoolOptions>;
+  public options: Readonly<
+    Required<
+      Pick<
+        ConnectionPoolOptions,
+        | 'maxPoolSize'
+        | 'minPoolSize'
+        | 'maxConnecting'
+        | 'maxIdleTimeMS'
+        | 'waitQueueTimeoutMS'
+        | 'minPoolSizeCheckFrequencyMS'
+      >
+    > &
+      ConnectionPoolOptions
+  >;
   /**  An integer representing the SDAM generation of the pool */
   public generation: number;
   /** A map of generations to service ids */
@@ -136,12 +152,16 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   private connections: List<Connection>;
   private pending: number;
   private checkedOut: Set<Connection>;
-  private minPoolSizeTimer?: NodeJS.Timeout;
+  private minPoolSizeTimer?: MongoDBTimeoutWrap;
   private connectionCounter: Generator<number>;
   private cancellationToken: CancellationToken;
   private waitQueue: List<WaitQueueMember>;
   private metrics: ConnectionPoolMetrics;
   private processingWaitQueue: boolean;
+
+  get closeSignal(): AbortSignal {
+    return this.server.topology.client.closeSignal;
+  }
 
   /**
    * Emitted when the connection pool is created.
@@ -317,7 +337,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
     this.poolState = PoolState.ready;
     this.emitAndLog(ConnectionPool.CONNECTION_POOL_READY, new ConnectionPoolReadyEvent(this));
-    clearTimeout(this.minPoolSizeTimer);
+    this.minPoolSizeTimer?.clearTimeout();
     this.ensureMinPoolSize();
   }
 
@@ -354,6 +374,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     try {
       timeout?.throwIfExpired();
+      timeout?.ref();
       return await (timeout ? Promise.race([promise, timeout]) : promise);
     } catch (error) {
       if (TimeoutError.is(error)) {
@@ -379,6 +400,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       throw error;
     } finally {
+      timeout?.unref();
       abortListener?.[kDispose]();
       timeout?.clear();
     }
@@ -393,6 +415,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     if (!this.checkedOut.has(connection)) {
       return;
     }
+
+    connection.unref();
     const poolClosed = this.closed;
     const stale = this.connectionIsStale(connection);
     const willDestroy = !!(poolClosed || stale || connection.closed);
@@ -546,7 +570,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
     }
 
-    await provider.reauth(authContext);
+    await provider.reauth(authContext, this.closeSignal);
 
     return;
   }
@@ -555,7 +579,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   private clearMinPoolSizeTimer(): void {
     const minPoolSizeTimer = this.minPoolSizeTimer;
     if (minPoolSizeTimer) {
-      clearTimeout(minPoolSizeTimer);
+      minPoolSizeTimer.clearTimeout();
     }
   }
 
@@ -620,7 +644,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
     );
 
-    connect(connectOptions).then(
+    connect(connectOptions, this.server.topology.client.closeSignal).then(
       connection => {
         // The pool might have closed since we started trying to create a connection
         if (this.poolState !== PoolState.ready) {
@@ -703,18 +727,20 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           process.nextTick(() => this.processWaitQueue());
         }
         if (this.poolState === PoolState.ready) {
-          clearTimeout(this.minPoolSizeTimer);
-          this.minPoolSizeTimer = setTimeout(
+          this.minPoolSizeTimer?.clearTimeout();
+          this.minPoolSizeTimer = clearOnAbortTimeout(
             () => this.ensureMinPoolSize(),
-            this.options.minPoolSizeCheckFrequencyMS
+            this.options.minPoolSizeCheckFrequencyMS,
+            this.closeSignal
           );
         }
       });
     } else {
-      clearTimeout(this.minPoolSizeTimer);
-      this.minPoolSizeTimer = setTimeout(
+      this.minPoolSizeTimer?.clearTimeout();
+      this.minPoolSizeTimer = clearOnAbortTimeout(
         () => this.ensureMinPoolSize(),
-        this.options.minPoolSizeCheckFrequencyMS
+        this.options.minPoolSizeCheckFrequencyMS,
+        this.closeSignal
       );
     }
   }
@@ -766,6 +792,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         );
 
         this.waitQueue.shift();
+        connection.ref();
         waitQueueMember.resolve(connection);
       }
     }

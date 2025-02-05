@@ -32,13 +32,16 @@ export class AzureMachineWorkflow extends MachineWorkflow {
   /**
    * Get the token from the environment.
    */
-  async getToken(credentials?: MongoCredentials): Promise<AccessToken> {
+  async getToken(
+    credentials: MongoCredentials | undefined,
+    closeSignal: AbortSignal
+  ): Promise<AccessToken> {
     const tokenAudience = credentials?.mechanismProperties.TOKEN_RESOURCE;
     const username = credentials?.username;
     if (!tokenAudience) {
       throw new MongoAzureError(TOKEN_RESOURCE_MISSING_ERROR);
     }
-    const response = await getAzureTokenData(tokenAudience, username);
+    const response = await getAzureTokenData(tokenAudience, username, closeSignal);
     if (!isEndpointResultValid(response)) {
       throw new MongoAzureError(ENDPOINT_RESULT_ERROR);
     }
@@ -49,12 +52,20 @@ export class AzureMachineWorkflow extends MachineWorkflow {
 /**
  * Hit the Azure endpoint to get the token data.
  */
-async function getAzureTokenData(tokenAudience: string, username?: string): Promise<AccessToken> {
+async function getAzureTokenData(
+  tokenAudience: string,
+  username: string | undefined,
+  closeSignal: AbortSignal
+): Promise<AccessToken> {
   const url = new URL(AZURE_BASE_URL);
   addAzureParams(url, tokenAudience, username);
-  const response = await get(url, {
-    headers: AZURE_HEADERS
-  });
+  const response = await get(
+    url,
+    {
+      headers: AZURE_HEADERS
+    },
+    closeSignal
+  );
   if (response.status !== 200) {
     throw new MongoAzureError(
       `Status code ${response.status} returned from the Azure endpoint. Response body: ${response.body}`

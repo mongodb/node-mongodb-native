@@ -999,7 +999,7 @@ export class MongoCursorExhaustedError extends MongoAPIError {
 
 /**
  * An error generated when an attempt is made to operate on a
- * dropped, or otherwise unavailable, database.
+ * closed, or otherwise unavailable, topology.
  *
  * @public
  * @category Error
@@ -1022,6 +1022,34 @@ export class MongoTopologyClosedError extends MongoAPIError {
 
   override get name(): string {
     return 'MongoTopologyClosedError';
+  }
+}
+
+/**
+ * An error generated when an attempt is made to operate on a
+ * closed, or otherwise unavailable, client.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoClientClosedError extends MongoAPIError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message = 'MongoClient is closed') {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoClientClosedError';
   }
 }
 

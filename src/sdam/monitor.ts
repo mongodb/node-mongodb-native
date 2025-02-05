@@ -1,5 +1,3 @@
-import { clearTimeout, setTimeout } from 'timers';
-
 import { type Document, Long } from '../bson';
 import { connect, makeConnection, makeSocket, performInitialHandshake } from '../cmap/connect';
 import type { Connection, ConnectionOptions } from '../cmap/connection';
@@ -7,7 +5,8 @@ import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
 import { MongoLoggableComponent } from '../mongo_logger';
-import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { type Abortable, CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { clearOnAbortTimeout, type MongoDBTimeoutWrap } from '../timeout';
 import {
   calculateDurationInMs,
   type Callback,
@@ -101,6 +100,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   private rttSampler: RTTSampler;
 
+  get closeSignal() {
+    return this.server.topology.client.closeSignal;
+  }
+
   constructor(server: Server, options: MonitorOptions) {
     super();
     this.on('error', noop);
@@ -160,7 +163,8 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.monitorId = new MonitorInterval(monitorServer(this), {
       heartbeatFrequencyMS: heartbeatFrequencyMS,
       minHeartbeatFrequencyMS: minHeartbeatFrequencyMS,
-      immediate: true
+      immediate: true,
+      signal: this.closeSignal
     });
   }
 
@@ -189,7 +193,8 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
     this.monitorId = new MonitorInterval(monitorServer(this), {
       heartbeatFrequencyMS: heartbeatFrequencyMS,
-      minHeartbeatFrequencyMS: minHeartbeatFrequencyMS
+      minHeartbeatFrequencyMS: minHeartbeatFrequencyMS,
+      signal: this.closeSignal
     });
   }
 
@@ -379,20 +384,14 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   }
 
   // connecting does an implicit `hello`
-  (async () => {
-    const socket = await makeSocket(monitor.connectOptions);
+  const makeMonitoringConnection = async () => {
+    const socket = await makeSocket(monitor.connectOptions, monitor.closeSignal);
     const connection = makeConnection(monitor.connectOptions, socket);
+    connection.unref();
     // The start time is after socket creation but before the handshake
     start = now();
     try {
-      await performInitialHandshake(connection, monitor.connectOptions);
-      return connection;
-    } catch (error) {
-      connection.destroy();
-      throw error;
-    }
-  })().then(
-    connection => {
+      await performInitialHandshake(connection, monitor.connectOptions, monitor.closeSignal);
       if (isInCloseState(monitor)) {
         connection.destroy();
         return;
@@ -412,15 +411,16 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
           useStreamingProtocol(monitor, connection.hello?.topologyVersion)
         )
       );
-
-      callback(undefined, connection.hello);
-    },
-    error => {
+      return connection.hello;
+    } catch (error) {
+      connection.destroy();
       monitor.connection = null;
       awaited = false;
-      onHeartbeatFailed(error);
+      throw error;
     }
-  );
+  };
+
+  makeMonitoringConnection().then(callback.bind(undefined, undefined), onHeartbeatFailed);
 }
 
 function monitorServer(monitor: Monitor) {
@@ -448,11 +448,11 @@ function monitorServer(monitor: Monitor) {
 
       // if the check indicates streaming is supported, immediately reschedule monitoring
       if (useStreamingProtocol(monitor, hello?.topologyVersion)) {
-        setTimeout(() => {
+        queueMicrotask(() => {
           if (!isInCloseState(monitor)) {
             monitor.monitorId?.wake();
           }
-        }, 0);
+        });
       }
 
       done();
@@ -480,7 +480,7 @@ export class RTTPinger {
   /** @internal */
   cancellationToken: CancellationToken;
   /** @internal */
-  monitorId: NodeJS.Timeout;
+  monitorId: MongoDBTimeoutWrap;
   /** @internal */
   monitor: Monitor;
   closed: boolean;
@@ -495,7 +495,11 @@ export class RTTPinger {
     this.latestRtt = monitor.latestRtt ?? undefined;
 
     const heartbeatFrequencyMS = monitor.options.heartbeatFrequencyMS;
-    this.monitorId = setTimeout(() => this.measureRoundTripTime(), heartbeatFrequencyMS);
+    this.monitorId = clearOnAbortTimeout(
+      () => this.measureRoundTripTime(),
+      heartbeatFrequencyMS,
+      this.closeSignal
+    );
   }
 
   get roundTripTime(): number {
@@ -506,9 +510,13 @@ export class RTTPinger {
     return this.monitor.minRoundTripTime;
   }
 
+  get closeSignal(): AbortSignal {
+    return this.monitor.closeSignal;
+  }
+
   close(): void {
     this.closed = true;
-    clearTimeout(this.monitorId);
+    this.monitorId.clearTimeout();
 
     this.connection?.destroy();
     this.connection = undefined;
@@ -525,9 +533,10 @@ export class RTTPinger {
     }
 
     this.latestRtt = calculateDurationInMs(start);
-    this.monitorId = setTimeout(
+    this.monitorId = clearOnAbortTimeout(
       () => this.measureRoundTripTime(),
-      this.monitor.options.heartbeatFrequencyMS
+      this.monitor.options.heartbeatFrequencyMS,
+      this.closeSignal
     );
   }
 
@@ -540,8 +549,9 @@ export class RTTPinger {
 
     const connection = this.connection;
     if (connection == null) {
-      connect(this.monitor.connectOptions).then(
+      connect(this.monitor.connectOptions, this.closeSignal).then(
         connection => {
+          connection.unref();
           this.measureAndReschedule(start, connection);
         },
         () => {
@@ -582,20 +592,23 @@ export interface MonitorIntervalOptions {
  */
 export class MonitorInterval {
   fn: (callback: Callback) => void;
-  timerId: NodeJS.Timeout | undefined;
+  timerId: MongoDBTimeoutWrap | undefined;
   lastExecutionEnded: number;
   isExpeditedCallToFnScheduled = false;
   stopped = false;
   isExecutionInProgress = false;
   hasExecutedOnce = false;
-
+  closeSignal: AbortSignal;
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
 
-  constructor(fn: (callback: Callback) => void, options: Partial<MonitorIntervalOptions> = {}) {
+  constructor(
+    fn: (callback: Callback) => void,
+    options: Partial<MonitorIntervalOptions> & Required<Abortable>
+  ) {
     this.fn = fn;
     this.lastExecutionEnded = -Infinity;
-
+    this.closeSignal = options.signal;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 1000;
     this.minHeartbeatFrequencyMS = options.minHeartbeatFrequencyMS ?? 500;
 
@@ -638,7 +651,7 @@ export class MonitorInterval {
   stop() {
     this.stopped = true;
     if (this.timerId) {
-      clearTimeout(this.timerId);
+      this.timerId.clearTimeout();
       this.timerId = undefined;
     }
 
@@ -668,16 +681,20 @@ export class MonitorInterval {
   private _reschedule(ms?: number) {
     if (this.stopped) return;
     if (this.timerId) {
-      clearTimeout(this.timerId);
+      this.timerId.clearTimeout();
     }
 
-    this.timerId = setTimeout(this._executeAndReschedule, ms || this.heartbeatFrequencyMS);
+    this.timerId = clearOnAbortTimeout(
+      this._executeAndReschedule,
+      ms || this.heartbeatFrequencyMS,
+      this.closeSignal
+    );
   }
 
   private _executeAndReschedule = () => {
     if (this.stopped) return;
     if (this.timerId) {
-      clearTimeout(this.timerId);
+      this.timerId.clearTimeout();
     }
 
     this.isExpeditedCallToFnScheduled = false;

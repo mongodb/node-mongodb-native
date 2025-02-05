@@ -125,12 +125,10 @@ async function runUnifiedTest(
 
     trace('satisfiesRequirements');
     const isSomeSuiteRequirementMet =
-      !suiteRequirements.length ||
-      (await isAnyRequirementSatisfied(ctx, suiteRequirements, utilClient));
+      !suiteRequirements.length || (await isAnyRequirementSatisfied(ctx, suiteRequirements));
     const isSomeTestRequirementMet =
       isSomeSuiteRequirementMet &&
-      (!testRequirements.length ||
-        (await isAnyRequirementSatisfied(ctx, testRequirements, utilClient)));
+      (!testRequirements.length || (await isAnyRequirementSatisfied(ctx, testRequirements)));
 
     if (!isSomeTestRequirementMet) {
       return ctx.skip();
@@ -319,23 +317,26 @@ export function runUnifiedSuite(
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const [index, test] of unifiedSuite.tests.entries()) {
-        it(String(test.description === '' ? `Test ${index}` : test.description), async function () {
-          if (expectRuntimeError) {
-            const error = await runUnifiedTest(this, unifiedSuite, test, skipFilter).catch(
-              error => error
-            );
-            expect(error).to.satisfy(value => {
-              return (
-                value instanceof AssertionError ||
-                value instanceof MongoServerError ||
-                value instanceof TypeError ||
-                value instanceof MongoParseError
+        it(
+          String(test.description === '' ? `Test ${index}` : test.description),
+          async function unifiedTest() {
+            if (expectRuntimeError) {
+              const error = await runUnifiedTest(this, unifiedSuite, test, skipFilter).catch(
+                error => error
               );
-            });
-          } else {
-            await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+              expect(error).to.satisfy(value => {
+                return (
+                  value instanceof AssertionError ||
+                  value instanceof MongoServerError ||
+                  value instanceof TypeError ||
+                  value instanceof MongoParseError
+                );
+              });
+            } else {
+              await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+            }
           }
-        });
+        );
       }
     });
   }

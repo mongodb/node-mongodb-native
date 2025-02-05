@@ -125,6 +125,10 @@ export class GridFSBucketReadStream extends Readable {
    */
   static readonly FILE = 'file' as const;
 
+  private get closeSignal() {
+    return this.s.files.client.closeSignal;
+  }
+
   /**
    * @param chunks - Handle for chunks collection
    * @param files - Handle for files collection
@@ -156,11 +160,17 @@ export class GridFSBucketReadStream extends Readable {
         ...options
       },
       readPreference,
-      timeoutContext:
-        options?.timeoutMS != null
-          ? new CSOTTimeoutContext({ timeoutMS: options.timeoutMS, serverSelectionTimeoutMS: 0 })
-          : undefined
+      timeoutContext: undefined
     };
+
+    this.s.timeoutContext =
+      options?.timeoutMS != null
+        ? new CSOTTimeoutContext({
+            timeoutMS: options.timeoutMS,
+            serverSelectionTimeoutMS: 0,
+            closeSignal: this.closeSignal
+          })
+        : undefined;
   }
 
   /**

@@ -176,7 +176,10 @@ export function isEmptyCredentials(
  *
  * @internal
  */
-export async function refreshKMSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
+export async function refreshKMSCredentials(
+  kmsProviders: KMSProviders,
+  closeSignal: AbortSignal
+): Promise<KMSProviders> {
   let finalKMSProviders = kmsProviders;
 
   if (isEmptyCredentials('aws', kmsProviders)) {
@@ -188,7 +191,7 @@ export async function refreshKMSCredentials(kmsProviders: KMSProviders): Promise
   }
 
   if (isEmptyCredentials('azure', kmsProviders)) {
-    finalKMSProviders = await loadAzureCredentials(finalKMSProviders);
+    finalKMSProviders = await loadAzureCredentials(finalKMSProviders, closeSignal);
   }
   return finalKMSProviders;
 }
