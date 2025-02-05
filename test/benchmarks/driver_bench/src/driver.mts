@@ -158,7 +158,7 @@ export class DriverTester {
     const collection = db.collection(COLLECTION_NAME);
     await collection.drop().catch(() => null);
     await db.dropDatabase().catch(() => null);
-    utilClient.close();
+    await utilClient.close();
   }
 
   async create() {
