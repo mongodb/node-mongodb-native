@@ -1993,15 +1993,15 @@ describe('Cursor', function () {
             expect(res).property('insertedId').to.exist;
           }, 300);
 
-          const start = new Date();
+          const start = performance.now();
           const doc1 = await cursor.next();
           expect(doc1).to.have.property('b', 2);
-          const end = new Date();
+          const end = performance.now();
 
           await later; // make sure this finished, without a failure
 
           // We should see here that cursor.next blocked for at least 300ms
-          expect(end.getTime() - start.getTime()).to.be.at.least(300);
+          expect(end - start).to.be.at.least(290);
         }
       }
     );

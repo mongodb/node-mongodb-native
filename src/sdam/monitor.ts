@@ -13,6 +13,7 @@ import {
   type Callback,
   type EventEmitterWithState,
   makeStateMachine,
+  noop,
   now,
   ns
 } from '../utils';
@@ -102,6 +103,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
 
   constructor(server: Server, options: MonitorOptions) {
     super();
+    this.on('error', noop);
 
     this.server = server;
     this.connection = null;

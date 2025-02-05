@@ -344,7 +344,6 @@ export class StateMachine {
     function destroySockets() {
       for (const sock of [socket, netSocket]) {
         if (sock) {
-          sock.removeAllListeners();
           sock.destroy();
         }
       }

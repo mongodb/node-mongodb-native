@@ -222,6 +222,8 @@ export class UnifiedMongoClient extends MongoClient {
       // TODO(NODE-5785): We need to increase the truncation length because signature.hash is a Buffer making hellos too long
       mongodbLogMaxDocumentLength: 1250
     } as any);
+
+    this.observedEventEmitter.on('error', () => null);
     this.logCollector = logCollector;
     this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 

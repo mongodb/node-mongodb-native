@@ -47,6 +47,7 @@ import {
   makeStateMachine,
   maxWireVersion,
   type MongoDBNamespace,
+  noop,
   supportsRetryableWrites
 } from '../utils';
 import { throwIfWriteConcernError } from '../write_concern';
@@ -142,6 +143,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   constructor(topology: Topology, description: ServerDescription, options: ServerOptions) {
     super();
+    this.on('error', noop);
 
     this.serverApi = options.serverApi;
 

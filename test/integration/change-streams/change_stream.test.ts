@@ -736,6 +736,7 @@ describe('Change Streams', function () {
           // ChangeStream detects emitter usage via 'newListener' event
           // so this covers all emitter methods
         });
+        changeStream.on('error', () => null); // one must listen for errors if they use EE mode.
 
         await once(changeStream.cursor, 'init');
         expect(changeStream).to.have.property('mode', 'emitter');
@@ -971,7 +972,7 @@ describe('Change Streams', function () {
           { requires: { topology: '!single' } },
           async function () {
             changeStream = collection.watch([]);
-            changeStream.on('change', sinon.stub());
+            changeStream.on('change', sinon.stub()).on('error', () => null);
 
             try {
               // eslint-disable-next-line @typescript-eslint/no-unused-vars

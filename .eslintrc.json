@@ -119,6 +119,10 @@
       {
         "selector": "BinaryExpression[operator=/[=!]==?/] Literal[value='undefined']",
         "message": "Do not strictly check typeof undefined (NOTE: currently this rule only detects the usage of 'undefined' string literal so this could be a misfire)"
+      },
+      {
+        "selector": "CallExpression[callee.property.name='removeAllListeners'][arguments.length=0]",
+        "message": "removeAllListeners can remove error listeners leading to uncaught errors"
       }
     ],
     "@typescript-eslint/no-unused-vars": "error",

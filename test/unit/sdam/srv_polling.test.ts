@@ -188,6 +188,10 @@ describe('Mongos SRV Polling', function () {
 
   describe('topology', function () {
     class FakeSrvPoller extends EventEmitter {
+      constructor() {
+        super();
+        this.on('error', () => null);
+      }
       start() {
         // ignore
       }

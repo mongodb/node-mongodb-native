@@ -4,7 +4,7 @@
     "source-map-support/register",
     "ts-node/register",
     "test/tools/runner/chai_addons.ts",
-    "test/tools/runner/hooks/unhandled_checker.ts"
+    "test/tools/runner/ee_checker.ts"
   ],
   "extension": [
     "js",

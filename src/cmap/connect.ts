@@ -427,7 +427,6 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     throw error;
   } finally {
     socket.setTimeout(0);
-    socket.removeAllListeners();
     if (cancellationHandler != null) {
       options.cancellationToken?.removeListener('cancel', cancellationHandler);
     }
