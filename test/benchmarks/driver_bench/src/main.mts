@@ -73,7 +73,8 @@ const systemInfo = () =>
     `- ram: ${platform.ram}`,
     `- node: ${process.version}`,
     `- running ${total} benchmarks`,
-    `  - finishes soonest: ${earliest.toLocaleTimeString('en-US', { timeZoneName: 'short' })} latest ${latest.toLocaleTimeString('en-US', { timeZoneName: 'short' })}`,
+    `  - finishes soonest: ${earliest.toLocaleTimeString('en-US', { timeZoneName: 'short' })}`,
+    `             latest:  ${latest.toLocaleTimeString('en-US', { timeZoneName: 'short' })}`,
     `- driver: ${MONGODB_DRIVER_VERSION} (${MONGODB_DRIVER_REVISION}): ${MONGODB_DRIVER_PATH}`,
     `  - options ${util.inspect(MONGODB_CLIENT_OPTIONS)}`,
     `- bson: ${MONGODB_BSON_VERSION} (${MONGODB_BSON_REVISION}): (${MONGODB_BSON_PATH})\n`

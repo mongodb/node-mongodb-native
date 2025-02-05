@@ -94,7 +94,7 @@ console.log(
   ' '.repeat(3),
   ...['total time:', totalDuration, 'sec,'],
   ...['ran:', count, 'times,'],
-  ...['time per run:', medianExecution, 'sec,'],
+  ...['median time per run:', medianExecution, 'sec,'],
   ...['throughput:', megabytesPerSecond, 'mb/sec']
 );
 
