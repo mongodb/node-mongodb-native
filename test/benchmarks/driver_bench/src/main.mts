@@ -18,6 +18,7 @@ import {
 } from './driver.mjs';
 
 const __dirname = import.meta.dirname;
+const alphabetically = (a: string, b: string) => String.prototype.localeCompare.call(a, b);
 
 /** Find every mjs file in the suites folder */
 async function getBenchmarks(): Promise<
@@ -28,8 +29,12 @@ async function getBenchmarks(): Promise<
     Record<string, { benchFile: string } & Record<string, any>>
   > = Object.create(null);
   const suites = await fs.readdir(path.join(__dirname, 'suites'));
+  suites.sort(alphabetically);
+
   for (const suite of suites) {
     const benchmarks = await fs.readdir(path.join(__dirname, 'suites', suite));
+    benchmarks.sort(alphabetically);
+
     for (const benchmark of benchmarks) {
       if (!benchmark.endsWith('.mjs')) continue;
       tests[suite] ??= Object.create(null);

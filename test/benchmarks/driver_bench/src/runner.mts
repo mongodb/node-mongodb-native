@@ -88,6 +88,7 @@ function percentileIndex(percentile: number, count: number) {
 }
 
 const medianExecution = durations[percentileIndex(50, count)];
+const megabytesPerSecond = benchmark.taskSize / medianExecution;
 
 console.log(
   '   ',
@@ -100,12 +101,12 @@ console.log(
   'median exec time',
   medianExecution,
   'sec',
-  benchmark.taskSize / medianExecution,
+  megabytesPerSecond,
   'mb/sec'
 );
 
 await fs.writeFile(
   `results_${path.basename(benchmarkFile, '.mjs')}.json`,
-  JSON.stringify(metrics(benchmarkName, medianExecution, count), undefined, 2) + '\n',
+  JSON.stringify(metrics(benchmarkName, megabytesPerSecond, count), undefined, 2) + '\n',
   'utf8'
 );
