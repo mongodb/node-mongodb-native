@@ -102,7 +102,7 @@ export function snakeToCamel(name: string) {
 import type mongodb from '../../../../mongodb.js';
 export type { mongodb };
 
-const { MongoClient /* GridFSBucket */ } = require(path.join(MONGODB_DRIVER_PATH));
+const { MongoClient, GridFSBucket } = require(path.join(MONGODB_DRIVER_PATH));
 
 const DB_NAME = 'perftest';
 const COLLECTION_NAME = 'corpus';
@@ -124,6 +124,7 @@ export function metrics(test_name: string, result: number, count: number) {
     },
     metrics: [
       { name: 'megabytes_per_second', value: result },
+      // Reporting the count so we can verify programmatically or in UI how many iterations we reached
       { name: 'count', value: count }
     ]
   } as const;
@@ -135,14 +136,26 @@ export function metrics(test_name: string, result: number, count: number) {
  */
 export class DriverTester {
   private utilClient: mongodb.MongoClient;
-  private client: mongodb.MongoClient;
+  public client: mongodb.MongoClient;
   constructor() {
     this.utilClient = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
     this.client = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
   }
 
-  get ns() {
+  private get ns() {
     return this.utilClient.db(DB_NAME).collection(COLLECTION_NAME);
+  }
+
+  public get db() {
+    return this.client.db(DB_NAME);
+  }
+
+  public get collection() {
+    return this.client.db(DB_NAME).collection(COLLECTION_NAME);
+  }
+
+  public get bucket(): mongodb.GridFSBucket {
+    return new GridFSBucket(this.db);
   }
 
   async drop() {
@@ -154,7 +167,7 @@ export class DriverTester {
   }
 
   async create() {
-    return await this.utilClient.db(DB_NAME).createCollection(COLLECTION_NAME);
+    await this.utilClient.db(DB_NAME).createCollection(COLLECTION_NAME);
   }
 
   async load(filePath: string, type: 'json' | 'string' | 'buffer'): Promise<any> {
