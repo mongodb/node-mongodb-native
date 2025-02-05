@@ -752,7 +752,7 @@ function addPerformanceTasks() {
     ]
   });
 
-  // temp
+  // TODO(NODE-6729): Remove this task when the original tasks are using the new runner
   const makePerfTaskNEW = (name, MONGODB_CLIENT_OPTIONS) => ({
     name,
     tags: ['run-spec-benchmark-tests', 'performance'],

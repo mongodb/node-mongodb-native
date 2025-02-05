@@ -883,7 +883,7 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
 
-  # TEMP!
+  # TODO(NODE-6729): Remove this task when the original tasks are using the new runner
   "run new spec driver benchmarks":
     - command: subprocess.exec
       type: test
