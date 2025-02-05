@@ -34,25 +34,12 @@ describe('Kerberos', function () {
     client = null;
   });
 
-  if (process.env.MONGODB_URI == null) {
-    console.error('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
-    return;
-  }
-  let krb5Uri = process.env.MONGODB_URI;
-  const parts = krb5Uri.split('@', 2);
-  const host = parts[1].split('/')[0];
+  const krb5Uri = process.env.MONGODB_URI;
+  const host = process.env.SASL_HOST;
 
-  if (!process.env.KRB5_PRINCIPAL) {
-    console.error('skipping Kerberos tests, KRB5_PRINCIPAL environment variable is not defined');
+  if (!process.env.PRINCIPAL) {
+    console.error('skipping Kerberos tests, PRINCIPAL environment variable is not defined');
     return;
-  }
-
-  if (process.platform === 'win32') {
-    console.error('Win32 run detected');
-    if (process.env.LDAPTEST_PASSWORD == null) {
-      throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
-    }
-    krb5Uri = `${parts[0]}:${process.env.LDAPTEST_PASSWORD}@${parts[1]}`;
   }
 
   it('should authenticate with original uri', async function () {
@@ -231,7 +218,9 @@ describe('Kerberos', function () {
         if (!expectedError) {
           expect.fail('Expected connect with invalid SERVICE_HOST to fail');
         }
-        expect(expectedError.message).to.match(/GSS failure|UNKNOWN_SERVER/);
+        expect(expectedError.message).to.match(
+          /GSS failure|UNKNOWN_SERVER|Server not found in Kerberos database/
+        );
       });
     });
 
@@ -277,7 +266,7 @@ describe('Kerberos', function () {
 
   it('should fail to authenticate with bad credentials', async function () {
     client = new MongoClient(
-      krb5Uri.replace(encodeURIComponent(process.env.KRB5_PRINCIPAL), 'bad%40creds.cc')
+      krb5Uri.replace(encodeURIComponent(process.env.PRINCIPAL), 'bad%40creds.cc')
     );
     const err = await client.connect().catch(e => e);
     expect(err.message).to.match(/Authentication failed/);

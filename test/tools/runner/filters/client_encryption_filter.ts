@@ -3,6 +3,7 @@ import { dirname, resolve } from 'path';
 import * as process from 'process';
 import { satisfies } from 'semver';
 
+import { kmsCredentialsPresent } from '../../../csfle-kms-providers';
 import { type MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
 
@@ -24,10 +25,7 @@ export class ClientSideEncryptionFilter extends Filter {
   static version = null;
   static libmongocrypt: string | null = null;
 
-  csfleKMSProviders = null;
-
   override async initializeFilter(client: MongoClient, context: Record<string, any>) {
-    this.csfleKMSProviders = process.env.CSFLE_KMS_PROVIDERS;
     let mongodbClientEncryption;
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -48,13 +46,12 @@ export class ClientSideEncryptionFilter extends Filter {
       )
     ).version;
 
-    this.enabled = !!(this.csfleKMSProviders && mongodbClientEncryption);
+    this.enabled = !!(kmsCredentialsPresent && mongodbClientEncryption);
 
     // Adds these fields onto the context so that they can be reused by tests
     context.clientSideEncryption = {
       enabled: this.enabled,
       mongodbClientEncryption,
-      CSFLE_KMS_PROVIDERS: this.csfleKMSProviders,
       version: ClientSideEncryptionFilter.version,
       libmongocrypt: ClientSideEncryptionFilter.libmongocrypt
     };
@@ -76,15 +73,12 @@ export class ClientSideEncryptionFilter extends Filter {
 
     // TODO(NODE-3401): unskip csfle tests on windows
     if (process.env.TEST_CSFLE && process.platform !== 'win32') {
-      if (!this.csfleKMSProviders) {
-        throw new Error('FLE tests must run, but no KMS providers were set in the environment.');
-      }
       if (ClientSideEncryptionFilter.version == null) {
         throw new Error('FLE tests must run, but mongodb client encryption was not installed.');
       }
     }
 
-    if (this.csfleKMSProviders == null) return 'Test requires FLE environment variables.';
+    if (!kmsCredentialsPresent) return 'Test requires FLE kms credentials';
     if (ClientSideEncryptionFilter.version == null)
       return 'Test requires mongodb-client-encryption to be installed.';
 

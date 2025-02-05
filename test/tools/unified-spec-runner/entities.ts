@@ -210,21 +210,12 @@ export class UnifiedMongoClient extends MongoClient {
         this.buffer.push(transformedLog);
       }
     };
-    const componentSeverities = {
-      MONGODB_LOG_ALL: 'off'
-    };
-
-    // NOTE: this is done to override the logger environment variables
-    for (const key in description.observeLogMessages) {
-      componentSeverities[UnifiedMongoClient.LOGGING_COMPONENT_TO_ENV_VAR_NAME[key]] =
-        description.observeLogMessages[key];
-    }
+    const mongodbLogComponentSeverities = description.observeLogMessages;
 
     super(uri, {
       monitorCommands: true,
       __skipPingOnConnect: true,
-      __enableMongoLogger: true,
-      __internalLoggerConfig: componentSeverities,
+      mongodbLogComponentSeverities,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {}),
       mongodbLogPath: logCollector,

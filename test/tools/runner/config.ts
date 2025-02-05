@@ -60,7 +60,6 @@ export class TestConfiguration {
   clientSideEncryption: {
     enabled: boolean;
     mongodbClientEncryption: any;
-    CSFLE_KMS_PROVIDERS: string | undefined;
     version: string;
     libmongocrypt: string | null;
   };
@@ -199,7 +198,6 @@ export class TestConfiguration {
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
     serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
-
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {
       if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {

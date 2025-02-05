@@ -18,6 +18,7 @@ import {
   CSOTTimeoutContext,
   type MongoClient,
   MongoOperationTimeoutError,
+  ObjectId,
   Timeout,
   TimeoutContext,
   Topology
@@ -195,11 +196,10 @@ describe('CSOT spec unit tests', function () {
               {
                 autoEncryption: {
                   extraOptions: {
-                    mongocryptdBypassSpawn: true,
-                    mongocryptdURI: 'mongodb://localhost:27017/db?serverSelectionTimeoutMS=1000',
+                    mongocryptdURI: 'mongodb://localhost:27020/db?serverSelectionTimeoutMS=2000',
                     mongocryptdSpawnArgs: [
-                      '--pidfilepath=bypass-spawning-mongocryptd.pid',
-                      '--port=27017'
+                      `--pidfilepath=${new ObjectId().toHexString()}.pid`,
+                      '--port=27020'
                     ]
                   },
                   keyVaultNamespace: 'admin.datakeys',
@@ -211,6 +211,7 @@ describe('CSOT spec unit tests', function () {
                 timeoutMS
               }
             );
+
             await encryptedClient.connect();
 
             const stub = sinon

@@ -39,7 +39,6 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       client = this.configuration.newClient(
         {},
         {
-          __enableMongoLogger: true,
           mongodbLogPath: writable,
           mongodbLogComponentSeverities: {
             command: 'debug'
@@ -123,7 +122,6 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       client = this.configuration.newClient(
         {},
         {
-          __enableMongoLogger: true,
           mongodbLogPath: writable,
           mongodbLogComponentSeverities: {
             command: 'debug'
@@ -180,7 +178,6 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       client = this.configuration.newClient(
         {},
         {
-          __enableMongoLogger: true,
           mongodbLogPath: writable,
           mongodbLogComponentSeverities: {
             command: 'debug'
