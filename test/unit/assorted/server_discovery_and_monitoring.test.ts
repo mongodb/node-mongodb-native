@@ -116,7 +116,7 @@ describe('Server Discovery and Monitoring', function () {
 
       expect(aOutcome.type).to.equal('Unknown');
       expect(aOutcome.error).to.match(
-        /primary marked stale due to electionId\/setVersion mismatch: server setVersion: \d+, server electionId: \d{24}, topology setVersion: \d, topology electionId: \d{24}/
+        /primary marked stale due to electionId\/setVersion mismatch: server setVersion: \d+, server electionId: \d{24}, topology setVersion: \d+, topology electionId: \d{24}/
       );
     });
   });
