@@ -624,6 +624,9 @@ Run `.evergreen/run-kerberos-tests.sh`.
 
 ### AWS Authentication tests
 
+> [!NOTE]
+> AWS ECS tests have a different set up process.  Don't even bother running these locally, just pray to the CI gods that things work and you never have to touch these tests.
+
 AWS tests require a cluster configured with MONGODB_AWS auth enabled.  This is easy to set up using drivers-evergreen-tools
 by specifying the `aws-auth.json` orchestration file (this is what CI does).
 
@@ -632,13 +635,16 @@ by specifying the `aws-auth.json` orchestration file (this is what CI does).
 
 Do you want the AWS SDK to be installed while running auth?  If not, set MONGODB_AWS_SDK to false.
 
-   Choose your AWS authentication credential type and export the `AWS_CREDENTIAL_TYPE` type with the chosen value:
+Choose your AWS authentication credential type and export the `AWS_CREDENTIAL_TYPE` type with the chosen value:
 
 | AWS Credential Type | Explanation                                                                                     |
 | ------------------- | ----------------------------------------------------------------------------------------------- |
-| regular             | The AWS credentials are present in the URI as username:password.                                |
+| regular             | The AWS credentials are present in the URI as username:password                                 |
 | env-creds           | AWS credentials are loaded into the environment as AWS_ACCESS_KEY_ID and  AWS_SECRET_ACCESS_KEY |
-| assume-role         | asdf                                                                                            |
+| assume-role         | The machine assumes a particular authentication role, associated with the machine               |
+| ec2                 | The driver authenticates against a local endpoint (on an AWS ec2 instance)                      |
+| web-identity        | Credentials are sourced from an AssumeRoleWithWebIdentity                                       |
+| session-creds       | Similar to env-creds, but the credentials are temporary and include a session token             |
 
 1. Run the `bash .evergreen/run-mongodb-aws-tests.sh`.
 
