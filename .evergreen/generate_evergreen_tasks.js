@@ -212,7 +212,7 @@ TASKS.push(
         { func: 'run socks5 tests' }
       ]
     }
-    ]
+  ]
 );
 
 TASKS.push({
@@ -367,6 +367,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
       { func: 'bootstrap mongo-orchestration' },
       { func: 'add aws auth variables to file' },
       { func: 'setup aws env' },
+      { func: 'assume secrets manager identity' },
       { func: fn.func }
     ]
   }));
@@ -388,6 +389,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
         { func: 'add aws auth variables to file' },
         { func: 'setup aws env' },
         { func: 'remove aws-credential-providers' },
+        { func: 'assume secrets manager identity' },
         { func: fn.func }
       ]
     }));
@@ -684,6 +686,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
       { func: 'bootstrap mongo-orchestration' },
       { func: 'bootstrap kms servers' },
       { func: 'install mongodb-client-encryption' },
+      { func: 'assume secrets manager identity' },
       { func: 'run custom csfle tests' }
     ]
   });

@@ -39,6 +39,7 @@ about the types of tests and how to run them.
       - [Search Indexes](#search-indexes)
       - [Deployed Lambda Tests](#deployed-lambda-tests)
     - [Kerberos Tests](#kerberos-tests)
+    - [AWS Authentication tests](#aws-authentication-tests)
     - [TODO Special Env Sections](#todo-special-env-sections)
   - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
     - [Point mongosh to the driver](#point-mongosh-to-the-driver)
@@ -617,11 +618,32 @@ TODO(NODE-6698): Update deployed lambda test section.
 
 ### Kerberos Tests
 
+You must be in an office or connected to the VPN to run these tests.
+
 Run `.evergreen/run-kerberos-tests.sh`.
+
+### AWS Authentication tests
+
+AWS tests require a cluster configured with MONGODB_AWS auth enabled.  This is easy to set up using drivers-evergreen-tools
+by specifying the `aws-auth.json` orchestration file (this is what CI does).
+
+1. Set up your cluster and export the URI of your cluster as MONGODB_URI.
+2. Choose your configuration and set the relevant environment variables.
+
+Do you want the AWS SDK to be installed while running auth?  If not, set MONGODB_AWS_SDK to false.
+
+   Choose your AWS authentication credential type and export the `AWS_CREDENTIAL_TYPE` type with the chosen value:
+
+| AWS Credential Type | Explanation                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------- |
+| regular             | The AWS credentials are present in the URI as username:password.                                |
+| env-creds           | AWS credentials are loaded into the environment as AWS_ACCESS_KEY_ID and  AWS_SECRET_ACCESS_KEY |
+| assume-role         | asdf                                                                                            |
+
+1. Run the `bash .evergreen/run-mongodb-aws-tests.sh`.
 
 ### TODO Special Env Sections
 
-- AWS Authentication
 - TLS
 - Atlas Data Lake
 - LDAP
