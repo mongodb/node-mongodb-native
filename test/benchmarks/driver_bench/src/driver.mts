@@ -112,7 +112,20 @@ const COLLECTION_NAME = 'corpus';
 
 const SPEC_DIRECTORY = path.resolve(__dirname, '..', '..', 'driverBench', 'spec');
 
-export function metrics(test_name: string, result: number, count: number) {
+export type Metric = {
+  name: 'megabytes_per_second';
+  value: number;
+};
+
+export type MetricInfo = {
+  info: {
+    test_name: string;
+    args: Record<string, number>;
+  };
+  metrics: Metric[];
+};
+
+export function metrics(test_name: string, result: number): MetricInfo {
   return {
     info: {
       test_name,
@@ -125,11 +138,7 @@ export function metrics(test_name: string, result: number, count: number) {
         ])
       )
     },
-    metrics: [
-      { name: 'megabytes_per_second', value: result },
-      // Reporting the count so we can verify programmatically or in UI how many iterations we reached
-      { name: 'count', value: count }
-    ]
+    metrics: [{ name: 'megabytes_per_second', value: result }]
   } as const;
 }
 
