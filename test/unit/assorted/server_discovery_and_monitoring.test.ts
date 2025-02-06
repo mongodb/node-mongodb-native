@@ -3,39 +3,31 @@ import { type TopologyDescription } from 'mongodb-legacy';
 import * as sinon from 'sinon';
 
 import {
-  type MongoClient,
+  MongoClient,
   ObjectId,
   Server,
   ServerDescription,
   Topology,
-  TOPOLOGY_DESCRIPTION_CHANGED,
   type TopologyDescriptionChangedEvent
 } from '../../mongodb';
-
-const SDAM_EVENTS = [
-  // Topology events
-  TOPOLOGY_DESCRIPTION_CHANGED
-];
 
 describe('Server Discovery and Monitoring', function () {
   let serverConnect: sinon.SinonStub;
   let topologySelectServer: sinon.SinonStub;
   let client: MongoClient;
-  let events: TopologyDescriptionChangedEvent[] = [];
+  let events: TopologyDescriptionChangedEvent[];
 
   function getNewDescription() {
-    const [topologyDescriptionChanged] = events.filter(
-      x => x.name === 'topologyDescriptionChanged'
-    );
-    events = [];
+    const topologyDescriptionChanged = events[events.length - 1];
     return topologyDescriptionChanged.newDescription;
   }
 
-  before(async function () {
+  beforeEach(async function () {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
       this.emit('connect');
     });
+
     topologySelectServer = sinon
       .stub(Topology.prototype, 'selectServer')
       .callsFake(async function (_selector, _options) {
@@ -44,57 +36,65 @@ describe('Server Discovery and Monitoring', function () {
         const fakeServer = { s: { state: 'connected' }, removeListener: () => true };
         return fakeServer;
       });
-    const events = [];
+
+    events = [];
+    client = new MongoClient('mongodb://a/?replicaSet=rs');
     client.on('topologyDescriptionChanged', event => events.push(event));
     await client.connect();
+
+    // Start with a as primary
+    client.topology.serverUpdateHandler(
+      new ServerDescription('a:27017', {
+        ok: 1,
+        helloOk: true,
+        isWritablePrimary: true,
+        hosts: ['a:27017', 'b:27017'],
+        setName: 'rs',
+        setVersion: 1,
+        electionId: ObjectId.createFromHexString('000000000000000000000001'),
+        minWireVersion: 0,
+        maxWireVersion: 21
+      })
+    );
+
+    // b is elected as primary, a gets marked stale
+    client.topology.serverUpdateHandler(
+      new ServerDescription('b:27017', {
+        ok: 1,
+        helloOk: true,
+        isWritablePrimary: true,
+        hosts: ['a:27017', 'b:27017'],
+        setName: 'rs',
+        setVersion: 2,
+        electionId: ObjectId.createFromHexString('000000000000000000000001'),
+        minWireVersion: 0,
+        maxWireVersion: 21
+      })
+    );
   });
 
-  after(function () {
+  afterEach(async function () {
     serverConnect.restore();
+    await client.close().catch(() => null);
   });
+
+  let newDescription: TopologyDescription;
 
   describe('when a newer primary is detected', function () {
-    it('steps down original primary to unknown server description with appropriate error message', async function () {
-      let newDescription: TopologyDescription;
-      // Start with a as primary
-      client.topology.serverUpdateHandler(
-        new ServerDescription('a:27017', {
-          ok: 1,
-          helloOk: true,
-          isWritablePrimary: true,
-          hosts: ['a:27017', 'b:27017'],
-          setName: 'rs',
-          setVersion: 1,
-          electionId: ObjectId.createFromHexString('000000000000000000000001'),
-          minWireVersion: 0,
-          maxWireVersion: 21
-        })
-      );
-
+    it('steps down original primary to unknown server description with appropriate error message', function () {
       newDescription = getNewDescription();
 
-      expect(newDescription.type).to.equal('ReplicaSetWithPrimary');
-
-      // b is elected as primary, a gets marked stale
-      client.topology.serverUpdateHandler(
-        new ServerDescription('b:27017', {
-          ok: 1,
-          helloOk: true,
-          isWritablePrimary: true,
-          hosts: ['a:27017', 'b:27017'],
-          setName: 'rs',
-          setVersion: 2,
-          electionId: ObjectId.createFromHexString('000000000000000000000001'),
-          minWireVersion: 0,
-          maxWireVersion: 21
-        })
-      );
-
-      newDescription = getNewDescription();
-
-      let aOutcome = newDescription.servers.get('a:27017');
+      const aOutcome = newDescription.servers.get('a:27017');
+      const bOutcome = newDescription.servers.get('b:27017');
+      expect(aOutcome.type).to.equal('Unknown');
       expect(aOutcome.error).to.match(/primary marked stale due to discovery of newer primary/);
 
+      expect(bOutcome.type).to.equal('RSPrimary');
+    });
+  });
+
+  describe('when a stale primary still reports itself as primary', function () {
+    it('gets marked as unknown with an error message with the new and old replicaSetVersion and electionId', function () {
       // a still incorrectly reports as primary
       client.topology.serverUpdateHandler(
         new ServerDescription('a:27017', {
@@ -112,7 +112,7 @@ describe('Server Discovery and Monitoring', function () {
 
       newDescription = getNewDescription();
 
-      aOutcome = newDescription.servers.get('a:27017');
+      const aOutcome = newDescription.servers.get('a:27017');
 
       expect(aOutcome.type).to.equal('Unknown');
       expect(aOutcome.error).to.match(
