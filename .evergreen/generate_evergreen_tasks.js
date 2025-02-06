@@ -387,8 +387,6 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
         { func: 'add aws auth variables to file' },
-        { func: 'setup aws env' },
-        { func: 'remove aws-credential-providers' },
         { func: 'assume secrets manager identity' },
         { func: fn.func }
       ]

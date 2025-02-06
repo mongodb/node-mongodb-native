@@ -1925,8 +1925,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with regular aws credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
@@ -1943,8 +1941,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with assume role credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
@@ -1961,8 +1957,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
@@ -1980,8 +1974,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
@@ -1998,8 +1990,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws ECS auth test
   - name: aws-8.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
@@ -2152,8 +2142,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with regular aws credentials
   - name: aws-8.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
@@ -2170,8 +2158,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with assume role credentials
   - name: aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
@@ -2188,8 +2174,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
@@ -2207,8 +2191,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-8.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
@@ -2225,8 +2207,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws ECS auth test
   - name: aws-7.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
@@ -2379,8 +2359,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with regular aws credentials
   - name: aws-7.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
@@ -2397,8 +2375,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with assume role credentials
   - name: aws-7.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
@@ -2415,8 +2391,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
@@ -2434,8 +2408,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-7.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
@@ -2452,8 +2424,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws ECS auth test
   - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
@@ -2606,8 +2576,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with regular aws credentials
   - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
@@ -2624,8 +2592,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with assume role credentials
   - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
@@ -2642,8 +2608,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
@@ -2661,8 +2625,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-6.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
@@ -2679,8 +2641,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws ECS auth test
   - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
@@ -2833,8 +2793,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with regular aws credentials
   - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
@@ -2851,8 +2809,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with assume role credentials
   - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
@@ -2869,8 +2825,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
@@ -2888,8 +2842,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-5.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
@@ -2906,8 +2858,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws ECS auth test
   - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
@@ -3060,8 +3010,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with regular aws credentials
   - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
@@ -3078,8 +3026,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with assume role credentials
   - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
@@ -3096,8 +3042,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
@@ -3115,8 +3059,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-4.4-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
@@ -3133,8 +3075,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
-      - func: setup aws env
-      - func: remove aws-credential-providers
       - func: assume secrets manager identity
       - func: run aws ECS auth test
   - name: run-spec-benchmark-tests-node-server
