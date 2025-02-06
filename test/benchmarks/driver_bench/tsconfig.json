@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": false,
+        "strict": true,
+        "alwaysStrict": true,
+        "target": "ESNext",
+        "verbatimModuleSyntax": true,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "skipLibCheck": true,
+        // We don't make use of tslib helpers, all syntax used is supported by target engine
+        "importHelpers": false,
+        "noEmitHelpers": true,
+        // Never emit error filled code
+        "noEmitOnError": true,
+        "outDir": "lib",
+        // We want the sourcemaps in a separate file
+        "inlineSourceMap": false,
+        "sourceMap": true,
+        // we include sources in the release
+        "inlineSources": false,
+        // Prevents web types from being suggested by vscode.
+        "types": [
+            "node"
+        ],
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+    },
+    "include": [
+        "src/**/*"
+    ]
+}
