@@ -88,8 +88,11 @@ export const MONGODB_CLIENT_OPTIONS = (() => {
 })();
 
 export const MONGODB_URI = (() => {
-  if (process.env.MONGODB_URI?.length) return process.env.MONGODB_URI;
-  return 'mongodb://127.0.0.1:27017';
+  const connectionString = process.env.MONGODB_URI;
+  if (connectionString?.length) {
+    return connectionString;
+  }
+  return 'mongodb://localhost:27017';
 })();
 
 export function snakeToCamel(name: string) {
