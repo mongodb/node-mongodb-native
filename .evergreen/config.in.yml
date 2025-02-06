@@ -456,7 +456,7 @@ functions:
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
 
-  "assume secrets manager identity":
+  "assume secrets manager rule":
     - command: ec2.assume_role
       params:
         role_arn: ${OIDC_AWS_ROLE_ARN}
@@ -614,9 +614,9 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
         env:
           AWS_CREDENTIAL_TYPE: env-creds
+          MONGODB_AWS_SDK: 'true'
         working_dir: "src"
         binary: bash
         args: 

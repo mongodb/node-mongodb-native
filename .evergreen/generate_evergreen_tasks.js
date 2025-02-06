@@ -307,7 +307,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'assume secrets manager identity' },
+    { func: 'assume secrets manager rule' },
     { func: 'run lambda handler example tests with aws auth' }
   ]
 });
@@ -364,7 +364,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'assume secrets manager identity' },
+      { func: 'assume secrets manager rule' },
       { func: fn.func }
     ]
   }));
@@ -383,7 +383,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
-        { func: 'assume secrets manager identity' },
+        { func: 'assume secrets manager rule' },
         { func: fn.func }
       ]
     }));
@@ -680,7 +680,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
       { func: 'bootstrap mongo-orchestration' },
       { func: 'bootstrap kms servers' },
       { func: 'install mongodb-client-encryption' },
-      { func: 'assume secrets manager identity' },
+      { func: 'assume secrets manager rule' },
       { func: 'run custom csfle tests' }
     ]
   });
