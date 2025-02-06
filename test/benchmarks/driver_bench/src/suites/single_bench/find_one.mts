@@ -1,23 +1,22 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { driver, type mongodb } from '../../driver.mjs';
 
 export const taskSize = 16.22;
 
-let collection: mongodb.Collection;
+let collection: mongodb.Collection<{ _id: number }>;
 
 export async function before() {
   await driver.drop();
   await driver.create();
 
   const tweet = await driver.load('single_and_multi_document/tweet.json', 'json');
-  await driver.insertManyOf(tweet, 10000);
+  await driver.insertManyOf(tweet, 10000, true);
 
   collection = driver.client.db(driver.DB_NAME).collection(driver.COLLECTION_NAME);
 }
 
 export async function run() {
-  for await (const doc of collection.find({})) {
-    // empty
+  for (let _id = 0; _id < 10000; ++_id) {
+    await collection.findOne({ _id });
   }
 }
 

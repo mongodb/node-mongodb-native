@@ -11,7 +11,7 @@ export async function before() {
 
   tweet = await driver.load('single_and_multi_document/tweet.json', 'json');
 
-  db = driver.db;
+  db = driver.client.db(driver.DB_NAME);
 }
 
 export async function run() {

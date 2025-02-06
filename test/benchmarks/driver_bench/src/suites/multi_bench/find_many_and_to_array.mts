@@ -11,7 +11,7 @@ export async function before() {
   const tweet = await driver.load('single_and_multi_document/tweet.json', 'json');
   await driver.insertManyOf(tweet, 10000);
 
-  collection = driver.collection;
+  collection = driver.client.db(driver.DB_NAME).collection(driver.COLLECTION_NAME);
 }
 
 export async function run() {

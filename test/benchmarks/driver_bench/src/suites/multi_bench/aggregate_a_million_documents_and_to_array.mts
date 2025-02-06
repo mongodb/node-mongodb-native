@@ -8,7 +8,7 @@ export async function before() {
   await driver.drop();
   await driver.create();
 
-  db = driver.db;
+  db = driver.client.db(driver.DB_NAME);
 }
 
 export async function run() {

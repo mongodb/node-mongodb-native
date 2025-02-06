@@ -16,7 +16,7 @@ export async function before() {
   await driver.drop();
   await driver.create();
 
-  bucket = driver.bucket;
+  bucket = driver.bucket(driver.client.db(driver.DB_NAME));
 
   await bucket.drop().catch(() => null);
 

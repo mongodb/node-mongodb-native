@@ -138,21 +138,16 @@ export function metrics(test_name: string, result: number, count: number) {
  * For use in setup/teardown mostly.
  */
 export class DriverTester {
+  readonly DB_NAME = DB_NAME;
+  readonly COLLECTION_NAME = COLLECTION_NAME;
+
   public client: mongodb.MongoClient;
   constructor() {
     this.client = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
   }
 
-  public get db() {
-    return this.client.db(DB_NAME);
-  }
-
-  public get collection() {
-    return this.client.db(DB_NAME).collection(COLLECTION_NAME);
-  }
-
-  public get bucket(): mongodb.GridFSBucket {
-    return new GridFSBucket(this.db);
+  bucket(db: mongodb.Db) {
+    return new GridFSBucket(db);
   }
 
   async drop() {
