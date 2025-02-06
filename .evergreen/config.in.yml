@@ -456,53 +456,10 @@ functions:
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
 
-  "add aws auth variables to file":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        script: |
-          cat <<EOF > ${DRIVERS_TOOLS}/.evergreen/auth_aws/aws_e2e_setup.json
-          {
-              "iam_auth_ecs_account" : "${iam_auth_ecs_account}",
-              "iam_auth_ecs_secret_access_key" : "${iam_auth_ecs_secret_access_key}",
-              "iam_auth_ecs_account_arn": "arn:aws:iam::557821124784:user/authtest_fargate_user",
-              "iam_auth_ecs_cluster": "${iam_auth_ecs_cluster}",
-              "iam_auth_ecs_task_definition": "${iam_auth_ecs_task_definition_ubuntu2004}",
-              "iam_auth_ecs_subnet_a": "${iam_auth_ecs_subnet_a}",
-              "iam_auth_ecs_subnet_b": "${iam_auth_ecs_subnet_b}",
-              "iam_auth_ecs_security_group": "${iam_auth_ecs_security_group}",
-              "iam_auth_assume_aws_account" : "${iam_auth_assume_aws_account}",
-              "iam_auth_assume_aws_secret_access_key" : "${iam_auth_assume_aws_secret_access_key}",
-              "iam_auth_assume_role_name" : "${iam_auth_assume_role_name}",
-              "iam_auth_ec2_instance_account" : "${iam_auth_ec2_instance_account}",
-              "iam_auth_ec2_instance_secret_access_key" : "${iam_auth_ec2_instance_secret_access_key}",
-              "iam_auth_ec2_instance_profile" : "${iam_auth_ec2_instance_profile}",
-              "iam_auth_assume_web_role_name": "${iam_auth_assume_web_role_name}",
-              "iam_web_identity_issuer": "${iam_web_identity_issuer}",
-              "iam_web_identity_rsa_key": "${iam_web_identity_rsa_key}",
-              "iam_web_identity_jwks_uri": "${iam_web_identity_jwks_uri}",
-              "iam_web_identity_token_file": "${iam_web_identity_token_file}"
-          }
-          EOF
-
   "assume secrets manager identity":
     - command: ec2.assume_role
       params:
         role_arn: ${OIDC_AWS_ROLE_ARN}
-
-  "setup aws env":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          cd -
 
   "run aws auth test with regular aws credentials":
     - command: subprocess.exec

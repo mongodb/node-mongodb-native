@@ -364,8 +364,6 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'add aws auth variables to file' },
-      { func: 'setup aws env' },
       { func: 'assume secrets manager identity' },
       { func: fn.func }
     ]
@@ -385,7 +383,6 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
-        { func: 'add aws auth variables to file' },
         { func: 'assume secrets manager identity' },
         { func: fn.func }
       ]
