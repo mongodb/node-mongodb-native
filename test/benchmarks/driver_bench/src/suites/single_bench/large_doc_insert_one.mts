@@ -17,7 +17,7 @@ export async function beforeEach() {
   // Make new "documents" so the _id field is not carried over from the last run
   documents = Array.from({ length: 10 }, () => ({ ...largeDoc }));
 
-  collection = driver.collection;
+  collection = driver.client.db(driver.DB_NAME).collection(driver.COLLECTION_NAME);
 }
 
 export async function run() {

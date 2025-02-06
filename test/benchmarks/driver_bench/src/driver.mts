@@ -146,16 +146,8 @@ export class DriverTester {
     this.client = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
   }
 
-  public get db() {
-    return this.client.db(DB_NAME);
-  }
-
-  public get collection() {
-    return this.client.db(DB_NAME).collection(COLLECTION_NAME);
-  }
-
-  public get bucket(): mongodb.GridFSBucket {
-    return new GridFSBucket(this.db);
+  bucket(db: mongodb.Db) {
+    return new GridFSBucket(db);
   }
 
   async drop() {
