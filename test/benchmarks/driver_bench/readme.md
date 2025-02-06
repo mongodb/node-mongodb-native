@@ -10,6 +10,23 @@ npm start
 
 will build the benchmarks and run them.
 
+## Environment Configuration and Setup
+
+The benchmarks respond to a few environment variables:
+
+- `MONGODB_URI`
+  - The connection string to run operations against.
+    CI uses a standalone, you should be able to launch any cluster and point the benchmarks at it via this env var.
+  - default: `"mongodb://localhost:27017"`
+- `MONGODB_DRIVER_PATH`
+  - The path to the MongoDB Node.js driver.
+    This MUST be set to the _directory_ the driver is installed in.
+    **NOT** the file "lib/index.js" that is the driver's export.
+  - default: 4 directories above driver.mjs (should be the root of this repo)
+- `MONGODB_CLIENT_OPTIONS`
+  - A JSON string that will be passed to the MongoClient constructor
+  - default: `"{}"`
+
 ## Running individual benchmarks
 
 `main.mjs` loops and launches the bench runner for you.
