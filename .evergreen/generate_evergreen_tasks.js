@@ -307,8 +307,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'add aws auth variables to file' },
-    { func: 'setup aws env' },
+    { func: 'assume secrets manager identity' },
     { func: 'run lambda handler example tests with aws auth' }
   ]
 });

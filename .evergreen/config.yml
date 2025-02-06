@@ -583,30 +583,19 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-lambda-tests.sh
   run lambda handler example tests with aws auth:
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: env-creds
         working_dir: src
-        silent: true
-        shell: bash
-        script: |
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py regular
-          cd -
-          cat <<EOF > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            export AWS_ACCESS_KEY_ID=${iam_auth_ecs_account}
-            export AWS_SECRET_ACCESS_KEY=${iam_auth_ecs_secret_access_key}
-            export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
-          EOF
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-lambda-aws-tests.sh
+        binary: bash
+        args:
+          - .evergreen/run-lambda-aws-tests.sh
   upload test results:
     - command: attach.xunit_results
       params:
@@ -3946,8 +3935,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
+      - func: assume secrets manager identity
       - func: run lambda handler example tests with aws auth
   - name: test-latest-csfle-mongocryptd
     tags:
