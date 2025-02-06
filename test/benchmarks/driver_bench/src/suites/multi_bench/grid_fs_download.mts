@@ -12,9 +12,7 @@ const devNull = () => new Writable({ write: (_, __, callback) => callback() });
 
 export async function before() {
   bin = await driver.load('single_and_multi_document/gridfs_large.bin', 'buffer');
-}
 
-export async function beforeEach() {
   await driver.drop();
   await driver.create();
 
@@ -26,6 +24,7 @@ export async function beforeEach() {
   const stream = bucket.openUploadStream('gridfstest');
   const largeBin = Readable.from(bin);
   await pipeline(largeBin, stream);
+
   _id = stream.id;
 }
 

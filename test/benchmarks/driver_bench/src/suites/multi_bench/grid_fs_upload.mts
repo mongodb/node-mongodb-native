@@ -11,16 +11,16 @@ let bin: Uint8Array;
 
 export async function before() {
   bin = await driver.load('single_and_multi_document/gridfs_large.bin', 'buffer');
-}
 
-export async function beforeEach() {
   await driver.drop();
   await driver.create();
 
   bucket = driver.bucket;
 
   await bucket.drop().catch(() => null);
+}
 
+export async function beforeEach() {
   uploadStream = bucket.openUploadStream('gridfstest');
 
   // Create the bucket.
