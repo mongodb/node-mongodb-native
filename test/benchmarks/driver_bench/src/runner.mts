@@ -95,6 +95,7 @@ console.log(
   ...['total time:', totalDuration, 'sec,'],
   ...['ran:', count, 'times,'],
   ...['median time per run:', medianExecution, 'sec,'],
+  ...['taskSize:', benchmark.taskSize, 'mb,'],
   ...['throughput:', megabytesPerSecond, 'mb/sec']
 );
 
