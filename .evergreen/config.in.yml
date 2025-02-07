@@ -456,300 +456,135 @@ functions:
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
 
-  "add aws auth variables to file":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        script: |
-          cat <<EOF > ${DRIVERS_TOOLS}/.evergreen/auth_aws/aws_e2e_setup.json
-          {
-              "iam_auth_ecs_account" : "${iam_auth_ecs_account}",
-              "iam_auth_ecs_secret_access_key" : "${iam_auth_ecs_secret_access_key}",
-              "iam_auth_ecs_account_arn": "arn:aws:iam::557821124784:user/authtest_fargate_user",
-              "iam_auth_ecs_cluster": "${iam_auth_ecs_cluster}",
-              "iam_auth_ecs_task_definition": "${iam_auth_ecs_task_definition_ubuntu2004}",
-              "iam_auth_ecs_subnet_a": "${iam_auth_ecs_subnet_a}",
-              "iam_auth_ecs_subnet_b": "${iam_auth_ecs_subnet_b}",
-              "iam_auth_ecs_security_group": "${iam_auth_ecs_security_group}",
-              "iam_auth_assume_aws_account" : "${iam_auth_assume_aws_account}",
-              "iam_auth_assume_aws_secret_access_key" : "${iam_auth_assume_aws_secret_access_key}",
-              "iam_auth_assume_role_name" : "${iam_auth_assume_role_name}",
-              "iam_auth_ec2_instance_account" : "${iam_auth_ec2_instance_account}",
-              "iam_auth_ec2_instance_secret_access_key" : "${iam_auth_ec2_instance_secret_access_key}",
-              "iam_auth_ec2_instance_profile" : "${iam_auth_ec2_instance_profile}",
-              "iam_auth_assume_web_role_name": "${iam_auth_assume_web_role_name}",
-              "iam_web_identity_issuer": "${iam_web_identity_issuer}",
-              "iam_web_identity_rsa_key": "${iam_web_identity_rsa_key}",
-              "iam_web_identity_jwks_uri": "${iam_web_identity_jwks_uri}",
-              "iam_web_identity_token_file": "${iam_web_identity_token_file}"
-          }
-          EOF
-
-  "setup aws env":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          cd -
-
-  "run aws auth test with regular aws credentials":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py regular
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        script: |
-          cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            alias urlencode='python3 -c "import sys, urllib.parse as ulp; sys.stdout.write(ulp.quote_plus(sys.argv[1]))"'
-            USER=$(urlencode ${iam_auth_ecs_account})
-            PASS=$(urlencode ${iam_auth_ecs_secret_access_key})
-            export MONGODB_URI="mongodb://$USER:$PASS@localhost:27017/aws?authMechanism=MONGODB-AWS"
-          EOF
-    - command: shell.exec
-      type: test
-      params:
-        env:
-          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
-
-  "run aws auth test with assume role credentials":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py assume-role
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        script: |
-          cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            alias urlencode='python3 -c "import sys, urllib.parse as ulp; sys.stdout.write(ulp.quote_plus(sys.argv[1]))"'
-            alias jsonkey='python3 -c "import json,sys;sys.stdout.write(json.load(sys.stdin)[sys.argv[1]])" < ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json'
-            USER=$(jsonkey AccessKeyId)
-            USER=$(urlencode $USER)
-            PASS=$(jsonkey SecretAccessKey)
-            PASS=$(urlencode $PASS)
-            SESSION_TOKEN=$(jsonkey SessionToken)
-            SESSION_TOKEN=$(urlencode $SESSION_TOKEN)
-            export MONGODB_URI="mongodb://$USER:$PASS@localhost:27017/aws?authMechanism=MONGODB-AWS&authMechanismProperties=AWS_SESSION_TOKEN:$SESSION_TOKEN"
-          EOF
-    - command: shell.exec
-      type: test
-      params:
-        env:
-          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
-
-  "run aws auth test with aws EC2 credentials":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          # Write an empty prepare_mongodb_aws so no auth environment variables
-          # are set.
-          echo "" > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py ec2
-    - command: shell.exec
-      type: test
-      params:
-        env:
-          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          export IS_EC2=true
-          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
-
-  "run aws auth test with aws credentials as environment variables":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        shell: bash
-        script: |
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py regular
-          cd -
-          cat <<EOF > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            export AWS_ACCESS_KEY_ID=${iam_auth_ecs_account}
-            export AWS_SECRET_ACCESS_KEY=${iam_auth_ecs_secret_access_key}
-            export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
-          EOF
-    - command: shell.exec
-      type: test
-      params:
-        env:
-          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
-
-  "run aws auth test with aws credentials and session token as environment variables":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        shell: bash
-        script: |
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py assume-role
-          cd -
-          cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            export AWS_ACCESS_KEY_ID=$(jq -r '.AccessKeyId' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
-            export AWS_SECRET_ACCESS_KEY=$(jq -r '.SecretAccessKey' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
-            export AWS_SESSION_TOKEN=$(jq -r '.SessionToken' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
-            export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
-          EOF
-    - command: shell.exec
-      type: test
-      params:
-        add_expansions_to_env: true
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
-
-  "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        shell: bash
-        script: |
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py web-identity
-          cd -
-          cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            export AWS_WEB_IDENTITY_TOKEN_FILE=${iam_web_identity_token_file}
-            export AWS_ROLE_ARN=${iam_auth_assume_web_role_name}
-            export AWS_ROLE_SESSION_NAME='test'
-            export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
-          EOF
-    - command: shell.exec
-      type: test
-      params:
-        env:
-          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
-
-  "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: "src"
-        silent: true
-        shell: bash
-        script: |
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py web-identity
-          cd -
-          cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            export AWS_WEB_IDENTITY_TOKEN_FILE=${iam_web_identity_token_file}
-            export AWS_ROLE_ARN=${iam_auth_assume_web_role_name}
-            export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
-          EOF
-    - command: shell.exec
-      type: test
-      params:
-        env:
-          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
-
-  "run aws ECS auth test":
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: src
-        env:
-          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          AUTH_AWS_DIR=${DRIVERS_TOOLS}/.evergreen/auth_aws
-          ECS_SRC_DIR=$AUTH_AWS_DIR/src
-
-          # pack up project directory to ssh it to the container
-          mkdir -p $ECS_SRC_DIR/.evergreen
-
-          set -ex
-
-          echo "export MONGODB_AWS_SDK=$MONGODB_AWS_SDK" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
-          echo "if [ $MONGODB_AWS_SDK = 'false' ]; then rm -rf ./node_modules/@aws-sdk/credential-providers; fi" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
-          echo "npm run check:aws" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
-
-          cp $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh $ECS_SRC_DIR/.evergreen
-
-          cd ..
-          tar -czf src.tgz src drivers-tools
-          mv src.tgz $ECS_SRC_DIR/src.tgz
-
-
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          export MONGODB_BINARIES="${MONGODB_BINARIES}";
-          export PROJECT_DIRECTORY=$ECS_SRC_DIR;
-          python aws_tester.py ecs
-
-  "run custom csfle tests":
+  "assume secrets manager rule":
     - command: ec2.assume_role
       params:
         role_arn: ${OIDC_AWS_ROLE_ARN}
+
+  "run aws auth test with regular aws credentials":
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: regular
+        working_dir: "src"
+        binary: bash
+        args: 
+          - .evergreen/run-mongodb-aws-test.sh
+
+  "run aws auth test with assume role credentials":
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: assume-role
+        working_dir: "src"
+        binary: bash
+        args: 
+          - .evergreen/run-mongodb-aws-test.sh
+
+  "run aws auth test with aws EC2 credentials":
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: ec2
+          IS_EC2: 'true'
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/run-mongodb-aws-test.sh
+
+  "run aws auth test with aws credentials as environment variables":
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: env-creds
+        working_dir: "src"
+        binary: bash
+        args: 
+          - .evergreen/run-mongodb-aws-test.sh
+
+  "run aws auth test with aws credentials and session token as environment variables":
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: session-creds
+        working_dir: "src"
+        binary: bash
+        args: 
+          - .evergreen/run-mongodb-aws-test.sh
+
+  "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set":
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: web-identity
+          AWS_ROLE_SESSION_NAME: test
+        working_dir: "src"
+        binary: bash
+        args: 
+          - .evergreen/run-mongodb-aws-test.sh
+
+  "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset":
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: web-identity
+        working_dir: "src"
+        binary: bash
+        args: 
+          - .evergreen/run-mongodb-aws-test.sh
+
+  "run aws ECS auth test":
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+          - PROJECT_DIRECTORY
+          - MONGODB_BINARIES
+        env:
+          AWS_CREDENTIAL_TYPE: web-identity
+        working_dir: "src"
+        binary: bash
+        args: 
+          - .evergreen/prepare-mongodb-aws-ecs-auth.sh
+   
+  "run custom csfle tests":
     - command: subprocess.exec
       type: test
       params:
@@ -773,30 +608,19 @@ functions:
           - "${PROJECT_DIRECTORY}/.evergreen/run-lambda-tests.sh"
 
   "run lambda handler example tests with aws auth":
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
-        working_dir: src
-        silent: true
-        shell: bash
-        script: |
-          set -ex
-          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate-authawsvenv.sh
-          python aws_tester.py regular
-          cd -
-          cat <<EOF > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-            export AWS_ACCESS_KEY_ID=${iam_auth_ecs_account}
-            export AWS_SECRET_ACCESS_KEY=${iam_auth_ecs_secret_access_key}
-            export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
-          EOF
-    - command: shell.exec
-      type: test
-      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+        env:
+          AWS_CREDENTIAL_TYPE: env-creds
+          MONGODB_AWS_SDK: 'true'
         working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-lambda-aws-tests.sh
+        binary: bash
+        args: 
+          - .evergreen/run-lambda-aws-tests.sh
 
   "upload test results":
     # Upload the xunit-format test results.
