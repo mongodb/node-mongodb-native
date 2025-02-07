@@ -101,6 +101,6 @@ console.log(
 
 await fs.writeFile(
   `results_${path.basename(benchmarkFile, '.mjs')}.json`,
-  JSON.stringify(metrics(benchmarkName, megabytesPerSecond, count), undefined, 2) + '\n',
+  JSON.stringify(metrics(benchmarkName, megabytesPerSecond), undefined, 2) + '\n',
   'utf8'
 );

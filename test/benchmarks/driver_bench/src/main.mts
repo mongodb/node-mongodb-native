@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import assert from 'node:assert/strict';
 import child_process from 'node:child_process';
 import events from 'node:events';
 import fs from 'node:fs/promises';
@@ -7,6 +8,9 @@ import path from 'node:path';
 import util from 'node:util';
 
 import {
+  type Metric,
+  type MetricInfo,
+  metrics,
   MONGODB_BSON_PATH,
   MONGODB_BSON_REVISION,
   MONGODB_BSON_VERSION,
@@ -81,7 +85,7 @@ console.log(systemInfo());
 
 const runnerPath = path.join(__dirname, 'runner.mjs');
 
-const results = [];
+const results: MetricInfo[] = [];
 
 for (const [suite, benchmarks] of Object.entries(tests)) {
   console.group(snakeToCamel(suite));
@@ -106,4 +110,94 @@ for (const [suite, benchmarks] of Object.entries(tests)) {
   console.groupEnd();
 }
 
-await fs.writeFile('results.json', JSON.stringify(results, undefined, 2), 'utf8');
+function calculateCompositeBenchmarks(results: MetricInfo[]) {
+  const composites = {
+    singleBench: ['findOne', 'smallDocInsertOne', 'largeDocInsertOne'],
+    multiBench: [
+      'findManyAndEmptyCursor',
+      'gridFsDownload',
+      'gridFsUpload',
+      'largeDocBulkInsert',
+      'smallDocBulkInsert'
+    ],
+    // parallelBench: [
+    //   'ldjsonMultiFileUpload',
+    //   'ldjsonMultiFileExport',
+    //   'gridfsMultiFileUpload',
+    //   'gridfsMultiFileDownload'
+    // ],
+    readBench: [
+      'findOne',
+      'findManyAndEmptyCursor',
+      'gridFsDownload'
+      // 'gridfsMultiFileDownload',
+      // 'ldjsonMultiFileExport'
+    ],
+    writeBench: [
+      'smallDocInsertOne',
+      'largeDocInsertOne',
+      'smallDocBulkInsert',
+      'largeDocBulkInsert',
+      'gridFsUpload'
+      // 'ldjsonMultiFileUpload',
+      // 'gridfsMultiFileUpload'
+    ]
+  };
+
+  const aMetricInfo =
+    (testName: string) =>
+    ({ info: { test_name } }: MetricInfo) =>
+      test_name === testName;
+
+  const anMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
+
+  let readBenchResult;
+  let writeBenchResult;
+
+  console.group('composite scores');
+
+  const compositeResults: MetricInfo[] = [];
+  for (const [compositeName, compositeTests] of Object.entries(composites)) {
+    console.group(`${compositeName}: ${compositeTests.join(', ')}`);
+
+    let sum = 0;
+    for (const testName of compositeTests) {
+      const testScore = results.find(aMetricInfo(testName));
+      assert.ok(testScore, `${compositeName} suite requires ${testName} for composite score`);
+
+      const metric = testScore.metrics.find(anMBsMetric);
+      assert.ok(metric, `${testName} is missing a megabytes_per_second metric`);
+
+      sum += metric.value;
+    }
+
+    const compositeAverage = sum / compositeTests.length;
+
+    if (compositeName === 'readBench') readBenchResult = compositeAverage;
+    if (compositeName === 'writeBench') writeBenchResult = compositeAverage;
+
+    compositeResults.push(metrics(compositeName, compositeAverage));
+
+    console.log('avg:', compositeAverage, 'mb/s');
+
+    console.groupEnd();
+  }
+
+  assert.ok(typeof readBenchResult === 'number');
+  assert.ok(typeof writeBenchResult === 'number');
+
+  const driverBench = (readBenchResult + writeBenchResult) / 2;
+
+  console.group('driverBench: readBench, writeBench');
+  console.log('avg:', driverBench, 'mb/s');
+  console.groupEnd();
+
+  compositeResults.push(metrics('driverBench', driverBench));
+
+  console.groupEnd();
+  return [...results, ...compositeResults];
+}
+
+const finalResults = calculateCompositeBenchmarks(results);
+
+await fs.writeFile('results.json', JSON.stringify(finalResults, undefined, 2), 'utf8');
