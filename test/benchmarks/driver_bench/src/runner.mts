@@ -39,16 +39,6 @@ const MAX_COUNT = 100;
 
 await benchmark.before?.();
 
-// for 1/10th the max iterations
-const warmupIterations = (MAX_COUNT / 10) | 0;
-
-// Warm Up.
-for (let i = 0; i < warmupIterations; i++) {
-  await benchmark.beforeEach?.();
-  await timeTask();
-  await benchmark.afterEach?.();
-}
-
 // Allocate an obscene amount of space
 const data = new Float64Array(10_000_000);
 
@@ -69,7 +59,7 @@ do {
   if (totalDuration < ONE_MIN) continue;
 
   // 100 runs OR five minutes
-  if (count >= 100 || totalDuration >= FIVE_MIN) break;
+  if (count >= MAX_COUNT || totalDuration >= FIVE_MIN) break;
 
   // count exceeds data space, we never intend to have more than a million data points let alone 10M
   if (count === data.length) break;

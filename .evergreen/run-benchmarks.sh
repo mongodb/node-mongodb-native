@@ -11,13 +11,6 @@ export MONGODB_CLIENT_OPTIONS=$MONGODB_CLIENT_OPTIONS
 
 npm run build:ts
 
-if [[ "${NEW_BENCH:-}" == "true" ]]; then
-  pushd test/benchmarks/driver_bench
-  npm start
-  popd
-  exit 0
-fi
-
 # If MONGODB_CLIENT_OPTIONS contains mongodbLogComponentSeverities redirect stderr to a file
 if [[ $MONGODB_CLIENT_OPTIONS == *"mongodbLogComponentSeverities"* ]]; then
   npm run check:bench 2> bench.log

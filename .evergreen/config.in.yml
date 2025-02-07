@@ -708,22 +708,6 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
 
-  # TODO(NODE-6729): Remove this task when the original tasks are using the new runner
-  "run new spec driver benchmarks":
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: "src"
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          MONGODB_CLIENT_OPTIONS: ${MONGODB_CLIENT_OPTIONS}
-          NEW_BENCH: "true"
-        binary: bash
-        args:
-          - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
-
   "run x509 auth tests":
     - command: subprocess.exec
       type: test

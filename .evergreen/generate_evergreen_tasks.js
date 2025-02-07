@@ -744,30 +744,11 @@ function addPerformanceTasks() {
       ].map(func => ({ func })),
       {
         command: 'perf.send',
-        params: { file: 'src/results.json' }
+        params: {
+          working_dir: 'src',
+          file: 'test/benchmarks/driver_bench/results.json'
+        }
       }
-    ]
-  });
-
-  // TODO(NODE-6729): Remove this task when the original tasks are using the new runner
-  const makePerfTaskNEW = (name, MONGODB_CLIENT_OPTIONS) => ({
-    name,
-    tags: ['run-spec-benchmark-tests', 'performance'],
-    exec_timeout_secs: 18000,
-    commands: [
-      updateExpansions({
-        NODE_LTS_VERSION: 'v22.11.0',
-        VERSION: 'v6.0-perf',
-        TOPOLOGY: 'server',
-        AUTH: 'noauth',
-        MONGODB_CLIENT_OPTIONS: JSON.stringify(MONGODB_CLIENT_OPTIONS)
-      }),
-      ...[
-        'install dependencies',
-        'bootstrap mongo-orchestration',
-        'run new spec driver benchmarks'
-      ].map(func => ({ func }))
-      // No perf send! just testing
     ]
   });
 
@@ -781,8 +762,7 @@ function addPerformanceTasks() {
     makePerfTask('run-spec-benchmark-tests-node-server-logging', {
       mongodbLogPath: 'stderr',
       mongodbLogComponentSeverities: { default: 'trace' }
-    }),
-    makePerfTaskNEW('run-spec-benchmark-tests-node-server-new', {})
+    })
   ];
 
   TASKS.push(...tasks);
