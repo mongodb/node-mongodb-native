@@ -1,10 +1,10 @@
-import type { Document, ObjectId } from './bson';
+import type { Document } from './bson';
 import {
   type ClientBulkWriteError,
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
 import type { ServerType } from './sdam/common';
-import type { ServerDescription, TopologyVersion } from './sdam/server_description';
+import type { TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
 
 /** @public */
@@ -355,16 +355,8 @@ export class MongoStalePrimaryError extends MongoRuntimeError {
    *
    * @public
    **/
-  constructor(
-    serverDescription: ServerDescription,
-    maxSetVersion: number | null,
-    maxElectionId: ObjectId | null,
-    options?: { cause?: Error }
-  ) {
-    super(
-      `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`,
-      options
-    );
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
   }
 
   override get name(): string {
