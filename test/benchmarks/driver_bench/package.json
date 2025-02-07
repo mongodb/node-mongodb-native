@@ -1,0 +1,9 @@
+{
+  "name": "driver_bench",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "prestart": "tsc",
+    "start": "node lib/main.mjs"
+  }
+}
