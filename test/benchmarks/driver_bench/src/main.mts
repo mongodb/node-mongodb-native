@@ -120,27 +120,27 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
       'largeDocBulkInsert',
       'smallDocBulkInsert'
     ],
-    // parallelBench: [
-    //   'ldjsonMultiFileUpload',
-    //   'ldjsonMultiFileExport',
-    //   'gridfsMultiFileUpload',
-    //   'gridfsMultiFileDownload'
-    // ],
+    parallelBench: [
+      'ldjsonMultiFileUpload',
+      'ldjsonMultiFileExport',
+      'gridfsMultiFileUpload',
+      'gridfsMultiFileDownload'
+    ],
     readBench: [
       'findOne',
       'findManyAndEmptyCursor',
-      'gridFsDownload'
-      // 'gridfsMultiFileDownload',
-      // 'ldjsonMultiFileExport'
+      'gridFsDownload',
+      'gridfsMultiFileDownload',
+      'ldjsonMultiFileExport'
     ],
     writeBench: [
       'smallDocInsertOne',
       'largeDocInsertOne',
       'smallDocBulkInsert',
       'largeDocBulkInsert',
-      'gridFsUpload'
-      // 'ldjsonMultiFileUpload',
-      // 'gridfsMultiFileUpload'
+      'gridFsUpload',
+      'ldjsonMultiFileUpload',
+      'gridfsMultiFileUpload'
     ]
   };
 
