@@ -244,10 +244,10 @@ interface AWS4 {
   };
 }
 
-export const aws4: AWS4 | { kModuleError: MongoMissingDependencyError } = loadAws4();
+export const aws4 = loadAws4();
 
 function loadAws4() {
-  let aws4: AWS4 | { kModuleError: MongoMissingDependencyError };
+  let aws4: typeof import('aws4') | { kModuleError: MongoMissingDependencyError };
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     aws4 = require('aws4');

@@ -138,8 +138,8 @@ export class MongoDBAWS extends AuthProvider {
     );
 
     const payload: AWSSaslContinuePayload = {
-      a: options.headers.Authorization,
-      d: options.headers['X-Amz-Date']
+      a: `${options.headers?.Authorization ?? ''}`,
+      d: `${options.headers?.['X-Amz-Date'] ?? ''}`
     };
 
     if (sessionToken) {
