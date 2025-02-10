@@ -128,7 +128,7 @@
     "build:docs": "./etc/docs/build.ts",
     "build:typedoc": "typedoc",
     "build:nightly": "node ./.github/scripts/nightly.mjs",
-    "check:bench": "node test/benchmarks/driverBench",
+    "check:bench": "npm --prefix test/benchmarks/driver_bench start",
     "check:coverage": "nyc npm run test:all",
     "check:integration-coverage": "nyc npm run check:test",
     "check:lambda": "mocha --config test/mocha_lambda.json test/integration/node-specific/examples/handler.test.js",

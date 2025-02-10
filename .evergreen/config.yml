@@ -1,6 +1,6 @@
 stepback: true
 command_type: system
-exec_timeout_secs: 2100
+exec_timeout_secs: 7200
 timeout:
   - command: subprocess.exec
     params:
@@ -630,20 +630,6 @@ functions:
           MONGODB_URI: ${MONGODB_URI}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           MONGODB_CLIENT_OPTIONS: ${MONGODB_CLIENT_OPTIONS}
-        binary: bash
-        args:
-          - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
-  run new spec driver benchmarks:
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: src
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          MONGODB_CLIENT_OPTIONS: ${MONGODB_CLIENT_OPTIONS}
-          NEW_BENCH: 'true'
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
@@ -2918,7 +2904,7 @@ tasks:
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -2934,12 +2920,12 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          file: src/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-spec-benchmark-tests-node-server-timeoutMS-120000
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -2955,12 +2941,12 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          file: src/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-spec-benchmark-tests-node-server-timeoutMS-0
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -2976,12 +2962,12 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          file: src/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-spec-benchmark-tests-node-server-monitorCommands-true
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -2997,12 +2983,12 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          file: src/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-spec-benchmark-tests-node-server-logging
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -3018,25 +3004,7 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          file: src/results.json
-  - name: run-spec-benchmark-tests-node-server-new
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 18000
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: MONGODB_CLIENT_OPTIONS, value: '{}'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run new spec driver benchmarks
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-unit-tests-node-16
     tags:
       - unit-tests
@@ -4856,7 +4824,6 @@ buildvariants:
       - run-spec-benchmark-tests-node-server-timeoutMS-0
       - run-spec-benchmark-tests-node-server-monitorCommands-true
       - run-spec-benchmark-tests-node-server-logging
-      - run-spec-benchmark-tests-node-server-new
   - name: rhel8-custom-dependency-tests
     display_name: Custom Dependency Version Test
     run_on: rhel80-large

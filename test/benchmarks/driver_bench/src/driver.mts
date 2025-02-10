@@ -113,8 +113,7 @@ export const EJSON = BSON.EJSON;
 const DB_NAME = 'perftest';
 const COLLECTION_NAME = 'corpus';
 
-// TODO(NODE-6729): move spec into this folder: export const SPEC_DIRECTORY = path.resolve(__dirname, '..', 'spec');
-export const SPEC_DIRECTORY = path.resolve(__dirname, '..', '..', 'driverBench', 'spec');
+export const SPEC_DIRECTORY = path.resolve(__dirname, '..', 'spec');
 export const PARALLEL_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'parallel');
 export const TEMP_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'tmp');
 
