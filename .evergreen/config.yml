@@ -364,15 +364,16 @@ functions:
         args:
           - .evergreen/run-kerberos-tests.sh
   run ldap tests:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
     - command: subprocess.exec
       type: test
       params:
         working_dir: src
         binary: bash
         env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          MONGODB_URI: ${plain_auth_mongodb_uri}
           NODE_LTS_VERSION: ${NODE_LTS_VERSION}
         args:
           - .evergreen/run-ldap-tests.sh

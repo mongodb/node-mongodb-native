@@ -154,7 +154,7 @@
     "check:oidc-k8s": "mocha --config test/mocha_mongodb.json test/integration/auth/mongodb_oidc_k8s.prose.07.test.ts",
     "check:kerberos": "nyc mocha --config test/manual/mocharc.json test/manual/kerberos.test.ts",
     "check:tls": "mocha --config test/manual/mocharc.json test/manual/tls_support.test.ts",
-    "check:ldap": "nyc mocha --config test/manual/mocharc.json test/manual/ldap.test.js",
+    "check:ldap": "nyc mocha --config test/manual/mocharc.json test/manual/ldap.test.ts",
     "check:socks5": "mocha --config test/manual/mocharc.json test/manual/socks5.test.ts",
     "check:csfle": "mocha --config test/mocha_mongodb.json test/integration/client-side-encryption",
     "check:snappy": "mocha test/unit/assorted/snappy.test.js",
