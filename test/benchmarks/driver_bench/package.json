@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "prestart": "rm -rf lib && tsc",
-    "start": "node lib/main.mjs"
+    "start": "node lib/main.mjs",
+    "clean": "rm -f results*.json"
   }
 }

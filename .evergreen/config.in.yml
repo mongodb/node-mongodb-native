@@ -11,7 +11,7 @@ command_type: system
 # Protect ourself against rogue test case, or curl gone wild, that runs forever
 # Good rule of thumb: the averageish length a task takes, times 5
 # That roughly accounts for variable system performance for various buildvariants
-exec_timeout_secs: 2100
+exec_timeout_secs: 7200
 
 # What to do when evergreen hits the timeout (`post:` tasks are run automatically)
 timeout:
@@ -474,7 +474,7 @@ functions:
           AWS_CREDENTIAL_TYPE: regular
         working_dir: "src"
         binary: bash
-        args: 
+        args:
           - .evergreen/run-mongodb-aws-test.sh
 
   "run aws auth test with assume role credentials":
@@ -489,7 +489,7 @@ functions:
           AWS_CREDENTIAL_TYPE: assume-role
         working_dir: "src"
         binary: bash
-        args: 
+        args:
           - .evergreen/run-mongodb-aws-test.sh
 
   "run aws auth test with aws EC2 credentials":
@@ -520,7 +520,7 @@ functions:
           AWS_CREDENTIAL_TYPE: env-creds
         working_dir: "src"
         binary: bash
-        args: 
+        args:
           - .evergreen/run-mongodb-aws-test.sh
 
   "run aws auth test with aws credentials and session token as environment variables":
@@ -535,7 +535,7 @@ functions:
           AWS_CREDENTIAL_TYPE: session-creds
         working_dir: "src"
         binary: bash
-        args: 
+        args:
           - .evergreen/run-mongodb-aws-test.sh
 
   "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set":
@@ -551,7 +551,7 @@ functions:
           AWS_ROLE_SESSION_NAME: test
         working_dir: "src"
         binary: bash
-        args: 
+        args:
           - .evergreen/run-mongodb-aws-test.sh
 
   "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset":
@@ -566,7 +566,7 @@ functions:
           AWS_CREDENTIAL_TYPE: web-identity
         working_dir: "src"
         binary: bash
-        args: 
+        args:
           - .evergreen/run-mongodb-aws-test.sh
 
   "run aws ECS auth test":
@@ -582,9 +582,9 @@ functions:
           AWS_CREDENTIAL_TYPE: web-identity
         working_dir: "src"
         binary: bash
-        args: 
+        args:
           - .evergreen/prepare-mongodb-aws-ecs-auth.sh
-   
+
   "run custom csfle tests":
     - command: subprocess.exec
       type: test
@@ -620,7 +620,7 @@ functions:
           MONGODB_AWS_SDK: 'true'
         working_dir: "src"
         binary: bash
-        args: 
+        args:
           - .evergreen/run-lambda-aws-tests.sh
 
   "upload test results":
@@ -704,22 +704,6 @@ functions:
           MONGODB_URI: ${MONGODB_URI}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           MONGODB_CLIENT_OPTIONS: ${MONGODB_CLIENT_OPTIONS}
-        binary: bash
-        args:
-          - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
-
-  # TODO(NODE-6729): Remove this task when the original tasks are using the new runner
-  "run new spec driver benchmarks":
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: "src"
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          MONGODB_CLIENT_OPTIONS: ${MONGODB_CLIENT_OPTIONS}
-          NEW_BENCH: "true"
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
