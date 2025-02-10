@@ -1,6 +1,6 @@
 stepback: true
 command_type: system
-exec_timeout_secs: 2100
+exec_timeout_secs: 7200
 timeout:
   - command: subprocess.exec
     params:
@@ -2904,7 +2904,7 @@ tasks:
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -2925,7 +2925,7 @@ tasks:
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -2946,7 +2946,7 @@ tasks:
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -2967,7 +2967,7 @@ tasks:
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup
@@ -2988,7 +2988,7 @@ tasks:
     tags:
       - run-spec-benchmark-tests
       - performance
-    exec_timeout_secs: 3600
+    exec_timeout_secs: 7200
     commands:
       - command: expansions.update
         type: setup

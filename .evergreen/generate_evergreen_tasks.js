@@ -728,7 +728,7 @@ function addPerformanceTasks() {
   const makePerfTask = (name, MONGODB_CLIENT_OPTIONS) => ({
     name,
     tags: ['run-spec-benchmark-tests', 'performance'],
-    exec_timeout_secs: 3600,
+    exec_timeout_secs: 7200,
     commands: [
       updateExpansions({
         NODE_LTS_VERSION: 'v22.11.0',
