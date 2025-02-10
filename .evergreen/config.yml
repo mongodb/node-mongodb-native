@@ -2920,8 +2920,7 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          working_dir: src
-          file: test/benchmarks/driver_bench/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-spec-benchmark-tests-node-server-timeoutMS-120000
     tags:
       - run-spec-benchmark-tests
@@ -2942,8 +2941,7 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          working_dir: src
-          file: test/benchmarks/driver_bench/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-spec-benchmark-tests-node-server-timeoutMS-0
     tags:
       - run-spec-benchmark-tests
@@ -2964,8 +2962,7 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          working_dir: src
-          file: test/benchmarks/driver_bench/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-spec-benchmark-tests-node-server-monitorCommands-true
     tags:
       - run-spec-benchmark-tests
@@ -2986,8 +2983,7 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          working_dir: src
-          file: test/benchmarks/driver_bench/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-spec-benchmark-tests-node-server-logging
     tags:
       - run-spec-benchmark-tests
@@ -3008,8 +3004,7 @@ tasks:
       - func: run spec driver benchmarks
       - command: perf.send
         params:
-          working_dir: src
-          file: test/benchmarks/driver_bench/results.json
+          file: src/test/benchmarks/driver_bench/results.json
   - name: run-unit-tests-node-16
     tags:
       - unit-tests

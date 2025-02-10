@@ -744,10 +744,7 @@ function addPerformanceTasks() {
       ].map(func => ({ func })),
       {
         command: 'perf.send',
-        params: {
-          working_dir: 'src',
-          file: 'test/benchmarks/driver_bench/results.json'
-        }
+        params: { file: 'src/test/benchmarks/driver_bench/results.json' }
       }
     ]
   });
