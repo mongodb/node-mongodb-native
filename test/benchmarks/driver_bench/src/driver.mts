@@ -105,12 +105,18 @@ export function snakeToCamel(name: string) {
 import type mongodb from '../../../../mongodb.js';
 export type { mongodb };
 
-const { MongoClient, GridFSBucket } = require(path.join(MONGODB_DRIVER_PATH));
+const { MongoClient, GridFSBucket, BSON } = require(path.join(MONGODB_DRIVER_PATH));
+
+export { BSON };
+export const EJSON = BSON.EJSON;
 
 const DB_NAME = 'perftest';
 const COLLECTION_NAME = 'corpus';
 
-const SPEC_DIRECTORY = path.resolve(__dirname, '..', '..', 'driverBench', 'spec');
+// TODO(NODE-6729): move spec into this folder: export const SPEC_DIRECTORY = path.resolve(__dirname, '..', 'spec');
+export const SPEC_DIRECTORY = path.resolve(__dirname, '..', '..', 'driverBench', 'spec');
+export const PARALLEL_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'parallel');
+export const TEMP_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'tmp');
 
 export type Metric = {
   name: 'megabytes_per_second';
@@ -184,6 +190,11 @@ export class DriverTester {
     if (type === 'string') return string;
     if (type === 'json') return JSON.parse(string);
     throw new Error('unknown type: ' + type);
+  }
+
+  async resetTmpDir() {
+    await fs.rm(TEMP_DIRECTORY, { recursive: true, force: true });
+    await fs.mkdir(TEMP_DIRECTORY);
   }
 
   async insertManyOf(document: Record<string, any>, length: number, addId = false) {

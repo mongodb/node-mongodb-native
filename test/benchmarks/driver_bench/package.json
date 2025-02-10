@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "prestart": "tsc",
+    "prestart": "rm -rf lib && tsc",
     "start": "node lib/main.mjs"
   }
 }
