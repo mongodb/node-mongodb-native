@@ -132,7 +132,7 @@ functions:
   "run tests":
     - command: ec2.assume_role
       params:
-        role_arn: ${OIDC_AWS_ROLE_ARN}
+        role_arn: ${DRIVERS_SECRETS_ARN}
     - command: subprocess.exec
       type: test
       params:
@@ -151,7 +151,7 @@ functions:
         exec_timeout_secs: 1800
     - command: ec2.assume_role
       params:
-        role_arn: ${OIDC_AWS_ROLE_ARN}
+        role_arn: ${DRIVERS_SECRETS_ARN}
     - command: subprocess.exec
       type: test
       params:
@@ -394,7 +394,7 @@ functions:
   "run socks5 tests":
     - command: ec2.assume_role
       params:
-        role_arn: ${OIDC_AWS_ROLE_ARN}
+        role_arn: ${DRIVERS_SECRETS_ARN}
     - command: subprocess.exec
       type: test
       params:
@@ -459,7 +459,7 @@ functions:
   "assume secrets manager rule":
     - command: ec2.assume_role
       params:
-        role_arn: ${OIDC_AWS_ROLE_ARN}
+        role_arn: ${DRIVERS_SECRETS_ARN}
 
   "run aws auth test with regular aws credentials":
     - command: subprocess.exec
@@ -1089,7 +1089,7 @@ task_groups:
       - func: fetch source
       - command: ec2.assume_role
         params:
-          role_arn: ${OIDC_AWS_ROLE_ARN}
+          role_arn: ${DRIVERS_SECRETS_ARN}
       - command: subprocess.exec
         params:
           binary: bash
@@ -1111,7 +1111,7 @@ task_groups:
       - func: fetch source
       - command: ec2.assume_role
         params:
-          role_arn: ${OIDC_AWS_ROLE_ARN}
+          role_arn: ${DRIVERS_SECRETS_ARN}
       - command: subprocess.exec
         params:
           binary: bash
@@ -1133,7 +1133,7 @@ task_groups:
       - func: fetch source
       - command: ec2.assume_role
         params:
-          role_arn: ${OIDC_AWS_ROLE_ARN}
+          role_arn: ${DRIVERS_SECRETS_ARN}
       - command: subprocess.exec
         params:
           binary: bash
@@ -1155,7 +1155,7 @@ task_groups:
       - func: fetch source
       - command: ec2.assume_role
         params:
-          role_arn: ${OIDC_AWS_ROLE_ARN}
+          role_arn: ${DRIVERS_SECRETS_ARN}
       - command: subprocess.exec
         params:
           binary: bash
