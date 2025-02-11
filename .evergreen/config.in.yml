@@ -971,7 +971,7 @@ tasks:
           working_dir: src
           binary: bash
           add_expansions_to_env: true
-          env: 
+          env:
             LAMBDA_STACK_NAME: dbx-node-lambda
             TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
             AWS_REGION: us-east-1
