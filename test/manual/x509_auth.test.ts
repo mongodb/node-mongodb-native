@@ -59,7 +59,10 @@ describe('x509 Authentication', function () {
     function () {
       it('fails to authenticate', async function () {
         client = new MongoClient(connectionString.toString(), validOptions);
-        const error = await client.connect().catch(e => e);
+        const error = await client.connect().then(
+          () => null,
+          e => e
+        );
 
         expect(error).to.be.instanceOf(MongoServerError);
         expect(error.codeName).to.match(/UserNotFound/i);
