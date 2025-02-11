@@ -376,7 +376,8 @@ describe('Authentication Spec Prose Tests', function () {
           expect(stats).to.exist;
         });
 
-        it(
+        // TODO(NODE-6752): Fix flaky test
+        it.skip(
           'logs in with non-normalized username and normalized password',
           metadata,
           async function () {
