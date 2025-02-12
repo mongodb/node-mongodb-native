@@ -718,7 +718,14 @@ const coverageTask = {
       func: 'download and merge coverage'
     }
   ],
-  depends_on: [{ name: '*', variant: '*', status: '*', patch_optional: true }]
+  depends_on: [
+    {
+      name: '*',
+      variant: '* !performance-tests',
+      status: '*',
+      patch_optional: true
+    }
+  ]
 };
 
 SINGLETON_TASKS.push(coverageTask);
@@ -768,7 +775,8 @@ function addPerformanceTasks() {
     name: 'performance-tests',
     display_name: 'Performance Test',
     run_on: 'rhel90-dbx-perf-large',
-    tasks: tasks.map(({ name }) => name)
+    tasks: tasks.map(({ name }) => name),
+    tags: ['performance']
   });
 }
 addPerformanceTasks();
@@ -872,15 +880,17 @@ for (const variant of BUILD_VARIANTS.filter(
 }
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.in.yml`, 'utf8'));
-fileData.tasks = (fileData.tasks || [])
-  .concat(BASE_TASKS)
-  .concat(TASKS)
-  .concat(SINGLETON_TASKS)
-  .concat(AUTH_DISABLED_TASKS)
-  .concat(AWS_LAMBDA_HANDLER_TASKS)
-  .concat(MONGOCRYPTD_CSFLE_TASKS);
+fileData.tasks = [
+  ...(fileData.tasks ?? []),
+  ...BASE_TASKS,
+  ...TASKS,
+  ...SINGLETON_TASKS,
+  ...AUTH_DISABLED_TASKS,
+  ...AWS_LAMBDA_HANDLER_TASKS,
+  ...MONGOCRYPTD_CSFLE_TASKS
+];
 
-fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
+fileData.buildvariants = [...(fileData.buildvariants ?? []), ...BUILD_VARIANTS];
 
 fs.writeFileSync(
   `${__dirname}/config.yml`,
