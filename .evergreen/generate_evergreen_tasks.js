@@ -826,7 +826,7 @@ BUILD_VARIANTS.push({
   batchtime: 20160,
   tasks: [
     'testtestoidc_task_group',
-    'testazureoidc_task_group',
+    // 'testazureoidc_task_group', TODO(NODE-6750): Unskip failed azure failed login
     'testgcpoidc_task_group',
     'testk8soidc_task_group_eks',
     'testk8soidc_task_group_gke',
