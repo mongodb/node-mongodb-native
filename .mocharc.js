@@ -5,10 +5,10 @@ const [major] = process.versions.node.split('.');
 /** @type {import("mocha").MochaOptions} */
 module.exports = {
   require: [
-    "source-map-support/register",
-    "ts-node/register",
-    "test/tools/runner/chai_addons.ts",
-    "test/tools/runner/ee_checker.ts"
+    'source-map-support/register',
+    'ts-node/register',
+    'test/tools/runner/chai_addons.ts',
+    'test/tools/runner/ee_checker.ts'
   ],
   extension: ['js', 'ts'],
   recursive: true,

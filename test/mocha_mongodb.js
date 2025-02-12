@@ -8,7 +8,7 @@ module.exports = {
     'source-map-support/register',
     'ts-node/register',
     'test/tools/runner/chai_addons.ts',
-    'test/tools/runner/hooks/ee_checker.ts',
+    'test/tools/runner/ee_checker.ts',
     'test/tools/runner/hooks/configuration.ts',
     'test/tools/runner/hooks/leak_checker.ts',
     'test/tools/runner/hooks/legacy_crud_shims.ts'
