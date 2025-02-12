@@ -494,7 +494,7 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
 
 BUILD_VARIANTS.push({
   name: MACOS_OS,
-  display_name: `MacOS 11 Node${LATEST_LTS}`,
+  display_name: `MacOS 14 ARM Node${LATEST_LTS}`,
   run_on: MACOS_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,

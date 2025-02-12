@@ -4699,9 +4699,9 @@ buildvariants:
       - test-5.0-csfle-mongocryptd
       - test-4.4-csfle-mongocryptd
       - test-4.2-csfle-mongocryptd
-  - name: macos-1100
-    display_name: MacOS 11 Node22
-    run_on: macos-1100
+  - name: macos-14-arm64
+    display_name: MacOS 14 ARM Node22
+    run_on: macos-14-arm64
     expansions:
       NODE_LTS_VERSION: 22
       CLIENT_ENCRYPTION: true

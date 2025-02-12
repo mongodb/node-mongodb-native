@@ -17,7 +17,7 @@ LB_VERSIONS.reverse();
 
 const DEFAULT_OS = 'rhel80-large';
 const WINDOWS_OS = 'windows-vsCurrent-large';
-const MACOS_OS = 'macos-1100';
+const MACOS_OS = 'macos-14-arm64';
 const UBUNTU_OS = 'ubuntu1804-large';
 const UBUNTU_20_OS = 'ubuntu2004-small';
 const UBUNTU_22_OS = 'ubuntu2204-large';
