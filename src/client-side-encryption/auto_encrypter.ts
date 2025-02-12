@@ -6,6 +6,7 @@ import {
 import * as net from 'net';
 
 import { deserialize, type Document, serialize } from '../bson';
+import { type AWSCredentialProvider } from '../cmap/auth/aws_temporary_credentials';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { kDecorateResult } from '../constants';
 import { getMongoDBClientEncryption } from '../deps';
@@ -104,6 +105,8 @@ export interface AutoEncryptionOptions {
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
   tlsOptions?: CSFLEKMSTlsOptions;
+  /** Optional custom credential provider to use for KMS requests. */
+  awsCredentialProvider?: AWSCredentialProvider;
 }
 
 /**
@@ -153,6 +156,7 @@ export class AutoEncrypter {
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
+  _awsCredentialProvider?: AWSCredentialProvider;
 
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
@@ -237,6 +241,7 @@ export class AutoEncrypter {
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
+    this._awsCredentialProvider = options.awsCredentialProvider;
 
     const mongoCryptOptions: MongoCryptOptions = {
       cryptoCallbacks
@@ -438,7 +443,7 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._awsCredentialProvider);
   }
 
   /**
