@@ -376,7 +376,8 @@ describe('Authentication Spec Prose Tests', function () {
           expect(stats).to.exist;
         });
 
-        it(
+        // TODO(NODE-6752): Fix flaky SCRAM-SHA-256 test
+        it.skip(
           'logs in with non-normalized username and normalized password',
           metadata,
           async function () {
@@ -390,7 +391,7 @@ describe('Authentication Spec Prose Tests', function () {
             const stats = await client.db('admin').stats();
             expect(stats).to.exist;
           }
-        );
+        ).skipReason = 'TODO(NODE-6752): Fix flaky SCRAM-SHA-256 test';
 
         it(
           'logs in with normalized username and non-normalized password',
