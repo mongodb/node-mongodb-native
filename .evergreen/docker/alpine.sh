@@ -3,13 +3,14 @@
 # script to aid in local testing of linux platforms
 # requires a running docker instance
 
+if [ -z ${NODE_VERSION+omitted} ]; then echo "NODE_VERSION is unset" && exit 1; fi
+if [ -z ${DRIVERS_TOOLS+omitted} ]; then echo "DRIVERS_TOOLS is unset" && exit 1; fi
+if [ -z ${MONGODB_URI+omitted} ]; then echo "MONGODB_URI is unset" && exit 1; fi
+
 # ubuntu2204 hosts in ci use amd64
-LINUX_ARCH=amd64
+LINUX_ARCH=${LINUX_ARCH:-amd64}
 
-# 16.20.1+, default 16.20.1
-NODE_VERSION=20.0.0
-
-IMAGE_TAG=alpine-fle-image
+IMAGE_TAG=${IMAGE_TAG:-alpine-fle-image}
 
 build_alpine() {
     docker buildx create --name builder --bootstrap --use

@@ -743,9 +743,11 @@ functions:
           INSTALL_DIR: mongodb-client-encryption
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          NODE_VERSION: ${NODE_VERSION}
+          MONGODB_URI: ${MONGODB_URI}
         binary: bash
         args:
-          - .evergreen/docker/apline.sh
+          - .evergreen/docker/alpine.sh
 
 tasks:
   - name: 'test-atlas-data-lake'
@@ -1007,26 +1009,6 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
-
-  - name: test-alpine-fle
-    tags:
-      - alpine-fle
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: auth}
-            - {key: CLIENT_ENCRYPTION, value: 'true'}
-            - {key: TEST_CSFLE, value: 'true'}
-            - {key: MONGODB_BINARIES, value: '${PROJECT_DIRECTORY}/mongodb/bin'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: assume secrets manager rule
-      - func: build and test alpine FLE
 
 task_groups:
   - name: serverless_task_group
