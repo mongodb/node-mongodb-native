@@ -124,7 +124,7 @@ export const PARALLEL_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'parallel');
 export const TEMP_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'tmp');
 
 export type Metric = {
-  name: 'megabytes_per_second';
+  name: 'megabytes_per_second' | 'normalized_throughput';
   value: number;
 };
 

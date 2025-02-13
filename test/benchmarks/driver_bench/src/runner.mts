@@ -14,6 +14,7 @@ type BenchmarkModule = {
   run: () => Promise<void>;
   afterEach?: () => Promise<void>;
   after?: () => Promise<void>;
+  tags?: string[];
 };
 
 const benchmarkName = snakeToCamel(path.basename(benchmarkFile, '.mjs'));

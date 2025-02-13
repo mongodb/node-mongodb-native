@@ -85,7 +85,7 @@ console.log(systemInfo());
 
 const runnerPath = path.join(__dirname, 'runner.mjs');
 
-const results: MetricInfo[] = [];
+let results: MetricInfo[] = [];
 
 for (const [suite, benchmarks] of Object.entries(tests)) {
   console.group(snakeToCamel(suite));
@@ -146,8 +146,8 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
 
   const aMetricInfo =
     (testName: string) =>
-    ({ info: { test_name } }: MetricInfo) =>
-      test_name === testName;
+      ({ info: { test_name } }: MetricInfo) =>
+        test_name === testName;
 
   const anMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
 
@@ -198,6 +198,32 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
   return [...results, ...compositeResults];
 }
 
-const finalResults = calculateCompositeBenchmarks(results);
+function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
+  const primesBench = results.find(r => r.info.test_name === 'primes');
+  const pingBench = results.find(r => r.info.test_name === 'ping');
+  let pingMegabytesPerSecond: number;
 
-await fs.writeFile('results.json', JSON.stringify(finalResults, undefined, 2), 'utf8');
+  if (pingBench) {
+    const pingThroughput = pingBench.metrics[0].value;
+    for (const bench of results) {
+      if (bench.info.test_name === 'primes' || bench.info.test_name === 'ping') continue;
+      const normalizedThroughput = bench.metrics[0].value / pingThroughput;
+      bench.metrics.push({name: 'normalized_throughput', value: normalizedThroughput});
+
+    }
+
+    if (primesBench) {
+      const normalizedThroughput = pingBench.metrics[0].value / primesBench.metrics[0].value;
+      pingMegabytesPerSecond = pingBench.metrics[0].value;
+      pingBench.metrics.push({ name: 'normalized_throughput', value: normalizedThroughput });
+    }
+  }
+
+  return results;
+}
+
+results = calculateNormalizedResults(results);
+results = calculateCompositeBenchmarks(results);
+
+
+await fs.writeFile('results.json', JSON.stringify(results, undefined, 2), 'utf8');
