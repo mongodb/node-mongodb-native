@@ -2,9 +2,10 @@ import { createReadStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 
-import { driver, type mongodb, PARALLEL_DIRECTORY } from '../../driver.mjs';
+import { ALERT_TAG, driver, type mongodb, PARALLEL_DIRECTORY, SPEC_TAG, WRITE_TAG } from '../../driver.mjs';
 
 export const taskSize = 565;
+export const tags = [SPEC_TAG, ALERT_TAG, WRITE_TAG];
 
 const directory = path.resolve(PARALLEL_DIRECTORY, 'ldjson_multi');
 let collection: mongodb.Collection;

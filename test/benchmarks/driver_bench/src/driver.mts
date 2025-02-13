@@ -7,6 +7,12 @@ import process from 'node:process';
 const __dirname = import.meta.dirname;
 const require = module.createRequire(__dirname);
 
+export const SPEC_TAG = 'spec-benchmark';
+export const ALERT_TAG = 'alerting-benchmark';
+export const CURSOR_TAG = 'cursor-benchmark';
+export const READ_TAG = 'read-benchmark';
+export const WRITE_TAG = 'write-benchmark';
+
 /**
  * The path to the MongoDB Node.js driver.
  * This MUST be set to the directory the driver is installed in

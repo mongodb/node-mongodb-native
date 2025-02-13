@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { driver, type mongodb } from '../../driver.mjs';
+import { driver, ALERT_TAG, SPEC_TAG, type mongodb, CURSOR_TAG, READ_TAG } from '../../driver.mjs';
 
 export const taskSize = 16.22;
+
+export const tags = [ALERT_TAG, SPEC_TAG, CURSOR_TAG, READ_TAG];
 
 let collection: mongodb.Collection;
 
