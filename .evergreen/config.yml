@@ -3200,7 +3200,7 @@ tasks:
       - func: download and merge coverage
     depends_on:
       - name: '*'
-        variant: '*'
+        variant: '* !performance-tests'
         status: '*'
         patch_optional: true
   - name: run-custom-csfle-tests-5.0
@@ -4468,7 +4468,6 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-    disable: true
   - name: windows-vsCurrent-large-gallium
     display_name: Windows Node16
     run_on: windows-vsCurrent-large
@@ -4825,6 +4824,8 @@ buildvariants:
       - run-spec-benchmark-tests-node-server-timeoutMS-0
       - run-spec-benchmark-tests-node-server-monitorCommands-true
       - run-spec-benchmark-tests-node-server-logging
+    tags:
+      - performance
   - name: rhel8-custom-dependency-tests
     display_name: Custom Dependency Version Test
     run_on: rhel80-large
