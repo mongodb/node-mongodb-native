@@ -276,26 +276,6 @@ TASKS.push({
   ]
 });
 
-TASKS.push({
-  name: `test-alpine-fle`,
-  tags: ['alpine-fle'],
-  commands: [
-    updateExpansions({
-      VERSION: 'latest',
-      TOPOLOGY: 'replica_set',
-      AUTH: 'auth',
-      CLIENT_ENCRYPTION: 'true',
-      TEST_CSFLE: 'true',
-      MONGODB_BINARIES: '${PROJECT_DIRECTORY}/mongodb/bin'
-    }),
-    { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
-    { func: 'bootstrap kms servers' },
-    { func: 'assume secrets manager rule' },
-    { func: 'build docker alpine image' }
-  ]
-});
-
 const AWS_LAMBDA_HANDLER_TASKS = [];
 // Add task for testing lambda example without aws auth.
 AWS_LAMBDA_HANDLER_TASKS.push({
@@ -887,13 +867,6 @@ BUILD_VARIANTS.push({
   display_name: 'resource management tests',
   run_on: DEFAULT_OS,
   tasks: ['.resource-management']
-});
-
-BUILD_VARIANTS.push({
-  name: 'alpine FLE test',
-  display_name: 'alpine FLE test',
-  run_on: 'ubuntu2204-small',
-  tasks: ['.alpine-fle']
 });
 
 // TODO(NODE-4897): Debug socks5 tests on node latest

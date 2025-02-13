@@ -1007,6 +1007,27 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
+
+  - name: test-alpine-fle
+    tags:
+      - alpine-fle
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+            - {key: MONGODB_BINARIES, value: '${PROJECT_DIRECTORY}/mongodb/bin'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: assume secrets manager rule
+      - func: build docker alpine image
+
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -1284,3 +1305,10 @@ post:
 
 ignore:
   - "*.md"
+
+buildvariants:
+  - name: Alpine FLE Tests
+    display_name: alpine FLE test
+    run_on: ubuntu2204-small
+    tasks:
+      - .alpine-fle
