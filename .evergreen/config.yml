@@ -657,7 +657,7 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
-  build docker alpine image:
+  build and test alpine FLE:
     - command: subprocess.exec
       type: test
       params:
@@ -668,7 +668,7 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
-          - etc/docker.sh
+          - .evergreen/docker/apline.sh
 tasks:
   - name: test-atlas-data-lake
     tags:
@@ -943,7 +943,7 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: assume secrets manager rule
-      - func: build docker alpine image
+      - func: build and test alpine FLE
   - name: test-latest-server
     tags:
       - latest
@@ -3208,8 +3208,21 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - test-search-index-helpers
+pre:
+  - func: fetch source
+  - func: windows fix
+  - func: fix absolute paths
+  - func: make files executable
+post:
+  - func: reset aws instance profile
+  - func: upload test results
+  - func: stop mongo-orchestration
+  - func: upload coverage report
+  - func: cleanup
+ignore:
+  - '*.md'
 buildvariants:
-  - name: alpine FLE test
+  - name: Alpine FLE Tests
     display_name: alpine FLE test
     run_on: ubuntu2204-small
     tasks:
@@ -3807,14 +3820,6 @@ buildvariants:
       - run-custom-csfle-tests-rapid
       - run-custom-csfle-tests-latest
       - test-latest-driver-mongodb-client-encryption-6.0.0
-  - name: rhel8-test-serverless
-    display_name: Serverless Test
-    run_on: rhel80-large
-    expansions:
-      NODE_LTS_VERSION: 16
-      NPM_VERSION: 9
-    tasks:
-      - serverless_task_group
   - name: rhel8-test-gcp-kms
     display_name: GCP KMS Test
     run_on: debian11-small
@@ -3894,16 +3899,3 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - .resource-management
-pre:
-  - func: fetch source
-  - func: windows fix
-  - func: fix absolute paths
-  - func: make files executable
-post:
-  - func: reset aws instance profile
-  - func: upload test results
-  - func: stop mongo-orchestration
-  - func: upload coverage report
-  - func: cleanup
-ignore:
-  - '*.md'

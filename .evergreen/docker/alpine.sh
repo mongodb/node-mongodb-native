@@ -3,9 +3,8 @@
 # script to aid in local testing of linux platforms
 # requires a running docker instance
 
-# s390x, arm64, amd64 for ubuntu
-# amd64 or arm64v8 for alpine
-LINUX_ARCH=arm64v8
+# ubuntu2204 hosts in ci use amd64
+LINUX_ARCH=amd64
 
 # 16.20.1+, default 16.20.1
 NODE_VERSION=20.0.0

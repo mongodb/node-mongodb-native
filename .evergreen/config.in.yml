@@ -734,7 +734,7 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
 
-  "build docker alpine image":
+  "build and test alpine FLE":
     - command: subprocess.exec
       type: test
       params:
@@ -745,7 +745,7 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         binary: bash
         args:
-          - etc/docker.sh
+          - .evergreen/docker/apline.sh
 
 tasks:
   - name: 'test-atlas-data-lake'
@@ -1026,7 +1026,7 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: assume secrets manager rule
-      - func: build docker alpine image
+      - func: build and test alpine FLE
 
 task_groups:
   - name: serverless_task_group
