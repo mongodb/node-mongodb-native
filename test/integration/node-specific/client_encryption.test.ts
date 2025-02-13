@@ -484,20 +484,24 @@ describe('ClientEncryption integration tests', function () {
     describe('errors', function () {
       for (const val of [42, 'hello', { keyAltNames: 'foobar' }, /foobar/]) {
         it(`should fail if typeof keyAltNames = ${typeof val}`, metadata, async function () {
-          const error = await clientEncryption.createDataKey('local', {
-            // @ts-expect-error Invalid type tests
-            keyAltNames: val
-          }).catch(error => error);
+          const error = await clientEncryption
+            .createDataKey('local', {
+              // @ts-expect-error Invalid type tests
+              keyAltNames: val
+            })
+            .catch(error => error);
           expect(error).to.be.instanceOf(MongoCryptInvalidArgumentError);
         });
       }
 
       for (const val of [undefined, null, 42, { keyAltNames: 'foobar' }, ['foobar'], /foobar/]) {
         it(`should fail if typeof keyAltNames[x] = ${typeof val}`, metadata, async function () {
-          const error = await clientEncryption.createDataKey('local', {
-            // @ts-expect-error Invalid type tests
-            keyAltNames: [val]
-          }).catch(error => error);
+          const error = await clientEncryption
+            .createDataKey('local', {
+              // @ts-expect-error Invalid type tests
+              keyAltNames: [val]
+            })
+            .catch(error => error);
           expect(error).to.be.instanceOf(MongoCryptInvalidArgumentError);
         });
       }
@@ -514,12 +518,9 @@ describe('ClientEncryption integration tests', function () {
     });
 
     it('should create a key with multiple keyAltNames', metadata, async function () {
-      const dataKey = await clientEncryption.createDataKey(
-        'local',
-        {
-          keyAltNames: ['foobar', 'fizzbuzz']
-        }
-      );
+      const dataKey = await clientEncryption.createDataKey('local', {
+        keyAltNames: ['foobar', 'fizzbuzz']
+      });
       const docs = await Promise.all([
         collection.findOne({ keyAltNames: 'foobar' }),
         collection.findOne({ keyAltNames: 'fizzbuzz' })
