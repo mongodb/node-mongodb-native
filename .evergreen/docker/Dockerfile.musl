@@ -1,0 +1,35 @@
+ARG ARCH=arm64
+ARG NODE_VERSION=16.20.1
+
+FROM ${ARCH}/node:${NODE_VERSION}-alpine AS dependencies
+
+RUN apk --no-cache add make g++ libc-dev curl bash python3 py3-pip cmake git vim ranger
+
+# useful debugging output
+RUN <<EOF
+python3 --version
+git --version
+c++ --version
+g++ --version
+EOF
+
+# clone drivers evergreen tools into the same location that it lives on the host machine
+# this ensures any paths configured in variables by drivers-evergreen-tools work
+# in the container too.
+ARG DRIVERS_TOOLS=drivers-evergreen-tools
+WORKDIR ${DRIVERS_TOOLS}
+RUN git clone https://github.com/mongodb-labs/drivers-evergreen-tools.git .
+
+# TODO: remove this cloning once we have an official release of FLE
+WORKDIR /mongodb-client-encryption
+RUN <<EOF
+git clone https://github.com/baileympearson/mongodb-client-encryption.git .
+cd mongodb-client-encryption
+git switch alpine
+npm run install:libmongocrypt
+EOF
+
+# TODO: don't copy in current dir, instead mount it as a volume at runtime.
+WORKDIR /node-mongodb-native
+COPY . .
+RUN npm install ../mongodb-client-encryption

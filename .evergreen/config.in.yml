@@ -734,6 +734,19 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
 
+  "build docker alpine image":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        env:
+          INSTALL_DIR: mongodb-client-encryption
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        binary: bash
+        args:
+          - etc/docker.sh
+
 tasks:
   - name: 'test-atlas-data-lake'
     tags: ["datalake", "mongohouse"]
@@ -994,7 +1007,6 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
-
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true

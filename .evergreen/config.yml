@@ -657,6 +657,18 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
+  build docker alpine image:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        env:
+          INSTALL_DIR: mongodb-client-encryption
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        binary: bash
+        args:
+          - etc/docker.sh
 tasks:
   - name: test-atlas-data-lake
     tags:
@@ -1627,6 +1639,25 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run-compression-tests
+  - name: test-alpine-fle
+    tags:
+      - alpine-fle
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+            - {key: MONGODB_BINARIES, value: '${PROJECT_DIRECTORY}/mongodb/bin'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: assume secrets manager rule
+      - func: build docker alpine image
   - name: test-tls-support-latest
     tags:
       - tls-support
@@ -3244,6 +3275,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3304,6 +3336,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3364,6 +3397,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3424,6 +3458,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3481,6 +3516,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3530,6 +3566,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3579,6 +3616,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3628,6 +3666,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3677,6 +3716,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-1.x-compression
       - test-zstd-2.x-compression
+      - test-alpine-fle
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3871,3 +3911,8 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - .resource-management
+  - name: alpine FLE test
+    display_name: alpine FLE test
+    run_on: ubuntu2204-small
+    tasks:
+      - .alpine-fle
