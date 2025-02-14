@@ -19,17 +19,3 @@ EOF
 ARG DRIVERS_TOOLS=drivers-evergreen-tools
 WORKDIR ${DRIVERS_TOOLS}
 RUN git clone https://github.com/mongodb-labs/drivers-evergreen-tools.git .
-
-# TODO: remove this cloning once we have an official release of FLE
-WORKDIR /mongodb-client-encryption
-RUN <<EOF
-git clone https://github.com/baileympearson/mongodb-client-encryption.git .
-cd mongodb-client-encryption
-git switch alpine
-npm run install:libmongocrypt
-EOF
-
-# TODO: don't copy in current dir, instead mount it as a volume at runtime.
-WORKDIR /node-mongodb-native
-COPY . .
-RUN npm install ../mongodb-client-encryption
