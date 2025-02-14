@@ -2,7 +2,7 @@
 
 set -o errexit
 
-export npm_cache_dir=$(pwd)
+export npm_config_cache=$(pwd)/.cache
 
 npm i
 source secrets-export.sh
