@@ -201,22 +201,33 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
 function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
   const primesBench = results.find(r => r.info.test_name === 'primes');
   const pingBench = results.find(r => r.info.test_name === 'ping');
-  let pingMegabytesPerSecond: number;
 
   if (pingBench) {
+    const newMetrics: MetricInfo[] = [];
     const pingThroughput = pingBench.metrics[0].value;
     for (const bench of results) {
-      if (bench.info.test_name === 'primes' || bench.info.test_name === 'ping') continue;
-      const normalizedThroughput = bench.metrics[0].value / pingThroughput;
-      bench.metrics.push({name: 'normalized_throughput', value: normalizedThroughput});
-
+      if (bench.info.test_name === 'primes') {
+        newMetrics.push({ ...bench });
+      }
+      else if (bench.info.test_name === 'ping') {
+        // Compute ping's normalized_throughput against the primes bench if present
+        if (primesBench) {
+          const primesThroughput = primesBench.metrics[0].value;
+          const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: bench.metrics[0].value / primesThroughput };
+          const newInfo: MetricInfo = { info: { ...bench.info }, metrics: [...bench.metrics, normalizedThroughput] };
+          newMetrics.push(newInfo);
+        } else {
+          newMetrics.push({ ...bench });
+        }
+      } else {
+        // Compute normalized_throughput of benchmarks against ping bench
+        const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: bench.metrics[0].value / pingThroughput };
+        const newInfo: MetricInfo = { info: { ...bench.info }, metrics: [...bench.metrics, normalizedThroughput] }
+        newMetrics.push(newInfo);
+      }
     }
 
-    if (primesBench) {
-      const normalizedThroughput = pingBench.metrics[0].value / primesBench.metrics[0].value;
-      pingMegabytesPerSecond = pingBench.metrics[0].value;
-      pingBench.metrics.push({ name: 'normalized_throughput', value: normalizedThroughput });
-    }
+    return newMetrics;
   }
 
   return results;

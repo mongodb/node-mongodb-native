@@ -17,6 +17,7 @@ type BenchmarkModule = {
   tags?: string[];
 };
 
+
 const benchmarkName = snakeToCamel(path.basename(benchmarkFile, '.mjs'));
 const benchmark: BenchmarkModule = await import(`./${benchmarkFile}`);
 
@@ -80,6 +81,7 @@ function percentileIndex(percentile: number, count: number) {
 
 const medianExecution = durations[percentileIndex(50, count)];
 const megabytesPerSecond = benchmark.taskSize / medianExecution;
+const tags = benchmark.tags;
 
 console.log(
   ' '.repeat(3),
@@ -92,6 +94,6 @@ console.log(
 
 await fs.writeFile(
   `results_${path.basename(benchmarkFile, '.mjs')}.json`,
-  JSON.stringify(metrics(benchmarkName, megabytesPerSecond), undefined, 2) + '\n',
+  JSON.stringify(metrics(benchmarkName, megabytesPerSecond, tags), undefined, 2) + '\n',
   'utf8'
 );
