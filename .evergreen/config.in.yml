@@ -1290,7 +1290,7 @@ ignore:
 
 buildvariants:
   - name: Alpine FLE Tests
-    display_name: alpine FLE test
+    display_name: Alpine FLE Test
     run_on: ubuntu2204-small
     tasks:
       - .alpine-fle
