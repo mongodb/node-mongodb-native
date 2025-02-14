@@ -4,13 +4,10 @@ set -o errexit
 source secrets-export.sh
 set -o xtrace
 
+# use local cache - otherwise npm tries to install to ~ in the docker container, which
+# fails when in a mounted volume
 export npm_config_cache=$(pwd)/.cache
+npm install
 
-npm i
-
-npm ls
-
-node --print "require('mongodb-client-encryption')"
-
-export ALPINE=true
-npm run check:csfle
+ALPINE=true \
+    npm run check:csfle

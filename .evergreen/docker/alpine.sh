@@ -26,14 +26,19 @@ build_alpine() {
 }
 
 test_alpine() {
-    # set up FLE creds on host.  don't download cryptd because we don't need it.
-    RUN_WITH_MONGOCRYPTD=true bash .evergreen/setup-fle.sh
-
     # # launch a mongocryptd on the host.
     ./mongodb/bin/mongocryptd --fork --port 3000 --pidfilepath $(pwd)/pid.file --logpath $(pwd)/logpath
     MONGOCRYPTD_URI='mongodb://localhost:3000'
 
-    # # run FLE tests in container, using mongocryptd and replica set running on host
+    # set up FLE creds on host.  don't download cryptd because we don't need it.
+    RUN_WITH_MONGOCRYPTD=true bash .evergreen/setup-fle.sh
+
+    # remove node_modules to remove any already downloaded prebuilds
+    rm -rf node_modules
+
+    # run FLE tests in container, using mongocryptd and replica set running on host.
+    # mount the current directory (the driver's root) as /node-mongodb-native and
+    # use that as the working directory for `run-alpine-fle-tests.sh`
     docker --debug run \
         --platform linux/$LINUX_ARCH \
         -e MONGODB_URI=${MONGODB_URI} -e MONGOCRYPTD_URI=${MONGOCRYPTD_URI} \
