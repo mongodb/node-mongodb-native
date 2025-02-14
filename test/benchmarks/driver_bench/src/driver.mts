@@ -132,11 +132,12 @@ export type MetricInfo = {
   info: {
     test_name: string;
     args: Record<string, number>;
+    tags?: string[]
   };
   metrics: Metric[];
 };
 
-export function metrics(test_name: string, result: number): MetricInfo {
+export function metrics(test_name: string, result: number, tags?: string[]): MetricInfo {
   return {
     info: {
       test_name,
@@ -147,7 +148,8 @@ export function metrics(test_name: string, result: number): MetricInfo {
           key,
           typeof value === 'number' ? value : value ? 1 : 0
         ])
-      )
+      ),
+      tags
     },
     metrics: [{ name: 'megabytes_per_second', value: result }]
   } as const;
