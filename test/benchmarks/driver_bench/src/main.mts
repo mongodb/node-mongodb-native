@@ -85,7 +85,7 @@ console.log(systemInfo());
 
 const runnerPath = path.join(__dirname, 'runner.mjs');
 
-const results: MetricInfo[] = [];
+let results: MetricInfo[] = [];
 
 for (const [suite, benchmarks] of Object.entries(tests)) {
   console.group(snakeToCamel(suite));
@@ -146,8 +146,8 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
 
   const aMetricInfo =
     (testName: string) =>
-    ({ info: { test_name } }: MetricInfo) =>
-      test_name === testName;
+      ({ info: { test_name } }: MetricInfo) =>
+        test_name === testName;
 
   const anMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
 
@@ -198,6 +198,43 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
   return [...results, ...compositeResults];
 }
 
-const finalResults = calculateCompositeBenchmarks(results);
+function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
+  const primesBench = results.find(r => r.info.test_name === 'primes');
+  const pingBench = results.find(r => r.info.test_name === 'ping');
 
-await fs.writeFile('results.json', JSON.stringify(finalResults, undefined, 2), 'utf8');
+  if (pingBench) {
+    const newMetrics: MetricInfo[] = [];
+    const pingThroughput = pingBench.metrics[0].value;
+    for (const bench of results) {
+      if (bench.info.test_name === 'primes') {
+        newMetrics.push({ ...bench });
+      }
+      else if (bench.info.test_name === 'ping') {
+        // Compute ping's normalized_throughput against the primes bench if present
+        if (primesBench) {
+          const primesThroughput = primesBench.metrics[0].value;
+          const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: bench.metrics[0].value / primesThroughput };
+          const newInfo: MetricInfo = { info: { ...bench.info }, metrics: [...bench.metrics, normalizedThroughput] };
+          newMetrics.push(newInfo);
+        } else {
+          newMetrics.push({ ...bench });
+        }
+      } else {
+        // Compute normalized_throughput of benchmarks against ping bench
+        const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: bench.metrics[0].value / pingThroughput };
+        const newInfo: MetricInfo = { info: { ...bench.info }, metrics: [...bench.metrics, normalizedThroughput] }
+        newMetrics.push(newInfo);
+      }
+    }
+
+    return newMetrics;
+  }
+
+  return results;
+}
+
+results = calculateNormalizedResults(results);
+results = calculateCompositeBenchmarks(results);
+
+
+await fs.writeFile('results.json', JSON.stringify(results, undefined, 2), 'utf8');

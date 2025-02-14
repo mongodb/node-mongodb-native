@@ -7,6 +7,12 @@ import process from 'node:process';
 const __dirname = import.meta.dirname;
 const require = module.createRequire(__dirname);
 
+export const SPEC_TAG = 'spec-benchmark';
+export const ALERT_TAG = 'alerting-benchmark';
+export const CURSOR_TAG = 'cursor-benchmark';
+export const READ_TAG = 'read-benchmark';
+export const WRITE_TAG = 'write-benchmark';
+
 /**
  * The path to the MongoDB Node.js driver.
  * This MUST be set to the directory the driver is installed in
@@ -118,7 +124,7 @@ export const PARALLEL_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'parallel');
 export const TEMP_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'tmp');
 
 export type Metric = {
-  name: 'megabytes_per_second';
+  name: 'megabytes_per_second' | 'normalized_throughput';
   value: number;
 };
 
@@ -126,11 +132,12 @@ export type MetricInfo = {
   info: {
     test_name: string;
     args: Record<string, number>;
+    tags?: string[]
   };
   metrics: Metric[];
 };
 
-export function metrics(test_name: string, result: number): MetricInfo {
+export function metrics(test_name: string, result: number, tags?: string[]): MetricInfo {
   return {
     info: {
       test_name,
@@ -141,7 +148,8 @@ export function metrics(test_name: string, result: number): MetricInfo {
           key,
           typeof value === 'number' ? value : value ? 1 : 0
         ])
-      )
+      ),
+      tags
     },
     metrics: [{ name: 'megabytes_per_second', value: result }]
   } as const;

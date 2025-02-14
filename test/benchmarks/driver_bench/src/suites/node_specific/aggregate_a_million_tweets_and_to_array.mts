@@ -1,6 +1,7 @@
-import { driver, type mongodb } from '../../driver.mjs';
+import { ALERT_TAG, driver, READ_TAG, type mongodb } from '../../driver.mjs';
 
 export const taskSize = 1500;
+export const tags = [ALERT_TAG, READ_TAG];
 
 let db: mongodb.Db;
 let tweet: Record<string, any>;
