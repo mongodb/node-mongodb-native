@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.13.1](https://github.com/mongodb/node-mongodb-native/compare/v6.13.0...v6.13.1) (2025-02-14)
+
+
+### Bug Fixes
+
+* **NODE-6407:** use conversationId returned from server in saslContinue ([#4368](https://github.com/mongodb/node-mongodb-native/issues/4368)) ([fbefa6b](https://github.com/mongodb/node-mongodb-native/commit/fbefa6b6265bf3c5019e07626dd298c265ad4746))
+* **NODE-6613:** Update error messages when primaries go stale ([#4397](https://github.com/mongodb/node-mongodb-native/issues/4397)) ([6528c8d](https://github.com/mongodb/node-mongodb-native/commit/6528c8db3acfb28fa58a7cd587703d3d40c065aa))
+* **NODE-6690:** Remove extraneous Document in replaceOne return type ([#4383](https://github.com/mongodb/node-mongodb-native/issues/4383)) ([6c81d4e](https://github.com/mongodb/node-mongodb-native/commit/6c81d4e839589dd51cea0dca10d4163a13744c94))
+
 ## [6.13.0](https://github.com/mongodb/node-mongodb-native/compare/v6.12.0...v6.13.0) (2025-01-30)
 
 
