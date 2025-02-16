@@ -531,9 +531,11 @@ export function resolveOptions<T extends CommandOperationOptions>(
     if (writeConcern) {
       if (timeoutMS != null) {
         writeConcern = WriteConcern.fromOptions({
-          ...writeConcern,
-          wtimeout: undefined,
-          wtimeoutMS: undefined
+          writeConcern: {
+            ...writeConcern,
+            wtimeout: undefined,
+            wtimeoutMS: undefined
+          }
         });
       }
       result.writeConcern = writeConcern;
