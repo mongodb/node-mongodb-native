@@ -162,7 +162,13 @@ TASKS.push(
     {
       name: 'test-auth-kerberos',
       tags: ['auth', 'kerberos'],
-      commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
+      commands: [
+        updateExpansions({
+          NATIVE: 'true'
+        }),
+        { func: 'install dependencies' },
+        { func: 'run kerberos tests' }
+      ]   
     },
     {
       name: 'test-auth-ldap',
