@@ -734,6 +734,21 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
 
+  "build and test alpine FLE":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        env:
+          INSTALL_DIR: mongodb-client-encryption
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          NODE_VERSION: ${NODE_VERSION}
+          MONGODB_URI: ${MONGODB_URI}
+        binary: bash
+        args:
+          - .evergreen/docker/alpine.sh
+
 tasks:
   - name: 'test-atlas-data-lake'
     tags: ["datalake", "mongohouse"]
@@ -1272,3 +1287,10 @@ post:
 
 ignore:
   - "*.md"
+
+buildvariants:
+  - name: Alpine FLE Tests
+    display_name: Alpine FLE Test
+    run_on: ubuntu2204-small
+    tasks:
+      - .alpine-fle

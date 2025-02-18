@@ -1,0 +1,6 @@
+node_modules
+lib
+.nyc_output
+docs
+*dylib
+*md
