@@ -1534,6 +1534,11 @@ tasks:
       - auth
       - kerberos
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NATIVE, value: 'true'}
       - func: install dependencies
       - func: run kerberos tests
   - name: test-auth-ldap
