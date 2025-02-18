@@ -1,8 +1,8 @@
-import { ALERT_TAG, driver, READ_TAG, SPEC_TAG, type mongodb } from '../../driver.mjs';
+import { ALERT_TAG, CURSOR_TAG, driver, READ_TAG, SPEC_TAG, type mongodb } from '../../driver.mjs';
 
 export const taskSize = 16.22;
 
-export const tags = [SPEC_TAG, ALERT_TAG,READ_TAG]
+export const tags = [SPEC_TAG, ALERT_TAG,READ_TAG, CURSOR_TAG]
 
 let collection: mongodb.Collection;
 
