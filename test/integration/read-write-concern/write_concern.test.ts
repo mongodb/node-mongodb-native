@@ -304,4 +304,50 @@ describe('Write Concern', function () {
       }
     });
   });
+
+  describe('NODE-6763: write concern is still added with timeoutMS is set', function () {
+    let client: MongoClient;
+    let collection: Collection;
+    const commands: CommandStartedEvent[] = [];
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      client.on('commandStarted', filterForCommands('insert', commands));
+      collection = client.db('foo').collection('bar');
+    })
+
+
+    afterEach(async function () {
+      await client.close();
+      commands.length = 0;
+    })
+
+    context('when the write concern includes only timeouts', function () {
+      it('the writeConcern is not added to the command.', async function () {
+        await collection.insertOne({ name: 'john doe' }, { timeoutMS: 1000, writeConcern: { wtimeout: 1000 } });
+        const [
+          {
+            command: {
+              writeConcern
+            }
+          }
+        ] = commands;
+        expect(writeConcern).not.to.exist;
+      })
+    })
+
+    context('when the write concern includes only non-timeout values (`w`)', function () {
+      it('the writeConcern is added to the command.', async function () {
+        await collection.insertOne({ name: 'john doe' }, { timeoutMS: 1000, writeConcern: { wtimeout: 1000, w: 'majority' } });
+        const [
+          {
+            command: {
+              writeConcern
+            }
+          }
+        ] = commands;
+        expect(writeConcern).to.deep.equal({ w: 'majority' })
+      })
+
+    })
+  })
 });

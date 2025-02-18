@@ -403,7 +403,7 @@ describe('driver utils', function () {
       it('should be instanceof GeneratorFunction', () => {
         const list = new List<number>();
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        expect(list[Symbol.iterator]).to.be.instanceOf(function* () {}.constructor);
+        expect(list[Symbol.iterator]).to.be.instanceOf(function* () { }.constructor);
       });
 
       it('should only run generator for the number of items in the list', () => {
@@ -857,9 +857,8 @@ describe('driver utils', function () {
         continue;
       }
 
-      const title = `comparing ${oid1} to ${oid2} returns ${
-        result === 0 ? 'equal' : result === -1 ? 'less than' : 'greater than'
-      }`;
+      const title = `comparing ${oid1} to ${oid2} returns ${result === 0 ? 'equal' : result === -1 ? 'less than' : 'greater than'
+        }`;
       // @ts-expect-error: not narrowed based on numeric result, but these values are correct
       it(title, () => expect(compareObjectId(oid1, oid2)).to.equal(result));
     }
