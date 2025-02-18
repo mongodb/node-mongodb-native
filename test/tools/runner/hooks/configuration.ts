@@ -6,7 +6,7 @@ require('source-map-support').install({
 });
 
 import { MongoClient } from '../../../mongodb';
-import { AstrolabeTestConfiguration, TestConfiguration } from '../config';
+import { AlpineTestConfiguration, AstrolabeTestConfiguration, TestConfiguration } from '../config';
 import { getEnvironmentalOptions } from '../../utils';
 import * as mock from '../../mongodb-mock/index';
 import { inspect } from 'util';
@@ -153,10 +153,10 @@ const testConfigBeforeHook = async function () {
     .command({ getParameter: '*' })
     .catch(error => ({ noReply: error }));
 
-  this.configuration = new TestConfiguration(
-    loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
-    context
-  );
+  const Config: typeof TestConfiguration = process.env.ALPINE
+    ? AlpineTestConfiguration
+    : TestConfiguration;
+  this.configuration = new Config(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, context);
 
   await client.close();
 
@@ -169,6 +169,8 @@ const testConfigBeforeHook = async function () {
     version: this.configuration.buildInfo.version,
     node: process.version,
     os: process.platform,
+    alpineLinux: Boolean(process.env.ALPINE),
+    cryptdUri: process.env.MONGOCRYPTD_URI,
     pid: process.pid,
     serverless: process.env.SERVERLESS === '1',
     auth: process.env.AUTH === 'auth',
@@ -186,7 +188,7 @@ const testConfigBeforeHook = async function () {
     adl: this.configuration.buildInfo.dataLake
       ? this.configuration.buildInfo.dataLake.version
       : false,
-    kerberos: process.env.KRB5_PRINCIPAL != null,
+    kerberos: process.env.PRINCIPAL != null,
     ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
     socks5: MONGODB_URI.includes('proxyHost='),
     compressor: process.env.COMPRESSOR,

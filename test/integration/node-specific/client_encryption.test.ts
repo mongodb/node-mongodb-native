@@ -463,16 +463,10 @@ describe('ClientEncryption integration tests', function () {
     let client: MongoClient;
     let clientEncryption: ClientEncryption;
     let collection: Collection<DataKey>;
-    // Data Key Stuff
-    const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
-    const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
-    const AWS_REGION = process.env.AWS_REGION;
-    const AWS_CMK_ID = process.env.AWS_CMK_ID;
 
     const kmsProviders = {
-      aws: { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY }
+      local: { key: Buffer.alloc(96) }
     };
-    const dataKeyOptions = { masterKey: { key: AWS_CMK_ID, region: AWS_REGION } };
 
     beforeEach(function () {
       client = this.configuration.newClient();
@@ -487,41 +481,36 @@ describe('ClientEncryption integration tests', function () {
       await client?.close();
     });
 
-    function makeOptions(keyAltNames) {
-      expect(dataKeyOptions.masterKey).to.be.an('object');
-      expect(dataKeyOptions.masterKey.key).to.be.a('string');
-      expect(dataKeyOptions.masterKey.region).to.be.a('string');
-
-      return {
-        masterKey: {
-          key: dataKeyOptions.masterKey.key,
-          region: dataKeyOptions.masterKey.region
-        },
-        keyAltNames
-      };
-    }
-
     describe('errors', function () {
       for (const val of [42, 'hello', { keyAltNames: 'foobar' }, /foobar/]) {
         it(`should fail if typeof keyAltNames = ${typeof val}`, metadata, async function () {
-          const options = makeOptions(val);
-          const error = await clientEncryption.createDataKey('aws', options).catch(error => error);
+          const error = await clientEncryption
+            .createDataKey('local', {
+              // @ts-expect-error Invalid type tests
+              keyAltNames: val
+            })
+            .catch(error => error);
           expect(error).to.be.instanceOf(MongoCryptInvalidArgumentError);
         });
       }
 
       for (const val of [undefined, null, 42, { keyAltNames: 'foobar' }, ['foobar'], /foobar/]) {
         it(`should fail if typeof keyAltNames[x] = ${typeof val}`, metadata, async function () {
-          const options = makeOptions([val]);
-          const error = await clientEncryption.createDataKey('aws', options).catch(error => error);
+          const error = await clientEncryption
+            .createDataKey('local', {
+              // @ts-expect-error Invalid type tests
+              keyAltNames: [val]
+            })
+            .catch(error => error);
           expect(error).to.be.instanceOf(MongoCryptInvalidArgumentError);
         });
       }
     });
 
     it('should create a key with keyAltNames', metadata, async function () {
-      const options = makeOptions(['foobar']);
-      const dataKey = await clientEncryption.createDataKey('aws', options);
+      const dataKey = await clientEncryption.createDataKey('local', {
+        keyAltNames: ['foobar']
+      });
       const document = await collection.findOne({ keyAltNames: 'foobar' });
       expect(document).to.be.an('object');
       expect(document).to.have.property('keyAltNames').that.includes.members(['foobar']);
@@ -529,10 +518,9 @@ describe('ClientEncryption integration tests', function () {
     });
 
     it('should create a key with multiple keyAltNames', metadata, async function () {
-      const dataKey = await clientEncryption.createDataKey(
-        'aws',
-        makeOptions(['foobar', 'fizzbuzz'])
-      );
+      const dataKey = await clientEncryption.createDataKey('local', {
+        keyAltNames: ['foobar', 'fizzbuzz']
+      });
       const docs = await Promise.all([
         collection.findOne({ keyAltNames: 'foobar' }),
         collection.findOne({ keyAltNames: 'fizzbuzz' })
@@ -557,7 +545,9 @@ describe('ClientEncryption integration tests', function () {
 
         const valueToEncrypt = 'foobar';
 
-        const keyId = await clientEncryption.createDataKey('aws', makeOptions([keyAltName]));
+        const keyId = await clientEncryption.createDataKey('local', {
+          keyAltNames: [keyAltName]
+        });
         const encryptedValue = await clientEncryption.encrypt(valueToEncrypt, { keyId, algorithm });
         const encryptedValue2 = await clientEncryption.encrypt(valueToEncrypt, {
           keyAltName,

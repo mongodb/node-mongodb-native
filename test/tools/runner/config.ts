@@ -453,3 +453,23 @@ export class AstrolabeTestConfiguration extends TestConfiguration {
     return process.env.DRIVERS_ATLAS_TESTING_URI!;
   }
 }
+
+export class AlpineTestConfiguration extends TestConfiguration {
+  override newClient(
+    urlOrQueryOptions?: string | Record<string, any>,
+    serverOptions?: MongoClientOptions
+  ): MongoClient {
+    const options = serverOptions ?? {};
+
+    if (options.autoEncryption) {
+      const extraOptions: MongoClientOptions['autoEncryption']['extraOptions'] = {
+        ...options.autoEncryption.extraOptions,
+        mongocryptdBypassSpawn: true,
+        mongocryptdURI: process.env.MONGOCRYPTD_URI
+      };
+      options.autoEncryption.extraOptions = extraOptions;
+    }
+
+    return super.newClient(urlOrQueryOptions, options);
+  }
+}
