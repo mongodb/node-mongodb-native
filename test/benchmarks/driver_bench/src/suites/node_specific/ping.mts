@@ -1,4 +1,4 @@
-import { ALERT_TAG, driver, WRITE_TAG, type mongodb } from '../../driver.mjs';
+import { ALERT_TAG, driver, type mongodb } from '../../driver.mjs';
 
 // { ping: 1 } is 15 bytes of BSON x 10,000 iterations
 export const taskSize = 0.15;

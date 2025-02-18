@@ -18,6 +18,7 @@ import {
   MONGODB_DRIVER_PATH,
   MONGODB_DRIVER_REVISION,
   MONGODB_DRIVER_VERSION,
+  NORMALIZED_PING_SCALING_CONST,
   snakeToCamel
 } from './driver.mjs';
 
@@ -203,38 +204,28 @@ function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
   const pingBench = results.find(r => r.info.test_name === 'ping');
 
   if (pingBench) {
-    const newMetrics: MetricInfo[] = [];
     const pingThroughput = pingBench.metrics[0].value;
     for (const bench of results) {
-      if (bench.info.test_name === 'primes') {
-        newMetrics.push({ ...bench });
-      }
-      else if (bench.info.test_name === 'ping') {
+      if (bench.info.test_name === 'ping') {
         // Compute ping's normalized_throughput against the primes bench if present
         if (primesBench) {
           const primesThroughput = primesBench.metrics[0].value;
-          const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: bench.metrics[0].value / primesThroughput };
-          const newInfo: MetricInfo = { info: { ...bench.info }, metrics: [...bench.metrics, normalizedThroughput] };
-          newMetrics.push(newInfo);
-        } else {
-          newMetrics.push({ ...bench });
+          const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: NORMALIZED_PING_SCALING_CONST * bench.metrics[0].value / primesThroughput };
+          bench.metrics.push(normalizedThroughput);
         }
       } else {
         // Compute normalized_throughput of benchmarks against ping bench
         const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: bench.metrics[0].value / pingThroughput };
-        const newInfo: MetricInfo = { info: { ...bench.info }, metrics: [...bench.metrics, normalizedThroughput] }
-        newMetrics.push(newInfo);
+        bench.metrics.push(normalizedThroughput);
       }
     }
-
-    return newMetrics;
   }
 
   return results;
 }
 
-results = calculateNormalizedResults(results);
 results = calculateCompositeBenchmarks(results);
+results = calculateNormalizedResults(results);
 
 
 await fs.writeFile('results.json', JSON.stringify(results, undefined, 2), 'utf8');
