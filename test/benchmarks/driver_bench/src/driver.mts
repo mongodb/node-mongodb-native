@@ -13,6 +13,8 @@ export const CURSOR_TAG = 'cursor-benchmark';
 export const READ_TAG = 'read-benchmark';
 export const WRITE_TAG = 'write-benchmark';
 
+export const NORMALIZED_PING_SCALING_CONST = 1000;
+
 /**
  * The path to the MongoDB Node.js driver.
  * This MUST be set to the directory the driver is installed in
