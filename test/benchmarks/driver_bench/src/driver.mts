@@ -7,10 +7,16 @@ import process from 'node:process';
 const __dirname = import.meta.dirname;
 const require = module.createRequire(__dirname);
 
+// Special tag that marks a benchmark as a spec-required benchmark
 export const SPEC_TAG = 'spec-benchmark';
+// Special tag that enables our perf monitoring tooling to create alerts when regressions in this
+// benchmark's performance are detected
 export const ALERT_TAG = 'alerting-benchmark';
+// Tag marking a benchmark as being related to cursor performance
 export const CURSOR_TAG = 'cursor-benchmark';
+// Tag marking a benchmark as being related to read performance
 export const READ_TAG = 'read-benchmark';
+// Tag marking a benchmark as being related to write performance
 export const WRITE_TAG = 'write-benchmark';
 
 export const NORMALIZED_PING_SCALING_CONST = 1000;
