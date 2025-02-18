@@ -3160,7 +3160,7 @@ task_groups:
           binary: bash
           env:
             MONGODB_VERSION: '7.0'
-            CLUSTER_PREFIX: dbx-node-search-indexes
+            CLUSTER_PREFIX: dbx-node-search
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
