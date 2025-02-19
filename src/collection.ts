@@ -968,7 +968,11 @@ export class Collection<TSchema extends Document = Document> {
    *
    * The value of `update` can be either:
    * - UpdateFilter<TSchema> - A document that contains update operator expressions,
-   * - Document[] - an aggregation pipeline.
+   * - Document[] - an aggregation pipeline consisting of the following stages:
+   *   - $addFields and its alias $set
+   *   - $project and its alias $unset
+   *   - $replaceRoot and its alias $replaceWith.
+   * See the [findAndModify command documentation](https://www.mongodb.com/docs/manual/reference/command/findAndModify) for details.
    *
    * @param filter - The filter used to select the document to update
    * @param update - The modifications to apply
