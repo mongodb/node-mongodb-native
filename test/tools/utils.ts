@@ -15,6 +15,7 @@ import {
   type Document,
   type HostAddress,
   MongoClient,
+  type MongoClientOptions,
   now,
   OP_MSG,
   Topology,
@@ -108,9 +109,7 @@ export class EventCollector {
   }
 }
 
-export function getEncryptExtraOptions(): {
-  cryptSharedLibPath?: string;
-} {
+export function getEncryptExtraOptions(): MongoClientOptions['autoEncryption']['extraOptions'] {
   if (
     typeof process.env.CRYPT_SHARED_LIB_PATH === 'string' &&
     process.env.CRYPT_SHARED_LIB_PATH.length > 0
