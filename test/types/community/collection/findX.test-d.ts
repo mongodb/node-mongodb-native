@@ -388,3 +388,14 @@ expectType<WithId<{ a: number; b: string }> | null>(
     }
   )
 );
+
+// the update operator can be an aggregation pipeline
+expectType<WithId<{ a: number; b: string }> | null>(
+  await coll.findOneAndUpdate({ a: 3 }, [
+    {
+      $set: {
+        a: 5
+      }
+    }
+  ])
+);
