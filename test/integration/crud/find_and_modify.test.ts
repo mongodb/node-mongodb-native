@@ -1,6 +1,12 @@
 import { expect } from 'chai';
 
-import { Collection, type CommandStartedEvent, MongoClient, MongoServerError, ObjectId } from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  type MongoClient,
+  MongoServerError,
+  ObjectId
+} from '../../mongodb';
 import { setupDatabase } from '../shared';
 
 describe('Collection (#findOneAnd...)', function () {
@@ -328,7 +334,7 @@ describe('Collection (#findOneAnd...)', function () {
     context('when updating with an aggregation pipeline', function () {
       context('when passing includeResultMetadata: true', function () {
         let client: MongoClient;
-        let collection: Collection<{ a: number, b: number }>;
+        let collection: Collection<{ a: number; b: number }>;
 
         beforeEach(async function () {
           client = this.configuration.newClient({}, { maxPoolSize: 1 });
@@ -341,22 +347,32 @@ describe('Collection (#findOneAnd...)', function () {
           await client?.close();
         });
 
-        it('the aggregation pipeline updates the matching document', async function () {
-          const { value: {
-            _id,
-            ...document
-          } } = await collection.findOneAndUpdate(
-            { a: 1 },
-            [{ $set: { a: { $add: [1, '$a'] } } }],
-            { includeResultMetadata: true, returnDocument: 'after' }
-          );
-          expect(document).to.deep.equal({ a: 2, b: 1 });
-        });
+        it(
+          'the aggregation pipeline updates the matching document',
+          {
+            requires: {
+              mongodb: '>4.0'
+            }
+          },
+          async function () {
+            const {
+              value: { _id, ...document }
+            } = await collection.findOneAndUpdate(
+              { a: 1 },
+              [{ $set: { a: { $add: [1, '$a'] } } }],
+              {
+                includeResultMetadata: true,
+                returnDocument: 'after'
+              }
+            );
+            expect(document).to.deep.equal({ a: 2, b: 1 });
+          }
+        );
       });
 
       context('when passing includeResultMetadata: false', function () {
         let client: MongoClient;
-        let collection: Collection<{ a: number, b: number }>;
+        let collection: Collection<{ a: number; b: number }>;
 
         beforeEach(async function () {
           client = this.configuration.newClient({}, { maxPoolSize: 1 });
@@ -369,15 +385,22 @@ describe('Collection (#findOneAnd...)', function () {
           await client?.close();
         });
 
-        it('the aggregation pipeline updates the matching document', async function () {
-          const {
-            _id,
-            ...document
-          } = await collection.findOneAndUpdate({ a: 1 }, [
-            { $set: { a: { $add: [1, '$a'] } } }
-          ], { returnDocument: 'after' });
-          expect(document).to.deep.equal({ a: 2, b: 1 });
-        });
+        it(
+          'the aggregation pipeline updates the matching document',
+          {
+            requires: {
+              mongodb: '>4.0'
+            }
+          },
+          async function () {
+            const { _id, ...document } = await collection.findOneAndUpdate(
+              { a: 1 },
+              [{ $set: { a: { $add: [1, '$a'] } } }],
+              { returnDocument: 'after' }
+            );
+            expect(document).to.deep.equal({ a: 2, b: 1 });
+          }
+        );
       });
     });
   });
