@@ -203,8 +203,8 @@ function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
   const primesBench = results.find(r => r.info.test_name === 'primes');
   const pingBench = results.find(r => r.info.test_name === 'ping');
 
-  assert.ok(pingBench);
-  assert.ok(primesBench);
+  assert.ok(pingBench, 'ping bench results not found!');
+  assert.ok(primesBench, 'primes bench results not found!');
   const pingThroughput = pingBench.metrics[0].value;
   const primesThroughput = primesBench.metrics[0].value;
   primesBench.metrics.push({ 'name': 'normalized_throughput', value: NORMALIZED_PING_SCALING_CONST * pingThroughput / primesThroughput });
