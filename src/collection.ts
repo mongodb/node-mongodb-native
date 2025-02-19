@@ -976,26 +976,26 @@ export class Collection<TSchema extends Document = Document> {
    */
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions & { includeResultMetadata: true }
   ): Promise<ModifyResult<TSchema>>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions & { includeResultMetadata: false }
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>
+    update: UpdateFilter<TSchema> | Document[]
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options?: FindOneAndUpdateOptions
   ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return await executeOperation(
