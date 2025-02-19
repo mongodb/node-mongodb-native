@@ -2,10 +2,10 @@ import { createReadStream, createWriteStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
-import { ALERT_TAG, CURSOR_TAG, driver, type mongodb, PARALLEL_DIRECTORY, READ_TAG, SPEC_TAG, TEMP_DIRECTORY } from '../../driver.mjs';
+import { driver, type mongodb, PARALLEL_DIRECTORY, TAG, TEMP_DIRECTORY } from '../../driver.mjs';
 
 export const taskSize = 262.144;
-export const tags = [SPEC_TAG, ALERT_TAG, READ_TAG, CURSOR_TAG];
+export const tags = [TAG.spec, TAG.alert, TAG.read, TAG.cursor];
 
 let bucket: mongodb.GridFSBucket;
 

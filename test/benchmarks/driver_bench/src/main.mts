@@ -203,22 +203,16 @@ function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
   const primesBench = results.find(r => r.info.test_name === 'primes');
   const pingBench = results.find(r => r.info.test_name === 'ping');
 
-  if (pingBench) {
-    const pingThroughput = pingBench.metrics[0].value;
-    for (const bench of results) {
-      if (bench.info.test_name === 'ping') {
-        // Compute ping's normalized_throughput against the primes bench if present
-        if (primesBench) {
-          const primesThroughput = primesBench.metrics[0].value;
-          const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: NORMALIZED_PING_SCALING_CONST * bench.metrics[0].value / primesThroughput };
-          bench.metrics.push(normalizedThroughput);
-        }
-      } else {
-        // Compute normalized_throughput of benchmarks against ping bench
-        const normalizedThroughput: Metric = { 'name': 'normalized_throughput', value: bench.metrics[0].value / pingThroughput };
-        bench.metrics.push(normalizedThroughput);
-      }
-    }
+  assert.ok(pingBench);
+  assert.ok(primesBench);
+  const pingThroughput = pingBench.metrics[0].value;
+  const primesThroughput = primesBench.metrics[0].value;
+  primesBench.metrics.push({ 'name': 'normalized_throughput', value: NORMALIZED_PING_SCALING_CONST * pingThroughput / primesThroughput });
+
+  for (const bench of results) {
+    if (bench.info.test_name === 'ping' || bench.info.test_name === 'primes') continue;
+    // Compute normalized_throughput of benchmarks against ping bench
+    bench.metrics.push({ 'name': 'normalized_throughput', value: bench.metrics[0].value / pingThroughput });
   }
 
   return results;

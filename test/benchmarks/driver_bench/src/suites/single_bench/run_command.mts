@@ -1,8 +1,8 @@
-import { ALERT_TAG, driver, SPEC_TAG, type mongodb } from '../../driver.mjs';
+import { driver, TAG, type mongodb } from '../../driver.mjs';
 
 // { hello: true } is 13 bytes of BSON x 10,000 iterations
 export const taskSize = 0.13;
-export const tags = [SPEC_TAG, ALERT_TAG];
+export const tags = [TAG.spec, TAG.alert];
 
 let db: mongodb.Db;
 

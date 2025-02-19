@@ -81,7 +81,13 @@ function percentileIndex(percentile: number, count: number) {
 
 const medianExecution = durations[percentileIndex(50, count)];
 const megabytesPerSecond = benchmark.taskSize / medianExecution;
+
 const tags = benchmark.tags;
+if (tags &&
+  (!Array.isArray(tags) || (tags.length > 0 && !tags.every(t => typeof t === 'string')))) {
+
+  throw new Error('If tags is specified, it MUST be an array of strings');
+}
 
 console.log(
   ' '.repeat(3),

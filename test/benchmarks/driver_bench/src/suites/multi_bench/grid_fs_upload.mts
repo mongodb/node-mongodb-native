@@ -1,10 +1,10 @@
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { ALERT_TAG, driver, SPEC_TAG, WRITE_TAG, type mongodb } from '../../driver.mjs';
+import { driver, TAG, type mongodb } from '../../driver.mjs';
 
 export const taskSize = 52.43;
-export const tags = [ALERT_TAG, SPEC_TAG, WRITE_TAG];
+export const tags = [TAG.alert, TAG.spec, TAG.write];
 
 let bucket: mongodb.GridFSBucket;
 let uploadStream: mongodb.GridFSBucketWriteStream;
