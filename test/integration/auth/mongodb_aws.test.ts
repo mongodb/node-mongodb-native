@@ -475,7 +475,7 @@ describe('AWS KMS Credential Fetching', function () {
       it('KMS credentials are successfully fetched.', async function () {
         const { aws } = await refreshKMSCredentials(
           { aws: {} },
-          credentialProvider.fromNodeProviderChain()
+          { aws: credentialProvider.fromNodeProviderChain() }
         );
 
         expect(aws).to.have.property('accessKeyId');
