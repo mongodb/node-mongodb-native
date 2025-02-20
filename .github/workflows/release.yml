@@ -71,7 +71,7 @@ jobs:
           sbom_file_name: sbom.json
 
       - name: Generate authorized pub report
-        uses: fetsko/drivers-github-tools/full-report@fetsko/gha-sbom-action-silkbomb-2.0
+        uses: blink1073/drivers-github-tools/full-report@fetsko/gha-sbom-action-silkbomb-2.0
         with:
           release_version: ${{ env.package_version }}
           product_name: mongodb
