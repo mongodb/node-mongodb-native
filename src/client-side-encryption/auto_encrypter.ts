@@ -6,7 +6,6 @@ import {
 import * as net from 'net';
 
 import { deserialize, type Document, serialize } from '../bson';
-import { type AWSCredentialProvider } from '../cmap/auth/aws_temporary_credentials';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { kDecorateResult } from '../constants';
 import { getMongoDBClientEncryption } from '../deps';
@@ -18,7 +17,7 @@ import { autoSelectSocketOptions } from './client_encryption';
 import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
-import { type KMSProviders, refreshKMSCredentials } from './providers';
+import { type CredentialProviders, type KMSProviders, refreshKMSCredentials } from './providers';
 import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /** @public */
@@ -31,6 +30,8 @@ export interface AutoEncryptionOptions {
   keyVaultNamespace?: string;
   /** Configuration options that are used by specific KMS providers during key generation, encryption, and decryption. */
   kmsProviders?: KMSProviders;
+  /** Configuration options for custom credential providers. */
+  credentialProviders?: CredentialProviders;
   /**
    * A map of namespaces to a local JSON schema for encryption
    *
@@ -105,8 +106,6 @@ export interface AutoEncryptionOptions {
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
   tlsOptions?: CSFLEKMSTlsOptions;
-  /** Optional custom credential provider to use for KMS requests. */
-  awsCredentialProvider?: AWSCredentialProvider;
 }
 
 /**
@@ -156,7 +155,7 @@ export class AutoEncrypter {
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
-  _awsCredentialProvider?: AWSCredentialProvider;
+  _credentialProviders?: CredentialProviders;
 
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
@@ -241,7 +240,7 @@ export class AutoEncrypter {
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
-    this._awsCredentialProvider = options.awsCredentialProvider;
+    this._credentialProviders = options.credentialProviders;
 
     const mongoCryptOptions: MongoCryptOptions = {
       enableMultipleCollinfo: true,
@@ -444,7 +443,7 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders, this._awsCredentialProvider);
+    return await refreshKMSCredentials(this._kmsProviders, this._credentialProviders);
   }
 
   /**
