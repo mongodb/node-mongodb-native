@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Node and dependencies
-        uses: baileympearson/drivers-github-tools/node/setup@v2
+        uses: baileympearson/drivers-github-tools/node/setup@bailey-sbom-2.0
 
       - run: npm publish --provenance --tag=latest
         if: ${{ needs.release_please.outputs.release_created }}
