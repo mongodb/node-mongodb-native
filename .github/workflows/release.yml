@@ -65,13 +65,13 @@ jobs:
       # only used for mongodb-client-encryption
       - name: Augment SBOM and copy to release assets
         if: ${{ '' != '' }}
-        uses: mongodb-labs/drivers-github-tools/sbom@v2
+        uses: baileympearson/drivers-github-tools/sbom@bailey-sbom-2.0
         with:
           silk_asset_group: ''
           sbom_file_name: sbom.json
 
       - name: Generate authorized pub report
-        uses: blink1073/drivers-github-tools/full-report@fetsko/gha-sbom-action-silkbomb-2.0
+        uses: baileympearson/drivers-github-tools/full-report@bailey-sbom-2.0
         with:
           release_version: ${{ env.package_version }}
           product_name: mongodb
