@@ -15,7 +15,6 @@ import {
   type UUID
 } from '../bson';
 import { type AnyBulkWriteOperation, type BulkWriteResult } from '../bulk/common';
-import { type AWSCredentialProvider } from '../cmap/auth/aws_temporary_credentials';
 import { type ProxyOptions } from '../cmap/connection';
 import { type Collection } from '../collection';
 import { type FindCursor } from '../cursor/find_cursor';
@@ -35,6 +34,7 @@ import {
 } from './errors';
 import {
   type ClientEncryptionDataKeyProvider,
+  type CredentialProviders,
   type KMSProviders,
   refreshKMSCredentials
 } from './providers/index';
@@ -83,7 +83,7 @@ export class ClientEncryption {
   _mongoCrypt: MongoCrypt;
 
   /** @internal */
-  _awsCredentialProvider?: AWSCredentialProvider;
+  _credentialProviders?: CredentialProviders;
 
   /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {
@@ -129,8 +129,7 @@ export class ClientEncryption {
     this._kmsProviders = options.kmsProviders || {};
     const { timeoutMS } = resolveTimeoutOptions(client, options);
     this._timeoutMS = timeoutMS;
-    this._awsCredentialProvider =
-      client.options.credentials?.mechanismProperties.AWS_CREDENTIAL_PROVIDER;
+    this._credentialProviders = options.credentialProviders;
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -718,7 +717,7 @@ export class ClientEncryption {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders, this._awsCredentialProvider);
+    return await refreshKMSCredentials(this._kmsProviders, this._credentialProviders);
   }
 
   static get libmongocryptVersion() {
@@ -863,6 +862,11 @@ export interface ClientEncryptionOptions {
    * Options for specific KMS providers to use
    */
   kmsProviders?: KMSProviders;
+
+  /**
+   * Options for user provided custom credential providers.
+   */
+  credentialProviders?: CredentialProviders;
 
   /**
    * Options for specifying a Socks5 proxy to use for connecting to the KMS.
