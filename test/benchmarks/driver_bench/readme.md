@@ -64,16 +64,16 @@ The `driver.mts` module is intended to hold various helpers for setup and teardo
 The `tags` property of `BenchmarkModule` is where a benchmark's tags should be added to facilitate
 performance alerting and filter of results via our internal tools.
 
-Tags are defined in `driver.mts` and should end with a _TAG suffix.
+Tags are defined in `driver.mts` under the `TAG` enum.
 Whenever a new tag is defined it should be documented in the table below .
 
 | tag variable name |    tag string value    |                                                               purpose                                                                |
 |-------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-|     `SPEC_TAG`    | `'spec-benchmark'`     | Special tag that marks a benchmark as a spec-required benchmark                                                                      |
-|     `ALERT_TAG`   | `'alerting-benchmark'` | Special tag that enables our perf monitoring tooling to create alerts when regressions in this benchmark's performance are detected  |
-|     `CURSOR_TAG`  | `'cursor-benchmark'`   | Tag marking a benchmark as being related to cursor performance                                                                       |
-|     `READ_TAG`    | `'read-benchmark'`     | Tag marking a benchmark as being related to read performance                                                                         |
-|     `WRITE_TAG`   | `'write-benchmark'`    | Tag marking a benchmark as being related to write performance                                                                        |
+|     `TAG.spec`    | `'spec-benchmark'`     | Special tag that marks a benchmark as a spec-required benchmark                                                                      |
+|     `TAG.alert`   | `'alerting-benchmark'` | Special tag that enables our perf monitoring tooling to create alerts when regressions in this benchmark's performance are detected  |
+|     `TAG.cursor`  | `'cursor-benchmark'`   | Tag marking a benchmark as being related to cursor performance                                                                       |
+|     `TAG.read`    | `'read-benchmark'`     | Tag marking a benchmark as being related to read performance                                                                         |
+|     `TAG.write`   | `'write-benchmark'`    | Tag marking a benchmark as being related to write performance                                                                        |
 
 ## Wishlist
 
