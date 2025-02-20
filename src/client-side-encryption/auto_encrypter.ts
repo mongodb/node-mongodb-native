@@ -17,7 +17,7 @@ import { autoSelectSocketOptions } from './client_encryption';
 import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
-import { type KMSProviders, refreshKMSCredentials } from './providers';
+import { type CredentialProviders, type KMSProviders, refreshKMSCredentials } from './providers';
 import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /** @public */
@@ -30,6 +30,8 @@ export interface AutoEncryptionOptions {
   keyVaultNamespace?: string;
   /** Configuration options that are used by specific KMS providers during key generation, encryption, and decryption. */
   kmsProviders?: KMSProviders;
+  /** Configuration options for custom credential providers. */
+  credentialProviders?: CredentialProviders;
   /**
    * A map of namespaces to a local JSON schema for encryption
    *
@@ -153,6 +155,7 @@ export class AutoEncrypter {
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
+  _credentialProviders?: CredentialProviders;
 
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
@@ -237,6 +240,7 @@ export class AutoEncrypter {
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
+    this._credentialProviders = options.credentialProviders;
 
     const mongoCryptOptions: MongoCryptOptions = {
       cryptoCallbacks
@@ -438,7 +442,7 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._credentialProviders);
   }
 
   /**
