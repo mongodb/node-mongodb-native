@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.13.2](https://github.com/mongodb/node-mongodb-native/compare/v6.13.1...v6.13.2) (2025-02-21)
+
+
+### Bug Fixes
+
+* **NODE-6765:** FindOneAndUpdateOptions supports aggregation expressions ([#4423](https://github.com/mongodb/node-mongodb-native/issues/4423)) ([421ddeb](https://github.com/mongodb/node-mongodb-native/commit/421ddeb329169f47b567cbe432c39737551bd234))
+
 ## [6.13.1](https://github.com/mongodb/node-mongodb-native/compare/v6.13.0...v6.13.1) (2025-02-20)
 
 
