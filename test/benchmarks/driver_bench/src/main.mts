@@ -18,7 +18,6 @@ import {
   MONGODB_DRIVER_PATH,
   MONGODB_DRIVER_REVISION,
   MONGODB_DRIVER_VERSION,
-  NORMALIZED_PING_SCALING_CONST,
   snakeToCamel
 } from './driver.mjs';
 
@@ -147,8 +146,8 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
 
   const aMetricInfo =
     (testName: string) =>
-      ({ info: { test_name } }: MetricInfo) =>
-        test_name === testName;
+    ({ info: { test_name } }: MetricInfo) =>
+      test_name === testName;
 
   const anMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
 
@@ -211,11 +210,17 @@ function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
   for (const bench of results) {
     if (bench.info.test_name === 'cpuBaseline') continue;
     if (bench.info.test_name === 'ping') {
-      bench.metrics.push({ 'name': 'normalized_throughput', value: bench.metrics[0].value / cpuBaseline });
+      bench.metrics.push({
+        name: 'normalized_throughput',
+        value: bench.metrics[0].value / cpuBaseline
+      });
     }
     // Compute normalized_throughput of benchmarks against ping bench
     else {
-      bench.metrics.push({ 'name': 'normalized_throughput', value: bench.metrics[0].value / pingThroughput });
+      bench.metrics.push({
+        name: 'normalized_throughput',
+        value: bench.metrics[0].value / pingThroughput
+      });
     }
   }
 
@@ -224,6 +229,5 @@ function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
 
 results = calculateCompositeBenchmarks(results);
 results = calculateNormalizedResults(results);
-
 
 await fs.writeFile('results.json', JSON.stringify(results, undefined, 2), 'utf8');

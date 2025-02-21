@@ -3,7 +3,14 @@ import path from 'node:path';
 import readline from 'node:readline/promises';
 import stream from 'node:stream/promises';
 
-import { driver, EJSON, type mongodb, PARALLEL_DIRECTORY, TAG, TEMP_DIRECTORY } from '../../driver.mjs';
+import {
+  driver,
+  EJSON,
+  type mongodb,
+  PARALLEL_DIRECTORY,
+  TAG,
+  TEMP_DIRECTORY
+} from '../../driver.mjs';
 
 export const taskSize = 565;
 export const tags = [TAG.spec, TAG.alert, TAG.write];

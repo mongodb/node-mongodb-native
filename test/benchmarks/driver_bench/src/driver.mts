@@ -144,7 +144,7 @@ export type MetricInfo = {
   info: {
     test_name: string;
     args: Record<string, number>;
-    tags?: string[]
+    tags?: string[];
   };
   metrics: Metric[];
 };
