@@ -2,9 +2,11 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { expect } from 'chai';
+import { type MongoCryptOptions } from 'mongodb-client-encryption';
+import * as sinon from 'sinon';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { BSON, type Document, type MongoClient } from '../../mongodb';
+import { AutoEncrypter, BSON, type Document, type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
@@ -342,4 +344,70 @@ describe.only('$lookup support', function () {
     new Error('Upgrade'),
     { requires: { ...defaultMetadata.requires, mongodb: '<8.1.0' } }
   );
+
+  describe('Node.js custom test', function () {
+    describe('when enableMultipleCollinfo is off and a $lookup is run', function () {
+      let client: MongoClient;
+
+      beforeEach(async function () {
+        const getMongoCrypt = sinon.stub(AutoEncrypter, 'getMongoCrypt').callsFake(function () {
+          const MongoCrypt = getMongoCrypt.wrappedMethod.call(this);
+          return class extends MongoCrypt {
+            constructor(options: MongoCryptOptions) {
+              //@ts-expect-error: not yet in the defs
+              options.enableMultipleCollinfo = false;
+              super(options);
+            }
+          };
+        });
+
+        client = this.configuration.newClient(
+          {},
+          {
+            autoEncryption: {
+              keyVaultNamespace: 'db.keyvault',
+              kmsProviders: { local: getCSFLEKMSProviders().local },
+              extraOptions: {
+                cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath,
+                mongocryptdBypassSpawn: true,
+                cryptSharedLibRequired: true
+              }
+            }
+          }
+        );
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+        await client.close();
+      });
+
+      it(
+        'throws a TypeError about libmongocrypt not enabled to support multiple collections',
+        defaultMetadata,
+        async () => {
+          const collection = client.db('db').collection('csfle');
+          const actual = await collection
+            .aggregate([
+              { $match: { csfle: 'csfle' } },
+              {
+                $lookup: {
+                  from: 'csfle2',
+                  as: 'matched',
+                  pipeline: [{ $match: { csfle2: 'csfle2' } }, { $project: { _id: 0 } }]
+                }
+              },
+              { $project: { _id: 0 } }
+            ])
+            .toArray()
+            .catch(error => error);
+
+          expect(actual).to.be.instanceOf(TypeError);
+          expect(actual.message).to.match(
+            /libmongocrypt is not configured to support encrypting a command with multiple collections/i
+          );
+        }
+      );
+    });
+  });
 });
