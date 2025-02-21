@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { driver, TAG, type mongodb, CURSOR_TAG, READ_TAG } from '../../driver.mjs';
+import { driver, TAG, type mongodb } from '../../driver.mjs';
 
 export const taskSize = 16.22;
 
