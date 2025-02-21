@@ -57,6 +57,19 @@
   "tests": [
     {
       "description": "operations against non-load balanced clusters fail if URI contains loadBalanced=true",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "8.0.99",
+          "topologies": [
+            "single"
+          ]
+        },
+        {
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
