@@ -1,6 +1,7 @@
-import { driver, type mongodb } from '../../driver.mjs';
+import { driver, type mongodb, TAG } from '../../driver.mjs';
 
 export const taskSize = 16;
+export const tags = [TAG.alert, TAG.cursor, TAG.read];
 
 let db: mongodb.Db;
 
