@@ -162,7 +162,13 @@ TASKS.push(
     {
       name: 'test-auth-kerberos',
       tags: ['auth', 'kerberos'],
-      commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
+      commands: [
+        updateExpansions({
+          NATIVE: 'true'
+        }),
+        { func: 'install dependencies' },
+        { func: 'run kerberos tests' }
+      ]   
     },
     {
       name: 'test-auth-ldap',
@@ -729,6 +735,28 @@ const coverageTask = {
 SINGLETON_TASKS.push(coverageTask);
 SINGLETON_TASKS.push(...customDependencyTests);
 
+SINGLETON_TASKS.push(
+  {
+    name: `test-alpine-fle`,
+    tags: ['alpine-fle'],
+    commands: [
+      updateExpansions({
+        NODE_VERSION: '16.20.1',
+        VERSION: 'latest',
+        TOPOLOGY: 'replica_set',
+        CLIENT_ENCRYPTION: true,
+        TEST_CSFLE: true,
+        MONGODB_BINARIES: '${PROJECT_DIRECTORY}/mongodb/bin',
+      }),
+      { func: 'install dependencies' },
+      { func: 'bootstrap mongo-orchestration' },
+      { func: 'bootstrap kms servers' },
+      { func: 'assume secrets manager rule' },
+      { func: 'build and test alpine FLE' }
+    ]
+  }
+)
+
 function addPerformanceTasks() {
   const makePerfTask = (name, MONGODB_CLIENT_OPTIONS) => ({
     name,
@@ -823,7 +851,7 @@ BUILD_VARIANTS.push({
   batchtime: 20160,
   tasks: [
     'testtestoidc_task_group',
-    // 'testazureoidc_task_group', TODO(NODE-6750): Unskip failed azure failed login
+    'testazureoidc_task_group',
     'testgcpoidc_task_group',
     'testk8soidc_task_group_eks',
     'testk8soidc_task_group_gke',

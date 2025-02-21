@@ -20,6 +20,7 @@ const {
   ClientSideEncryptionFilter
 } = require('../../tools/runner/filters/client_encryption_filter');
 const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
+const { AlpineTestConfiguration } = require('../../tools/runner/config');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = getCSFLEKMSProviders();
@@ -1113,6 +1114,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       // configure with `client_encrypted` to use the schema `external/external-schema.json` for
       // `db.coll` by setting a schema map like `{"db.coll": <contents of external-schema.json }`
       beforeEach(async function () {
+        if (this.configuration instanceof AlpineTestConfiguration) {
+          this.currentTest.skipReason =
+            'alpine tests cannot spawn mongocryptds or use the crypt_shared.';
+          this.skip();
+        }
+
         clientEncrypted = this.configuration.newClient(
           {},
           {

@@ -657,6 +657,20 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
+  build and test alpine FLE:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        env:
+          INSTALL_DIR: mongodb-client-encryption
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          NODE_VERSION: ${NODE_VERSION}
+          MONGODB_URI: ${MONGODB_URI}
+        binary: bash
+        args:
+          - .evergreen/docker/alpine.sh
 tasks:
   - name: test-atlas-data-lake
     tags:
@@ -1520,6 +1534,11 @@ tasks:
       - auth
       - kerberos
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NATIVE, value: 'true'}
       - func: install dependencies
       - func: run kerberos tests
   - name: test-auth-ldap
@@ -2300,6 +2319,25 @@ tasks:
         vars:
           PACKAGE: mongodb-client-encryption@6.0.0
       - func: run tests
+  - name: test-alpine-fle
+    tags:
+      - alpine-fle
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_VERSION, value: 16.20.1}
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+            - {key: MONGODB_BINARIES, value: '${PROJECT_DIRECTORY}/mongodb/bin'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: bootstrap kms servers
+      - func: assume secrets manager rule
+      - func: build and test alpine FLE
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -3191,6 +3229,11 @@ post:
 ignore:
   - '*.md'
 buildvariants:
+  - name: Alpine FLE Tests
+    display_name: Alpine FLE Test
+    run_on: ubuntu2204-small
+    tasks:
+      - .alpine-fle
   - name: rhel80-large-gallium
     display_name: rhel8 Node16
     run_on: rhel80-large
@@ -3813,6 +3856,7 @@ buildvariants:
     batchtime: 20160
     tasks:
       - testtestoidc_task_group
+      - testazureoidc_task_group
       - testgcpoidc_task_group
       - testk8soidc_task_group_eks
       - testk8soidc_task_group_gke

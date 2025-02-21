@@ -966,32 +966,40 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Find a document and update it in one atomic operation. Requires a write lock for the duration of the operation.
    *
+   * The value of `update` can be either:
+   * - UpdateFilter<TSchema> - A document that contains update operator expressions,
+   * - Document[] - an aggregation pipeline consisting of the following stages:
+   *   - $addFields and its alias $set
+   *   - $project and its alias $unset
+   *   - $replaceRoot and its alias $replaceWith.
+   * See the [findAndModify command documentation](https://www.mongodb.com/docs/manual/reference/command/findAndModify) for details.
+   *
    * @param filter - The filter used to select the document to update
-   * @param update - Update operations to be performed on the document
+   * @param update - The modifications to apply
    * @param options - Optional settings for the command
    */
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions & { includeResultMetadata: true }
   ): Promise<ModifyResult<TSchema>>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions & { includeResultMetadata: false }
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>
+    update: UpdateFilter<TSchema> | Document[]
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options?: FindOneAndUpdateOptions
   ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return await executeOperation(
