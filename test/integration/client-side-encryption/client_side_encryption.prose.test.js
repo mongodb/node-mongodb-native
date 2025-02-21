@@ -42,7 +42,7 @@ const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => 
   return result;
 };
 
-const noop = () => { };
+const noop = () => {};
 const metadata = {
   requires: {
     clientSideEncryption: true,
@@ -1356,7 +1356,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
   // TODO(NODE-3151): Implement kms prose tests
   describe('KMS TLS Tests', () => {
-    it.skip('TBD', () => { }).skipReason = 'TODO(NODE-3151): Implement "KMS TLS Tests"';
+    it.skip('TBD', () => {}).skipReason = 'TODO(NODE-3151): Implement "KMS TLS Tests"';
   });
 
   /**
@@ -1697,7 +1697,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     context(
       'Case 5: `tlsDisableOCSPEndpointCheck` is permitted',
       metadata,
-      function () { }
+      function () {}
     ).skipReason = 'TODO(NODE-4840): Node does not support any OCSP options';
 
     context('Case 6: named KMS providers apply TLS options', function () {
