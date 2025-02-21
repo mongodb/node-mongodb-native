@@ -21,10 +21,6 @@ export const TAG = {
   write: 'write-benchmark'
 };
 
-// Constant used to scale normalized_throughput results for ping benchmark to be roughly in the
-// range 0 - 9 to make it easier to work with
-export const NORMALIZED_PING_SCALING_CONST = 1000;
-
 /**
  * The path to the MongoDB Node.js driver.
  * This MUST be set to the directory the driver is installed in
