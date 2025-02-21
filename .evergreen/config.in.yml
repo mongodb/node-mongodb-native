@@ -92,43 +92,6 @@ functions:
           sleep 1
           docker ps
 
-  "bootstrap kms servers":
-    - command: subprocess.exec
-      params:
-        binary: bash
-        working_dir: src
-        args:
-          - .evergreen/activate-kms-venv.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-    - command: subprocess.exec
-      params:
-        background: true
-        binary: bash
-        working_dir: src
-        args:
-          - .evergreen/run-kmip-server.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-    - command: subprocess.exec
-      params:
-        background: true
-        binary: bash
-        working_dir: src
-        args:
-          - .evergreen/run-kms-servers.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-    - command: subprocess.exec
-      params:
-        background: true
-        working_dir: src
-        binary: bash
-        args:
-          - .evergreen/run-azure-kms-mock-server.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-
   "run tests":
     - command: ec2.assume_role
       params:
@@ -761,7 +724,6 @@ tasks:
     tags: ["serverless"]
     commands:
       - func: install dependencies
-      - func: bootstrap kms servers
       - func: "run serverless tests"
 
   - name: "test-gcpkms-task"
