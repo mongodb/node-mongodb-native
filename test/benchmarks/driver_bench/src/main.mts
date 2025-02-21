@@ -212,14 +212,20 @@ function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
     if (bench.info.test_name === 'ping') {
       bench.metrics.push({
         name: 'normalized_throughput',
-        value: bench.metrics[0].value / cpuBaseline
+        value: bench.metrics[0].value / cpuBaseline,
+        metadata: {
+          improvement_direction: 'up'
+        }
       });
     }
     // Compute normalized_throughput of benchmarks against ping bench
     else {
       bench.metrics.push({
         name: 'normalized_throughput',
-        value: bench.metrics[0].value / pingThroughput
+        value: bench.metrics[0].value / pingThroughput,
+        metadata: {
+          improvement_direction: 'up'
+        }
       });
     }
   }

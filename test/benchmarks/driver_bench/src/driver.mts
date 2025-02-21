@@ -138,6 +138,9 @@ export const TEMP_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'tmp');
 export type Metric = {
   name: 'megabytes_per_second' | 'normalized_throughput';
   value: number;
+  metadata?: {
+    improvement_direction: 'up' | 'down'
+  };
 };
 
 export type MetricInfo = {
@@ -163,7 +166,8 @@ export function metrics(test_name: string, result: number, tags?: string[]): Met
       ),
       tags
     },
-    metrics: [{ name: 'megabytes_per_second', value: result }]
+    // FIXME: For now all of our metrics are of throughput so their improvement_direction is up,
+    metrics: [{ name: 'megabytes_per_second', value: result, metadata: {improvement_direction: 'up'} }]
   } as const;
 }
 
