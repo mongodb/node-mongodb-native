@@ -12,10 +12,12 @@ import {
 } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
+import { type ListCollectionsCursor } from '../cursor/list_collections_cursor';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Abortable } from '../mongo_types';
+import { type CollectionInfo } from '../operations/list_collections';
 import { Timeout, type TimeoutContext, TimeoutError } from '../timeout';
 import {
   addAbortListener,
@@ -218,14 +220,15 @@ export class StateMachine {
             );
           }
 
-          const collInfo = await this.fetchCollectionInfo(
+          const collInfoCursor = this.fetchCollectionInfo(
             metaDataClient,
             context.ns,
             filter,
             options
           );
-          if (collInfo) {
-            context.addMongoOperationResponse(collInfo);
+
+          for await (const collInfo of collInfoCursor) {
+            context.addMongoOperationResponse(serialize(collInfo));
           }
 
           context.finishMongoOperation();
@@ -527,12 +530,12 @@ export class StateMachine {
    * @param filter - A filter for the listCollections command
    * @param callback - Invoked with the info of the requested collection, or with an error
    */
-  async fetchCollectionInfo(
+  fetchCollectionInfo(
     client: MongoClient,
     ns: string,
     filter: Document,
     options?: { timeoutContext?: TimeoutContext } & Abortable
-  ): Promise<Uint8Array | null> {
+  ): ListCollectionsCursor<CollectionInfo> {
     const { db } = MongoDBCollectionNamespace.fromString(ns);
 
     const cursor = client.db(db).listCollections(filter, {
@@ -540,16 +543,11 @@ export class StateMachine {
       promoteValues: false,
       timeoutContext:
         options?.timeoutContext && new CursorTimeoutContext(options?.timeoutContext, Symbol()),
-      signal: options?.signal
+      signal: options?.signal,
+      nameOnly: false
     });
 
-    // There is always exactly zero or one matching documents, so this should always exhaust the cursor
-    // in a single batch.  We call `toArray()` just to be safe and ensure that the cursor is always
-    // exhausted and closed.
-    const collections = await cursor.toArray();
-
-    const info = collections.length > 0 ? serialize(collections[0]) : null;
-    return info;
+    return cursor;
   }
 
   /**

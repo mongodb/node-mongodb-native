@@ -1,0 +1,19 @@
+{
+    "properties": {
+        "csfle2": {
+            "encrypt": {
+                "keyId": [
+                    {
+                        "$binary": {
+                            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                            "subType": "04"
+                        }
+                    }
+                ],
+                "bsonType": "string",
+                "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+            }
+        }
+    },
+    "bsonType": "object"
+}
