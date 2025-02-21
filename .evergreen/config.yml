@@ -65,42 +65,6 @@ functions:
           DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-image.sh
           sleep 1
           docker ps
-  bootstrap kms servers:
-    - command: subprocess.exec
-      params:
-        binary: bash
-        working_dir: src
-        args:
-          - .evergreen/activate-kms-venv.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-    - command: subprocess.exec
-      params:
-        background: true
-        binary: bash
-        working_dir: src
-        args:
-          - .evergreen/run-kmip-server.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-    - command: subprocess.exec
-      params:
-        background: true
-        binary: bash
-        working_dir: src
-        args:
-          - .evergreen/run-kms-servers.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-    - command: subprocess.exec
-      params:
-        background: true
-        working_dir: src
-        binary: bash
-        args:
-          - .evergreen/run-azure-kms-mock-server.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
   run tests:
     - command: ec2.assume_role
       params:
@@ -685,7 +649,6 @@ tasks:
       - serverless
     commands:
       - func: install dependencies
-      - func: bootstrap kms servers
       - func: run serverless tests
   - name: test-gcpkms-task
     commands:
@@ -941,7 +904,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-replica_set
     tags:
@@ -957,7 +919,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-sharded_cluster
     tags:
@@ -973,7 +934,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-rapid-server
     tags:
@@ -989,7 +949,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-rapid-replica_set
     tags:
@@ -1005,7 +964,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-rapid-sharded_cluster
     tags:
@@ -1021,7 +979,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-8.0-server
     tags:
@@ -1037,7 +994,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-8.0-replica_set
     tags:
@@ -1053,7 +1009,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-8.0-sharded_cluster
     tags:
@@ -1069,7 +1024,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-7.0-server
     tags:
@@ -1085,7 +1039,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-7.0-replica_set
     tags:
@@ -1101,7 +1054,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-7.0-sharded_cluster
     tags:
@@ -1117,7 +1069,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-6.0-server
     tags:
@@ -1133,7 +1084,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-6.0-replica_set
     tags:
@@ -1149,7 +1099,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-6.0-sharded_cluster
     tags:
@@ -1165,7 +1114,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-server
     tags:
@@ -1181,7 +1129,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-replica_set
     tags:
@@ -1197,7 +1144,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-sharded_cluster
     tags:
@@ -1213,7 +1159,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-server
     tags:
@@ -1229,7 +1174,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-replica_set
     tags:
@@ -1245,7 +1189,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-sharded_cluster
     tags:
@@ -1261,7 +1204,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-server
     tags:
@@ -1277,7 +1219,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-replica_set
     tags:
@@ -1293,7 +1234,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-sharded_cluster
     tags:
@@ -1309,7 +1249,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-server
     tags:
@@ -1325,7 +1264,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-replica_set
     tags:
@@ -1341,7 +1279,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-sharded_cluster
     tags:
@@ -1357,7 +1294,6 @@ tasks:
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-server-v1-api
     tags:
@@ -1378,7 +1314,6 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-x509-authentication
     tags:
@@ -1559,7 +1494,6 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run socks5 tests
   - name: test-socks5-csfle
     tags:
@@ -1574,7 +1508,6 @@ tasks:
             - {key: TEST_SOCKS5_CSFLE, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run socks5 tests
   - name: test-socks5-tls
     tags: []
@@ -2257,7 +2190,6 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: install mongodb-client-encryption
       - func: assume secrets manager rule
       - func: run custom csfle tests
@@ -2276,7 +2208,6 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: install mongodb-client-encryption
       - func: assume secrets manager rule
       - func: run custom csfle tests
@@ -2295,7 +2226,6 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: install mongodb-client-encryption
       - func: assume secrets manager rule
       - func: run custom csfle tests
@@ -2314,7 +2244,6 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: install package
         vars:
           PACKAGE: mongodb-client-encryption@6.0.0
@@ -2335,7 +2264,6 @@ tasks:
             - {key: MONGODB_BINARIES, value: '${PROJECT_DIRECTORY}/mongodb/bin'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: assume secrets manager rule
       - func: build and test alpine FLE
   - name: test-latest-server-noauth
@@ -2353,7 +2281,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-replica_set-noauth
     tags:
@@ -2370,7 +2297,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-sharded_cluster-noauth
     tags:
@@ -2387,7 +2313,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-rapid-server-noauth
     tags:
@@ -2404,7 +2329,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-rapid-replica_set-noauth
     tags:
@@ -2421,7 +2345,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-rapid-sharded_cluster-noauth
     tags:
@@ -2438,7 +2361,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-8.0-server-noauth
     tags:
@@ -2455,7 +2377,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-8.0-replica_set-noauth
     tags:
@@ -2472,7 +2393,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-8.0-sharded_cluster-noauth
     tags:
@@ -2489,7 +2409,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-7.0-server-noauth
     tags:
@@ -2506,7 +2425,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-7.0-replica_set-noauth
     tags:
@@ -2523,7 +2441,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-7.0-sharded_cluster-noauth
     tags:
@@ -2540,7 +2457,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-6.0-server-noauth
     tags:
@@ -2557,7 +2473,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-6.0-replica_set-noauth
     tags:
@@ -2574,7 +2489,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-6.0-sharded_cluster-noauth
     tags:
@@ -2591,7 +2505,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-server-noauth
     tags:
@@ -2608,7 +2521,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-replica_set-noauth
     tags:
@@ -2625,7 +2537,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-sharded_cluster-noauth
     tags:
@@ -2642,7 +2553,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-server-noauth
     tags:
@@ -2659,7 +2569,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-replica_set-noauth
     tags:
@@ -2676,7 +2585,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-sharded_cluster-noauth
     tags:
@@ -2693,7 +2601,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-server-noauth
     tags:
@@ -2710,7 +2617,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-replica_set-noauth
     tags:
@@ -2727,7 +2633,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-sharded_cluster-noauth
     tags:
@@ -2744,7 +2649,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-server-noauth
     tags:
@@ -2761,7 +2665,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-replica_set-noauth
     tags:
@@ -2778,7 +2681,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-sharded_cluster-noauth
     tags:
@@ -2795,7 +2697,6 @@ tasks:
             - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-lambda-example
     tags:
@@ -2845,7 +2746,6 @@ tasks:
             - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-rapid-csfle-mongocryptd
     tags:
@@ -2862,7 +2762,6 @@ tasks:
             - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-8.0-csfle-mongocryptd
     tags:
@@ -2879,7 +2778,6 @@ tasks:
             - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-7.0-csfle-mongocryptd
     tags:
@@ -2896,7 +2794,6 @@ tasks:
             - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-6.0-csfle-mongocryptd
     tags:
@@ -2913,7 +2810,6 @@ tasks:
             - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-csfle-mongocryptd
     tags:
@@ -2930,7 +2826,6 @@ tasks:
             - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-csfle-mongocryptd
     tags:
@@ -2947,7 +2842,6 @@ tasks:
             - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-csfle-mongocryptd
     tags:
@@ -2964,7 +2858,6 @@ tasks:
             - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
       - func: run tests
 task_groups:
   - name: serverless_task_group
