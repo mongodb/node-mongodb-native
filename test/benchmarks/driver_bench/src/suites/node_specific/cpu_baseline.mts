@@ -6,11 +6,9 @@ const expectedPrimes = 78_498;
 // byteLength of
 // BSON.serialize({ primes: Buffer.from(new Int32Array(sieveOfEratosthenes(findPrimesBelow)).buffer) }).byteLength)
 // a bin data of int32s
-const byteLength = 314_010;
 
-export const taskSize = 3.1401000000000003; // ~3MB worth of work
+export const taskSize = .0031401000000000003; // ~3MB worth of work, scaled down 1000 times to make the relative ping measurement be on the order of 10^0
 
-assert.equal(taskSize, byteLength * 10e-6); // taskSize should stay hardcoded, checking here the math is done right.
 
 /** @see https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes */
 export function sieveOfEratosthenes(n: number) {
