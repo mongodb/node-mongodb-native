@@ -42,7 +42,7 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
     }
   );
 
-describe('$lookup support', function () {
+describe('$lookup support', defaultMetadata, function () {
   before(async function () {
     let client: MongoClient, encryptedClient: MongoClient;
     try {

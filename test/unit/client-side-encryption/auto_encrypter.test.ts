@@ -11,7 +11,7 @@ import { MongocryptdManager } from '../../../src/client-side-encryption/mongocry
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoClient } from '../../../src/mongo_client';
-import { BSON, type DataKey } from '../../mongodb';
+import { BSON, type DataKey, type Db, ListCollectionsCursor } from '../../mongodb';
 import * as requirements from './requirements.helper';
 
 const bson = BSON;
@@ -63,7 +63,11 @@ describe('AutoEncrypter', function () {
       return Promise.resolve();
     });
 
-    sandbox.stub(StateMachine.prototype, 'fetchCollectionInfo').resolves(MOCK_COLLINFO_RESPONSE);
+    sandbox.stub(StateMachine.prototype, 'fetchCollectionInfo').returns(
+      (async function* () {
+        while (true) yield MOCK_COLLINFO_RESPONSE;
+      })()
+    );
 
     sandbox.stub(StateMachine.prototype, 'markCommand').callsFake(() => {
       if (ENABLE_LOG_TEST) {

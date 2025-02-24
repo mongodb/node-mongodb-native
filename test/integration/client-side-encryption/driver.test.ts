@@ -1047,11 +1047,19 @@ describe('CSOT', function () {
           });
 
           it('the command should fail due to a timeout error', metadata, async function () {
-            const { duration, result: error } = await measureDuration(() =>
-              stateMachine
-                .fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 }, timeoutContext())
-                .catch(e => e)
-            );
+            const { duration, result: error } = await measureDuration(async () => {
+              try {
+                const cursor = stateMachine.fetchCollectionInfo(
+                  encryptedClient,
+                  'test.test',
+                  { a: 1 },
+                  timeoutContext()
+                );
+                for await (const doc of cursor) void doc;
+              } catch (error) {
+                return error;
+              }
+            });
             expect(error).to.be.instanceOf(MongoOperationTimeoutError);
             expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
           });
@@ -1074,7 +1082,8 @@ describe('CSOT', function () {
           });
 
           it('the command succeeds', metadata, async function () {
-            await stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
+            const cursor = stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
+            for await (const doc of cursor) void doc;
           });
         }
       );

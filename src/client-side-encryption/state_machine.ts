@@ -12,7 +12,6 @@ import {
 } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
-import { type ListCollectionsCursor } from '../cursor/list_collections_cursor';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
@@ -207,11 +206,19 @@ export class StateMachine {
     const mongocryptdManager = executor._mongocryptdManager;
     let result: Uint8Array | null = null;
 
-    while (context.state !== MONGOCRYPT_CTX_DONE && context.state !== MONGOCRYPT_CTX_ERROR) {
-      options.signal?.throwIfAborted();
-      debug(`[context#${context.id}] ${stateToString.get(context.state) || context.state}`);
+    // Typescript treats getters just like properties: Once you've tested it for equality
+    // it cannot change. Which is exactly the opposite of what we use state and status for.
+    // Every call to at least `addMongoOperationResponse` and `finalize` can change the state.
+    // These wrappers let us write code more naturally and not add compiler exceptions
+    // to conditions checks inside the state machine.
+    const getStatus = () => context.status;
+    const getState = () => context.state;
 
-      switch (context.state) {
+    while (getState() !== MONGOCRYPT_CTX_DONE && getState() !== MONGOCRYPT_CTX_ERROR) {
+      options.signal?.throwIfAborted();
+      debug(`[context#${context.id}] ${stateToString.get(getState()) || getState()}`);
+
+      switch (getState()) {
         case MONGOCRYPT_CTX_NEED_MONGO_COLLINFO: {
           const filter = deserialize(context.nextMongoOperation());
           if (!metaDataClient) {
@@ -229,7 +236,10 @@ export class StateMachine {
 
           for await (const collInfo of collInfoCursor) {
             context.addMongoOperationResponse(serialize(collInfo));
+            if (getState() === MONGOCRYPT_CTX_ERROR) break;
           }
+
+          if (getState() === MONGOCRYPT_CTX_ERROR) break;
 
           context.finishMongoOperation();
           break;
@@ -286,9 +296,8 @@ export class StateMachine {
 
         case MONGOCRYPT_CTX_READY: {
           const finalizedContext = context.finalize();
-          // @ts-expect-error finalize can change the state, check for error
-          if (context.state === MONGOCRYPT_CTX_ERROR) {
-            const message = context.status.message || 'Finalization error';
+          if (getState() === MONGOCRYPT_CTX_ERROR) {
+            const message = getStatus().message || 'Finalization error';
             throw new MongoCryptError(message);
           }
           result = finalizedContext;
@@ -296,12 +305,12 @@ export class StateMachine {
         }
 
         default:
-          throw new MongoCryptError(`Unknown state: ${context.state}`);
+          throw new MongoCryptError(`Unknown state: ${getState()}`);
       }
     }
 
-    if (context.state === MONGOCRYPT_CTX_ERROR || result == null) {
-      const message = context.status.message;
+    if (getState() === MONGOCRYPT_CTX_ERROR || result == null) {
+      const message = getStatus().message;
       if (!message) {
         debug(
           `unidentifiable error in MongoCrypt - received an error status from \`libmongocrypt\` but received no error message.`
@@ -535,7 +544,7 @@ export class StateMachine {
     ns: string,
     filter: Document,
     options?: { timeoutContext?: TimeoutContext } & Abortable
-  ): ListCollectionsCursor<CollectionInfo> {
+  ): AsyncIterable<CollectionInfo> {
     const { db } = MongoDBCollectionNamespace.fromString(ns);
 
     const cursor = client.db(db).listCollections(filter, {
