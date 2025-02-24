@@ -11,7 +11,7 @@ import { MongocryptdManager } from '../../../src/client-side-encryption/mongocry
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoClient } from '../../../src/mongo_client';
-import { BSON, type DataKey, type Db, ListCollectionsCursor } from '../../mongodb';
+import { BSON, type DataKey } from '../../mongodb';
 import * as requirements from './requirements.helper';
 
 const bson = BSON;
