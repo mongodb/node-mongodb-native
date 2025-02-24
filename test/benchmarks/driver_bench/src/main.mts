@@ -85,7 +85,7 @@ console.log(systemInfo());
 
 const runnerPath = path.join(__dirname, 'runner.mjs');
 
-const results: MetricInfo[] = [];
+let results: MetricInfo[] = [];
 
 for (const [suite, benchmarks] of Object.entries(tests)) {
   console.group(snakeToCamel(suite));
@@ -198,6 +198,42 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
   return [...results, ...compositeResults];
 }
 
-const finalResults = calculateCompositeBenchmarks(results);
+function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
+  const baselineBench = results.find(r => r.info.test_name === 'cpuBaseline');
+  const pingBench = results.find(r => r.info.test_name === 'ping');
 
-await fs.writeFile('results.json', JSON.stringify(finalResults, undefined, 2), 'utf8');
+  assert.ok(pingBench, 'ping bench results not found!');
+  assert.ok(baselineBench, 'baseline results not found!');
+  const pingThroughput = pingBench.metrics[0].value;
+  const cpuBaseline = baselineBench.metrics[0].value;
+
+  for (const bench of results) {
+    if (bench.info.test_name === 'cpuBaseline') continue;
+    if (bench.info.test_name === 'ping') {
+      bench.metrics.push({
+        name: 'normalized_throughput',
+        value: bench.metrics[0].value / cpuBaseline,
+        metadata: {
+          improvement_direction: 'up'
+        }
+      });
+    }
+    // Compute normalized_throughput of benchmarks against ping bench
+    else {
+      bench.metrics.push({
+        name: 'normalized_throughput',
+        value: bench.metrics[0].value / pingThroughput,
+        metadata: {
+          improvement_direction: 'up'
+        }
+      });
+    }
+  }
+
+  return results;
+}
+
+results = calculateCompositeBenchmarks(results);
+results = calculateNormalizedResults(results);
+
+await fs.writeFile('results.json', JSON.stringify(results, undefined, 2), 'utf8');

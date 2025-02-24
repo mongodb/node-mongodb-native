@@ -51,12 +51,29 @@ type BenchmarkModule = {
   run: () => Promise<void>;
   afterEach?: () => Promise<void>;
   after?: () => Promise<void>;
+
+  tags?: string[];
 };
 ```
 
 Just like mocha we have once before and once after as well as before each and after each hooks.
 
 The `driver.mts` module is intended to hold various helpers for setup and teardown and help abstract some of the driver API.
+
+## Benchmark tags
+The `tags` property of `BenchmarkModule` is where a benchmark's tags should be added to facilitate
+performance alerting and filter of results via our internal tools.
+
+Tags are defined in `driver.mts` under the `TAG` enum.
+Whenever a new tag is defined it should be documented in the table below .
+
+| tag variable name |    tag string value    |                                                               purpose                                                                |
+|-------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+|     `TAG.spec`    | `'spec-benchmark'`     | Special tag that marks a benchmark as a spec-required benchmark                                                                      |
+|     `TAG.alert`   | `'alerting-benchmark'` | Special tag that enables our perf monitoring tooling to create alerts when regressions in this benchmark's performance are detected  |
+|     `TAG.cursor`  | `'cursor-benchmark'`   | Tag marking a benchmark as being related to cursor performance                                                                       |
+|     `TAG.read`    | `'read-benchmark'`     | Tag marking a benchmark as being related to read performance                                                                         |
+|     `TAG.write`   | `'write-benchmark'`    | Tag marking a benchmark as being related to write performance                                                                        |
 
 ## Wishlist
 

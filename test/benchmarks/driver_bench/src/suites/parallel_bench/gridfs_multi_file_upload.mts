@@ -3,9 +3,10 @@ import path from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { driver, type mongodb, PARALLEL_DIRECTORY } from '../../driver.mjs';
+import { driver, type mongodb, PARALLEL_DIRECTORY, TAG } from '../../driver.mjs';
 
 export const taskSize = 262.144;
+export const tags = [TAG.spec, TAG.alert, TAG.write];
 
 let bucket: mongodb.GridFSBucket;
 

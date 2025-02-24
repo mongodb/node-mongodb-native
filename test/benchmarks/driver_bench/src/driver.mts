@@ -7,6 +7,20 @@ import process from 'node:process';
 const __dirname = import.meta.dirname;
 const require = module.createRequire(__dirname);
 
+export const TAG = {
+  // Special tag that marks a benchmark as a spec-required benchmark
+  spec: 'spec-benchmark',
+  // Special tag that enables our perf monitoring tooling to create alerts when regressions in this
+  // benchmark's performance are detected
+  alert: 'alerting-benchmark',
+  // Tag marking a benchmark as being related to cursor performance
+  cursor: 'cursor-benchmark',
+  // Tag marking a benchmark as being related to read performance
+  read: 'read-benchmark',
+  // Tag marking a benchmark as being related to write performance
+  write: 'write-benchmark'
+};
+
 /**
  * The path to the MongoDB Node.js driver.
  * This MUST be set to the directory the driver is installed in
@@ -118,19 +132,23 @@ export const PARALLEL_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'parallel');
 export const TEMP_DIRECTORY = path.resolve(SPEC_DIRECTORY, 'tmp');
 
 export type Metric = {
-  name: 'megabytes_per_second';
+  name: 'megabytes_per_second' | 'normalized_throughput';
   value: number;
+  metadata: {
+    improvement_direction: 'up' | 'down';
+  };
 };
 
 export type MetricInfo = {
   info: {
     test_name: string;
     args: Record<string, number>;
+    tags?: string[];
   };
   metrics: Metric[];
 };
 
-export function metrics(test_name: string, result: number): MetricInfo {
+export function metrics(test_name: string, result: number, tags?: string[]): MetricInfo {
   return {
     info: {
       test_name,
@@ -141,9 +159,13 @@ export function metrics(test_name: string, result: number): MetricInfo {
           key,
           typeof value === 'number' ? value : value ? 1 : 0
         ])
-      )
+      ),
+      tags
     },
-    metrics: [{ name: 'megabytes_per_second', value: result }]
+    // FIXME(NODE-6781): For now all of our metrics are of throughput so their improvement_direction is up,
+    metrics: [
+      { name: 'megabytes_per_second', value: result, metadata: { improvement_direction: 'up' } }
+    ]
   } as const;
 }
 
