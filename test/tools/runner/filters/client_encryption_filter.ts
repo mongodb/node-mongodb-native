@@ -4,8 +4,43 @@ import * as process from 'process';
 import { satisfies } from 'semver';
 
 import { kmsCredentialsPresent } from '../../../csfle-kms-providers';
-import { type MongoClient } from '../../../mongodb';
+import { type AutoEncrypter, MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
+
+function getCryptSharedVersion(): AutoEncrypter['cryptSharedLibVersionInfo'] | null {
+  try {
+    const mc = new MongoClient('mongodb://localhost:27017', {
+      autoEncryption: {
+        kmsProviders: {
+          local: {
+            key: Buffer.alloc(96)
+          }
+        },
+        extraOptions: {
+          cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
+        }
+      }
+    });
+    return mc.autoEncrypter.cryptSharedLibVersionInfo;
+  } catch {
+    try {
+      const mc = new MongoClient('mongodb://localhost:27017', {
+        autoEncryption: {
+          kmsProviders: {
+            local: {
+              key: Buffer.alloc(96)
+            }
+          }
+        }
+      });
+      return mc.autoEncrypter.cryptSharedLibVersionInfo;
+    } catch {
+      // squash errors
+    }
+  }
+
+  return null;
+}
 
 /**
  * Filter for whether or not a test needs / doesn't need Client Side Encryption
@@ -24,15 +59,18 @@ export class ClientSideEncryptionFilter extends Filter {
   enabled: boolean;
   static version = null;
   static libmongocrypt: string | null = null;
+  static cryptShared: AutoEncrypter['cryptSharedLibVersionInfo'] | null = null;
 
   override async initializeFilter(client: MongoClient, context: Record<string, any>) {
-    let mongodbClientEncryption;
+    let mongodbClientEncryption: typeof import('mongodb-client-encryption');
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       mongodbClientEncryption = require('mongodb-client-encryption');
       ClientSideEncryptionFilter.libmongocrypt = (
         mongodbClientEncryption as typeof import('mongodb-client-encryption')
       ).MongoCrypt.libmongocryptVersion;
+
+      ClientSideEncryptionFilter.cryptShared = getCryptSharedVersion();
     } catch (failedToGetFLELib) {
       if (process.env.TEST_CSFLE) {
         console.error({ failedToGetFLELib });
@@ -53,7 +91,8 @@ export class ClientSideEncryptionFilter extends Filter {
       enabled: this.enabled,
       mongodbClientEncryption,
       version: ClientSideEncryptionFilter.version,
-      libmongocrypt: ClientSideEncryptionFilter.libmongocrypt
+      libmongocrypt: ClientSideEncryptionFilter.libmongocrypt,
+      cryptShared: ClientSideEncryptionFilter.cryptShared
     };
   }
 

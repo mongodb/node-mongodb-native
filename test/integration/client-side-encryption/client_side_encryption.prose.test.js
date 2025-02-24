@@ -1146,7 +1146,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 mongocryptdSpawnArgs: [
                   '--pidfilepath=bypass-spawning-mongocryptd.pid',
                   '--port=27021'
-                ]
+                ],
+                cryptSharedLibSearchPaths: []
               }
             }
           }

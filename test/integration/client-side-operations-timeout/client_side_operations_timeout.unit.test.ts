@@ -200,7 +200,8 @@ describe('CSOT spec unit tests', function () {
                     mongocryptdSpawnArgs: [
                       `--pidfilepath=${new ObjectId().toHexString()}.pid`,
                       '--port=27020'
-                    ]
+                    ],
+                    cryptSharedLibSearchPaths: []
                   },
                   keyVaultNamespace: 'admin.datakeys',
                   kmsProviders: {
