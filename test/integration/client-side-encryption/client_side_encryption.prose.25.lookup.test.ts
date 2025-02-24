@@ -42,7 +42,7 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
     }
   );
 
-describe.only('$lookup support', function () {
+describe('$lookup support', function () {
   before(async function () {
     let client: MongoClient, encryptedClient: MongoClient;
     try {
@@ -155,7 +155,6 @@ describe.only('$lookup support', function () {
       let client: MongoClient;
 
       beforeEach(async function () {
-        Error.stackTraceLimit = 0;
         client = newEncryptedClient(this);
       });
 
@@ -354,6 +353,7 @@ describe.only('$lookup support', function () {
           const MongoCrypt = getMongoCrypt.wrappedMethod.call(this);
           return class extends MongoCrypt {
             constructor(options: MongoCryptOptions) {
+              expect(options).to.have.property('enableMultipleCollinfo', true); // assert invariant
               //@ts-expect-error: not yet in the defs
               options.enableMultipleCollinfo = false;
               super(options);
