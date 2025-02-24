@@ -35,6 +35,7 @@ import {
 import {
   type ClientEncryptionDataKeyProvider,
   type CredentialProviders,
+  isEmptyCredentials,
   type KMSProviders,
   refreshKMSCredentials
 } from './providers/index';
@@ -130,6 +131,15 @@ export class ClientEncryption {
     const { timeoutMS } = resolveTimeoutOptions(client, options);
     this._timeoutMS = timeoutMS;
     this._credentialProviders = options.credentialProviders;
+
+    if (
+      options.credentialProviders?.aws &&
+      !isEmptyCredentials('aws', options.kmsProviders || {})
+    ) {
+      throw new MongoCryptInvalidArgumentError(
+        'Cannot provide both a custom credential provider and credentials. Please specify one or the other.'
+      );
+    }
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
