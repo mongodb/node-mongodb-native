@@ -45,11 +45,19 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
 
 describe('$lookup support', defaultMetadata, function () {
   before(async function () {
-    if (
-      !this.configuration.filters.MongoDBVersionFilter.filter({
-        metadata: defaultMetadata
-      } as unknown as Test)
-    ) {
+    const mochaTest = {
+      metadata: defaultMetadata
+    } as unknown as Test;
+
+    if (!this.configuration.filters.MongoDBVersionFilter.filter(mochaTest)) {
+      return;
+    }
+
+    if (!this.configuration.filters.MongoDBTopologyFilter.filter(mochaTest)) {
+      return;
+    }
+
+    if (!this.configuration.filters.ClientSideEncryptionFilter.filter(mochaTest)) {
       return;
     }
 
