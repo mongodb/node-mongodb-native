@@ -46,7 +46,7 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
 describe('$lookup support', defaultMetadata, function () {
   before(async function () {
     if (
-      this.configuration.filters.MongoDBVersionFilter.filter({
+      !this.configuration.filters.MongoDBVersionFilter.filter({
         metadata: defaultMetadata
       } as unknown as Test)
     ) {
