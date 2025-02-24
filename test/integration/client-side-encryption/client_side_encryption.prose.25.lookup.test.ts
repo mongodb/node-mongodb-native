@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { expect } from 'chai';
+import { type Test } from 'mocha';
 import { type MongoCryptOptions } from 'mongodb-client-encryption';
 import * as sinon from 'sinon';
 
@@ -44,6 +45,14 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
 
 describe('$lookup support', defaultMetadata, function () {
   before(async function () {
+    if (
+      this.configuration.filters.MongoDBVersionFilter.filter({
+        metadata: defaultMetadata
+      } as unknown as Test)
+    ) {
+      return;
+    }
+
     let client: MongoClient, encryptedClient: MongoClient;
     try {
       /** Create an unencrypted MongoClient. */
