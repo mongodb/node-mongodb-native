@@ -4,7 +4,7 @@ import * as process from 'process';
 import { satisfies } from 'semver';
 
 import { kmsCredentialsPresent } from '../../../csfle-kms-providers';
-import { AutoEncrypter, MongoClient } from '../../../mongodb';
+import { type AutoEncrypter, MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
 
 function getCryptSharedVersion(): AutoEncrypter['cryptSharedLibVersionInfo'] | null {
@@ -22,7 +22,7 @@ function getCryptSharedVersion(): AutoEncrypter['cryptSharedLibVersionInfo'] | n
       }
     });
     return mc.autoEncrypter.cryptSharedLibVersionInfo;
-  } catch (error) {
+  } catch {
     try {
       const mc = new MongoClient('mongodb://localhost:27017', {
         autoEncryption: {
@@ -35,6 +35,7 @@ function getCryptSharedVersion(): AutoEncrypter['cryptSharedLibVersionInfo'] | n
       });
       return mc.autoEncrypter.cryptSharedLibVersionInfo;
     } catch {
+      // squash errors
     }
   }
 
