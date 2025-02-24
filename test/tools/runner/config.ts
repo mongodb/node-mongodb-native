@@ -5,6 +5,7 @@ import * as url from 'url';
 
 import {
   type AuthMechanism,
+  CompressorName,
   HostAddress,
   MongoClient,
   type MongoClientOptions,
@@ -85,6 +86,7 @@ export class TestConfiguration {
   serverApi?: ServerApi;
   activeResources: number;
   isSrv: boolean;
+  compressors: CompressorName[];
 
   constructor(
     private uri: string,
@@ -116,11 +118,11 @@ export class TestConfiguration {
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
         ? {
-            proxyHost: url.searchParams.get('proxyHost'),
-            proxyPort: Number(url.searchParams.get('proxyPort')),
-            proxyUsername: url.searchParams.get('proxyUsername'),
-            proxyPassword: url.searchParams.get('proxyPassword')
-          }
+          proxyHost: url.searchParams.get('proxyHost'),
+          proxyPort: Number(url.searchParams.get('proxyPort')),
+          proxyUsername: url.searchParams.get('proxyUsername'),
+          proxyPassword: url.searchParams.get('proxyPassword')
+        }
         : undefined
     };
     if (url.username) {
@@ -133,6 +135,7 @@ export class TestConfiguration {
       const { username, password } = context.serverlessCredentials;
       this.options.auth = { username, password, authSource: 'admin' };
     }
+    this.compressors = url.searchParams.getAll('compressors') as CompressorName[];
   }
 
   get isLoadBalanced() {
@@ -197,7 +200,8 @@ export class TestConfiguration {
   }
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
-    serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
+    const baseOptions = this.compressors.length > 0 ? { compressors: this.compressors } : {}
+    serverOptions = Object.assign(baseOptions, getEnvironmentalOptions(), serverOptions);
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {
       if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
