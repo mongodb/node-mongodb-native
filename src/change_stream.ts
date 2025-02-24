@@ -423,7 +423,7 @@ export interface ChangeStreamCreateDocument
   /**
    * The type of the newly created object.
    *
-   * @since 8.1.0
+   * @sinceServerVersion 8.1.0
    */
   nsType?: 'collection' | 'timeseries' | 'view';
 }
