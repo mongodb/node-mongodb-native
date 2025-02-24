@@ -50,6 +50,67 @@ describe('Client Side Encryption Functional', function () {
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
+  describe('ClientEncryption', metadata, function () {
+    describe('#constructor', function () {
+      context('when a custom credential provider and credentials are provided', function () {
+        let client;
+
+        before(function () {
+          client = this.configuration.newClient({});
+        });
+
+        it('throws an error', function () {
+          expect(() => {
+            new ClientEncryption(client, {
+              keyVaultNamespace: 'test.keyvault',
+              kmsProviders: {
+                aws: { secretAccessKey: 'test', accessKeyId: 'test' }
+              },
+              credentialProviders: {
+                aws: async () => {
+                  return {
+                    sessionToken: 'test',
+                    secretAccessKey: 'test',
+                    accessKeyId: 'test'
+                  };
+                }
+              }
+            });
+          }).to.throw(/custom credential provider and credentials/);
+        });
+      });
+    });
+  });
+
+  describe('AutoEncrypter', metadata, function () {
+    context('when a custom credential provider and credentials are provided', function () {
+      it('throws an error', function () {
+        expect(() => {
+          this.configuration.newClient(
+            {},
+            {
+              autoEncryption: {
+                keyVaultNamespace: 'test.keyvault',
+                kmsProviders: {
+                  aws: { secretAccessKey: 'test', accessKeyId: 'test' }
+                },
+                credentialProviders: {
+                  aws: async () => {
+                    return {
+                      sessionToken: 'test',
+                      secretAccessKey: 'test',
+                      accessKeyId: 'test'
+                    };
+                  }
+                }
+              }
+            }
+          );
+        }).to.throw(/custom credential provider and credentials/);
+      });
+    });
+  });
+
   describe('Collection', metadata, function () {
     describe('#bulkWrite()', metadata, function () {
       context('when encryption errors', function () {
