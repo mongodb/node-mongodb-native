@@ -17,7 +17,12 @@ import { autoSelectSocketOptions } from './client_encryption';
 import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
-import { type CredentialProviders, type KMSProviders, refreshKMSCredentials } from './providers';
+import {
+  type CredentialProviders,
+  isEmptyCredentials,
+  type KMSProviders,
+  refreshKMSCredentials
+} from './providers';
 import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /** @public */
@@ -241,6 +246,15 @@ export class AutoEncrypter {
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
     this._credentialProviders = options.credentialProviders;
+
+    if (
+      options.credentialProviders?.aws &&
+      !isEmptyCredentials('aws', options.kmsProviders || {})
+    ) {
+      throw new MongoCryptInvalidArgumentError(
+        'Cannot provide both a custom credential provider and credentials. Please specify one or the other.'
+      );
+    }
 
     const mongoCryptOptions: MongoCryptOptions = {
       enableMultipleCollinfo: true,
