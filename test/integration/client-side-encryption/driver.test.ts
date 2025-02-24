@@ -718,6 +718,7 @@ describe('CSOT', function () {
                 keyVaultClient,
                 keyVaultNamespace: 'keyvault.datakeys',
                 kmsProviders: getLocalKmsProvider(),
+                extraOptions: getEncryptExtraOptions(),
                 schemaMap: {
                   'test.test': {
                     bsonType: 'object',
@@ -771,14 +772,15 @@ describe('CSOT', function () {
               autoEncryption: {
                 keyVaultClient,
                 keyVaultNamespace: 'admin.datakeys',
-                kmsProviders: getLocalKmsProvider()
+                kmsProviders: getLocalKmsProvider(),
+                extraOptions: getEncryptExtraOptions()
               }
             }
           );
         });
 
         afterEach(async function () {
-          await encryptedClient.close();
+          await encryptedClient?.close();
         });
 
         it('the command succeeds', metadata, async function () {
