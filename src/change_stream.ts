@@ -419,6 +419,13 @@ export interface ChangeStreamCreateDocument
     ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'create';
+
+  /**
+   * The type of the newly created object.
+   *
+   * @since 8.1.0
+   */
+  nsType?: 'collection' | 'timeseries' | 'view';
 }
 
 /**
