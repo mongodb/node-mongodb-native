@@ -63,11 +63,12 @@ describe('AutoEncrypter', function () {
       return Promise.resolve();
     });
 
-    sandbox.stub(StateMachine.prototype, 'fetchCollectionInfo').returns(
-      (async function* () {
-        while (true) yield MOCK_COLLINFO_RESPONSE;
-      })()
-    );
+    const iterator = (async function* () {
+      yield BSON.deserialize(MOCK_COLLINFO_RESPONSE);
+      yield BSON.deserialize(MOCK_COLLINFO_RESPONSE);
+      yield BSON.deserialize(MOCK_COLLINFO_RESPONSE);
+    })();
+    sandbox.stub(StateMachine.prototype, 'fetchCollectionInfo').returns(iterator);
 
     sandbox.stub(StateMachine.prototype, 'markCommand').callsFake(() => {
       if (ENABLE_LOG_TEST) {
