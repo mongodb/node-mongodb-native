@@ -807,16 +807,16 @@ BUILD_VARIANTS.push({
 });
 
 // special case for serverless testing
-BUILD_VARIANTS.push({
-  name: 'rhel8-test-serverless',
-  display_name: 'Serverless Test',
-  run_on: DEFAULT_OS,
-  expansions: {
-    NODE_LTS_VERSION: LOWEST_LTS,
-    NPM_VERSION: 9
-  },
-  tasks: ['serverless_task_group']
-});
+// BUILD_VARIANTS.push({
+//   name: 'rhel8-test-serverless',
+//   display_name: 'Serverless Test',
+//   run_on: DEFAULT_OS,
+//   expansions: {
+//     NODE_LTS_VERSION: LOWEST_LTS,
+//     NPM_VERSION: 9
+//   },
+//   tasks: ['serverless_task_group']
+// });
 
 BUILD_VARIANTS.push({
   name: 'rhel8-test-gcp-kms',
