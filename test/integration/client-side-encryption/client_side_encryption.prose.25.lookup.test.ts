@@ -34,11 +34,7 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
       autoEncryption: {
         keyVaultNamespace: 'db.keyvault',
         kmsProviders: { local: getCSFLEKMSProviders().local },
-        extraOptions: {
-          cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath,
-          mongocryptdBypassSpawn: true,
-          cryptSharedLibRequired: true
-        }
+        extraOptions: getEncryptExtraOptions()
       }
     }
   );
@@ -366,6 +362,22 @@ describe('$lookup support', defaultMetadata, function () {
       let client: MongoClient;
 
       beforeEach(async function () {
+        const mochaTest = {
+          metadata: defaultMetadata
+        } as unknown as Test;
+
+        if (!this.configuration.filters.MongoDBVersionFilter.filter(mochaTest)) {
+          return;
+        }
+
+        if (!this.configuration.filters.MongoDBTopologyFilter.filter(mochaTest)) {
+          return;
+        }
+
+        if (!this.configuration.filters.ClientSideEncryptionFilter.filter(mochaTest)) {
+          return;
+        }
+
         const getMongoCrypt = sinon.stub(AutoEncrypter, 'getMongoCrypt').callsFake(function () {
           const MongoCrypt = getMongoCrypt.wrappedMethod.call(this);
           return class extends MongoCrypt {
@@ -384,11 +396,7 @@ describe('$lookup support', defaultMetadata, function () {
             autoEncryption: {
               keyVaultNamespace: 'db.keyvault',
               kmsProviders: { local: getCSFLEKMSProviders().local },
-              extraOptions: {
-                cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath,
-                mongocryptdBypassSpawn: true,
-                cryptSharedLibRequired: true
-              }
+              extraOptions: getEncryptExtraOptions()
             }
           }
         );
@@ -396,7 +404,7 @@ describe('$lookup support', defaultMetadata, function () {
 
       afterEach(async function () {
         sinon.restore();
-        await client.close();
+        await client?.close();
       });
 
       it(

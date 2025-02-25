@@ -247,6 +247,8 @@ export class StateMachine {
 
         case MONGOCRYPT_CTX_NEED_MONGO_MARKINGS: {
           const command = context.nextMongoOperation();
+          if (getState() === MONGOCRYPT_CTX_ERROR) break;
+
           if (!mongocryptdClient) {
             throw new MongoCryptError(
               'unreachable state machine state: entered MONGOCRYPT_CTX_NEED_MONGO_MARKINGS but mongocryptdClient is undefined'
