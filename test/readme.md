@@ -520,15 +520,7 @@ source .evergreen/setup-fle.sh
 > By default, `setup-fle.sh` installs crypt_shared.  If you want to test with mongocryptd instead, set the RUN_WITH_MONGOCRYPTD environment variable before 
 > sourcing `setup-fle.sh`. 
 
-
-3. Start the KMS and KMIP servers:
-
-```bash
-bash .evergreen/run-kms-servers.sh
-bash .evergreen/run-kmip-server.sh &
-```
-
-4. Run the functional tests:
+3. Run the functional tests:
 ```bash
 export TEST_CSFLE=true
 npm run check:test

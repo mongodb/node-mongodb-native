@@ -73,7 +73,6 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
       updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'bootstrap kms servers' },
       { func: 'run tests' }
     ]
   };
@@ -111,7 +110,6 @@ BASE_TASKS.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'bootstrap kms servers' },
     { func: 'run tests' }
   ]
 });
@@ -168,7 +166,7 @@ TASKS.push(
         }),
         { func: 'install dependencies' },
         { func: 'run kerberos tests' }
-      ]   
+      ]
     },
     {
       name: 'test-auth-ldap',
@@ -185,7 +183,6 @@ TASKS.push(
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
-        { func: 'bootstrap kms servers' },
         { func: 'run socks5 tests' }
       ]
     },
@@ -200,7 +197,6 @@ TASKS.push(
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
-        { func: 'bootstrap kms servers' },
         { func: 'run socks5 tests' }
       ]
     },
@@ -473,7 +469,6 @@ const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'bootstrap kms servers' },
       { func: 'run tests' }
     ]
   };
@@ -682,7 +677,6 @@ for (const version of ['5.0', 'rapid', 'latest']) {
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'bootstrap kms servers' },
       { func: 'install mongodb-client-encryption' },
       { func: 'assume secrets manager rule' },
       { func: 'run custom csfle tests' }
@@ -703,7 +697,6 @@ customDependencyTests.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'bootstrap kms servers' },
     {
       func: 'install package',
       vars: {
@@ -750,7 +743,6 @@ SINGLETON_TASKS.push(
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'bootstrap kms servers' },
       { func: 'assume secrets manager rule' },
       { func: 'build and test alpine FLE' }
     ]

@@ -1394,13 +1394,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       };
       const clientNoTlsOptions = {
         keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+        kmsProviders: getKmsProviders(null, null, '127.0.0.1:9002', '127.0.0.1:9002'),
         tlsOptions: tlsCaOptions,
         extraOptions: getEncryptExtraOptions()
       };
       const clientWithTlsOptions = {
         keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+        kmsProviders: getKmsProviders(null, null, '127.0.0.1:9002', '127.0.0.1:9002'),
         tlsOptions: {
           aws: {
             tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
@@ -1423,13 +1423,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       };
       const clientWithTlsExpiredOptions = {
         keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
+        kmsProviders: getKmsProviders(null, '127.0.0.1:9000', '127.0.0.1:9000', '127.0.0.1:9000'),
         tlsOptions: tlsCaOptions,
         extraOptions: getEncryptExtraOptions()
       };
       const clientWithInvalidHostnameOptions = {
         keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
+        kmsProviders: getKmsProviders(null, '127.0.0.1:9001', '127.0.0.1:9001', '127.0.0.1:9001'),
         tlsOptions: tlsCaOptions,
         extraOptions: getEncryptExtraOptions()
       };
@@ -1506,10 +1506,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKey = {
         region: 'us-east-1',
         key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-        endpoint: '127.0.0.1:8002'
+        endpoint: '127.0.0.1:9002'
       };
-      const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:8000' };
-      const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:8001' };
+      const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:9000' };
+      const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:9001' };
 
       it('should fail with no TLS', metadata, async function () {
         try {
@@ -1730,12 +1730,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               tenantId: providers.azure.tenantId,
               clientId: providers.azure.clientId,
               clientSecret: providers.azure.clientId,
-              identityPlatformEndpoint: '127.0.0.1:8002'
+              identityPlatformEndpoint: '127.0.0.1:9002'
             },
             'gcp:no_client_cert': {
               email: providers.gcp.email,
               privateKey: providers.gcp.privateKey,
-              endpoint: '127.0.0.1:8002'
+              endpoint: '127.0.0.1:9002'
             },
             'kmip:no_client_cert': {
               endpoint: '127.0.0.1:5698'
@@ -1748,12 +1748,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               tenantId: providers.azure.tenantId,
               clientId: providers.azure.clientId,
               clientSecret: providers.azure.clientId,
-              identityPlatformEndpoint: '127.0.0.1:8002'
+              identityPlatformEndpoint: '127.0.0.1:9002'
             },
             'gcp:with_tls': {
               email: providers.gcp.email,
               privateKey: providers.gcp.privateKey,
-              endpoint: '127.0.0.1:8002'
+              endpoint: '127.0.0.1:9002'
             },
             'kmip:with_tls': {
               endpoint: '127.0.0.1:5698'
@@ -1800,7 +1800,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               masterKey: {
                 region: 'us-east-1',
                 key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-                endpoint: '127.0.0.1:8002'
+                endpoint: '127.0.0.1:9002'
               }
             })
             .catch(e => e);
@@ -1816,7 +1816,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               masterKey: {
                 region: 'us-east-1',
                 key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-                endpoint: '127.0.0.1:8002'
+                endpoint: '127.0.0.1:9002'
               }
             })
             .catch(e => e);
