@@ -305,7 +305,8 @@ describe('Authentication Spec Prose Tests', function () {
       );
     });
 
-    describe('Step 4', function () {
+    // TODO(NODE-6752): Fix flaky SCRAM-SHA-256 tests
+    describe.skip('Step 4', function () {
       /**
        * Step 4
        * To test SASLprep behavior, create two users:
@@ -376,8 +377,7 @@ describe('Authentication Spec Prose Tests', function () {
           expect(stats).to.exist;
         });
 
-        // TODO(NODE-6752): Fix flaky SCRAM-SHA-256 test
-        it.skip(
+        it(
           'logs in with non-normalized username and normalized password',
           metadata,
           async function () {

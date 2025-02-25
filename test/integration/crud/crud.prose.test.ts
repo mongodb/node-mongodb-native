@@ -13,6 +13,7 @@ import {
   MongoInvalidArgumentError,
   MongoServerError
 } from '../../mongodb';
+import { getEncryptExtraOptions } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 describe('CRUD Prose Spec Tests', () => {
@@ -1023,7 +1024,8 @@ describe('CRUD Prose Spec Tests', () => {
                 accessKeyId: 'foo',
                 secretAccessKey: 'bar'
               }
-            }
+            },
+            extraOptions: getEncryptExtraOptions()
           }
         }
       );

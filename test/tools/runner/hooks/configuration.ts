@@ -176,9 +176,7 @@ const testConfigBeforeHook = async function () {
     auth: process.env.AUTH === 'auth',
     tls: process.env.SSL === 'ssl',
     csfle: {
-      enabled: this.configuration.clientSideEncryption.enabled,
-      version: this.configuration.clientSideEncryption.version,
-      libmongocrypt: this.configuration.clientSideEncryption.libmongocrypt
+      ...this.configuration.clientSideEncryption
     },
     serverApi: MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,
