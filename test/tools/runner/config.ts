@@ -5,7 +5,7 @@ import * as url from 'url';
 
 import {
   type AuthMechanism,
-  CompressorName,
+  type CompressorName,
   HostAddress,
   MongoClient,
   type MongoClientOptions,
@@ -118,11 +118,11 @@ export class TestConfiguration {
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
         ? {
-          proxyHost: url.searchParams.get('proxyHost'),
-          proxyPort: Number(url.searchParams.get('proxyPort')),
-          proxyUsername: url.searchParams.get('proxyUsername'),
-          proxyPassword: url.searchParams.get('proxyPassword')
-        }
+            proxyHost: url.searchParams.get('proxyHost'),
+            proxyPort: Number(url.searchParams.get('proxyPort')),
+            proxyUsername: url.searchParams.get('proxyUsername'),
+            proxyPassword: url.searchParams.get('proxyPassword')
+          }
         : undefined
     };
     if (url.username) {
@@ -200,7 +200,7 @@ export class TestConfiguration {
   }
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
-    const baseOptions = this.compressors.length > 0 ? { compressors: this.compressors } : {}
+    const baseOptions = this.compressors.length > 0 ? { compressors: this.compressors } : {};
     serverOptions = Object.assign(baseOptions, getEnvironmentalOptions(), serverOptions);
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {

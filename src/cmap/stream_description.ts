@@ -91,6 +91,6 @@ export class StreamDescription {
     return Long.isLong(serverConnectionId)
       ? serverConnectionId.toBigInt()
       : // @ts-expect-error: Doubles are coercible to number
-      BigInt(serverConnectionId);
+        BigInt(serverConnectionId);
   }
 }
