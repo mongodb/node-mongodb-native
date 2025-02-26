@@ -3720,14 +3720,6 @@ buildvariants:
       - run-custom-csfle-tests-rapid
       - run-custom-csfle-tests-latest
       - test-latest-driver-mongodb-client-encryption-6.0.0
-  - name: rhel8-test-serverless
-    display_name: Serverless Test
-    run_on: rhel80-large
-    expansions:
-      NODE_LTS_VERSION: 16
-      NPM_VERSION: 9
-    tasks:
-      - serverless_task_group
   - name: rhel8-test-gcp-kms
     display_name: GCP KMS Test
     run_on: debian11-small
