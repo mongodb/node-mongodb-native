@@ -48,7 +48,7 @@ const filters: Filter[] = [];
 
 let initializedFilters = false;
 
-process.env.IP = spawnSync('curl ifconfig.me', { encoding: 'utf-8' }).stdout;
+process.env.IP = spawnSync('curl', ['ifconfig.me'], { encoding: 'utf-8' }).stdout;
 
 async function initializeFilters(client): Promise<Record<string, any>> {
   if (initializedFilters) {
