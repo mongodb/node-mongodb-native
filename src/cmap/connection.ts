@@ -183,9 +183,11 @@ function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
 
 export const logger = createWriteStream('connection-logs.txt');
 export const write = (payload: Document) => {
-  payload.timestamp = new Date();
-  payload.hostname = process.env.HOSTNAME;
-  const log = EJSON.stringify(payload);
+  payload.timestamp = new Date().toISOString();
+  payload.hostname = process.env.MONGODB_URI;
+  payload.ip = process.env.IP;
+
+  const log = JSON.stringify(payload);
   logger.write(log);
   logger.write('\n');
 };
