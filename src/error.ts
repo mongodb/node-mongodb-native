@@ -1,5 +1,4 @@
 import type { Document } from './bson';
-import { write } from './cmap/connection';
 import {
   type ClientBulkWriteError,
   type ClientBulkWriteResult
@@ -1050,6 +1049,7 @@ export class MongoNetworkError extends MongoError {
     super(message, { cause: options?.cause });
     this.beforeHandshake = !!options?.beforeHandshake;
 
+    const { write } = require('./cmap/connection');
     write({
       event: 'network error',
       message,
