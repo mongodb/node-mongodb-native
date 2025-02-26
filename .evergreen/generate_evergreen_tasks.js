@@ -806,7 +806,7 @@ BUILD_VARIANTS.push({
   tasks: customDependencyTests.map(({ name }) => name)
 });
 
-// special case for serverless testing
+// TODO(NODE-6786): Reenable serverless testing.
 // BUILD_VARIANTS.push({
 //   name: 'rhel8-test-serverless',
 //   display_name: 'Serverless Test',
