@@ -22,6 +22,7 @@ import { NodeVersionFilter } from '../filters/node_version_filter';
 import { OSFilter } from '../filters/os_filter';
 import { ServerlessFilter } from '../filters/serverless_filter';
 import { type Filter } from '../filters/filter';
+import { spawnSync } from 'child_process';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -46,6 +47,8 @@ const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
 const filters: Filter[] = [];
 
 let initializedFilters = false;
+
+process.env.HOSTNAME = spawnSync('hostname', { encoding: 'utf-8' }).stdout;
 async function initializeFilters(client): Promise<Record<string, any>> {
   if (initializedFilters) {
     return {};

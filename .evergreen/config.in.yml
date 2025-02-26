@@ -107,6 +107,20 @@ functions:
         binary: bash
         args:
           - .evergreen/run-tests.sh
+    - command: s3.put
+      params:
+        aws_key: ${aws_key}
+        aws_secret: ${aws_secret}
+        local_file: src/connection-logs.txt
+        optional: true
+        # Upload the coverage report for all tasks in a single build to the same directory.
+        # TODO NODE-4707 - change upload directory to ${UPLOAD_BUCKET}
+        # This change will require changing the `download and merge coverage` func as well
+        remote_file: mongo-node-driver/${revision}/${version_id}/${build_variant}/${task_name}/connection-logs.txt
+        bucket: mciuploads
+        permissions: public-read
+        content_type: text/plain
+        display_name: "Connection Logs"
 
   "run serverless tests":
     - command: timeout.update
@@ -127,6 +141,20 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/run-serverless-tests.sh
+    - command: s3.put
+      params:
+        aws_key: ${aws_key}
+        aws_secret: ${aws_secret}
+        local_file: src/connection-logs.txt
+        optional: true
+        # Upload the coverage report for all tasks in a single build to the same directory.
+        # TODO NODE-4707 - change upload directory to ${UPLOAD_BUCKET}
+        # This change will require changing the `download and merge coverage` func as well
+        remote_file: mongo-node-driver/${revision}/${version_id}/${build_variant}/${task_name}/connection-logs.txt
+        bucket: mciuploads
+        permissions: public-read
+        content_type: text/plain
+        display_name: "Connection Logs"
 
   "start-load-balancer":
     - command: shell.exec

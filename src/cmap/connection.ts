@@ -1,3 +1,4 @@
+import { createWriteStream } from 'fs';
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
@@ -6,6 +7,7 @@ import {
   deserialize,
   type DeserializeOptions,
   type Document,
+  EJSON,
   type ObjectId
 } from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
@@ -178,6 +180,43 @@ function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
 
   return uuidV4().toString('hex');
 }
+
+export const logger = createWriteStream('connection-logs.txt');
+export const write = (payload: Document) => {
+  payload.timestamp = new Date();
+  payload.hostname = process.env.HOSTNAME;
+  const log = EJSON.stringify(payload);
+  logger.write(log);
+  logger.write('\n');
+};
+
+const writeEvent =
+  (event: string) =>
+  <T extends Document>(payload: T) => {
+    (payload as T & { event: string }).event = event;
+    write(payload);
+  };
+
+export const writeStarted = writeEvent('commandStarted')<{
+  requestId: number;
+  connectionId: number | '<monitor>';
+}>;
+
+export const readStarted = writeEvent('readStarted')<{
+  requestId: number;
+  connectionId: number | '<monitor>';
+}>;
+
+export const readSucceeded = writeEvent('readSucceeded')<{
+  requestId: number;
+  connectionId: number | '<monitor>';
+}>;
+
+export const readFailed = writeEvent('readFailed')<{
+  requestId: number;
+  connectionId: number | '<monitor>';
+  error: Error;
+}>;
 
 /** @internal */
 export class Connection extends TypedEventEmitter<ConnectionEvents> {
@@ -451,7 +490,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       this.socketTimeoutMS;
     this.socket.setTimeout(timeout);
 
+    const payload = {
+      connectionId: this.id,
+      requestId: message.requestId
+    };
     try {
+      writeStarted(payload);
+
       await this.writeCommand(message, {
         agreedCompressor: this.description.compressor ?? 'none',
         zlibCompressionLevel: this.description.zlibCompressionLevel,
@@ -476,16 +521,28 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         );
       }
 
-      for await (const response of this.readMany(options)) {
-        this.socket.setTimeout(0);
-        const bson = response.parse();
+      readStarted(payload);
+      try {
+        for await (const response of this.readMany(options)) {
+          readSucceeded(payload);
+          this.socket.setTimeout(0);
+          const bson = response.parse();
 
-        const document = (responseType ?? MongoDBResponse).make(bson);
+          const document = (responseType ?? MongoDBResponse).make(bson);
 
-        yield document;
-        this.throwIfAborted();
+          yield document;
 
-        this.socket.setTimeout(timeout);
+          readStarted(payload);
+          this.throwIfAborted();
+
+          this.socket.setTimeout(timeout);
+        }
+      } catch (error) {
+        readFailed({
+          ...payload,
+          error
+        });
+        throw error;
       }
     } finally {
       this.socket.setTimeout(0);
