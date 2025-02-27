@@ -31,7 +31,7 @@ for await (let line of lines) {
   const varVal = line.slice('export '.length);
   const variable = varVal.slice(0, varVal.indexOf('='));
   const value = varVal.slice(varVal.indexOf('=') + 1);
-  output.appendFile(`set -x ${variable} ${value}\n`);
+  await output.appendFile(`set -x ${variable} ${value}\n`);
 }
 
 output.close();
