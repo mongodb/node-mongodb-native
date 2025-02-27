@@ -13,6 +13,7 @@ import {
   type WriteConcernSettings
 } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
+import { type Filter } from './filters/filter';
 
 interface ProxyParams {
   proxyHost?: string;
@@ -85,6 +86,7 @@ export class TestConfiguration {
   serverApi?: ServerApi;
   activeResources: number;
   isSrv: boolean;
+  filters: Record<string, Filter>;
 
   constructor(
     private uri: string,
@@ -129,6 +131,11 @@ export class TestConfiguration {
         password: url.password
       };
     }
+
+    this.filters = Object.fromEntries(
+      context.filters.map(filter => [filter.constructor.name, filter])
+    );
+
     if (context.serverlessCredentials) {
       const { username, password } = context.serverlessCredentials;
       this.options.auth = { username, password, authSource: 'admin' };

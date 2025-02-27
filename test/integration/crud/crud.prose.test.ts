@@ -1032,7 +1032,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     afterEach(async function () {
-      await client.close();
+      await client?.close();
     });
 
     it('raises a client side error', async function () {

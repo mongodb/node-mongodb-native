@@ -15,7 +15,6 @@ const {
   HEARTBEAT_EVENTS
 } = require('../../mongodb');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
-const { ClientSideEncryptionFilter } = require('../runner/filters/client_encryption_filter');
 const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
@@ -153,7 +152,7 @@ function legacyRunOnToRunOnRequirement(runOn) {
 }
 
 /**
- * @param {((test: { description: string }) => true | string)?} filter a function that returns true for any tests that should run, false otherwise.
+ * @param {((test: { description: string }, configuration: TestConfiguration) => true | string)?} filter a function that returns true for any tests that should run, false otherwise.
  */
 function generateTopologyTests(testSuites, testContext, filter) {
   for (const testSuite of testSuites) {
@@ -198,10 +197,8 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
       let csfleFilterError = null;
       if (shouldRun && testContext.requiresCSFLE) {
-        const csfleFilter = new ClientSideEncryptionFilter();
-        await csfleFilter.initializeFilter(null, {});
         try {
-          const filterResult = csfleFilter.filter({
+          const filterResult = this.configuration.filters.ClientSideEncryptionFilter.filter({
             metadata: { requires: { clientSideEncryption: true } }
           });
           if (typeof filterResult === 'string') {
