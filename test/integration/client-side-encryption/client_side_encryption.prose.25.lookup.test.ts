@@ -346,7 +346,7 @@ describe('$lookup support', defaultMetadata, function () {
   );
 
   test(
-    'Case 9: db.csfle joins db.qe',
+    'Case 9: test error with <8.1',
     'csfle',
     [
       { $match: { csfle: 'csfle' } },
@@ -360,7 +360,7 @@ describe('$lookup support', defaultMetadata, function () {
       { $project: { _id: 0 } }
     ],
     /Upgrade/i,
-    { requires: { ...defaultMetadata.requires, mongodb: '<8.1.0' } }
+    { requires: { ...defaultMetadata.requires, mongodb: '>=7.0.0 <8.1.0' } }
   );
 
   describe('Node.js custom test', function () {
@@ -387,7 +387,6 @@ describe('$lookup support', defaultMetadata, function () {
           return class extends MongoCrypt {
             constructor(options: MongoCryptOptions) {
               expect(options).to.have.property('enableMultipleCollinfo', true); // assert invariant
-              //@ts-expect-error: not yet in the defs
               options.enableMultipleCollinfo = false;
               super(options);
             }
