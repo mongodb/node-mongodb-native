@@ -65,8 +65,6 @@ describe('AutoEncrypter', function () {
 
     const iterator = (async function* () {
       yield BSON.deserialize(MOCK_COLLINFO_RESPONSE);
-      yield BSON.deserialize(MOCK_COLLINFO_RESPONSE);
-      yield BSON.deserialize(MOCK_COLLINFO_RESPONSE);
     })();
     sandbox.stub(StateMachine.prototype, 'fetchCollectionInfo').returns(iterator);
 
