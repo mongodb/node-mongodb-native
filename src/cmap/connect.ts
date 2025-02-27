@@ -391,7 +391,12 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     socket
       .once(connectEvent, () => resolve(socket))
       .once('error', cause =>
-        reject(new MongoNetworkError(MongoError.buildErrorMessage(cause), { cause }))
+        reject(
+          new MongoNetworkError(
+            MongoError.buildErrorMessage(cause) + '- error encountered while establishing socket',
+            { cause }
+          )
+        )
       )
       .once('timeout', () => {
         reject(
@@ -489,7 +494,10 @@ async function makeSocks5Connection(options: MakeConnectionOptions): Promise<Str
     });
     existingSocket = connection.socket;
   } catch (cause) {
-    throw new MongoNetworkError(MongoError.buildErrorMessage(cause), { cause });
+    throw new MongoNetworkError(
+      MongoError.buildErrorMessage(cause) + '- during socks5 proxy establishment',
+      { cause }
+    );
   }
 
   // Finally, now treat the resulting duplex stream as the
