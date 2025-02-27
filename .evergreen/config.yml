@@ -493,6 +493,20 @@ functions:
         binary: bash
         args:
           - .evergreen/prepare-mongodb-aws-ecs-auth.sh
+  run aws custom credential providers test:
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
+          - MONGODB_URI
+          - DRIVERS_TOOLS
+          - MONGODB_AWS_SDK
+        env:
+          AWS_CREDENTIAL_TYPE: env-creds
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/run-aws-custom-credential-providers-test.sh
   run custom csfle tests:
     - command: subprocess.exec
       type: test
@@ -1805,6 +1819,21 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager rule
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
+  - name: aws-latest-auth-test-run-aws-custom-credential-providers-test
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: assume secrets manager rule
+      - func: run aws custom credential providers test
   - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
     commands:
       - command: expansions.update
@@ -3686,6 +3715,7 @@ buildvariants:
       - aws-latest-auth-test-run-aws-ECS-auth-test
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
+      - aws-latest-auth-test-run-aws-custom-credential-providers-test
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies

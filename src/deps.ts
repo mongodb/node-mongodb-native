@@ -85,7 +85,7 @@ export function getZstdLibrary(): ZStandardLib | { kModuleError: MongoMissingDep
 export interface AWSCredentials {
   accessKeyId: string;
   secretAccessKey: string;
-  sessionToken: string;
+  sessionToken?: string;
   expiration?: Date;
 }
 
