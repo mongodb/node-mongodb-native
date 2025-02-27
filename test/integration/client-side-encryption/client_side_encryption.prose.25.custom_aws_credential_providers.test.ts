@@ -104,8 +104,7 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
     });
 
     it('is successful', async function () {
-      const result = await client.db('test').collection('test').insertOne({ n: 1 });
-      expect(result.ok).to.equal(1);
+      await client.db('aws').collection('aws_test').estimatedDocumentCount();
     });
   });
 });
