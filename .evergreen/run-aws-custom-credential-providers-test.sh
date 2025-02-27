@@ -4,8 +4,13 @@ set -o errexit # Exit the script with error if any of the commands fail
 
 MONGODB_URI=${MONGODB_URI:-}
 
+# . $DRIVERS_TOOLS/.evergreen/secrets_handling/setup-secrets.sh drivers/aws_auth
+
+export
 source .evergreen/setup-fle.sh
-source .evergreen/setup-mongodb-aws-auth-tests.sh
+
+#export
+#source .evergreen/setup-mongodb-aws-auth-tests.sh
 
 # load node.js environment
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh

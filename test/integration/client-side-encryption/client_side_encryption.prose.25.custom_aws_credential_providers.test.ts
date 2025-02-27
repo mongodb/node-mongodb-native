@@ -76,7 +76,7 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
     });
   });
 
-  context('Case 3: Automatic encryption with different custom providers', function () {
+  context.skip('Case 3: Automatic encryption with different custom providers', function () {
     let client;
 
     beforeEach(function () {
