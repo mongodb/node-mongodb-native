@@ -16,9 +16,6 @@ const {
 } = require('../../spec/client-side-encryption/external/external-schema.json');
 /* eslint-disable no-restricted-modules */
 const { ClientEncryption } = require('../../../src/client-side-encryption/client_encryption');
-const {
-  ClientSideEncryptionFilter
-} = require('../../tools/runner/filters/client_encryption_filter');
 const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
 const { AlpineTestConfiguration } = require('../../tools/runner/config');
 
