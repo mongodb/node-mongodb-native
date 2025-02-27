@@ -1,5 +1,4 @@
 import { inspect, promisify } from 'util';
-import { isUint8Array } from 'util/types';
 
 import {
   type Binary,
@@ -75,7 +74,7 @@ import type {
   ServerSelectionSucceededEvent,
   WaitingForSuitableServerEvent
 } from './sdam/server_selection_events';
-import { HostAddress, isPromiseLike, parseUnsignedInteger } from './utils';
+import { HostAddress, isPromiseLike, isUint8Array, parseUnsignedInteger } from './utils';
 
 /**
  * @public
