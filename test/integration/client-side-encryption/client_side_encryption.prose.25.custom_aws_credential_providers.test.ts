@@ -12,8 +12,7 @@ const metadata: MongoDBMetadataUI = {
 
 const masterKey = {
   region: 'us-east-1',
-  key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-  endpoint: '127.0.0.1:9002'
+  key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
 };
 
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
@@ -104,7 +103,8 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
     });
 
     it('is successful', async function () {
-      await client.db('aws').collection('aws_test').estimatedDocumentCount();
+      const result = await client.db('test').collection('test').insertOne({ n: 1 });
+      expect(result.ok).to.equal(1);
     });
   });
 });
