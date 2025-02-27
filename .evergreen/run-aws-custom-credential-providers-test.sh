@@ -11,4 +11,4 @@ source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 export TEST_CSFLE=true
 
-npx mocha --config test/mocha_mongodb.js test/integration/client-side-encryption/client_side_encryption.prose.25.custon_aws_credential_providers.test.ts
+npx mocha --config test/mocha_mongodb.js test/integration/client-side-encryption/client_side_encryption.prose.25.custom_aws_credential_providers.test.ts
