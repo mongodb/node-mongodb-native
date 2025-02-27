@@ -3,6 +3,7 @@ import { expect } from 'chai';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { AWSTemporaryCredentialProvider, Binary } from '../../mongodb';
+import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
@@ -93,7 +94,8 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
                 secretAccessKey: process.env.FLE_AWS_SECRET
               };
             }
-          }
+          },
+          extraOptions: getEncryptExtraOptions()
         }
       });
     });
