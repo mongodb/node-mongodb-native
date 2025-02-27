@@ -1703,9 +1703,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     context('Case 6: named KMS providers apply TLS options', function () {
       afterEach(() => keyvaultClient?.close());
       beforeEach(async function () {
-        const filter = new ClientSideEncryptionFilter();
-        await filter.initializeFilter({}, {});
-        const shouldSkip = filter.filter({
+        const shouldSkip = this.configuration.filters.ClientSideEncryptionFilter.filter({
           metadata: {
             requires: {
               // 6.0.1 includes libmongocrypt 1.10.

@@ -2,7 +2,6 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { expect } from 'chai';
-import { type Test } from 'mocha';
 import { type MongoCryptOptions } from 'mongodb-client-encryption';
 import * as sinon from 'sinon';
 
@@ -15,7 +14,7 @@ const defaultMetadata: MongoDBMetadataUI = {
   requires: {
     topology: '!single',
     clientSideEncryption: '>=6.3.0',
-    mongodb: '>=8.1.0'
+    mongodb: '>=7.0.0'
   }
 };
 
@@ -31,6 +30,7 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
   configuration.newClient(
     {},
     {
+      writeConcern: { w: 'majority' },
       autoEncryption: {
         keyVaultNamespace: 'db.keyvault',
         kmsProviders: { local: getCSFLEKMSProviders().local },
@@ -41,9 +41,7 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
 
 describe('$lookup support', defaultMetadata, function () {
   before(async function () {
-    const mochaTest = {
-      metadata: defaultMetadata
-    } as unknown as Test;
+    const mochaTest = { metadata: defaultMetadata };
 
     if (!this.configuration.filters.MongoDBVersionFilter.filter(mochaTest)) {
       return;
@@ -57,16 +55,26 @@ describe('$lookup support', defaultMetadata, function () {
       return;
     }
 
-    let client: MongoClient, encryptedClient: MongoClient;
+    let unencryptedClient: MongoClient, encryptedClient: MongoClient;
     try {
-      /** Create an unencrypted MongoClient. */
-      client = this.configuration.newClient();
+      /**
+       * Create an encrypted MongoClient configured with:
+       *
+       * ```txt
+       *   AutoEncryptionOpts(
+       *       keyVaultNamespace="db.keyvault",
+       *       kmsProviders={"local": { "key": "<base64 decoding of LOCAL_MASTERKEY>" }}
+       *   )
+       * ```
+       */
+      encryptedClient = newEncryptedClient(this);
+
       /** Drop database db. */
-      await client.db('db').dropDatabase();
+      await encryptedClient.db('db').dropDatabase();
 
       /** Insert `key-doc.json` into db.keyvault. */
       const keyDoc = await readFixture('key-doc.json');
-      await client.db('db').collection('keyvault').insertOne(keyDoc);
+      await encryptedClient.db('db').collection('keyvault').insertOne(keyDoc);
 
       /**
        * Create the following collections:
@@ -113,20 +121,11 @@ describe('$lookup support', defaultMetadata, function () {
       ];
 
       for (const { name, options } of collections) {
-        await client.db('db').createCollection(name, options);
+        await encryptedClient.db('db').createCollection(name, options);
       }
 
-      /**
-       * Create an encrypted MongoClient configured with:
-       *
-       * ```txt
-       *   AutoEncryptionOpts(
-       *       keyVaultNamespace="db.keyvault",
-       *       kmsProviders={"local": { "key": "<base64 decoding of LOCAL_MASTERKEY>" }}
-       *   )
-       * ```
-       */
-      encryptedClient = newEncryptedClient(this);
+      /** Create an unencrypted MongoClient. */
+      unencryptedClient = this.configuration.newClient({}, { writeConcern: { w: 'majority' } });
 
       /**
        * ```
@@ -147,12 +146,12 @@ describe('$lookup support', defaultMetadata, function () {
 
         if (name.startsWith('no_')) continue;
 
-        expect(await client.db('db').collection(name).findOne(insertedId))
+        expect(await unencryptedClient.db('db').collection(name).findOne(insertedId))
           .to.have.property(Object.keys(document)[0])
           .that.has.property('_bsontype', 'Binary');
       }
     } finally {
-      await client?.close();
+      await unencryptedClient?.close();
       await encryptedClient?.close();
     }
   });
@@ -161,7 +160,7 @@ describe('$lookup support', defaultMetadata, function () {
     title: string,
     collName: string,
     pipeline: Document[],
-    expected: Document,
+    expected: Document | RegExp,
     metadata?: MongoDBMetadataUI
   ) {
     describe(title.slice(0, title.indexOf(':')), function () {
@@ -182,12 +181,11 @@ describe('$lookup support', defaultMetadata, function () {
           .toArray()
           .catch(error => error);
 
-        const expectedError = expected instanceof Error;
+        const expectedError = expected instanceof RegExp;
 
         if (expectedError) {
           expect(actual).to.be.instanceOf(Error);
-          const expectedErrorMessage = new RegExp(expected.message, 'i');
-          if (!expectedErrorMessage.test(actual.message)) {
+          if (!expected.test(actual.message)) {
             throw actual;
           }
         } else if (actual instanceof Error) {
@@ -214,7 +212,8 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0 } }
     ],
-    { csfle: 'csfle', matched: [{ no_schema: 'no_schema' }] }
+    { csfle: 'csfle', matched: [{ no_schema: 'no_schema' }] },
+    { requires: { ...defaultMetadata.requires, mongodb: '>=8.1.0' } }
   );
 
   test(
@@ -234,7 +233,8 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0, __safeContent__: 0 } }
     ],
-    { qe: 'qe', matched: [{ no_schema: 'no_schema' }] }
+    { qe: 'qe', matched: [{ no_schema: 'no_schema' }] },
+    { requires: { ...defaultMetadata.requires, mongodb: '>=8.1.0' } }
   );
 
   test(
@@ -251,7 +251,8 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0 } }
     ],
-    { no_schema: 'no_schema', matched: [{ csfle: 'csfle' }] }
+    { no_schema: 'no_schema', matched: [{ csfle: 'csfle' }] },
+    { requires: { ...defaultMetadata.requires, mongodb: '>=8.1.0' } }
   );
 
   test(
@@ -268,7 +269,8 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0 } }
     ],
-    { no_schema: 'no_schema', matched: [{ qe: 'qe' }] }
+    { no_schema: 'no_schema', matched: [{ qe: 'qe' }] },
+    { requires: { ...defaultMetadata.requires, mongodb: '>=8.1.0' } }
   );
 
   test(
@@ -285,7 +287,8 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0 } }
     ],
-    { csfle: 'csfle', matched: [{ csfle2: 'csfle2' }] }
+    { csfle: 'csfle', matched: [{ csfle2: 'csfle2' }] },
+    { requires: { ...defaultMetadata.requires, mongodb: '>=8.1.0' } }
   );
 
   test(
@@ -302,7 +305,8 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0, __safeContent__: 0 } }
     ],
-    { qe: 'qe', matched: [{ qe2: 'qe2' }] }
+    { qe: 'qe', matched: [{ qe2: 'qe2' }] },
+    { requires: { ...defaultMetadata.requires, mongodb: '>=8.1.0' } }
   );
 
   test(
@@ -319,7 +323,8 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0 } }
     ],
-    { no_schema: 'no_schema', matched: [{ no_schema2: 'no_schema2' }] }
+    { no_schema: 'no_schema', matched: [{ no_schema2: 'no_schema2' }] },
+    { requires: { ...defaultMetadata.requires, mongodb: '>=8.1.0' } }
   );
 
   test(
@@ -336,7 +341,8 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0 } }
     ],
-    new Error('not supported')
+    /not supported/i,
+    { requires: { ...defaultMetadata.requires, mongodb: '>=8.1.0' } }
   );
 
   test(
@@ -353,7 +359,7 @@ describe('$lookup support', defaultMetadata, function () {
       },
       { $project: { _id: 0 } }
     ],
-    new Error('Upgrade'),
+    /Upgrade/i,
     { requires: { ...defaultMetadata.requires, mongodb: '<8.1.0' } }
   );
 
@@ -362,9 +368,7 @@ describe('$lookup support', defaultMetadata, function () {
       let client: MongoClient;
 
       beforeEach(async function () {
-        const mochaTest = {
-          metadata: defaultMetadata
-        } as unknown as Test;
+        const mochaTest = { metadata: defaultMetadata };
 
         if (!this.configuration.filters.MongoDBVersionFilter.filter(mochaTest)) {
           return;
@@ -390,16 +394,7 @@ describe('$lookup support', defaultMetadata, function () {
           };
         });
 
-        client = this.configuration.newClient(
-          {},
-          {
-            autoEncryption: {
-              keyVaultNamespace: 'db.keyvault',
-              kmsProviders: { local: getCSFLEKMSProviders().local },
-              extraOptions: getEncryptExtraOptions()
-            }
-          }
-        );
+        client = newEncryptedClient(this);
       });
 
       afterEach(async function () {
