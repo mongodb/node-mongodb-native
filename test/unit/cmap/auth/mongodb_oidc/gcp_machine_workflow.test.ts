@@ -19,4 +19,28 @@ describe('GCPMachineFlow', function () {
       });
     });
   });
+
+  describe('#getTokenFromCacheOrEnv', function () {
+    context('when the cache has a token', function () {
+      const connection = sinon.createStubInstance(Connection);
+      const credentials = sinon.createStubInstance(MongoCredentials);
+
+      context('when the connection has no token', function () {
+        let cache;
+        let workflow;
+
+        this.beforeEach(function () {
+          cache = new TokenCache();
+          cache.put({ accessToken: 'test', expiresInSeconds: 7200 });
+          workflow = new GCPMachineWorkflow(cache);
+        });
+
+        it('sets the token on the connection', async function () {
+          const token = await workflow.getTokenFromCacheOrEnv(connection, credentials);
+          expect(token).to.equal('test');
+          expect(connection.accessToken).to.equal('test');
+        });
+      });
+    });
+  });
 });
