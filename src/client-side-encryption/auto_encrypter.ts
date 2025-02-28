@@ -239,6 +239,7 @@ export class AutoEncrypter {
     this._kmsProviders = options.kmsProviders || {};
 
     const mongoCryptOptions: MongoCryptOptions = {
+      enableMultipleCollinfo: true,
       cryptoCallbacks
     };
     if (options.schemaMap) {

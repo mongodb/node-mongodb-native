@@ -51,20 +51,22 @@ async function initializeFilters(client): Promise<Record<string, any>> {
     return {};
   }
   initializedFilters = true;
-  const context = {};
+  const context = {
+    filters: [
+      new ApiVersionFilter(),
+      new AuthFilter(),
+      new ClientSideEncryptionFilter(),
+      new GenericPredicateFilter(),
+      new IDMSMockServerFilter(),
+      new MongoDBTopologyFilter(),
+      new MongoDBVersionFilter(),
+      new NodeVersionFilter(),
+      new OSFilter(),
+      new ServerlessFilter()
+    ]
+  };
 
-  for (const filter of [
-    new ApiVersionFilter(),
-    new AuthFilter(),
-    new ClientSideEncryptionFilter(),
-    new GenericPredicateFilter(),
-    new IDMSMockServerFilter(),
-    new MongoDBTopologyFilter(),
-    new MongoDBVersionFilter(),
-    new NodeVersionFilter(),
-    new OSFilter(),
-    new ServerlessFilter()
-  ]) {
+  for (const filter of context.filters) {
     filters.push(filter);
     await filter.initializeFilter(client, context);
   }

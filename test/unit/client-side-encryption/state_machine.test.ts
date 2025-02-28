@@ -580,11 +580,21 @@ describe('StateMachine', function () {
               serverSelectionTimeoutMS: 30000
             });
             await sleep(300);
-            await stateMachine
-              .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }), {
-                timeoutContext: context
-              })
-              .catch(e => squashError(e));
+
+            try {
+              const cursor = stateMachine.fetchCollectionInfo(
+                client,
+                'keyVault',
+                BSON.serialize({ a: 1 }),
+                {
+                  timeoutContext: context
+                }
+              );
+              for await (const doc of cursor) void doc;
+            } catch {
+              // ignore
+            }
+
             const [_filter, { timeoutContext }] = listCollectionsSpy.getCalls()[0].args;
             expect(timeoutContext).to.exist;
             expect(timeoutContext.timeoutContext).to.equal(context);
@@ -596,9 +606,16 @@ describe('StateMachine', function () {
         'when StateMachine.fetchCollectionInfo() is not passed a `CSOTimeoutContext`',
         function () {
           it('no timeoutContext is provided to listCollections', async function () {
-            await stateMachine
-              .fetchCollectionInfo(client, 'keyVault', BSON.serialize({ a: 1 }))
-              .catch(e => squashError(e));
+            try {
+              const cursor = stateMachine.fetchCollectionInfo(
+                client,
+                'keyVault',
+                BSON.serialize({ a: 1 })
+              );
+              for await (const doc of cursor) void doc;
+            } catch {
+              // ignore
+            }
             const [_filter, { timeoutContext }] = listCollectionsSpy.getCalls()[0].args;
             expect(timeoutContext).not.to.exist;
           });

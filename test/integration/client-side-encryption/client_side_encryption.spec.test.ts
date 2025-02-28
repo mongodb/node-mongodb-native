@@ -1,7 +1,6 @@
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
-import { ClientSideEncryptionFilter } from '../../tools/runner/filters/client_encryption_filter';
 import {
   gatherTestSuites,
   generateTopologyTests,
@@ -60,8 +59,6 @@ const SKIPPED_TESTS = new Set([
 
 const isServerless = !!process.env.SERVERLESS;
 
-const filter = new ClientSideEncryptionFilter();
-
 describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
@@ -75,11 +72,7 @@ describe('Client Side Encryption (Legacy)', function () {
     return testContext.setup(this.configuration);
   });
 
-  before(async function () {
-    await filter.initializeFilter({} as any, {});
-  });
-
-  generateTopologyTests(testSuites, testContext, test => {
+  generateTopologyTests(testSuites, testContext, (test, configuration) => {
     const { description } = test;
     if (SKIPPED_TESTS.has(description)) {
       return 'Skipped by generic test name skip filter.';
@@ -109,7 +102,7 @@ describe('Client Side Encryption (Legacy)', function () {
         'Automatically encrypt and decrypt with a named KMS provider'
       ].includes(description)
     ) {
-      const result = filter.filter({
+      const result = configuration.filters.ClientSideEncryptionFilter.filter({
         metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
       });
 
@@ -121,13 +114,9 @@ describe('Client Side Encryption (Legacy)', function () {
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  before(async function () {
-    await filter.initializeFilter({} as any, {});
-  });
-
   runUnifiedSuite(
     loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
-    ({ description }) => {
+    ({ description }, configuration) => {
       const delegatedKMIPTests = [
         'rewrap with current KMS provider',
         'rewrap with new local KMS provider',
@@ -154,7 +143,7 @@ describe('Client Side Encryption (Unified)', function () {
         'can explicitly encrypt with a named KMS provider'
       ];
       if (delegatedKMIPTests.includes(description)) {
-        const shouldSkip = filter.filter({
+        const shouldSkip = configuration.filters.ClientSideEncryptionFilter.filter({
           metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
         });
         if (typeof shouldSkip === 'string') return shouldSkip;
