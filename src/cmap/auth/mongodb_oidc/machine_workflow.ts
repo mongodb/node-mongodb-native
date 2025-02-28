@@ -94,7 +94,12 @@ export abstract class MachineWorkflow implements Workflow {
     credentials: MongoCredentials
   ): Promise<string> {
     if (this.cache.hasAccessToken) {
-      return this.cache.getAccessToken();
+      const token = this.cache.getAccessToken();
+      // New connections won't have an access token so ensure we set here.
+      if (!connection.accessToken) {
+        connection.accessToken = token;
+      }
+      return token;
     } else {
       const token = await this.callback(credentials);
       this.cache.put({ accessToken: token.access_token, expiresInSeconds: token.expires_in });
