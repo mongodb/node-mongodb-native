@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.14.0](https://github.com/mongodb/node-mongodb-native/compare/v6.13.1...v6.14.0) (2025-02-28)
+
+
+### Features
+
+* **NODE-6676:** add support for `nsType` in change stream create events ([#4431](https://github.com/mongodb/node-mongodb-native/issues/4431)) ([7800067](https://github.com/mongodb/node-mongodb-native/commit/7800067ad0ea4e24e3180fe264da4951b883e08d))
+* **NODE-6773:** add support for $lookup with automatic encryption ([#4427](https://github.com/mongodb/node-mongodb-native/issues/4427)) ([965b21a](https://github.com/mongodb/node-mongodb-native/commit/965b21a20eff38c7fe7d9036f912b31c10e5ba21))
+
+
+### Bug Fixes
+
+* **NODE-6765:** FindOneAndUpdateOptions supports aggregation expressions ([#4423](https://github.com/mongodb/node-mongodb-native/issues/4423)) ([421ddeb](https://github.com/mongodb/node-mongodb-native/commit/421ddeb329169f47b567cbe432c39737551bd234))
+* **NODE-6792:** use isUint8Array from driver's utils instead of util/types ([#4436](https://github.com/mongodb/node-mongodb-native/issues/4436)) ([dfe1fba](https://github.com/mongodb/node-mongodb-native/commit/dfe1fba777d89a53106487e38aaf5072978096b5))
+* **NODE-6794:** revert `@aws-sdk/credential-providers` peer compatibility change ([#4437](https://github.com/mongodb/node-mongodb-native/issues/4437)) ([488c407](https://github.com/mongodb/node-mongodb-native/commit/488c4071632c29960de8955bfbefbaab163b45ba))
+
 ## [6.13.1](https://github.com/mongodb/node-mongodb-native/compare/v6.13.0...v6.13.1) (2025-02-20)
 
 
