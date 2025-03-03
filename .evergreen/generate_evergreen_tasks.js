@@ -351,10 +351,6 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     {
       func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set',
       onlySdk: true
-    },
-    {
-      func: 'run aws custom credential providers test',
-      onlySdk: true
     }
   ];
 
