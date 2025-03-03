@@ -7,7 +7,9 @@ import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
-    clientSideEncryption: true
+    clientSideEncryption: true,
+    mongodb: '>=4.2.0',
+    topology: '!load-balanced'
   }
 } as const;
 
@@ -37,8 +39,9 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
 
   context(
     'Case 1: Explicit encryption with credentials and custom credential provider',
+    metadata,
     function () {
-      it('throws an error', function () {
+      it('throws an error', metadata, function () {
         expect(() => {
           new ClientEncryption(keyVaultClient, {
             keyVaultNamespace: 'keyvault.datakeys',
@@ -55,20 +58,27 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
     }
   );
 
-  context('Case 2: Explicit encryption with custom credential provider', function () {
+  context('Case 2: Explicit encryption with custom credential provider', metadata, function () {
     let clientEncryption;
 
     beforeEach(function () {
       const options = {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: { aws: {} },
-        credentialProviders: { aws: credentialProvider.fromNodeProviderChain() },
+        credentialProviders: {
+          aws: async () => {
+            return {
+              accessKeyId: process.env.FLE_AWS_KEY,
+              secretAccessKey: process.env.FLE_AWS_SECRET
+            };
+          }
+        },
         extraOptions: getEncryptExtraOptions()
       };
       clientEncryption = new ClientEncryption(keyVaultClient, options);
     });
 
-    it('is successful', async function () {
+    it('is successful', metadata, async function () {
       const dk = await clientEncryption.createDataKey('aws', { masterKey });
       expect(dk).to.be.instanceOf(Binary);
     });
