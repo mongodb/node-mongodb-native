@@ -244,7 +244,10 @@ describe('When executing an operation for the first time', () => {
     });
 
     afterEach(async function () {
-      await client.db('auto-connect-change').command({ killCursors: 'auto-connect', cursors });
+      if (cursors.length) {
+        await client.db('auto-connect-change').command({ killCursors: 'auto-connect', cursors });
+        cursors.length = 0;
+      }
       await changeCausingClient?.close();
       await cs?.close();
     });

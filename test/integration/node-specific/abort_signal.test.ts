@@ -95,7 +95,10 @@ describe('AbortSignal support', () => {
     logs.length = 0;
     const utilClient = this.configuration.newClient();
     try {
-      await utilClient.db('abortSignal').command({ killCursors: 'support', cursors });
+      if (cursors.length) {
+        await utilClient.db('abortSignal').command({ killCursors: 'support', cursors });
+        cursors.length = 0;
+      }
       await utilClient.db('abortSignal').collection('support').deleteMany({});
     } finally {
       await utilClient.close();
