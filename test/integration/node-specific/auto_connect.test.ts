@@ -227,6 +227,10 @@ describe('When executing an operation for the first time', () => {
         .createCollection('auto-connect')
         .catch(() => null);
 
+      changeCausingCollection = changeCausingClient
+        .db('auto-connect-change')
+        .collection('auto-connect');
+
       collection = client.db('auto-connect-change').collection('auto-connect');
       cs = collection.watch();
 
