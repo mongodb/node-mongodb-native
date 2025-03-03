@@ -16,18 +16,14 @@ const masterKey = {
   key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
 };
 
-const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
-
 describe('25. Custom AWS Credential Providers', metadata, () => {
   let keyVaultClient;
   let credentialProvider;
 
   beforeEach(async function () {
-    this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
-      ? 'Test must run in an AWS auth testing environment'
-      : !AWSTemporaryCredentialProvider.isAWSSDKInstalled
-        ? 'This test must run in an environment where the AWS SDK is installed.'
-        : undefined;
+    this.currentTest.skipReason = !AWSTemporaryCredentialProvider.isAWSSDKInstalled
+      ? 'This test must run in an environment where the AWS SDK is installed.'
+      : undefined;
     this.currentTest?.skipReason && this.skip();
 
     keyVaultClient = this.configuration.newClient(process.env.MONGODB_UR);
