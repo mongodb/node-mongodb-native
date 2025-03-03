@@ -69,7 +69,7 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
     });
 
     it('is successful', async function () {
-      const dk = await clientEncryption.createDataKey('aws', masterKey);
+      const dk = await clientEncryption.createDataKey('aws', { masterKey });
       expect(dk).to.be.instanceOf(Binary);
     });
   });
