@@ -7,6 +7,7 @@ import {
   type ChangeStream,
   ClientSession,
   type Collection,
+  Long,
   MongoClient,
   MongoNotConnectedError,
   ProfilingLevel,
@@ -19,7 +20,7 @@ describe('When executing an operation for the first time', () => {
   let client: MongoClient;
 
   beforeEach('create client', async function () {
-    client = this.configuration.newClient();
+    client = this.configuration.newClient({}, { monitorCommands: true });
   });
 
   beforeEach('create test namespace', async function () {
@@ -212,26 +213,38 @@ describe('When executing an operation for the first time', () => {
     let changeCausingCollection: Collection;
     let collection: Collection;
     let cs: ChangeStream;
+    const cursors = [];
 
     beforeEach(async function () {
+      cursors.length = 0;
+
       if (this.configuration.topologyType === TopologyType.Single) {
         return;
       }
       changeCausingClient = this.configuration.newClient();
-      await changeCausingClient
+      changeCausingCollection = await changeCausingClient
         .db('auto-connect-change')
         .createCollection('auto-connect')
         .catch(() => null);
 
-      changeCausingCollection = changeCausingClient
-        .db('auto-connect-change')
-        .collection('auto-connect');
-
       collection = client.db('auto-connect-change').collection('auto-connect');
       cs = collection.watch();
+
+      client.on('commandSucceeded', ev => {
+        if (ev.commandName === 'aggregate') {
+          const cursorId = Long.isLong(ev.reply.cursor.id)
+            ? ev.reply.cursor.id
+            : Long.fromNumber(ev.reply.cursor.id);
+
+          if (!Long.ZERO.equals(cursorId)) {
+            cursors.push(cursorId);
+          }
+        }
+      });
     });
 
     afterEach(async function () {
+      await client.db('auto-connect-change').command({ killCursors: 'auto-connect', cursors });
       await changeCausingClient?.close();
       await cs?.close();
     });

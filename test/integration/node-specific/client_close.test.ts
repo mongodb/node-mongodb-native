@@ -755,13 +755,7 @@ describe('MongoClient.close() Integration', () => {
             );
           };
 
-          cursor = coll.find(
-            {},
-            {
-              tailable: true,
-              awaitData: true
-            }
-          );
+          cursor = coll.find({}, { batchSize: 1 });
           await cursor.next();
 
           // assert creation

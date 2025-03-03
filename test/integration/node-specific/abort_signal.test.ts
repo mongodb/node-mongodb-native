@@ -16,6 +16,7 @@ import {
   FindCursor,
   ListCollectionsCursor,
   type Log,
+  Long,
   type MongoClient,
   MongoServerError,
   promiseWithResolvers,
@@ -52,9 +53,11 @@ describe('AbortSignal support', () => {
   let db: Db;
   let collection: Collection<{ a: number; ssn: string }>;
   const logs: Log[] = [];
+  const cursors = [];
 
   beforeEach(async function () {
     logs.length = 0;
+    cursors.length = 0;
 
     client = this.configuration.newClient(
       {},
@@ -70,17 +73,34 @@ describe('AbortSignal support', () => {
     await client.connect();
     db = client.db('abortSignal');
     collection = db.collection('support');
+
+    client.on('commandSucceeded', ev => {
+      if (
+        ev.commandName === 'find' ||
+        ev.commandName === 'aggregate' ||
+        ev.commandName === 'listCollections'
+      ) {
+        const cursorId = Long.isLong(ev.reply.cursor.id)
+          ? ev.reply.cursor.id
+          : Long.fromNumber(ev.reply.cursor.id);
+
+        if (!Long.ZERO.equals(cursorId)) {
+          cursors.push(cursorId);
+        }
+      }
+    });
   });
 
   afterEach(async function () {
     logs.length = 0;
     const utilClient = this.configuration.newClient();
     try {
+      await utilClient.db('abortSignal').command({ killCursors: 'support', cursors });
       await utilClient.db('abortSignal').collection('support').deleteMany({});
     } finally {
       await utilClient.close();
+      await client?.close();
     }
-    await client?.close();
   });
 
   function testCursor(cursorName: string, constructor: any) {
