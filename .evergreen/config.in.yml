@@ -557,21 +557,6 @@ functions:
         args:
           - .evergreen/prepare-mongodb-aws-ecs-auth.sh
 
-  "run aws custom credential providers test":
-    - command: subprocess.exec
-      type: test
-      params:
-        include_expansions_in_env:
-          - MONGODB_URI
-          - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
-        env:
-          AWS_CREDENTIAL_TYPE: env-creds
-        working_dir: "src"
-        binary: bash
-        args:
-          - .evergreen/run-aws-custom-credential-providers-test.sh
-
   "run custom csfle tests":
     - command: subprocess.exec
       type: test

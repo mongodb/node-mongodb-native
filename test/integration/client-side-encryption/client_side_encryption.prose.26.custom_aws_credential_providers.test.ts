@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { AWSTemporaryCredentialProvider, Binary } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
@@ -59,11 +60,13 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
     let clientEncryption;
 
     beforeEach(function () {
-      clientEncryption = new ClientEncryption(keyVaultClient, {
+      const options = {
         keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: { aws: {} },
-        credentialProviders: { aws: credentialProvider.fromNodeProviderChain() }
-      });
+        kmsProviders: getCSFLEKMSProviders(),
+        credentialProviders: { aws: credentialProvider.fromNodeProviderChain() },
+        extraOptions: getEncryptExtraOptions()
+      };
+      clientEncryption = new ClientEncryption(keyVaultClient, options);
     });
 
     it('is successful', async function () {
