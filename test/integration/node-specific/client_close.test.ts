@@ -65,10 +65,11 @@ describe('MongoClient.close() Integration', () => {
                 authMechanism: 'MONGODB-OIDC'
               };
               const client = new MongoClient(uri, options);
-              client.connect();
+              const connectPromise = client.connect();
               expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
               await client.close();
               expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+              await connectPromise;
             }
           );
         });
@@ -80,6 +81,7 @@ describe('MongoClient.close() Integration', () => {
     describe('Node.js resource: Server Selection Timer', () => {
       describe('after a Topology is created through client.connect()', () => {
         const metadata: MongoDBMetadataUI = { requires: { topology: 'replicaset' } };
+
         it.skip('server selection timers are cleaned up by client.close()', metadata, async () => {
           const run = async function ({ MongoClient, uri, expect, sleep, mongodb, getTimerCount }) {
             const serverSelectionTimeoutMS = 2222;
@@ -160,7 +162,7 @@ describe('MongoClient.close() Integration', () => {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient('mongodb://fakeUri', { heartbeatFrequencyMS });
                     const willBeHeartbeatFailed = once(client, 'serverHeartbeatFailed');
-                    client.connect();
+                    const connectPromise = client.connect();
                     await willBeHeartbeatFailed;
                     function getMonitorTimer(servers) {
                       for (const [, server] of servers) {
@@ -174,6 +176,8 @@ describe('MongoClient.close() Integration', () => {
                     expect(getMonitorTimer(servers)).to.not.exist;
 
                     expect(getTimerCount()).to.equal(0);
+
+                    await connectPromise;
                   };
                   await runScriptAndGetProcessInfo('timer-heartbeat-failed-monitor', config, run);
                 }

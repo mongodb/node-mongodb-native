@@ -174,10 +174,16 @@ export async function runScriptAndGetProcessInfo(
     REPORT_RESOURCE_SCRIPT_PATH,
     func
   );
-  await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
-  const logFile = name + '.logs.txt';
 
+  const logFile = name + '.logs.txt';
   const stdErrFile = 'err.out';
+
+  await unlink(scriptName).catch(() => null);
+  await unlink(logFile).catch(() => null);
+  await unlink(stdErrFile).catch(() => null);
+
+  await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
+
   const script = spawn(process.execPath, [scriptName], {
     stdio: ['ignore', 'ignore', openSync(stdErrFile, 'w')]
   });
@@ -185,16 +191,15 @@ export async function runScriptAndGetProcessInfo(
   const willClose = once(script, 'close');
 
   // make sure the process ended
-  const [exitCode] = await willClose;
+  const [exitCode] = (await willClose) as [number];
 
   // format messages from child process as an object
   const messages = (await readFile(logFile, 'utf-8'))
     .trim()
     .split('\n')
-    .map(line => JSON.parse(line))
-    .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+    .map(line => JSON.parse(line));
 
-  const stdErrSize = await readFile(stdErrFile, { encoding: 'utf8' });
+  const stdErr = await readFile(stdErrFile, { encoding: 'utf8' });
 
   // delete temporary files
   await unlink(scriptName);
@@ -203,18 +208,23 @@ export async function runScriptAndGetProcessInfo(
 
   // assertions about exit status
   if (exitCode) {
+    const { error } = messages.find(m => m.error != null);
+    expect(error).to.exist;
     const assertionError = new AssertionError(
-      messages.error?.message + '\n\t' + JSON.stringify(messages.error?.resources, undefined, 2)
+      error.message + '\n\t' + JSON.stringify(error.resources, undefined, 2)
     );
-    assertionError.stack = messages.error?.stack + new Error().stack.slice('Error'.length);
+    assertionError.stack = error.stack + new Error().stack.slice('Error'.length);
     throw assertionError;
   }
 
   // assertions about resource status
-  expect(messages.beforeExitHappened).to.be.true;
-  expect(messages.newResources.libuvResources).to.be.empty;
-  expect(messages.newResources.activeResources).to.be.empty;
+  const { beforeExitHappened } = messages.find(m => 'beforeExitHappened' in m);
+  const { newResources } = messages.find(m => 'newResources' in m);
+
+  expect(beforeExitHappened).to.be.true;
+  expect(newResources.libuvResources).to.be.empty;
+  expect(newResources.activeResources).to.be.empty;
 
   // assertion about error output
-  expect(stdErrSize).to.be.empty;
+  expect(stdErr).to.be.empty;
 }
