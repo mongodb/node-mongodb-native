@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.14.1](https://github.com/mongodb/node-mongodb-native/compare/v6.14.0...v6.14.1) (2025-03-03)
+
+
+### Bug Fixes
+
+* **NODE-6801:** set token on connection from cache ([#4438](https://github.com/mongodb/node-mongodb-native/issues/4438)) ([cb13746](https://github.com/mongodb/node-mongodb-native/commit/cb1374649858ae2e0f3f3e109d7bf7e4bcd193c2))
+
 ## [6.14.0](https://github.com/mongodb/node-mongodb-native/compare/v6.13.1...v6.14.0) (2025-02-28)
 
 
