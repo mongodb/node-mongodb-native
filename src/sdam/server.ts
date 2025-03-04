@@ -48,6 +48,7 @@ import {
   maxWireVersion,
   type MongoDBNamespace,
   noop,
+  squashError,
   supportsRetryableWrites
 } from '../utils';
 import { throwIfWriteConcernError } from '../write_concern';
@@ -345,10 +346,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError instanceof MongoError &&
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
-        reauthPromise = this.pool.reauthenticate(conn).catch(error => {
-          reauthPromise = null;
-          throw error;
-        });
+        // TODO: what do we do with this error? the signal has aborted so where should it be delivered?
+        reauthPromise = this.pool.reauthenticate(conn).then(undefined, squashError);
 
         await abortable(reauthPromise, options);
         reauthPromise = null; // only reachable if reauth succeeds
