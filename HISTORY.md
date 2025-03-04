@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.14.2](https://github.com/mongodb/node-mongodb-native/compare/v6.14.1...v6.14.2) (2025-03-04)
+
+
+### Bug Fixes
+
+* **NODE-6803:** kms proxy socket creates unhandled rejection ([#4444](https://github.com/mongodb/node-mongodb-native/issues/4444)) ([ed69cf9](https://github.com/mongodb/node-mongodb-native/commit/ed69cf914435ebc96c44b265704571e3d34629ef))
+
 ## [6.14.1](https://github.com/mongodb/node-mongodb-native/compare/v6.14.0...v6.14.1) (2025-03-03)
 
 
