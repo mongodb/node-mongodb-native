@@ -211,6 +211,10 @@ const beforeAllPluginImports = () => {
   require('mocha-sinon');
 };
 
+process.on('unhandledRejection', error => {
+  throw error;
+});
+
 export const mochaHooks = {
   beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
   beforeEach: [testSkipBeforeEachHook],
