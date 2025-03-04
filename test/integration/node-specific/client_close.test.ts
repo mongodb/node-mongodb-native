@@ -744,18 +744,14 @@ describe('MongoClient.close() Integration', () => {
           const getCursors = async () => {
             const cursors = await utilClient
               .db('admin')
-              .runCursorCommand({
-                aggregate: 1,
-                cursor: {},
-                pipeline: [{ $currentOp: { idleCursors: true } }]
-              })
+              .aggregate([{ $currentOp: { idleCursors: true } }])
               .toArray();
 
-            return [
-              ...cursors.filter(c => c.type === 'idleCursor'), // all idle cursors
-              ...cursors.filter(c => c.type === 'op' && c.desc === 'getMore'), // all running getMores
-              ...cursors.filter(c => c.ns !== 'local.oplog.rs') // no internal oplog cursors (sharded clusters)
-            ];
+            return cursors.filter(
+              c =>
+                c.ns !== 'local.oplog.rs' &&
+                (c.type === 'idleCursor' || (c.type === 'op' && c.desc === 'getMore'))
+            ); // all idle cursors
           };
 
           cursor = coll.find({}, { batchSize: 1 });
