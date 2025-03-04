@@ -7,6 +7,7 @@ module.exports = {
   require: [
     'source-map-support/register',
     'ts-node/register',
+    'test/tools/runner/throw_rejections.cjs',
     'test/tools/runner/chai_addons.ts',
     'test/tools/runner/ee_checker.ts'
   ],
