@@ -352,7 +352,7 @@ export class StateMachine {
     const message = request.message;
     const buffer = new BufferPool();
 
-    const netSocket: net.Socket = new net.Socket();
+    let netSocket: net.Socket;
     let socket: tls.TLSSocket;
 
     function destroySockets() {
@@ -388,26 +388,31 @@ export class StateMachine {
       }
     }
 
-    const {
-      promise: willConnect,
-      reject: rejectOnNetSocketError,
-      resolve: resolveOnNetSocketConnect
-    } = promiseWithResolvers<void>();
-    netSocket
-      .once('error', err => rejectOnNetSocketError(onerror(err)))
-      .once('close', () => rejectOnNetSocketError(onclose()))
-      .once('connect', () => resolveOnNetSocketConnect());
-
     let abortListener;
 
     try {
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
+        netSocket = new net.Socket();
+
+        const {
+          promise: willConnect,
+          reject: rejectOnNetSocketError,
+          resolve: resolveOnNetSocketConnect
+        } = promiseWithResolvers<void>();
+
+        netSocket
+          .once('error', err => rejectOnNetSocketError(onerror(err)))
+          .once('close', () => rejectOnNetSocketError(onclose()))
+          .once('connect', () => resolveOnNetSocketConnect());
+
         const netSocketOptions = {
           ...socketOptions,
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         };
+
         netSocket.connect(netSocketOptions);
+
         await willConnect;
 
         try {
