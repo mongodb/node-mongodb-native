@@ -5,12 +5,6 @@ import { env } from 'process';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { Binary } from '../../mongodb';
 
-const metadata: MongoDBMetadataUI = {
-  requires: {
-    clientSideEncryption: true
-  }
-} as const;
-
 const dataKeyOptions = {
   masterKey: {
     projectId: 'devprod-drivers',
@@ -45,25 +39,39 @@ describe('17. On-demand GCP Credentials', () => {
     await keyVaultClient?.close();
   });
 
-  it('Case 1: Failure', metadata, async function () {
-    if (env.EXPECTED_GCPKMS_OUTCOME !== 'failure') {
-      this.skipReason = 'This test is supposed to run in the environment where failure is expected';
-      this.skip();
+  it(
+    'Case 1: Failure',
+    {
+      requires: {
+        predicate: () =>
+          env.EXPECTED_GCPKMS_OUTCOME !== 'failure'
+            ? 'This test is supposed to run in the environment where failure is expected'
+            : true
+      }
+    },
+    async function () {
+      const error = await clientEncryption
+        .createDataKey('gcp', dataKeyOptions)
+        .catch(error => error);
+      // GaxiosError: Unsuccessful response status code. Request failed with status code 404
+      expect(error).to.be.instanceOf(Error);
+      expect(error).property('code', '404');
     }
+  );
 
-    const error = await clientEncryption.createDataKey('gcp', dataKeyOptions).catch(error => error);
-    // GaxiosError: Unsuccessful response status code. Request failed with status code 404
-    expect(error).to.be.instanceOf(Error);
-    expect(error).property('code', '404');
-  });
-
-  it('Case 2: Success', metadata, async function () {
-    if (env.EXPECTED_GCPKMS_OUTCOME !== 'success') {
-      this.skipReason = 'This test is supposed to run in the environment where success is expected';
-      this.skip();
+  it(
+    'Case 2: Success',
+    {
+      requires: {
+        predicate: () =>
+          env.EXPECTED_GCPKMS_OUTCOME !== 'success'
+            ? 'This test is supposed to run in the environment where success is expected'
+            : true
+      }
+    },
+    async function () {
+      const dk = await clientEncryption.createDataKey('gcp', dataKeyOptions);
+      expect(dk).to.be.instanceOf(Binary);
     }
-
-    const dk = await clientEncryption.createDataKey('gcp', dataKeyOptions);
-    expect(dk).to.be.instanceOf(Binary);
-  });
+  );
 });

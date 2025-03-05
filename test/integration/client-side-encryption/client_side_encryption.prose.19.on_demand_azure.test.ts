@@ -7,12 +7,6 @@ import { ClientEncryption } from '../../../src/client-side-encryption/client_enc
 import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
 import { Binary } from '../../mongodb';
 
-const metadata: MongoDBMetadataUI = {
-  requires: {
-    clientSideEncryption: true
-  }
-} as const;
-
 const dataKeyOptions = {
   masterKey: {
     keyVaultEndpoint: 'https://drivers-2411-keyvault.vault.azure.net/',
@@ -48,25 +42,37 @@ describe('19. On-demand Azure Credentials', () => {
     await keyVaultClient?.close();
   });
 
-  it('Case 1: Failure', metadata, async function () {
-    if (env.EXPECTED_AZUREKMS_OUTCOME !== 'failure') {
-      this.skipReason = 'This test is supposed to run in the environment where failure is expected';
-      this.skip();
+  it(
+    'Case 1: Failure',
+    {
+      requires: {
+        predicate: () =>
+          env.EXPECTED_AZUREKMS_OUTCOME !== 'failure'
+            ? 'This test is supposed to run in the environment where failure is expected'
+            : true
+      }
+    },
+    async function () {
+      const error = await clientEncryption
+        .createDataKey('azure', dataKeyOptions)
+        .catch(error => error);
+      expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
     }
+  );
 
-    const error = await clientEncryption
-      .createDataKey('azure', dataKeyOptions)
-      .catch(error => error);
-    expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
-  });
-
-  it('Case 2: Success', metadata, async function () {
-    if (env.EXPECTED_AZUREKMS_OUTCOME !== 'success') {
-      this.skipReason = 'This test is supposed to run in the environment where success is expected';
-      this.skip();
+  it(
+    'Case 2: Success',
+    {
+      requires: {
+        predicate: () =>
+          env.EXPECTED_AZUREKMS_OUTCOME !== 'success'
+            ? 'This test is supposed to run in the environment where success is expected'
+            : true
+      }
+    },
+    async function () {
+      const dk = await clientEncryption.createDataKey('azure', dataKeyOptions);
+      expect(dk).to.be.instanceOf(Binary);
     }
-
-    const dk = await clientEncryption.createDataKey('azure', dataKeyOptions);
-    expect(dk).to.be.instanceOf(Binary);
-  });
+  );
 });
