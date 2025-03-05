@@ -346,8 +346,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError instanceof MongoError &&
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
-        // TODO: what do we do with this error? the signal has aborted so where should it be delivered?
-        reauthPromise = this.pool.reauthenticate(conn).then(undefined, squashError);
+        reauthPromise = this.pool.reauthenticate(conn);
+        reauthPromise.then(undefined, error => {
+          reauthPromise = null;
+          squashError(error);
+        });
 
         await abortable(reauthPromise, options);
         reauthPromise = null; // only reachable if reauth succeeds
