@@ -793,8 +793,9 @@ describe('AbortSignal support', () => {
     describe('if reauth throws', () => {
       beforeEach(() => {
         sinon.stub(ConnectionPool.prototype, 'reauthenticate').callsFake(async function () {
+          const error = new Error('Rejecting reauthenticate for testing');
           await sleep(1000);
-          throw new Error('Rejecting reauthenticate for testing');
+          throw error;
         });
       });
 

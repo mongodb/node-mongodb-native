@@ -559,6 +559,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         new ServerSelectionStartedEvent(selector, this.description, options.operationName)
       );
     }
+    let timeout;
+    if (options.timeoutContext) timeout = options.timeoutContext.serverSelectionTimeout;
+    else {
+      timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
+    }
 
     const isSharded = this.description.type === TopologyType.Sharded;
     const session = options.session;
@@ -581,14 +586,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-
+      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
       return transaction.server;
-    }
-
-    let timeout;
-    if (options.timeoutContext) timeout = options.timeoutContext.serverSelectionTimeout;
-    else {
-      timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
     }
 
     const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
