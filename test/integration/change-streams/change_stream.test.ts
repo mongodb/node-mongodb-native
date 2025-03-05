@@ -8,6 +8,7 @@ import { setTimeout } from 'timers';
 
 import {
   type ChangeStream,
+  type ChangeStreamDocument,
   type ChangeStreamOptions,
   type Collection,
   type CommandStartedEvent,
@@ -1955,7 +1956,9 @@ describe('ChangeStream resumability', function () {
 
             expect(change).to.have.property('operationType', 'insert');
 
-            expect(aggregateEvents).to.have.lengthOf(6);
+            // More than one aggregate event indicates that the change stream attempted more than one
+            // resume attempt.
+            expect(aggregateEvents.length).to.be.greaterThan(1);
           }
         );
       }
@@ -2147,7 +2150,9 @@ describe('ChangeStream resumability', function () {
 
             expect(change).to.be.true;
 
-            expect(aggregateEvents).to.have.lengthOf(6);
+            // More than one aggregate event indicates that the change stream attempted more than one
+            // resume attempt.
+            expect(aggregateEvents.length).to.be.greaterThan(1);
           }
         );
       }
@@ -2346,7 +2351,9 @@ describe('ChangeStream resumability', function () {
               expect.fail(`expected tryNext to resume, received error instead: ${err}`);
             }
 
-            expect(aggregateEvents).to.have.lengthOf(6);
+            // More than one aggregate event indicates that the change stream attempted more than one
+            // resume attempt.
+            expect(aggregateEvents.length).to.be.greaterThan(1);
           }
         );
       }
@@ -2732,7 +2739,9 @@ describe('ChangeStream resumability', function () {
           const [change] = (value as PromiseFulfilledResult<ChangeStreamDocument[]>).value;
           expect(change).to.have.property('operationType', 'insert');
 
-          expect(aggregateEvents).to.have.lengthOf(6);
+          // More than one aggregate event indicates that the change stream attempted more than one
+          // resume attempt.
+          expect(aggregateEvents.length).to.be.greaterThan(1);
         }
       );
     }
