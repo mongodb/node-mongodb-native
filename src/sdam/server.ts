@@ -370,9 +370,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       if (session?.pinnedConnection !== conn) {
         if (reauthPromise != null) {
           // The reauth promise only exists if it hasn't thrown.
-          void reauthPromise.finally(() => {
+          const checkBackIn = () => {
             this.pool.checkIn(conn);
-          });
+          };
+          void reauthPromise.then(checkBackIn, checkBackIn);
         } else {
           this.pool.checkIn(conn);
         }
