@@ -23,8 +23,6 @@ cd $DRIVERS_TOOLS/.evergreen/auth_aws
 
 cd $BEFORE
 
-npm install --no-save aws4
-
 if [ $MONGODB_AWS_SDK = 'false' ]; then rm -rf ./node_modules/@aws-sdk/credential-providers; fi
 
 # revert to show test output

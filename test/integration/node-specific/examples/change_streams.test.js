@@ -2,6 +2,7 @@
 'use strict';
 
 const { setTimeout } = require('timers');
+const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
 
 // TODO: NODE-3819: Unskip flaky MacOS/Windows tests.
@@ -10,9 +11,13 @@ maybeDescribe('examples(change-stream):', function () {
   let client;
   let db;
 
+  before(async function () {
+    await setupDatabase(this.configuration);
+  });
+
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
-    db = client.db('change_stream_examples');
+    db = client.db(this.configuration.db);
 
     // ensure database exists, we need this for 3.6
     await db.collection('inventory').insertOne({});
