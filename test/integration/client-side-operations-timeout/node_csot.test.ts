@@ -1023,7 +1023,9 @@ describe('CSOT driver tests', metadata, () => {
 
         beforeEach(async function () {
           cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
-          const _changePromise = once(cs, 'change');
+          const changePromise = once(cs, 'change');
+          void changePromise.then(undefined, () => null); // need to handled when this rejects with the timeout error
+
           await once(cs.cursor, 'init');
 
           await internalClient.db().admin().command(failpoint);
