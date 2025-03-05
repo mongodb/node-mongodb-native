@@ -1146,50 +1146,59 @@ class ReadableCursorStream extends Readable {
       return;
     }
 
-    this._cursor.next().then(
-      result => {
-        if (result == null) {
-          this.push(null);
-        } else if (this.destroyed) {
-          this._cursor.close().then(undefined, squashError);
-        } else {
-          if (this.push(result)) {
-            return this._readNext();
+    this._cursor
+      .next()
+      .then(
+        // result from next()
+        result => {
+          if (result == null) {
+            this.push(null);
+          } else if (this.destroyed) {
+            this._cursor.close().then(undefined, squashError);
+          } else {
+            if (this.push(result)) {
+              return this._readNext();
+            }
+
+            this._readInProgress = false;
+          }
+        },
+        // error from next()
+        err => {
+          // NOTE: This is questionable, but we have a test backing the behavior. It seems the
+          //       desired behavior is that a stream ends cleanly when a user explicitly closes
+          //       a client during iteration. Alternatively, we could do the "right" thing and
+          //       propagate the error message by removing this special case.
+          if (err.message.match(/server is closed/)) {
+            this._cursor.close().then(undefined, squashError);
+            return this.push(null);
           }
 
-          this._readInProgress = false;
-        }
-      },
-      err => {
-        // NOTE: This is questionable, but we have a test backing the behavior. It seems the
-        //       desired behavior is that a stream ends cleanly when a user explicitly closes
-        //       a client during iteration. Alternatively, we could do the "right" thing and
-        //       propagate the error message by removing this special case.
-        if (err.message.match(/server is closed/)) {
-          this._cursor.close().then(undefined, squashError);
-          return this.push(null);
-        }
+          // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
+          //       to be "operation was interrupted", where a cursor has been closed but there is an
+          //       active getMore in-flight. This used to check if the cursor was killed but once
+          //       that changed to happen in cleanup legitimate errors would not destroy the
+          //       stream. There are change streams test specifically test these cases.
+          if (err.message.match(/operation was interrupted/)) {
+            return this.push(null);
+          }
 
-        // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
-        //       to be "operation was interrupted", where a cursor has been closed but there is an
-        //       active getMore in-flight. This used to check if the cursor was killed but once
-        //       that changed to happen in cleanup legitimate errors would not destroy the
-        //       stream. There are change streams test specifically test these cases.
-        if (err.message.match(/operation was interrupted/)) {
-          return this.push(null);
+          // NOTE: The two above checks on the message of the error will cause a null to be pushed
+          //       to the stream, thus closing the stream before the destroy call happens. This means
+          //       that either of those error messages on a change stream will not get a proper
+          //       'error' event to be emitted (the error passed to destroy). Change stream resumability
+          //       relies on that error event to be emitted to create its new cursor and thus was not
+          //       working on 4.4 servers because the error emitted on failover was "interrupted at
+          //       shutdown" while on 5.0+ it is "The server is in quiesce mode and will shut down".
+          //       See NODE-4475.
+          return this.destroy(err);
         }
-
-        // NOTE: The two above checks on the message of the error will cause a null to be pushed
-        //       to the stream, thus closing the stream before the destroy call happens. This means
-        //       that either of those error messages on a change stream will not get a proper
-        //       'error' event to be emitted (the error passed to destroy). Change stream resumability
-        //       relies on that error event to be emitted to create its new cursor and thus was not
-        //       working on 4.4 servers because the error emitted on failover was "interrupted at
-        //       shutdown" while on 5.0+ it is "The server is in quiesce mode and will shut down".
-        //       See NODE-4475.
-        return this.destroy(err);
-      }
-    );
+      )
+      // if either of the above handlers throw
+      .catch(error => {
+        this._readInProgress = false;
+        this.destroy(error);
+      });
   }
 }
 
