@@ -106,12 +106,18 @@ Additionally, our Typescript types are compatible with the ECMAScript standard f
 
 The recommended way to get started using the Node.js 5.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
-After you've created your own project using `npm init`, you can run:
+First, create your own project using `npm init`. Then, you can run:
 
 ```bash
 npm install mongodb
-# or ...
+```
+
+You can also use a `npm`-compatible package manager, like yarn or bun to install:
+
+```bash
 yarn add mongodb
+# or
+bun install mongodb
 ```
 
 This will download the MongoDB driver and add a dependency entry in your `package.json` file.
