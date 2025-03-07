@@ -632,12 +632,6 @@ describe('MongoClient.close() Integration', () => {
   });
 
   describe('Server resource: Cursor', () => {
-    const metadata: MongoDBMetadataUI = {
-      requires: {
-        mongodb: '>=4.2.0'
-      }
-    };
-
     describe('after cursors are created', () => {
       let client: MongoClient;
       let coll: Collection;
@@ -653,9 +647,7 @@ describe('MongoClient.close() Integration', () => {
           .collection('coll')
           .drop()
           .catch(() => null);
-        coll = await client
-          .db('db')
-          .createCollection('coll', { capped: true, size: 1_000, max: 4 });
+        coll = await client.db('db').createCollection('coll');
         await coll.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
       });
 
@@ -665,35 +657,31 @@ describe('MongoClient.close() Integration', () => {
         await cursor?.close();
       });
 
-      it(
-        'all active server-side cursors are closed by client.close()',
-        metadata,
-        async function () {
-          const getCursors = async () => {
-            const cursors = await utilClient
-              .db('admin')
-              .aggregate([{ $currentOp: { idleCursors: true } }])
-              .toArray();
+      it('all active server-side cursors are closed by client.close()', async function () {
+        const getCursors = async () => {
+          const cursors = await utilClient
+            .db('admin')
+            .aggregate([{ $currentOp: { idleCursors: true } }])
+            .toArray();
 
-            return cursors.filter(
-              c =>
-                c.ns !== 'local.oplog.rs' &&
-                (c.type === 'idleCursor' || (c.type === 'op' && c.desc === 'getMore'))
-            ); // all idle cursors
-          };
+          return cursors.filter(
+            c =>
+              c.ns !== 'local.oplog.rs' &&
+              (c.type === 'idleCursor' || (c.type === 'op' && c.desc === 'getMore'))
+          ); // all idle cursors
+        };
 
-          cursor = coll.find({}, { batchSize: 1 });
-          await cursor.next();
+        cursor = coll.find({}, { batchSize: 1 });
+        await cursor.next();
 
-          // assert creation
-          expect(await getCursors()).to.not.be.empty;
+        // assert creation
+        expect(await getCursors()).to.not.be.empty;
 
-          await client.close();
+        await client.close();
 
-          // assert clean-up
-          expect(await getCursors()).to.be.empty;
-        }
-      );
+        // assert clean-up
+        expect(await getCursors()).to.be.empty;
+      });
     });
   });
 });
