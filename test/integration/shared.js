@@ -96,16 +96,13 @@ async function setupDatabase(configuration, dbsToClean) {
 
   dbsToClean.push(configDbName);
 
-  const client = configuration.newClient(configuration.writeConcernMax());
+  const client = configuration.newClient();
   try {
     for (const dbName of dbsToClean) {
-      await client
-        .db(dbName)
-        .command({ dropAllUsersFromDatabase: 1, writeConcern: { w: 'majority' } });
-      try {
-        await client.db(dbName).dropDatabase({ writeConcern: { w: 'majority' } });
-      } catch (error) {
-        if (!error.message.match(/database is currently being dropped/)) throw error;
+      const db = await client.db(dbName);
+      for await (const { name } of db.listCollections({}, { nameOnly: true })) {
+        const collection = db.collection(name);
+        await collection.deleteMany({});
       }
     }
   } finally {

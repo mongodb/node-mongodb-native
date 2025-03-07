@@ -103,6 +103,7 @@ secrets-export.fish
 mo-expansion.sh
 mo-expansion.yml
 expansions.sh
+uri.txt
 
 .drivers-tools/
 
