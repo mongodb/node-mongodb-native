@@ -209,7 +209,8 @@ export async function runScriptAndGetProcessInfo(
   // assertions about exit status
   if (exitCode) {
     const { error } = messages.find(m => m.error != null);
-    expect(error).to.exist;
+    expect(error, 'test script exited with non-zero exit code but did not report an error.').to
+      .exist;
     const assertionError = new AssertionError(
       error.message + '\n\t' + JSON.stringify(error.resources, undefined, 2)
     );
