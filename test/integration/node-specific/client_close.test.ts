@@ -441,8 +441,8 @@ describe('MongoClient.close() Integration', () => {
               // 27017 localhost.test.build.10gen.cc.
 
               const client = new MongoClient(SRV_CONNECTION_STRING, {
-                serverSelectionTimeoutMS: 2000,
-                tls: false
+                serverSelectionTimeoutMS: 2000, // if something changes make this test fail faster than 30s (connect() will reject)
+                tls: false // srv automatically sets tls to true, so we have to set it to false here.
               });
               await client.connect();
               // the current expected behavior is that _timeout is set to undefined until SRV polling starts
