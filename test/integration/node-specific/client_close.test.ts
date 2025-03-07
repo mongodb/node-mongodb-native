@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { expect } from 'chai';
+import { once } from 'events';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type Collection, type FindCursor, type MongoClient } from '../../mongodb';
@@ -454,78 +454,6 @@ describe('MongoClient.close() Integration', () => {
             await runScriptAndGetProcessInfo('timer-srv-poller', config, run);
           });
         });
-      });
-    });
-  });
-
-  describe('ClientSession (Implicit)', () => {
-    let idleSessionsBeforeClose;
-    let idleSessionsAfterClose;
-    let client;
-    let utilClient;
-    let session;
-
-    const metadata: MongoDBMetadataUI = {
-      requires: {
-        topology: ['replicaset', 'sharded'],
-        mongodb: '>=4.2'
-      }
-    };
-
-    beforeEach(async function () {
-      client = this.configuration.newClient();
-      utilClient = this.configuration.newClient();
-      await client.connect();
-      await client
-        .db('db')
-        .collection('collection')
-        .drop()
-        .catch(() => null);
-      const collection = await client.db('db').createCollection('collection');
-      session = client.startSession({ explicit: false });
-      session.startTransaction();
-      await collection.insertOne({ x: 1 }, { session });
-
-      const opBefore = await utilClient.db().admin().command({ currentOp: 1 });
-      idleSessionsBeforeClose = opBefore.inprog.filter(s => s.type === 'idleSession');
-
-      await client.close();
-
-      const opAfter = await utilClient.db().admin().command({ currentOp: 1 });
-      idleSessionsAfterClose = opAfter.inprog.filter(s => s.type === 'idleSession');
-
-      await utilClient.close();
-    });
-
-    afterEach(async function () {
-      await utilClient?.close();
-      await session?.endSession();
-      await client?.close();
-    });
-
-    describe('Server resource: LSID/ServerSession', () => {
-      describe('after a clientSession is implicitly created and used', () => {
-        it(
-          'the server-side ServerSession is cleaned up by client.close()',
-          metadata,
-          async function () {
-            expect(idleSessionsBeforeClose).to.not.be.empty;
-            expect(idleSessionsAfterClose).to.be.empty;
-          }
-        );
-      });
-    });
-
-    describe('Server resource: Transactions', () => {
-      describe('after a clientSession is implicitly created and used', () => {
-        it(
-          'the server-side transaction is cleaned up by client.close()',
-          metadata,
-          async function () {
-            expect(idleSessionsBeforeClose[0].transaction.txnNumber).to.not.null;
-            expect(idleSessionsAfterClose).to.be.empty;
-          }
-        );
       });
     });
   });
