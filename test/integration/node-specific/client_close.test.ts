@@ -651,7 +651,7 @@ describe('MongoClient.close() Integration', () => {
         await client
           .db('db')
           .collection('coll')
-          ?.drop()
+          .drop()
           .catch(() => null);
         coll = await client
           .db('db')
