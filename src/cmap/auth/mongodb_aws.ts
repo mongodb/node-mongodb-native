@@ -33,11 +33,7 @@ interface AWSSaslContinuePayload {
   t?: string;
 }
 
-let aws4:
-  | AWS4
-  | {
-      kModuleError: MongoMissingDependencyError;
-    };
+let aws4: AWS4 | { kModuleError: MongoMissingDependencyError };
 
 export class MongoDBAWS extends AuthProvider {
   private credentialFetcher: AWSTemporaryCredentialProvider;
