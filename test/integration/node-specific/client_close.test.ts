@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { once } from 'events';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type Collection, type FindCursor, type MongoClient } from '../../mongodb';
@@ -626,13 +625,19 @@ describe('MongoClient.close() Integration', () => {
       });
 
       describe('Node.js resource: Socket', () => {
-        it.skip('no sockets remain after client.close()', metadata, async () => {});
+        it.skip('no sockets remain after client.close()', metadata, async () => null);
       });
     });
   });
 
   describe('Server resource: Cursor', () => {
-    describe('after cursors are created', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: {
+        mongodb: '>=4.2.0' // MongoServerError: Unrecognized option 'idleCursors' in $currentOp stage. on 4.0
+      }
+    };
+
+    describe('after cursors are created', metadata, () => {
       let client: MongoClient;
       let coll: Collection;
       let cursor: FindCursor;
@@ -657,31 +662,35 @@ describe('MongoClient.close() Integration', () => {
         await cursor?.close();
       });
 
-      it('all active server-side cursors are closed by client.close()', async function () {
-        const getCursors = async () => {
-          const cursors = await utilClient
-            .db('admin')
-            .aggregate([{ $currentOp: { idleCursors: true } }])
-            .toArray();
+      it(
+        'all active server-side cursors are closed by client.close()',
+        metadata,
+        async function () {
+          const getCursors = async () => {
+            const cursors = await utilClient
+              .db('admin')
+              .aggregate([{ $currentOp: { idleCursors: true } }])
+              .toArray();
 
-          return cursors.filter(
-            c =>
-              c.ns !== 'local.oplog.rs' &&
-              (c.type === 'idleCursor' || (c.type === 'op' && c.desc === 'getMore'))
-          ); // all idle cursors
-        };
+            return cursors.filter(
+              c =>
+                c.ns !== 'local.oplog.rs' &&
+                (c.type === 'idleCursor' || (c.type === 'op' && c.desc === 'getMore'))
+            ); // all idle cursors
+          };
 
-        cursor = coll.find({}, { batchSize: 1 });
-        await cursor.next();
+          cursor = coll.find({}, { batchSize: 1 });
+          await cursor.next();
 
-        // assert creation
-        expect(await getCursors()).to.not.be.empty;
+          // assert creation
+          expect(await getCursors()).to.not.be.empty;
 
-        await client.close();
+          await client.close();
 
-        // assert clean-up
-        expect(await getCursors()).to.be.empty;
-      });
+          // assert clean-up
+          expect(await getCursors()).to.be.empty;
+        }
+      );
     });
   });
 });
