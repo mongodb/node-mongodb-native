@@ -551,7 +551,7 @@ describe('MongoClient.close() Integration', () => {
       await client
         .db('db')
         .collection('collection')
-        ?.drop()
+        .drop()
         .catch(() => null);
       const collection = await client.db('db').createCollection('collection');
       session = client.startSession();
