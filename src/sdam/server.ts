@@ -48,6 +48,7 @@ import {
   maxWireVersion,
   type MongoDBNamespace,
   noop,
+  squashError,
   supportsRetryableWrites
 } from '../utils';
 import { throwIfWriteConcernError } from '../write_concern';
@@ -345,9 +346,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError instanceof MongoError &&
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
-        reauthPromise = this.pool.reauthenticate(conn).catch(error => {
+        reauthPromise = this.pool.reauthenticate(conn);
+        reauthPromise.then(undefined, error => {
           reauthPromise = null;
-          throw error;
+          squashError(error);
         });
 
         await abortable(reauthPromise, options);
@@ -368,9 +370,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       if (session?.pinnedConnection !== conn) {
         if (reauthPromise != null) {
           // The reauth promise only exists if it hasn't thrown.
-          void reauthPromise.finally(() => {
+          const checkBackIn = () => {
             this.pool.checkIn(conn);
-          });
+          };
+          void reauthPromise.then(checkBackIn, checkBackIn);
         } else {
           this.pool.checkIn(conn);
         }
