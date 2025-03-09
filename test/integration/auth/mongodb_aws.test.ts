@@ -137,6 +137,8 @@ describe('MONGODB-AWS', function () {
   });
 
   context('when user supplies a credentials provider', function () {
+    let providerCount = 0;
+
     beforeEach(function () {
       if (!awsSdkPresent) {
         this.skipReason = 'only relevant to AssumeRoleWithWebIdentity with SDK installed';
@@ -147,9 +149,13 @@ describe('MONGODB-AWS', function () {
     it('authenticates with a user provided credentials provider', async function () {
       // @ts-expect-error We intentionally access a protected variable.
       const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+      const provider = async () => {
+        providerCount++;
+        return await credentialProvider.fromNodeProviderChain().apply();
+      };
       client = this.configuration.newClient(process.env.MONGODB_URI, {
         authMechanismProperties: {
-          AWS_CREDENTIAL_PROVIDER: credentialProvider.fromNodeProviderChain()
+          AWS_CREDENTIAL_PROVIDER: provider
         }
       });
 
@@ -161,6 +167,13 @@ describe('MONGODB-AWS', function () {
 
       expect(result).to.not.be.instanceOf(MongoServerError);
       expect(result).to.be.a('number');
+      // If we have a username the credentials have been set from the URI, options, or environment
+      // variables per the auth spec stated order.
+      if (client.options.credentials.username) {
+        expect(providerCount).to.equal(0);
+      } else {
+        expect(providerCount).to.be.greaterThan(0);
+      }
     });
   });
 

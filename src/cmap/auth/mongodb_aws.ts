@@ -35,9 +35,12 @@ interface AWSSaslContinuePayload {
 
 export class MongoDBAWS extends AuthProvider {
   private credentialFetcher: AWSTemporaryCredentialProvider;
+  private credentialProvider?: AWSCredentialProvider;
+
   constructor(credentialProvider?: AWSCredentialProvider) {
     super();
 
+    this.credentialProvider = credentialProvider;
     this.credentialFetcher = AWSTemporaryCredentialProvider.isAWSSDKInstalled
       ? new AWSSDKCredentialProvider(credentialProvider)
       : new LegacyAWSTemporaryCredentialProvider();
