@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { AWSTemporaryCredentialProvider, Binary } from '../../mongodb';
+import { AWSTemporaryCredentialProvider, Binary, MongoClient } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
@@ -53,7 +53,7 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
             },
             credentialProviders: { aws: credentialProvider.fromNodeProviderChain() }
           });
-        }).to.throw();
+        }).to.throw(/custom credential provider and credentials/);
       });
     }
   );
@@ -84,37 +84,26 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
     });
   });
 
-  context.skip('Case 3: Automatic encryption with different custom providers', function () {
-    let client;
-
-    beforeEach(function () {
-      client = this.configuration.newClient(process.env.MONGODB_URI, {
-        authMechanismProperties: {
-          AWS_CREDENTIAL_PROVIDER: credentialProvider.fromNodeProviderChain()
-        },
-        autoEncryption: {
-          keyVaultNamespace: 'keyvault.datakeys',
-          kmsProviders: { aws: {} },
-          credentialProviders: {
-            aws: async () => {
-              return {
-                accessKeyId: process.env.FLE_AWS_KEY,
-                secretAccessKey: process.env.FLE_AWS_SECRET
-              };
+  context(
+    'Case 3: Auto encryption with credentials and custom credential provider',
+    metadata,
+    function () {
+      it('throws an error', metadata, function () {
+        expect(() => {
+          new MongoClient('mongodb://127.0.0.1:27017', {
+            autoEncryption: {
+              keyVaultNamespace: 'keyvault.datakeys',
+              kmsProviders: {
+                aws: {
+                  accessKeyId: process.env.FLE_AWS_KEY,
+                  secretAccessKey: process.env.FLE_AWS_SECRET
+                }
+              },
+              credentialProviders: { aws: credentialProvider.fromNodeProviderChain() }
             }
-          },
-          extraOptions: getEncryptExtraOptions()
-        }
+          });
+        }).to.throw(/custom credential provider and credentials/);
       });
-    });
-
-    afterEach(async function () {
-      await client?.close();
-    });
-
-    it('is successful', async function () {
-      const result = await client.db('test').collection('test').insertOne({ n: 1 });
-      expect(result.ok).to.equal(1);
-    });
-  });
+    }
+  );
 });
