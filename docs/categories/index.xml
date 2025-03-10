@@ -4,11 +4,8 @@
     <title>Categories on MongoDB Node.js Driver</title>
     <link>/node-mongodb-native/categories/</link>
     <description>Recent content in Categories on MongoDB Node.js Driver</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    
-	<atom:link href="/node-mongodb-native/categories/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <atom:link href="/node-mongodb-native/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

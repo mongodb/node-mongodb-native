@@ -135,6 +135,7 @@ export type Metric = {
   name: 'megabytes_per_second' | 'normalized_throughput';
   value: number;
   metadata: {
+    tags?: string[];
     improvement_direction: 'up' | 'down';
   };
 };
@@ -143,7 +144,6 @@ export type MetricInfo = {
   info: {
     test_name: string;
     args: Record<string, number>;
-    tags?: string[];
   };
   metrics: Metric[];
 };
@@ -159,12 +159,15 @@ export function metrics(test_name: string, result: number, tags?: string[]): Met
           key,
           typeof value === 'number' ? value : value ? 1 : 0
         ])
-      ),
-      tags
+      )
     },
     // FIXME(NODE-6781): For now all of our metrics are of throughput so their improvement_direction is up,
     metrics: [
-      { name: 'megabytes_per_second', value: result, metadata: { improvement_direction: 'up' } }
+      {
+        name: 'megabytes_per_second',
+        value: result,
+        metadata: { tags, improvement_direction: 'up' }
+      }
     ]
   } as const;
 }
