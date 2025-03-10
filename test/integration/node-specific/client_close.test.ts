@@ -648,11 +648,11 @@ describe('MongoClient.close() Integration', () => {
         utilClient = this.configuration.newClient();
         await client.connect();
         await client
-          .db('db')
-          .collection('coll')
+          .db('close_db')
+          .collection('close_coll')
           .drop()
           .catch(() => null);
-        coll = await client.db('db').createCollection('coll');
+        coll = await client.db('close_db').createCollection('close_coll');
         await coll.insertMany([{ a: 1 }, { b: 2 }, { c: 3 }]);
       });
 
@@ -672,11 +672,7 @@ describe('MongoClient.close() Integration', () => {
               .aggregate([{ $currentOp: { idleCursors: true } }])
               .toArray();
 
-            return cursors.filter(
-              c =>
-                c.ns !== 'local.oplog.rs' &&
-                (c.type === 'idleCursor' || (c.type === 'op' && c.desc === 'getMore'))
-            ); // all idle cursors
+            return cursors.filter(c => c.ns === 'close_db.close_coll');
           };
 
           cursor = coll.find({}, { batchSize: 1 });
