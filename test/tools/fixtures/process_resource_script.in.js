@@ -1,7 +1,7 @@
 'use strict';
 
 /* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
+
 const driverPath = DRIVER_SOURCE_PATH;
 const func = FUNCTION_STRING;
 const scriptName = SCRIPT_NAME_STRING;
@@ -48,7 +48,6 @@ function getNewLibuvResourceArray() {
    * @param {LibuvResource} resource
    */
   function isNewLibuvResource(resource) {
-    const serverType = ['tcp', 'udp'];
     return (
       !originalReportAddresses.includes(resource.address) && resource.is_referenced // if a resource is unreferenced, it's not keeping the event loop open
     );
@@ -128,10 +127,10 @@ async function main() {
 }
 
 main()
-  .then(() => {})
+  .then(() => null)
   .catch(e => {
     log({ error: { message: e.message, stack: e.stack, resources: getNewResources() } });
-    process.exit(1);
+    process.exit(2);
   });
 
 setTimeout(() => {
