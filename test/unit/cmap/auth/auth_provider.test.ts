@@ -5,6 +5,7 @@ import { AuthProvider, MongoRuntimeError } from '../../../mongodb';
 describe('AuthProvider', function () {
   describe('#reauth', function () {
     context('when the provider is already reauthenticating', function () {
+      //@ts-expect-error: cannot make an instance of an abstract class
       const provider = new AuthProvider();
       const context = { reauthenticating: true };
 
