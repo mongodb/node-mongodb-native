@@ -1,10 +1,9 @@
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { type AWS4, loadAws4 } from '../../deps';
+import { aws4 } from '../../deps';
 import {
   MongoCompatibilityError,
   MongoMissingCredentialsError,
-  type MongoMissingDependencyError,
   MongoRuntimeError
 } from '../../error';
 import { ByteUtils, maxWireVersion, ns, randomBytes } from '../../utils';
@@ -33,8 +32,6 @@ interface AWSSaslContinuePayload {
   t?: string;
 }
 
-let aws4: AWS4 | { kModuleError: MongoMissingDependencyError };
-
 export class MongoDBAWS extends AuthProvider {
   private credentialFetcher: AWSTemporaryCredentialProvider;
   constructor() {
@@ -51,7 +48,6 @@ export class MongoDBAWS extends AuthProvider {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
-    aws4 ??= loadAws4();
     if ('kModuleError' in aws4) {
       throw aws4['kModuleError'];
     }

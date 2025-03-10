@@ -62,9 +62,9 @@ describe('optionalRequire', function () {
       }
       const mdbAWS = new MongoDBAWS();
 
-      const error = await mdbAWS.auth(
-        new AuthContext({ hello: { maxWireVersion: 9 } }, true, null)
-      );
+      const error = await mdbAWS
+        .auth(new AuthContext({ hello: { maxWireVersion: 9 } }, true, null))
+        .catch(error => error);
 
       expect(error).to.be.instanceOf(MongoMissingDependencyError);
     });

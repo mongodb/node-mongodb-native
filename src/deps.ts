@@ -203,8 +203,7 @@ export function getSocks(): SocksLib | { kModuleError: MongoMissingDependencyErr
   }
 }
 
-/** @internal */
-export interface AWS4 {
+interface AWS4 {
   /**
    * Created these inline types to better assert future usage of this API
    * @param options - options for request
@@ -245,7 +244,9 @@ export interface AWS4 {
   };
 }
 
-export function loadAws4() {
+export const aws4: AWS4 | { kModuleError: MongoMissingDependencyError } = loadAws4();
+
+function loadAws4() {
   let aws4: AWS4 | { kModuleError: MongoMissingDependencyError };
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
