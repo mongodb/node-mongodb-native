@@ -1,25 +1,20 @@
+import * as events from 'node:events';
+
 import { expect } from 'chai';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type Collection, type FindCursor, type MongoClient } from '../../mongodb';
-import { type TestConfiguration } from '../../tools/runner/config';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
 describe('MongoClient.close() Integration', () => {
   // note: these tests are set-up in accordance of the resource ownership tree
-
-  let config: TestConfiguration;
-
-  beforeEach(function () {
-    config = this.configuration;
-  });
 
   describe('Node.js resource: TLS File read', () => {
     describe('when client is connecting and reads an infinite TLS file', () => {
       it.skip('the file read is interrupted by client.close()', async function () {
         await runScriptAndGetProcessInfo(
           'tls-file-read',
-          config,
+          this.configuration,
           async function run({ MongoClient, uri, expect }) {
             const infiniteFile = '/dev/zero';
             const client = new MongoClient(uri, { tls: true, tlsCertificateKeyFile: infiniteFile });
@@ -52,10 +47,10 @@ describe('MongoClient.close() Integration', () => {
       });
 
       describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
-        it.skip('the file read is interrupted by client.close()', async () => {
+        it.skip('the file read is interrupted by client.close()', async function () {
           await runScriptAndGetProcessInfo(
             'token-file-read',
-            config,
+            this.configuration,
             async function run({ MongoClient, uri, expect }) {
               const infiniteFile = '/dev/zero';
               process.env.OIDC_TOKEN_FILE = infiniteFile;
@@ -81,30 +76,41 @@ describe('MongoClient.close() Integration', () => {
       describe('after a Topology is created through client.connect()', () => {
         const metadata: MongoDBMetadataUI = { requires: { topology: 'replicaset' } };
 
-        it.skip('server selection timers are cleaned up by client.close()', metadata, async () => {
-          const run = async function ({ MongoClient, uri, expect, sleep, mongodb, getTimerCount }) {
-            const serverSelectionTimeoutMS = 2222;
-            const client = new MongoClient(uri, {
-              minPoolSize: 1,
-              serverSelectionTimeoutMS,
-              readPreference: new mongodb.ReadPreference('secondary', [
-                { something: 'that does not exist' }
-              ])
-            });
-            const insertPromise = client.db('db').collection('collection').insertOne({ x: 1 });
+        it.skip(
+          'server selection timers are cleaned up by client.close()',
+          metadata,
+          async function () {
+            const run = async function ({
+              MongoClient,
+              uri,
+              expect,
+              sleep,
+              mongodb,
+              getTimerCount
+            }) {
+              const serverSelectionTimeoutMS = 2222;
+              const client = new MongoClient(uri, {
+                minPoolSize: 1,
+                serverSelectionTimeoutMS,
+                readPreference: new mongodb.ReadPreference('secondary', [
+                  { something: 'that does not exist' }
+                ])
+              });
+              const insertPromise = client.db('db').collection('collection').insertOne({ x: 1 });
 
-            // don't allow entire server selection timer to elapse to ensure close is called mid-timeout
-            await sleep(serverSelectionTimeoutMS / 2);
+              // don't allow entire server selection timer to elapse to ensure close is called mid-timeout
+              await sleep(serverSelectionTimeoutMS / 2);
 
-            expect(getTimerCount()).to.not.equal(0);
-            await client.close();
-            expect(getTimerCount()).to.equal(0);
+              expect(getTimerCount()).to.not.equal(0);
+              await client.close();
+              expect(getTimerCount()).to.equal(0);
 
-            const err = await insertPromise.catch(e => e);
-            expect(err).to.be.instanceOf(mongodb.MongoTopologyClosedError);
-          };
-          await runScriptAndGetProcessInfo('timer-server-selection', config, run);
-        });
+              const err = await insertPromise.catch(e => e);
+              expect(err).to.be.instanceOf(mongodb.MongoTopologyClosedError);
+            };
+            await runScriptAndGetProcessInfo('timer-server-selection', this.configuration, run);
+          }
+        );
       });
     });
 
@@ -147,7 +153,11 @@ describe('MongoClient.close() Integration', () => {
 
                     expect(getTimerCount()).to.equal(0);
                   };
-                  await runScriptAndGetProcessInfo('timer-monitor-interval', config, run);
+                  await runScriptAndGetProcessInfo(
+                    'timer-monitor-interval',
+                    this.configuration,
+                    run
+                  );
                 }
               );
             });
@@ -156,7 +166,7 @@ describe('MongoClient.close() Integration', () => {
               it.skip(
                 'the new monitor interval timer is cleaned up by client.close()',
                 metadata,
-                async () => {
+                async function () {
                   const run = async function ({ MongoClient, expect, getTimerCount, once }) {
                     const heartbeatFrequencyMS = 2000;
                     const client = new MongoClient('mongodb://fakeUri', { heartbeatFrequencyMS });
@@ -178,7 +188,11 @@ describe('MongoClient.close() Integration', () => {
 
                     await connectPromise;
                   };
-                  await runScriptAndGetProcessInfo('timer-heartbeat-failed-monitor', config, run);
+                  await runScriptAndGetProcessInfo(
+                    'timer-heartbeat-failed-monitor',
+                    this.configuration,
+                    run
+                  );
                 }
               );
             });
@@ -207,7 +221,11 @@ describe('MongoClient.close() Integration', () => {
                   expect(getSocketEndpoints()).to.not.deep.include({ host, port });
                 }
               };
-              await runScriptAndGetProcessInfo('socket-connection-monitoring', config, run);
+              await runScriptAndGetProcessInfo(
+                'socket-connection-monitoring',
+                this.configuration,
+                run
+              );
             });
           });
         });
@@ -242,7 +260,7 @@ describe('MongoClient.close() Integration', () => {
 
                     expect(getTimerCount()).to.equal(0);
                   };
-                  await runScriptAndGetProcessInfo('timer-rtt-monitor', config, run);
+                  await runScriptAndGetProcessInfo('timer-rtt-monitor', this.configuration, run);
                 }
               );
             });
@@ -251,7 +269,7 @@ describe('MongoClient.close() Integration', () => {
           describe('Connection', () => {
             describe('Node.js resource: Socket', () => {
               describe('when rtt monitoring is turned on', () => {
-                it.skip('no sockets remain after client.close()', metadata, async () => {
+                it.skip('no sockets remain after client.close()', metadata, async function () {
                   const run = async ({ MongoClient, uri, expect, getSockets, once }) => {
                     const heartbeatFrequencyMS = 500;
                     const client = new MongoClient(uri, {
@@ -289,7 +307,11 @@ describe('MongoClient.close() Integration', () => {
                     expect(activeSocketsAfterClose).to.have.lengthOf(0);
                   };
 
-                  await runScriptAndGetProcessInfo('socket-connection-rtt-monitoring', config, run);
+                  await runScriptAndGetProcessInfo(
+                    'socket-connection-rtt-monitoring',
+                    this.configuration,
+                    run
+                  );
                 });
               });
             });
@@ -323,7 +345,7 @@ describe('MongoClient.close() Integration', () => {
                 expect(getMinPoolSizeTimer(servers)).to.not.exist;
                 expect(getTimerCount()).to.equal(0);
               };
-              await runScriptAndGetProcessInfo('timer-min-pool-size', config, run);
+              await runScriptAndGetProcessInfo('timer-min-pool-size', this.configuration, run);
             });
           });
         });
@@ -334,8 +356,8 @@ describe('MongoClient.close() Integration', () => {
             const waitQueueTimeoutMS = 1515;
 
             beforeEach(async function () {
-              // configure failPoint
-              utilClient = this.configuration.newClient();
+              // this.configurationure failPoint
+              utilClient = this.this.configurationuration.newClient();
               await utilClient.connect();
               const failPoint = {
                 configureFailPoint: 'failCommand',
@@ -392,7 +414,7 @@ describe('MongoClient.close() Integration', () => {
                   'Timed out while checking out a connection from connection pool'
                 );
               };
-              await runScriptAndGetProcessInfo('timer-check-out', config, run);
+              await runScriptAndGetProcessInfo('timer-check-out', this.configuration, run);
             });
           });
         });
@@ -418,7 +440,7 @@ describe('MongoClient.close() Integration', () => {
                   expect(getSockets()).to.have.lengthOf(0);
                 };
 
-                await runScriptAndGetProcessInfo('socket-minPoolSize', config, run);
+                await runScriptAndGetProcessInfo('socket-minPoolSize', this.configuration, run);
               });
             });
           });
@@ -432,7 +454,7 @@ describe('MongoClient.close() Integration', () => {
         const metadata: MongoDBMetadataUI = { requires: { topology: 'sharded' } };
 
         describe('after SRVPoller is created', () => {
-          it.skip('timers are cleaned up by client.close()', metadata, async () => {
+          it.skip('timers are cleaned up by client.close()', metadata, async function () {
             const run = async function ({ MongoClient, expect, getTimerCount }) {
               const SRV_CONNECTION_STRING = `mongodb+srv://test1.test.build.10gen.cc`;
 
@@ -450,9 +472,39 @@ describe('MongoClient.close() Integration', () => {
               await client.close();
               expect(getTimerCount()).to.equal(0);
             };
-            await runScriptAndGetProcessInfo('timer-srv-poller', config, run);
+            await runScriptAndGetProcessInfo('timer-srv-poller', this.configuration, run);
           });
         });
+      });
+    });
+  });
+
+  describe('ClientSession (Implicit)', () => {
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    describe('when MongoClient.close is called', function () {
+      it('sends an endSessions command', async function () {
+        await client.db('a').collection('a').insertOne({ a: 1 });
+        await client.db('a').collection('a').insertOne({ a: 1 });
+        await client.db('a').collection('a').insertOne({ a: 1 });
+        const endSessionsStarted = events.once(client, 'commandStarted');
+        const willEndSessions = events.once(client, 'commandSucceeded');
+
+        await client.close();
+
+        const [startedEv] = await endSessionsStarted;
+        expect(startedEv).to.have.nested.property('command.endSessions').that.has.lengthOf(1);
+
+        const [commandEv] = await willEndSessions;
+        expect(commandEv).to.have.property('commandName', 'endSessions');
       });
     });
   });
@@ -538,10 +590,10 @@ describe('MongoClient.close() Integration', () => {
     describe('KMS Request', () => {
       describe('Node.js resource: TLS file read', () => {
         describe('when KMSRequest reads an infinite TLS file', () => {
-          it.skip('the file read is interrupted by client.close()', metadata, async () => {
+          it.skip('the file read is interrupted by client.close()', metadata, async function () {
             await runScriptAndGetProcessInfo(
               'tls-file-read-auto-encryption',
-              config,
+              this.configuration,
               async function run({ MongoClient, uri, expect, mongodb }) {
                 const infiniteFile = '/dev/zero';
 
@@ -666,7 +718,7 @@ describe('MongoClient.close() Integration', () => {
         'all active server-side cursors are closed by client.close()',
         metadata,
         async function () {
-          const getCursors = async () => {
+          const getCursors = async function () {
             const cursors = await utilClient
               .db('admin')
               .aggregate([{ $currentOp: { idleCursors: true } }])
