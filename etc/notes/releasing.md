@@ -8,6 +8,20 @@
 - You must be an employee of MongoDB.
 - You must have maintainer access to the repository you are publishing a release for.
 
+## Branching and backport strategy
+
+The Node team develops almost exclusively from the `main` branch.  Commits follow [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) formatting and the next release's version is determined automatically by [release-please](#release-please).
+
+Fixes are usually released in either the next patch version or in the next minor version, depending on which of the two the next release is.  In rare cases, we will backport changes to certain minor versions.
+
+### Backports
+
+release-please automatically tags release commits with a tag in the format v<major>.<minor>.<patch>.  When backporting, first determine the target minor version and create a release branch for it by branching off of the release tag.  The release branch should follow the format `v<major>.<minor>.x`.  For example, to create a backport of bson's 6.5 release, create a release branch from the v6.5.0 tag with the name v6.5.x.  
+
+Then, backport the release action to the target release branch.  First, create a copy of our current release action (release.yml).  Then, change any references to `main` to the target branch.  Double check that there isn't any release tooling on main that doesn't exist on the target branch.  If there is, make sure this is backported too.  Check if the target branch has a release-please config and manifest file.  If not, make sure to adopt changes for release-please v4 (see https://github.com/mongodb/js-bson/pull/682 as an example).  Backport all of the above changes to the target release branch.
+
+Now, the release-please will work the same as `main`.  Any PRs that merge to the release branch trigger the release action and update release-pleases' release PR.  Proceed as normal from here.
+
 ## `release-please`
 
 Every commit that lands on a release branch **MUST** follow [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) formatting.
