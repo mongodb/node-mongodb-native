@@ -7,8 +7,9 @@ describe('Views', function () {
   let db: Db;
 
   beforeEach(async function () {
+    const configuration = this.configuration;
     client = this.configuration.newClient();
-    db = client.db('views');
+    db = client.db(configuration.db);
   });
 
   afterEach(async function () {
