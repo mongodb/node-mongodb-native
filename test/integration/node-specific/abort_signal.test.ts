@@ -751,7 +751,6 @@ describe('AbortSignal support', () => {
         ...args
       ) {
         if (args[1].find != null) {
-          await sleep(1);
           commandStub.restore();
           controller.abort();
           throw new ReAuthenticationError({ message: 'This is a fake reauthentication error' });
