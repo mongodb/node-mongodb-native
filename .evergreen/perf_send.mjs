@@ -47,8 +47,6 @@ const body = {
   results
 };
 
-console.log('POST', util.inspect(body, { depth: Infinity }));
-
 const resp = await fetch(API_PATH, {
   method: 'POST',
   headers: {
