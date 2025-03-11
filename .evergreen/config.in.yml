@@ -108,6 +108,15 @@ functions:
         args:
           - .evergreen/run-tests.sh
 
+  "perf send":
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/perf-send.sh
+
   "run serverless tests":
     - command: timeout.update
       params:
