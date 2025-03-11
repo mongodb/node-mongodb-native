@@ -209,75 +209,68 @@ describe('Change Streams', function () {
     }
   });
 
-  it('should support creating multiple simultaneous ChangeStreams', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    test: function (done) {
+  it(
+    'should support creating multiple simultaneous ChangeStreams',
+    { requires: { topology: 'replicaset' } },
+    async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const database = client.db('integration_tests');
-        const collection1 = database.collection('simultaneous1');
-        const collection2 = database.collection('simultaneous2');
+      this.defer(() => client.close());
 
-        const changeStream1 = collection1.watch([{ $addFields: { changeStreamNumber: 1 } }]);
-        this.defer(() => changeStream1.close());
-        const changeStream2 = collection2.watch([{ $addFields: { changeStreamNumber: 2 } }]);
-        this.defer(() => changeStream2.close());
-        const changeStream3 = collection2.watch([{ $addFields: { changeStreamNumber: 3 } }]);
-        this.defer(() => changeStream3.close());
+      const database = client.db('integration_tests');
+      const collection1 = database.collection('simultaneous1');
+      const collection2 = database.collection('simultaneous2');
 
-        setTimeout(() => {
-          this.defer(
-            collection1.insertMany([{ a: 1 }]).then(() => collection2.insertMany([{ a: 1 }]))
-          );
-        }, 50);
+      const changeStream1 = collection1.watch([{ $addFields: { changeStreamNumber: 1 } }]);
+      this.defer(() => changeStream1.close());
+      const changeStream2 = collection2.watch([{ $addFields: { changeStreamNumber: 2 } }]);
+      this.defer(() => changeStream2.close());
+      const changeStream3 = collection2.watch([{ $addFields: { changeStreamNumber: 3 } }]);
+      this.defer(() => changeStream3.close());
 
-        Promise.resolve()
-          .then(() =>
-            Promise.all([changeStream1.hasNext(), changeStream2.hasNext(), changeStream3.hasNext()])
-          )
-          .then(function (hasNexts) {
-            // Check all the Change Streams have a next item
-            assert.ok(hasNexts[0]);
-            assert.ok(hasNexts[1]);
-            assert.ok(hasNexts[2]);
+      setTimeout(() => {
+        collection1.insertMany([{ a: 1 }]).then(() => collection2.insertMany([{ a: 1 }]));
+      }, 50);
 
-            return Promise.all([changeStream1.next(), changeStream2.next(), changeStream3.next()]);
-          })
-          .then(function (changes) {
-            // Check the values of the change documents are correct
-            assert.equal(changes[0].operationType, 'insert');
-            assert.equal(changes[1].operationType, 'insert');
-            assert.equal(changes[2].operationType, 'insert');
+      await Promise.resolve()
+        .then(() =>
+          Promise.all([changeStream1.hasNext(), changeStream2.hasNext(), changeStream3.hasNext()])
+        )
+        .then(function (hasNexts) {
+          // Check all the Change Streams have a next item
+          assert.ok(hasNexts[0]);
+          assert.ok(hasNexts[1]);
+          assert.ok(hasNexts[2]);
 
-            expect(changes[0]).to.have.nested.property('fullDocument.a', 1);
-            expect(changes[1]).to.have.nested.property('fullDocument.a', 1);
-            expect(changes[2]).to.have.nested.property('fullDocument.a', 1);
+          return Promise.all([changeStream1.next(), changeStream2.next(), changeStream3.next()]);
+        })
+        .then(function (changes) {
+          // Check the values of the change documents are correct
+          assert.equal(changes[0].operationType, 'insert');
+          assert.equal(changes[1].operationType, 'insert');
+          assert.equal(changes[2].operationType, 'insert');
 
-            expect(changes[0]).to.have.nested.property('ns.db', 'integration_tests');
-            expect(changes[1]).to.have.nested.property('ns.db', 'integration_tests');
-            expect(changes[2]).to.have.nested.property('ns.db', 'integration_tests');
+          expect(changes[0]).to.have.nested.property('fullDocument.a', 1);
+          expect(changes[1]).to.have.nested.property('fullDocument.a', 1);
+          expect(changes[2]).to.have.nested.property('fullDocument.a', 1);
 
-            expect(changes[0]).to.have.nested.property('ns.coll', 'simultaneous1');
-            expect(changes[1]).to.have.nested.property('ns.coll', 'simultaneous2');
-            expect(changes[2]).to.have.nested.property('ns.coll', 'simultaneous2');
+          expect(changes[0]).to.have.nested.property('ns.db', 'integration_tests');
+          expect(changes[1]).to.have.nested.property('ns.db', 'integration_tests');
+          expect(changes[2]).to.have.nested.property('ns.db', 'integration_tests');
 
-            expect(changes[0]).to.have.nested.property('changeStreamNumber', 1);
-            expect(changes[1]).to.have.nested.property('changeStreamNumber', 2);
-            expect(changes[2]).to.have.nested.property('changeStreamNumber', 3);
-          })
-          .then(
-            () => done(),
-            err => done(err)
-          );
-      });
+          expect(changes[0]).to.have.nested.property('ns.coll', 'simultaneous1');
+          expect(changes[1]).to.have.nested.property('ns.coll', 'simultaneous2');
+          expect(changes[2]).to.have.nested.property('ns.coll', 'simultaneous2');
+
+          expect(changes[0]).to.have.nested.property('changeStreamNumber', 1);
+          expect(changes[1]).to.have.nested.property('changeStreamNumber', 2);
+          expect(changes[2]).to.have.nested.property('changeStreamNumber', 3);
+        });
     }
-  });
+  );
 
   it('should properly close ChangeStream cursor', {
     metadata: { requires: { topology: 'replicaset' } },
@@ -807,22 +800,27 @@ describe('Change Streams', function () {
 
     it('when invoked with promises', {
       metadata: { requires: { topology: 'replicaset' } },
-      test: function () {
-        const read = () => {
-          return Promise.resolve()
-            .then(() => changeStream.next())
-            .then(() => changeStream.next())
-            .then(() => {
-              this.defer(lastWrite());
-              const nextP = changeStream.next();
-              return changeStream.close().then(() => nextP);
-            });
+      test: async function () {
+        const read = async () => {
+          await changeStream.next();
+          await changeStream.next();
+
+          const write = lastWrite();
+
+          const nextP = changeStream.next();
+
+          await changeStream.close();
+
+          await write;
+          await nextP;
         };
 
-        return Promise.all([read(), write()]).then(
-          () => Promise.reject(new Error('Expected operation to fail with error')),
-          err => expect(err.message).to.equal('ChangeStream is closed')
+        const error = await Promise.all([read(), write()]).then(
+          () => null,
+          error => error
         );
+
+        expect(error.message).to.equal('ChangeStream is closed');
       }
     });
 
