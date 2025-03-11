@@ -247,12 +247,9 @@ export class AutoEncrypter {
     this._kmsProviders = options.kmsProviders || {};
     this._credentialProviders = options.credentialProviders;
 
-    if (
-      options.credentialProviders?.aws &&
-      !isEmptyCredentials('aws', options.kmsProviders || {})
-    ) {
+    if (options.credentialProviders?.aws && !isEmptyCredentials('aws', this._kmsProviders)) {
       throw new MongoCryptInvalidArgumentError(
-        'Cannot provide both a custom credential provider and credentials. Please specify one or the other.'
+        'Can only provide a custom AWS credential provider when the state machine is configured for automatic AWS credential fetching'
       );
     }
 

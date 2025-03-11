@@ -468,7 +468,7 @@ describe('AWS KMS Credential Fetching', function () {
       this.currentTest?.skipReason && this.skip();
     });
 
-    context('when a credential provider is not providered', function () {
+    context('when a credential provider is not provided', function () {
       it('KMS credentials are successfully fetched.', async function () {
         const { aws } = await refreshKMSCredentials({ aws: {} });
 
@@ -479,20 +479,23 @@ describe('AWS KMS Credential Fetching', function () {
 
     context('when a credential provider is provided', function () {
       let credentialProvider;
+      let providerCount = 0;
 
       beforeEach(function () {
         // @ts-expect-error We intentionally access a protected variable.
-        credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+        const provider = AWSTemporaryCredentialProvider.awsSDK;
+        credentialProvider = async () => {
+          providerCount++;
+          return await provider.fromNodeProviderChain().apply();
+        };
       });
 
       it('KMS credentials are successfully fetched.', async function () {
-        const { aws } = await refreshKMSCredentials(
-          { aws: {} },
-          { aws: credentialProvider.fromNodeProviderChain() }
-        );
+        const { aws } = await refreshKMSCredentials({ aws: {} }, { aws: credentialProvider });
 
         expect(aws).to.have.property('accessKeyId');
         expect(aws).to.have.property('secretAccessKey');
+        expect(providerCount).to.be.greaterThan(0);
       });
     });
 

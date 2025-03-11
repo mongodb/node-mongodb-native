@@ -18,7 +18,7 @@ const masterKey = {
   key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
 };
 
-describe('25. Custom AWS Credential Providers', metadata, () => {
+describe('26. Custom AWS Credential Providers', metadata, () => {
   let keyVaultClient;
   let credentialProvider;
 
