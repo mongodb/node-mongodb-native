@@ -60,6 +60,7 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
 
   context('Case 2: Explicit encryption with custom credential provider', metadata, function () {
     let clientEncryption;
+    let providerCount = 0;
 
     beforeEach(function () {
       const options = {
@@ -67,6 +68,7 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
         kmsProviders: { aws: {} },
         credentialProviders: {
           aws: async () => {
+            providerCount++;
             return {
               accessKeyId: process.env.FLE_AWS_KEY,
               secretAccessKey: process.env.FLE_AWS_SECRET
@@ -81,6 +83,7 @@ describe('25. Custom AWS Credential Providers', metadata, () => {
     it('is successful', metadata, async function () {
       const dk = await clientEncryption.createDataKey('aws', { masterKey });
       expect(dk).to.be.instanceOf(Binary);
+      expect(providerCount).to.be.greaterThan(0);
     });
   });
 
