@@ -1,12 +1,16 @@
 import { expect } from 'chai';
 
-import { AuthProvider, MongoRuntimeError } from '../../../mongodb';
+import { type AuthContext, AuthProvider, MongoRuntimeError } from '../../../mongodb';
 
 describe('AuthProvider', function () {
   describe('#reauth', function () {
     context('when the provider is already reauthenticating', function () {
-      //@ts-expect-error: cannot make an instance of an abstract class
-      const provider = new AuthProvider();
+      const provider = new (class extends AuthProvider {
+        override auth(_context: AuthContext): Promise<void> {
+          throw new Error('Method not implemented.');
+        }
+      })();
+
       const context = { reauthenticating: true };
 
       it('returns an error', async function () {
