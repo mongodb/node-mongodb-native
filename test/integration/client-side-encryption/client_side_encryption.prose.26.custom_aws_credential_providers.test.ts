@@ -53,7 +53,7 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
             },
             credentialProviders: { aws: credentialProvider.fromNodeProviderChain() }
           });
-        }).to.throw(/custom credential provider and credentials/);
+        }).to.throw(/Can only provide a custom AWS credential provider/);
       });
     }
   );
@@ -105,7 +105,7 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
               credentialProviders: { aws: credentialProvider.fromNodeProviderChain() }
             }
           });
-        }).to.throw(/custom credential provider and credentials/);
+        }).to.throw(/Can only provide a custom AWS credential provider/);
       });
     }
   );

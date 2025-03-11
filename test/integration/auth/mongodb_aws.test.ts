@@ -144,6 +144,12 @@ describe('MONGODB-AWS', function () {
         this.skipReason = 'only relevant to AssumeRoleWithWebIdentity with SDK installed';
         return this.skip();
       }
+      // If we have a username the credentials have been set from the URI, options, or environment
+      // variables per the auth spec stated order.
+      if (client.options.credentials.username) {
+        this.skipReason = 'Credentials in the URI on env variables will not use custom provider.';
+        return this.skip();
+      }
     });
 
     it('authenticates with a user provided credentials provider', async function () {
@@ -167,13 +173,7 @@ describe('MONGODB-AWS', function () {
 
       expect(result).to.not.be.instanceOf(MongoServerError);
       expect(result).to.be.a('number');
-      // If we have a username the credentials have been set from the URI, options, or environment
-      // variables per the auth spec stated order.
-      if (client.options.credentials.username) {
-        expect(providerCount).to.equal(0);
-      } else {
-        expect(providerCount).to.be.greaterThan(0);
-      }
+      expect(providerCount).to.be.greaterThan(0);
     });
   });
 
