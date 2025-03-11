@@ -356,8 +356,7 @@ describe('MongoClient.close() Integration', () => {
             const waitQueueTimeoutMS = 1515;
 
             beforeEach(async function () {
-              // this.configurationure failPoint
-              utilClient = this.this.configurationuration.newClient();
+              utilClient = this.configuration.newClient();
               await utilClient.connect();
               const failPoint = {
                 configureFailPoint: 'failCommand',
