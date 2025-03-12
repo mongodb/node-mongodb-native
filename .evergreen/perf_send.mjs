@@ -27,12 +27,6 @@ if (!Number.isInteger(order)) throw new Error(`Failed to parse integer from orde
 
 const results = JSON.parse(await fs.readFile(resultFile, 'utf8'));
 
-// FIXME(NODE-6838): We are using dummy dates here just to be able to successfully post our results
-for (const r of results) {
-  r.created_at = new Date().toISOString();
-  r.completed_at = new Date().toISOString();
-}
-
 const body = {
   id: {
     project,
@@ -67,5 +61,3 @@ try {
 console.log(resp.statusText, util.inspect(jsonResponse ?? responseText, { depth: Infinity }));
 
 if (jsonResponse.message == null) throw new Error("Didn't get success message");
-
-console.log(jsonResponse.message);

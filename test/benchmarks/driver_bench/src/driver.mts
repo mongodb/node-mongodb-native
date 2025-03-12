@@ -145,6 +145,8 @@ export type MetricInfo = {
     test_name: string;
     args: Record<string, number>;
   };
+  created_at: string;
+  completed_at: string;
   metrics: Metric[];
 };
 
@@ -161,6 +163,8 @@ export function metrics(test_name: string, result: number, tags?: string[]): Met
         ])
       )
     },
+    created_at: new Date().toISOString(),
+    completed_at: new Date().toISOString(),
     // FIXME(NODE-6781): For now all of our metrics are of throughput so their improvement_direction is up,
     metrics: [
       {
