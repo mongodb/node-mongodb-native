@@ -819,6 +819,7 @@ describe('Change Streams', function () {
           const write = lastWrite();
 
           const nextP = changeStream.next();
+          nextP.catch(() => null);
 
           await changeStream.close();
 
