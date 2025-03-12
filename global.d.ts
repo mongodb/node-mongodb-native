@@ -84,6 +84,8 @@ declare global {
 
     interface Context {
       configuration: TestConfiguration;
+      /** @deprecated Please use afterEach hooks instead */
+      defer(fn: () => Promise<unknown>): void;
     }
 
     interface Test {

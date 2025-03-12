@@ -80,10 +80,9 @@ const initIteratorMode = async (cs: ChangeStream) => {
 };
 
 /** Waits for a change stream to start */
-function waitForStarted(changeStream, callback) {
-  changeStream.cursor.once('init', () => {
-    callback();
-  });
+async function waitForStarted(changeStream, callback) {
+  await once(changeStream.cursor, 'init');
+  await callback();
 }
 
 // Define the pipeline processing changes
@@ -844,42 +843,48 @@ describe('Change Stream prose tests', function () {
   describe('Change Stream prose 17-18', function () {
     let client: MongoClient;
     let coll: Collection;
-    let startAfter;
+    let startAfter: unknown;
 
     function recordEvent(events, e) {
       if (e.commandName !== 'aggregate') return;
       events.push({ $changeStream: e.command.pipeline[0].$changeStream });
     }
 
-    beforeEach(function (done) {
+    beforeEach('get startAfter token', async function () {
       const configuration = this.configuration;
-      client = configuration.newClient({ monitorCommands: true });
-      client.connect(err => {
-        expect(err).to.not.exist;
-        coll = client.db('integration_tests').collection('setupAfterTest');
-        const changeStream = coll.watch();
-        changeStream.on('error', done);
-        waitForStarted(changeStream, () => {
-          coll.insertOne({ x: 1 }, { writeConcern: { w: 'majority', j: true } }, err => {
-            expect(err).to.not.exist;
+      const utilClient = configuration.newClient();
+      await utilClient.connect();
 
-            coll.drop(err => {
-              expect(err).to.not.exist;
-            });
-          });
-        });
+      const coll = utilClient.db('integration_tests').collection('setupAfterTest');
+      const changeStream = coll.watch();
 
-        changeStream.on('change', change => {
-          if (change.operationType === 'invalidate') {
-            startAfter = change._id;
-            changeStream.close(done);
-          }
-        });
-      });
+      const willInit = once(changeStream.cursor, 'init');
+
+      await changeStream.tryNext();
+      await willInit;
+
+      await coll.insertOne({ x: 1 }, { writeConcern: { w: 'majority', j: true } });
+      await coll.drop();
+
+      for await (const change of changeStream) {
+        if (change.operationType === 'invalidate') {
+          startAfter = change._id;
+          break;
+        }
+      }
+
+      await changeStream.close();
+
+      await utilClient.close();
     });
 
-    afterEach(function (done) {
-      client.close(done);
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { monitorCommands: true });
+      coll = client.db('integration_tests').collection('setupAfterTest');
+    });
+
+    afterEach(async function () {
+      await client.close();
     });
 
     // 17. $changeStream stage for ChangeStream started with startAfter against a server >=4.1.1
@@ -894,8 +899,8 @@ describe('Change Stream prose tests', function () {
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
 
-        changeStream.on('error', async e => {
-          await changeStream.close(e);
+        changeStream.on('error', async () => {
+          await changeStream.close();
         });
 
         const changePromise = once(changeStream, 'change');
@@ -955,11 +960,9 @@ describe('Change Stream prose tests', function () {
         });
 
         waitForStarted(changeStream, () =>
-          this.defer(
-            coll
-              .insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } })
-              .then(() => coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } }))
-          )
+          coll
+            .insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } })
+            .then(() => coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } }))
         );
       }
     });

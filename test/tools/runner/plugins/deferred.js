@@ -1,57 +1,52 @@
 'use strict';
+
 const kDeferred = Symbol('deferred');
+const mocha = require('mocha');
 
-(mocha => {
-  const Context = mocha.Context;
-  function makeExecuteDeferred(test) {
-    return () => {
-      const deferredActions = test[kDeferred];
+const { Context } = mocha;
 
-      // process actions LIFO
-      const promises = Array.from(deferredActions).reverse();
-      const result = promises.reduce((p, action) => {
-        if (action.length > 0) {
-          // assume these are async methods with provided `done`
-          const actionPromise = new Promise((resolve, reject) => {
-            function done(err) {
-              if (err) return reject(err);
-              resolve();
-            }
+function makeExecuteDeferred(test) {
+  return async function () {
+    /** @type {Array<() => Promise<void>>} */
+    const deferredActions = test[kDeferred];
 
-            action(done);
-          });
+    // process actions LIFO
+    const actions = Array.from(deferredActions).reverse();
 
-          return p.then(actionPromise);
-        }
+    try {
+      for (const fn of actions) {
+        await fn();
+      }
+    } finally {
+      test[kDeferred].length = 0;
+    }
+  };
+}
 
-        return p.then(action);
-      }, Promise.resolve());
+Context.prototype.defer = function defer(fn) {
+  const test = this.test;
 
-      return result.then(
-        () => test[kDeferred].clear(),
-        err => {
-          test[kDeferred].clear();
-          return Promise.reject(err);
-        }
-      );
-    };
+  if (typeof fn !== 'function') {
+    throw new Error('defer is meant to take a function that returns a promise');
   }
 
-  Context.prototype.defer = function (fn) {
-    const test = this.test;
-    if (test[kDeferred] == null) {
-      test[kDeferred] = new Set();
+  if (test[kDeferred] == null) {
+    test[kDeferred] = [];
 
-      const parentSuite = test.parent;
-      const afterEachHooks = parentSuite._afterEach;
-      if (afterEachHooks[0] == null || afterEachHooks[0].title !== kDeferred) {
-        const deferredHook = parentSuite._createHook('"deferred" hook', makeExecuteDeferred(test));
+    const parentSuite = test.parent;
+    const afterEachHooks = parentSuite._afterEach;
+    if (afterEachHooks[0] == null || afterEachHooks[0].title !== kDeferred) {
+      const deferredHook = parentSuite._createHook('"deferred" hook', makeExecuteDeferred(test));
 
-        afterEachHooks.unshift(deferredHook);
-      }
+      // defer runs after test but before afterEach(s)
+      afterEachHooks.unshift(deferredHook);
     }
+  }
 
-    test[kDeferred].add(fn);
-    return this;
-  };
-})(require('mocha'));
+  if (test[kDeferred].includes(fn)) {
+    throw new Error('registered the same deferred action more than once');
+  }
+
+  test[kDeferred].push(fn);
+  return this;
+};
