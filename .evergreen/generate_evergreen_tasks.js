@@ -765,12 +765,9 @@ function addPerformanceTasks() {
       ...[
         'install dependencies',
         'bootstrap mongo-orchestration',
-        'run spec driver benchmarks'
-      ].map(func => ({ func })),
-      {
-        command: 'perf.send',
-        params: { file: 'src/test/benchmarks/driver_bench/results.json' }
-      }
+        'run spec driver benchmarks',
+        'perf send'
+      ].map(func => ({ func }))
     ]
   });
 

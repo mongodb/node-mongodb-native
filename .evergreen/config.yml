@@ -80,6 +80,14 @@ functions:
         binary: bash
         args:
           - .evergreen/run-tests.sh
+  perf send:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/perf-send.sh
   run serverless tests:
     - command: timeout.update
       params:
@@ -1891,9 +1899,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/test/benchmarks/driver_bench/results.json
+      - func: perf send
   - name: run-spec-benchmark-tests-node-server-timeoutMS-120000
     tags:
       - run-spec-benchmark-tests
@@ -1912,9 +1918,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/test/benchmarks/driver_bench/results.json
+      - func: perf send
   - name: run-spec-benchmark-tests-node-server-timeoutMS-0
     tags:
       - run-spec-benchmark-tests
@@ -1933,9 +1937,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/test/benchmarks/driver_bench/results.json
+      - func: perf send
   - name: run-spec-benchmark-tests-node-server-monitorCommands-true
     tags:
       - run-spec-benchmark-tests
@@ -1954,9 +1956,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/test/benchmarks/driver_bench/results.json
+      - func: perf send
   - name: run-spec-benchmark-tests-node-server-logging
     tags:
       - run-spec-benchmark-tests
@@ -1975,9 +1975,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/test/benchmarks/driver_bench/results.json
+      - func: perf send
   - name: run-unit-tests-node-16
     tags:
       - unit-tests
