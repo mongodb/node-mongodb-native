@@ -826,38 +826,6 @@ describe('Change Streams', function () {
       }
     });
 
-    it('when invoked with callbacks', {
-      metadata: { requires: { topology: 'replicaset' } },
-      test: function (done) {
-        const ops = [];
-        changeStream.next(() => {
-          changeStream.next(() => {
-            ops.push(lastWrite());
-
-            // explicitly close the change stream after the write has begun
-            ops.push(changeStream.close());
-
-            changeStream.next(err => {
-              try {
-                expect(err)
-                  .property('message')
-                  .to.match(/ChangeStream is closed/);
-                Promise.all(ops).then(() => done(), done);
-              } catch (e) {
-                done(e);
-              }
-            });
-          });
-        });
-
-        ops.push(
-          write().catch(() => {
-            // ignore
-          })
-        );
-      }
-    });
-
     it.skip('when invoked using eventEmitter API', {
       metadata: {
         requires: { topology: 'replicaset' }
