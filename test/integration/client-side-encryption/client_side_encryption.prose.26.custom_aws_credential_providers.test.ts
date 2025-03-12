@@ -38,7 +38,7 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
   });
 
   context(
-    'Case 1: Explicit encryption with credentials and custom credential provider',
+    'Case 1: ClientEncryption with credentialProviders and incorrect kmsProviders',
     metadata,
     function () {
       it('throws an error', metadata, function () {
@@ -58,7 +58,7 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
     }
   );
 
-  context('Case 2: Explicit encryption with custom credential provider', metadata, function () {
+  context('Case 2: ClientEncryption with credentialProviders works', metadata, function () {
     let clientEncryption;
     let providerCount = 0;
 
@@ -88,7 +88,7 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
   });
 
   context(
-    'Case 3: Auto encryption with credentials and custom credential provider',
+    'Case 3: AutoEncryptionOpts with credentialProviders and incorrect kmsProviders',
     metadata,
     function () {
       it('throws an error', metadata, function () {
