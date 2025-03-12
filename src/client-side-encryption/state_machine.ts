@@ -367,8 +367,9 @@ export class StateMachine {
       return new MongoCryptError('KMS request failed', { cause });
     }
 
+    const closeError = new MongoCryptError('KMS request will close');
     function onclose() {
-      return new MongoCryptError('KMS request closed');
+      return new MongoCryptError('KMS request closed', { cause: closeError });
     }
 
     const tlsOptions = this.options.tlsOptions;

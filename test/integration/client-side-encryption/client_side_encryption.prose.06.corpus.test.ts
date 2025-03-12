@@ -5,10 +5,11 @@ import { expect } from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { type ClientEncryptionEncryptOptions } from '../../../mongodb';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { type MongoClient, WriteConcern } from '../../mongodb';
+import { type AutoEncryptionOptions, type MongoClient, WriteConcern } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 describe('Client Side Encryption Prose Corpus Test', function () {
@@ -68,7 +69,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
   const algorithmMap = new Map([
     ['rand', 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'],
     ['det', 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic']
-  ]);
+  ] as const);
   const identifierMap = new Map([
     ['local', corpusKeyLocal._id],
     ['aws', corpusKeyAws._id],
@@ -161,7 +162,12 @@ describe('Client Side Encryption Prose Corpus Test', function () {
 
   afterEach(() => client?.close());
 
-  function defineCorpusTests(corpus, corpusEncryptedExpected, useClientSideSchema: boolean) {
+  function defineCorpusTests(
+    corpus,
+    corpusEncryptedExpected,
+    useClientSideSchema: boolean,
+    i?: number
+  ) {
     let clientEncrypted: MongoClient, clientEncryption: ClientEncryption;
     beforeEach(async function () {
       // 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <../corpus/corpus-schema.json>`_.
@@ -197,7 +203,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
         }
       };
       const extraOptions = getEncryptExtraOptions();
-      const autoEncryption = {
+      const autoEncryption: AutoEncryptionOptions = {
         keyVaultNamespace,
         kmsProviders,
         tlsOptions,
@@ -221,10 +227,10 @@ describe('Client Side Encryption Prose Corpus Test', function () {
     afterEach(() => clientEncrypted.close());
 
     it(
-      `should pass corpus ${useClientSideSchema ? 'with' : 'without'} client schema`,
+      `should pass corpus ${useClientSideSchema ? 'with' : 'without'} client schema` + i,
       metadata,
       async function () {
-        const corpusCopied = {};
+        const corpusCopied: Record<string, any> = {};
 
         // 5. Load `corpus/corpus.json <../corpus/corpus.json>`_ to a variable named ``corpus``. The corpus contains subdocuments with the following fields:
         //
@@ -262,7 +268,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
             continue;
           }
           if (field.method === 'explicit') {
-            const encryptOptions = {
+            const encryptOptions: ClientEncryptionEncryptOptions = {
               algorithm: algorithmMap.get(field.algo)
             };
             if (field.identifier === 'id') {
@@ -359,7 +365,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
   //     });
   //   });
 
-  defineCorpusTests(corpusAll, corpusEncryptedExpectedAll, false);
+  for (let i = 0; i < 100; i++) defineCorpusTests(corpusAll, corpusEncryptedExpectedAll, false, i);
 
   // 9. Repeat steps 1-8 with a local JSON schema. I.e. amend step 4 to configure the schema on ``client_encrypted`` with the ``schema_map`` option.
   defineCorpusTests(corpusAll, corpusEncryptedExpectedAll, true);
