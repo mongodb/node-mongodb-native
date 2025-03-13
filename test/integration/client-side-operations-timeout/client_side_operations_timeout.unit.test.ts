@@ -111,7 +111,7 @@ describe('CSOT spec unit tests', function () {
 
   describe('Client side encryption', function () {
     describe('KMS requests', function () {
-      const stateMachine = new StateMachine({} as any);
+      const stateMachine = new StateMachine({} as any, {} as any);
       const request = {
         addResponse: _response => {},
         status: {

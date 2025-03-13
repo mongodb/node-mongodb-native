@@ -817,7 +817,7 @@ describe('AbortSignal support', () => {
   });
 
   describe('KMS requests', function () {
-    const stateMachine = new StateMachine({} as any);
+    const stateMachine = new StateMachine({} as any, {} as any);
     const request = {
       addResponse: _response => undefined,
       status: {
