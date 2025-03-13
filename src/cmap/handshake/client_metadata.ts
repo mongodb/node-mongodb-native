@@ -3,8 +3,7 @@ import * as process from 'process';
 
 import { BSON, type Document, Int32 } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
-import type { MongoOptions } from '../../mongo_client';
-import { fileIsAccessible } from '../../utils';
+import type { MongoClient, MongoOptions } from '../../mongo_client';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const NODE_DRIVER_VERSION = require('../../../package.json').version;
@@ -158,9 +157,9 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
 
 let dockerPromise: Promise<boolean>;
 /** @internal */
-async function getContainerMetadata() {
+async function getContainerMetadata(client: MongoClient) {
   const containerMetadata: Record<string, any> = {};
-  dockerPromise ??= fileIsAccessible('/.dockerenv');
+  dockerPromise ??= client.io.fs.access('/.dockerenv');
   const isDocker = await dockerPromise;
 
   const { KUBERNETES_SERVICE_HOST = '' } = process.env;
@@ -177,8 +176,8 @@ async function getContainerMetadata() {
  * Re-add each metadata value.
  * Attempt to add new env container metadata, but keep old data if it does not fit.
  */
-export async function addContainerMetadata(originalMetadata: ClientMetadata) {
-  const containerMetadata = await getContainerMetadata();
+export async function addContainerMetadata(client: MongoClient, originalMetadata: ClientMetadata) {
+  const containerMetadata = await getContainerMetadata(client);
   if (Object.keys(containerMetadata).length === 0) return originalMetadata;
 
   const extendedMetadata = new LimitedSizeDocument(512);

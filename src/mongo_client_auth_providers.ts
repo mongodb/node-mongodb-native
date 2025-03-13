@@ -11,6 +11,7 @@ import { AuthMechanism } from './cmap/auth/providers';
 import { ScramSHA1, ScramSHA256 } from './cmap/auth/scram';
 import { X509 } from './cmap/auth/x509';
 import { MongoInvalidArgumentError } from './error';
+import { type MongoClient } from './mongo_client';
 
 /** @internal */
 const AUTH_PROVIDERS = new Map<AuthMechanism | string, (workflow?: Workflow) => AuthProvider>([
@@ -38,6 +39,11 @@ const AUTH_PROVIDERS = new Map<AuthMechanism | string, (workflow?: Workflow) => 
  */
 export class MongoClientAuthProviders {
   private existingProviders: Map<AuthMechanism | string, AuthProvider> = new Map();
+  private client: MongoClient;
+
+  constructor(client: MongoClient) {
+    this.client = client;
+  }
 
   /**
    * Get or create an authentication provider based on the provided mechanism.
@@ -86,7 +92,7 @@ export class MongoClientAuthProviders {
       return new AutomatedCallbackWorkflow(new TokenCache(), authMechanismProperties.OIDC_CALLBACK);
     } else {
       const environment = authMechanismProperties.ENVIRONMENT;
-      const workflow = OIDC_WORKFLOWS.get(environment)?.();
+      const workflow = OIDC_WORKFLOWS.get(environment)?.(this.client);
       if (!workflow) {
         throw new MongoInvalidArgumentError(
           `Could not load workflow for environment ${authMechanismProperties.ENVIRONMENT}`

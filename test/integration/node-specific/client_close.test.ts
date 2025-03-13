@@ -11,19 +11,22 @@ describe('MongoClient.close() Integration', () => {
 
   describe('Node.js resource: TLS File read', () => {
     describe('when client is connecting and reads an infinite TLS file', () => {
-      it.skip('the file read is interrupted by client.close()', async function () {
+      it('the file read is interrupted by client.close()', async function () {
         await runScriptAndGetProcessInfo(
           'tls-file-read',
           this.configuration,
-          async function run({ MongoClient, uri, expect }) {
+          async function run({ mongodb: { MongoClient, MongoClientClosedError }, uri, expect }) {
             const infiniteFile = '/dev/zero';
             const client = new MongoClient(uri, { tls: true, tlsCertificateKeyFile: infiniteFile });
-            const connectPromise = client.connect();
+            const connectPromise = client.connect().then(
+              () => null,
+              e => e
+            );
             expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
             await client.close();
+            const err = await connectPromise;
+            expect(err).to.be.instanceOf(MongoClientClosedError);
             expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-            const err = await connectPromise.catch(e => e);
-            expect(err).to.exist;
           }
         );
       });
@@ -47,7 +50,7 @@ describe('MongoClient.close() Integration', () => {
       });
 
       describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
-        it.skip('the file read is interrupted by client.close()', async function () {
+        it('the file read is interrupted by client.close()', async function () {
           await runScriptAndGetProcessInfo(
             'token-file-read',
             this.configuration,
@@ -453,7 +456,7 @@ describe('MongoClient.close() Integration', () => {
         const metadata: MongoDBMetadataUI = { requires: { topology: 'sharded' } };
 
         describe('after SRVPoller is created', () => {
-          it.skip('timers are cleaned up by client.close()', metadata, async function () {
+          it('timers are cleaned up by client.close()', metadata, async function () {
             const run = async function ({ MongoClient, expect, getTimerCount }) {
               const SRV_CONNECTION_STRING = `mongodb+srv://test1.test.build.10gen.cc`;
 
@@ -589,7 +592,7 @@ describe('MongoClient.close() Integration', () => {
     describe('KMS Request', () => {
       describe('Node.js resource: TLS file read', () => {
         describe('when KMSRequest reads an infinite TLS file', () => {
-          it.skip('the file read is interrupted by client.close()', metadata, async function () {
+          it('the file read is interrupted by client.close()', metadata, async function () {
             await runScriptAndGetProcessInfo(
               'tls-file-read-auto-encryption',
               this.configuration,

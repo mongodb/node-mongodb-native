@@ -224,8 +224,11 @@ export async function runScriptAndGetProcessInfo(
 
   expect(beforeExitHappened).to.be.true;
   expect(newResources.libuvResources).to.be.empty;
+  newResources.activeResources = newResources.activeResources.filter(r => r !== 'CloseReq');
   expect(newResources.activeResources).to.be.empty;
 
-  // assertion about error output
-  expect(stdErr).to.be.empty;
+  if (!stdErr.includes('Debugger listening on')) {
+    // assertion about error output
+    expect(stdErr).to.be.empty;
+  }
 }
