@@ -827,7 +827,7 @@ describe('CSOT', function () {
               // @ts-expect-error accessing private method
               .stub(Connection.prototype, 'sendCommand')
               .callsFake(async function* (...args) {
-                await sleep(1000);
+                await sleep(1010);
                 yield* stub.wrappedMethod.call(this, ...args);
               });
           });
