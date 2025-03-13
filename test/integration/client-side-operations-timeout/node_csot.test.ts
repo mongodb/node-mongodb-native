@@ -1023,7 +1023,8 @@ describe('CSOT driver tests', metadata, () => {
 
         beforeEach(async function () {
           cs = client.db('db').collection('coll').watch([], { timeoutMS: 120 });
-          const _changePromise = once(cs, 'change');
+          cs.once('change', () => null);
+
           await once(cs.cursor, 'init');
 
           await internalClient.db().admin().command(failpoint);

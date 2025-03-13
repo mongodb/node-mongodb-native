@@ -4,7 +4,10 @@ const [major] = process.versions.node.split('.');
 
 /** @type {import("mocha").MochaOptions} */
 module.exports = {
-  require: ['test/integration/node-specific/examples/setup.js'],
+  require: [
+    'test/tools/runner/throw_rejections.cjs',
+    'test/integration/node-specific/examples/setup.js'
+  ],
   extension: ['js'],
   ui: 'test/tools/runner/metadata_ui.js',
   recursive: true,

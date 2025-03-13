@@ -60,7 +60,9 @@ maybeDescribe('examples(change-stream):', function () {
   it('Open A Change Stream', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
     test: async function () {
-      const looper = new Looper(() => db.collection('inventory').insertOne({ a: 1 }));
+      const looper = new Looper(async () => {
+        await db.collection('inventory').insertOne({ a: 1 });
+      });
       looper.run();
 
       // Start Changestream Example 1

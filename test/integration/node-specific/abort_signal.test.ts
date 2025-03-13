@@ -753,7 +753,7 @@ describe('AbortSignal support', () => {
         if (args[1].find != null) {
           commandStub.restore();
           controller.abort();
-          throw new ReAuthenticationError({});
+          throw new ReAuthenticationError({ message: 'This is a fake reauthentication error' });
         }
         return commandStub.wrappedMethod.apply(this, args);
       });
@@ -792,8 +792,9 @@ describe('AbortSignal support', () => {
     describe('if reauth throws', () => {
       beforeEach(() => {
         sinon.stub(ConnectionPool.prototype, 'reauthenticate').callsFake(async function () {
+          const error = new Error('Rejecting reauthenticate for testing');
           await sleep(1000);
-          throw new Error();
+          throw error;
         });
       });
 

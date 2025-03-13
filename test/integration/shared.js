@@ -90,32 +90,25 @@ function ignoreNsNotFound(err) {
   if (!err.message.match(/ns not found/)) throw err;
 }
 
-function setupDatabase(configuration, dbsToClean) {
+async function setupDatabase(configuration, dbsToClean) {
   dbsToClean = Array.isArray(dbsToClean) ? dbsToClean : [];
-  var configDbName = configuration.db;
-  var client = configuration.newClient(configuration.writeConcernMax(), {
-    maxPoolSize: 1
-  });
+  const configDbName = configuration.db;
 
   dbsToClean.push(configDbName);
 
-  return client
-    .connect()
-    .then(() =>
-      dbsToClean.reduce(
-        (result, dbName) =>
-          result
-            .then(() =>
-              client.db(dbName).command({ dropAllUsersFromDatabase: 1, writeConcern: { w: 1 } })
-            )
-            .then(() => client.db(dbName).dropDatabase({ writeConcern: { w: 1 } })),
-        Promise.resolve()
-      )
-    )
-    .then(
-      () => client.close(),
-      err => client.close(() => Promise.reject(err))
-    );
+  const client = configuration.newClient();
+  try {
+    for (const dbName of dbsToClean) {
+      const db = await client.db(dbName);
+      for await (const { name } of db.listCollections({}, { nameOnly: true })) {
+        const collection = db.collection(name);
+        await collection.deleteMany({}).catch(() => null);
+        await collection.drop().catch(() => null);
+      }
+    }
+  } finally {
+    await client.close();
+  }
 }
 
 /**
