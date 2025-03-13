@@ -35,7 +35,7 @@ import {
   type MongoServerError,
   needsRetryableWriteLabel
 } from '../error';
-import type { ServerApi } from '../mongo_client';
+import type { MongoClient, ServerApi } from '../mongo_client';
 import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
@@ -138,6 +138,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   static readonly CLOSED = CLOSED;
   /** @event */
   static readonly ENDED = ENDED;
+
+  get client(): MongoClient {
+    return this.topology.client;
+  }
 
   /**
    * Create a server

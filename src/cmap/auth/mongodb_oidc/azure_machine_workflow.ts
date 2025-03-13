@@ -3,7 +3,6 @@ import { MongoAzureError } from '../../../error';
 import { get } from '../../../utils';
 import type { MongoCredentials } from '../mongo_credentials';
 import { type AccessToken, MachineWorkflow } from './machine_workflow';
-import { type TokenCache } from './token_cache';
 
 /** Azure request headers. */
 const AZURE_HEADERS = Object.freeze({ Metadata: 'true', Accept: 'application/json' });
@@ -22,13 +21,6 @@ const TOKEN_RESOURCE_MISSING_ERROR =
  * @internal
  */
 export class AzureMachineWorkflow extends MachineWorkflow {
-  /**
-   * Instantiate the machine workflow.
-   */
-  constructor(cache: TokenCache) {
-    super(cache);
-  }
-
   /**
    * Get the token from the environment.
    */

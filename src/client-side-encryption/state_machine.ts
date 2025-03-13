@@ -1,8 +1,8 @@
-import * as fs from 'fs/promises';
 import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
 import * as tls from 'tls';
 
+import { type AutoEncrypter } from '..';
 import {
   type BSONSerializeOptions,
   deserialize,
@@ -25,7 +25,7 @@ import {
   MongoDBCollectionNamespace,
   promiseWithResolvers
 } from '../utils';
-import { autoSelectSocketOptions, type DataKey } from './client_encryption';
+import { autoSelectSocketOptions, type ClientEncryption, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders } from './providers';
@@ -186,10 +186,15 @@ export type StateMachineOptions = {
  */
 // TODO(DRIVERS-2671): clarify CSOT behavior for FLE APIs
 export class StateMachine {
+  private parent: AutoEncrypter | ClientEncryption;
+
   constructor(
+    parent: AutoEncrypter | ClientEncryption,
     private options: StateMachineOptions,
     private bsonOptions = pluckBSONSerializeOptions(options)
-  ) {}
+  ) {
+    this.parent = parent;
+  }
 
   /**
    * Executes the state machine according to the specification
@@ -524,11 +529,11 @@ export class StateMachine {
     options: tls.ConnectionOptions
   ): Promise<void> {
     if (tlsOptions.tlsCertificateKeyFile) {
-      const cert = await fs.readFile(tlsOptions.tlsCertificateKeyFile);
+      const cert = await this.parent._client.io.fs.readFile(tlsOptions.tlsCertificateKeyFile);
       options.cert = options.key = cert;
     }
     if (tlsOptions.tlsCAFile) {
-      options.ca = await fs.readFile(tlsOptions.tlsCAFile);
+      options.ca = await this.parent._client.io.fs.readFile(tlsOptions.tlsCAFile);
     }
     if (tlsOptions.tlsCertificateKeyFilePassword) {
       options.passphrase = tlsOptions.tlsCertificateKeyFilePassword;

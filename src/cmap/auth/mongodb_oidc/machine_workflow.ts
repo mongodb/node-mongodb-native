@@ -1,6 +1,7 @@
 import { setTimeout } from 'timers/promises';
 
 import { type Document } from '../../../bson';
+import { type MongoClient } from '../../../mongo_client';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
@@ -21,7 +22,10 @@ export interface AccessToken {
 }
 
 /** @internal */
-export type OIDCTokenFunction = (credentials: MongoCredentials) => Promise<AccessToken>;
+export type OIDCTokenFunction = (
+  credentials: MongoCredentials,
+  client: MongoClient
+) => Promise<AccessToken>;
 
 /**
  * Common behaviour for OIDC machine workflows.
@@ -31,11 +35,13 @@ export abstract class MachineWorkflow implements Workflow {
   cache: TokenCache;
   callback: OIDCTokenFunction;
   lastExecutionTime: number;
+  client: MongoClient;
 
   /**
    * Instantiate the machine workflow.
    */
-  constructor(cache: TokenCache) {
+  constructor(client: MongoClient, cache: TokenCache) {
+    this.client = client;
     this.cache = cache;
     this.callback = this.withLock(this.getToken.bind(this));
     this.lastExecutionTime = Date.now() - THROTTLE_MS;
@@ -101,7 +107,7 @@ export abstract class MachineWorkflow implements Workflow {
       }
       return token;
     } else {
-      const token = await this.callback(credentials);
+      const token = await this.callback(credentials, connection.client);
       this.cache.put({ accessToken: token.access_token, expiresInSeconds: token.expires_in });
       // Put the access token on the connection as well.
       connection.accessToken = token.access_token;
@@ -129,7 +135,7 @@ export abstract class MachineWorkflow implements Workflow {
             await setTimeout(THROTTLE_MS - difference);
           }
           this.lastExecutionTime = Date.now();
-          return await callback(credentials);
+          return await callback(credentials, this.client);
         });
       return await lock;
     };
@@ -138,5 +144,5 @@ export abstract class MachineWorkflow implements Workflow {
   /**
    * Get the token from the environment or endpoint.
    */
-  abstract getToken(credentials: MongoCredentials): Promise<AccessToken>;
+  abstract getToken(credentials: MongoCredentials, client: MongoClient): Promise<AccessToken>;
 }

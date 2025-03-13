@@ -1,7 +1,6 @@
-import { readFile } from 'fs/promises';
-
+import { type MongoClient } from '../../../mongo_client';
+import { type MongoCredentials } from '../mongo_credentials';
 import { type AccessToken, MachineWorkflow } from './machine_workflow';
-import { type TokenCache } from './token_cache';
 
 /** The fallback file name */
 const FALLBACK_FILENAME = '/var/run/secrets/kubernetes.io/serviceaccount/token';
@@ -14,16 +13,9 @@ const AWS_FILENAME = 'AWS_WEB_IDENTITY_TOKEN_FILE';
 
 export class K8SMachineWorkflow extends MachineWorkflow {
   /**
-   * Instantiate the machine workflow.
-   */
-  constructor(cache: TokenCache) {
-    super(cache);
-  }
-
-  /**
    * Get the token from the environment.
    */
-  async getToken(): Promise<AccessToken> {
+  async getToken(_credentials: MongoCredentials, client: MongoClient): Promise<AccessToken> {
     let filename: string;
     if (process.env[AZURE_FILENAME]) {
       filename = process.env[AZURE_FILENAME];
@@ -32,7 +24,7 @@ export class K8SMachineWorkflow extends MachineWorkflow {
     } else {
       filename = FALLBACK_FILENAME;
     }
-    const token = await readFile(filename, 'utf8');
+    const token = await client.io.fs.readFile(filename, { encoding: 'utf8' });
     return { access_token: token };
   }
 }

@@ -21,7 +21,7 @@ import { MONGO_CLIENT_EVENTS } from './constants';
 import { type AbstractCursor } from './cursor/abstract_cursor';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
-import { MongoInvalidArgumentError } from './error';
+import { MongoClientClosedError, MongoInvalidArgumentError } from './error';
 import { MongoClientAuthProviders } from './mongo_client_auth_providers';
 import {
   type LogComponentSeveritiesClientOptions,
@@ -49,6 +49,7 @@ import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, type TopologyEvents } from './sdam/topology';
 import { ClientSession, type ClientSessionOptions, ServerSessionPool } from './sessions';
 import {
+  abortable,
   COSMOS_DB_CHECK,
   COSMOS_DB_MSG,
   DOCUMENT_DB_CHECK,
@@ -342,6 +343,20 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
 };
 
 /**
+ * @internal
+ * The driver's IO helpers.
+ */
+export interface IO {
+  fs: {
+    readFile(path: string): Promise<Buffer>;
+    readFile(path: string, options?: undefined): Promise<Buffer>;
+    readFile(path: string, options: { encoding: 'utf8'; signal?: AbortSignal }): Promise<string>;
+
+    access(path: string): Promise<boolean>;
+  };
+}
+
+/**
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
  * @public
  *
@@ -372,6 +387,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /** @internal */
   private closeLock?: Promise<void>;
 
+  /** @internal */
+  private closeController: AbortController;
+  /** @internal */
+  public get closeSignal(): AbortSignal {
+    return this.closeController.signal;
+  }
+
   /**
    * The consolidate, parsed, transformed and merged options.
    */
@@ -383,6 +405,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   constructor(url: string, options?: MongoClientOptions) {
     super();
     this.on('error', noop);
+    this.closeController = new AbortController();
 
     this.options = parseOptions(url, this, options);
 
@@ -405,7 +428,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       sessionPool: new ServerSessionPool(this),
       activeSessions: new Set(),
       activeCursors: new Set(),
-      authProviders: new MongoClientAuthProviders(),
+      authProviders: new MongoClientAuthProviders(this),
 
       get options() {
         return client.options;
@@ -495,6 +518,36 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     return this.s.options.timeoutMS;
   }
 
+  /** @internal */
+  public io: IO = {
+    fs: {
+      readFile: async (path: string, options?: { signal?: AbortSignal }) => {
+        try {
+          return await fs.readFile(path, {
+            ...options,
+            signal:
+              options?.signal != null
+                ? AbortSignal.any([options.signal, this.closeSignal])
+                : this.closeSignal
+          });
+        } catch (error) {
+          if (error.cause instanceof MongoClientClosedError) throw error.cause;
+          throw error;
+        }
+      },
+      access: async (path: string) => {
+        try {
+          const p = fs.access(path);
+          p.catch(squashError);
+          await abortable(p, { signal: this.closeSignal });
+          return true;
+        } catch {
+          return false;
+        }
+      }
+    } as const
+  } as any;
+
   /**
    * Executes a client bulk write operation, available on server 8.0+.
    * @param models - The client bulk write models.
@@ -565,14 +618,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
     if (options.tls) {
       if (typeof options.tlsCAFile === 'string') {
-        options.ca ??= await fs.readFile(options.tlsCAFile);
+        options.ca ??= await this.io.fs.readFile(options.tlsCAFile);
       }
       if (typeof options.tlsCRLFile === 'string') {
-        options.crl ??= await fs.readFile(options.tlsCRLFile);
+        options.crl ??= await this.io.fs.readFile(options.tlsCRLFile);
       }
       if (typeof options.tlsCertificateKeyFile === 'string') {
         if (!options.key || !options.cert) {
-          const contents = await fs.readFile(options.tlsCertificateKeyFile);
+          const contents = await this.io.fs.readFile(options.tlsCertificateKeyFile);
           options.key ??= contents;
           options.cert ??= contents;
         }
@@ -681,6 +734,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     this.s.activeSessions.clear();
 
     await Promise.all(activeSessionEnds);
+
+    this.closeController.abort(new MongoClientClosedError());
 
     if (this.topology == null) {
       return;

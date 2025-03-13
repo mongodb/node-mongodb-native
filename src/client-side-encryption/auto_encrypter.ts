@@ -409,7 +409,7 @@ export class AutoEncrypter {
     context.ns = ns;
     context.document = cmd;
 
-    const stateMachine = new StateMachine({
+    const stateMachine = new StateMachine(this, {
       promoteValues: false,
       promoteLongs: false,
       proxyOptions: this._proxyOptions,
@@ -436,7 +436,7 @@ export class AutoEncrypter {
 
     context.id = this._contextCounter++;
 
-    const stateMachine = new StateMachine({
+    const stateMachine = new StateMachine(this, {
       ...options,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
