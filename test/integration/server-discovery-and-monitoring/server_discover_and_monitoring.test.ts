@@ -54,7 +54,9 @@ describe('Monitoring rtt tests', function () {
             // @ts-expect-error accessing private method
             .stub(Connection.prototype, 'sendCommand')
             .callsFake(async function* (...args) {
-              await setTimeout(DELAY_MS);
+              // https://github.com/nodejs/node/issues/26578
+              // setTimeout can result in the timeout being called in < the provided interval
+              await setTimeout(DELAY_MS + 1);
               yield* stub.wrappedMethod.call(this, ...args);
             });
           await client.connect();
