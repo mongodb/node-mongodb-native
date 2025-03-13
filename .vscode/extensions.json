@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "hbenl.vscode-test-explorer",
+        "hbenl.vscode-mocha-test-adapter",
+        "ryanluker.vscode-coverage-gutters",
+        "github.vscode-pull-request-github",
+        "mongodb.mongodb-vscode",
+        "eamodio.gitlens",
+    ]
+}
