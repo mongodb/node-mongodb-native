@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
 import { type MongoClient, ObjectId, ReadPreference } from '../../mongodb';
-import { sleep } from '../../tools/utils';
 import { filterForCommands, ignoreNsNotFound, setupDatabase } from '../shared';
 
 describe('Command Monitoring', function () {
