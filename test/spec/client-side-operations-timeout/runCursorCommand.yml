@@ -70,7 +70,13 @@ tests:
     runOnRequirements:
       - serverless: forbid
     operations:
-      # Block find/getMore for 120ms.
+      # pre-populate the pool with a connection
+      - name: find
+        object: collection
+        arguments:
+          filter: { _id: 0 }
+        expectResult: []
+      # Block find/getMore for 60ms.
       - name: failPoint
         object: testRunner
         arguments:
@@ -81,22 +87,25 @@ tests:
             data:
               failCommands: [find, getMore]
               blockConnection: true
-              blockTimeMS: 120
+              blockTimeMS: 60
       # Run a find with timeoutMS less than double our failPoint blockTimeMS and
       # batchSize less than the total document count will cause a find and a 
-      # getMore to be sent. Both will block for 120ms so together they will go 
+      # getMore to be sent. Both will block for 60ms so together they will go 
       # over the timeout.
       - name: runCursorCommand
         object: *db
         arguments:
           commandName: find
-          timeoutMS: 200
+          timeoutMS: 100
           command: { find: *collection, batchSize: 2 }
         expectError:
           isTimeoutError: true
     expectEvents:
       - client: *client
         events:
+          # first find is from the initial find to populate the connection poo
+          - commandStartedEvent:
+              commandName: find
           - commandStartedEvent:
               commandName: find
               command:
