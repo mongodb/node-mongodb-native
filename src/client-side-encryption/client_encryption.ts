@@ -34,6 +34,8 @@ import {
 } from './errors';
 import {
   type ClientEncryptionDataKeyProvider,
+  type CredentialProviders,
+  isEmptyCredentials,
   type KMSProviders,
   refreshKMSCredentials
 } from './providers/index';
@@ -82,6 +84,9 @@ export class ClientEncryption {
   _mongoCrypt: MongoCrypt;
 
   /** @internal */
+  _credentialProviders?: CredentialProviders;
+
+  /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {
     const encryption = getMongoDBClientEncryption();
     if ('kModuleError' in encryption) {
@@ -125,6 +130,13 @@ export class ClientEncryption {
     this._kmsProviders = options.kmsProviders || {};
     const { timeoutMS } = resolveTimeoutOptions(client, options);
     this._timeoutMS = timeoutMS;
+    this._credentialProviders = options.credentialProviders;
+
+    if (options.credentialProviders?.aws && !isEmptyCredentials('aws', this._kmsProviders)) {
+      throw new MongoCryptInvalidArgumentError(
+        'Can only provide a custom AWS credential provider when the state machine is configured for automatic AWS credential fetching'
+      );
+    }
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -712,7 +724,7 @@ export class ClientEncryption {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._credentialProviders);
   }
 
   static get libmongocryptVersion() {
@@ -857,6 +869,11 @@ export interface ClientEncryptionOptions {
    * Options for specific KMS providers to use
    */
   kmsProviders?: KMSProviders;
+
+  /**
+   * Options for user provided custom credential providers.
+   */
+  credentialProviders?: CredentialProviders;
 
   /**
    * Options for specifying a Socks5 proxy to use for connecting to the KMS.

@@ -136,6 +136,47 @@ describe('MONGODB-AWS', function () {
     });
   });
 
+  context('when user supplies a credentials provider', function () {
+    let providerCount = 0;
+
+    beforeEach(function () {
+      if (!awsSdkPresent) {
+        this.skipReason = 'only relevant to AssumeRoleWithWebIdentity with SDK installed';
+        return this.skip();
+      }
+      // If we have a username the credentials have been set from the URI, options, or environment
+      // variables per the auth spec stated order.
+      if (client.options.credentials.username) {
+        this.skipReason = 'Credentials in the URI on env variables will not use custom provider.';
+        return this.skip();
+      }
+    });
+
+    it('authenticates with a user provided credentials provider', async function () {
+      // @ts-expect-error We intentionally access a protected variable.
+      const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+      const provider = async () => {
+        providerCount++;
+        return await credentialProvider.fromNodeProviderChain().apply();
+      };
+      client = this.configuration.newClient(process.env.MONGODB_URI, {
+        authMechanismProperties: {
+          AWS_CREDENTIAL_PROVIDER: provider
+        }
+      });
+
+      const result = await client
+        .db('aws')
+        .collection('aws_test')
+        .estimatedDocumentCount()
+        .catch(error => error);
+
+      expect(result).to.not.be.instanceOf(MongoServerError);
+      expect(result).to.be.a('number');
+      expect(providerCount).to.be.greaterThan(0);
+    });
+  });
+
   it('should allow empty string in authMechanismProperties.AWS_SESSION_TOKEN to override AWS_SESSION_TOKEN environment variable', function () {
     client = this.configuration.newClient(this.configuration.url(), {
       authMechanismProperties: { AWS_SESSION_TOKEN: '' }
@@ -426,11 +467,36 @@ describe('AWS KMS Credential Fetching', function () {
           : undefined;
       this.currentTest?.skipReason && this.skip();
     });
-    it('KMS credentials are successfully fetched.', async function () {
-      const { aws } = await refreshKMSCredentials({ aws: {} });
 
-      expect(aws).to.have.property('accessKeyId');
-      expect(aws).to.have.property('secretAccessKey');
+    context('when a credential provider is not provided', function () {
+      it('KMS credentials are successfully fetched.', async function () {
+        const { aws } = await refreshKMSCredentials({ aws: {} });
+
+        expect(aws).to.have.property('accessKeyId');
+        expect(aws).to.have.property('secretAccessKey');
+      });
+    });
+
+    context('when a credential provider is provided', function () {
+      let credentialProvider;
+      let providerCount = 0;
+
+      beforeEach(function () {
+        // @ts-expect-error We intentionally access a protected variable.
+        const provider = AWSTemporaryCredentialProvider.awsSDK;
+        credentialProvider = async () => {
+          providerCount++;
+          return await provider.fromNodeProviderChain().apply();
+        };
+      });
+
+      it('KMS credentials are successfully fetched.', async function () {
+        const { aws } = await refreshKMSCredentials({ aws: {} }, { aws: credentialProvider });
+
+        expect(aws).to.have.property('accessKeyId');
+        expect(aws).to.have.property('secretAccessKey');
+        expect(providerCount).to.be.greaterThan(0);
+      });
     });
 
     it('does not return any extra keys for the `aws` credential provider', async function () {
