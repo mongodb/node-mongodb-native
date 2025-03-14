@@ -6,14 +6,19 @@ import { pipeline } from 'node:stream/promises';
 import { AssertionError, expect } from 'chai';
 
 import {
+  _log,
   type ChangeStream,
   Collection,
   CommandStartedEvent,
   Db,
+  disable,
   type Document,
+  enable,
   GridFSBucket,
+  log,
   type MongoClient,
   MongoError,
+  now,
   ReadConcern,
   ReadPreference,
   SERVER_DESCRIPTION_CHANGED,
@@ -821,7 +826,16 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
   if (!Number.isNaN(+opts.maxTimeMS)) cursor.setMaxTimeMS(+opts.maxTimeMS);
   if (opts.comment !== undefined) cursor.setComment(opts.comment);
 
-  return cursor.toArray();
+  enable();
+  log('starting iteration');
+  log(now());
+  const result = await cursor.toArray().catch(e => {
+    log('finished', now());
+    disable();
+
+    throw e;
+  });
+  return result;
 });
 
 operations.set('createCommandCursor', async ({ entities, operation }: OperationFunctionParams) => {

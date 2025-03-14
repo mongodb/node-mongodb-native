@@ -149,7 +149,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 120
+                "blockTimeMS": 60
               }
             }
           }
@@ -159,7 +159,7 @@
           "object": "db",
           "arguments": {
             "commandName": "find",
-            "timeoutMS": 200,
+            "timeoutMS": 100,
             "command": {
               "find": "collection",
               "batchSize": 2
