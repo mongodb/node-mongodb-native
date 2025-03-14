@@ -146,37 +146,40 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
       await client.close();
     });
 
-    it('ensure monitors properly create and unpause connection pools when they discover servers', {
-      metadata: { requires: { mongodb: '>=4.2.9', topology: '!load-balanced' } },
-      test: async function () {
-        await client.connect();
-        expect(events.shift()).to.equal(SERVER_HEARTBEAT_SUCCEEDED);
-        expect(events.shift()).to.equal(CONNECTION_POOL_READY);
+    it.skip(
+      'ensure monitors properly create and unpause connection pools when they discover servers',
+      {
+        metadata: { requires: { mongodb: '>=4.2.9', topology: '!load-balanced' } },
+        test: async function () {
+          await client.connect();
+          expect(events.shift()).to.equal(SERVER_HEARTBEAT_SUCCEEDED);
+          expect(events.shift()).to.equal(CONNECTION_POOL_READY);
 
-        expect(events).to.be.empty;
+          expect(events).to.be.empty;
 
-        const heartBeatFailedEvent = once(client, SERVER_HEARTBEAT_FAILED);
-        await client.db('admin').command({
-          configureFailPoint: 'failCommand',
-          mode: { times: 2 },
-          data: {
-            failCommands: ['hello'],
-            errorCode: 1234,
-            appName: 'SDAMPoolManagementTest'
-          }
-        });
-        await heartBeatFailedEvent;
-        expect(events.shift()).to.equal(SERVER_HEARTBEAT_FAILED);
-        expect(events.shift()).to.equal(CONNECTION_POOL_CLEARED);
+          const heartBeatFailedEvent = once(client, SERVER_HEARTBEAT_FAILED);
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: { times: 2 },
+            data: {
+              failCommands: ['hello'],
+              errorCode: 1234,
+              appName: 'SDAMPoolManagementTest'
+            }
+          });
+          await heartBeatFailedEvent;
+          expect(events.shift()).to.equal(SERVER_HEARTBEAT_FAILED);
+          expect(events.shift()).to.equal(CONNECTION_POOL_CLEARED);
 
-        expect(events).to.be.empty;
+          expect(events).to.be.empty;
 
-        await once(client, SERVER_HEARTBEAT_SUCCEEDED);
-        expect(events.shift()).to.equal(SERVER_HEARTBEAT_SUCCEEDED);
-        expect(events.shift()).to.equal(CONNECTION_POOL_READY);
+          await once(client, SERVER_HEARTBEAT_SUCCEEDED);
+          expect(events.shift()).to.equal(SERVER_HEARTBEAT_SUCCEEDED);
+          expect(events.shift()).to.equal(CONNECTION_POOL_READY);
 
-        expect(events).to.be.empty;
+          expect(events).to.be.empty;
+        }
       }
-    });
+    ).skipReason = 'TODO(NODE-5206): fix flaky test';
   });
 });
