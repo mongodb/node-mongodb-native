@@ -531,7 +531,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
                 : this.closeSignal
           });
         } catch (error) {
-          if (error.cause instanceof MongoClientClosedError) throw error.cause;
+          if (error.cause?.name === 'MongoClientClosedError') throw error.cause;
           throw error;
         }
       },

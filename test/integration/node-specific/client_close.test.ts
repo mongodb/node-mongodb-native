@@ -40,7 +40,7 @@ describe('MongoClient.close() Integration', () => {
       beforeEach(function () {
         if (process.env.AUTH === 'auth') {
           this.currentTest.skipReason = 'OIDC test environment requires auth disabled';
-          return this.skip();
+          this.skip();
         }
         tokenFileEnvCache = process.env.OIDC_TOKEN_FILE;
       });
@@ -60,7 +60,7 @@ describe('MongoClient.close() Integration', () => {
               const options = {
                 authMechanismProperties: { ENVIRONMENT: 'test' },
                 authMechanism: 'MONGODB-OIDC'
-              };
+              } as const;
               const client = new MongoClient(uri, options);
               const connectPromise = client.connect();
               expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
