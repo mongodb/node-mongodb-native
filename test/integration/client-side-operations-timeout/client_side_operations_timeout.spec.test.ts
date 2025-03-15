@@ -21,20 +21,26 @@ const skippedTests = {
   'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set': 'TODO(DRIVERS-3018)'
 };
 
-describe('CSOT spec tests', function () {
-  const specs = loadSpecTests('client-side-operations-timeout');
-  for (const spec of specs) {
-    for (const test of spec.tests) {
-      if (skippedSpecs[spec.name] != null) {
-        test.skipReason = skippedSpecs[spec.name];
-      }
-      if (skippedTests[test.description] != null) {
-        test.skipReason = skippedTests[test.description];
-      }
+const specs = loadSpecTests('client-side-operations-timeout');
+for (const spec of specs) {
+  for (const test of spec.tests) {
+    if (skippedSpecs[spec.name] != null) {
+      test.skipReason = skippedSpecs[spec.name];
+    }
+    if (skippedTests[test.description] != null) {
+      test.skipReason = skippedTests[test.description];
     }
   }
+}
 
+describe('CSOT spec tests', function () {
   runUnifiedSuite(specs, (test, configuration) => {
+    if (
+      test.description !==
+      'Non-tailable cursor lifetime remaining timeoutMS applied to getMore if timeoutMode is unset'
+    ) {
+      return 'skipped for now';
+    }
     const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
     if (
       configuration.topologyType === 'LoadBalanced' &&

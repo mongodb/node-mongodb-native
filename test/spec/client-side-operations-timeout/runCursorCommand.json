@@ -134,6 +134,16 @@
       ],
       "operations": [
         {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 0
+            }
+          },
+          "expectResult": []
+        },
+        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -174,6 +184,11 @@
         {
           "client": "client",
           "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find"
+              }
+            },
             {
               "commandStartedEvent": {
                 "commandName": "find",
