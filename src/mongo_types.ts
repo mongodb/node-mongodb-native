@@ -45,6 +45,9 @@ export type InferIdType<TSchema> = TSchema extends { _id: infer IdType }
 /** Add an _id field to an object shaped type @public */
 export type WithId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id: InferIdType<TSchema> };
 
+/** Add timestamp fields (createdAt and updatedAt) to an object shaped type @public */
+export type WithTimestamp<TSchema> = TSchema & { createdAt: Date; updatedAt: Date };
+
 /**
  * Add an optional _id field to an object shaped type
  * @public
