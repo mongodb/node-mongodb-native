@@ -67,7 +67,8 @@ lib/
 !test/types
 !global.d.ts
 
-.vscode
+.vscode/**
+!.vscode/extensions.json
 output
 
 serverless-expansion.yml
