@@ -932,7 +932,7 @@ describe('AbortSignal support', () => {
       await clearFailPoint(this.configuration);
     });
 
-    it.skip(`rejects findOne`, async () => {
+    it(`rejects findOne`, async () => {
       client.on(
         'commandStarted',
         // Abort a bit after find has started:
@@ -942,10 +942,11 @@ describe('AbortSignal support', () => {
       const start = performance.now();
       const result = await collection.findOne({}, { signal }).catch(error => error);
       const end = performance.now();
-      expect(end - start).to.be.lessThan(10); // shouldn't wait for the blocked connection
+      // TODO(NODE-6833): This duration was bumped from 10 to 40 to reduce flakiness, if this fails again investigate it.
+      expect(end - start).to.be.lessThan(40); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
-    }).skipReason = 'TODO(NODE-6833): fix flaky test';
+    });
   });
 
   describe('when a signal passed to db.command() is aborted', failPointMetadata, () => {
