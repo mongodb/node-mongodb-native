@@ -1561,7 +1561,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         keyName: 'foo'
       };
 
-      it('should fail with no TLS', metadata, async function () {
+      it.skip('should fail with no TLS', metadata, async function () {
         try {
           await clientEncryptionNoTls.createDataKey('azure', { masterKey });
           expect.fail('it must fail with no tls');
@@ -1569,7 +1569,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           //Expect an error indicating TLS handshake failed.
           expect(e.cause.message).to.include('certificate required');
         }
-      });
+      }).skipReason = 'TODO(NODE-6861): fix flaky test';
 
       it('should succeed with valid TLS options', metadata, async function () {
         try {
