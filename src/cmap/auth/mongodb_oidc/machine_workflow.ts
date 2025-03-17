@@ -1,7 +1,7 @@
 import { setTimeout } from 'timers/promises';
 
 import { type Document } from '../../../bson';
-import { type MongoClient } from '../../../mongo_client';
+import { type IO } from '../../../mongo_client';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
@@ -24,7 +24,7 @@ export interface AccessToken {
 /** @internal */
 export type OIDCTokenFunction = (
   credentials: MongoCredentials,
-  client: MongoClient
+  client: { io: IO }
 ) => Promise<AccessToken>;
 
 /**
@@ -35,12 +35,12 @@ export abstract class MachineWorkflow implements Workflow {
   cache: TokenCache;
   callback: OIDCTokenFunction;
   lastExecutionTime: number;
-  client: MongoClient;
+  client: { io: IO };
 
   /**
    * Instantiate the machine workflow.
    */
-  constructor(client: MongoClient, cache: TokenCache) {
+  constructor(client: { io: IO }, cache: TokenCache) {
     this.client = client;
     this.cache = cache;
     this.callback = this.withLock(this.getToken.bind(this));
@@ -144,5 +144,5 @@ export abstract class MachineWorkflow implements Workflow {
   /**
    * Get the token from the environment or endpoint.
    */
-  abstract getToken(credentials: MongoCredentials, client: MongoClient): Promise<AccessToken>;
+  abstract getToken(credentials: MongoCredentials, client: { io: IO }): Promise<AccessToken>;
 }

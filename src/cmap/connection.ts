@@ -30,7 +30,7 @@ import {
   MongoServerError,
   MongoUnexpectedServerResponseError
 } from '../error';
-import type { MongoClient, ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import type { IO, ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type Abortable, type CancellationToken, TypedEventEmitter } from '../mongo_types';
@@ -209,6 +209,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private clusterTime: Document | null = null;
   private error: Error | null = null;
   private dataEvents: AsyncGenerator<Buffer, void, void> | null = null;
+  private parent: { client: { io: IO } };
 
   private readonly socketTimeoutMS: number;
   private readonly monitorCommands: boolean;
@@ -230,17 +231,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   /** @event */
   static readonly UNPINNED = UNPINNED;
 
-  private parent: Monitor | ConnectionPool | RTTPinger;
-
-  get client(): MongoClient {
+  get client(): { io: IO } {
     return this.parent.client;
   }
 
-  constructor(
-    parent: Monitor | ConnectionPool | RTTPinger,
-    stream: Stream,
-    options: ConnectionOptions
-  ) {
+  constructor(parent: { client: { io: IO } }, stream: Stream, options: ConnectionOptions) {
     super();
     this.on('error', noop);
 

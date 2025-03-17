@@ -3,7 +3,7 @@ import * as process from 'process';
 
 import { BSON, type Document, Int32 } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
-import type { MongoClient, MongoOptions } from '../../mongo_client';
+import type { IO, MongoOptions } from '../../mongo_client';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const NODE_DRIVER_VERSION = require('../../../package.json').version;
@@ -157,7 +157,7 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
 
 let dockerPromise: Promise<boolean>;
 /** @internal */
-async function getContainerMetadata(client: MongoClient) {
+async function getContainerMetadata(client: { io: IO }) {
   const containerMetadata: Record<string, any> = {};
   dockerPromise ??= client.io.fs.access('/.dockerenv');
   const isDocker = await dockerPromise;
@@ -176,7 +176,7 @@ async function getContainerMetadata(client: MongoClient) {
  * Re-add each metadata value.
  * Attempt to add new env container metadata, but keep old data if it does not fit.
  */
-export async function addContainerMetadata(client: MongoClient, originalMetadata: ClientMetadata) {
+export async function addContainerMetadata(client: { io: IO }, originalMetadata: ClientMetadata) {
   const containerMetadata = await getContainerMetadata(client);
   if (Object.keys(containerMetadata).length === 0) return originalMetadata;
 

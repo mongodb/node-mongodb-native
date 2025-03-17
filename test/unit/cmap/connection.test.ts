@@ -49,7 +49,7 @@ describe('new Connection()', function () {
       authProviders: new MongoClientAuthProviders()
     };
 
-    const conn = await connect(options);
+    const conn = await connect({ io: {} }, options);
     const readSpy = sinon.spy(conn, 'readMany');
     await conn.command(ns('$admin.cmd'), { ping: 1 }, { noResponse: true });
     expect(readSpy).to.not.have.been.called;
@@ -72,7 +72,7 @@ describe('new Connection()', function () {
       authProviders: new MongoClientAuthProviders()
     };
 
-    const conn = await connect(options);
+    const conn = await connect({ io: {} }, options);
     const error = await conn
       .command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 })
       .catch(error => error);
@@ -95,7 +95,7 @@ describe('new Connection()', function () {
       authProviders: new MongoClientAuthProviders()
     };
 
-    const conn = await connect(options);
+    const conn = await connect({ io: {} }, options);
 
     const error = await conn
       .command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 })
@@ -119,7 +119,7 @@ describe('new Connection()', function () {
       authProviders: new MongoClientAuthProviders()
     };
 
-    const connection = await connect(options);
+    const connection = await connect({ io: {} }, options);
     const commandSpy = sinon.spy(connection, 'command');
 
     await connection.command(ns('dummy'), { ping: 1 }, {});
@@ -138,7 +138,7 @@ describe('new Connection()', function () {
       authProviders: new MongoClientAuthProviders()
     };
 
-    const error = await connect(options).catch(error => error);
+    const error = await connect({ io: {} }, options).catch(error => error);
 
     expect(error).to.have.property('beforeHandshake', true);
   });
@@ -157,7 +157,7 @@ describe('new Connection()', function () {
 
     beforeEach(function () {
       socket = new MockSocket();
-      connection = new Connection(socket, {});
+      connection = new Connection({ io: {} }, socket, {});
     });
 
     const validResponse = Buffer.from(

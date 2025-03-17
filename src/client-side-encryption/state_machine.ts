@@ -2,7 +2,6 @@ import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-clien
 import * as net from 'net';
 import * as tls from 'tls';
 
-import { type AutoEncrypter } from '..';
 import {
   type BSONSerializeOptions,
   deserialize,
@@ -14,7 +13,7 @@ import { type ProxyOptions } from '../cmap/connection';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
-import { type MongoClient, type MongoClientOptions } from '../mongo_client';
+import { type IO, type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Abortable } from '../mongo_types';
 import { type CollectionInfo } from '../operations/list_collections';
 import { Timeout, type TimeoutContext, TimeoutError } from '../timeout';
@@ -25,7 +24,7 @@ import {
   MongoDBCollectionNamespace,
   promiseWithResolvers
 } from '../utils';
-import { autoSelectSocketOptions, type ClientEncryption, type DataKey } from './client_encryption';
+import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders } from './providers';
@@ -186,10 +185,10 @@ export type StateMachineOptions = {
  */
 // TODO(DRIVERS-2671): clarify CSOT behavior for FLE APIs
 export class StateMachine {
-  private parent: AutoEncrypter | ClientEncryption;
+  private parent: { _client: { io: IO } };
 
   constructor(
-    parent: AutoEncrypter | ClientEncryption,
+    parent: { _client: { io: IO } },
     private options: StateMachineOptions,
     private bsonOptions = pluckBSONSerializeOptions(options)
   ) {

@@ -1,21 +1,24 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
-import { AzureMachineWorkflow, Connection, MongoCredentials } from '../../../../mongodb';
+import {
+  AzureMachineWorkflow,
+  Connection,
+  MongoCredentials,
+  TokenCache
+} from '../../../../mongodb';
 
 describe('AzureMachineFlow', function () {
   describe('#execute', function () {
-    const workflow = new AzureMachineWorkflow(new TokenCache());
+    const workflow = new AzureMachineWorkflow({ io: {} }, new TokenCache());
 
     context('when TOKEN_RESOURCE is not set', function () {
-      const connection = sinon.createStubInstance(Connection);
-      const credentials = sinon.createStubInstance(MongoCredentials);
-
       it('throws an error', async function () {
+        const connection = sinon.createStubInstance(Connection);
+        const credentials = sinon.createStubInstance(MongoCredentials);
+        connection.parent = { client: { io: {} } };
         const error = await workflow.execute(connection, credentials).catch(error => error);
-        expect(error.message).to.include('TOKEN_RESOURCE');
+        expect(error.message, error.stack).to.include('TOKEN_RESOURCE');
       });
     });
   });

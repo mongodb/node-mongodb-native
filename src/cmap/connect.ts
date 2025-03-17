@@ -16,6 +16,7 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
+import { type IO } from '../mongo_client';
 import { type Monitor, type RTTPinger } from '../sdam/monitor';
 import { HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext } from './auth/auth_provider';
@@ -38,7 +39,7 @@ import {
 export type Stream = Socket | TLSSocket;
 
 export async function connect(
-  parent: Monitor | RTTPinger | ConnectionPool,
+  parent: { client: { io: IO } },
   options: ConnectionOptions
 ): Promise<Connection> {
   let connection: Connection | null = null;
@@ -54,7 +55,7 @@ export async function connect(
 }
 
 export function makeConnection(
-  parent: Monitor | RTTPinger | ConnectionPool,
+  parent: { client: { io: IO } },
   options: ConnectionOptions,
   socket: Stream
 ): Connection {

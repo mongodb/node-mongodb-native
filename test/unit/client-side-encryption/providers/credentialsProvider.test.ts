@@ -59,20 +59,26 @@ describe('#refreshKMSCredentials', function () {
     const secretKey = 'example';
     const sessionToken = 'example';
 
-    after(function () {
+    beforeEach(function () {
+      process.env.AWS_ACCESS_KEY_ID = accessKey;
+      process.env.AWS_SECRET_ACCESS_KEY = secretKey;
+      process.env.AWS_SESSION_TOKEN = sessionToken;
+    });
+
+    afterEach(function () {
       // After the entire suite runs, set the env back for the rest of the test run.
-      process.env.AWS_ACCESS_KEY_ID = originalAccessKeyId;
-      process.env.AWS_SECRET_ACCESS_KEY = originalSecretAccessKey;
-      process.env.AWS_SESSION_TOKEN = originalSessionToken;
+      if (typeof originalAccessKeyId === 'string') {
+        process.env.AWS_ACCESS_KEY_ID = originalAccessKeyId;
+      }
+      if (typeof originalSecretAccessKey === 'string') {
+        process.env.AWS_SECRET_ACCESS_KEY = originalSecretAccessKey;
+      }
+      if (typeof originalSessionToken === 'string') {
+        process.env.AWS_SESSION_TOKEN = originalSessionToken;
+      }
     });
 
     context('when the credential provider finds credentials', function () {
-      before(function () {
-        process.env.AWS_ACCESS_KEY_ID = accessKey;
-        process.env.AWS_SECRET_ACCESS_KEY = secretKey;
-        process.env.AWS_SESSION_TOKEN = sessionToken;
-      });
-
       context('when the credentials are empty', function () {
         const kmsProviders = { aws: {} };
 

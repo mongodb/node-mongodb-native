@@ -8,23 +8,28 @@ import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import * as tls from 'tls';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { Db } from '../../../src/db';
 import {
   BSON,
   Collection,
   CSOTTimeoutContext,
   CursorTimeoutContext,
+  Db,
   type FindOptions,
   Int32,
   Long,
   MongoClient,
   serialize,
-  squashError
+  squashError,
+  StateMachine
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
+
+function makeStateMachine(userFS, options) {
+  const defaultFS = {
+    readFile: async file => await fs.readFile(file)
+  };
+  return new StateMachine({ _client: { io: { fs: { ...defaultFS, ...userFS } } } }, options);
+}
 
 describe('StateMachine', function () {
   class MockRequest implements MongoCryptKMSRequest {
@@ -88,7 +93,7 @@ describe('StateMachine', function () {
       timeoutMS: undefined
     };
     const serializedCommand = serialize(command);
-    const stateMachine = new StateMachine({} as any, {} as any);
+    const stateMachine = makeStateMachine({}, {});
 
     context('when executing the command', function () {
       it('does not promote values', function () {
@@ -132,7 +137,7 @@ describe('StateMachine', function () {
       });
 
       it('should only resolve once bytesNeeded drops to zero', function (done) {
-        const stateMachine = new StateMachine({} as any, {} as any);
+        const stateMachine = makeStateMachine({} as any, {} as any);
         const request = new MockRequest(Buffer.from('foobar'), 500);
         let status = 'pending';
         stateMachine
@@ -165,11 +170,9 @@ describe('StateMachine', function () {
     });
 
     context('when socket options are provided', function () {
-      const stateMachine = new StateMachine(
-        {} as any,
-        {
-          socketOptions: { autoSelectFamily: true, autoSelectFamilyAttemptTimeout: 300 }
-        } as any
+      const stateMachine = makeStateMachine(
+        {},
+        { socketOptions: { autoSelectFamily: true, autoSelectFamilyAttemptTimeout: 300 } }
       );
       const request = new MockRequest(Buffer.from('foobar'), -1);
       let connectOptions;
@@ -201,12 +204,7 @@ describe('StateMachine', function () {
           'tlsDisableCertificateRevocationCheck'
         ].forEach(function (option) {
           context(`when the option is ${option}`, function () {
-            const stateMachine = new StateMachine(
-              {} as any,
-              {
-                tlsOptions: { aws: { [option]: true } }
-              } as any
-            );
+            const stateMachine = makeStateMachine({}, { tlsOptions: { aws: { [option]: true } } });
             const request = new MockRequest(Buffer.from('foobar'), 500);
 
             it('rejects with the validation error', function (done) {
@@ -221,11 +219,16 @@ describe('StateMachine', function () {
 
       context('when the options are secure', function () {
         context('when providing tlsCertificateKeyFile', function () {
-          const stateMachine = new StateMachine(
-            {} as any,
+          const stateMachine = makeStateMachine(
+            {
+              readFile: async (fileName: string) => {
+                expect(fileName).to.equal('test.pem');
+                return buffer;
+              }
+            },
             {
               tlsOptions: { aws: { tlsCertificateKeyFile: 'test.pem' } }
-            } as any
+            }
           );
           const request = new MockRequest(Buffer.from('foobar'), -1);
           const buffer = Buffer.from('foobar');
@@ -253,7 +256,7 @@ describe('StateMachine', function () {
         });
 
         context('when providing tlsCAFile', function () {
-          const stateMachine = new StateMachine(
+          const stateMachine = makeStateMachine(
             {} as any,
             {
               tlsOptions: { aws: { tlsCAFile: 'test.pem' } }
@@ -284,7 +287,7 @@ describe('StateMachine', function () {
         });
 
         context('when providing tlsCertificateKeyFilePassword', function () {
-          const stateMachine = new StateMachine(
+          const stateMachine = makeStateMachine(
             {} as any,
             {
               tlsOptions: { aws: { tlsCertificateKeyFilePassword: 'test' } }
@@ -328,7 +331,7 @@ describe('StateMachine', function () {
         });
 
         it('throws a MongoCryptError with SocksClientError cause', async function () {
-          const stateMachine = new StateMachine(
+          const stateMachine = makeStateMachine(
             {} as any,
             {
               proxyOptions: {
@@ -381,7 +384,7 @@ describe('StateMachine', function () {
         });
 
         it('throws a MongoCryptError error', async function () {
-          const stateMachine = new StateMachine(
+          const stateMachine = makeStateMachine(
             {} as any,
             {
               host: 'localhost',
@@ -398,7 +401,7 @@ describe('StateMachine', function () {
 
             await kmsRequestPromise;
           } catch (err) {
-            expect(err.name).to.equal('MongoCryptError');
+            expect(err.name, err.stack).to.equal('MongoCryptError');
             expect(err.message).to.equal('KMS request closed');
             return;
           }
@@ -453,7 +456,7 @@ describe('StateMachine', function () {
     });
 
     it('should create HTTPS connections through a Socks5 proxy (no proxy auth)', async function () {
-      const stateMachine = new StateMachine(
+      const stateMachine = makeStateMachine(
         {} as any,
         {
           proxyOptions: {
@@ -477,7 +480,7 @@ describe('StateMachine', function () {
 
     it('should create HTTPS connections through a Socks5 proxy (username/password auth)', async function () {
       withUsernamePassword = true;
-      const stateMachine = new StateMachine(
+      const stateMachine = makeStateMachine(
         {} as any,
         {
           proxyOptions: {
@@ -504,7 +507,7 @@ describe('StateMachine', function () {
 
   describe('CSOT', function () {
     describe('#fetchKeys', function () {
-      const stateMachine = new StateMachine({} as any, {} as any);
+      const stateMachine = makeStateMachine({} as any, {} as any);
       const client = new MongoClient('mongodb://localhost:27017');
       let findSpy;
 
@@ -546,7 +549,7 @@ describe('StateMachine', function () {
     });
 
     describe('#markCommand', function () {
-      const stateMachine = new StateMachine({} as any, {} as any);
+      const stateMachine = makeStateMachine({} as any, {} as any);
       const client = new MongoClient('mongodb://localhost:27017');
       let dbCommandSpy;
 
@@ -585,7 +588,7 @@ describe('StateMachine', function () {
     });
 
     describe('#fetchCollectionInfo', function () {
-      const stateMachine = new StateMachine({} as any, {} as any);
+      const stateMachine = makeStateMachine({} as any, {} as any);
       const client = new MongoClient('mongodb://localhost:27017');
       let listCollectionsSpy;
 
