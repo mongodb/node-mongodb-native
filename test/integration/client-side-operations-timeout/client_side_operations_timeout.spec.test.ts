@@ -20,7 +20,9 @@ const skippedTests = {
   'timeoutMS applies to full resume attempt in a next call': 'TODO(DRIVERS-3006)',
   'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set': 'TODO(DRIVERS-3018)',
   'operation succeeds after one socket timeout - aggregate on collection':
-    'TODO(NODE-6863): fix flaky test'
+    'TODO(NODE-6863): fix flaky test',
+  'socketTimeoutMS is ignored if timeoutMS is set - dropIndex on collection':
+    'TODO(NODE-6862): fix flaky test'
 };
 
 describe('CSOT spec tests', function () {
