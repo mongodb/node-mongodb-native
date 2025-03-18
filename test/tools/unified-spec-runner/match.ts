@@ -262,12 +262,13 @@ export function resultCheck(
       return;
     }
 
-    expect(actual, `Expected actual to be an object at: ${path.join('')}`).to.be.an('object');
+    expect(actual, `Expected actual to be an object at: ${path.join('')}`).to.be.an(
+      Array.isArray(expected) ? 'array' : 'object'
+    );
 
     const expectedEntries = Object.entries(expected);
 
     if (Array.isArray(expected)) {
-      expect(actual, `Expected actual to be an array at: ${path.join('')}`).to.be.an('array');
       for (const [index, value] of expectedEntries) {
         path.push(`[${index}]`);
         checkNestedDocuments(index, value, checkExtraKeys);

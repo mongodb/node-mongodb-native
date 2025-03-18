@@ -135,7 +135,7 @@ describe('Unified Spec Runner', function () {
 
             expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
-              /Expected actual value to be an object/
+              /to be an object/
             );
           });
         });
