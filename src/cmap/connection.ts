@@ -247,9 +247,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.lastUseTime = now();
 
     this.messageStream = this.socket
-      .on('error', this.onError.bind(this))
+      .on('error', this.onSocketError.bind(this))
       .pipe(new SizedMessageTransform({ connection: this }))
-      .on('error', this.onError.bind(this));
+      .on('error', this.onTransformError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
 
@@ -302,6 +302,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   public markAvailable(): void {
     this.lastUseTime = now();
+  }
+
+  private onSocketError(cause: Error) {
+    this.onError(new MongoNetworkError(cause.message, { cause }));
+  }
+
+  private onTransformError(error: Error) {
+    this.onError(error);
   }
 
   public onError(error: Error) {
@@ -769,7 +777,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     } finally {
       this.dataEvents = null;
       this.messageStream.pause();
-      this.throwIfAborted();
     }
   }
 }
