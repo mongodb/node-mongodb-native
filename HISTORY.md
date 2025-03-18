@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.15.0](https://github.com/mongodb/node-mongodb-native/compare/v6.14.2...v6.15.0) (2025-03-18)
+
+
+### Features
+
+* **NODE-6141:** allow custom aws sdk config ([#4373](https://github.com/mongodb/node-mongodb-native/issues/4373)) ([3d047ed](https://github.com/mongodb/node-mongodb-native/commit/3d047ed19f6bf5c06e441fdf3a9c90b05ef9c15d))
+
+
+### Bug Fixes
+
+* **NODE-6845:** ensure internal rejections are handled ([#4448](https://github.com/mongodb/node-mongodb-native/issues/4448)) ([06e941a](https://github.com/mongodb/node-mongodb-native/commit/06e941a87c5278d0a7baedccc646924bf64ddfb7))
+
 ## [6.14.2](https://github.com/mongodb/node-mongodb-native/compare/v6.14.1...v6.14.2) (2025-03-04)
 
 
