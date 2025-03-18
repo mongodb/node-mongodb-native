@@ -262,8 +262,11 @@ export function resultCheck(
       return;
     }
 
-    expect(actual, `Expected actual to be an object at: ${path.join('')}`).to.be.an(
-      Array.isArray(expected) ? 'array' : 'object'
+    expect(
+      actual,
+      `Expected actual (${inspect(actual)}) to be an ${Array.isArray(expected) ? 'array' : 'object'} at: ${path.join('')}`
+    ).to.satisfies(actual =>
+      Array.isArray(expected) ? Array.isArray(actual) : typeof actual === 'object'
     );
 
     const expectedEntries = Object.entries(expected);
