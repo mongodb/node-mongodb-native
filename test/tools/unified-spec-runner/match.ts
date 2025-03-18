@@ -262,20 +262,12 @@ export function resultCheck(
       return;
     }
 
-    if (typeof actual !== 'object') {
-      expect.fail(
-        `Expected actual value (${inspect(actual)}) to be an object at: ${path.join('')}`
-      );
-    }
+    expect(actual, `Expected actual to be an object at: ${path.join('')}`).to.be.an('object');
 
     const expectedEntries = Object.entries(expected);
 
     if (Array.isArray(expected)) {
-      if (!Array.isArray(actual)) {
-        expect.fail(
-          `expected value at ${path.join('.')} to be an array, but received ${inspect(actual)}`
-        );
-      }
+      expect(actual, `Expected actual to be an array at: ${path.join('')}`).to.be.an('array');
       for (const [index, value] of expectedEntries) {
         path.push(`[${index}]`);
         checkNestedDocuments(index, value, checkExtraKeys);
