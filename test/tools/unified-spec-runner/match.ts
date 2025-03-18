@@ -263,7 +263,9 @@ export function resultCheck(
     }
 
     if (typeof actual !== 'object') {
-      expect.fail(`Expected actual value to be an object at: ${path.join('')}`);
+      expect.fail(
+        `Expected actual value (${inspect(actual)}) to be an object at: ${path.join('')}`
+      );
     }
 
     const expectedEntries = Object.entries(expected);
