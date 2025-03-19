@@ -110,12 +110,12 @@ for (const [suite, benchmarks] of Object.entries(tests)) {
   console.groupEnd();
 }
 
-const aMetricInfo =
+const metricInfoFilterByName =
   (testName: string) =>
   ({ info: { test_name } }: MetricInfo) =>
     test_name === testName;
 
-const anMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
+const isMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
 
 function calculateCompositeBenchmarks(results: MetricInfo[]) {
   const composites = {
@@ -162,10 +162,10 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
 
     let sum = 0;
     for (const testName of compositeTests) {
-      const testScore = results.find(aMetricInfo(testName));
+      const testScore = results.find(metricInfoFilterByName(testName));
       assert.ok(testScore, `${compositeName} suite requires ${testName} for composite score`);
 
-      const metric = testScore.metrics.find(anMBsMetric);
+      const metric = testScore.metrics.find(isMBsMetric);
       assert.ok(metric, `${testName} is missing a megabytes_per_second metric`);
 
       sum += metric.value;
@@ -199,14 +199,14 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
 }
 
 function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
-  const baselineBench = results.find(aMetricInfo('cpuBaseline'));
-  const pingBench = results.find(aMetricInfo('ping'));
+  const baselineBench = results.find(metricInfoFilterByName('cpuBaseline'));
+  const pingBench = results.find(metricInfoFilterByName('ping'));
 
   assert.ok(pingBench, 'ping bench results not found!');
   assert.ok(baselineBench, 'cpuBaseline results not found!');
 
-  const cpuBaseline = baselineBench.metrics.find(anMBsMetric);
-  const pingThroughput = pingBench.metrics.find(anMBsMetric);
+  const cpuBaseline = baselineBench.metrics.find(isMBsMetric);
+  const pingThroughput = pingBench.metrics.find(isMBsMetric);
 
   assert.ok(cpuBaseline, 'cpu benchmark does not have a MB/s metric');
   assert.ok(pingThroughput, 'ping does not have a MB/s metric');
@@ -214,7 +214,7 @@ function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
   for (const bench of results) {
     if (bench.info.test_name === 'cpuBaseline') continue;
 
-    const currentMetric = bench.metrics.find(anMBsMetric);
+    const currentMetric = bench.metrics.find(isMBsMetric);
     assert.ok(currentMetric, `${bench.info.test_name} does not have a MB/s metric`);
 
     if (bench.info.test_name === 'ping') {
