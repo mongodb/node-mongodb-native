@@ -262,18 +262,16 @@ export function resultCheck(
       return;
     }
 
-    if (typeof actual !== 'object') {
-      expect.fail('Expected actual value to be an object');
-    }
+    expect(
+      actual,
+      `Expected actual (${inspect(actual)}) to be an ${Array.isArray(expected) ? 'array' : 'object'} at: ${path.join('')}`
+    ).to.satisfy(actual =>
+      Array.isArray(expected) ? Array.isArray(actual) : typeof actual === 'object'
+    );
 
     const expectedEntries = Object.entries(expected);
 
     if (Array.isArray(expected)) {
-      if (!Array.isArray(actual)) {
-        expect.fail(
-          `expected value at ${path.join('.')} to be an array, but received ${inspect(actual)}`
-        );
-      }
       for (const [index, value] of expectedEntries) {
         path.push(`[${index}]`);
         checkNestedDocuments(index, value, checkExtraKeys);
