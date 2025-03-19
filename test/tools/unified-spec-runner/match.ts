@@ -265,7 +265,7 @@ export function resultCheck(
     expect(
       actual,
       `Expected actual (${inspect(actual)}) to be an ${Array.isArray(expected) ? 'array' : 'object'} at: ${path.join('')}`
-    ).to.satisfies(actual =>
+    ).to.satisfy(actual =>
       Array.isArray(expected) ? Array.isArray(actual) : typeof actual === 'object'
     );
 
