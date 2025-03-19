@@ -110,6 +110,13 @@ for (const [suite, benchmarks] of Object.entries(tests)) {
   console.groupEnd();
 }
 
+const aMetricInfo =
+  (testName: string) =>
+  ({ info: { test_name } }: MetricInfo) =>
+    test_name === testName;
+
+const anMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
+
 function calculateCompositeBenchmarks(results: MetricInfo[]) {
   const composites = {
     singleBench: ['findOne', 'smallDocInsertOne', 'largeDocInsertOne'],
@@ -143,13 +150,6 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
       'gridfsMultiFileUpload'
     ]
   };
-
-  const aMetricInfo =
-    (testName: string) =>
-    ({ info: { test_name } }: MetricInfo) =>
-      test_name === testName;
-
-  const anMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
 
   let readBenchResult;
   let writeBenchResult;
@@ -199,31 +199,40 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
 }
 
 function calculateNormalizedResults(results: MetricInfo[]): MetricInfo[] {
-  const baselineBench = results.find(r => r.info.test_name === 'cpuBaseline');
-  const pingBench = results.find(r => r.info.test_name === 'ping');
+  const baselineBench = results.find(aMetricInfo('cpuBaseline'));
+  const pingBench = results.find(aMetricInfo('ping'));
 
   assert.ok(pingBench, 'ping bench results not found!');
-  assert.ok(baselineBench, 'baseline results not found!');
-  const pingThroughput = pingBench.metrics[0].value;
-  const cpuBaseline = baselineBench.metrics[0].value;
+  assert.ok(baselineBench, 'cpuBaseline results not found!');
+
+  const cpuBaseline = baselineBench.metrics.find(anMBsMetric);
+  const pingThroughput = pingBench.metrics.find(anMBsMetric);
+
+  assert.ok(cpuBaseline, 'cpu benchmark does not have a MB/s metric');
+  assert.ok(pingThroughput, 'ping does not have a MB/s metric');
 
   for (const bench of results) {
     if (bench.info.test_name === 'cpuBaseline') continue;
+
+    const currentMetric = bench.metrics.find(anMBsMetric);
+    assert.ok(currentMetric, `${bench.info.test_name} does not have a MB/s metric`);
+
     if (bench.info.test_name === 'ping') {
       bench.metrics.push({
         name: 'normalized_throughput',
-        value: bench.metrics[0].value / cpuBaseline,
+        value: currentMetric.value / cpuBaseline.value,
         metadata: {
+          tags: currentMetric.metadata.tags,
           improvement_direction: 'up'
         }
       });
-    }
-    // Compute normalized_throughput of benchmarks against ping bench
-    else {
+    } else {
+      // Compute normalized_throughput of benchmarks against ping bench
       bench.metrics.push({
         name: 'normalized_throughput',
-        value: bench.metrics[0].value / pingThroughput,
+        value: currentMetric.value / pingThroughput.value,
         metadata: {
+          tags: currentMetric.metadata.tags,
           improvement_direction: 'up'
         }
       });
