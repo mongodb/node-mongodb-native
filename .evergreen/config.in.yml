@@ -111,6 +111,7 @@ functions:
   "perf send":
     - command: attach.artifacts
       params:
+        working_dir: src
         files:
           - ./test/benchmarks/driver_bench/results.json
     - command: subprocess.exec
