@@ -865,7 +865,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
+            - {key: NODE_VERSION, value: '22'}
       - func: install dependencies
       - command: ec2.assume_role
         params:

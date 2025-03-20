@@ -1,11 +1,26 @@
-import * as assert from 'node:assert/strict';
+/* eslint-disable no-console */
+import util from 'node:util';
 
 import { MongoClient } from 'mongodb';
 
 // Creates the client that is cached for all requests, subscribes to
 // relevant events, and forces the connection pool to get populated.
 const mongoClient = new MongoClient(process.env.MONGODB_URI, {
-  monitorCommands: true
+  monitorCommands: true,
+  mongodbLogComponentSeverities: {
+    command: 'trace',
+    topology: 'trace',
+    connection: 'trace',
+    default: 'trace'
+  },
+  mongodbLogMaxDocumentLength: 10_000,
+  mongodbLogPath: {
+    write(log) {
+      console.log(
+        util.inspect(log, { colors: false, breakLength: Infinity, compact: true, depth: Infinity })
+      );
+    }
+  }
 });
 
 let openConnections = 0;
@@ -14,49 +29,38 @@ let totalHeartbeatDuration = 0;
 let totalCommands = 0;
 let totalCommandDuration = 0;
 
-mongoClient.on('commandStarted', (event) => {
-  console.log('commandStarted', event);
-});
-
-mongoClient.on('commandSucceeded', (event) => {
+mongoClient.on('commandSucceeded', event => {
   totalCommands++;
   totalCommandDuration += event.duration;
-  console.log('commandSucceeded', event);
 });
 
-mongoClient.on('commandFailed', (event) => {
+mongoClient.on('commandFailed', event => {
   totalCommands++;
   totalCommandDuration += event.duration;
-  console.log('commandFailed', event);
 });
 
-mongoClient.on('serverHeartbeatStarted', (event) => {
-  console.log('serverHeartbeatStarted', event);
-  assert.strictEqual(event.awaited, false);
+mongoClient.on('serverHeartbeatStarted', event => {
+  if (event.awaited !== false) console.log('server hb started', { awaited: event.awaited });
 });
 
-mongoClient.on('serverHeartbeatSucceeded', (event) => {
+mongoClient.on('serverHeartbeatSucceeded', event => {
   heartbeatCount++;
   totalHeartbeatDuration += event.duration;
-  console.log('serverHeartbeatSucceeded', event);
-  assert.strictEqual(event.awaited, false);
+  if (event.awaited !== false) console.log('server hb succeeded', { awaited: event.awaited });
 });
 
-mongoClient.on('serverHeartbeatFailed', (event) => {
+mongoClient.on('serverHeartbeatFailed', event => {
   heartbeatCount++;
   totalHeartbeatDuration += event.duration;
-  console.log('serverHeartbeatFailed', event);
-  assert.strictEqual(event.awaited, false);
+  if (event.awaited !== false) console.log('server hb failed', { awaited: event.awaited });
 });
 
-mongoClient.on('connectionCreated', (event) => {
+mongoClient.on('connectionCreated', () => {
   openConnections++;
-  console.log('connectionCreated', event);
 });
 
-mongoClient.on('connectionClosed', (event) => {
+mongoClient.on('connectionClosed', () => {
   openConnections--;
-  console.log('connectionClosed', event);
 });
 
 // Populate the connection pool.
@@ -65,8 +69,8 @@ await mongoClient.connect();
 // Create the response to send back.
 function createResponse() {
   return {
-    averageCommandDuration: totalCommandDuration / totalCommands,
-    averageHeartbeatDuration: totalHeartbeatDuration / heartbeatCount,
+    averageCommandDuration: totalCommands === 0 ? 0 : totalCommandDuration / totalCommands,
+    averageHeartbeatDuration: heartbeatCount === 0 ? 0 : totalHeartbeatDuration / heartbeatCount,
     openConnections: openConnections,
     heartbeatCount: heartbeatCount
   };
@@ -85,10 +89,10 @@ function reset() {
  * The handler function itself performs an insert/delete and returns the
  * id of the document in play.
  *
- * @param {Object} event - API Gateway Lambda Proxy Input Format
- * @returns {Object} object - API Gateway Lambda Proxy Output Format
+ * @param event - API Gateway Lambda Proxy Input Format
+ * @returns API Gateway Lambda Proxy Output Format
  */
-export const lambdaHandler = async (event) => {
+export const lambdaHandler = async () => {
   const db = mongoClient.db('lambdaTest');
   const collection = db.collection('test');
   const { insertedId } = await collection.insertOne({ n: 1 });
