@@ -81,6 +81,10 @@ functions:
         args:
           - .evergreen/run-tests.sh
   perf send:
+    - command: attach.artifacts
+      params:
+        files:
+          - ./test/benchmarks/driver_bench/results.json
     - command: subprocess.exec
       params:
         working_dir: src
