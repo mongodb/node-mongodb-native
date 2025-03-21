@@ -8,17 +8,18 @@ const __dirname = import.meta.dirname;
 const require = module.createRequire(__dirname);
 
 export const TAG = {
-  // Special tag that marks a benchmark as a spec-required benchmark
+  /** Special tag that marks a benchmark as a spec-required benchmark */
   spec: 'spec-benchmark',
-  // Special tag that enables our perf monitoring tooling to create alerts when regressions in this
-  // benchmark's performance are detected
+  /** Special tag that enables our perf monitoring tooling to create alerts when regressions in this benchmark's performance are detected */
   alert: 'alerting-benchmark',
-  // Tag marking a benchmark as being related to cursor performance
+  /** Tag marking a benchmark as being related to cursor performance */
   cursor: 'cursor-benchmark',
-  // Tag marking a benchmark as being related to read performance
+  /** Tag marking a benchmark as being related to read performance */
   read: 'read-benchmark',
-  // Tag marking a benchmark as being related to write performance
-  write: 'write-benchmark'
+  /** Tag marking a benchmark as being related to write performance */
+  write: 'write-benchmark',
+  /** A tag for the cpu baseline task */
+  reference: 'reference'
 };
 
 /**
@@ -135,7 +136,7 @@ export type Metric = {
   name: 'megabytes_per_second' | 'normalized_throughput';
   value: number;
   metadata: {
-    tags?: string[];
+    tags: ReadonlyArray<string>;
     improvement_direction: 'up' | 'down';
   };
 };
@@ -150,7 +151,11 @@ export type MetricInfo = {
   metrics: Metric[];
 };
 
-export function metrics(test_name: string, result: number, tags?: string[]): MetricInfo {
+export function metrics(
+  test_name: string,
+  result: number,
+  tags: ReadonlyArray<string>
+): MetricInfo {
   return {
     info: {
       test_name,

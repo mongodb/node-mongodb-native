@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 
+import { TAG } from '../../driver.mjs';
+
 const findPrimesBelow = 1_000_000;
 const expectedPrimes = 78_498;
 
@@ -9,6 +11,9 @@ const expectedPrimes = 78_498;
 
 const stableRegionMean = 42.82;
 export const taskSize = 3.1401000000000003 / stableRegionMean; // ~3MB worth of work scaled down by the mean of the current stable region in CI to bring this value to roughly 1
+
+export const tags = [TAG.reference];
+
 /** @see https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes */
 export function sieveOfEratosthenes(n: number) {
   // Create a boolean array "prime[0..n]" and initialize
