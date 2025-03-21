@@ -9,12 +9,13 @@ const [, , benchmarkFile] = process.argv;
 
 type BenchmarkModule = {
   taskSize: number;
+  tags: ReadonlyArray<string>;
+
   before?: () => Promise<void>;
   beforeEach?: () => Promise<void>;
   run: () => Promise<void>;
   afterEach?: () => Promise<void>;
   after?: () => Promise<void>;
-  tags?: string[];
 };
 
 const benchmarkName = snakeToCamel(path.basename(benchmarkFile, '.mjs'));
@@ -22,6 +23,10 @@ const benchmark: BenchmarkModule = await import(`./${benchmarkFile}`);
 
 if (typeof benchmark.taskSize !== 'number') throw new Error('missing taskSize');
 if (typeof benchmark.run !== 'function') throw new Error('missing run');
+if (!Array.isArray(benchmark.tags)) throw new Error('tags must be an array');
+if (benchmark.tags.length === 0 || !benchmark.tags.every(t => typeof t === 'string')) {
+  throw new Error('must have more than one tag and all tags must be strings');
+}
 
 /** CRITICAL SECTION: time task took in seconds */
 async function timeTask() {
@@ -81,14 +86,6 @@ function percentileIndex(percentile: number, count: number) {
 const medianExecution = durations[percentileIndex(50, count)];
 const megabytesPerSecond = benchmark.taskSize / medianExecution;
 
-const tags = benchmark.tags;
-if (
-  tags &&
-  (!Array.isArray(tags) || (tags.length > 0 && !tags.every(t => typeof t === 'string')))
-) {
-  throw new Error('If tags is specified, it MUST be an array of strings');
-}
-
 console.log(
   ' '.repeat(3),
   ...['total time:', totalDuration, 'sec,'],
@@ -100,6 +97,6 @@ console.log(
 
 await fs.writeFile(
   `results_${path.basename(benchmarkFile, '.mjs')}.json`,
-  JSON.stringify(metrics(benchmarkName, megabytesPerSecond, tags), undefined, 2) + '\n',
+  JSON.stringify(metrics(benchmarkName, megabytesPerSecond, benchmark.tags), undefined, 2) + '\n',
   'utf8'
 );

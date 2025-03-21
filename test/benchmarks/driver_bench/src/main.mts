@@ -18,7 +18,8 @@ import {
   MONGODB_DRIVER_PATH,
   MONGODB_DRIVER_REVISION,
   MONGODB_DRIVER_VERSION,
-  snakeToCamel
+  snakeToCamel,
+  TAG
 } from './driver.mjs';
 
 const __dirname = import.meta.dirname;
@@ -176,7 +177,7 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
     if (compositeName === 'readBench') readBenchResult = compositeAverage;
     if (compositeName === 'writeBench') writeBenchResult = compositeAverage;
 
-    compositeResults.push(metrics(compositeName, compositeAverage));
+    compositeResults.push(metrics(compositeName, compositeAverage, [TAG.spec]));
 
     console.log('avg:', compositeAverage, 'mb/s');
 
@@ -192,7 +193,7 @@ function calculateCompositeBenchmarks(results: MetricInfo[]) {
   console.log('avg:', driverBench, 'mb/s');
   console.groupEnd();
 
-  compositeResults.push(metrics('driverBench', driverBench));
+  compositeResults.push(metrics('driverBench', driverBench, [TAG.spec]));
 
   console.groupEnd();
   return [...results, ...compositeResults];
