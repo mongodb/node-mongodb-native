@@ -16,11 +16,11 @@ import { type MongoClient } from './mongo_client';
 /** @internal */
 const AUTH_PROVIDERS = new Map<
   AuthMechanism | string,
-  (authMechanismProperties: AuthMechanismProperties) => AuthProvider
+  (client: MongoClient, authMechanismProperties: AuthMechanismProperties) => AuthProvider
 >([
   [
     AuthMechanism.MONGODB_AWS,
-    ({ AWS_CREDENTIAL_PROVIDER }) => new MongoDBAWS(AWS_CREDENTIAL_PROVIDER)
+    (_, { AWS_CREDENTIAL_PROVIDER }) => new MongoDBAWS(AWS_CREDENTIAL_PROVIDER)
   ],
   [
     AuthMechanism.MONGODB_CR,
@@ -31,7 +31,10 @@ const AUTH_PROVIDERS = new Map<
     }
   ],
   [AuthMechanism.MONGODB_GSSAPI, () => new GSSAPI()],
-  [AuthMechanism.MONGODB_OIDC, properties => new MongoDBOIDC(getWorkflow(properties))],
+  [
+    AuthMechanism.MONGODB_OIDC,
+    (client, properties) => new MongoDBOIDC(getWorkflow(client, properties))
+  ],
   [AuthMechanism.MONGODB_PLAIN, () => new Plain()],
   [AuthMechanism.MONGODB_SCRAM_SHA1, () => new ScramSHA1()],
   [AuthMechanism.MONGODB_SCRAM_SHA256, () => new ScramSHA256()],
@@ -74,7 +77,7 @@ export class MongoClientAuthProviders {
       throw new MongoInvalidArgumentError(`authMechanism ${name} not supported`);
     }
 
-    const provider = providerFunction(authMechanismProperties);
+    const provider = providerFunction(this.client, authMechanismProperties);
     this.existingProviders.set(name, provider);
     return provider;
   }
@@ -83,14 +86,17 @@ export class MongoClientAuthProviders {
 /**
  * Gets either a device workflow or callback workflow.
  */
-function getWorkflow(authMechanismProperties: AuthMechanismProperties): Workflow {
+function getWorkflow(
+  client: MongoClient,
+  authMechanismProperties: AuthMechanismProperties
+): Workflow {
   if (authMechanismProperties.OIDC_HUMAN_CALLBACK) {
     return new HumanCallbackWorkflow(new TokenCache(), authMechanismProperties.OIDC_HUMAN_CALLBACK);
   } else if (authMechanismProperties.OIDC_CALLBACK) {
     return new AutomatedCallbackWorkflow(new TokenCache(), authMechanismProperties.OIDC_CALLBACK);
   } else {
     const environment = authMechanismProperties.ENVIRONMENT;
-    const workflow = OIDC_WORKFLOWS.get(environment)?.(this.client);
+    const workflow = OIDC_WORKFLOWS.get(environment)?.(client);
     if (!workflow) {
       throw new MongoInvalidArgumentError(
         `Could not load workflow for environment ${authMechanismProperties.ENVIRONMENT}`

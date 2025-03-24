@@ -17,7 +17,6 @@ import {
   needsRetryableWriteLabel
 } from '../error';
 import { type IO } from '../mongo_client';
-import { type Monitor, type RTTPinger } from '../sdam/monitor';
 import { HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext } from './auth/auth_provider';
 import { AuthMechanism } from './auth/providers';
@@ -27,7 +26,6 @@ import {
   type ConnectionOptions,
   CryptoConnection
 } from './connection';
-import { type ConnectionPool } from './connection_pool';
 import {
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
