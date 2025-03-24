@@ -95,29 +95,34 @@
             "ordered": false
           },
           "expectResult": {
-            "insertedCount": {
-              "$$unsetOrMatches": 0
-            },
-            "upsertedCount": {
-              "$$unsetOrMatches": 0
-            },
-            "matchedCount": {
-              "$$unsetOrMatches": 0
-            },
-            "modifiedCount": {
-              "$$unsetOrMatches": 0
-            },
-            "deletedCount": {
-              "$$unsetOrMatches": 0
-            },
-            "insertResults": {
-              "$$unsetOrMatches": {}
-            },
-            "updateResults": {
-              "$$unsetOrMatches": {}
-            },
-            "deleteResults": {
-              "$$unsetOrMatches": {}
+            "$$unsetOrMatches": {
+              "acknowledged": {
+                "$$unsetOrMatches": false
+              },
+              "insertedCount": {
+                "$$unsetOrMatches": 0
+              },
+              "upsertedCount": {
+                "$$unsetOrMatches": 0
+              },
+              "matchedCount": {
+                "$$unsetOrMatches": 0
+              },
+              "modifiedCount": {
+                "$$unsetOrMatches": 0
+              },
+              "deletedCount": {
+                "$$unsetOrMatches": 0
+              },
+              "insertResults": {
+                "$$unsetOrMatches": {}
+              },
+              "updateResults": {
+                "$$unsetOrMatches": {}
+              },
+              "deleteResults": {
+                "$$unsetOrMatches": {}
+              }
             }
           }
         },
