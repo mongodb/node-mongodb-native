@@ -25,8 +25,11 @@ import {
 
 describe('MongoClient', function () {
   const client: MongoClient = {
-    listeners: () => []
-  } as MongoClient;
+    listeners: () => [],
+    on() {
+      return this;
+    }
+  } as unknown as MongoClient;
 
   it('programmatic options should override URI options', function () {
     const options = parseOptions('mongodb://localhost:27017/test?directConnection=true', client, {
@@ -76,34 +79,30 @@ describe('MongoClient', function () {
     expect(options).has.property('tls', true);
   });
 
-  const ALL_OPTIONS = {
+  const ALL_OPTIONS: MongoClientOptions = {
     appName: 'cats',
     auth: { username: 'username', password: 'password' },
     authMechanism: 'SCRAM-SHA-1',
     authMechanismProperties: { SERVICE_NAME: 'service name here' },
     authSource: 'refer to dbName',
-    autoEncryption: { bypassAutoEncryption: true },
+    autoEncryption: { bypassAutoEncryption: true, kmsProviders: { aws: {} } },
     checkKeys: true,
-    checkServerIdentity: false,
+    checkServerIdentity: () => undefined,
     compressors: 'snappy,zlib',
     connectTimeoutMS: 123,
     directConnection: true,
-    dbName: 'test',
     driverInfo: { name: 'MyDriver', platform: 'moonOS' },
     family: 6,
     fieldsAsRaw: { rawField: true },
     forceServerObjectId: true,
-    fsync: true,
     heartbeatFrequencyMS: 3,
     ignoreUndefined: false,
-    j: true,
-    journal: false,
+    journal: true,
     localThresholdMS: 3,
     maxConnecting: 5,
     maxIdleTimeMS: 3,
     maxPoolSize: 2,
     maxStalenessSeconds: 3,
-    minInternalBufferSize: 0,
     minPoolSize: 1,
     monitorCommands: true,
     noDelay: true,
@@ -136,7 +135,6 @@ describe('MongoClient', function () {
     w: 'majority',
     waitQueueTimeoutMS: 3,
     writeConcern: new WriteConcern(2),
-    wtimeout: 5,
     wtimeoutMS: 6,
     zlibCompressionLevel: 2
   };
@@ -150,7 +148,7 @@ describe('MongoClient', function () {
     // Check consolidated options
     expect(options).has.property('writeConcern');
     expect(options.writeConcern).has.property('w', 2);
-    expect(options.writeConcern).has.property('j', true);
+    expect(options.writeConcern).has.property('journal', true);
   });
 
   const allURIOptions =
