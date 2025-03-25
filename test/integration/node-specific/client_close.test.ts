@@ -10,25 +10,32 @@ describe('MongoClient.close() Integration', () => {
 
   describe('Node.js resource: TLS File read', () => {
     describe('when client is connecting and reads an infinite TLS file', () => {
-      it('the file read is interrupted by client.close()', async function () {
-        await runScriptAndGetProcessInfo(
-          'tls-file-read',
-          this.configuration,
-          async function run({ mongodb: { MongoClient, MongoClientClosedError }, uri, expect }) {
-            const infiniteFile = '/dev/zero';
-            const client = new MongoClient(uri, { tls: true, tlsCertificateKeyFile: infiniteFile });
-            const connectPromise = client.connect().then(
-              () => null,
-              e => e
-            );
-            expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-            await client.close();
-            const err = await connectPromise;
-            expect(err).to.be.instanceOf(MongoClientClosedError);
-            expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-          }
-        );
-      });
+      it(
+        'the file read is interrupted by client.close()',
+        { requires: { os: 'linux' } },
+        async function () {
+          await runScriptAndGetProcessInfo(
+            'tls-file-read',
+            this.configuration,
+            async function run({ mongodb: { MongoClient, MongoClientClosedError }, uri, expect }) {
+              const infiniteFile = '/dev/zero';
+              const client = new MongoClient(uri, {
+                tls: true,
+                tlsCertificateKeyFile: infiniteFile
+              });
+              const connectPromise = client.connect().then(
+                () => null,
+                e => e
+              );
+              expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+              await client.close();
+              const err = await connectPromise;
+              expect(err).to.be.instanceOf(MongoClientClosedError);
+              expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+            }
+          );
+        }
+      );
     });
   });
 
@@ -49,26 +56,30 @@ describe('MongoClient.close() Integration', () => {
       });
 
       describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
-        it('the file read is interrupted by client.close()', async function () {
-          await runScriptAndGetProcessInfo(
-            'token-file-read',
-            this.configuration,
-            async function run({ MongoClient, uri, expect }) {
-              const infiniteFile = '/dev/zero';
-              process.env.OIDC_TOKEN_FILE = infiniteFile;
-              const options = {
-                authMechanismProperties: { ENVIRONMENT: 'test' },
-                authMechanism: 'MONGODB-OIDC'
-              } as const;
-              const client = new MongoClient(uri, options);
-              const connectPromise = client.connect();
-              expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-              await client.close();
-              expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-              await connectPromise;
-            }
-          );
-        });
+        it(
+          'the file read is interrupted by client.close()',
+          { requires: { os: 'linux' } },
+          async function () {
+            await runScriptAndGetProcessInfo(
+              'token-file-read',
+              this.configuration,
+              async function run({ MongoClient, uri, expect }) {
+                const infiniteFile = '/dev/zero';
+                process.env.OIDC_TOKEN_FILE = infiniteFile;
+                const options = {
+                  authMechanismProperties: { ENVIRONMENT: 'test' },
+                  authMechanism: 'MONGODB-OIDC'
+                } as const;
+                const client = new MongoClient(uri, options);
+                const connectPromise = client.connect();
+                expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+                await client.close();
+                expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+                await connectPromise;
+              }
+            );
+          }
+        );
       });
     });
   });
@@ -583,6 +594,7 @@ describe('MongoClient.close() Integration', () => {
   describe('AutoEncrypter', () => {
     const metadata: MongoDBMetadataUI = {
       requires: {
+        os: 'linux',
         mongodb: '>=4.2.0',
         clientSideEncryption: true
       }
