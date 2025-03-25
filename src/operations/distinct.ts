@@ -15,6 +15,9 @@ export type DistinctOptions = CommandOperationOptions & {
    * The index to use. Specify either the index name as a string or the index key pattern.
    * If specified, then the query system will only consider plans using the hinted index.
    *
+   * If provided as a string, `hint` must be index name for an index on the collection.
+   * If provided as an object, `hint` must be an index description for an index defined on the collection.
+   *
    * See https://www.mongodb.com/docs/manual/reference/command/distinct/#command-fields.
    */
   hint?: Document | string;
@@ -81,9 +84,9 @@ export class DistinctOperation extends CommandOperation<any[]> {
       cmd.comment = options.comment;
     }
 
-    if (options.hint != null) {
-      cmd.hint = options.hint;
-    }
+    // if (options.hint != null) {
+    cmd.hint = options.hint;
+    // }
 
     // Do we have a readConcern specified
     decorateWithReadConcern(cmd, coll, options);
