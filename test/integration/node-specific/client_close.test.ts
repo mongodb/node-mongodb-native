@@ -2,7 +2,6 @@ import * as events from 'node:events';
 
 import { expect } from 'chai';
 
-import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type Collection, type FindCursor, type MongoClient } from '../../mongodb';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 

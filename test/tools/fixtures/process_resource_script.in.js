@@ -16,7 +16,7 @@ const { expect } = require('chai');
 const timers = require('node:timers');
 const { setTimeout } = timers;
 const { once } = require('node:events');
-const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
+const { getCSFLEKMSProviders } = require('./test/csfle-kms-providers');
 
 let originalReport;
 const logFile = scriptName + '.logs.txt';
