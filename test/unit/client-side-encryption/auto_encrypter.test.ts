@@ -8,7 +8,7 @@ import {
   type AutoEncryptionOptions,
   BSON,
   type DataKey,
-  MongoClient,
+  type MongoClient,
   MongocryptdManager,
   StateMachine
 } from '../../mongodb';
@@ -109,7 +109,9 @@ describe('AutoEncrypter', function () {
       const autoEncrypter = new AutoEncrypter(client, autoEncrypterOptions);
 
       it('instantiates a mongo client on the auto encrypter', function () {
-        expect(autoEncrypter).to.have.property('_mongocryptdClient').to.be.instanceOf(MongoClient);
+        expect(autoEncrypter)
+          .to.have.property('_mongocryptdClient')
+          .to.have.nested.property('s.isMongoClient');
       });
 
       it('sets serverSelectionTimeoutMS to 10000ms', function () {
