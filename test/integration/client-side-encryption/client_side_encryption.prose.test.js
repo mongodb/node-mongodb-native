@@ -1351,11 +1351,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  // TODO(NODE-3151): Implement kms prose tests
-  describe('KMS TLS Tests', () => {
-    it.skip('TBD', () => {}).skipReason = 'TODO(NODE-3151): Implement "KMS TLS Tests"';
-  });
-
   /**
    * - Create client encryption no tls
    * - Create client encryption with tls
