@@ -594,7 +594,7 @@ describe('MongoClient.close() Integration', () => {
   describe('AutoEncrypter', () => {
     const metadata: MongoDBMetadataUI = {
       requires: {
-        os: 'linux',
+        os: '!win32',
         mongodb: '>=4.2.0',
         clientSideEncryption: true
       }
@@ -619,70 +619,21 @@ describe('MongoClient.close() Integration', () => {
 
                 const keyVaultClient = new MongoClient(uri);
                 await keyVaultClient.connect();
-                await keyVaultClient.db('keyvault').collection('datakeys');
+                await keyVaultClient.db('keyvault').createCollection('datakeys');
 
                 const clientEncryption = new mongodb.ClientEncryption(keyVaultClient, {
                   keyVaultNamespace: 'keyvault.datakeys',
-                  kmsProviders
+                  kmsProviders,
+                  tlsOptions: { aws: { tlsCAFile: infiniteFile } }
                 });
-                const dataKey = await clientEncryption.createDataKey(provider, { masterKey });
-
-                function getEncryptExtraOptions() {
-                  if (
-                    typeof process.env.CRYPT_SHARED_LIB_PATH === 'string' &&
-                    process.env.CRYPT_SHARED_LIB_PATH.length > 0
-                  ) {
-                    return { cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH };
-                  }
-                  return {};
-                }
-                const schemaMap = {
-                  'db.coll': {
-                    bsonType: 'object',
-                    encryptMetadata: {
-                      keyId: [dataKey]
-                    },
-                    properties: {
-                      a: {
-                        encrypt: {
-                          bsonType: 'int',
-                          algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
-                          keyId: [dataKey]
-                        }
-                      }
-                    }
-                  }
-                };
-                const encryptionOptions = {
-                  autoEncryption: {
-                    keyVaultNamespace: 'keyvault.datakeys',
-                    kmsProviders,
-                    extraOptions: getEncryptExtraOptions(),
-                    schemaMap,
-                    tlsOptions: { aws: { tlsCAFile: infiniteFile } }
-                  }
-                };
-
-                const encryptedClient = new MongoClient(uri, encryptionOptions);
-                await encryptedClient.connect();
 
                 expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-
-                const insertPromise = encryptedClient
-                  .db('db')
-                  .collection('coll')
-                  .insertOne({ a: 1 });
-
+                const dataKeyProm = clientEncryption.createDataKey(provider, { masterKey });
                 expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-
                 await keyVaultClient.close();
-                await encryptedClient.close();
-
-                expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-
-                const err = await insertPromise.catch(e => e);
-                expect(err).to.exist;
-                expect(err.errmsg).to.contain('Error in KMS response');
+                const error = await dataKeyProm.catch(error => error);
+                expect(error.message).to.equal('KMS request failed');
+                expect(error.cause.name).to.equal('MongoClientClosedError');
               }
             );
           });
