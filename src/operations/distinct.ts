@@ -84,9 +84,9 @@ export class DistinctOperation extends CommandOperation<any[]> {
       cmd.comment = options.comment;
     }
 
-    // if (options.hint != null) {
-    cmd.hint = options.hint;
-    // }
+    if (options.hint != null) {
+      cmd.hint = options.hint;
+    }
 
     // Do we have a readConcern specified
     decorateWithReadConcern(cmd, coll, options);
