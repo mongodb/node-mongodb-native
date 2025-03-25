@@ -377,7 +377,10 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   }
 
   const metadata = makeClientMetadata({ appName: poolOptions.appName, driverInfo: {} });
-  const extendedMetadata = addContainerMetadata(metadata);
+  const extendedMetadata = addContainerMetadata(
+    { io: { fs: { readFile: async () => Buffer.alloc(0), access: async () => false } } },
+    metadata
+  );
   delete poolOptions.appName;
 
   const operations = test.operations;

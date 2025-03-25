@@ -596,7 +596,7 @@ describe('MongoClient.close() Integration', () => {
             await runScriptAndGetProcessInfo(
               'tls-file-read-auto-encryption',
               this.configuration,
-              async function run({ MongoClient, uri, expect, mongodb }) {
+              async function run({ MongoClient, uri, expect, mongodb, getCSFLEKMSProviders }) {
                 const infiniteFile = '/dev/zero';
 
                 const kmsProviders = getCSFLEKMSProviders();

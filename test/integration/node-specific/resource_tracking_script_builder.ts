@@ -32,6 +32,7 @@ export type ProcessResourceTestFunction = (options: {
   timers?: typeof timers;
   getSocketReport?: () => { host: string; port: string };
   getSocketEndpointReport?: () => any;
+  getCSFLEKMSProviders: () => Record<string, any>;
   once?: () => typeof once;
 }) => Promise<void>;
 
