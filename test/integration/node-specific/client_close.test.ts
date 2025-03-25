@@ -67,6 +67,7 @@ describe('MongoClient.close() Integration', () => {
                 const infiniteFile = '/dev/zero';
                 process.env.OIDC_TOKEN_FILE = infiniteFile;
                 const options = {
+                  authSource: '',
                   authMechanismProperties: { ENVIRONMENT: 'test' },
                   authMechanism: 'MONGODB-OIDC'
                 } as const;
