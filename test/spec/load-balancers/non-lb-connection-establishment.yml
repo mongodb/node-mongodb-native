@@ -42,11 +42,6 @@ tests:
   # If the server is not configured to be behind a load balancer and the URI contains loadBalanced=true, the driver
   # should error during the connection handshake because the server's hello response does not contain a serviceId field.
   - description: operations against non-load balanced clusters fail if URI contains loadBalanced=true
-    runOnRequirements:
-      - maxServerVersion: 8.0.99 # DRIVERS-3108: Skip test on >=8.1 mongod. SERVER-85804 changes a non-LB mongod to close connection.
-        topologies: [ single ]
-      - topologies: [ sharded ]
-
     operations:
       - name: runCommand
         object: *lbTrueDatabase
