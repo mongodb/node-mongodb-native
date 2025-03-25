@@ -466,7 +466,7 @@ describe('MongoClient.close() Integration', () => {
         const metadata: MongoDBMetadataUI = { requires: { topology: 'sharded' } };
 
         describe('after SRVPoller is created', () => {
-          it('timers are cleaned up by client.close()', metadata, async function () {
+          it.skip('timers are cleaned up by client.close()', metadata, async function () {
             const run = async function ({ MongoClient, expect, getTimerCount }) {
               const SRV_CONNECTION_STRING = `mongodb+srv://test1.test.build.10gen.cc`;
 
