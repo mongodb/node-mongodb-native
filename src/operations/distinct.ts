@@ -8,7 +8,17 @@ import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export type DistinctOptions = CommandOperationOptions;
+export type DistinctOptions = CommandOperationOptions & {
+  /**
+   * @sinceServerVersion 7.1
+   *
+   * The index to use. Specify either the index name as a string or the index key pattern.
+   * If specified, then the query system will only consider plans using the hinted index.
+   *
+   * See https://www.mongodb.com/docs/manual/reference/command/distinct/#command-fields.
+   */
+  hint?: Document | string;
+};
 
 /**
  * Return a list of distinct values for the given key across a collection.
@@ -69,6 +79,10 @@ export class DistinctOperation extends CommandOperation<any[]> {
     // eslint-disable-next-line no-restricted-syntax
     if (typeof options.comment !== 'undefined') {
       cmd.comment = options.comment;
+    }
+
+    if (options.hint != null) {
+      cmd.hint = options.hint;
     }
 
     // Do we have a readConcern specified
