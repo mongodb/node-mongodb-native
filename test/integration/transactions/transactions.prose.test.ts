@@ -21,7 +21,7 @@ describe('Transactions Spec Prose', function () {
       if (this.currentTest) {
         this.currentTest.skipReason =
           'Transactions on sharded clusters are only supported after 4.2';
-        this.currentTest.skip();
+        this.skip();
       }
     }
     started.length = 0;
@@ -39,11 +39,11 @@ describe('Transactions Spec Prose', function () {
 
   afterEach(async function () {
     await client
-      .db()
+      ?.db()
       .collection('txn-test')
       .drop()
       .catch(() => null);
-    await client.close();
+    await client?.close();
   });
 
   describe('Options Inside Transaction', function () {
