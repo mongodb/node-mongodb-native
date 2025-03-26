@@ -21,8 +21,8 @@ describe('Transactions Spec Prose', function () {
       if (this.currentTest) {
         this.currentTest.skipReason =
           'Transactions on sharded clusters are only supported after 4.2';
+        this.currentTest.skip();
       }
-      this.skip();
     }
     started.length = 0;
     client = this.configuration.newClient({}, { monitorCommands: true });
