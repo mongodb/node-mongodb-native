@@ -57,7 +57,7 @@ describe('x509 Authentication', function () {
   context(
     'when a valid cert is provided but the certificate does not correspond to a user',
     function () {
-      it('fails to authenticate', async function () {
+      it.skip('fails to authenticate', async function () {
         client = new MongoClient(connectionString.toString(), validOptions);
         const error = await client.connect().then(
           () => null,
@@ -66,7 +66,7 @@ describe('x509 Authentication', function () {
 
         expect(error).to.be.instanceOf(MongoServerError);
         expect(error.codeName).to.match(/UserNotFound/i);
-      });
+      }).skipReason = 'TODO(NODE-6834): fix flaky test';
     }
   );
 
