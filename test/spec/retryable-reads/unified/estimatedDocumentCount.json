@@ -195,7 +195,7 @@
           "object": "collection1",
           "name": "estimatedDocumentCount",
           "expectError": {
-            "isError": true
+            "isClientError": true
           }
         }
       ],
@@ -241,7 +241,7 @@
           "object": "collection0",
           "name": "estimatedDocumentCount",
           "expectError": {
-            "isError": true
+            "isClientError": true
           }
         }
       ],

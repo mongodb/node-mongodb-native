@@ -130,7 +130,7 @@ tests:
       - name: estimatedDocumentCount
         object: *collection0
         expectError:
-          isError: true
+          isClientError: true
     expectEvents:
       - client: *client0
         events:
