@@ -1,4 +1,4 @@
-'use strict';
+import { type KMSProviders } from './mongodb';
 
 const csfleKMSProviders = {
   aws: {
@@ -22,7 +22,7 @@ const csfleKMSProviders = {
   }
 };
 
-function getCSFLEKMSProviders() {
+export function getCSFLEKMSProviders(): KMSProviders {
   return JSON.parse(JSON.stringify(csfleKMSProviders));
 }
 
@@ -37,10 +37,7 @@ const keys = [
 ];
 
 const isInEnvironment = key => typeof process.env[key] === 'string' && process.env[key].length > 0;
-const missingKeys = keys.filter(key => !isInEnvironment(key)).join(',');
 
-module.exports = {
-  getCSFLEKMSProviders,
-  kmsCredentialsPresent: missingKeys === '',
-  missingKeys
-};
+export const missingKeys = keys.filter(key => !isInEnvironment(key)).join(',');
+
+export const kmsCredentialsPresent = missingKeys === '';
