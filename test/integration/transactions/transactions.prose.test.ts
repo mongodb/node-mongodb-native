@@ -15,7 +15,7 @@ describe('Transactions Spec Prose', function () {
 
   beforeEach(async function () {
     if (
-      semver.satisfies(this.configuration.version, '>4.2') &&
+      semver.satisfies(this.configuration.version, '<=4.2') &&
       this.configuration.topologyType === 'Sharded'
     ) {
       if (this.currentTest) {
