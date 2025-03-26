@@ -285,7 +285,7 @@ export class BulkWriteResult {
         if (i === 0) errmsg = errmsg + ' and ';
       }
 
-      return new WriteConcernError({ errmsg, code: MONGODB_ERROR_CODES.WriteConcernFailed });
+      return new WriteConcernError({ errmsg, code: MONGODB_ERROR_CODES.WriteConcernTimeout });
     }
   }
 

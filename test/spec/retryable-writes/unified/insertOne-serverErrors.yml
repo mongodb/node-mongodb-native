@@ -339,7 +339,7 @@ tests:
           - { _id: 2, x: 22 }
           - { _id: 3, x: 33 } # The write was still applied.
   -
-    description: 'InsertOne fails after WriteConcernError WriteConcernFailed'
+    description: 'InsertOne fails after WriteConcernError WriteConcernTimeout'
     operations:
       -
         name: failPoint
@@ -353,7 +353,6 @@ tests:
               failCommands: [ insert ]
               writeConcernError:
                 code: 64
-                codeName: WriteConcernFailed
                 errmsg: 'waiting for replication timed out'
                 errInfo:
                   wtimeout: true

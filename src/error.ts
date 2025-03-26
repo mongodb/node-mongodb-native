@@ -56,7 +56,8 @@ export const MONGODB_ERROR_CODES = Object.freeze({
   FailedToSatisfyReadPreference: 133,
   CursorNotFound: 43,
   LegacyNotPrimary: 10058,
-  WriteConcernFailed: 64,
+  // WriteConcernTimeout is WriteConcernFailed on pre-8.1 servers
+  WriteConcernTimeout: 64,
   NamespaceNotFound: 26,
   IllegalOperation: 20,
   MaxTimeMSExpired: 50,
