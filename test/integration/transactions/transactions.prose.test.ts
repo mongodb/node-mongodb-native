@@ -15,10 +15,23 @@ describe('Transactions Spec Prose', function () {
   beforeEach(async function () {
     started.length = 0;
     client = this.configuration.newClient({}, { monitorCommands: true });
+
+    await client
+      .db()
+      .collection('txn-test')
+      .drop()
+      .catch(() => null);
+    await client.db().createCollection('txn-test');
+
     client.on('commandStarted', ev => started.push(ev));
   });
 
   afterEach(async function () {
+    await client
+      .db()
+      .collection('txn-test')
+      .drop()
+      .catch(() => null);
     await client.close();
   });
 
