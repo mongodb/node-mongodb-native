@@ -1,5 +1,6 @@
 import type { Document } from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
+import { log } from '../cmap/connect';
 import { type CommandOptions, Connection } from '../cmap/connection';
 import {
   ConnectionPool,
@@ -48,6 +49,7 @@ import {
   maxWireVersion,
   type MongoDBNamespace,
   noop,
+  now,
   squashError,
   supportsRetryableWrites
 } from '../utils';
@@ -320,7 +322,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     this.incrementOperationCount();
     if (conn == null) {
       try {
+        log('starting checkout, ', now());
         conn = await this.pool.checkOut(options);
+        log('checked out', now());
+
         if (this.loadBalanced && isPinnableCommand(cmd, session)) {
           session?.pin(conn);
         }

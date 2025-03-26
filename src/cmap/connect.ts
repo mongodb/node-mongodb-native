@@ -35,12 +35,19 @@ import {
 /** @public */
 export type Stream = Socket | TLSSocket;
 
+export const log = (...args) => _log && console.error(...args);
+export let _log = false;
+export const enable = () => (_log = true);
+export const disable = () => (_log = false);
+
 export async function connect(options: ConnectionOptions): Promise<Connection> {
+  const start = performance.now();
   let connection: Connection | null = null;
   try {
     const socket = await makeSocket(options);
     connection = makeConnection(options, socket);
     await performInitialHandshake(connection, options);
+    log('established: ', performance.now() - start);
     return connection;
   } catch (error) {
     connection?.destroy();

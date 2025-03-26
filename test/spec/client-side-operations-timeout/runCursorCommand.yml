@@ -70,6 +70,12 @@ tests:
     runOnRequirements:
       - serverless: forbid
     operations:
+      # pre-populate the pool with a connection
+      - name: find
+        object: collection
+        arguments:
+          filter: { _id: 0 }
+        expectResult: []
       # Block find/getMore for 60ms.
       - name: failPoint
         object: testRunner
@@ -97,6 +103,9 @@ tests:
     expectEvents:
       - client: *client
         events:
+          # first find is from the initial find to populate the connection poo
+          - commandStartedEvent:
+              commandName: find
           - commandStartedEvent:
               commandName: find
               command:
