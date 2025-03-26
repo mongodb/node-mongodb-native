@@ -5,6 +5,8 @@ import { ClientEncryption, type MongoClient } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
+    os: '!win32',
+    topology: '!load-balanced',
     mongodb: '>=4.2.0'
   }
 };
@@ -25,7 +27,7 @@ describe('10. KMS TLS Tests', function () {
 
     clientEncryption = new ClientEncryption(client, {
       keyVaultNamespace,
-      kmsProviders: getCSFLEKMSProviders(),
+      kmsProviders: { aws: getCSFLEKMSProviders().aws },
       tlsOptions: {
         aws: {
           tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
@@ -47,6 +49,8 @@ describe('10. KMS TLS Tests', function () {
       error => error
     );
 
+    expect(error).to.exist;
+    expect(error, error.stack).to.have.property('cause').that.is.instanceOf(Error);
     expect(error.cause.message, error.stack).to.include('certificate has expired');
   });
 
@@ -58,6 +62,8 @@ describe('10. KMS TLS Tests', function () {
       error => error
     );
 
+    expect(error).to.exist;
+    expect(error, error.stack).to.have.property('cause').that.is.instanceOf(Error);
     expect(error.cause.message, error.stack).to.include('does not match certificate');
   });
 });
