@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as semver from 'semver';
 
 import { type MongoClient } from '../../mongodb';
 
@@ -13,6 +14,16 @@ describe('Transactions Spec Prose', function () {
   const started = [];
 
   beforeEach(async function () {
+    if (
+      semver.satisfies(this.configuration.version, '>4.2') &&
+      this.configuration.topologyType === 'Sharded'
+    ) {
+      if (this.currentTest) {
+        this.currentTest.skipReason =
+          'Transactions on sharded clusters are only supported after 4.2';
+      }
+      this.skip();
+    }
     started.length = 0;
     client = this.configuration.newClient({}, { monitorCommands: true });
 
