@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as semver from 'semver';
 
-import { type MongoClient } from '../../mongodb';
+import { type MongoClient, type ObjectId } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
@@ -51,15 +51,17 @@ describe('Transactions Spec Prose', function () {
       '1.0 Write concern not inherited from collection object inside transaction.',
       metadata,
       async () => {
+        let _id: ObjectId;
+        const collection = client.db().collection('txn-test', { writeConcern: { w: 0 } });
+
         await client.withSession(async session => {
           session.startTransaction();
-
-          const collection = client.db().collection('txn-test', { writeConcern: { w: 0 } });
-
-          await collection.insertOne({ n: 1 }, { session });
-
+          _id = (await collection.insertOne({ n: 1 }, { session })).insertedId;
           await session.commitTransaction();
         });
+
+        // keep finding until we get a result, otherwise the test will timeout.
+        while ((await collection.findOne({ _id })) == null);
 
         const insertStarted = started.find(ev => ev.commandName === 'insert');
         expect(insertStarted).to.not.have.nested.property('command.writeConcern');
