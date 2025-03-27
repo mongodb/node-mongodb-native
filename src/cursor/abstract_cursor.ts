@@ -867,7 +867,14 @@ export abstract class AbstractCursor<
     }
 
     this.cursorId = null;
-    this.documents?.clear();
+
+    if (this.documents && typeof this.documents.clear === 'function') {
+      this.documents.clear();
+    } else {
+      // If documents is the emptyGetMore object or doesn't have the clear() method
+      // Simply set it to null to force reinitialization
+      this.documents = null;
+    }
     this.timeoutContext?.clear();
     this.timeoutContext = undefined;
     this.isClosed = false;
