@@ -249,7 +249,7 @@
           "name": "estimatedDocumentCount",
           "object": "collection0",
           "expectError": {
-            "isError": true
+            "isClientError": true
           }
         }
       ],
