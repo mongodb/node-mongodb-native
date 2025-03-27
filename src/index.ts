@@ -53,6 +53,7 @@ export {
   MongoClientBulkWriteCursorError,
   MongoClientBulkWriteError,
   MongoClientBulkWriteExecutionError,
+  MongoClientClosedError,
   MongoCompatibilityError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
@@ -400,6 +401,7 @@ export type { GridFSBucketWriteStreamOptions, GridFSChunk } from './gridfs/uploa
 export type {
   Auth,
   DriverInfo,
+  IO,
   MongoClientEvents,
   MongoClientOptions,
   MongoClientPrivate,

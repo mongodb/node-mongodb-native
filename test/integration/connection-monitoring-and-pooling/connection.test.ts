@@ -25,7 +25,7 @@ import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/confi
 import { sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
-const commonConnectOptions = {
+const commonConnectOptions = client => ({
   id: 1,
   generation: 1,
   monitorCommands: false,
@@ -33,8 +33,8 @@ const commonConnectOptions = {
   loadBalanced: false,
   // Will be overridden by configuration options
   hostAddress: HostAddress.fromString('127.0.0.1:1'),
-  authProviders: new MongoClientAuthProviders()
-};
+  authProviders: new MongoClientAuthProviders(client)
+});
 
 describe('Connection', function () {
   beforeEach(
@@ -50,21 +50,31 @@ describe('Connection', function () {
     return setupDatabase(this.configuration);
   });
 
+  let client;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
+  });
+
   describe('Connection.command', function () {
     it('should execute a command against a server', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
         const connectOptions: ConnectionOptions = {
-          ...commonConnectOptions,
+          ...commonConnectOptions(client),
           connectionType: Connection,
           ...this.configuration.options,
           metadata: makeClientMetadata({ driverInfo: {} }),
-          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+          extendedMetadata: addContainerMetadata(client, makeClientMetadata({ driverInfo: {} }))
         };
 
         let conn;
         try {
-          conn = await connect(connectOptions);
+          conn = await connect(client, connectOptions);
           const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
           expect(hello).to.have.property('ok', 1);
         } finally {
@@ -77,17 +87,17 @@ describe('Connection', function () {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
         const connectOptions: ConnectionOptions = {
-          ...commonConnectOptions,
+          ...commonConnectOptions(client),
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
           metadata: makeClientMetadata({ driverInfo: {} }),
-          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+          extendedMetadata: addContainerMetadata(client, makeClientMetadata({ driverInfo: {} }))
         };
 
         let conn;
         try {
-          conn = await connect(connectOptions);
+          conn = await connect(client, connectOptions);
 
           const events: any[] = [];
           conn.on('commandStarted', event => events.push(event));
@@ -109,17 +119,17 @@ describe('Connection', function () {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
         const connectOptions: ConnectionOptions = {
-          ...commonConnectOptions,
+          ...commonConnectOptions(client),
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
           metadata: makeClientMetadata({ driverInfo: {} }),
-          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+          extendedMetadata: addContainerMetadata(client, makeClientMetadata({ driverInfo: {} }))
         };
 
         let conn;
         try {
-          conn = await connect(connectOptions);
+          conn = await connect(client, connectOptions);
 
           const toObjectSpy = sinon.spy(MongoDBResponse.prototype, 'toObject');
 
