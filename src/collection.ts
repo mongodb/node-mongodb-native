@@ -98,7 +98,11 @@ import { WriteConcern, type WriteConcernOptions } from './write_concern';
 /** @public */
 export interface ModifyResult<TSchema = Document> {
   value: WithId<TSchema> | null;
-  lastErrorObject?: Document;
+  lastErrorObject?: {
+    n: integer;
+    updatedExisting: boolean;
+    upserted: WithId<TSchema>;
+  };
   ok: 0 | 1;
 }
 
