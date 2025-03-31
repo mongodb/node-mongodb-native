@@ -61,7 +61,7 @@ describe('Transactions Spec Prose', function () {
         });
 
         // keep finding until we get a result, otherwise the test will timeout.
-        while ((await collection.findOne({ _id })) == null);
+        expect(await collection.findOne({ _id })).to.have.property('n', 1);
 
         const insertStarted = started.find(ev => ev.commandName === 'insert');
         expect(insertStarted).to.not.have.nested.property('command.writeConcern');
