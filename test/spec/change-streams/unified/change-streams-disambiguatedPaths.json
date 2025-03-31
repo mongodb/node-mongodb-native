@@ -26,6 +26,7 @@
   "runOnRequirements": [
     {
       "minServerVersion": "6.1.0",
+      "maxServerVersion": "8.1.0",
       "topologies": [
         "replicaset",
         "load-balanced",
