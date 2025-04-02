@@ -8,7 +8,7 @@ import { cryptShared } from './auto_encrypter.test';
 
 const { EJSON } = BSON;
 
-describe.only('crypt shared library', () => {
+describe('crypt shared library', () => {
   it('should fail if no library can be found in the search path and cryptSharedLibRequired is set', async function () {
     const env = {
       MONGODB_URI: this.configuration.url(),
