@@ -464,8 +464,7 @@ const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
       updateExpansions({
         VERSION: mongoVersion,
         TOPOLOGY: 'sharded_cluster',
-        AUTH: 'auth',
-        TEST_NPM_SCRIPT: 'check:csfle'
+        AUTH: 'auth'
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },

@@ -4,31 +4,31 @@ import * as fs from 'fs';
 import { dirname, resolve } from 'path';
 import * as sinon from 'sinon';
 
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import {
+  AutoEncrypter,
   BSON,
+  type CollectionInfo,
+  type DataKey,
   deserialize,
   type MongoClient,
+  MongocryptdManager,
   MongoError,
   MongoNetworkTimeoutError,
-  serialize
+  serialize,
+  StateMachine
 } from '../../mongodb';
+import { ClientSideEncryptionFilter } from '../../tools/runner/filters/client_encryption_filter';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const { EJSON } = BSON;
 const cryptShared = (status: 'enabled' | 'disabled') => () => {
-  const isPathPresent = (getEncryptExtraOptions().cryptSharedLibPath ?? '').length > 0;
+  const isCryptSharedLoaded = ClientSideEncryptionFilter.cryptShared != null;
 
   if (status === 'enabled') {
-    return isPathPresent ? true : 'Test requires the shared library.';
+    return isCryptSharedLoaded ? true : 'Test requires the shared library.';
   }
 
-  return isPathPresent ? 'Test requires that the crypt shared library NOT be present' : true;
+  return isCryptSharedLoaded ? 'Test requires that the crypt shared library NOT be present' : true;
 };
 
 const dataPath = (fileName: string) =>
@@ -51,7 +51,7 @@ const MOCK_MONGOCRYPTD_RESPONSE = readExtendedJsonToBuffer(dataPath(`mongocryptd
 const MOCK_KEYDOCUMENT_RESPONSE = readExtendedJsonToBuffer(dataPath(`key-document.json`));
 const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(dataPath(`kms-decrypt-reply.txt`));
 
-describe('crypt_shared library', function () {
+describe.only('crypt_shared library', function () {
   let client: MongoClient;
   let autoEncrypter: AutoEncrypter | undefined;
 
@@ -68,37 +68,24 @@ describe('crypt_shared library', function () {
 
   beforeEach(() => {
     sandbox.restore();
-    sandbox.stub(StateMachine.prototype, 'kmsRequest').callsFake(request => {
+    sandbox.stub(StateMachine.prototype, 'kmsRequest').callsFake(async request => {
       request.addResponse(MOCK_KMS_DECRYPT_REPLY);
-      return Promise.resolve();
     });
 
     sandbox
       .stub(StateMachine.prototype, 'fetchCollectionInfo')
-      .callsFake((client, ns, filter, callback) => {
-        callback(null, MOCK_COLLINFO_RESPONSE);
+      .callsFake(function (_client, __ns, ___filter) {
+        async function* iterator() {
+          yield deserialize(MOCK_COLLINFO_RESPONSE) as CollectionInfo;
+        }
+        return iterator();
       });
+
+    sandbox.stub(StateMachine.prototype, 'markCommand').resolves(MOCK_MONGOCRYPTD_RESPONSE);
 
     sandbox
-      .stub(StateMachine.prototype, 'markCommand')
-      .callsFake((client, ns, command, callback) => {
-        if (ENABLE_LOG_TEST) {
-          const response = bson.deserialize(MOCK_MONGOCRYPTD_RESPONSE);
-          response.schemaRequiresEncryption = false;
-
-          ENABLE_LOG_TEST = false; // disable test after run
-          callback(null, bson.serialize(response));
-          return;
-        }
-
-        callback(null, MOCK_MONGOCRYPTD_RESPONSE);
-      });
-
-    sandbox.stub(StateMachine.prototype, 'fetchKeys').callsFake((client, ns, filter, callback) => {
-      // mock data is already serialized, our action deals with the result of a cursor
-      const deserializedKey = deserialize(MOCK_KEYDOCUMENT_RESPONSE);
-      callback(null, [deserializedKey]);
-    });
+      .stub(StateMachine.prototype, 'fetchKeys')
+      .resolves([deserialize(MOCK_KEYDOCUMENT_RESPONSE) as DataKey]);
   });
 
   afterEach(() => {
@@ -134,14 +121,13 @@ describe('crypt_shared library', function () {
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
       async function () {
         let called = false;
-        StateMachine.prototype.markCommand.callsFake((client, ns, filter, callback) => {
+        StateMachine.prototype.markCommand.callsFake(async (_client, _ns, _filter) => {
           if (!called) {
             called = true;
-            callback(new Error('msg'));
-            return;
+            throw new Error('msg');
           }
 
-          callback(null, MOCK_MONGOCRYPTD_RESPONSE);
+          return MOCK_MONGOCRYPTD_RESPONSE;
         });
 
         autoEncrypter = new AutoEncrypter(client, {
@@ -169,14 +155,13 @@ describe('crypt_shared library', function () {
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
       async function () {
         let called = false;
-        StateMachine.prototype.markCommand.callsFake((client, ns, filter, callback) => {
+        StateMachine.prototype.markCommand.callsFake(async (_client, _ns, _filter) => {
           if (!called) {
             called = true;
-            callback(new MongoNetworkTimeoutError('msg'));
-            return;
+            throw new MongoNetworkTimeoutError('msg');
           }
 
-          callback(null, MOCK_MONGOCRYPTD_RESPONSE);
+          return MOCK_MONGOCRYPTD_RESPONSE;
         });
 
         autoEncrypter = new AutoEncrypter(client, {
@@ -203,14 +188,13 @@ describe('crypt_shared library', function () {
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
       async function () {
         let counter = 2;
-        StateMachine.prototype.markCommand.callsFake((client, ns, filter, callback) => {
+        StateMachine.prototype.markCommand.callsFake(async (_client, _ns, _filter) => {
           if (counter) {
             counter -= 1;
-            callback(new MongoNetworkTimeoutError('msg'));
-            return;
+            throw new MongoNetworkTimeoutError('msg');
           }
 
-          callback(null, MOCK_MONGOCRYPTD_RESPONSE);
+          return MOCK_MONGOCRYPTD_RESPONSE;
         });
 
         autoEncrypter = new AutoEncrypter(client, {
@@ -298,14 +282,13 @@ describe('crypt_shared library', function () {
       async function () {
         let called = false;
         const timeoutError = new MongoNetworkTimeoutError('msg');
-        StateMachine.prototype.markCommand.callsFake((client, ns, filter, callback) => {
+        StateMachine.prototype.markCommand.callsFake(async (_client, _ns, _filter) => {
           if (!called) {
             called = true;
-            callback(timeoutError);
-            return;
+            throw timeoutError;
           }
 
-          callback(null, MOCK_MONGOCRYPTD_RESPONSE);
+          return MOCK_MONGOCRYPTD_RESPONSE;
         });
 
         autoEncrypter = new AutoEncrypter(client, {
