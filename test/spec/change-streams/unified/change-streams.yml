@@ -115,8 +115,7 @@ tests:
                 "field": "array",
                 "newSize": 2
               }
-            ],
-            disambiguatedPaths: { $$unsetOrMatches: { $$exists: true } }
+            ]
           }
         }
 
@@ -723,7 +722,6 @@ tests:
             updatedFields: { x: 2 }
             removedFields: []
             truncatedArrays: { $$unsetOrMatches: { $$exists: true } }
-            disambiguatedPaths: { $$unsetOrMatches: { $$exists: true } }
       - name: iterateUntilDocumentOrError
         object: *changeStream0
         expectResult:
