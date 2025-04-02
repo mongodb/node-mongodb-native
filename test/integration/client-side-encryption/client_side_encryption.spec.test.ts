@@ -149,14 +149,6 @@ describe('Client Side Encryption (Unified)', function () {
         if (typeof shouldSkip === 'string') return shouldSkip;
       }
 
-      const flakyTests = {
-        'rewrap to azure:name1': 'TODO(NODE-6860): fix flaky tests'
-      };
-
-      const skipReason = flakyTests[description];
-
-      if (skipReason) return skipReason;
-
       return isServerless ? 'Unified CSFLE tests to not run on serverless' : false;
     }
   );

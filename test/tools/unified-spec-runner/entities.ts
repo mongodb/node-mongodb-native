@@ -28,7 +28,9 @@ import {
   type HostAddress,
   type Log,
   MongoClient,
+  type MongoClientOptions,
   type MongoCredentials,
+  type MongoDBLogWritable,
   ReadConcern,
   ReadPreference,
   SENSITIVE_COMMANDS,
@@ -126,7 +128,6 @@ export class UnifiedMongoClient extends MongoClient {
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
-  logCollector: { buffer: LogMessage[]; write: (log: Log) => void };
 
   ignoredEvents: string[];
   observeSensitiveCommands: boolean;
@@ -197,34 +198,44 @@ export class UnifiedMongoClient extends MongoClient {
     topology: 'MONGODB_LOG_TOPOLOGY'
   } as const;
 
-  constructor(uri: string, description: ClientEntity) {
-    const logCollector: { buffer: LogMessage[]; write: (log: Log) => void } = {
-      buffer: [],
-      write(log: Log): void {
-        const transformedLog = {
-          level: log.s,
-          component: log.c,
-          data: { ...log }
-        };
-
-        this.buffer.push(transformedLog);
-      }
-    };
-    const mongodbLogComponentSeverities = description.observeLogMessages;
-
-    super(uri, {
+  constructor(
+    uri: string,
+    description: ClientEntity,
+    config: {
+      loggingEnabled?: boolean;
+      setupLogging?: (options: Record<string, any>) => Record<string, any>;
+    }
+  ) {
+    const options: MongoClientOptions = {
       monitorCommands: true,
       __skipPingOnConnect: true,
-      mongodbLogComponentSeverities,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {}),
-      mongodbLogPath: logCollector,
       // TODO(NODE-5785): We need to increase the truncation length because signature.hash is a Buffer making hellos too long
       mongodbLogMaxDocumentLength: 1250
-    } as any);
+    };
+
+    if (description.observeLogMessages != null) {
+      options.mongodbLogComponentSeverities = description.observeLogMessages;
+      options.mongodbLogPath = {
+        buffer: [],
+        write(log: Log): void {
+          const transformedLog = {
+            level: log.s,
+            component: log.c,
+            data: { ...log }
+          };
+
+          this.buffer.push(transformedLog);
+        }
+      } as MongoDBLogWritable;
+    } else if (config.loggingEnabled) {
+      config.setupLogging?.(options);
+    }
+
+    super(uri, options);
 
     this.observedEventEmitter.on('error', () => null);
-    this.logCollector = logCollector;
     this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
     this.ignoredEvents = [
@@ -337,7 +348,7 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   get collectedLogs(): LogMessage[] {
-    return this.logCollector.buffer;
+    return (this.options.mongodbLogPath as unknown as { buffer: any[] })?.buffer ?? [];
   }
 }
 
@@ -578,7 +589,8 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         } else {
           uri = makeConnectionString(config.url({ useMultipleMongoses }), entity.client.uriOptions);
         }
-        const client = new UnifiedMongoClient(uri, entity.client);
+
+        const client = new UnifiedMongoClient(uri, entity.client, config);
         try {
           new EntityEventRegistry(client, entity.client, map).register();
           await client.connect();

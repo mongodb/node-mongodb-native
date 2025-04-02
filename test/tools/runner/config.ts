@@ -1,4 +1,7 @@
+import * as util from 'node:util';
+
 import { expect } from 'chai';
+import { type Context } from 'mocha';
 import ConnectionString from 'mongodb-connection-string-url';
 import * as qs from 'querystring';
 import * as url from 'url';
@@ -205,6 +208,11 @@ export class TestConfiguration {
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
     serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
+
+    if (this.loggingEnabled && !Object.hasOwn(serverOptions, 'mongodbLogPath')) {
+      serverOptions = this.setupLogging(serverOptions);
+    }
+
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {
       if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
@@ -426,6 +434,47 @@ export class TestConfiguration {
 
   makeAtlasTestConfiguration(): AtlasTestConfiguration {
     return new AtlasTestConfiguration(this.uri, this.context);
+  }
+
+  loggingEnabled = false;
+  logs = [];
+  /**
+   * Known flaky tests that we want to turn on logging for
+   * so that we can get a better idea of what is failing when it fails
+   */
+  testsToEnableLogging = [
+    'Client Side Encryption (Unified) namedKMS-rewrapManyDataKey rewrap to azure:name1',
+    'Server Discovery and Monitoring Prose Tests Connection Pool Management ensure monitors properly create and unpause connection pools when they discover servers',
+    'CSOT spec tests legacy timeouts behave correctly for retryable operations operation succeeds after one socket timeout - aggregate on collection'
+  ];
+
+  setupLogging(options) {
+    this.logs = [];
+    const write = log => this.logs.push(log);
+    options.mongodbLogPath = { write };
+    options.mongodbLogComponentSeverities = { default: 'trace' };
+    options.mongodbLogMaxDocumentLength = 300;
+    return options;
+  }
+
+  beforeEachLogging(ctx: Context) {
+    this.loggingEnabled = this.testsToEnableLogging.includes(ctx.currentTest.fullTitle());
+  }
+
+  afterEachLogging(ctx: Context) {
+    if (this.loggingEnabled && ctx.currentTest.state === 'failed') {
+      for (const log of this.logs) {
+        const logLine = util.inspect(log, {
+          compact: true,
+          breakLength: Infinity,
+          colors: true,
+          depth: 1000
+        });
+        console.error(logLine);
+      }
+    }
+    this.loggingEnabled = false;
+    this.logs = [];
   }
 }
 
