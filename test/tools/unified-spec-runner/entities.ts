@@ -203,7 +203,7 @@ export class UnifiedMongoClient extends MongoClient {
     description: ClientEntity,
     config: {
       loggingEnabled?: boolean;
-      setupLogging?: (options: Record<string, any>) => Record<string, any>;
+      setupLogging?: (options: Record<string, any>, id: string) => Record<string, any>;
     }
   ) {
     const options: MongoClientOptions = {
@@ -230,7 +230,7 @@ export class UnifiedMongoClient extends MongoClient {
         }
       } as MongoDBLogWritable;
     } else if (config.loggingEnabled) {
-      config.setupLogging?.(options);
+      config.setupLogging?.(options, description.id);
     }
 
     super(uri, options);

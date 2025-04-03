@@ -448,9 +448,9 @@ export class TestConfiguration {
     'CSOT spec tests legacy timeouts behave correctly for retryable operations operation succeeds after one socket timeout - aggregate on collection'
   ];
 
-  setupLogging(options) {
+  setupLogging(options: MongoClientOptions, s: string = '') {
     this.logs = [];
-    const write = log => this.logs.push(log);
+    const write = log => this.logs.push({ t: log.t, s, ...log });
     options.mongodbLogPath = { write };
     options.mongodbLogComponentSeverities = { default: 'trace' };
     options.mongodbLogMaxDocumentLength = 300;
