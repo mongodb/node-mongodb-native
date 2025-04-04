@@ -7,7 +7,7 @@ const path = require('path');
 const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
-const { LEGACY_HELLO_COMMAND, MongoCryptError } = require('../../mongodb');
+const { LEGACY_HELLO_COMMAND, MongoCryptError, MongoRuntimeError } = require('../../mongodb');
 const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 
@@ -1177,9 +1177,16 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .insertOne({ encrypted: 'test' })
           .catch(e => e);
 
-        expect(insertError).to.be.instanceOf(MongoServerSelectionError);
+        expect(insertError)
+          .to.be.instanceOf(MongoRuntimeError)
+          .to.match(
+            /Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn/
+          );
 
-        expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
+        const { cause } = insertError;
+
+        expect(cause).to.be.instanceOf(MongoServerSelectionError);
+        expect(cause, 'Error must contain ECONNREFUSED').to.satisfy(
           error =>
             /ECONNREFUSED/.test(error.message) ||
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
