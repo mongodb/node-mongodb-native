@@ -6,6 +6,7 @@ import type { Connection, ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
+import { type MongoClient } from '../mongo_client';
 import { MongoLoggableComponent } from '../mongo_logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import {
@@ -100,6 +101,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   override component = MongoLoggableComponent.TOPOLOGY;
   /** @internal */
   private rttSampler: RTTSampler;
+
+  get client(): MongoClient {
+    return this.server.client;
+  }
 
   constructor(server: Server, options: MonitorOptions) {
     super();
@@ -381,7 +386,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   // connecting does an implicit `hello`
   (async () => {
     const socket = await makeSocket(monitor.connectOptions);
-    const connection = makeConnection(monitor.connectOptions, socket);
+    const connection = makeConnection(monitor, monitor.connectOptions, socket);
     // The start time is after socket creation but before the handshake
     start = now();
     try {
@@ -487,6 +492,10 @@ export class RTTPinger {
   /** @internal */
   latestRtt?: number;
 
+  get client(): MongoClient {
+    return this.monitor.client;
+  }
+
   constructor(monitor: Monitor) {
     this.connection = undefined;
     this.cancellationToken = monitor.cancellationToken;
@@ -540,7 +549,7 @@ export class RTTPinger {
 
     const connection = this.connection;
     if (connection == null) {
-      connect(this.monitor.connectOptions).then(
+      connect(this, this.monitor.connectOptions).then(
         connection => {
           this.measureAndReschedule(start, connection);
         },

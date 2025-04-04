@@ -2,7 +2,6 @@ import * as events from 'node:events';
 
 import { expect } from 'chai';
 
-import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type Collection, type FindCursor, type MongoClient } from '../../mongodb';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
@@ -11,22 +10,32 @@ describe('MongoClient.close() Integration', () => {
 
   describe('Node.js resource: TLS File read', () => {
     describe('when client is connecting and reads an infinite TLS file', () => {
-      it.skip('the file read is interrupted by client.close()', async function () {
-        await runScriptAndGetProcessInfo(
-          'tls-file-read',
-          this.configuration,
-          async function run({ MongoClient, uri, expect }) {
-            const infiniteFile = '/dev/zero';
-            const client = new MongoClient(uri, { tls: true, tlsCertificateKeyFile: infiniteFile });
-            const connectPromise = client.connect();
-            expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-            await client.close();
-            expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-            const err = await connectPromise.catch(e => e);
-            expect(err).to.exist;
-          }
-        );
-      });
+      it(
+        'the file read is interrupted by client.close()',
+        { requires: { os: 'linux' } },
+        async function () {
+          await runScriptAndGetProcessInfo(
+            'tls-file-read',
+            this.configuration,
+            async function run({ mongodb: { MongoClient, MongoClientClosedError }, uri, expect }) {
+              const infiniteFile = '/dev/zero';
+              const client = new MongoClient(uri, {
+                tls: true,
+                tlsCertificateKeyFile: infiniteFile
+              });
+              const connectPromise = client.connect().then(
+                () => null,
+                e => e
+              );
+              expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+              await client.close();
+              const err = await connectPromise;
+              expect(err).to.be.instanceOf(MongoClientClosedError);
+              expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+            }
+          );
+        }
+      );
     });
   });
 
@@ -37,7 +46,7 @@ describe('MongoClient.close() Integration', () => {
       beforeEach(function () {
         if (process.env.AUTH === 'auth') {
           this.currentTest.skipReason = 'OIDC test environment requires auth disabled';
-          return this.skip();
+          this.skip();
         }
         tokenFileEnvCache = process.env.OIDC_TOKEN_FILE;
       });
@@ -47,26 +56,31 @@ describe('MongoClient.close() Integration', () => {
       });
 
       describe('when MongoClientAuthProviders is instantiated and token file read hangs', () => {
-        it.skip('the file read is interrupted by client.close()', async function () {
-          await runScriptAndGetProcessInfo(
-            'token-file-read',
-            this.configuration,
-            async function run({ MongoClient, uri, expect }) {
-              const infiniteFile = '/dev/zero';
-              process.env.OIDC_TOKEN_FILE = infiniteFile;
-              const options = {
-                authMechanismProperties: { ENVIRONMENT: 'test' },
-                authMechanism: 'MONGODB-OIDC'
-              };
-              const client = new MongoClient(uri, options);
-              const connectPromise = client.connect();
-              expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-              await client.close();
-              expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-              await connectPromise;
-            }
-          );
-        });
+        it(
+          'the file read is interrupted by client.close()',
+          { requires: { os: 'linux' } },
+          async function () {
+            await runScriptAndGetProcessInfo(
+              'token-file-read',
+              this.configuration,
+              async function run({ MongoClient, uri, expect }) {
+                const infiniteFile = '/dev/zero';
+                process.env.OIDC_TOKEN_FILE = infiniteFile;
+                const options = {
+                  authSource: '$external',
+                  authMechanismProperties: { ENVIRONMENT: 'test' },
+                  authMechanism: 'MONGODB-OIDC'
+                } as const;
+                const client = new MongoClient(uri, options);
+                const connectPromise = client.connect();
+                expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
+                await client.close();
+                expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
+                await connectPromise;
+              }
+            );
+          }
+        );
       });
     });
   });
@@ -581,6 +595,7 @@ describe('MongoClient.close() Integration', () => {
   describe('AutoEncrypter', () => {
     const metadata: MongoDBMetadataUI = {
       requires: {
+        os: '!win32',
         mongodb: '>=4.2.0',
         clientSideEncryption: true
       }
@@ -589,11 +604,11 @@ describe('MongoClient.close() Integration', () => {
     describe('KMS Request', () => {
       describe('Node.js resource: TLS file read', () => {
         describe('when KMSRequest reads an infinite TLS file', () => {
-          it.skip('the file read is interrupted by client.close()', metadata, async function () {
+          it('the file read is interrupted by client.close()', metadata, async function () {
             await runScriptAndGetProcessInfo(
               'tls-file-read-auto-encryption',
               this.configuration,
-              async function run({ MongoClient, uri, expect, mongodb }) {
+              async function run({ MongoClient, uri, expect, mongodb, getCSFLEKMSProviders }) {
                 const infiniteFile = '/dev/zero';
 
                 const kmsProviders = getCSFLEKMSProviders();
@@ -605,70 +620,21 @@ describe('MongoClient.close() Integration', () => {
 
                 const keyVaultClient = new MongoClient(uri);
                 await keyVaultClient.connect();
-                await keyVaultClient.db('keyvault').collection('datakeys');
+                await keyVaultClient.db('keyvault').createCollection('datakeys');
 
                 const clientEncryption = new mongodb.ClientEncryption(keyVaultClient, {
                   keyVaultNamespace: 'keyvault.datakeys',
-                  kmsProviders
+                  kmsProviders,
+                  tlsOptions: { aws: { tlsCAFile: infiniteFile } }
                 });
-                const dataKey = await clientEncryption.createDataKey(provider, { masterKey });
-
-                function getEncryptExtraOptions() {
-                  if (
-                    typeof process.env.CRYPT_SHARED_LIB_PATH === 'string' &&
-                    process.env.CRYPT_SHARED_LIB_PATH.length > 0
-                  ) {
-                    return { cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH };
-                  }
-                  return {};
-                }
-                const schemaMap = {
-                  'db.coll': {
-                    bsonType: 'object',
-                    encryptMetadata: {
-                      keyId: [dataKey]
-                    },
-                    properties: {
-                      a: {
-                        encrypt: {
-                          bsonType: 'int',
-                          algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
-                          keyId: [dataKey]
-                        }
-                      }
-                    }
-                  }
-                };
-                const encryptionOptions = {
-                  autoEncryption: {
-                    keyVaultNamespace: 'keyvault.datakeys',
-                    kmsProviders,
-                    extraOptions: getEncryptExtraOptions(),
-                    schemaMap,
-                    tlsOptions: { aws: { tlsCAFile: infiniteFile } }
-                  }
-                };
-
-                const encryptedClient = new MongoClient(uri, encryptionOptions);
-                await encryptedClient.connect();
 
                 expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-
-                const insertPromise = encryptedClient
-                  .db('db')
-                  .collection('coll')
-                  .insertOne({ a: 1 });
-
+                const dataKeyProm = clientEncryption.createDataKey(provider, { masterKey });
                 expect(process.getActiveResourcesInfo()).to.include('FSReqPromise');
-
                 await keyVaultClient.close();
-                await encryptedClient.close();
-
-                expect(process.getActiveResourcesInfo()).to.not.include('FSReqPromise');
-
-                const err = await insertPromise.catch(e => e);
-                expect(err).to.exist;
-                expect(err.errmsg).to.contain('Error in KMS response');
+                const error = await dataKeyProm.catch(error => error);
+                expect(error.message).to.equal('KMS request failed');
+                expect(error.cause.name).to.equal('MongoClientClosedError');
               }
             );
           });

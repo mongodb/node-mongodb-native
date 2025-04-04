@@ -1,19 +1,17 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
-import { Connection, GCPMachineWorkflow, MongoCredentials } from '../../../../mongodb';
+import { Connection, GCPMachineWorkflow, MongoCredentials, TokenCache } from '../../../../mongodb';
 
 describe('GCPMachineFlow', function () {
   describe('#execute', function () {
-    const workflow = new GCPMachineWorkflow(new TokenCache());
+    const workflow = new GCPMachineWorkflow({ io: {} }, new TokenCache());
 
     context('when TOKEN_RESOURCE is not set', function () {
-      const connection = sinon.createStubInstance(Connection);
-      const credentials = sinon.createStubInstance(MongoCredentials);
-
       it('throws an error', async function () {
+        const connection = sinon.createStubInstance(Connection);
+        const credentials = sinon.createStubInstance(MongoCredentials);
+        connection.parent = { client: { io: {} } };
         const error = await workflow.execute(connection, credentials).catch(error => error);
         expect(error.message).to.include('TOKEN_RESOURCE');
       });
@@ -32,7 +30,7 @@ describe('GCPMachineFlow', function () {
         this.beforeEach(function () {
           cache = new TokenCache();
           cache.put({ accessToken: 'test', expiresInSeconds: 7200 });
-          workflow = new GCPMachineWorkflow(cache);
+          workflow = new GCPMachineWorkflow({ io: {} }, cache);
         });
 
         it('sets the token on the connection', async function () {

@@ -24,8 +24,15 @@ import {
 } from '../mongodb';
 
 describe('MongoClient', function () {
+  const client: MongoClient = {
+    listeners: () => [],
+    on() {
+      return this;
+    }
+  } as unknown as MongoClient;
+
   it('programmatic options should override URI options', function () {
-    const options = parseOptions('mongodb://localhost:27017/test?directConnection=true', {
+    const options = parseOptions('mongodb://localhost:27017/test?directConnection=true', client, {
       directConnection: false
     });
     expect(options.directConnection).to.be.false;
@@ -37,7 +44,7 @@ describe('MongoClient', function () {
   it('should rename tls options correctly', function () {
     const filename = `${os.tmpdir()}/tmp.pem`;
     fs.closeSync(fs.openSync(filename, 'w'));
-    const options = parseOptions('mongodb://localhost:27017/?ssl=true', {
+    const options = parseOptions('mongodb://localhost:27017/?ssl=true', client, {
       tlsCertificateKeyFile: filename,
       tlsCAFile: filename,
       tlsCRLFile: filename,
@@ -72,34 +79,30 @@ describe('MongoClient', function () {
     expect(options).has.property('tls', true);
   });
 
-  const ALL_OPTIONS = {
+  const ALL_OPTIONS: MongoClientOptions = {
     appName: 'cats',
     auth: { username: 'username', password: 'password' },
     authMechanism: 'SCRAM-SHA-1',
     authMechanismProperties: { SERVICE_NAME: 'service name here' },
     authSource: 'refer to dbName',
-    autoEncryption: { bypassAutoEncryption: true },
+    autoEncryption: { bypassAutoEncryption: true, kmsProviders: { aws: {} } },
     checkKeys: true,
-    checkServerIdentity: false,
+    checkServerIdentity: () => undefined,
     compressors: 'snappy,zlib',
     connectTimeoutMS: 123,
     directConnection: true,
-    dbName: 'test',
     driverInfo: { name: 'MyDriver', platform: 'moonOS' },
     family: 6,
     fieldsAsRaw: { rawField: true },
     forceServerObjectId: true,
-    fsync: true,
     heartbeatFrequencyMS: 3,
     ignoreUndefined: false,
-    j: true,
-    journal: false,
+    journal: true,
     localThresholdMS: 3,
     maxConnecting: 5,
     maxIdleTimeMS: 3,
     maxPoolSize: 2,
     maxStalenessSeconds: 3,
-    minInternalBufferSize: 0,
     minPoolSize: 1,
     monitorCommands: true,
     noDelay: true,
@@ -132,7 +135,6 @@ describe('MongoClient', function () {
     w: 'majority',
     waitQueueTimeoutMS: 3,
     writeConcern: new WriteConcern(2),
-    wtimeout: 5,
     wtimeoutMS: 6,
     zlibCompressionLevel: 2
   };
@@ -140,12 +142,13 @@ describe('MongoClient', function () {
   it('should parse all options from the options object', function () {
     const options = parseOptions(
       'mongodb://localhost:27017/',
+      client,
       ALL_OPTIONS as unknown as MongoClientOptions
     );
     // Check consolidated options
     expect(options).has.property('writeConcern');
     expect(options.writeConcern).has.property('w', 2);
-    expect(options.writeConcern).has.property('j', true);
+    expect(options.writeConcern).has.property('journal', true);
   });
 
   const allURIOptions =
@@ -186,7 +189,7 @@ describe('MongoClient', function () {
     ].join('&');
 
   it('should parse all options from the URI string', function () {
-    const options = parseOptions(allURIOptions);
+    const options = parseOptions(allURIOptions, client);
     expect(options).has.property('zlibCompressionLevel', 2);
 
     expect(options).has.property('writeConcern');
@@ -215,13 +218,13 @@ describe('MongoClient', function () {
 
   it('should throw an error on unrecognized keys in the options object if they are defined', function () {
     expect(() =>
-      parseOptions('mongodb://localhost:27017/', {
+      parseOptions('mongodb://localhost:27017/', client, {
         randomopt: 'test'
       })
     ).to.throw(MongoParseError, 'option randomopt is not supported');
 
     expect(() =>
-      parseOptions('mongodb://localhost:27017/', {
+      parseOptions('mongodb://localhost:27017/', client, {
         randomopt: 'test',
         randomopt2: 'test'
       })
@@ -229,43 +232,43 @@ describe('MongoClient', function () {
   });
 
   it('srvHost saved to options for later resolution', function () {
-    const options = parseOptions('mongodb+srv://server.example.com/');
+    const options = parseOptions('mongodb+srv://server.example.com/', client);
     expect(options).has.property('srvHost', 'server.example.com');
     expect(options).has.property('tls', true);
   });
 
   it('ssl= can be used to set tls=false', function () {
-    const options = parseOptions('mongodb+srv://server.example.com/?ssl=false');
+    const options = parseOptions('mongodb+srv://server.example.com/?ssl=false', client);
     expect(options).has.property('srvHost', 'server.example.com');
     expect(options).has.property('tls', false);
   });
 
   it('tls= can be used to set tls=false', function () {
-    const options = parseOptions('mongodb+srv://server.example.com/?tls=false');
+    const options = parseOptions('mongodb+srv://server.example.com/?tls=false', client);
     expect(options).has.property('srvHost', 'server.example.com');
     expect(options).has.property('tls', false);
   });
 
   it('ssl= can be used to set tls=true', function () {
-    const options = parseOptions('mongodb+srv://server.example.com/?ssl=true');
+    const options = parseOptions('mongodb+srv://server.example.com/?ssl=true', client);
     expect(options).has.property('srvHost', 'server.example.com');
     expect(options).has.property('tls', true);
   });
 
   it('tls= can be used to set tls=true', function () {
-    const options = parseOptions('mongodb+srv://server.example.com/?tls=true');
+    const options = parseOptions('mongodb+srv://server.example.com/?tls=true', client);
     expect(options).has.property('srvHost', 'server.example.com');
     expect(options).has.property('tls', true);
   });
 
   it('supports ReadPreference option in url', function () {
-    const options = parseOptions('mongodb://localhost/?readPreference=nearest');
+    const options = parseOptions('mongodb://localhost/?readPreference=nearest', client);
     expect(options.readPreference).to.be.an.instanceof(ReadPreference);
     expect(options.readPreference.mode).to.equal('nearest');
   });
 
   it('supports ReadPreference option in object plain', function () {
-    const options = parseOptions('mongodb://localhost', {
+    const options = parseOptions('mongodb://localhost', client, {
       readPreference: { mode: 'nearest', hedge: { enabled: true } }
     });
     expect(options.readPreference).to.be.an.instanceof(ReadPreference);
@@ -275,7 +278,7 @@ describe('MongoClient', function () {
 
   it('supports ReadPreference option in object proper class', function () {
     const tag = { rack: 1 };
-    const options = parseOptions('mongodb://localhost', {
+    const options = parseOptions('mongodb://localhost', client, {
       readPreference: new ReadPreference('nearest', [tag], { maxStalenessSeconds: 20 })
     });
     expect(options.readPreference).to.be.an.instanceof(ReadPreference);
@@ -295,13 +298,13 @@ describe('MongoClient', function () {
   });
 
   it('supports WriteConcern option in url', function () {
-    const options = parseOptions('mongodb://localhost/?w=3');
+    const options = parseOptions('mongodb://localhost/?w=3', client);
     expect(options.writeConcern).to.be.an.instanceof(WriteConcern);
     expect(options.writeConcern.w).to.equal(3);
   });
 
   it('supports WriteConcern option in object plain', function () {
-    const options = parseOptions('mongodb://localhost', {
+    const options = parseOptions('mongodb://localhost', client, {
       writeConcern: { w: 'majority', wtimeoutMS: 300 }
     });
     expect(options.writeConcern).to.be.an.instanceof(WriteConcern);
@@ -310,7 +313,7 @@ describe('MongoClient', function () {
   });
 
   it('supports WriteConcern option in object proper class', function () {
-    const options = parseOptions('mongodb://localhost', {
+    const options = parseOptions('mongodb://localhost', client, {
       writeConcern: new WriteConcern(5, 200, true)
     });
     expect(options.writeConcern).to.be.an.instanceof(WriteConcern);
@@ -320,13 +323,13 @@ describe('MongoClient', function () {
   });
 
   it('supports ReadConcern option in url', function () {
-    const options = parseOptions('mongodb://localhost/?readConcernLevel=available');
+    const options = parseOptions('mongodb://localhost/?readConcernLevel=available', client);
     expect(options.readConcern).to.be.an.instanceof(ReadConcern);
     expect(options.readConcern.level).to.equal('available');
   });
 
   it('supports ReadConcern option in object plain', function () {
-    const options = parseOptions('mongodb://localhost', {
+    const options = parseOptions('mongodb://localhost', client, {
       readConcern: { level: 'linearizable' }
     });
     expect(options.readConcern).to.be.an.instanceof(ReadConcern);
@@ -334,7 +337,7 @@ describe('MongoClient', function () {
   });
 
   it('supports ReadConcern option in object proper class', function () {
-    const options = parseOptions('mongodb://localhost', {
+    const options = parseOptions('mongodb://localhost', client, {
       readConcern: new ReadConcern('snapshot')
     });
     expect(options.readConcern).to.be.an.instanceof(ReadConcern);
@@ -342,7 +345,7 @@ describe('MongoClient', function () {
   });
 
   it('supports Credentials option in url', function () {
-    const options = parseOptions('mongodb://USERNAME:PASSWORD@localhost/');
+    const options = parseOptions('mongodb://USERNAME:PASSWORD@localhost/', client);
     expect(options.credentials).to.be.an.instanceof(MongoCredentials);
     expect(options.credentials.username).to.equal('USERNAME');
     expect(options.credentials.password).to.equal('PASSWORD');
@@ -350,7 +353,7 @@ describe('MongoClient', function () {
   });
 
   it('supports Credentials option in url with db', function () {
-    const options = parseOptions('mongodb://USERNAME:PASSWORD@localhost/foo');
+    const options = parseOptions('mongodb://USERNAME:PASSWORD@localhost/foo', client);
     expect(options.credentials).to.be.an.instanceof(MongoCredentials);
     expect(options.credentials.username).to.equal('USERNAME');
     expect(options.credentials.password).to.equal('PASSWORD');
@@ -358,7 +361,7 @@ describe('MongoClient', function () {
   });
 
   it('supports Credentials option in auth object plain', function () {
-    const options = parseOptions('mongodb://localhost/', {
+    const options = parseOptions('mongodb://localhost/', client, {
       auth: { username: 'USERNAME', password: 'PASSWORD' }
     });
     expect(options.credentials).to.be.an.instanceof(MongoCredentials);
@@ -367,7 +370,7 @@ describe('MongoClient', function () {
   });
 
   it('transforms tlsAllowInvalidCertificates and tlsAllowInvalidHostnames correctly', function () {
-    const optionsTrue = parseOptions('mongodb://localhost/', {
+    const optionsTrue = parseOptions('mongodb://localhost/', client, {
       tlsAllowInvalidCertificates: true,
       tlsAllowInvalidHostnames: true
     });
@@ -375,14 +378,14 @@ describe('MongoClient', function () {
     expect(optionsTrue.checkServerIdentity).to.be.a('function');
     expect(optionsTrue.checkServerIdentity()).to.equal(undefined);
 
-    const optionsFalse = parseOptions('mongodb://localhost/', {
+    const optionsFalse = parseOptions('mongodb://localhost/', client, {
       tlsAllowInvalidCertificates: false,
       tlsAllowInvalidHostnames: false
     });
     expect(optionsFalse.rejectUnauthorized).to.equal(true);
     expect(optionsFalse.checkServerIdentity).to.equal(undefined);
 
-    const optionsUndefined = parseOptions('mongodb://localhost/');
+    const optionsUndefined = parseOptions('mongodb://localhost/', client);
     expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
     expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
   });
@@ -401,45 +404,54 @@ describe('MongoClient', function () {
     });
 
     it('correctly sets the cert and key if only tlsCertificateKeyFile is provided', function () {
-      const optsFromObject = parseOptions('mongodb://localhost/', {
+      const optsFromObject = parseOptions('mongodb://localhost/', client, {
         tlsCertificateKeyFile: 'testCertKey.pem'
       });
       expect(optsFromObject).to.have.property('tlsCertificateKeyFile', 'testCertKey.pem');
 
-      const optsFromUri = parseOptions('mongodb://localhost?tlsCertificateKeyFile=testCertKey.pem');
+      const optsFromUri = parseOptions(
+        'mongodb://localhost?tlsCertificateKeyFile=testCertKey.pem',
+        client
+      );
       expect(optsFromUri).to.have.property('tlsCertificateKeyFile', 'testCertKey.pem');
     });
   });
 
   it('throws an error if tls and ssl parameters are not all set to the same value', () => {
-    expect(() => parseOptions('mongodb://localhost?tls=true&ssl=false')).to.throw(
+    expect(() => parseOptions('mongodb://localhost?tls=true&ssl=false', client)).to.throw(
       'All values of tls/ssl must be the same.'
     );
-    expect(() => parseOptions('mongodb://localhost?tls=false&ssl=true')).to.throw(
+    expect(() => parseOptions('mongodb://localhost?tls=false&ssl=true', client)).to.throw(
       'All values of tls/ssl must be the same.'
     );
   });
 
   it('correctly sets tls if tls and ssl parameters are all set to the same value', () => {
-    expect(parseOptions('mongodb://localhost?ssl=true&tls=true')).to.have.property('tls', true);
-    expect(parseOptions('mongodb://localhost?ssl=false&tls=false')).to.have.property('tls', false);
+    expect(parseOptions('mongodb://localhost?ssl=true&tls=true', client)).to.have.property(
+      'tls',
+      true
+    );
+    expect(parseOptions('mongodb://localhost?ssl=false&tls=false', client)).to.have.property(
+      'tls',
+      false
+    );
   });
 
   it('transforms tlsInsecure correctly', function () {
-    const optionsTrue = parseOptions('mongodb://localhost/', {
+    const optionsTrue = parseOptions('mongodb://localhost/', client, {
       tlsInsecure: true
     });
     expect(optionsTrue.rejectUnauthorized).to.equal(false);
     expect(optionsTrue.checkServerIdentity).to.be.a('function');
     expect(optionsTrue.checkServerIdentity()).to.equal(undefined);
 
-    const optionsFalse = parseOptions('mongodb://localhost/', {
+    const optionsFalse = parseOptions('mongodb://localhost/', client, {
       tlsInsecure: false
     });
     expect(optionsFalse.rejectUnauthorized).to.equal(true);
     expect(optionsFalse.checkServerIdentity).to.equal(undefined);
 
-    const optionsUndefined = parseOptions('mongodb://localhost/');
+    const optionsUndefined = parseOptions('mongodb://localhost/', client);
     expect(optionsUndefined.rejectUnauthorized).to.equal(undefined);
     expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
   });
@@ -495,7 +507,7 @@ describe('MongoClient', function () {
       const validVersions = Object.values(ServerApiVersion);
       expect(validVersions.length).to.be.at.least(1);
       for (const version of validVersions) {
-        const result = parseOptions('mongodb://localhost/', {
+        const result = parseOptions('mongodb://localhost/', client, {
           serverApi: version
         });
         expect(result).to.have.property('serverApi').deep.equal({ version });
@@ -506,7 +518,7 @@ describe('MongoClient', function () {
       const validVersions = Object.values(ServerApiVersion);
       expect(validVersions.length).to.be.at.least(1);
       for (const version of validVersions) {
-        const result = parseOptions('mongodb://localhost/', {
+        const result = parseOptions('mongodb://localhost/', client, {
           serverApi: { version }
         });
         expect(result).to.have.property('serverApi').deep.equal({ version });
@@ -515,7 +527,7 @@ describe('MongoClient', function () {
 
     it('is not supported as a client option when it is an invalid string', function () {
       expect(() =>
-        parseOptions('mongodb://localhost/', {
+        parseOptions('mongodb://localhost/', client, {
           serverApi: 'bad'
         })
       ).to.throw(/^Invalid server API version=bad;/);
@@ -523,7 +535,7 @@ describe('MongoClient', function () {
 
     it('is not supported as a client option when it is a number', function () {
       expect(() =>
-        parseOptions('mongodb://localhost/', {
+        parseOptions('mongodb://localhost/', client, {
           serverApi: 1
         })
       ).to.throw(/^Invalid `serverApi` property;/);
@@ -531,7 +543,7 @@ describe('MongoClient', function () {
 
     it('is not supported as a client option when it is an object without a specified version', function () {
       expect(() =>
-        parseOptions('mongodb://localhost/', {
+        parseOptions('mongodb://localhost/', client, {
           serverApi: {}
         })
       ).to.throw(/^Invalid `serverApi` property;/);
@@ -539,19 +551,19 @@ describe('MongoClient', function () {
 
     it('is not supported as a client option when it is an object with an invalid specified version', function () {
       expect(() =>
-        parseOptions('mongodb://localhost/', {
+        parseOptions('mongodb://localhost/', client, {
           serverApi: { version: 1 }
         })
       ).to.throw(/^Invalid server API version=1;/);
       expect(() =>
-        parseOptions('mongodb://localhost/', {
+        parseOptions('mongodb://localhost/', client, {
           serverApi: { version: 'bad' }
         })
       ).to.throw(/^Invalid server API version=bad;/);
     });
 
     it('is not supported as a URI option even when it is a valid ServerApiVersion string', function () {
-      expect(() => parseOptions('mongodb://localhost/?serverApi=1')).to.throw(
+      expect(() => parseOptions('mongodb://localhost/?serverApi=1', client)).to.throw(
         'URI cannot contain `serverApi`, it can only be passed to the client'
       );
     });
@@ -638,27 +650,27 @@ describe('MongoClient', function () {
 
   context('when loadBalanced=true is in the URI', function () {
     it('sets the option', function () {
-      const options = parseOptions('mongodb://a/?loadBalanced=true');
+      const options = parseOptions('mongodb://a/?loadBalanced=true', client);
       expect(options.loadBalanced).to.be.true;
     });
 
     it('errors with multiple hosts', function () {
       const parse = () => {
-        parseOptions('mongodb://a,b/?loadBalanced=true');
+        parseOptions('mongodb://a,b/?loadBalanced=true', client);
       };
       expect(parse).to.throw(/single host/);
     });
 
     it('errors with a replicaSet option', function () {
       const parse = () => {
-        parseOptions('mongodb://a/?loadBalanced=true&replicaSet=test');
+        parseOptions('mongodb://a/?loadBalanced=true&replicaSet=test', client);
       };
       expect(parse).to.throw(/replicaSet/);
     });
 
     it('errors with a directConnection option', function () {
       const parse = () => {
-        parseOptions('mongodb://a/?loadBalanced=true&directConnection=true');
+        parseOptions('mongodb://a/?loadBalanced=true&directConnection=true', client);
       };
       expect(parse).to.throw(/directConnection/);
     });
@@ -667,14 +679,14 @@ describe('MongoClient', function () {
   context('when loadBalanced is in the options object', function () {
     it('errors when the option is true', function () {
       const parse = () => {
-        parseOptions('mongodb://a/', { loadBalanced: true });
+        parseOptions('mongodb://a/', client, { loadBalanced: true });
       };
       expect(parse).to.throw(/URI/);
     });
 
     it('errors when the option is false', function () {
       const parse = () => {
-        parseOptions('mongodb://a/', { loadBalanced: false });
+        parseOptions('mongodb://a/', client, { loadBalanced: false });
       };
       expect(parse).to.throw(/URI/);
     });
@@ -723,7 +735,7 @@ describe('MongoClient', function () {
   });
 
   it('srvServiceName should error if it is too long', async () => {
-    const options = parseOptions('mongodb+srv://localhost.a.com', {
+    const options = parseOptions('mongodb+srv://localhost.a.com', client, {
       srvServiceName: 'a'.repeat(255)
     });
     const error = await resolveSRVRecord(options).catch(error => error);
@@ -731,7 +743,7 @@ describe('MongoClient', function () {
   });
 
   it('srvServiceName should not error if it is greater than 15 characters as long as the DNS query limit is not surpassed', async () => {
-    const options = parseOptions('mongodb+srv://localhost.a.com', {
+    const options = parseOptions('mongodb+srv://localhost.a.com', client, {
       srvServiceName: 'a'.repeat(16)
     });
     const error = await resolveSRVRecord(options).catch(error => error);

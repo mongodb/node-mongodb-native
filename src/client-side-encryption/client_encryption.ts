@@ -226,7 +226,7 @@ export class ClientEncryption {
       keyMaterial
     });
 
-    const stateMachine = new StateMachine({
+    const stateMachine = new StateMachine(this, {
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
       socketOptions: autoSelectSocketOptions(this._client.s.options)
@@ -295,7 +295,7 @@ export class ClientEncryption {
     }
     const filterBson = serialize(filter);
     const context = this._mongoCrypt.makeRewrapManyDataKeyContext(filterBson, keyEncryptionKeyBson);
-    const stateMachine = new StateMachine({
+    const stateMachine = new StateMachine(this, {
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
       socketOptions: autoSelectSocketOptions(this._client.s.options)
@@ -699,7 +699,7 @@ export class ClientEncryption {
     const valueBuffer = serialize({ v: value });
     const context = this._mongoCrypt.makeExplicitDecryptionContext(valueBuffer);
 
-    const stateMachine = new StateMachine({
+    const stateMachine = new StateMachine(this, {
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
       socketOptions: autoSelectSocketOptions(this._client.s.options)
@@ -783,7 +783,7 @@ export class ClientEncryption {
     }
 
     const valueBuffer = serialize({ v: value });
-    const stateMachine = new StateMachine({
+    const stateMachine = new StateMachine(this, {
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
       socketOptions: autoSelectSocketOptions(this._client.s.options)
