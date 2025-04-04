@@ -30,7 +30,6 @@ import {
   MongoClient,
   type MongoClientOptions,
   type MongoCredentials,
-  type MongoDBLogWritable,
   ReadConcern,
   ReadPreference,
   SENSITIVE_COMMANDS,
@@ -128,6 +127,7 @@ export class UnifiedMongoClient extends MongoClient {
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
+  logCollector?: { buffer: LogMessage[]; write: (log: Log) => void };
 
   ignoredEvents: string[];
   observeSensitiveCommands: boolean;
@@ -215,9 +215,11 @@ export class UnifiedMongoClient extends MongoClient {
       mongodbLogMaxDocumentLength: 1250
     };
 
+    let logCollector: { buffer: LogMessage[]; write: (log: Log) => void } | undefined;
+
     if (description.observeLogMessages != null) {
       options.mongodbLogComponentSeverities = description.observeLogMessages;
-      options.mongodbLogPath = {
+      logCollector = {
         buffer: [],
         write(log: Log): void {
           const transformedLog = {
@@ -228,13 +230,14 @@ export class UnifiedMongoClient extends MongoClient {
 
           this.buffer.push(transformedLog);
         }
-      } as MongoDBLogWritable;
+      };
+      options.mongodbLogPath = logCollector;
     } else if (config.loggingEnabled) {
       config.setupLogging?.(options, description.id);
     }
 
     super(uri, options);
-
+    this.logCollector = logCollector;
     this.observedEventEmitter.on('error', () => null);
     this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
@@ -348,7 +351,7 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   get collectedLogs(): LogMessage[] {
-    return (this.options.mongodbLogPath as unknown as { buffer: any[] })?.buffer ?? [];
+    return this.logCollector?.buffer ?? [];
   }
 }
 
