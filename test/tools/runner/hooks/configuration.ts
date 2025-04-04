@@ -22,6 +22,7 @@ import { NodeVersionFilter } from '../filters/node_version_filter';
 import { OSFilter } from '../filters/os_filter';
 import { ServerlessFilter } from '../filters/serverless_filter';
 import { type Filter } from '../filters/filter';
+import { type Context } from 'mocha';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -211,8 +212,19 @@ const beforeAllPluginImports = () => {
   require('mocha-sinon');
 };
 
+async function beforeEachLogging(this: Context) {
+  if (this.currentTest == null) return;
+  this.configuration.beforeEachLogging(this);
+}
+
+async function afterEachLogging(this: Context) {
+  if (this.currentTest == null) return;
+  this.configuration.afterEachLogging(this);
+}
+
 export const mochaHooks = {
   beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
-  beforeEach: [testSkipBeforeEachHook],
+  beforeEach: [testSkipBeforeEachHook, beforeEachLogging],
+  afterEach: [afterEachLogging],
   afterAll: [cleanUpMocksAfterHook]
 };

@@ -48,7 +48,7 @@ describe('EntityEventRegistry', function () {
       };
       const entitesMap = new EntitiesMap();
       const uri = 'mongodb://127.0.0.1:27017';
-      const client = new UnifiedMongoClient(uri, clientEntity);
+      const client = new UnifiedMongoClient(uri, clientEntity, {});
       const registry = new EntityEventRegistry(client, clientEntity, entitesMap);
 
       before(function () {
@@ -120,7 +120,7 @@ describe('EntityEventRegistry', function () {
       const clientEntity = { id: 'client0' };
       const entitesMap = new EntitiesMap();
       const uri = 'mongodb://127.0.0.1:27017';
-      const client = new UnifiedMongoClient(uri, clientEntity);
+      const client = new UnifiedMongoClient(uri, clientEntity, {});
       const registry = new EntityEventRegistry(client, clientEntity, entitesMap);
 
       before(function () {
