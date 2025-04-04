@@ -1345,7 +1345,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: SSL, value: ssl}
       - func: install dependencies
