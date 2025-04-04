@@ -1,4 +1,5 @@
 import * as util from 'node:util';
+import * as types from 'node:util/types';
 
 import { expect } from 'chai';
 import { type Context } from 'mocha';
@@ -9,6 +10,7 @@ import * as url from 'url';
 import {
   type AuthMechanism,
   HostAddress,
+  Long,
   MongoClient,
   type MongoClientOptions,
   ObjectId,
@@ -466,13 +468,23 @@ export class TestConfiguration {
   afterEachLogging(ctx: Context) {
     if (this.loggingEnabled && ctx.currentTest.state === 'failed') {
       for (const log of this.logs) {
-        const logLine = util.inspect(log, {
-          compact: true,
-          breakLength: Infinity,
-          colors: true,
-          depth: 1000
-        });
-        console.error(logLine);
+        console.error(
+          JSON.stringify(
+            log,
+            function (_, value) {
+              if (types.isMap(value)) return { Map: Array.from(value.entries()) };
+              if (types.isSet(value)) return { Set: Array.from(value.values()) };
+              if (types.isNativeError(value)) return { [value.name]: util.inspect(value) };
+              if (typeof value === 'bigint') return new Long(value).toExtendedJSON();
+              if (typeof value === 'symbol') return `Symbol(${value.description})`;
+              if (Buffer.isBuffer(value))
+                return { [value.constructor.name]: Buffer.prototype.base64Slice.call(value) };
+              if (value === undefined) return { undefined: 'key was set but equal to undefined' };
+              return value;
+            },
+            0
+          )
+        );
       }
     }
     this.loggingEnabled = false;
