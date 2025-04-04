@@ -120,7 +120,7 @@ BASE_TASKS.push({
   commands: [
     updateExpansions({
       VERSION: 'latest',
-      TOPOLOGY: 'sharded_cluster',
+      TOPOLOGY: 'server',
       AUTH: 'noauth',
       SSL: 'ssl'
     }),
