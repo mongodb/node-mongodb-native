@@ -9,6 +9,7 @@ import * as url from 'url';
 
 import {
   type AuthMechanism,
+  Double,
   HostAddress,
   Long,
   MongoClient,
@@ -475,8 +476,13 @@ export class TestConfiguration {
               if (types.isMap(value)) return { Map: Array.from(value.entries()) };
               if (types.isSet(value)) return { Set: Array.from(value.values()) };
               if (types.isNativeError(value)) return { [value.name]: util.inspect(value) };
-              if (typeof value === 'bigint') return new Long(value).toExtendedJSON();
+              if (typeof value === 'bigint') return { bigint: new Long(value).toExtendedJSON() };
               if (typeof value === 'symbol') return `Symbol(${value.description})`;
+              if (typeof value === 'number') {
+                if (Number.isNaN(value) || !Number.isFinite(value) || Object.is(value, -0))
+                  // @ts-expect-error: toExtendedJSON internal on double but not on long
+                  return { number: new Double(value).toExtendedJSON() };
+              }
               if (Buffer.isBuffer(value))
                 return { [value.constructor.name]: Buffer.prototype.base64Slice.call(value) };
               if (value === undefined) return { undefined: 'key was set but equal to undefined' };
