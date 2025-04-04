@@ -237,8 +237,8 @@ export class UnifiedMongoClient extends MongoClient {
     }
 
     super(uri, options);
-    this.logCollector = logCollector;
     this.observedEventEmitter.on('error', () => null);
+    this.logCollector = logCollector;
     this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
     this.ignoredEvents = [
