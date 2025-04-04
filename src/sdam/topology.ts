@@ -490,6 +490,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
   }
 
+  closeCheckedOutConnections() {
+    for (const server of this.s.servers.values()) {
+      return server.closeCheckedOutConnections();
+    }
+  }
+
   /** Close this topology */
   close(): void {
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
@@ -497,7 +503,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     for (const server of this.s.servers.values()) {
-      destroyServer(server, this);
+      closeServer(server, this);
     }
 
     this.s.servers.clear();
@@ -791,12 +797,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 }
 
 /** Destroys a server, and removes all event listeners from the instance */
-function destroyServer(server: Server, topology: Topology) {
+function closeServer(server: Server, topology: Topology) {
   for (const event of LOCAL_SERVER_EVENTS) {
     server.removeAllListeners(event);
   }
 
-  server.destroy();
+  server.close();
   topology.emitAndLog(
     Topology.SERVER_CLOSED,
     new ServerClosedEvent(topology.s.id, server.description.address)
@@ -903,7 +909,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
 
     // prepare server for garbage collection
     if (server) {
-      destroyServer(server, topology);
+      closeServer(server, topology);
     }
   }
 }

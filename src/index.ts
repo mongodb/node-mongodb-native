@@ -45,6 +45,7 @@ export {
 export { ClientEncryption } from './client-side-encryption/client_encryption';
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
+  ConnectionPoolClosedError,
   MongoAPIError,
   MongoAWSError,
   MongoAzureError,
@@ -53,6 +54,7 @@ export {
   MongoClientBulkWriteCursorError,
   MongoClientBulkWriteError,
   MongoClientBulkWriteExecutionError,
+  MongoClientClosedError,
   MongoCompatibilityError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,

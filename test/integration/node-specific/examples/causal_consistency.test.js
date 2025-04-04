@@ -31,8 +31,8 @@ describe('examples(causal-consistency):', function () {
   it('supports causal consistency', async function () {
     const session = client.startSession({ causalConsistency: true });
 
-    collection.insertOne({ darmok: 'jalad' }, { session });
-    collection.updateOne({ darmok: 'jalad' }, { $set: { darmok: 'tanagra' } }, { session });
+    await collection.insertOne({ darmok: 'jalad' }, { session });
+    await collection.updateOne({ darmok: 'jalad' }, { $set: { darmok: 'tanagra' } }, { session });
 
     const results = await collection.find({}, { session }).toArray();
 

@@ -17,6 +17,7 @@ import {
 } from '../constants';
 import {
   type AnyError,
+  ConnectionPoolClosedError,
   type MongoError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
@@ -486,6 +487,16 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         connection.onError(new PoolClearedOnNetworkError(this));
         this.checkIn(connection);
       }
+    }
+  }
+
+  closeCheckedOutConnections() {
+    for (const conn of this.checkedOut) {
+      this.emitAndLog(
+        ConnectionPool.CONNECTION_CLOSED,
+        new ConnectionClosedEvent(this, conn, 'poolClosed')
+      );
+      conn.onError(new ConnectionPoolClosedError());
     }
   }
 
