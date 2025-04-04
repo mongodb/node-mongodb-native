@@ -11,6 +11,7 @@ import {
   HostAddress,
   MongoClient,
   type MongoClientOptions,
+  ObjectId,
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
@@ -448,7 +449,8 @@ export class TestConfiguration {
     'CSOT spec tests legacy timeouts behave correctly for retryable operations operation succeeds after one socket timeout - aggregate on collection'
   ];
 
-  setupLogging(options: MongoClientOptions, s: string = '') {
+  setupLogging(options: MongoClientOptions, s?: string) {
+    s ??= new ObjectId().toString();
     this.logs = [];
     const write = log => this.logs.push({ t: log.t, s, ...log });
     options.mongodbLogPath = { write };
