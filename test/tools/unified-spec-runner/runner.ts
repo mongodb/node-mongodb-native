@@ -319,23 +319,28 @@ export function runUnifiedSuite(
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const [index, test] of unifiedSuite.tests.entries()) {
-        it(String(test.description === '' ? `Test ${index}` : test.description), async function () {
-          if (expectRuntimeError) {
-            const error = await runUnifiedTest(this, unifiedSuite, test, skipFilter).catch(
-              error => error
-            );
-            expect(error).to.satisfy(value => {
-              return (
-                value instanceof AssertionError ||
-                value instanceof MongoServerError ||
-                value instanceof TypeError ||
-                value instanceof MongoParseError
-              );
-            });
-          } else {
-            await runUnifiedTest(this, unifiedSuite, test, skipFilter);
-          }
-        });
+        for (let i = 0; i < 1000; ++i) {
+          it(
+            String(test.description === '' ? `Test ${index}` : test.description) + i,
+            async function () {
+              if (expectRuntimeError) {
+                const error = await runUnifiedTest(this, unifiedSuite, test, skipFilter).catch(
+                  error => error
+                );
+                expect(error).to.satisfy(value => {
+                  return (
+                    value instanceof AssertionError ||
+                    value instanceof MongoServerError ||
+                    value instanceof TypeError ||
+                    value instanceof MongoParseError
+                  );
+                });
+              } else {
+                await runUnifiedTest(this, unifiedSuite, test, skipFilter);
+              }
+            }
+          );
+        }
       }
     });
   }
