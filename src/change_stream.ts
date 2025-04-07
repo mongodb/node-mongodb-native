@@ -521,8 +521,12 @@ export interface UpdateDescription<TSchema extends Document = Document> {
    *   }
    * ```
    *
-   * This field is only present when there are ambiguous paths that are updated as a part of the update event and `showExpandedEvents`
+   * This field is only present when there are ambiguous paths that are updated as a part of the update event.
+   *
+   * On \<8.2.0 servers, this field is only present when `showExpandedEvents` is set to true.
    * is enabled for the change stream.
+   *
+   * On 8.2.0+ servers, this field is present for update events regardless of whether `showExpandedEvents` is enabled.
    * @sinceServerVersion 6.1.0
    */
   disambiguatedPaths?: Document;
