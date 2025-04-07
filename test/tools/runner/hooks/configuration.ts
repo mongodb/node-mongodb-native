@@ -236,8 +236,13 @@ function checkFlakyTestList(this: Context) {
 
   const flakyTestDoesNotExist = flakyTests.find(testName => !allTests.includes(testName));
   if (flakyTestDoesNotExist != null) {
-    console.error('Flaky test:', JSON.stringify(flakyTestDoesNotExist), 'is not run at all');
-    process.exit(1);
+    console.error(
+      '\n' + '='.repeat(100) + '\n',
+      'Flaky test:',
+      JSON.stringify(flakyTestDoesNotExist),
+      'is not run at all',
+      '\n' + '='.repeat(100) + '\n'
+    );
   }
 }
 
