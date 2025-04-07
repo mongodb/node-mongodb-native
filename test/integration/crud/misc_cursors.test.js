@@ -1873,9 +1873,9 @@ describe('Cursor', function () {
 
     const error = await rejectedEarlyBecauseClientClosed;
     if (this.configuration.topologyType === 'LoadBalanced') {
-      expect(error).to.be.null;
-    } else {
       expect(error).to.be.instanceOf(ConnectionPoolClosedError);
+    } else {
+      expect(error).to.be.null;
     }
   });
 
