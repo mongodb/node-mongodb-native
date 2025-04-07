@@ -143,8 +143,8 @@ functions:
         working_dir: src
         binary: bash
         env:
-          AUTH: 'auth'
-          SSL: 'ssl'
+          AUTH: "auth"
+          SSL: "ssl"
         add_expansions_to_env: true
         args:
           - .evergreen/run-serverless-tests.sh
@@ -454,6 +454,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: regular
         working_dir: "src"
@@ -469,6 +472,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: assume-role
         working_dir: "src"
@@ -484,9 +490,12 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: ec2
-          IS_EC2: 'true'
+          IS_EC2: "true"
         working_dir: src
         binary: bash
         args:
@@ -500,6 +509,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: env-creds
         working_dir: "src"
@@ -515,6 +527,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: session-creds
         working_dir: "src"
@@ -530,6 +545,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
           AWS_ROLE_SESSION_NAME: test
@@ -546,6 +564,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
         working_dir: "src"
@@ -562,6 +583,9 @@ functions:
           - MONGODB_AWS_SDK
           - PROJECT_DIRECTORY
           - MONGODB_BINARIES
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
         working_dir: "src"
@@ -601,7 +625,7 @@ functions:
           - DRIVERS_TOOLS
         env:
           AWS_CREDENTIAL_TYPE: env-creds
-          MONGODB_AWS_SDK: 'true'
+          MONGODB_AWS_SDK: "true"
         working_dir: "src"
         binary: bash
         args:
@@ -734,12 +758,12 @@ functions:
           - .evergreen/docker/alpine.sh
 
 tasks:
-  - name: 'test-atlas-data-lake'
+  - name: "test-atlas-data-lake"
     tags: ["datalake", "mongohouse"]
     commands:
-      - func: 'install dependencies'
-      - func: 'bootstrap mongohoused'
-      - func: 'run data lake tests'
+      - func: "install dependencies"
+      - func: "bootstrap mongohoused"
+      - func: "run data lake tests"
 
   - name: "test-serverless"
     tags: ["serverless"]
@@ -840,7 +864,8 @@ tasks:
             ENVIRONMENT: k8s
             K8S_VARIANT: eks
             SCRIPT: run-oidc-prose-tests.sh
-          include_expansions_in_env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
+          include_expansions_in_env:
+            ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
           args:
             - .evergreen/run-oidc-tests-k8s.sh
 
@@ -858,7 +883,8 @@ tasks:
             ENVIRONMENT: k8s
             K8S_VARIANT: gke
             SCRIPT: run-oidc-prose-tests.sh
-          include_expansions_in_env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
+          include_expansions_in_env:
+            ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
           args:
             - .evergreen/run-oidc-tests-k8s.sh
 
@@ -876,7 +902,8 @@ tasks:
             ENVIRONMENT: k8s
             K8S_VARIANT: aks
             SCRIPT: run-oidc-prose-tests.sh
-          include_expansions_in_env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
+          include_expansions_in_env:
+            ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
           args:
             - .evergreen/run-oidc-tests-k8s.sh
 
@@ -1143,11 +1170,12 @@ task_groups:
       - command: subprocess.exec
         params:
           binary: bash
-          include_expansions_in_env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
+          include_expansions_in_env:
+            ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"]
           env:
             MONGODB_VERSION: "8.0"
           args:
-          - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
