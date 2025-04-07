@@ -365,14 +365,10 @@ export class AutoEncrypter {
       const client = await this._mongocryptdClient.connect();
       return client;
     } catch (error) {
-      const { message } = error;
-      if (message && (message.match(/timed out after/) || message.match(/ENOTFOUND/))) {
-        throw new MongoRuntimeError(
-          'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
-          { cause: error }
-        );
-      }
-      throw error;
+      throw new MongoRuntimeError(
+        'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
+        { cause: error }
+      );
     }
   }
 
