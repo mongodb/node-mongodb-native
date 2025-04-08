@@ -1,19 +1,17 @@
 #!/bin/bash
 # set -o xtrace   # Write all commands first to stderr
-set -o errexit  # Exit the script with error if any of the commands fail
+set -o errexit # Exit the script with error if any of the commands fail
 
 # Supported/used environment variables:
 #       AUTH                    Set to enable authentication. Defaults to "noauth"
 #       SSL                     Set to enable SSL. Defaults to "nossl"
 #       MONGODB_URI             Set the suggested connection MONGODB_URI (including credentials and topology info)
 #       MARCH                   Machine Architecture. Defaults to lowercase uname -m
-#       TEST_NPM_SCRIPT         Script to npm run. Defaults to "integration-coverage"
 #       SKIP_DEPS               Skip installing dependencies
 #       TEST_CSFLE              Set to enforce running csfle tests
 
 AUTH=${AUTH:-noauth}
 MONGODB_URI=${MONGODB_URI:-}
-TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:integration-coverage}
 COMPRESSOR=${COMPRESSOR:-}
 SKIP_DEPS=${SKIP_DEPS:-true}
 
@@ -28,8 +26,8 @@ fi
 # ssl setup
 SSL=${SSL:-nossl}
 if [ "$SSL" != "nossl" ]; then
-   export SSL_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
-   export SSL_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
+  export SSL_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
+  export SSL_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
 fi
 
 # run tests
@@ -60,4 +58,4 @@ export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
 export TEST_CSFLE=${TEST_CSFLE}
 export COMPRESSOR=${COMPRESSOR}
-npm run "${TEST_NPM_SCRIPT}"
+npm run check:integration-coverage
