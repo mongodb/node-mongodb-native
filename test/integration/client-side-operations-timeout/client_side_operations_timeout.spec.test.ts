@@ -17,10 +17,7 @@ const skippedTests = {
     'TODO(DRIVERS-2970): see modified test in unified-csot-node-specs',
   'timeoutMS is refreshed for getMore - failure':
     'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs',
-  'timeoutMS applies to full resume attempt in a next call': 'TODO(DRIVERS-3006)',
-  'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set': 'TODO(DRIVERS-3018)',
-  'socketTimeoutMS is ignored if timeoutMS is set - dropIndex on collection':
-    'TODO(NODE-6862): fix flaky test'
+  'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set': 'TODO(DRIVERS-3018)'
 };
 
 describe('CSOT spec tests', function () {
