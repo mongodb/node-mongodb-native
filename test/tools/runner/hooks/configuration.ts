@@ -22,6 +22,8 @@ import { NodeVersionFilter } from '../filters/node_version_filter';
 import { OSFilter } from '../filters/os_filter';
 import { ServerlessFilter } from '../filters/serverless_filter';
 import { type Filter } from '../filters/filter';
+import { type Context } from 'mocha';
+import { flakyTests } from '../flaky';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -211,8 +213,42 @@ const beforeAllPluginImports = () => {
   require('mocha-sinon');
 };
 
+async function beforeEachLogging(this: Context) {
+  if (this.currentTest == null) return;
+  this.configuration.beforeEachLogging(this);
+}
+
+async function afterEachLogging(this: Context) {
+  if (this.currentTest == null) return;
+  this.configuration.afterEachLogging(this);
+}
+
+function checkFlakyTestList(this: Context) {
+  const allTests: string[] = [];
+
+  const stack = [this.test.parent];
+  while (stack.length) {
+    const suite = stack.pop();
+    allTests.push(...suite.tests.map(test => test.fullTitle()));
+    stack.push(...suite.suites);
+  }
+  allTests.reverse(); // Doesn't matter but when debugging easier to see this in the expected order.
+
+  const flakyTestDoesNotExist = flakyTests.find(testName => !allTests.includes(testName));
+  if (flakyTestDoesNotExist != null) {
+    console.error(
+      '\n' + '='.repeat(100) + '\n',
+      'Flaky test:',
+      JSON.stringify(flakyTestDoesNotExist),
+      'is not run at all',
+      '\n' + '='.repeat(100) + '\n'
+    );
+  }
+}
+
 export const mochaHooks = {
-  beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
-  beforeEach: [testSkipBeforeEachHook],
+  beforeAll: [beforeAllPluginImports, testConfigBeforeHook, checkFlakyTestList],
+  beforeEach: [testSkipBeforeEachHook, beforeEachLogging],
+  afterEach: [afterEachLogging],
   afterAll: [cleanUpMocksAfterHook]
 };

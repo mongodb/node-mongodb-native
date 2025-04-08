@@ -1,19 +1,27 @@
+import * as util from 'node:util';
+import * as types from 'node:util/types';
+
 import { expect } from 'chai';
+import { type Context } from 'mocha';
 import ConnectionString from 'mongodb-connection-string-url';
 import * as qs from 'querystring';
 import * as url from 'url';
 
 import {
   type AuthMechanism,
+  Double,
   HostAddress,
+  Long,
   MongoClient,
   type MongoClientOptions,
+  ObjectId,
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
 } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
+import { flakyTests } from './flaky';
 
 interface ProxyParams {
   proxyHost?: string;
@@ -205,6 +213,11 @@ export class TestConfiguration {
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
     serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
+
+    if (this.loggingEnabled && !Object.hasOwn(serverOptions, 'mongodbLogPath')) {
+      serverOptions = this.setupLogging(serverOptions);
+    }
+
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {
       if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
@@ -426,6 +439,59 @@ export class TestConfiguration {
 
   makeAtlasTestConfiguration(): AtlasTestConfiguration {
     return new AtlasTestConfiguration(this.uri, this.context);
+  }
+
+  loggingEnabled = false;
+  logs = [];
+  /**
+   * Known flaky tests that we want to turn on logging for
+   * so that we can get a better idea of what is failing when it fails
+   */
+  testsToEnableLogging = flakyTests;
+
+  setupLogging(options: MongoClientOptions, id?: string) {
+    id ??= new ObjectId().toString();
+    this.logs = [];
+    const write = log => this.logs.push({ t: log.t, id, ...log });
+    options.mongodbLogPath = { write };
+    options.mongodbLogComponentSeverities = { default: 'trace' };
+    options.mongodbLogMaxDocumentLength = 300;
+    return options;
+  }
+
+  beforeEachLogging(ctx: Context) {
+    this.loggingEnabled = this.testsToEnableLogging.includes(ctx.currentTest.fullTitle());
+  }
+
+  afterEachLogging(ctx: Context) {
+    if (this.loggingEnabled && ctx.currentTest.state === 'failed') {
+      for (const log of this.logs) {
+        console.error(
+          JSON.stringify(
+            log,
+            function (_, value) {
+              if (types.isMap(value)) return { Map: Array.from(value.entries()) };
+              if (types.isSet(value)) return { Set: Array.from(value.values()) };
+              if (types.isNativeError(value)) return { [value.name]: util.inspect(value) };
+              if (typeof value === 'bigint') return { bigint: new Long(value).toExtendedJSON() };
+              if (typeof value === 'symbol') return `Symbol(${value.description})`;
+              if (typeof value === 'number') {
+                if (Number.isNaN(value) || !Number.isFinite(value) || Object.is(value, -0))
+                  // @ts-expect-error: toExtendedJSON internal on double but not on long
+                  return { number: new Double(value).toExtendedJSON() };
+              }
+              if (Buffer.isBuffer(value))
+                return { [value.constructor.name]: Buffer.prototype.base64Slice.call(value) };
+              if (value === undefined) return { undefined: 'key was set but equal to undefined' };
+              return value;
+            },
+            0
+          )
+        );
+      }
+    }
+    this.loggingEnabled = false;
+    this.logs = [];
   }
 }
 
