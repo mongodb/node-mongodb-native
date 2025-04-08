@@ -397,6 +397,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: regular
         working_dir: src
@@ -411,6 +414,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: assume-role
         working_dir: src
@@ -425,6 +431,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: ec2
           IS_EC2: 'true'
@@ -440,6 +449,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: env-creds
         working_dir: src
@@ -454,6 +466,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: session-creds
         working_dir: src
@@ -468,6 +483,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
           AWS_ROLE_SESSION_NAME: test
@@ -483,6 +501,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
         working_dir: src
@@ -498,6 +519,9 @@ functions:
           - MONGODB_AWS_SDK
           - PROJECT_DIRECTORY
           - MONGODB_BINARIES
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
         working_dir: src

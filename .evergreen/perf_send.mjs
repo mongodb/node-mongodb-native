@@ -23,7 +23,8 @@ const {
 const orderSplit = revision_order_id?.split('_');
 const order = Number(orderSplit ? orderSplit[orderSplit.length - 1] : undefined);
 
-if (!Number.isInteger(order)) throw new Error(`Failed to parse integer from order, revision_order_id=${revision_order_id}`);
+if (!Number.isInteger(order))
+  throw new Error(`Failed to parse integer from order, revision_order_id=${revision_order_id}`);
 
 const results = JSON.parse(await fs.readFile(resultFile, 'utf8'));
 
@@ -53,7 +54,7 @@ const resp = await fetch(API_PATH, {
 const responseText = await resp.text();
 let jsonResponse = null;
 try {
-  jsonResponse = JSON.parse(responseText)
+  jsonResponse = JSON.parse(responseText);
 } catch (cause) {
   console.log('Failed to parse json response', cause);
 }
