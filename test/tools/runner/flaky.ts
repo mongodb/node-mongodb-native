@@ -28,5 +28,6 @@ export const flakyTests = [
   'Client Side Encryption Prose Tests 16. Rewrap Case 1: Rewrap with separate ClientEncryption should rewrap data key from local to kmip',
   'Client Side Encryption Prose Tests 16. Rewrap Case 1: Rewrap with separate ClientEncryption should rewrap data key from local to local',
   'Client Side Encryption Prose Tests 16. Rewrap Case 2: RewrapManyDataKeyOpts.provider is not optional when provider field is missing raises an error',
-  'Transactions Convenient API Spec Unified Tests transaction-options withTransaction inherits transaction options from defaultTransactionOptions'
+  'Transactions Convenient API Spec Unified Tests transaction-options withTransaction inherits transaction options from defaultTransactionOptions',
+  'CSOT spec tests timeoutMS behaves correctly for GridFS download operations timeoutMS applied to entire download, not individual parts'
 ];
