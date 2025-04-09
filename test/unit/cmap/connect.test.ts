@@ -24,7 +24,7 @@ const CONNECT_DEFAULTS = {
   generation: 1,
   monitorCommands: false,
   metadata: {} as ClientMetadata,
-  extendedMetadata: addContainerMetadata({} as ClientMetadata),
+  extendedMetadata: addContainerMetadata({}, {} as ClientMetadata),
   loadBalanced: false
 };
 
@@ -74,7 +74,7 @@ describe('Connect Tests', function () {
         }
       });
 
-      await connect(test.connectOptions);
+      await connect({ io: {} }, test.connectOptions);
 
       expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
       expect(whatHappened).to.have.property('saslStart', true);
@@ -99,7 +99,7 @@ describe('Connect Tests', function () {
         }
       });
 
-      await connect(test.connectOptions);
+      await connect({ io: {} }, test.connectOptions);
 
       expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
       expect(whatHappened).to.not.have.property('saslStart');
@@ -124,11 +124,11 @@ describe('Connect Tests', function () {
         socketTimeoutMS: 15000
       };
 
-      connection = await connect(connectOptions);
+      connection = await connect({ io: {} }, connectOptions);
     });
 
     afterEach(async () => {
-      connection.destroy();
+      connection?.destroy();
       await mock.cleanup();
     });
 
@@ -154,13 +154,16 @@ describe('Connect Tests', function () {
           });
         });
 
-        const error = await connect({
-          ...connectOptions,
-          // Ensure these timeouts do not fire first
-          socketTimeoutMS: 5000,
-          connectTimeoutMS: 5000,
-          cancellationToken
-        }).catch(error => error);
+        const error = await connect(
+          { io: {} },
+          {
+            ...connectOptions,
+            // Ensure these timeouts do not fire first
+            socketTimeoutMS: 5000,
+            connectTimeoutMS: 5000,
+            cancellationToken
+          }
+        ).catch(error => error);
 
         expect(error, error.stack).to.match(/connection establishment was cancelled/);
       });
@@ -171,7 +174,7 @@ describe('Connect Tests', function () {
         // set no response handler for mock server, effectively black hole requests
         server.setMessageHandler(() => null);
 
-        const error = await connect({ ...connectOptions, connectTimeoutMS: 5 }).catch(
+        const error = await connect({ io: {} }, { ...connectOptions, connectTimeoutMS: 5 }).catch(
           error => error
         );
 
@@ -181,9 +184,10 @@ describe('Connect Tests', function () {
   });
 
   it('should emit `MongoNetworkError` for network errors', async function () {
-    const error = await connect({
-      hostAddress: new HostAddress('non-existent:27018')
-    }).catch(e => e);
+    const error = await connect(
+      { io: {} },
+      { hostAddress: new HostAddress('non-existent:27018') }
+    ).catch(e => e);
     expect(error).to.be.instanceOf(MongoNetworkError);
   });
 
@@ -200,7 +204,7 @@ describe('Connect Tests', function () {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              extendedMetadata: addContainerMetadata({} as ClientMetadata)
+              extendedMetadata: addContainerMetadata({}, {} as ClientMetadata)
             }
           };
         });
@@ -232,7 +236,7 @@ describe('Connect Tests', function () {
               connection: {},
               options: {
                 ...CONNECT_DEFAULTS,
-                extendedMetadata: addContainerMetadata({ appName: longAppName })
+                extendedMetadata: addContainerMetadata({}, { appName: longAppName })
               }
             };
             const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
@@ -250,7 +254,7 @@ describe('Connect Tests', function () {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              extendedMetadata: addContainerMetadata({ env: { name: 'aws.lambda' } })
+              extendedMetadata: addContainerMetadata({}, { env: { name: 'aws.lambda' } })
             }
           };
         });

@@ -15,7 +15,7 @@ import {
   MongoParseError
 } from './error';
 import {
-  MongoClient,
+  type MongoClient,
   type MongoClientOptions,
   type MongoOptions,
   type PkFactory,
@@ -241,14 +241,9 @@ class CaseInsensitiveMap<Value = any> extends Map<string, Value> {
 
 export function parseOptions(
   uri: string,
-  mongoClient: MongoClient | MongoClientOptions | undefined = undefined,
+  mongoClient: MongoClient,
   options: MongoClientOptions = {}
 ): MongoOptions {
-  if (mongoClient != null && !(mongoClient instanceof MongoClient)) {
-    options = mongoClient;
-    mongoClient = undefined;
-  }
-
   // validate BSONOptions
   if (options.useBigInt64 && typeof options.promoteLongs === 'boolean' && !options.promoteLongs) {
     throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
@@ -542,7 +537,7 @@ export function parseOptions(
 
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
 
-  mongoOptions.extendedMetadata = addContainerMetadata(mongoOptions.metadata).then(
+  mongoOptions.extendedMetadata = addContainerMetadata(mongoClient, mongoOptions.metadata).then(
     undefined,
     squashError
   ); // rejections will be handled later

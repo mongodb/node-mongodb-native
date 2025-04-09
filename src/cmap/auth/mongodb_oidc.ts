@@ -1,5 +1,6 @@
 import type { Document } from '../../bson';
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
+import { type MongoClient } from '../../mongo_client';
 import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
@@ -115,11 +116,11 @@ export interface Workflow {
 }
 
 /** @internal */
-export const OIDC_WORKFLOWS: Map<EnvironmentName, () => Workflow> = new Map();
-OIDC_WORKFLOWS.set('test', () => new TokenMachineWorkflow(new TokenCache()));
-OIDC_WORKFLOWS.set('azure', () => new AzureMachineWorkflow(new TokenCache()));
-OIDC_WORKFLOWS.set('gcp', () => new GCPMachineWorkflow(new TokenCache()));
-OIDC_WORKFLOWS.set('k8s', () => new K8SMachineWorkflow(new TokenCache()));
+export const OIDC_WORKFLOWS: Map<EnvironmentName, (client: MongoClient) => Workflow> = new Map();
+OIDC_WORKFLOWS.set('test', client => new TokenMachineWorkflow(client, new TokenCache()));
+OIDC_WORKFLOWS.set('azure', client => new AzureMachineWorkflow(client, new TokenCache()));
+OIDC_WORKFLOWS.set('gcp', client => new GCPMachineWorkflow(client, new TokenCache()));
+OIDC_WORKFLOWS.set('k8s', client => new K8SMachineWorkflow(client, new TokenCache()));
 
 /**
  * OIDC auth provider.

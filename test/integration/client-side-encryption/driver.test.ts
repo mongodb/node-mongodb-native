@@ -791,7 +791,7 @@ describe('CSOT', function () {
   });
 
   describe('State machine', function () {
-    const stateMachine = new StateMachine({} as any);
+    const stateMachine = new StateMachine({} as any, {} as any);
 
     const timeoutContext = () => ({
       timeoutContext: new CSOTTimeoutContext({
