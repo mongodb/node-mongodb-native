@@ -11,7 +11,7 @@ const { Writable } = require('stream');
 const { once, on } = require('events');
 const { setTimeout } = require('timers');
 const { ReadPreference } = require('../../mongodb');
-const { ServerType } = require('../../mongodb');
+const { ServerType, ConnectionPoolClosedError } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
 
 describe('Cursor', function () {
@@ -1872,7 +1872,11 @@ describe('Cursor', function () {
     expect(cursor).to.have.property('closed', true);
 
     const error = await rejectedEarlyBecauseClientClosed;
-    expect(error).to.be.null; // TODO(NODE-6632): This should throw again after the client signal aborts the in-progress next call
+    if (this.configuration.topologyType === 'LoadBalanced') {
+      expect(error).to.be.instanceOf(ConnectionPoolClosedError);
+    } else {
+      expect(error).to.be.null;
+    }
   });
 
   it('shouldAwaitData', {
