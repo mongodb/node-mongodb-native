@@ -7,7 +7,7 @@ const path = require('path');
 const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
-const { LEGACY_HELLO_COMMAND, MongoCryptError } = require('../../mongodb');
+const { LEGACY_HELLO_COMMAND, MongoCryptError, MongoRuntimeError } = require('../../mongodb');
 const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 
@@ -1177,9 +1177,16 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .insertOne({ encrypted: 'test' })
           .catch(e => e);
 
-        expect(insertError).to.be.instanceOf(MongoServerSelectionError);
+        expect(insertError)
+          .to.be.instanceOf(MongoRuntimeError)
+          .to.match(
+            /Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn/
+          );
 
-        expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
+        const { cause } = insertError;
+
+        expect(cause).to.be.instanceOf(MongoServerSelectionError);
+        expect(cause, 'Error must contain ECONNREFUSED').to.satisfy(
           error =>
             /ECONNREFUSED/.test(error.message) ||
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
@@ -1349,11 +1356,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         expect(error).to.be.instanceOf(MongoServerSelectionError, /'Server selection timed out'/i);
       });
     });
-  });
-
-  // TODO(NODE-3151): Implement kms prose tests
-  describe('KMS TLS Tests', () => {
-    it.skip('TBD', () => {}).skipReason = 'TODO(NODE-3151): Implement "KMS TLS Tests"';
   });
 
   /**
@@ -2315,7 +2317,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       kmip: {},
       local: undefined
     };
-    let client1, client2;
+    /** @type {import('../../mongodb').MongoClient} */
+    let client1;
+    /** @type {import('../../mongodb').MongoClient} */
+    let client2;
 
     describe('Case 1: Rewrap with separate ClientEncryption', function () {
       /**
@@ -2346,11 +2351,15 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           `should rewrap data key from ${srcProvider} to ${dstProvider}`,
           metadata,
           async function () {
+            client1.mongoLogger?.trace('client', 'dropping datakeys collection');
+
             // Step 1. Drop the collection ``keyvault.datakeys``
             await client1
               .db('keyvault')
               .dropCollection('datakeys')
               .catch(() => null);
+
+            client1.mongoLogger?.trace('client', 'dropped datakeys collection');
 
             // Step 2. Create a ``ClientEncryption`` object named ``clientEncryption1``
             const clientEncryption1 = new ClientEncryption(client1, {
@@ -2366,16 +2375,23 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               bson: BSON
             });
 
+            client1.mongoLogger?.trace('client', 'clientEncryption1.createDataKey started');
+
             // Step 3. Call ``clientEncryption1.createDataKey`` with ``srcProvider``
             const keyId = await clientEncryption1.createDataKey(srcProvider, {
               masterKey: masterKeys[srcProvider]
             });
+
+            client1.mongoLogger?.trace('client', 'clientEncryption1.createDataKey finished');
+            client1.mongoLogger?.trace('client', 'clientEncryption1.encrypt started');
 
             // Step 4. Call ``clientEncryption1.encrypt`` with the value "test"
             const cipherText = await clientEncryption1.encrypt('test', {
               keyId,
               algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
             });
+
+            client1.mongoLogger?.trace('client', 'clientEncryption1.encrypt finished');
 
             // Step 5. Create a ``ClientEncryption`` object named ``clientEncryption2``
             const clientEncryption2 = new ClientEncryption(client2, {
@@ -2391,6 +2407,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               bson: BSON
             });
 
+            client2.mongoLogger?.trace('client', 'clientEncryption2.rewrapManyDataKey started');
+
             // Step 6. Call ``clientEncryption2.rewrapManyDataKey`` with an empty ``filter``
             const rewrapManyDataKeyResult = await clientEncryption2.rewrapManyDataKey(
               {},
@@ -2400,16 +2418,25 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               }
             );
 
+            client2.mongoLogger?.trace('client', 'clientEncryption2.rewrapManyDataKey finished');
+
             expect(rewrapManyDataKeyResult).to.have.property('bulkWriteResult');
             expect(rewrapManyDataKeyResult.bulkWriteResult).to.have.property('modifiedCount', 1);
+
+            client1.mongoLogger?.trace('client', 'clientEncryption1.decrypt started');
 
             // 7. Call ``clientEncryption1.decrypt`` with the ``ciphertext``. Assert the return value is "test".
             const decryptResult1 = await clientEncryption1.decrypt(cipherText);
             expect(decryptResult1).to.equal('test');
 
+            client1.mongoLogger?.trace('client', 'clientEncryption1.decrypt finished');
+            client2.mongoLogger?.trace('client', 'clientEncryption2.decrypt started');
+
             // 8. Call ``clientEncryption2.decrypt`` with the ``ciphertext``. Assert the return value is "test".
             const decryptResult2 = await clientEncryption2.decrypt(cipherText);
             expect(decryptResult2).to.equal('test');
+
+            client2.mongoLogger?.trace('client', 'clientEncryption2.decrypt finished');
           }
         );
       }

@@ -1,0 +1,139 @@
+{
+  "description": "distinct-hint",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "7.1.0"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "distinct-hint-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "distinct-hint-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "distinct with hint string",
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {
+              "_id": 1
+            },
+            "hint": "_id_"
+          },
+          "expectResult": [
+            11
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "coll0",
+                  "key": "x",
+                  "query": {
+                    "_id": 1
+                  },
+                  "hint": "_id_"
+                },
+                "commandName": "distinct",
+                "databaseName": "distinct-hint-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "distinct with hint document",
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {
+              "_id": 1
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            11
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "coll0",
+                  "key": "x",
+                  "query": {
+                    "_id": 1
+                  },
+                  "hint": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "distinct",
+                "databaseName": "distinct-hint-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

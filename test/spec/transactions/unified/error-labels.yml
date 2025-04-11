@@ -688,7 +688,7 @@ tests:
         databaseName: *database_name
         documents: []
   -
-    description: 'add UnknownTransactionCommitResult label to writeConcernError WriteConcernFailed'
+    description: 'add UnknownTransactionCommitResult label to writeConcernError WriteConcernTimeout'
     operations:
       -
         object: testRunner
@@ -702,7 +702,7 @@ tests:
               failCommands:
                 - commitTransaction
               writeConcernError:
-                code: 64 # WriteConcernFailed without wtimeout
+                code: 64 # WriteConcernTimeout without wtimeout
                 errmsg: 'multiple errors reported'
       -
         object: *session0
@@ -782,7 +782,7 @@ tests:
         documents:
           - { _id: 1 }
   -
-    description: 'add UnknownTransactionCommitResult label to writeConcernError WriteConcernFailed with wtimeout'
+    description: 'add UnknownTransactionCommitResult label to writeConcernError WriteConcernTimeout with wtimeout'
     operations:
       -
         object: testRunner
@@ -797,7 +797,6 @@ tests:
                 - commitTransaction
               writeConcernError:
                 code: 64
-                codeName: WriteConcernFailed
                 errmsg: 'waiting for replication timed out'
                 errInfo:
                   wtimeout: true

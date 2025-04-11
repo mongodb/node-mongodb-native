@@ -15,5 +15,8 @@ if ! git diff --exit-code ./.evergreen/config.yml; then
 fi
 set -o xtrace
 
+npx prettier --check --single-quote=false .evergreen/config.in.yml
+npx prettier --check .evergreen/*.js .evergreen/*.mjs
+
 ## Checks typescript, eslint, and prettier
 npm run check:lint

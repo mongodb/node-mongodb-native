@@ -397,6 +397,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: regular
         working_dir: src
@@ -411,6 +414,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: assume-role
         working_dir: src
@@ -425,6 +431,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: ec2
           IS_EC2: 'true'
@@ -440,6 +449,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: env-creds
         working_dir: src
@@ -454,6 +466,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: session-creds
         working_dir: src
@@ -468,6 +483,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
           AWS_ROLE_SESSION_NAME: test
@@ -483,6 +501,9 @@ functions:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - MONGODB_AWS_SDK
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
         working_dir: src
@@ -498,6 +519,9 @@ functions:
           - MONGODB_AWS_SDK
           - PROJECT_DIRECTORY
           - MONGODB_BINARIES
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: web-identity
         working_dir: src
@@ -576,6 +600,7 @@ functions:
           #       compression tests.
           aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ \
             coverage/ \
+            --exclude "results.*.json" \
             --exclude "*rhel80-large*" \
             --include "*fermiun"
 
@@ -1345,7 +1370,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: SSL, value: ssl}
       - func: install dependencies
@@ -2752,7 +2777,6 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2768,7 +2792,6 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2784,7 +2807,6 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2800,7 +2822,6 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2816,7 +2837,6 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2832,7 +2852,6 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2848,7 +2867,6 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2864,7 +2882,6 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: TEST_NPM_SCRIPT, value: check:csfle}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests

@@ -992,7 +992,7 @@ describe('Change Stream prose tests', function () {
     });
 
     it('splits the event into multiple fragments', {
-      metadata: { requires: { topology: '!single', mongodb: '>=7.0.0' } },
+      metadata: { requires: { topology: '!single', mongodb: '>=6.0.9' } },
       test: async function () {
         // Insert into _C_ a document at least 10mb in size, e.g. { "value": "q"*10*1024*1024 }
         await collection.insertOne({ value: 'q'.repeat(10 * 1024 * 1024) });

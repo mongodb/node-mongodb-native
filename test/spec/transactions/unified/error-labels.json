@@ -1176,7 +1176,7 @@
       ]
     },
     {
-      "description": "add UnknownTransactionCommitResult label to writeConcernError WriteConcernFailed",
+      "description": "add UnknownTransactionCommitResult label to writeConcernError WriteConcernTimeout",
       "operations": [
         {
           "object": "testRunner",
@@ -1338,7 +1338,7 @@
       ]
     },
     {
-      "description": "add UnknownTransactionCommitResult label to writeConcernError WriteConcernFailed with wtimeout",
+      "description": "add UnknownTransactionCommitResult label to writeConcernError WriteConcernTimeout with wtimeout",
       "operations": [
         {
           "object": "testRunner",
@@ -1356,7 +1356,6 @@
                 ],
                 "writeConcernError": {
                   "code": 64,
-                  "codeName": "WriteConcernFailed",
                   "errmsg": "waiting for replication timed out",
                   "errInfo": {
                     "wtimeout": true

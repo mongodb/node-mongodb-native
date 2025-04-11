@@ -739,7 +739,7 @@
       ]
     },
     {
-      "description": "InsertOne fails after WriteConcernError WriteConcernFailed",
+      "description": "InsertOne fails after WriteConcernError WriteConcernTimeout",
       "operations": [
         {
           "name": "failPoint",
@@ -757,7 +757,6 @@
                 ],
                 "writeConcernError": {
                   "code": 64,
-                  "codeName": "WriteConcernFailed",
                   "errmsg": "waiting for replication timed out",
                   "errInfo": {
                     "wtimeout": true
