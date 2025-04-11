@@ -8,6 +8,7 @@ import {
   parseToElementsToArray,
   parseUtf8ValidationOption,
   pluckBSONSerializeOptions,
+  serialize,
   type Timestamp
 } from '../../bson';
 import { MONGODB_ERROR_CODES, MongoUnexpectedServerResponseError } from '../../error';
@@ -230,11 +231,9 @@ export class CursorResponse extends MongoDBResponse {
    * This supports a feature of the FindCursor.
    * It is an optimization to avoid an extra getMore when the limit has been reached
    */
-  static emptyGetMore: CursorResponse = {
-    id: new Long(0),
-    length: 0,
-    shift: () => null
-  } as unknown as CursorResponse;
+  static get emptyGetMore(): CursorResponse {
+    return new CursorResponse(serialize({ ok: 1, cursor: { id: 0, nextBatch: [] } }));
+  }
 
   static override is(value: unknown): value is CursorResponse {
     return value instanceof CursorResponse || value === CursorResponse.emptyGetMore;
@@ -249,7 +248,8 @@ export class CursorResponse extends MongoDBResponse {
 
   public get id(): Long {
     try {
-      return Long.fromBigInt(this.cursor.get('id', BSONType.long, true));
+      const cursorId = this.cursor.get('id', BSONType.long, false);
+      return cursorId ? Long.fromBigInt(cursorId) : Long.fromBigInt(0n);
     } catch (cause) {
       throw new MongoUnexpectedServerResponseError(cause.message, { cause });
     }

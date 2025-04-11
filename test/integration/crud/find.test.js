@@ -2388,4 +2388,122 @@ describe('Find', function () {
       });
     });
   });
+
+  it('should correctly rewind cursor after emptyGetMore optimization', {
+    metadata: {
+      requires: { topology: ['sharded'] }
+    },
+
+    test: async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      await client.connect();
+      this.defer(async () => await client.close());
+
+      const db = client.db(configuration.db);
+      const collectionName = 'test_rewind_emptygetmore';
+      await db.dropCollection(collectionName).catch(() => null);
+      const collection = db.collection(collectionName);
+
+      // Insert 10 documents
+      const docsToInsert = Array.from({ length: 10 }, (_, i) => ({ x: i }));
+      await collection.insertMany(docsToInsert, configuration.writeConcernMax());
+
+      // Create a cursor with batch size = 2 and limit = 4 (a multiple of batch size)
+      // This configuration is important to trigger the emptyGetMore optimization
+      const cursor = collection.find({}, { batchSize: 2, limit: 4 });
+
+      // Consume all documents (4 due to limit)
+      const documents = [];
+      for (let i = 0; i < 5; i++) {
+        // The 5th iteration should return null as the cursor is exhausted
+        const doc = await cursor.next();
+        if (doc !== null) {
+          documents.push(doc);
+        }
+      }
+
+      // Verify we got the correct number of documents (based on limit)
+      expect(documents).to.have.length(4);
+
+      // Prior to the fix, this rewind() call would throw
+      // "TypeError: this.documents?.clear is not a function"
+      // because the emptyGetMore optimization sets documents to an object without a clear method
+      try {
+        cursor.rewind();
+
+        // Verify we can iterate the cursor again after rewind
+        const documentsAfterRewind = [];
+        for (let i = 0; i < 4; i++) {
+          const doc = await cursor.next();
+          if (doc !== null) {
+            documentsAfterRewind.push(doc);
+          }
+        }
+
+        // Verify we got the same documents again
+        expect(documentsAfterRewind).to.have.length(4);
+        for (let i = 0; i < 4; i++) {
+          expect(documentsAfterRewind[i].x).to.equal(documents[i].x);
+        }
+      } catch (error) {
+        // If the rewind() operation fails, the test should fail
+        expect.fail(`Rewind operation failed: ${error.message}`);
+      }
+    }
+  });
+
+  it('should handle rewind after emptyGetMore optimization (using repro.js scenario)', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    test: async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      await client.connect();
+      this.defer(async () => await client.close());
+
+      const db = client.db(configuration.db);
+      const collectionName = 'test_rewind_repro';
+      await db.dropCollection(collectionName).catch(() => null);
+      const collection = db.collection(collectionName);
+
+      // Insert 100 documents (like in repro.js)
+      const documents = Array.from({ length: 100 }, (_, i) => ({
+        _id: i,
+        value: `Document ${i}`
+      }));
+      await collection.insertMany(documents, configuration.writeConcernMax());
+
+      // Create a cursor with a small batch size to force multiple getMore operations
+      const cursor = collection.find({}).batchSize(10);
+
+      // Consume the cursor until it's exhausted (like in repro.js)
+      while (await cursor.hasNext()) {
+        await cursor.next();
+      }
+
+      // At this point, cursor should be fully consumed and potentially
+      // optimized with emptyGetMore which lacks clear() method
+
+      // Now try to rewind the cursor and fetch documents again
+      try {
+        // This would throw if documents.clear is not a function and fix isn't applied
+        cursor.rewind();
+
+        // If we got here, rewind succeeded - now try to use the cursor again
+        const results = await cursor.toArray();
+
+        // Verify the results
+        expect(results).to.have.length(100);
+        for (let i = 0; i < 100; i++) {
+          expect(results[i]).to.have.property('_id', i);
+          expect(results[i]).to.have.property('value', `Document ${i}`);
+        }
+      } catch (error) {
+        expect.fail(`Error during rewind or subsequent fetch: ${error.message}`);
+      }
+    }
+  });
 });
