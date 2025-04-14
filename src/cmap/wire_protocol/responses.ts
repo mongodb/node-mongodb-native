@@ -248,9 +248,15 @@ export class CursorResponse extends MongoDBResponse {
 
   public get id(): Long {
     try {
-      const cursorId = this.cursor.get('id', BSONType.long, true);
-      return Long.fromBigInt(cursorId);
+      if (!this.cursor.has('id')) {
+        throw new MongoUnexpectedServerResponseError('"id" is missing');
+      }
+      const cursorId = this.cursor.get('id', BSONType.long, false);
+      return cursorId != null ? Long.fromBigInt(cursorId) : Long.fromBigInt(0n);
     } catch (cause) {
+      if (cause instanceof MongoUnexpectedServerResponseError) {
+        throw cause;
+      }
       throw new MongoUnexpectedServerResponseError(cause.message, { cause });
     }
   }
