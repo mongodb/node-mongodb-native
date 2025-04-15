@@ -33,5 +33,6 @@ export const flakyTests = [
   'Retryable Writes (unified) retryable writes handshake failures collection.updateOne succeeds after retryable handshake network error',
   'Retryable Reads (unified) retryable reads handshake failures collection.aggregate succeeds after retryable handshake network error',
   'CSOT spec tests legacy timeouts behave correctly for retryable operations operation fails after two consecutive socket timeouts - aggregate on collection',
-  'Server Discovery and Monitoring Prose Tests Connection Pool Management ensure monitors properly create and unpause connection pools when they discover servers'
+  'Server Discovery and Monitoring Prose Tests Connection Pool Management ensure monitors properly create and unpause connection pools when they discover servers',
+  'CSOT spec tests legacy timeouts behave correctly for retryable operations operation succeeds after one socket timeout - aggregate on collection'
 ];
