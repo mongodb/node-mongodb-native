@@ -1109,7 +1109,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_task:
+    teardown_group:
       - command: subprocess.exec
         params:
           binary: bash
@@ -1132,7 +1132,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_task:
+    teardown_group:
       - command: subprocess.exec
         params:
           binary: bash
@@ -1155,7 +1155,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_task:
+    teardown_group:
       - command: subprocess.exec
         params:
           binary: bash
@@ -1200,7 +1200,7 @@ task_groups:
             ${PREPARE_SHELL}
             export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
             $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/setup.sh
-    teardown_task:
+    teardown_group:
       - command: shell.exec
         params:
           shell: bash
@@ -1224,7 +1224,7 @@ task_groups:
             ${PREPARE_SHELL}
             export GCPOIDC_VMNAME_PREFIX="NODE_DRIVER"
             $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/setup.sh
-    teardown_task:
+    teardown_group:
       - command: shell.exec
         params:
           shell: bash
@@ -1254,7 +1254,7 @@ task_groups:
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
-    teardown_task:
+    teardown_group:
       - command: subprocess.exec
         params:
           working_dir: src
@@ -1282,7 +1282,7 @@ task_groups:
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
-    teardown_task:
+    teardown_group:
       - command: subprocess.exec
         params:
           working_dir: src
