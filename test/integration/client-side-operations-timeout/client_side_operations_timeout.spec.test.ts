@@ -22,9 +22,7 @@ const skippedTests = {
   'operation succeeds after one socket timeout - aggregate on collection':
     'TODO(NODE-6863): fix flaky test',
   'socketTimeoutMS is ignored if timeoutMS is set - dropIndex on collection':
-    'TODO(NODE-6862): fix flaky test',
-  'operation fails after two consecutive socket timeouts - aggregate on collection':
-    'TODO(NODE-6867): fix flaky test'
+    'TODO(NODE-6862): fix flaky test'
 };
 
 describe('CSOT spec tests', function () {
