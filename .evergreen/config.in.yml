@@ -1066,6 +1066,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
+      - func: "upload coverage report"
     tasks:
       - test-gcpkms-task
 
@@ -1093,6 +1094,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
+      - func: "upload coverage report"
     tasks:
       - test-azurekms-task
 
@@ -1113,6 +1115,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1135,6 +1138,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1157,6 +1161,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1177,6 +1182,8 @@ task_groups:
             MONGODB_VERSION: "8.0"
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
+    teardown_task:
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1200,6 +1207,7 @@ task_groups:
           script: |-
             ${PREPARE_SHELL}
             $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/teardown.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1223,6 +1231,7 @@ task_groups:
           script: |-
             ${PREPARE_SHELL}
             $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/teardown.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1252,6 +1261,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1279,6 +1289,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
