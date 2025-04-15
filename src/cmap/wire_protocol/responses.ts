@@ -232,7 +232,7 @@ export class CursorResponse extends MongoDBResponse {
    * It is an optimization to avoid an extra getMore when the limit has been reached
    */
   static get emptyGetMore(): CursorResponse {
-    return new CursorResponse(serialize({ ok: 1, cursor: { id: 0, nextBatch: [] } }));
+    return new CursorResponse(serialize({ ok: 1, cursor: { id: 0n, nextBatch: [] } }));
   }
 
   static override is(value: unknown): value is CursorResponse {
@@ -248,8 +248,7 @@ export class CursorResponse extends MongoDBResponse {
 
   public get id(): Long {
     try {
-      const cursorId = this.cursor.get('id', BSONType.long, false);
-      return cursorId ? Long.fromBigInt(cursorId) : Long.fromBigInt(0n);
+      return Long.fromBigInt(this.cursor.get('id', BSONType.long, true));
     } catch (cause) {
       throw new MongoUnexpectedServerResponseError(cause.message, { cause });
     }
