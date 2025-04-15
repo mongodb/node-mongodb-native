@@ -2966,12 +2966,12 @@ task_groups:
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
+      - func: upload coverage report
       - command: subprocess.exec
         params:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
-      - func: upload coverage report
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -2988,12 +2988,12 @@ task_groups:
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
+      - func: upload coverage report
       - command: subprocess.exec
         params:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
-      - func: upload coverage report
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -3010,12 +3010,12 @@ task_groups:
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
+      - func: upload coverage report
       - command: subprocess.exec
         params:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
-      - func: upload coverage report
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
