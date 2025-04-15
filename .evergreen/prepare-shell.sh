@@ -30,8 +30,11 @@ export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
 export PATH="$MONGODB_BINARIES:$PATH"
 
 # Note the evergreen option on git.get_project recurse_submodules does not work, so do it here.
+# We ignore errors in case we are running in a container where git doesn't trust the tmp directory.
+set +e
 git submodule init
 git submodule update
+set -e
 
 ls -la $DRIVERS_TOOLS
 

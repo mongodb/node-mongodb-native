@@ -9,5 +9,7 @@ set -o xtrace
 export npm_config_cache=$(pwd)/.cache
 npm install
 
+ls -la $DRIVERS_TOOLS
+
 ALPINE=true \
     npm run check:csfle
