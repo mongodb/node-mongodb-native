@@ -323,7 +323,7 @@ describe('new Connection()', function () {
     });
   });
 
-  describe('SizedMessageTransform', function () {
+  describe.only('SizedMessageTransform', function () {
     it('parses chunks of wire messages', function () {
       const stream = new SizedMessageTransform({ connection: {} as any });
       // Message of length 4 + 4 = 8
@@ -337,7 +337,7 @@ describe('new Connection()', function () {
       expect(stream.read(1)).to.equal(null);
     });
 
-    it('parses many wire messages when chunk arrives', function () {
+    it('parses many wire messages when a single chunk arrives', function () {
       const stream = new SizedMessageTransform({ connection: {} as any });
 
       let dataCount = 0;
@@ -357,7 +357,32 @@ describe('new Connection()', function () {
       expect(dataCount).to.equal(3);
     });
 
-    it('waits for a drain event when destination needs backpressure', async function () {
+    it('parses many wire messages when a single chunk arrives and processes the remaining partial when it is complete', function () {
+      const stream = new SizedMessageTransform({ connection: {} as any });
+
+      let dataCount = 0;
+      stream.on('data', () => {
+        dataCount += 1;
+      });
+
+      // 3 messages of size 8
+      stream.write(
+        Buffer.from([
+          ...[8, 0, 0, 0, 0, 0, 0, 0],
+          ...[8, 0, 0, 0, 0, 0, 0, 0],
+          ...[8, 0, 0, 0, 0, 0, 0, 0],
+          ...[8, 0, 0, 0, 0, 0] // two shy of 8
+        ])
+      );
+
+      expect(dataCount).to.equal(3);
+
+      stream.write(Buffer.from([0, 0])); // the rest of the last 8
+
+      expect(dataCount).to.equal(4);
+    });
+
+    it('throws an error when backpressure detected', async function () {
       const stream = new SizedMessageTransform({ connection: {} as any });
       const destination = new Writable({
         highWaterMark: 1,
