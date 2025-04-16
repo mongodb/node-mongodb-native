@@ -78,10 +78,17 @@ The actual implementations of the spec tests can be unit tests or integration te
 
 The easiest way to get started running the tests locally is to start a standalone server and run all of the tests.
 
-Start a `mongod` standalone with our [cluster_setup.sh](tools/cluster_setup.sh) script:
+Ensure the drivers tools submodule is cloned:
 
 ```sh
-./test/tools/cluster_setup.sh server
+git submodule init
+git submodule update
+```
+
+Start a `mongod` standalone with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
+
+```sh
+VERSION='latest' TOPOLOGY='server' AUTH='noauth' ./.evergreen/run-orchestration.sh
 ```
 
 Then run the tests:
@@ -98,11 +105,10 @@ In the following subsections, we'll dig into the details of running the tests.
 
 ### Testing With Authorization-Enabled
 
-By default, the integration tests run with auth-enabled and the `cluster_setup.sh` script defaults to starting servers with auth-enabled. Tests can be run locally without auth by setting the environment
-variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
+By default, the integration tests run with auth-enabled and the mongo orchestration script will run with auth enabled when the `AUTH` variable is set to `auth`. Tests can be run locally without auth by setting the environment variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
 
 ```shell
-AUTH='noauth' ./test/tools/cluster_setup.sh <server>
+AUTH='noauth' TOPOLOGY='server' ./.evergreen/run-orchestration.sh
 AUTH='noauth' npm run check:test
 ```
 ### Testing Different MongoDB Topologies
@@ -112,21 +118,21 @@ As we mentioned earlier, the tests check the topology of the MongoDB server bein
 In the steps above, we started a standalone server:
 
 ```sh
-./test/tools/cluster_setup.sh server
+TOPOLOGY='server' ./.evergreen/run-orchestration.sh
 ```
 
-You can use the same [cluster_setup.sh](tools/cluster_setup.sh) script to start a replica set or sharded cluster by passing the appropriate option:
+You can use the same [run-orchestration.sh](.evergreen/run-orchestration.sh) script to start a replica set or sharded cluster by passing the appropriate option:
 ```sh
-./test/tools/cluster_setup.sh replica_set
+TOPOLOGY='replica_set' ./.evergreen/run-orchestration.sh
 ```
 or
 ```sh
-./test/tools/cluster_setup.sh sharded_cluster
+TOPOLOGY='sharded_cluster' ./.evergreen/run-orchestration.sh
 ```
 If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated `maxproc` steps.)
 
-The [cluster_setup.sh](tools/cluster_setup.sh) script automatically stores the files associated with the MongoDB server in the `data` directory, which is stored at the top-level of this repository.
-You can delete this directory if you want to ensure you're running a clean configuration. If you delete the directory, the associated database server will be stopped, and you will need to run [cluster_setup.sh](tools/cluster_setup.sh) again.
+The [run-orchestration.sh](.evergreen/run-orchestration.sh) script automatically stores the files associated with the MongoDB server in the `data` directory, which is stored at the top-level of this repository.
+You can delete this directory if you want to ensure you're running a clean configuration. If you delete the directory, the associated database server will be stopped, and you will need to run [run-orchestration.sh](.evergreen/run-orchestration.sh) again.
 
 You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment. For example, for a standalone server, you might use:
 
