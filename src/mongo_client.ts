@@ -115,7 +115,11 @@ export type SupportedTLSSocketOptions = Pick<
 
 /** @public */
 export type SupportedSocketOptions = Pick<
-  TcpNetConnectOpts & { autoSelectFamily?: boolean; autoSelectFamilyAttemptTimeout?: number },
+  TcpNetConnectOpts & {
+    autoSelectFamily?: boolean;
+    autoSelectFamilyAttemptTimeout?: number;
+    keepAliveInitialDelay?: number;
+  },
   (typeof LEGAL_TCP_SOCKET_OPTIONS)[number]
 >;
 

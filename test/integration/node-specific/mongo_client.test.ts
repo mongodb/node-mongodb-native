@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { once } from 'events';
 import * as net from 'net';
+import { Socket } from 'net';
 import * as sinon from 'sinon';
 
 import {
@@ -133,6 +134,93 @@ describe('class MongoClient', function () {
 
     const error = await client.connect().catch(error => error);
     expect(error).to.be.instanceOf(MongoServerSelectionError);
+  });
+
+  describe('#connect', function () {
+    context('when keepAliveInitialDelay is provided', function () {
+      context('when the value is 0', function () {
+        const options = { keepAliveInitialDelay: 0 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(Socket.prototype, 'setKeepAlive');
+          client = this.configuration.newClient(options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('passes through the option', function () {
+          expect(spy).to.have.been.calledWith(true, 0);
+        });
+      });
+
+      context('when the value is positive', function () {
+        const options = { keepAliveInitialDelay: 100 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(Socket.prototype, 'setKeepAlive');
+          client = this.configuration.newClient(options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('passes through the option', function () {
+          expect(spy).to.have.been.calledWith(true, 100);
+        });
+      });
+
+      context('when the value is negative', function () {
+        const options = { keepAliveInitialDelay: -100 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(Socket.prototype, 'setKeepAlive');
+          client = this.configuration.newClient(options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('passes through the option', function () {
+          expect(spy).to.have.been.calledWith(true, -100);
+        });
+      });
+    });
+
+    context('when keepAliveInitialDelay is not provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        spy = sinon.spy(Socket.prototype, 'setKeepAlive');
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets keepalive to 120000', function () {
+        expect(spy).to.have.been.calledWith(true, 120000);
+      });
+    });
   });
 
   it('Should correctly pass through appname', {

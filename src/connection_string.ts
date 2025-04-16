@@ -872,6 +872,9 @@ export const OPTIONS = {
       return wc;
     }
   },
+  keepAliveInitialDelay: {
+    type: 'uint'
+  },
   loadBalanced: {
     default: false,
     type: 'boolean'

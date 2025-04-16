@@ -289,6 +289,7 @@ export const LEGAL_TLS_SOCKET_OPTIONS = [
 export const LEGAL_TCP_SOCKET_OPTIONS = [
   'autoSelectFamily',
   'autoSelectFamilyAttemptTimeout',
+  'keepAliveInitialDelay',
   'family',
   'hints',
   'localAddress',
@@ -376,7 +377,7 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     socket = net.createConnection(parseConnectOptions(options));
   }
 
-  socket.setKeepAlive(true, 300000);
+  socket.setKeepAlive(true, options.keepAliveInitialDelay ?? 120000);
   socket.setTimeout(connectTimeoutMS);
   socket.setNoDelay(noDelay);
 
