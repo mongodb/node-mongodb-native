@@ -323,7 +323,7 @@ describe('new Connection()', function () {
     });
   });
 
-  describe.only('SizedMessageTransform', function () {
+  describe('SizedMessageTransform', function () {
     it('parses chunks of wire messages', function () {
       const stream = new SizedMessageTransform({ connection: {} as any });
       // Message of length 4 + 4 = 8
@@ -341,7 +341,8 @@ describe('new Connection()', function () {
       const stream = new SizedMessageTransform({ connection: {} as any });
 
       let dataCount = 0;
-      stream.on('data', () => {
+      stream.on('data', chunk => {
+        expect(chunk).to.have.lengthOf(8);
         dataCount += 1;
       });
 
@@ -361,7 +362,8 @@ describe('new Connection()', function () {
       const stream = new SizedMessageTransform({ connection: {} as any });
 
       let dataCount = 0;
-      stream.on('data', () => {
+      stream.on('data', chunk => {
+        expect(chunk).to.have.lengthOf(8);
         dataCount += 1;
       });
 

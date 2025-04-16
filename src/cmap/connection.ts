@@ -828,11 +828,6 @@ export class SizedMessageTransform extends Transform {
 
     callback();
   }
-
-  override pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean }): T {
-    destination.on('drain', this.emit.bind('drain'));
-    return super.pipe(destination, options);
-  }
 }
 
 /** @internal */
