@@ -1,4 +1,5 @@
 import { Socket } from 'node:net';
+import { Writable } from 'node:stream';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
@@ -11,7 +12,9 @@ import {
   MongoClientAuthProviders,
   MongoDBCollectionNamespace,
   MongoNetworkTimeoutError,
+  MongoRuntimeError,
   ns,
+  promiseWithResolvers,
   SizedMessageTransform
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
@@ -332,6 +335,50 @@ describe('new Connection()', function () {
       expect(stream.read(1)).to.deep.equal(Buffer.from([8, 0, 0, 0, 1, 2, 3, 4]));
       expect(stream.read(1)).to.deep.equal(Buffer.from([6, 0, 0, 0, 5, 6]));
       expect(stream.read(1)).to.equal(null);
+    });
+
+    it('parses many wire messages when chunk arrives', function () {
+      const stream = new SizedMessageTransform({ connection: {} as any });
+
+      let dataCount = 0;
+      stream.on('data', () => {
+        dataCount += 1;
+      });
+
+      // 3 messages of size 8
+      stream.write(
+        Buffer.from([
+          ...[8, 0, 0, 0, 0, 0, 0, 0],
+          ...[8, 0, 0, 0, 0, 0, 0, 0],
+          ...[8, 0, 0, 0, 0, 0, 0, 0]
+        ])
+      );
+
+      expect(dataCount).to.equal(3);
+    });
+
+    it('waits for a drain event when destination needs backpressure', async function () {
+      const stream = new SizedMessageTransform({ connection: {} as any });
+      const destination = new Writable({
+        highWaterMark: 1,
+        objectMode: true,
+        write: (chunk, encoding, callback) => {
+          void stream;
+          setTimeout(1).then(() => callback());
+        }
+      });
+
+      // 1000 messages of size 8
+      stream.write(
+        Buffer.from(Array.from({ length: 1000 }, () => [8, 0, 0, 0, 0, 0, 0, 0]).flat(1))
+      );
+
+      const { promise, resolve, reject } = promiseWithResolvers();
+
+      stream.on('error', reject).pipe(destination).on('error', reject).on('finish', resolve);
+
+      const error = await promise.catch(error => error);
+      expect(error).to.be.instanceOf(MongoRuntimeError);
     });
   });
 });

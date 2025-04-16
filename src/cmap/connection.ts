@@ -27,6 +27,7 @@ import {
   MongoNetworkTimeoutError,
   MongoOperationTimeoutError,
   MongoParseError,
+  MongoRuntimeError,
   MongoServerError,
   MongoUnexpectedServerResponseError
 } from '../error';
@@ -791,22 +792,46 @@ export class SizedMessageTransform extends Transform {
     }
 
     this.bufferPool.append(chunk);
-    const sizeOfMessage = this.bufferPool.getInt32();
 
-    if (sizeOfMessage == null) {
-      return callback();
+    while (this.bufferPool.length) {
+      // While there are any bytes in the buffer
+
+      // Try to fetch a size from the top 4 bytes
+      const sizeOfMessage = this.bufferPool.getInt32();
+
+      if (sizeOfMessage == null) {
+        // Not even an int32 worth of data. Stop the loop, we need more chunks.
+        break;
+      }
+
+      if (sizeOfMessage < 0) {
+        // The size in the message has a negative value, this is probably corruption, throw:
+        return callback(new MongoParseError(`Message size cannot be negative: ${sizeOfMessage}`));
+      }
+
+      if (sizeOfMessage > this.bufferPool.length) {
+        // We do not have enough bytes to make a sizeOfMessage chunk
+        break;
+      }
+
+      // Add a message to the stream
+      const message = this.bufferPool.read(sizeOfMessage);
+
+      if (!this.push(message)) {
+        // We only subscribe to data events so we should never get backpressure
+        // if we do, we do not have the handling for it.
+        return callback(
+          new MongoRuntimeError(`SizedMessageTransform does not support backpressure`)
+        );
+      }
     }
 
-    if (sizeOfMessage < 0) {
-      return callback(new MongoParseError(`Invalid message size: ${sizeOfMessage}, too small`));
-    }
+    callback();
+  }
 
-    if (sizeOfMessage > this.bufferPool.length) {
-      return callback();
-    }
-
-    const message = this.bufferPool.read(sizeOfMessage);
-    return callback(null, message);
+  override pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean }): T {
+    destination.on('drain', this.emit.bind('drain'));
+    return super.pipe(destination, options);
   }
 }
 
