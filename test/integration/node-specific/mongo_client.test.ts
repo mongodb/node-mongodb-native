@@ -182,22 +182,10 @@ describe('class MongoClient', function () {
 
       context('when the value is negative', function () {
         const options = { keepAliveInitialDelay: -100 };
-        let client;
-        let spy;
-
-        beforeEach(async function () {
-          spy = sinon.spy(Socket.prototype, 'setKeepAlive');
-          client = this.configuration.newClient(options);
-        });
-
-        afterEach(async function () {
-          await client?.close();
-          spy.restore();
-        });
 
         it('raises an error', function () {
           expect(async () => {
-            await client.connect();
+            this.configuration.newClient(options);
           }).to.throw(/keepAliveInitialDelay can only be a positive int value/);
         });
       });
