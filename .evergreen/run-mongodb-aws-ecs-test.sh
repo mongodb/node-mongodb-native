@@ -5,7 +5,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 export MONGODB_URI="$1"
 
 tar -xzf src/src.tgz
-# produces src/ and drivers-tools/
+# produces src/
 
 cd src
 

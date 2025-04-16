@@ -11,7 +11,7 @@ export AZUREKMS_PUBLICKEYPATH=/tmp/testazurekms_publickey
 export AZUREKMS_PRIVATEKEYPATH=/tmp/testazurekms_privatekey
 
 echo "compressing node driver source and tools ... begin"
-tar -czf node-driver-source.tgz src drivers-tools
+tar -czf node-driver-source.tgz src
 echo "compressing node driver source and tools ... end"
 
 export AZUREKMS_SRC=node-driver-source.tgz

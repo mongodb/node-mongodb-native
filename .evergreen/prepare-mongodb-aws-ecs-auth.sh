@@ -21,7 +21,7 @@ cat $ECS_SRC_DIR/.evergreen/run-mongodb-aws-ecs-test.sh
 
 # tar the file and drivers tools and do the same
 cd ..
-tar -czf src.tgz src drivers-tools
+tar -czf src.tgz src
 mv src.tgz $ECS_SRC_DIR/src.tgz
 
 export MONGODB_BINARIES="${MONGODB_BINARIES}"

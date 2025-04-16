@@ -4,7 +4,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 
 export GCPOIDC_DRIVERS_TAR_FILE=/tmp/node-mongodb-native.tgz
 cd ..
-tar -czf $GCPOIDC_DRIVERS_TAR_FILE src drivers-tools
+tar -czf $GCPOIDC_DRIVERS_TAR_FILE src
 cd -
 export GCPOIDC_TEST_CMD="source ./secrets-export.sh drivers/gcpoidc && cd src && ENVIRONMENT=gcp ./.evergreen/${SCRIPT}"
 export PROJECT_DIRECTORY=$PROJECT_DIRECTORY
