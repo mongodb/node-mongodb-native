@@ -366,12 +366,17 @@ In order to test some features, you will need to generate and set a specialized 
 
 We recommend using a different terminal for each specialized environment to avoid the environment variables from one specialized environment impacting the test runs for another specialized environment.
 
-Before you begin any of the subsections below, clone the [drivers-evergreen-tools repo](https://github.com/mongodb-labs/drivers-evergreen-tools.git).
-
-We recommend creating an environment variable named `DRIVERS_TOOLS` that stores the path to your local copy of the `driver-evergreen-tools` repo (code examples in this section will assume this has been done):
+Before you begin any of the subsections below, ensure the drivers-evergreen-tools submodule is updated:
 
 ```sh
-export DRIVERS_TOOLS="/path/to/your/copy/of/drivers-evergreen-tools"
+git submodule init
+git submodule update
+```
+
+We recommend creating an environment variable named `DRIVERS_TOOLS` that stores the path to the `driver-evergreen-tools` submodule (code examples in this section will assume this has been done):
+
+```sh
+export DRIVERS_TOOLS="./drivers-evergreen-tools"
 ```
 
 ### Serverless
