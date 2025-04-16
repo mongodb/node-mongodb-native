@@ -184,7 +184,7 @@ describe('class MongoClient', function () {
         const options = { keepAliveInitialDelay: -100 };
 
         it('raises an error', function () {
-          expect(async () => {
+          expect(() => {
             this.configuration.newClient(options);
           }).to.throw(/keepAliveInitialDelay can only be a positive int value/);
         });
