@@ -600,9 +600,7 @@ functions:
           #       compression tests.
           aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ \
             coverage/ \
-            --exclude "results.*.json" \
-            --exclude "*rhel80-large*" \
-            --include "*fermiun"
+            --exclude "results.*.json"
 
           # npx does not recognize the dependency so install it directly.
           npm install @istanbuljs/nyc-config-typescript
