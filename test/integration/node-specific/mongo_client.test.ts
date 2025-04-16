@@ -188,7 +188,6 @@ describe('class MongoClient', function () {
         beforeEach(async function () {
           spy = sinon.spy(Socket.prototype, 'setKeepAlive');
           client = this.configuration.newClient(options);
-          await client.connect();
         });
 
         afterEach(async function () {
@@ -196,8 +195,10 @@ describe('class MongoClient', function () {
           spy.restore();
         });
 
-        it('passes through the option', function () {
-          expect(spy).to.have.been.calledWith(true, -100);
+        it('raises an error', function () {
+          expect(async () => {
+            await client.connect();
+          }).to.throw(/keepAliveInitialDelay can only be a positive int value/);
         });
       });
     });
