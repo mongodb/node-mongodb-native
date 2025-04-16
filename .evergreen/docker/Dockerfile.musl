@@ -12,10 +12,3 @@ git --version
 c++ --version
 g++ --version
 EOF
-
-# clone drivers evergreen tools into the same location that it lives on the host machine
-# this ensures any paths configured in variables by drivers-evergreen-tools work
-# in the container too.
-# ARG DRIVERS_TOOLS=drivers-evergreen-tools
-# WORKDIR ${DRIVERS_TOOLS}
-# RUN git clone https://github.com/mongodb-labs/drivers-evergreen-tools.git .

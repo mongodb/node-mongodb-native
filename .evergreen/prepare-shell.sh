@@ -36,8 +36,6 @@ git submodule init
 git submodule update
 set -e
 
-ls -la $DRIVERS_TOOLS
-
 cat <<EOT > "$MONGO_ORCHESTRATION_HOME/orchestration.config"
 {
   "releases": {
