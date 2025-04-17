@@ -254,16 +254,13 @@ describe('Connection', function () {
       { requires: { topology: 'replicaset', mongodb: '>=4.4' } }, // need to be on a streaming hello version
       function () {
         let client: MongoClient;
-        let hbSuccess = 0;
 
         beforeEach(async function () {
-          client = this.configuration.newClient({}, { heartbeatFrequencyMS: 100 }); // just so we don't have to wait so long for a hello
-          hbSuccess = 0;
-          client.on('serverHeartbeatSucceeded', () => (hbSuccess += 1));
+          // set heartbeatFrequencyMS just so we don't have to wait so long for a hello
+          client = this.configuration.newClient({}, { heartbeatFrequencyMS: 10 });
         });
 
         afterEach(async function () {
-          hbSuccess = 0;
           await client.close();
         });
 
@@ -273,6 +270,8 @@ describe('Connection', function () {
           'processes all of them and emits heartbeats',
           { requires: { topology: 'replicaset', mongodb: '>=4.4' } },
           async function () {
+            let hbSuccess = 0;
+            client.on('serverHeartbeatSucceeded', () => (hbSuccess += 1));
             expect(hbSuccess).to.equal(0);
 
             await client.db().command({ ping: 1 }); // start monitoring.
@@ -292,7 +291,7 @@ describe('Connection', function () {
 
             // All of the hb will be emitted synchronously in the next tick as the entire chunk is processed.
             await processTick();
-            expect(hbSuccess).to.be.greaterThan(100);
+            expect(hbSuccess).to.be.greaterThan(1000);
           }
         );
       }
