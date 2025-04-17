@@ -251,7 +251,7 @@ describe('Connection', function () {
 
     describe(
       'when a monitoring Connection receives many hellos in one chunk',
-      { requires: { topology: 'replicaset' } },
+      { requires: { topology: 'replicaset', mongodb: '>=4.4' } }, // need to be on a streaming hello version
       function () {
         let client: MongoClient;
         let hbSuccess = 0;
@@ -271,7 +271,7 @@ describe('Connection', function () {
         // This test exists to prevent regression of processing many messages inside one chunk.
         it(
           'processes all of them and emits heartbeats',
-          { requires: { topology: 'replicaset' } },
+          { requires: { topology: 'replicaset', mongodb: '>=4.4' } },
           async function () {
             expect(hbSuccess).to.equal(0);
 
