@@ -3,7 +3,7 @@ const { assert: test } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { setTimeout } = require('timers');
-const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../mongodb');
+const { Code, ObjectId, Long, Binary, ReturnDocument, CursorResponse } = require('../../mongodb');
 
 describe('Find', function () {
   let client;
@@ -2395,12 +2395,18 @@ describe('Find', function () {
     await collection.deleteMany({});
     await collection.insertMany(Array.from({ length: 4 }, (_, i) => ({ x: i })));
 
+    const getMoreSpy = sinon.spy(CursorResponse, 'emptyGetMore', ['get']);
+
     const cursor = collection.find({}, { batchSize: 1, limit: 3 });
     // emptyGetMore is used internally after limit + 1 documents have been iterated
     await cursor.next();
     await cursor.next();
     await cursor.next();
     await cursor.next();
+
+    // assert that `emptyGetMore` is called.  if it is not, this test
+    // always passes, even without the fix in NODE-6878.
+    expect(getMoreSpy.get).to.have.been.called;
 
     cursor.rewind();
 
