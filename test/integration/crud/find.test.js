@@ -2389,27 +2389,31 @@ describe('Find', function () {
     });
   });
 
-  it('regression test (NODE-6878): CursorResponse.emptyGetMore contains all CursorResponse fields', async function () {
-    const collection = client.db('rewind-regression').collection('bar');
+  it(
+    'regression test (NODE-6878): CursorResponse.emptyGetMore contains all CursorResponse fields',
+    { requires: { topology: 'sharded' } },
+    async function () {
+      const collection = client.db('rewind-regression').collection('bar');
 
-    await collection.deleteMany({});
-    await collection.insertMany(Array.from({ length: 4 }, (_, i) => ({ x: i })));
+      await collection.deleteMany({});
+      await collection.insertMany(Array.from({ length: 4 }, (_, i) => ({ x: i })));
 
-    const getMoreSpy = sinon.spy(CursorResponse, 'emptyGetMore', ['get']);
+      const getMoreSpy = sinon.spy(CursorResponse, 'emptyGetMore', ['get']);
 
-    const cursor = collection.find({}, { batchSize: 1, limit: 3 });
-    // emptyGetMore is used internally after limit + 1 documents have been iterated
-    await cursor.next();
-    await cursor.next();
-    await cursor.next();
-    await cursor.next();
+      const cursor = collection.find({}, { batchSize: 1, limit: 3 });
+      // emptyGetMore is used internally after limit + 1 documents have been iterated
+      await cursor.next();
+      await cursor.next();
+      await cursor.next();
+      await cursor.next();
 
-    // assert that `emptyGetMore` is called.  if it is not, this test
-    // always passes, even without the fix in NODE-6878.
-    expect(getMoreSpy.get).to.have.been.called;
+      // assert that `emptyGetMore` is called.  if it is not, this test
+      // always passes, even without the fix in NODE-6878.
+      expect(getMoreSpy.get).to.have.been.called;
 
-    cursor.rewind();
+      cursor.rewind();
 
-    await cursor.toArray();
-  });
+      await cursor.toArray();
+    }
+  );
 });
