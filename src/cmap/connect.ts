@@ -16,6 +16,7 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
+import { type IO } from '../mongo_client';
 import { HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext } from './auth/auth_provider';
 import { AuthMechanism } from './auth/providers';
@@ -35,11 +36,14 @@ import {
 /** @public */
 export type Stream = Socket | TLSSocket;
 
-export async function connect(options: ConnectionOptions): Promise<Connection> {
+export async function connect(
+  parent: { client: { io: IO } },
+  options: ConnectionOptions
+): Promise<Connection> {
   let connection: Connection | null = null;
   try {
     const socket = await makeSocket(options);
-    connection = makeConnection(options, socket);
+    connection = makeConnection(parent, options, socket);
     await performInitialHandshake(connection, options);
     return connection;
   } catch (error) {
@@ -48,13 +52,17 @@ export async function connect(options: ConnectionOptions): Promise<Connection> {
   }
 }
 
-export function makeConnection(options: ConnectionOptions, socket: Stream): Connection {
+export function makeConnection(
+  parent: { client: { io: IO } },
+  options: ConnectionOptions,
+  socket: Stream
+): Connection {
   let ConnectionType = options.connectionType ?? Connection;
   if (options.autoEncrypter) {
     ConnectionType = CryptoConnection;
   }
 
-  return new ConnectionType(socket, options);
+  return new ConnectionType(parent, socket, options);
 }
 
 function checkSupportedServer(hello: Document, options: ConnectionOptions) {

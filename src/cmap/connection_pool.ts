@@ -25,6 +25,7 @@ import {
   MongoRuntimeError,
   MongoServerError
 } from '../error';
+import { type MongoClient } from '../mongo_client';
 import { type Abortable, CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { type TimeoutContext, TimeoutError } from '../timeout';
@@ -142,6 +143,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   private waitQueue: List<WaitQueueMember>;
   private metrics: ConnectionPoolMetrics;
   private processingWaitQueue: boolean;
+
+  get client(): MongoClient {
+    return this.server.client;
+  }
 
   /**
    * Emitted when the connection pool is created.
@@ -620,7 +625,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
     );
 
-    connect(connectOptions).then(
+    connect(this, connectOptions).then(
       connection => {
         // The pool might have closed since we started trying to create a connection
         if (this.poolState !== PoolState.ready) {

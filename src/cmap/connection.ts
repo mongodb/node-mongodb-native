@@ -31,12 +31,13 @@ import {
   MongoServerError,
   MongoUnexpectedServerResponseError
 } from '../error';
-import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import type { IO, ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type Abortable, type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
+import { type Monitor, type RTTPinger } from '../sdam/monitor';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import { type TimeoutContext, TimeoutError } from '../timeout';
 import {
@@ -70,6 +71,7 @@ import {
   type WriteProtocolMessageType
 } from './commands';
 import type { Stream } from './connect';
+import { type ConnectionPool } from './connection_pool';
 import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
@@ -132,7 +134,7 @@ export interface ConnectionOptions
   serverApi?: ServerApi;
   monitorCommands: boolean;
   /** @internal */
-  connectionType?: any;
+  connectionType?: typeof Connection;
   credentials?: MongoCredentials;
   /** @internal */
   authProviders: MongoClientAuthProviders;
@@ -208,6 +210,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private clusterTime: Document | null = null;
   private error: Error | null = null;
   private dataEvents: AsyncGenerator<Buffer, void, void> | null = null;
+  private parent: { client: { io: IO } };
 
   private readonly socketTimeoutMS: number;
   private readonly monitorCommands: boolean;
@@ -229,10 +232,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   /** @event */
   static readonly UNPINNED = UNPINNED;
 
-  constructor(stream: Stream, options: ConnectionOptions) {
+  get client(): { io: IO } {
+    return this.parent.client;
+  }
+
+  constructor(parent: { client: { io: IO } }, stream: Stream, options: ConnectionOptions) {
     super();
     this.on('error', noop);
 
+    this.parent = parent;
     this.socket = stream;
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
@@ -835,8 +843,12 @@ export class CryptoConnection extends Connection {
   /** @internal */
   autoEncrypter?: AutoEncrypter;
 
-  constructor(stream: Stream, options: ConnectionOptions) {
-    super(stream, options);
+  constructor(
+    parent: Monitor | RTTPinger | ConnectionPool,
+    stream: Stream,
+    options: ConnectionOptions
+  ) {
+    super(parent, stream, options);
     this.autoEncrypter = options.autoEncrypter;
   }
 

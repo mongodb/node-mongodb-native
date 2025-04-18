@@ -26,18 +26,22 @@ import {
 } from '../mongodb';
 
 describe('Connection String', function () {
+  const client: MongoClient = {} as MongoClient;
   context('when serverMonitoringMode is set', function () {
     context('when it is valid', function () {
       context('when set in the connection string', function () {
         it('sets the mode', function () {
-          const options = parseOptions('mongodb://localhost:27017/?serverMonitoringMode=poll');
+          const options = parseOptions(
+            'mongodb://localhost:27017/?serverMonitoringMode=poll',
+            client
+          );
           expect(options.serverMonitoringMode).to.equal('poll');
         });
       });
 
       context('when set in the options', function () {
         it('sets the mode', function () {
-          const options = parseOptions('mongodb://localhost:27017', {
+          const options = parseOptions('mongodb://localhost:27017', client, {
             serverMonitoringMode: 'poll'
           });
           expect(options.serverMonitoringMode).to.equal('poll');
@@ -49,7 +53,7 @@ describe('Connection String', function () {
       context('when set in the connection string', function () {
         it('throws a parse error', function () {
           expect(() =>
-            parseOptions('mongodb://localhost:27017/?serverMonitoringMode=invalid')
+            parseOptions('mongodb://localhost:27017/?serverMonitoringMode=invalid', client)
           ).to.throw(MongoParseError, /serverMonitoringMode/);
         });
       });
@@ -58,7 +62,7 @@ describe('Connection String', function () {
 
   context('when serverMonitoringMode is not set', function () {
     it('defaults to auto', function () {
-      const options = parseOptions('mongodb://localhost:27017');
+      const options = parseOptions('mongodb://localhost:27017', client);
       expect(options.serverMonitoringMode).to.equal('auto');
     });
   });
@@ -69,7 +73,7 @@ describe('Connection String', function () {
       auth: { user: 'testing', password: 'llamas' }
     };
 
-    expect(() => parseOptions('mongodb://localhost', optionsWithUser as any)).to.throw(
+    expect(() => parseOptions('mongodb://localhost', client, optionsWithUser as any)).to.throw(
       MongoParseError
     );
   });
@@ -79,7 +83,7 @@ describe('Connection String', function () {
       authMechanism: 'SCRAM-SHA-1',
       auth: { username: 'testing', password: 'llamas' }
     };
-    const options = parseOptions('mongodb://localhost', optionsWithUsername as any);
+    const options = parseOptions('mongodb://localhost', client, optionsWithUsername as any);
     expect(options.credentials).to.containSubset({
       source: 'admin',
       username: 'testing',
@@ -88,14 +92,14 @@ describe('Connection String', function () {
   });
 
   it('throws an error related to the option that was given an empty value', function () {
-    expect(() => parseOptions('mongodb://localhost?tls=', {})).to.throw(
+    expect(() => parseOptions('mongodb://localhost?tls=', client, {})).to.throw(
       MongoAPIError,
       /tls" cannot/i
     );
   });
 
   it('should provide a default port if one is not provided', function () {
-    const options = parseOptions('mongodb://hostname');
+    const options = parseOptions('mongodb://hostname', client);
     expect(options.hosts[0].socketPath).to.be.undefined;
     expect(options.hosts[0].host).to.be.a('string');
     expect(options.hosts[0].port).to.equal(27017);
@@ -104,14 +108,12 @@ describe('Connection String', function () {
   describe('ca option', () => {
     context('when set in the options object', () => {
       it('should parse a string', () => {
-        const options = parseOptions('mongodb://localhost', {
-          ca: 'hello'
-        });
+        const options = parseOptions('mongodb://localhost', client, { ca: 'hello' });
         expect(options).to.have.property('ca').to.equal('hello');
       });
 
       it('should parse a NodeJS buffer', () => {
-        const options = parseOptions('mongodb://localhost', {
+        const options = parseOptions('mongodb://localhost', client, {
           ca: Buffer.from([1, 2, 3, 4])
         });
 
@@ -121,50 +123,42 @@ describe('Connection String', function () {
       });
 
       it('should parse arrays with a single element', () => {
-        const options = parseOptions('mongodb://localhost', {
-          ca: ['hello']
-        });
+        const options = parseOptions('mongodb://localhost', client, { ca: ['hello'] });
         expect(options).to.have.property('ca').to.deep.equal(['hello']);
       });
 
       it('should parse an empty array', () => {
-        const options = parseOptions('mongodb://localhost', {
-          ca: []
-        });
+        const options = parseOptions('mongodb://localhost', client, { ca: [] });
         expect(options).to.have.property('ca').to.deep.equal([]);
       });
 
       it('should parse arrays with multiple elements', () => {
-        const options = parseOptions('mongodb://localhost', {
-          ca: ['hello', 'world']
-        });
+        const options = parseOptions('mongodb://localhost', client, { ca: ['hello', 'world'] });
         expect(options).to.have.property('ca').to.deep.equal(['hello', 'world']);
       });
     });
 
     context('when set in the uri', () => {
       it('should parse a string value', () => {
-        const options = parseOptions('mongodb://localhost?ca=hello', {});
+        const options = parseOptions('mongodb://localhost?ca=hello', client, {});
         expect(options).to.have.property('ca').to.equal('hello');
       });
 
       it('should throw an error with a buffer value', () => {
         const buffer = Buffer.from([1, 2, 3, 4]);
         expect(() => {
-          parseOptions(`mongodb://localhost?ca=${buffer.toString()}`, {});
+          parseOptions(`mongodb://localhost?ca=${buffer.toString()}`, client, {});
         }).to.throw(MongoAPIError);
       });
 
       it('should not parse multiple string values (array of options)', () => {
-        const options = parseOptions('mongodb://localhost?ca=hello,world', {});
+        const options = parseOptions('mongodb://localhost?ca=hello,world', client, {});
         expect(options).to.have.property('ca').to.equal('hello,world');
       });
     });
 
     it('should prioritize options set in the object over those set in the URI', () => {
-      const options = parseOptions('mongodb://localhost?ca=hello', {
-        ca: ['world']
-      });
+      const options = parseOptions('mongodb://localhost?ca=hello', client, { ca: ['world'] });
       expect(options).to.have.property('ca').to.deep.equal(['world']);
     });
   });
@@ -172,20 +166,24 @@ describe('Connection String', function () {
   describe('readPreferenceTags option', function () {
     context('when the option is passed in the uri', () => {
       it('should parse a single read preference tag', () => {
-        const options = parseOptions('mongodb://hostname?readPreferenceTags=bar:foo');
+        const options = parseOptions('mongodb://hostname?readPreferenceTags=bar:foo', client, {});
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }]);
       });
 
       it('should parse multiple readPreferenceTags', () => {
         const options = parseOptions(
-          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar'
+          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar',
+          client,
+          {}
         );
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
       });
 
       it('should parse multiple readPreferenceTags for the same key', () => {
         const options = parseOptions(
-          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=bar:banana&readPreferenceTags=baz:bar'
+          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=bar:banana&readPreferenceTags=baz:bar',
+          client,
+          {}
         );
         expect(options.readPreference.tags).to.deep.equal([
           { bar: 'foo' },
@@ -196,13 +194,14 @@ describe('Connection String', function () {
 
       it('should parse multiple and empty readPreferenceTags', () => {
         const options = parseOptions(
-          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar&readPreferenceTags='
+          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar&readPreferenceTags=',
+          client
         );
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }, {}]);
       });
 
       it('will set "__proto__" as own property on readPreferenceTag', () => {
-        const options = parseOptions('mongodb://hostname?readPreferenceTags=__proto__:foo');
+        const options = parseOptions('mongodb://hostname?readPreferenceTags=__proto__:foo', client);
         expect(options.readPreference.tags?.[0]).to.have.own.property('__proto__', 'foo');
         expect(Object.getPrototypeOf(options.readPreference.tags?.[0])).to.be.null;
       });
@@ -210,28 +209,26 @@ describe('Connection String', function () {
 
     context('when the option is passed in the options object', () => {
       it('should not parse an empty readPreferenceTags object', () => {
-        const options = parseOptions('mongodb://hostname?', {
-          readPreferenceTags: []
-        });
+        const options = parseOptions('mongodb://hostname?', client, { readPreferenceTags: [] });
         expect(options.readPreference.tags).to.deep.equal([]);
       });
 
       it('should parse a single readPreferenceTags object', () => {
-        const options = parseOptions('mongodb://hostname?', {
+        const options = parseOptions('mongodb://hostname?', client, {
           readPreferenceTags: [{ bar: 'foo' }]
         });
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }]);
       });
 
       it('should parse multiple readPreferenceTags', () => {
-        const options = parseOptions('mongodb://hostname?', {
+        const options = parseOptions('mongodb://hostname?', client, {
           readPreferenceTags: [{ bar: 'foo' }, { baz: 'bar' }]
         });
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
       });
 
       it('should parse multiple readPreferenceTags for the same key', () => {
-        const options = parseOptions('mongodb://hostname?', {
+        const options = parseOptions('mongodb://hostname?', client, {
           readPreferenceTags: [{ bar: 'foo' }, { bar: 'banana' }, { baz: 'bar' }]
         });
         expect(options.readPreference.tags).to.deep.equal([
@@ -243,7 +240,7 @@ describe('Connection String', function () {
     });
 
     it('should prioritize options from the options object over the uri options', () => {
-      const options = parseOptions('mongodb://hostname?readPreferenceTags=a:b', {
+      const options = parseOptions('mongodb://hostname?readPreferenceTags=a:b', client, {
         readPreferenceTags: [{ bar: 'foo' }, { baz: 'bar' }]
       });
       expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
@@ -271,12 +268,12 @@ describe('Connection String', function () {
         if (expectation === 'error') {
           it('throws MongoParseError', function () {
             expect(() => {
-              parseOptions(connString);
+              parseOptions(connString, client);
             }).to.throw(MongoParseError);
           });
         } else {
           it(`parses as ${expectation}`, function () {
-            const options = parseOptions(connString);
+            const options = parseOptions(connString, client);
             expect(options).to.have.property('retryWrites', expectation);
           });
         }
@@ -285,14 +282,17 @@ describe('Connection String', function () {
   });
 
   it('should parse compression options', function () {
-    const options = parseOptions('mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4');
+    const options = parseOptions(
+      'mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4',
+      client
+    );
     expect(options).to.have.property('compressors');
     expect(options.compressors).to.include('zlib');
     expect(options.zlibCompressionLevel).to.equal(4);
   });
 
   it('should parse `readConcernLevel`', function () {
-    const options = parseOptions('mongodb://localhost/?readConcernLevel=local');
+    const options = parseOptions('mongodb://localhost/?readConcernLevel=local', client);
     expect(options).to.have.property('readConcern');
     expect(options.readConcern.level).to.equal('local');
   });
@@ -302,7 +302,8 @@ describe('Connection String', function () {
       it('raises an error', function () {
         expect(() => {
           parseOptions(
-            'mongodb://localhost/?authMechanismProperties=ENVIRONMENT:test,ALLOWED_HOSTS:[localhost]&authMechanism=MONGODB-OIDC'
+            'mongodb://localhost/?authMechanismProperties=ENVIRONMENT:test,ALLOWED_HOSTS:[localhost]&authMechanism=MONGODB-OIDC',
+            client
           );
         }).to.throw(
           MongoParseError,
@@ -318,6 +319,7 @@ describe('Connection String', function () {
         it('sets the allowed hosts property', function () {
           const options = parseOptions(
             'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:test',
+            client,
             {
               authMechanismProperties: {
                 ALLOWED_HOSTS: hosts
@@ -336,6 +338,7 @@ describe('Connection String', function () {
           expect(() => {
             parseOptions(
               'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:test',
+              client,
               {
                 authMechanismProperties: {
                   ALLOWED_HOSTS: [1, 2, 3]
@@ -353,7 +356,8 @@ describe('Connection String', function () {
     context('when ALLOWED_HOSTS is not in the options', function () {
       it('sets the default value', function () {
         const options = parseOptions(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:test'
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:test',
+          client
         );
         expect(options.credentials.mechanismProperties).to.deep.equal({
           ENVIRONMENT: 'test',
@@ -365,7 +369,8 @@ describe('Connection String', function () {
     context('when TOKEN_RESOURCE is in the properties', function () {
       context('when it is a uri', function () {
         const options = parseOptions(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:azure,TOKEN_RESOURCE:api%3A%2F%2Ftest'
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:azure,TOKEN_RESOURCE:api%3A%2F%2Ftest',
+          client
         );
 
         it('parses the uri', function () {
@@ -381,7 +386,8 @@ describe('Connection String', function () {
 
   it('should parse `authMechanismProperties`', function () {
     const options = parseOptions(
-      'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com&authMechanism=GSSAPI'
+      'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com&authMechanism=GSSAPI',
+      client
     );
     expect(options.credentials.mechanismProperties).to.deep.include({
       SERVICE_HOST: 'example.com',
@@ -394,15 +400,16 @@ describe('Connection String', function () {
 
   it('should provide default authSource when valid AuthMechanism provided', function () {
     const options = parseOptions(
-      'mongodb+srv://jira-sync.pw0q4.mongodb.net/testDB?authMechanism=MONGODB-AWS&retryWrites=true&w=majority'
+      'mongodb+srv://jira-sync.pw0q4.mongodb.net/testDB?authMechanism=MONGODB-AWS&retryWrites=true&w=majority',
+      client
     );
     expect(options.credentials.source).to.equal('$external');
   });
 
   it('should omit credentials option when the only authSource is provided', function () {
-    let options = parseOptions(`mongodb://a/?authSource=someDb`);
+    let options = parseOptions(`mongodb://a/?authSource=someDb`, client);
     expect(options).to.not.have.property('credentials');
-    options = parseOptions(`mongodb+srv://a/?authSource=someDb`);
+    options = parseOptions(`mongodb+srv://a/?authSource=someDb`, client);
     expect(options).to.not.have.property('credentials');
   });
 
@@ -410,7 +417,10 @@ describe('Connection String', function () {
     context(`when the authMechanism is ${mechanism} and authSource is NOT $external`, function () {
       it('throws a MongoParseError', function () {
         expect(() =>
-          parseOptions(`mongodb+srv://hostname/?authMechanism=${mechanism}&authSource=invalid`)
+          parseOptions(
+            `mongodb+srv://hostname/?authMechanism=${mechanism}&authSource=invalid`,
+            client
+          )
         )
           .to.throw(MongoParseError)
           .to.match(/requires an authSource of '\$external'/);
@@ -443,7 +453,7 @@ describe('Connection String', function () {
   });
 
   it('should parse a numeric authSource with variable width', function () {
-    const options = parseOptions('mongodb://test@localhost/?authSource=0001');
+    const options = parseOptions('mongodb://test@localhost/?authSource=0001', client);
     expect(options.credentials.source).to.equal('0001');
   });
 
@@ -451,7 +461,8 @@ describe('Connection String', function () {
     const dbName = 'my-db-name';
     const authSource = 'admin';
     const options = parseOptions(
-      `mongodb://myName:myPassword@localhost:27017/${dbName}?authSource=${authSource}`
+      `mongodb://myName:myPassword@localhost:27017/${dbName}?authSource=${authSource}`,
+      client
     );
 
     expect(options).has.property('dbName', dbName);
@@ -459,27 +470,30 @@ describe('Connection String', function () {
   });
 
   it('should parse a replicaSet with a leading number', function () {
-    const options = parseOptions('mongodb://localhost/?replicaSet=123abc');
+    const options = parseOptions('mongodb://localhost/?replicaSet=123abc', client);
     expect(options).to.have.property('replicaSet');
     expect(options.replicaSet).to.equal('123abc');
   });
 
   context('when directionConnection is set', () => {
     it('sets directConnection successfully when there is one host', () => {
-      const options = parseOptions('mongodb://localhost:27027/?directConnection=true');
+      const options = parseOptions('mongodb://localhost:27027/?directConnection=true', client);
       expect(options.directConnection).to.be.true;
     });
 
     it('throws when directConnection is true and there is more than one host', () => {
       expect(() =>
-        parseOptions('mongodb://localhost:27027,localhost:27018/?directConnection=true')
+        parseOptions('mongodb://localhost:27027,localhost:27018/?directConnection=true', client)
       ).to.throw(MongoParseError, 'directConnection option requires exactly one host');
     });
   });
 
   context('when providing tlsCRLFile', function () {
     it('sets the tlsCRLFile option', function () {
-      const options = parseOptions('mongodb://localhost/?tls=true&tlsCRLFile=path/to/crl.pem');
+      const options = parseOptions(
+        'mongodb://localhost/?tls=true&tlsCRLFile=path/to/crl.pem',
+        client
+      );
       expect(options.tlsCRLFile).to.equal('path/to/crl.pem');
     });
   });
@@ -489,24 +503,24 @@ describe('Connection String', function () {
       context('when the options are equal', function () {
         context('when both options are true', function () {
           it('sets the tls option', function () {
-            const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
+            const options = parseOptions('mongodb://localhost/?tls=true&ssl=true', client);
             expect(options.tls).to.be.true;
           });
 
           it('does not set the ssl option', function () {
-            const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
+            const options = parseOptions('mongodb://localhost/?tls=true&ssl=true', client);
             expect(options).to.not.have.property('ssl');
           });
         });
 
         context('when both options are false', function () {
           it('sets the tls option', function () {
-            const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
+            const options = parseOptions('mongodb://localhost/?tls=false&ssl=false', client);
             expect(options.tls).to.be.false;
           });
 
           it('does not set the ssl option', function () {
-            const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
+            const options = parseOptions('mongodb://localhost/?tls=false&ssl=false', client);
             expect(options).to.not.have.property('ssl');
           });
         });
@@ -515,7 +529,7 @@ describe('Connection String', function () {
       context('when the options are not equal', function () {
         it('raises an error', function () {
           expect(() => {
-            parseOptions('mongodb://localhost/?tls=true&ssl=false');
+            parseOptions('mongodb://localhost/?tls=true&ssl=false', client);
           }).to.throw(MongoParseError, 'All values of tls/ssl must be the same.');
         });
       });
@@ -525,12 +539,12 @@ describe('Connection String', function () {
       context('when the options are equal', function () {
         context('when both options are true', function () {
           it('sets the tls option', function () {
-            const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
+            const options = parseOptions('mongodb://localhost/', client, { tls: true, ssl: true });
             expect(options.tls).to.be.true;
           });
 
           it('does not set the ssl option', function () {
-            const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
+            const options = parseOptions('mongodb://localhost/', client, { tls: true, ssl: true });
             expect(options).to.not.have.property('ssl');
           });
         });
@@ -538,24 +552,36 @@ describe('Connection String', function () {
         context('when both options are false', function () {
           context('when the URI is an SRV URI', function () {
             it('overrides the tls option', function () {
-              const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
+              const options = parseOptions('mongodb+srv://localhost/', client, {
+                tls: false,
+                ssl: false
+              });
               expect(options.tls).to.be.false;
             });
 
             it('does not set the ssl option', function () {
-              const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
+              const options = parseOptions('mongodb+srv://localhost/', client, {
+                tls: false,
+                ssl: false
+              });
               expect(options).to.not.have.property('ssl');
             });
           });
 
           context('when the URI is not SRV', function () {
             it('sets the tls option', function () {
-              const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
+              const options = parseOptions('mongodb://localhost/', client, {
+                tls: false,
+                ssl: false
+              });
               expect(options.tls).to.be.false;
             });
 
             it('does not set the ssl option', function () {
-              const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
+              const options = parseOptions('mongodb://localhost/', client, {
+                tls: false,
+                ssl: false
+              });
               expect(options).to.not.have.property('ssl');
             });
           });
@@ -565,7 +591,7 @@ describe('Connection String', function () {
       context('when the options are not equal', function () {
         it('raises an error', function () {
           expect(() => {
-            parseOptions('mongodb://localhost/', { tls: true, ssl: false });
+            parseOptions('mongodb://localhost/', client, { tls: true, ssl: false });
           }).to.throw(MongoParseError, 'All values of tls/ssl must be the same.');
         });
       });
@@ -576,7 +602,7 @@ describe('Connection String', function () {
     it('should validate compressors options', function () {
       let thrownError;
       try {
-        parseOptions('mongodb://localhost/?compressors=bunnies');
+        parseOptions('mongodb://localhost/?compressors=bunnies', client);
       } catch (error) {
         thrownError = error;
       }
@@ -588,25 +614,26 @@ describe('Connection String', function () {
 
     it('throws an error for repeated options that can only appear once', function () {
       // At the time of writing, readPreferenceTags is the only options that can be repeated
-      expect(() => parseOptions('mongodb://localhost/?compressors=zstd&compressors=zstd')).to.throw(
-        MongoInvalidArgumentError,
-        /cannot appear more than once/
-      );
-      expect(() => parseOptions('mongodb://localhost/?tls=true&tls=true')).to.throw(
+      expect(() =>
+        parseOptions('mongodb://localhost/?compressors=zstd&compressors=zstd', client)
+      ).to.throw(MongoInvalidArgumentError, /cannot appear more than once/);
+      expect(() => parseOptions('mongodb://localhost/?tls=true&tls=true', client)).to.throw(
         MongoInvalidArgumentError,
         /cannot appear more than once/
       );
     });
 
     it('should validate authMechanism', function () {
-      expect(() => parseOptions('mongodb://localhost/?authMechanism=DOGS')).to.throw(
+      expect(() => parseOptions('mongodb://localhost/?authMechanism=DOGS', client)).to.throw(
         MongoParseError,
         'authMechanism one of MONGODB-AWS,MONGODB-CR,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509,MONGODB-OIDC, got DOGS'
       );
     });
 
     it('should validate readPreference', function () {
-      expect(() => parseOptions('mongodb://localhost/?readPreference=llamasPreferred')).to.throw(
+      expect(() =>
+        parseOptions('mongodb://localhost/?readPreference=llamasPreferred', client)
+      ).to.throw(
         MongoDriverError, // not parse Error b/c thrown from ReadPreference construction
         'Invalid read preference mode "llamasPreferred"'
       );
@@ -615,7 +642,7 @@ describe('Connection String', function () {
 
   describe('mongodb+srv', function () {
     it('should parse a default database', function () {
-      const options = parseOptions('mongodb+srv://test1.test.build.10gen.cc/somedb');
+      const options = parseOptions('mongodb+srv://test1.test.build.10gen.cc/somedb', client);
       expect(options.dbName).to.equal('somedb');
       expect(options.srvHost).to.equal('test1.test.build.10gen.cc');
     });
@@ -802,7 +829,7 @@ describe('Connection String', function () {
   describe('when deprecated options are used', () => {
     it('useNewUrlParser emits a warning', async () => {
       let willBeWarning = once(process, 'warning');
-      parseOptions('mongodb://host?useNewUrlParser=true');
+      parseOptions('mongodb://host?useNewUrlParser=true', client);
       let [warning] = await willBeWarning;
       expect(warning)
         .to.have.property('message')
@@ -810,7 +837,7 @@ describe('Connection String', function () {
 
       willBeWarning = once(process, 'warning');
       //@ts-expect-error: using unsupported option on purpose
-      parseOptions('mongodb://host', { useNewUrlParser: true });
+      parseOptions('mongodb://host', client, { useNewUrlParser: true });
       [warning] = await willBeWarning;
       expect(warning)
         .to.have.property('message')
@@ -819,7 +846,7 @@ describe('Connection String', function () {
 
     it('useUnifiedTopology emits a warning', async () => {
       let willBeWarning = once(process, 'warning');
-      parseOptions('mongodb://host?useUnifiedTopology=true');
+      parseOptions('mongodb://host?useUnifiedTopology=true', client);
       let [warning] = await willBeWarning;
       expect(warning)
         .to.have.property('message')
@@ -827,7 +854,7 @@ describe('Connection String', function () {
 
       willBeWarning = once(process, 'warning');
       //@ts-expect-error: using unsupported option on purpose
-      parseOptions('mongodb://host', { useUnifiedTopology: true });
+      parseOptions('mongodb://host', client, { useUnifiedTopology: true });
       [warning] = await willBeWarning;
       expect(warning)
         .to.have.property('message')
