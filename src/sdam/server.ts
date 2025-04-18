@@ -246,8 +246,12 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
+  closeCheckedOutConnections() {
+    return this.pool.closeCheckedOutConnections();
+  }
+
   /** Destroy the server connection */
-  destroy(): void {
+  close(): void {
     if (this.s.state === STATE_CLOSED) {
       return;
     }
