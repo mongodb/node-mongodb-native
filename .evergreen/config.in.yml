@@ -674,9 +674,7 @@ functions:
           #       compression tests.
           aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ \
             coverage/ \
-            --exclude "results.*.json" \
-            --exclude "*rhel80-large*" \
-            --include "*fermiun"
+            --exclude "results.*.json"
 
           # npx does not recognize the dependency so install it directly.
           npm install @istanbuljs/nyc-config-typescript
@@ -1066,6 +1064,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
+      - func: "upload coverage report"
     tasks:
       - test-gcpkms-task
 
@@ -1093,6 +1092,7 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
+      - func: "upload coverage report"
     tasks:
       - test-azurekms-task
 
@@ -1107,7 +1107,8 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_task:
+    teardown_group:
+      - func: "upload coverage report"
       - command: subprocess.exec
         params:
           binary: bash
@@ -1129,7 +1130,8 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_task:
+    teardown_group:
+      - func: "upload coverage report"
       - command: subprocess.exec
         params:
           binary: bash
@@ -1151,7 +1153,8 @@ task_groups:
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_task:
+    teardown_group:
+      - func: "upload coverage report"
       - command: subprocess.exec
         params:
           binary: bash
@@ -1177,6 +1180,8 @@ task_groups:
             MONGODB_VERSION: "8.0"
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
+    teardown_task:
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1193,13 +1198,14 @@ task_groups:
             ${PREPARE_SHELL}
             export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
             $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/setup.sh
-    teardown_task:
+    teardown_group:
       - command: shell.exec
         params:
           shell: bash
           script: |-
             ${PREPARE_SHELL}
             $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/teardown.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1216,13 +1222,14 @@ task_groups:
             ${PREPARE_SHELL}
             export GCPOIDC_VMNAME_PREFIX="NODE_DRIVER"
             $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/setup.sh
-    teardown_task:
+    teardown_group:
       - command: shell.exec
         params:
           shell: bash
           script: |-
             ${PREPARE_SHELL}
             $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/teardown.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1245,13 +1252,14 @@ task_groups:
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
-    teardown_task:
+    teardown_group:
       - command: subprocess.exec
         params:
           working_dir: src
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -1272,13 +1280,14 @@ task_groups:
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
-    teardown_task:
+    teardown_group:
       - command: subprocess.exec
         params:
           working_dir: src
           binary: bash
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+      - func: "upload coverage report"
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
