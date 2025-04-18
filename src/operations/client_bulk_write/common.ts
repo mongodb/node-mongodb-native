@@ -2,6 +2,7 @@ import { type Document } from '../../bson';
 import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
 import type { CollationOptions, CommandOperationOptions } from '../../operations/command';
 import type { Hint } from '../../operations/operation';
+import { type Sort } from '../../sort';
 
 /** @public */
 export interface ClientBulkWriteOptions extends CommandOperationOptions {
@@ -89,6 +90,8 @@ export interface ClientReplaceOneModel<TSchema> extends ClientWriteModel {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
+  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  sort?: Sort;
 }
 
 /** @public */
@@ -113,6 +116,8 @@ export interface ClientUpdateOneModel<TSchema> extends ClientWriteModel {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
+  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  sort?: Sort;
 }
 
 /** @public */

@@ -3,6 +3,7 @@ import { DocumentSequence } from '../../cmap/commands';
 import { MongoAPIError, MongoInvalidArgumentError } from '../../error';
 import { type PkFactory } from '../../mongo_client';
 import type { Filter, OptionalId, UpdateFilter, WithoutId } from '../../mongo_types';
+import { formatSort, type SortForCmd } from '../../sort';
 import { DEFAULT_PK_FACTORY, hasAtomicOperators } from '../../utils';
 import { type CollationOptions } from '../command';
 import { type Hint } from '../operation';
@@ -327,6 +328,7 @@ export interface ClientUpdateOperation {
   upsert?: boolean;
   arrayFilters?: Document[];
   collation?: CollationOptions;
+  sort?: SortForCmd;
 }
 
 /**
@@ -398,6 +400,9 @@ function createUpdateOperation(
   if (model.collation) {
     document.collation = model.collation;
   }
+  if (!multi && 'sort' in model && model.sort != null) {
+    document.sort = formatSort(model.sort);
+  }
   return document;
 }
 
@@ -410,6 +415,7 @@ export interface ClientReplaceOneOperation {
   hint?: Hint;
   upsert?: boolean;
   collation?: CollationOptions;
+  sort?: SortForCmd;
 }
 
 /**
@@ -442,6 +448,9 @@ export const buildReplaceOneOperation = (
   }
   if (model.collation) {
     document.collation = model.collation;
+  }
+  if (model.sort != null) {
+    document.sort = formatSort(model.sort);
   }
   return document;
 };

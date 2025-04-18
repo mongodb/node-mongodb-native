@@ -87,6 +87,7 @@ import {
 } from './operations/update';
 import { ReadConcern, type ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceLike } from './read_preference';
+import { type Sort } from './sort';
 import {
   DEFAULT_PK_FACTORY,
   MongoDBCollectionNamespace,
@@ -365,7 +366,7 @@ export class Collection<TSchema extends Document = Document> {
   async updateOne(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Document[],
-    options?: UpdateOptions
+    options?: UpdateOptions & { sort?: Sort }
   ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,

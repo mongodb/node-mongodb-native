@@ -19,6 +19,7 @@ import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../o
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
+import { type Sort } from '../sort';
 import { type TimeoutContext } from '../timeout';
 import {
   applyRetryableWrites,
@@ -78,6 +79,8 @@ export interface ReplaceOneModel<TSchema extends Document = Document> {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
+  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  sort?: Sort;
 }
 
 /** @public */
@@ -98,6 +101,8 @@ export interface UpdateOneModel<TSchema extends Document = Document> {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
+  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  sort?: Sort;
 }
 
 /** @public */
