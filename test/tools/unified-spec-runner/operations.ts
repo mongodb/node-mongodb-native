@@ -58,7 +58,7 @@ operations.set('aggregate', async ({ entities, operation }) => {
   }
   const { pipeline, ...opts } = operation.arguments!;
   const cursor = dbOrCollection.aggregate(pipeline, opts);
-  return cursor.toArray();
+  return await cursor.toArray();
 });
 
 operations.set('assertCollectionExists', async ({ operation, client }) => {
@@ -196,7 +196,7 @@ operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation
 operations.set('bulkWrite', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { requests, ...opts } = operation.arguments!;
-  return collection.bulkWrite(requests, opts);
+  return await collection.bulkWrite(requests, opts);
 });
 
 operations.set('clientBulkWrite', async ({ entities, operation }) => {
@@ -206,7 +206,7 @@ operations.set('clientBulkWrite', async ({ entities, operation }) => {
     const name = Object.keys(model)[0];
     return { name: name, ...model[name] };
   });
-  return client.bulkWrite(bulkWriteModels, opts);
+  return await client.bulkWrite(bulkWriteModels, opts);
 });
 
 // The entity exists for the name but can potentially have the wrong
@@ -303,7 +303,7 @@ operations.set('dropIndex', async ({ entities, operation }) => {
 operations.set('deleteOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, ...options } = operation.arguments!;
-  return collection.deleteOne(filter, options);
+  return await collection.deleteOne(filter, options);
 });
 
 operations.set('dropCollection', async ({ entities, operation }) => {
@@ -323,17 +323,17 @@ operations.set('dropCollection', async ({ entities, operation }) => {
 
 operations.set('drop', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
-  return bucket.drop(operation.arguments);
+  return await bucket.drop(operation.arguments);
 });
 
 operations.set('dropIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.dropIndexes(operation.arguments);
+  return await collection.dropIndexes(operation.arguments);
 });
 
 operations.set('endSession', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
-  return session.endSession();
+  return await session.endSession();
 });
 
 operations.set('find', async ({ entities, operation }) => {
@@ -355,36 +355,36 @@ operations.set('find', async ({ entities, operation }) => {
     default:
       break;
   }
-  return queryable.find(filter, opts).toArray();
+  return await queryable.find(filter, opts).toArray();
 });
 
 operations.set('findOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, ...opts } = operation.arguments!;
-  return collection.findOne(filter, opts);
+  return await collection.findOne(filter, opts);
 });
 
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, replacement, ...opts } = operation.arguments!;
-  return collection.findOneAndReplace(filter, replacement, translateOptions(opts));
+  return await collection.findOneAndReplace(filter, replacement, translateOptions(opts));
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...opts } = operation.arguments!;
-  return collection.findOneAndUpdate(filter, update, translateOptions(opts));
+  return await collection.findOneAndUpdate(filter, update, translateOptions(opts));
 });
 
 operations.set('findOneAndDelete', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, ...opts } = operation.arguments!;
-  return collection.findOneAndDelete(filter, opts);
+  return await collection.findOneAndDelete(filter, opts);
 });
 
 operations.set('failPoint', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.arguments!.client);
-  return entities.failPoints.enableFailPoint(client, operation.arguments!.failPoint);
+  return await entities.failPoints.enableFailPoint(client, operation.arguments!.failPoint);
 });
 
 operations.set('insertOne', async ({ entities, operation }) => {
@@ -408,23 +408,23 @@ operations.set('insertMany', async ({ entities, operation }) => {
   const clonedDocuments = documents.map(doc => {
     return { ...doc };
   });
-  return collection.insertMany(clonedDocuments, opts);
+  return await collection.insertMany(clonedDocuments, opts);
 });
 
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
   const iterable = entities.getChangeStreamOrCursor(operation.object);
-  return iterable.next();
+  return await iterable.next();
 });
 
 operations.set('iterateOnce', async ({ entities, operation }) => {
   const iterable = entities.getChangeStreamOrCursor(operation.object);
-  return iterable.tryNext();
+  return await iterable.tryNext();
 });
 
 operations.set('listCollections', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
   const { filter, ...opts } = operation.arguments ?? { filter: {} };
-  return db.listCollections(filter, opts).toArray();
+  return await db.listCollections(filter, opts).toArray();
 });
 
 operations.set('listCollectionNames', async ({ entities, operation }) => {
@@ -436,7 +436,7 @@ operations.set('listCollectionNames', async ({ entities, operation }) => {
 
 operations.set('listDatabases', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.object);
-  return client.db().admin().listDatabases(operation.arguments!);
+  return await client.db().admin().listDatabases(operation.arguments!);
 });
 
 operations.set('listDatabaseNames', async ({ entities, operation }) => {
@@ -447,7 +447,7 @@ operations.set('listDatabaseNames', async ({ entities, operation }) => {
 
 operations.set('listIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.listIndexes(operation.arguments!).toArray();
+  return await collection.listIndexes(operation.arguments!).toArray();
 });
 
 operations.set('listIndexNames', async ({ entities, operation }) => {
@@ -532,7 +532,7 @@ operations.set('loop', async ({ entities, operation, client, testConfig }) => {
 operations.set('replaceOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, replacement, ...opts } = operation.arguments!;
-  return collection.replaceOne(filter, replacement, opts);
+  return await collection.replaceOne(filter, replacement, opts);
 });
 
 operations.set('startTransaction', async ({ entities, operation }) => {
@@ -553,7 +553,7 @@ operations.set('targetedFailPoint', async ({ entities, operation }) => {
 operations.set('delete', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
   const { id, ...opts } = operation.arguments;
-  return bucket.delete(id, opts);
+  return await bucket.delete(id, opts);
 });
 
 operations.set('download', async ({ entities, operation }) => {
@@ -765,30 +765,30 @@ operations.set('withTransaction', async ({ entities, operation, client, testConf
 operations.set('count', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, ...opts } = operation.arguments!;
-  return collection.count(filter, opts);
+  return await collection.count(filter, opts);
 });
 
 operations.set('countDocuments', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, ...opts } = operation.arguments!;
-  return collection.countDocuments(filter, opts);
+  return await collection.countDocuments(filter, opts);
 });
 
 operations.set('deleteMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, ...opts } = operation.arguments!;
-  return collection.deleteMany(filter, opts);
+  return await collection.deleteMany(filter, opts);
 });
 
 operations.set('distinct', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { fieldName, filter, ...opts } = operation.arguments!;
-  return collection.distinct(fieldName, filter, opts);
+  return await collection.distinct(fieldName, filter, opts);
 });
 
 operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.estimatedDocumentCount(operation.arguments!);
+  return await collection.estimatedDocumentCount(operation.arguments!);
 });
 
 operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {
@@ -804,7 +804,7 @@ operations.set('runCommand', async ({ entities, operation }: OperationFunctionPa
     timeoutMS: operation.arguments.timeoutMS
   };
 
-  return db.command(command, options);
+  return await db.command(command, options);
 });
 
 operations.set('runCursorCommand', async ({ entities, operation }: OperationFunctionParams) => {
@@ -821,7 +821,7 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
   if (!Number.isNaN(+opts.maxTimeMS)) cursor.setMaxTimeMS(+opts.maxTimeMS);
   if (opts.comment !== undefined) cursor.setComment(opts.comment);
 
-  return cursor.toArray();
+  return await cursor.toArray();
 });
 
 operations.set('createCommandCursor', async ({ entities, operation }: OperationFunctionParams) => {
@@ -861,13 +861,13 @@ operations.set('createCommandCursor', async ({ entities, operation }: OperationF
 operations.set('updateMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...options } = operation.arguments!;
-  return collection.updateMany(filter, update, options);
+  return await collection.updateMany(filter, update, options);
 });
 
 operations.set('updateOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...options } = operation.arguments!;
-  return collection.updateOne(filter, update, options);
+  return await collection.updateOne(filter, update, options);
 });
 
 operations.set('rename', async ({ entities, operation }) => {
@@ -880,7 +880,7 @@ operations.set('rename', async ({ entities, operation }) => {
 
   if (entity instanceof Collection) {
     const { to, ...options } = operation.arguments!;
-    return entity.rename(to, options);
+    return await entity.rename(to, options);
   }
 
   try {
@@ -891,7 +891,7 @@ operations.set('rename', async ({ entities, operation }) => {
 
   if (entity instanceof GridFSBucket) {
     const { id, newFilename, ...opts } = operation.arguments!;
-    return entity.rename(id, newFilename, opts as any);
+    return await entity.rename(id, newFilename, opts as any);
   }
 
   expect.fail(`No collection or bucket with name '${operation.object}' found`);
@@ -901,7 +901,7 @@ operations.set('createDataKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { kmsProvider, opts } = operation.arguments!;
 
-  return clientEncryption.createDataKey(kmsProvider, opts);
+  return await clientEncryption.createDataKey(kmsProvider, opts);
 });
 
 operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
@@ -915,85 +915,85 @@ operations.set('deleteKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { id } = operation.arguments!;
 
-  return clientEncryption.deleteKey(id);
+  return await clientEncryption.deleteKey(id);
 });
 
 operations.set('getKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { id } = operation.arguments!;
 
-  return clientEncryption.getKey(id);
+  return await clientEncryption.getKey(id);
 });
 
 operations.set('getKeys', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
 
-  return clientEncryption.getKeys().toArray();
+  return await clientEncryption.getKeys().toArray();
 });
 
 operations.set('addKeyAltName', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { id, keyAltName } = operation.arguments!;
 
-  return clientEncryption.addKeyAltName(id, keyAltName);
+  return await clientEncryption.addKeyAltName(id, keyAltName);
 });
 
 operations.set('removeKeyAltName', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { id, keyAltName } = operation.arguments!;
 
-  return clientEncryption.removeKeyAltName(id, keyAltName);
+  return await clientEncryption.removeKeyAltName(id, keyAltName);
 });
 
 operations.set('getKeyByAltName', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { keyAltName } = operation.arguments ?? {};
 
-  return clientEncryption.getKeyByAltName(keyAltName);
+  return await clientEncryption.getKeyByAltName(keyAltName);
 });
 
 operations.set('encrypt', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { value, opts } = operation.arguments ?? {};
 
-  return clientEncryption.encrypt(value, opts);
+  return await clientEncryption.encrypt(value, opts);
 });
 
 operations.set('decrypt', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { value } = operation.arguments ?? {};
 
-  return clientEncryption.decrypt(value);
+  return await clientEncryption.decrypt(value);
 });
 
 operations.set('listSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
   const { name, aggregationOptions } = operation.arguments ?? {};
-  return collection.listSearchIndexes(name, aggregationOptions).toArray();
+  return await collection.listSearchIndexes(name, aggregationOptions).toArray();
 });
 
 operations.set('dropSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
   const { name } = operation.arguments ?? {};
-  return collection.dropSearchIndex(name);
+  return await collection.dropSearchIndex(name);
 });
 
 operations.set('updateSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
   const { name, definition } = operation.arguments ?? {};
-  return collection.updateSearchIndex(name, definition);
+  return await collection.updateSearchIndex(name, definition);
 });
 
 operations.set('createSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
   const { model } = operation.arguments ?? {};
-  return collection.createSearchIndex(model);
+  return await collection.createSearchIndex(model);
 });
 
 operations.set('createSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
   const { models } = operation.arguments ?? {};
-  return collection.createSearchIndexes(models);
+  return await collection.createSearchIndexes(models);
 });
 
 operations.set('modifyCollection', async ({ entities, operation }) => {
@@ -1002,8 +1002,13 @@ operations.set('modifyCollection', async ({ entities, operation }) => {
     collMod: operation.arguments?.collection,
     validator: operation.arguments?.validator
   };
-  return db.command(command, {});
+  return await db.command(command, {});
 });
+
+// make function name appear in stack trace
+operations.forEach((fn, name) =>
+  Object.defineProperty(fn, 'name', { value: name, configurable: true })
+);
 
 export async function executeOperationAndCheck(
   operation: OperationDescription,
