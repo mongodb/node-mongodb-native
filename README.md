@@ -72,6 +72,8 @@ Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mo
 
 The driver currently supports 4.0+ servers.
 
+** 4.0 support is deprecated and support will be removed in an upcoming driver release. **
+
 For exhaustive server and runtime version compatibility matrices, please refer to the following links:
 
 - [MongoDB](https://www.mongodb.com/docs/drivers/node/current/compatibility/#mongodb-compatibility)
