@@ -32,7 +32,7 @@ describe('Driver Resources', () => {
     }
   });
 
-  context.only('on MongoClient.close()', () => {
+  context('on MongoClient.close()', () => {
     before('create leak reproduction script', async function () {
       if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
         return;
