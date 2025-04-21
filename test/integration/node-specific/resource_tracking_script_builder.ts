@@ -51,7 +51,6 @@ export async function testScriptFactory(
   uri: string,
   resourceScriptPath: string,
   func: ResourceTestFunction,
-  logFn: string,
   iterations?: number
 ) {
   let resourceScript = await readFile(resourceScriptPath, { encoding: 'utf8' });
@@ -61,7 +60,6 @@ export async function testScriptFactory(
   resourceScript = resourceScript.replace('SCRIPT_NAME_STRING', JSON.stringify(name));
   resourceScript = resourceScript.replace('URI_STRING', JSON.stringify(uri));
   resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
-  resourceScript = resourceScript.replace('LOG_FN', `${logFn.toString()}`);
 
   return resourceScript;
 }
@@ -95,8 +93,17 @@ export async function runScriptAndReturnHeapInfo(
   func: HeapResourceTestFunction,
   { iterations = 100 } = {}
 ) {
-  const log = (...args) => process.stdout.write(`${args}\n`);
-
+  const log = (...args) => {
+    const payload =
+      args
+        .map(item =>
+          typeof item === 'string'
+            ? item
+            : inspect(item, { depth: Infinity, breakLength: Infinity })
+        )
+        .join(', ') + '\n';
+    process.stdout.write(payload);
+  };
   log('starting');
   const scriptName = `${name}.cjs`;
   const heapsnapshotFile = `${name}.heapsnapshot.json`;
@@ -106,7 +113,6 @@ export async function runScriptAndReturnHeapInfo(
     config.url(),
     HEAP_RESOURCE_SCRIPT_PATH,
     func,
-    `(...args) => process.stdout.write('(subprocess): ' + args)`,
     iterations
   );
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
@@ -133,11 +139,11 @@ export async function runScriptAndReturnHeapInfo(
 
   log('fetching messages 1...');
   const starting = await messages.next();
-  log('fetching messages 2: ', inspect(starting, { depth: Infinity }));
+  log('fetching messages 2: ', starting);
 
   const ending = await messages.next();
 
-  log('fetching messages 3: ', inspect(ending, { depth: Infinity }));
+  log('fetching messages 3: ', ending);
 
   const startingMemoryUsed = starting.value[0].startingMemoryUsed;
   const endingMemoryUsed = ending.value[0].endingMemoryUsed;
