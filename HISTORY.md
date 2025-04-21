@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.16.0](https://github.com/mongodb/node-mongodb-native/compare/v6.15.0...v6.16.0) (2025-04-21)
+
+
+### Features
+
+* **NODE-6494:** add support for `hint` on distinct commands ([#4487](https://github.com/mongodb/node-mongodb-native/issues/4487)) ([40d0e87](https://github.com/mongodb/node-mongodb-native/commit/40d0e87199d75df93284a1802e54e118539f7e0e))
+* **NODE-6515:** deprecate driver support for server 4.0 ([#4517](https://github.com/mongodb/node-mongodb-native/issues/4517)) ([4c1a8a7](https://github.com/mongodb/node-mongodb-native/commit/4c1a8a71d67cb201dbb3c7101ebf6e316e4dbc50))
+
+
+### Bug Fixes
+
+* **NODE-6630:** read all messages in buffer when chunk arrives ([#4512](https://github.com/mongodb/node-mongodb-native/issues/4512)) ([8c86e30](https://github.com/mongodb/node-mongodb-native/commit/8c86e303594bad8c7b8cd9033fe47afe1e813388))
+* **NODE-6878:** documents.clear() throws a TypeError after cursor is rewound ([#4488](https://github.com/mongodb/node-mongodb-native/issues/4488)) ([a1fffeb](https://github.com/mongodb/node-mongodb-native/commit/a1fffeb0e7fbd41832e6ae751a3f7369ea585b20))
+
 ## [6.15.0](https://github.com/mongodb/node-mongodb-native/compare/v6.14.2...v6.15.0) (2025-03-18)
 
 
