@@ -6,6 +6,7 @@ import { finished } from 'stream/promises';
 import {
   Collection,
   CommandFailedEvent,
+  type CommandStartedEvent,
   CommandSucceededEvent,
   MongoBulkWriteError,
   type MongoClient,
@@ -1151,5 +1152,54 @@ describe('CRUD API', function () {
         );
       });
     }
+  });
+
+  describe('sort support', function () {
+    let client: MongoClient;
+    let events: Array<CommandStartedEvent>;
+    let collection: Collection;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      events = [];
+      client.on('commandStarted', commandStarted =>
+        commandStarted.commandName === 'update' ? events.push(commandStarted) : null
+      );
+
+      collection = client.db('updateManyTest').collection('updateManyTest');
+      await collection.drop().catch(() => null);
+      await collection.insertMany([{ a: 1 }, { a: 2 }]);
+    });
+
+    afterEach(async function () {
+      await collection.drop().catch(() => null);
+      await client.close();
+    });
+
+    describe('collection.updateMany()', () => {
+      it('does not attach a sort property if one is specified', async function () {
+        // @ts-expect-error: sort is not supported
+        await collection.updateMany({ a: { $gte: 1 } }, { $set: { b: 1 } }, { sort: { a: 1 } });
+
+        expect(events).to.have.lengthOf(1);
+        const [updateEvent] = events;
+        expect(updateEvent.commandName).to.equal('update');
+        expect(updateEvent.command.updates[0]).to.not.have.property('sort');
+      });
+    });
+
+    describe('collection.bulkWrite([{updateMany}])', () => {
+      it('does not attach a sort property if one is specified', async function () {
+        await collection.bulkWrite([
+          // @ts-expect-error: sort is not supported
+          { updateMany: { filter: { a: { $gte: 1 } }, update: { $set: { b: 1 } }, sort: { a: 1 } } }
+        ]);
+
+        expect(events).to.have.lengthOf(1);
+        const [updateEvent] = events;
+        expect(updateEvent.commandName).to.equal('update');
+        expect(updateEvent.command.updates[0]).to.not.have.property('sort');
+      });
+    });
   });
 });

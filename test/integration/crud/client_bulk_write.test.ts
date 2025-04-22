@@ -396,4 +396,39 @@ describe('Client Bulk Write', function () {
       });
     });
   });
+
+  describe('sort support', () => {
+    describe(
+      'updateMany does not support sort option',
+      { requires: { mongodb: '>=8.0' } },
+      function () {
+        const commands: CommandStartedEvent[] = [];
+
+        beforeEach(async function () {
+          client = this.configuration.newClient({}, { monitorCommands: true });
+
+          client.on('commandStarted', filterForCommands('bulkWrite', commands));
+          await client.connect();
+        });
+
+        it('should not include sort field in the command', async function () {
+          await client.bulkWrite([
+            {
+              name: 'updateMany',
+              namespace: 'foo.bar',
+              filter: { age: { $lte: 5 } },
+              update: { $set: { puppy: true } },
+              // @ts-expect-error: sort is not supported in updateMany
+              sort: { age: 1 } // This sort option should be ignored
+            }
+          ]);
+
+          expect(commands).to.have.lengthOf(1);
+          const [updateCommand] = commands;
+          expect(updateCommand.commandName).to.equal('bulkWrite');
+          expect(updateCommand.command.ops[0]).to.not.have.property('sort');
+        });
+      }
+    );
+  });
 });

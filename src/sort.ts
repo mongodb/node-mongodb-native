@@ -8,24 +8,24 @@ export type SortDirection =
   | 'desc'
   | 'ascending'
   | 'descending'
-  | { $meta: string };
+  | { readonly $meta: string };
 
 /** @public */
 export type Sort =
   | string
-  | Exclude<SortDirection, { $meta: string }>
-  | string[]
-  | { [key: string]: SortDirection }
-  | Map<string, SortDirection>
-  | [string, SortDirection][]
-  | [string, SortDirection];
+  | Exclude<SortDirection, { readonly $meta: string }>
+  | ReadonlyArray<string>
+  | { readonly [key: string]: SortDirection }
+  | ReadonlyMap<string, SortDirection>
+  | ReadonlyArray<readonly [string, SortDirection]>
+  | readonly [string, SortDirection];
 
 /** Below stricter types were created for sort that correspond with type that the cmd takes  */
 
-/** @internal */
+/** @public */
 export type SortDirectionForCmd = 1 | -1 | { $meta: string };
 
-/** @internal */
+/** @public */
 export type SortForCmd = Map<string, SortDirectionForCmd>;
 
 /** @internal */
@@ -55,7 +55,7 @@ function isMeta(t: SortDirection): t is { $meta: string } {
 }
 
 /** @internal */
-function isPair(t: Sort): t is [string, SortDirection] {
+function isPair(t: Sort): t is readonly [string, SortDirection] {
   if (Array.isArray(t) && t.length === 2) {
     try {
       prepareDirection(t[1]);
@@ -67,33 +67,37 @@ function isPair(t: Sort): t is [string, SortDirection] {
   return false;
 }
 
-function isDeep(t: Sort): t is [string, SortDirection][] {
+function isDeep(t: Sort): t is ReadonlyArray<readonly [string, SortDirection]> {
   return Array.isArray(t) && Array.isArray(t[0]);
 }
 
-function isMap(t: Sort): t is Map<string, SortDirection> {
+function isMap(t: Sort): t is ReadonlyMap<string, SortDirection> {
   return t instanceof Map && t.size > 0;
 }
 
+function isReadonlyArray<T>(value: any): value is readonly T[] {
+  return Array.isArray(value);
+}
+
 /** @internal */
-function pairToMap(v: [string, SortDirection]): SortForCmd {
+function pairToMap(v: readonly [string, SortDirection]): SortForCmd {
   return new Map([[`${v[0]}`, prepareDirection([v[1]])]]);
 }
 
 /** @internal */
-function deepToMap(t: [string, SortDirection][]): SortForCmd {
+function deepToMap(t: ReadonlyArray<readonly [string, SortDirection]>): SortForCmd {
   const sortEntries: SortPairForCmd[] = t.map(([k, v]) => [`${k}`, prepareDirection(v)]);
   return new Map(sortEntries);
 }
 
 /** @internal */
-function stringsToMap(t: string[]): SortForCmd {
+function stringsToMap(t: ReadonlyArray<string>): SortForCmd {
   const sortEntries: SortPairForCmd[] = t.map(key => [`${key}`, 1]);
   return new Map(sortEntries);
 }
 
 /** @internal */
-function objectToMap(t: { [key: string]: SortDirection }): SortForCmd {
+function objectToMap(t: { readonly [key: string]: SortDirection }): SortForCmd {
   const sortEntries: SortPairForCmd[] = Object.entries(t).map(([k, v]) => [
     `${k}`,
     prepareDirection(v)
@@ -102,7 +106,7 @@ function objectToMap(t: { [key: string]: SortDirection }): SortForCmd {
 }
 
 /** @internal */
-function mapToMap(t: Map<string, SortDirection>): SortForCmd {
+function mapToMap(t: ReadonlyMap<string, SortDirection>): SortForCmd {
   const sortEntries: SortPairForCmd[] = Array.from(t).map(([k, v]) => [
     `${k}`,
     prepareDirection(v)
@@ -116,17 +120,22 @@ export function formatSort(
   direction?: SortDirection
 ): SortForCmd | undefined {
   if (sort == null) return undefined;
-  if (typeof sort === 'string') return new Map([[sort, prepareDirection(direction)]]);
+
+  if (typeof sort === 'string') return new Map([[sort, prepareDirection(direction)]]); // 'fieldName'
+
   if (typeof sort !== 'object') {
     throw new MongoInvalidArgumentError(
       `Invalid sort format: ${JSON.stringify(sort)} Sort must be a valid object`
     );
   }
-  if (!Array.isArray(sort)) {
-    return isMap(sort) ? mapToMap(sort) : Object.keys(sort).length ? objectToMap(sort) : undefined;
+
+  if (!isReadonlyArray(sort)) {
+    if (isMap(sort)) return mapToMap(sort); // Map<fieldName, SortDirection>
+    if (Object.keys(sort).length) return objectToMap(sort); // { [fieldName: string]: SortDirection }
+    return undefined;
   }
   if (!sort.length) return undefined;
-  if (isDeep(sort)) return deepToMap(sort);
-  if (isPair(sort)) return pairToMap(sort);
-  return stringsToMap(sort);
+  if (isDeep(sort)) return deepToMap(sort); // [ [fieldName, sortDir], [fieldName, sortDir] ... ]
+  if (isPair(sort)) return pairToMap(sort); // [ fieldName, sortDir ]
+  return stringsToMap(sort); // [ fieldName, fieldName ]
 }
