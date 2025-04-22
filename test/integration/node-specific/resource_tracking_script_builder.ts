@@ -3,6 +3,7 @@ import { on, once } from 'node:events';
 import { openSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
+import { inspect } from 'node:util';
 
 import { AssertionError, expect } from 'chai';
 import type * as timers from 'timers';
@@ -92,6 +93,18 @@ export async function runScriptAndReturnHeapInfo(
   func: HeapResourceTestFunction,
   { iterations = 100 } = {}
 ) {
+  const log = (...args) => {
+    const payload =
+      args
+        .map(item =>
+          typeof item === 'string'
+            ? item
+            : inspect(item, { depth: Infinity, breakLength: Infinity })
+        )
+        .join(', ') + '\n';
+    process.stdout.write(payload);
+  };
+  log('starting');
   const scriptName = `${name}.cjs`;
   const heapsnapshotFile = `${name}.heapsnapshot.json`;
 
@@ -105,30 +118,48 @@ export async function runScriptAndReturnHeapInfo(
   await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
 
   const processDiedController = new AbortController();
-  const script = fork(scriptName, { execArgv: ['--expose-gc'] });
+  const script = fork(scriptName, { execArgv: ['--expose-gc'], stdio: 'inherit' });
   // Interrupt our awaiting of messages if the process crashed
   script.once('close', exitCode => {
     if (exitCode !== 0) {
+      log('process exited with non-zero: ', exitCode);
       processDiedController.abort(new Error(`process exited with: ${exitCode}`));
     }
   });
 
+  script.once('error', error => {
+    log(`processed errored: ${error}`);
+    processDiedController.abort(new Error(`process errored: `, { cause: error }));
+  });
+
+  script.once('spawn', () => log('script spawned successfully.'));
+
   const messages = on(script, 'message', { signal: processDiedController.signal });
   const willClose = once(script, 'close');
 
+  log('fetching messages 1...');
   const starting = await messages.next();
+  log('fetching messages 2: ', starting);
+
   const ending = await messages.next();
+
+  log('fetching messages 3: ', ending);
 
   const startingMemoryUsed = starting.value[0].startingMemoryUsed;
   const endingMemoryUsed = ending.value[0].endingMemoryUsed;
 
   // make sure the process ended
   const [exitCode] = await willClose;
+
+  log('child process closed.');
+
   expect(exitCode, 'process should have exited with zero').to.equal(0);
 
   const heap = await readFile(heapsnapshotFile, { encoding: 'utf8' }).then(c =>
     parseSnapshot(JSON.parse(c))
   );
+
+  log('done.');
 
   // If any of the above throws we won't reach these unlinks that clean up the created files.
   // This is intentional so that when debugging the file will still be present to check it for errors
