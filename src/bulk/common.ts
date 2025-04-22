@@ -69,7 +69,7 @@ export interface DeleteManyModel<TSchema extends Document = Document> {
 
 /** @public */
 export interface ReplaceOneModel<TSchema extends Document = Document> {
-  /** The filter to limit the replaced document. */
+  /** The filter that specifies which document to replace. In the case of multiple matches, the first document matched is replaced. */
   filter: Filter<TSchema>;
   /** The document with which to replace the matched document. */
   replacement: WithoutId<TSchema>;
@@ -79,13 +79,13 @@ export interface ReplaceOneModel<TSchema extends Document = Document> {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
-  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  /** Specifies the sort order for the documents matched by the filter. */
   sort?: Sort;
 }
 
 /** @public */
 export interface UpdateOneModel<TSchema extends Document = Document> {
-  /** The filter to limit the updated documents. */
+  /** The filter that specifies which document to update. In the case of multiple matches, the first document matched is updated. */
   filter: Filter<TSchema>;
   /**
    * The modifications to apply. The value can be either:
@@ -101,7 +101,7 @@ export interface UpdateOneModel<TSchema extends Document = Document> {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
-  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  /** Specifies the sort order for the documents matched by the filter. */
   sort?: Sort;
 }
 

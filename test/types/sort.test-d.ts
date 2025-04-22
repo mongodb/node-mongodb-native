@@ -8,6 +8,19 @@ import {
   type Sort
 } from '../mongodb';
 
+const sortFieldName: Sort = 'a';
+const sortFieldNameObject: Sort = { a: 1, b: -1 };
+const sortFieldNameList: Sort = ['a', 'b'];
+const sortFieldNameTuple: Sort = ['a', 1];
+const sortFieldNameTuples: Sort = [
+  ['a', 1],
+  ['b', -1]
+];
+const sortFieldNameMap: Sort = new Map([
+  ['a', 1],
+  ['b', -1]
+]);
+
 const sorts = [
   // field names
   'a',

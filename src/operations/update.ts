@@ -59,7 +59,7 @@ export interface UpdateStatement {
   arrayFilters?: Document[];
   /** A document or string that specifies the index to use to support the query predicate. */
   hint?: Hint;
-  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  /** Specifies the sort order for the documents matched by the filter. */
   sort?: SortForCmd;
 }
 
@@ -217,7 +217,7 @@ export interface ReplaceOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
-  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  /** Specifies the sort order for the documents matched by the filter. */
   sort?: Sort;
 }
 

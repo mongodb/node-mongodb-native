@@ -90,7 +90,7 @@ export interface ClientReplaceOneModel<TSchema> extends ClientWriteModel {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
-  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  /** Specifies the sort order for the documents matched by the filter. */
   sort?: Sort;
 }
 
@@ -116,7 +116,7 @@ export interface ClientUpdateOneModel<TSchema> extends ClientWriteModel {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
-  /** if the filter matches more than one document the first one matched by the sort order will be updated */
+  /** Specifies the sort order for the documents matched by the filter. */
   sort?: Sort;
 }
 
