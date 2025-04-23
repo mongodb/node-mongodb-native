@@ -154,13 +154,16 @@ describe('class MongoClient', function () {
           spy.restore();
         });
 
-        it('passes through the option', function () {
-          expect(spy).to.have.been.calledWith(
-            sinon.match({
-              keepAlive: true,
-              keepAliveInitialDelay: 0
-            })
-          );
+        it('passes through the option', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 0
+              })
+            );
+          }
         });
       });
 
@@ -181,13 +184,16 @@ describe('class MongoClient', function () {
           spy.restore();
         });
 
-        it('passes through the option', function () {
-          expect(spy).to.have.been.calledWith(
-            sinon.match({
-              keepAlive: true,
-              keepAliveInitialDelay: 100
-            })
-          );
+        it('passes through the option', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 100
+              })
+            );
+          }
         });
       });
 
@@ -208,13 +214,16 @@ describe('class MongoClient', function () {
           spy.restore();
         });
 
-        it('sets the option to 0', function () {
-          expect(spy).to.have.been.calledWith(
-            sinon.match({
-              keepAlive: true,
-              keepAliveInitialDelay: 0
-            })
-          );
+        it('sets the option to 0', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 0
+              })
+            );
+          }
         });
       });
     });
@@ -285,12 +294,15 @@ describe('class MongoClient', function () {
         spy.restore();
       });
 
-      it('sets noDelay', function () {
-        expect(spy).to.have.been.calledWith(
-          sinon.match({
-            noDelay: false
-          })
-        );
+      it('sets noDelay', {
+        metadata: { requires: { apiVersion: false } },
+        test: function () {
+          expect(spy).to.have.been.calledWith(
+            sinon.match({
+              noDelay: false
+            })
+          );
+        }
       });
     });
   });
