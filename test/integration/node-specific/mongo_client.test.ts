@@ -135,6 +135,206 @@ describe('class MongoClient', function () {
     expect(error).to.be.instanceOf(MongoServerSelectionError);
   });
 
+  describe('#connect', function () {
+    context('when keepAliveInitialDelay is provided', function () {
+      context('when the value is 0', function () {
+        const options = { keepAliveInitialDelay: 0 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('passes through the option', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 0
+              })
+            );
+          }
+        });
+      });
+
+      context('when the value is positive', function () {
+        const options = { keepAliveInitialDelay: 100 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('passes through the option', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 100
+              })
+            );
+          }
+        });
+      });
+
+      context('when the value is negative', function () {
+        const options = { keepAliveInitialDelay: -100 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('the Node.js runtime sets the option to 0', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 0
+              })
+            );
+          }
+        });
+      });
+
+      context('when the value is mistyped', function () {
+        // Set server selection timeout to get the error quicker.
+        const options = { keepAliveInitialDelay: 'test', serverSelectionTimeoutMS: 1000 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('throws an error', {
+          metadata: { requires: { apiVersion: false } },
+          test: async function () {
+            const error = await client.connect().catch(error => error);
+            expect(error.message).to.include(
+              'property must be of type number. Received type string'
+            );
+          }
+        });
+      });
+    });
+
+    context('when keepAliveInitialDelay is not provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        spy = sinon.spy(net, 'createConnection');
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets keepalive to 120000', function () {
+        expect(spy).to.have.been.calledWith(
+          sinon.match({
+            keepAlive: true,
+            keepAliveInitialDelay: 120000
+          })
+        );
+      });
+    });
+
+    context('when noDelay is not provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        spy = sinon.spy(net, 'createConnection');
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets noDelay to true', function () {
+        expect(spy).to.have.been.calledWith(
+          sinon.match({
+            noDelay: true
+          })
+        );
+      });
+    });
+
+    context('when noDelay is provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        const options = { noDelay: false };
+        spy = sinon.spy(net, 'createConnection');
+        const uri = this.configuration.url();
+        client = new MongoClient(uri, options);
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets noDelay', {
+        metadata: { requires: { apiVersion: false } },
+        test: function () {
+          expect(spy).to.have.been.calledWith(
+            sinon.match({
+              noDelay: false
+            })
+          );
+        }
+      });
+    });
+  });
+
   it('Should correctly pass through appname', {
     metadata: {
       requires: {
@@ -889,12 +1089,12 @@ describe('class MongoClient', function () {
         metadata: { requires: { topology: ['single'] } },
         test: async function () {
           await client.connect();
-          expect(netSpy).to.have.been.calledWith({
-            autoSelectFamily: false,
-            autoSelectFamilyAttemptTimeout: 100,
-            host: 'localhost',
-            port: 27017
-          });
+          expect(netSpy).to.have.been.calledWith(
+            sinon.match({
+              autoSelectFamily: false,
+              autoSelectFamilyAttemptTimeout: 100
+            })
+          );
         }
       });
     });
@@ -908,11 +1108,11 @@ describe('class MongoClient', function () {
         metadata: { requires: { topology: ['single'] } },
         test: async function () {
           await client.connect();
-          expect(netSpy).to.have.been.calledWith({
-            autoSelectFamily: true,
-            host: 'localhost',
-            port: 27017
-          });
+          expect(netSpy).to.have.been.calledWith(
+            sinon.match({
+              autoSelectFamily: true
+            })
+          );
         }
       });
     });

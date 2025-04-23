@@ -1273,6 +1273,7 @@ export const OPTIONS = {
   requestCert: { type: 'any' },
   rejectUnauthorized: { type: 'any' },
   checkServerIdentity: { type: 'any' },
+  keepAliveInitialDelay: { type: 'any' },
   ALPNProtocols: { type: 'any' },
   SNICallback: { type: 'any' },
   session: { type: 'any' },
