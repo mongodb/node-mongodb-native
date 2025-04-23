@@ -311,6 +311,7 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
     result.keepAliveInitialDelay = 120000;
   }
   result.keepAlive = true;
+  result.noDelay = options.noDelay ?? true;
 
   if (typeof hostAddress.socketPath === 'string') {
     result.path = hostAddress.socketPath;
@@ -352,7 +353,6 @@ function parseSslOptions(options: MakeConnectionOptions): TLSConnectionOpts {
 
 export async function makeSocket(options: MakeConnectionOptions): Promise<Stream> {
   const useTLS = options.tls ?? false;
-  const noDelay = options.noDelay ?? true;
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
   const existingSocket = options.existingSocket;
 
@@ -382,7 +382,6 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   }
 
   socket.setTimeout(connectTimeoutMS);
-  socket.setNoDelay(noDelay);
 
   let cancellationHandler: ((err: Error) => void) | null = null;
 

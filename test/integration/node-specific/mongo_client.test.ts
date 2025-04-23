@@ -243,6 +243,56 @@ describe('class MongoClient', function () {
         );
       });
     });
+
+    context('when noDelay is not provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        spy = sinon.spy(net, 'createConnection');
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets noDelay to true', function () {
+        expect(spy).to.have.been.calledWith(
+          sinon.match({
+            noDelay: true
+          })
+        );
+      });
+    });
+
+    context('when noDelay is provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        const options = { noDelay: false };
+        spy = sinon.spy(net, 'createConnection');
+        const uri = this.configuration.url();
+        client = new MongoClient(uri, options);
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets noDelay', function () {
+        expect(spy).to.have.been.calledWith(
+          sinon.match({
+            noDelay: false
+          })
+        );
+      });
+    });
   });
 
   it('Should correctly pass through appname', {
@@ -999,12 +1049,12 @@ describe('class MongoClient', function () {
         metadata: { requires: { topology: ['single'] } },
         test: async function () {
           await client.connect();
-          expect(netSpy).to.have.been.calledWith({
-            autoSelectFamily: false,
-            autoSelectFamilyAttemptTimeout: 100,
-            host: 'localhost',
-            port: 27017
-          });
+          expect(netSpy).to.have.been.calledWith(
+            sinon.match({
+              autoSelectFamily: false,
+              autoSelectFamilyAttemptTimeout: 100
+            })
+          );
         }
       });
     });
@@ -1018,11 +1068,11 @@ describe('class MongoClient', function () {
         metadata: { requires: { topology: ['single'] } },
         test: async function () {
           await client.connect();
-          expect(netSpy).to.have.been.calledWith({
-            autoSelectFamily: true,
-            host: 'localhost',
-            port: 27017
-          });
+          expect(netSpy).to.have.been.calledWith(
+            sinon.match({
+              autoSelectFamily: true
+            })
+          );
         }
       });
     });
