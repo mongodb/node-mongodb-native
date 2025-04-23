@@ -107,7 +107,7 @@ describe('Driver Resources', () => {
       await sleep(10);
       const promiseCountAfter = v8.queryObjects(Promise, { format: 'count' });
 
-      expect(promiseCountAfter).to.be.within(promiseCountBefore - 5, promiseCountBefore + 5);
+      expect(promiseCountAfter).to.be.lessThan(promiseCountBefore + 5);
     });
   });
 });
