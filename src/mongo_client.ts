@@ -118,7 +118,7 @@ export type SupportedSocketOptions = Pick<
   TcpNetConnectOpts & {
     autoSelectFamily?: boolean;
     autoSelectFamilyAttemptTimeout?: number;
-    /** Node.JS socket option to set the time the first keepalive probe is sent on an idle socket. */
+    /** Node.JS socket option to set the time the first keepalive probe is sent on an idle socket. Defaults to 120000ms */
     keepAliveInitialDelay?: number;
   },
   (typeof LEGAL_TCP_SOCKET_OPTIONS)[number]

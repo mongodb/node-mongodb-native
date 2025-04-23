@@ -214,7 +214,7 @@ describe('class MongoClient', function () {
           spy.restore();
         });
 
-        it('sets the option to 0', {
+        it('the Node.js runtime sets the option to 0', {
           metadata: { requires: { apiVersion: false } },
           test: function () {
             expect(spy).to.have.been.calledWith(
@@ -222,6 +222,34 @@ describe('class MongoClient', function () {
                 keepAlive: true,
                 keepAliveInitialDelay: 0
               })
+            );
+          }
+        });
+      });
+
+      context('when the value is mistyped', function () {
+        // Set server selection timeout to get the error quicker.
+        const options = { keepAliveInitialDelay: 'test', serverSelectionTimeoutMS: 1000 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('throws an error', {
+          metadata: { requires: { apiVersion: false } },
+          test: async function () {
+            const error = await client.connect().catch(error => error);
+            expect(error.message).to.include(
+              'property must be of type number. Received type string'
             );
           }
         });
