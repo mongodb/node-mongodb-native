@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
 import * as net from 'net';
-import { Socket } from 'net';
 import * as sinon from 'sinon';
 
 import {
@@ -144,8 +143,9 @@ describe('class MongoClient', function () {
         let spy;
 
         beforeEach(async function () {
-          spy = sinon.spy(Socket.prototype, 'setKeepAlive');
-          client = this.configuration.newClient(options);
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
           await client.connect();
         });
 
@@ -155,7 +155,12 @@ describe('class MongoClient', function () {
         });
 
         it('passes through the option', function () {
-          expect(spy).to.have.been.calledWith(true, 0);
+          expect(spy).to.have.been.calledWith(
+            sinon.match({
+              keepAlive: true,
+              keepAliveInitialDelay: 0
+            })
+          );
         });
       });
 
@@ -165,8 +170,9 @@ describe('class MongoClient', function () {
         let spy;
 
         beforeEach(async function () {
-          spy = sinon.spy(Socket.prototype, 'setKeepAlive');
-          client = this.configuration.newClient(options);
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
           await client.connect();
         });
 
@@ -176,17 +182,39 @@ describe('class MongoClient', function () {
         });
 
         it('passes through the option', function () {
-          expect(spy).to.have.been.calledWith(true, 100);
+          expect(spy).to.have.been.calledWith(
+            sinon.match({
+              keepAlive: true,
+              keepAliveInitialDelay: 100
+            })
+          );
         });
       });
 
       context('when the value is negative', function () {
         const options = { keepAliveInitialDelay: -100 };
+        let client;
+        let spy;
 
-        it('raises an error', function () {
-          expect(() => {
-            this.configuration.newClient(options);
-          }).to.throw(/keepAliveInitialDelay can only be a positive int value/);
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('sets the option to 0', function () {
+          expect(spy).to.have.been.calledWith(
+            sinon.match({
+              keepAlive: true,
+              keepAliveInitialDelay: 0
+            })
+          );
         });
       });
     });
@@ -196,7 +224,7 @@ describe('class MongoClient', function () {
       let spy;
 
       beforeEach(async function () {
-        spy = sinon.spy(Socket.prototype, 'setKeepAlive');
+        spy = sinon.spy(net, 'createConnection');
         client = this.configuration.newClient();
         await client.connect();
       });
@@ -207,7 +235,12 @@ describe('class MongoClient', function () {
       });
 
       it('sets keepalive to 120000', function () {
-        expect(spy).to.have.been.calledWith(true, 120000);
+        expect(spy).to.have.been.calledWith(
+          sinon.match({
+            keepAlive: true,
+            keepAliveInitialDelay: 120000
+          })
+        );
       });
     });
   });

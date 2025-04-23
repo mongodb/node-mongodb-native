@@ -872,9 +872,6 @@ export const OPTIONS = {
       return wc;
     }
   },
-  keepAliveInitialDelay: {
-    type: 'uint'
-  },
   loadBalanced: {
     default: false,
     type: 'boolean'
@@ -1276,6 +1273,7 @@ export const OPTIONS = {
   requestCert: { type: 'any' },
   rejectUnauthorized: { type: 'any' },
   checkServerIdentity: { type: 'any' },
+  keepAliveInitialDelay: { type: 'any' },
   ALPNProtocols: { type: 'any' },
   SNICallback: { type: 'any' },
   session: { type: 'any' },

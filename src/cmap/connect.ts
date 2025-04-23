@@ -307,6 +307,10 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
       (result as Document)[name] = options[name];
     }
   }
+  if (result.keepAliveInitialDelay == null) {
+    result.keepAliveInitialDelay = 120000;
+  }
+  result.keepAlive = true;
 
   if (typeof hostAddress.socketPath === 'string') {
     result.path = hostAddress.socketPath;
@@ -377,7 +381,6 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     socket = net.createConnection(parseConnectOptions(options));
   }
 
-  socket.setKeepAlive(true, options.keepAliveInitialDelay ?? 120000);
   socket.setTimeout(connectTimeoutMS);
   socket.setNoDelay(noDelay);
 
