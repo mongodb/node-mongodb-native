@@ -307,9 +307,7 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
       (result as Document)[name] = options[name];
     }
   }
-  if (result.keepAliveInitialDelay == null) {
-    result.keepAliveInitialDelay = 120000;
-  }
+result.keepAliveInitialDelay ??= 120000;
   result.keepAlive = true;
   result.noDelay = options.noDelay ?? true;
 
