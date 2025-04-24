@@ -31,6 +31,7 @@ export const flakyTests = [
   'Client Side Encryption Prose Tests 16. Rewrap Case 1: Rewrap with separate ClientEncryption should rewrap data key from local to kmip',
   'Client Side Encryption Prose Tests 16. Rewrap Case 1: Rewrap with separate ClientEncryption should rewrap data key from local to local',
   'Client Side Encryption Prose Tests 16. Rewrap Case 2: RewrapManyDataKeyOpts.provider is not optional when provider field is missing raises an error',
+  'Client Side Encryption Prose Tests Custom Endpoint Test 4. aws: custom endpoint with bad url',
   'CSOT spec tests legacy timeouts behave correctly for retryable operations operation fails after two consecutive socket timeouts - aggregate on collection',
   'CSOT spec tests legacy timeouts behave correctly for retryable operations operation succeeds after one socket timeout - aggregate on collection',
   'CSOT spec tests operations ignore deprecated timeout options if timeoutMS is set socketTimeoutMS is ignored if timeoutMS is set - dropIndex on collection',

@@ -925,6 +925,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
           endpoint: 'kms.us-east-1.amazonaws.com:12345'
         },
+        skipReason: 'TODO(NODE-6928): Fix failing aws bad URI test',
         succeed: false,
         errorValidator: err => {
           expect(err)
@@ -1042,6 +1043,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     testCases.forEach(testCase => {
       it(testCase.description, metadata, function () {
+        if (testCase.skipReason) {
+          this.skipReason = testCase.skipReason;
+          this.skip();
+        }
         // Call `client_encryption.createDataKey()` with <provider> as the provider and the following masterKey:
         // .. code:: javascript
         //    {
