@@ -1035,7 +1035,7 @@ describe('class MongoClient', function () {
         client.on('commandStarted', ev => ev.commandName === 'killCursors' && kills.push(ev));
       });
 
-      it('are all closed', async () => {
+      it('are all closed', async function () {
         const cursors = Array.from({ length: 30 }, (_, skip) =>
           collection.find({}, { skip, batchSize: 1 })
         );
@@ -1043,7 +1043,7 @@ describe('class MongoClient', function () {
         expect(client.s.activeCursors).to.have.lengthOf(30);
         await client.close();
         expect(client.s.activeCursors).to.have.lengthOf(0);
-        expect(kills).to.have.lengthOf(30);
+        expect(kills).to.have.lengthOf(this.configuration.topologyType === 'LoadBalanced' ? 0 : 30);
       });
 
       it('creating cursors after close adds to activeCursors', async () => {

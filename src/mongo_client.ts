@@ -641,7 +641,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * Cleans up client-side resources used by the MongoCLient and .  This includes:
+   * Cleans up client-side resources used by the MongoClient.
+   *
+   * This includes:
    *
    * - Closes all open, unused connections (see note).
    * - Ends all in-use sessions with {@link ClientSession#endSession|ClientSession.endSession()}.
@@ -676,6 +678,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       configurable: false,
       writable: false
     });
+
+    this.topology?.closeCheckedOutConnections();
 
     const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
     this.s.activeCursors.clear();

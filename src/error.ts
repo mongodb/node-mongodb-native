@@ -1018,6 +1018,62 @@ export class MongoTopologyClosedError extends MongoAPIError {
   }
 }
 
+/**
+ * An error generated when the MongoClient is closed and async
+ * operations are interrupted.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoClientClosedError extends MongoAPIError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message = 'MongoClient is closed') {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoClientClosedError';
+  }
+}
+
+/**
+ * An error generated when a ConnectionPool is closed and async
+ * operations are interrupted.
+ *
+ * @public
+ * @category Error
+ */
+export class ConnectionPoolClosedError extends MongoAPIError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message = 'ConnectionPool is closed') {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'ConnectionPoolClosedError';
+  }
+}
+
 /** @public */
 export interface MongoNetworkErrorOptions {
   /** Indicates the timeout happened before a connection handshake completed */
