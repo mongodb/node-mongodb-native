@@ -913,7 +913,9 @@ describe('CRUD API', function () {
           const error = await collection
             .updateOne({ a: 1 }, { $set: undefined, $unset: undefined }, { ignoreUndefined: true })
             .catch(error => error);
-          expect(error.message).to.include('All atomic operators provided have undefined values.');
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
         });
       }
     );
@@ -937,7 +939,9 @@ describe('CRUD API', function () {
           const error = await collection
             .updateMany({ a: 1 }, { $set: undefined, $unset: undefined }, { ignoreUndefined: true })
             .catch(error => error);
-          expect(error.message).to.include('All atomic operators provided have undefined values.');
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
         });
       }
     );
@@ -965,7 +969,9 @@ describe('CRUD API', function () {
               { ignoreUndefined: true }
             )
             .catch(error => error);
-          expect(error.message).to.include('All atomic operators provided have undefined values.');
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
         });
       }
     );

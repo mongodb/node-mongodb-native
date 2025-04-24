@@ -66,7 +66,7 @@ describe('Bulk', function () {
               )
               .catch(error => error);
             expect(error.message).to.include(
-              'All atomic operators provided have undefined values.'
+              'Update operations require that all atomic operators have defined values, but none were provided'
             );
           });
         });
@@ -88,7 +88,7 @@ describe('Bulk', function () {
               )
               .catch(error => error);
             expect(error.message).to.include(
-              'All atomic operators provided have undefined values.'
+              'Update operations require that all atomic operators have defined values, but none were provided'
             );
           });
         });

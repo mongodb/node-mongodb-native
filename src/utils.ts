@@ -501,7 +501,9 @@ export function hasAtomicOperators(
       }
     }
     if (allUndefined) {
-      throw new MongoInvalidArgumentError('All atomic operators provided have undefined values.');
+      throw new MongoInvalidArgumentError(
+        'Update operations require that all atomic operators have defined values, but none were provided.'
+      );
     }
   }
 
