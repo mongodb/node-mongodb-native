@@ -645,23 +645,23 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    *
    * This includes:
    *
-   * - Closes all open, unused connections (see note).
+   * - Closes in-use connections.
+   * - Closes all active cursors.
    * - Ends all in-use sessions with {@link ClientSession#endSession|ClientSession.endSession()}.
+   *   - aborts in progress transactions if is one related to the session.
    * - Ends all unused sessions server-side.
+   * - Closes all remaining idle connections.
    * - Cleans up any resources being used for auto encryption if auto encryption is enabled.
    *
-   * @remarks Any in-progress operations are not killed and any connections used by in progress operations
-   * will be cleaned up lazily as operations finish.
-   *
-   * @param force - Force close, emitting no events
+   * @param _force - currently an unused flag that has no effect. Defaults to `false`.
    */
-  async close(force = false): Promise<void> {
+  async close(_force = false): Promise<void> {
     if (this.closeLock) {
       return await this.closeLock;
     }
 
     try {
-      this.closeLock = this._close(force);
+      this.closeLock = this._close();
       await this.closeLock;
     } finally {
       // release
@@ -670,7 +670,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /* @internal */
-  private async _close(force = false): Promise<void> {
+  private async _close(): Promise<void> {
     // There's no way to set hasBeenClosed back to false
     Object.defineProperty(this.s, 'hasBeenClosed', {
       value: true,
@@ -726,7 +726,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
     const { encrypter } = this.options;
     if (encrypter) {
-      await encrypter.close(this, force);
+      await encrypter.close(this);
     }
   }
 
