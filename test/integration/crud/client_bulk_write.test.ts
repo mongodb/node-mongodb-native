@@ -31,7 +31,7 @@ describe('Client Bulk Write', function () {
 
   afterEach(async function () {
     await client?.close();
-    await clearFailPoint(this.configuration);
+    await clearFailPoint(this.configuration).catch(() => null);
   });
 
   describe('#bulkWrite', function () {
