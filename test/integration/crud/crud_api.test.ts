@@ -15,8 +15,6 @@ import {
   ReturnDocument
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
-import { assert as test } from '../shared';
-
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
 // backwards compatibility in a fundamental way
@@ -908,18 +906,21 @@ describe('CRUD API', function () {
       await collection.drop();
     });
 
-    context('when including an update with all undefined atomic operators', function () {
-      beforeEach(async function () {
-        client = this.configuration.newClient();
-      });
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
 
-      it('throws an error', async function () {
-        const error = await collection
-          .updateOne({ a: 1 }, { $set: undefined, $unset: undefined })
-          .catch(error => error);
-        expect(error.message).to.include('All atomic operators provided have undefined values.');
-      });
-    });
+        it('throws an error', async function () {
+          const error = await collection
+            .updateOne({ a: 1 }, { $set: undefined, $unset: undefined }, { ignoreUndefined: true })
+            .catch(error => error);
+          expect(error.message).to.include('All atomic operators provided have undefined values.');
+        });
+      }
+    );
   });
 
   describe('#updateMany', function () {
@@ -934,18 +935,21 @@ describe('CRUD API', function () {
       await collection.drop();
     });
 
-    context('when including an update with all undefined atomic operators', function () {
-      beforeEach(async function () {
-        client = this.configuration.newClient();
-      });
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
 
-      it('throws an error', async function () {
-        const error = await collection
-          .updateMany({ a: 1 }, { $set: undefined, $unset: undefined })
-          .catch(error => error);
-        expect(error.message).to.include('All atomic operators provided have undefined values.');
-      });
-    });
+        it('throws an error', async function () {
+          const error = await collection
+            .updateMany({ a: 1 }, { $set: undefined, $unset: undefined }, { ignoreUndefined: true })
+            .catch(error => error);
+          expect(error.message).to.include('All atomic operators provided have undefined values.');
+        });
+      }
+    );
   });
 
   describe('#findOneAndUpdate', function () {
@@ -960,18 +964,21 @@ describe('CRUD API', function () {
       await collection.drop();
     });
 
-    context('when including an update with all undefined atomic operators', function () {
-      beforeEach(async function () {
-        client = this.configuration.newClient();
-      });
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
 
-      it('throws an error', async function () {
-        const error = await collection
-          .findOneAndUpdate({ a: 1 }, { $set: undefined, $unset: undefined })
-          .catch(error => error);
-        expect(error.message).to.include('All atomic operators provided have undefined values.');
-      });
-    });
+        it('throws an error', async function () {
+          const error = await collection
+            .findOneAndUpdate({ a: 1 }, { $set: undefined, $unset: undefined })
+            .catch(error => error);
+          expect(error.message).to.include('All atomic operators provided have undefined values.');
+        });
+      }
+    );
 
     context('when includeResultMetadata is true', function () {
       beforeEach(async function () {

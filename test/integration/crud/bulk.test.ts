@@ -48,37 +48,49 @@ describe('Bulk', function () {
 
   describe('#bulkWrite', function () {
     context('when including an update with all undefined atomic operators', function () {
-      context('when performing an update many', function () {
-        it('throws an error', async function () {
-          const collection = client.db('test').collection('test');
-          const error = await collection
-            .bulkWrite([
-              {
-                updateMany: {
-                  filter: { age: { $lte: 5 } },
-                  update: { $set: undefined, $unset: undefined }
-                }
-              }
-            ])
-            .catch(error => error);
-          expect(error.message).to.include('All atomic operators provided have undefined values.');
+      context('when ignoreUndefined is true', function () {
+        context('when performing an update many', function () {
+          it('throws an error', async function () {
+            const collection = client.db('test').collection('test');
+            const error = await collection
+              .bulkWrite(
+                [
+                  {
+                    updateMany: {
+                      filter: { age: { $lte: 5 } },
+                      update: { $set: undefined, $unset: undefined }
+                    }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'All atomic operators provided have undefined values.'
+            );
+          });
         });
-      });
 
-      context('when performing an update one', function () {
-        it('throws an error', async function () {
-          const collection = client.db('test').collection('test');
-          const error = await collection
-            .bulkWrite([
-              {
-                updateOne: {
-                  filter: { age: { $lte: 5 } },
-                  update: { $set: undefined, $unset: undefined }
-                }
-              }
-            ])
-            .catch(error => error);
-          expect(error.message).to.include('All atomic operators provided have undefined values.');
+        context('when performing an update one', function () {
+          it('throws an error', async function () {
+            const collection = client.db('test').collection('test');
+            const error = await collection
+              .bulkWrite(
+                [
+                  {
+                    updateOne: {
+                      filter: { age: { $lte: 5 } },
+                      update: { $set: undefined, $unset: undefined }
+                    }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'All atomic operators provided have undefined values.'
+            );
+          });
         });
       });
     });

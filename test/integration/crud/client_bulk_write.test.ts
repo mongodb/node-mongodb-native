@@ -35,44 +35,56 @@ describe('Client Bulk Write', function () {
   });
 
   describe('#bulkWrite', function () {
-    context('when including an update with all undefined atomic operators', function () {
-      context('when performing an update many', function () {
-        beforeEach(async function () {
-          client = this.configuration.newClient();
+    context('when ignoreUndefined is true', function () {
+      context('when including an update with all undefined atomic operators', function () {
+        context('when performing an update many', function () {
+          beforeEach(async function () {
+            client = this.configuration.newClient();
+          });
+
+          it('throws an error', async function () {
+            const error = await client
+              .bulkWrite(
+                [
+                  {
+                    name: 'updateMany',
+                    namespace: 'foo.bar',
+                    filter: { age: { $lte: 5 } },
+                    update: { $set: undefined, $unset: undefined }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'All atomic operators provided have undefined values.'
+            );
+          });
         });
 
-        it('throws an error', async function () {
-          const error = await client
-            .bulkWrite([
-              {
-                name: 'updateMany',
-                namespace: 'foo.bar',
-                filter: { age: { $lte: 5 } },
-                update: { $set: undefined, $unset: undefined }
-              }
-            ])
-            .catch(error => error);
-          expect(error.message).to.include('All atomic operators provided have undefined values.');
-        });
-      });
+        context('when performing an update one', function () {
+          beforeEach(async function () {
+            client = this.configuration.newClient();
+          });
 
-      context('when performing an update one', function () {
-        beforeEach(async function () {
-          client = this.configuration.newClient();
-        });
-
-        it('throws an error', async function () {
-          const error = await client
-            .bulkWrite([
-              {
-                name: 'updateOne',
-                namespace: 'foo.bar',
-                filter: { age: { $lte: 5 } },
-                update: { $set: undefined, $unset: undefined }
-              }
-            ])
-            .catch(error => error);
-          expect(error.message).to.include('All atomic operators provided have undefined values.');
+          it('throws an error', async function () {
+            const error = await client
+              .bulkWrite(
+                [
+                  {
+                    name: 'updateOne',
+                    namespace: 'foo.bar',
+                    filter: { age: { $lte: 5 } },
+                    update: { $set: undefined, $unset: undefined }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'All atomic operators provided have undefined values.'
+            );
+          });
         });
       });
     });
