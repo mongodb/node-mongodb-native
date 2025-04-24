@@ -1,4 +1,4 @@
-import { BSON, type Document } from '../../bson';
+import { BSON, type BSONSerializeOptions, type Document } from '../../bson';
 import { DocumentSequence } from '../../cmap/commands';
 import { MongoAPIError, MongoInvalidArgumentError } from '../../error';
 import { type PkFactory } from '../../mongo_client';
@@ -128,7 +128,7 @@ export class ClientBulkWriteCommandBuilder {
 
       if (nsIndex != null) {
         // Build the operation and serialize it to get the bytes buffer.
-        const operation = buildOperation(model, nsIndex, this.pkFactory);
+        const operation = buildOperation(model, nsIndex, this.pkFactory, this.options);
         let operationBuffer;
         try {
           operationBuffer = BSON.serialize(operation);
@@ -159,7 +159,12 @@ export class ClientBulkWriteCommandBuilder {
         // construct our nsInfo and ops documents and buffers.
         namespaces.set(ns, currentNamespaceIndex);
         const nsInfo = { ns: ns };
-        const operation = buildOperation(model, currentNamespaceIndex, this.pkFactory);
+        const operation = buildOperation(
+          model,
+          currentNamespaceIndex,
+          this.pkFactory,
+          this.options
+        );
         let nsInfoBuffer;
         let operationBuffer;
         try {
@@ -339,9 +344,10 @@ export interface ClientUpdateOperation {
  */
 export const buildUpdateOneOperation = (
   model: ClientUpdateOneModel<Document>,
-  index: number
+  index: number,
+  options: BSONSerializeOptions
 ): ClientUpdateOperation => {
-  return createUpdateOperation(model, index, false);
+  return createUpdateOperation(model, index, false, options);
 };
 
 /**
@@ -352,17 +358,18 @@ export const buildUpdateOneOperation = (
  */
 export const buildUpdateManyOperation = (
   model: ClientUpdateManyModel<Document>,
-  index: number
+  index: number,
+  options: BSONSerializeOptions
 ): ClientUpdateOperation => {
-  return createUpdateOperation(model, index, true);
+  return createUpdateOperation(model, index, true, options);
 };
 
 /**
  * Validate the update document.
  * @param update - The update document.
  */
-function validateUpdate(update: Document) {
-  if (!hasAtomicOperators(update)) {
+function validateUpdate(update: Document, options: BSONSerializeOptions) {
+  if (!hasAtomicOperators(update, options)) {
     throw new MongoAPIError(
       'Client bulk write update models must only contain atomic modifiers (start with $) and must not be empty.'
     );
@@ -375,13 +382,14 @@ function validateUpdate(update: Document) {
 function createUpdateOperation(
   model: ClientUpdateOneModel<Document> | ClientUpdateManyModel<Document>,
   index: number,
-  multi: boolean
+  multi: boolean,
+  options: BSONSerializeOptions
 ): ClientUpdateOperation {
   // Update documents provided in UpdateOne and UpdateMany write models are
   // required only to contain atomic modifiers (i.e. keys that start with "$").
   // Drivers MUST throw an error if an update document is empty or if the
   // document's first key does not start with "$".
-  validateUpdate(model.update);
+  validateUpdate(model.update, options);
   const document: ClientUpdateOperation = {
     update: index,
     multi: multi,
@@ -459,7 +467,8 @@ export const buildReplaceOneOperation = (
 export function buildOperation(
   model: AnyClientBulkWriteModel<Document>,
   index: number,
-  pkFactory: PkFactory
+  pkFactory: PkFactory,
+  options: BSONSerializeOptions
 ): Document {
   switch (model.name) {
     case 'insertOne':
@@ -469,9 +478,9 @@ export function buildOperation(
     case 'deleteMany':
       return buildDeleteManyOperation(model, index);
     case 'updateOne':
-      return buildUpdateOneOperation(model, index);
+      return buildUpdateOneOperation(model, index, options);
     case 'updateMany':
-      return buildUpdateManyOperation(model, index);
+      return buildUpdateManyOperation(model, index, options);
     case 'replaceOne':
       return buildReplaceOneOperation(model, index);
   }

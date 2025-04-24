@@ -34,6 +34,50 @@ describe('Client Bulk Write', function () {
     await clearFailPoint(this.configuration);
   });
 
+  describe('#bulkWrite', function () {
+    context('when including an update with all undefined atomic operators', function () {
+      context('when performing an update many', function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
+
+        it('throws an error', async function () {
+          const error = await client
+            .bulkWrite([
+              {
+                name: 'updateMany',
+                namespace: 'foo.bar',
+                filter: { age: { $lte: 5 } },
+                update: { $set: undefined, $unset: undefined }
+              }
+            ])
+            .catch(error => error);
+          expect(error.message).to.include('All atomic operators provided have undefined values.');
+        });
+      });
+
+      context('when performing an update one', function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
+
+        it('throws an error', async function () {
+          const error = await client
+            .bulkWrite([
+              {
+                name: 'updateOne',
+                namespace: 'foo.bar',
+                filter: { age: { $lte: 5 } },
+                update: { $set: undefined, $unset: undefined }
+              }
+            ])
+            .catch(error => error);
+          expect(error.message).to.include('All atomic operators provided have undefined values.');
+        });
+      });
+    });
+  });
+
   describe('CSOT enabled', function () {
     describe('when timeoutMS is set on the client', function () {
       beforeEach(async function () {

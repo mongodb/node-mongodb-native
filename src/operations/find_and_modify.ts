@@ -273,7 +273,7 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
       throw new MongoInvalidArgumentError('Argument "update" must be an object');
     }
 
-    if (!hasAtomicOperators(update)) {
+    if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
 

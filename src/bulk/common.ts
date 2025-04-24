@@ -705,7 +705,7 @@ export class FindOperators {
 
   /** Add a single update operation to the bulk operation */
   updateOne(updateDocument: Document | Document[]): BulkOperationBase {
-    if (!hasAtomicOperators(updateDocument)) {
+    if (!hasAtomicOperators(updateDocument, this.bulkOperation.bsonOptions)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
 
@@ -1115,7 +1115,7 @@ export abstract class BulkOperationBase {
           ...op.updateOne,
           multi: false
         });
-        if (!hasAtomicOperators(updateStatement.u)) {
+        if (!hasAtomicOperators(updateStatement.u, this.bsonOptions)) {
           throw new MongoInvalidArgumentError('Update document requires atomic operators');
         }
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
@@ -1129,7 +1129,7 @@ export abstract class BulkOperationBase {
           ...op.updateMany,
           multi: true
         });
-        if (!hasAtomicOperators(updateStatement.u)) {
+        if (!hasAtomicOperators(updateStatement.u, this.bsonOptions)) {
           throw new MongoInvalidArgumentError('Update document requires atomic operators');
         }
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);

@@ -144,7 +144,7 @@ export class UpdateOneOperation extends UpdateOperation {
       options
     );
 
-    if (!hasAtomicOperators(update)) {
+    if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
@@ -179,7 +179,7 @@ export class UpdateManyOperation extends UpdateOperation {
       options
     );
 
-    if (!hasAtomicOperators(update)) {
+    if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }

@@ -896,6 +896,58 @@ describe('CRUD API', function () {
     });
   });
 
+  describe('#updateOne', function () {
+    let collection;
+
+    beforeEach(async function () {
+      await client.connect();
+      collection = client.db().collection('updateOneTest');
+    });
+
+    afterEach(async function () {
+      await collection.drop();
+    });
+
+    context('when including an update with all undefined atomic operators', function () {
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+      });
+
+      it('throws an error', async function () {
+        const error = await collection
+          .updateOne({ a: 1 }, { $set: undefined, $unset: undefined })
+          .catch(error => error);
+        expect(error.message).to.include('All atomic operators provided have undefined values.');
+      });
+    });
+  });
+
+  describe('#updateMany', function () {
+    let collection;
+
+    beforeEach(async function () {
+      await client.connect();
+      collection = client.db().collection('updateManyTest');
+    });
+
+    afterEach(async function () {
+      await collection.drop();
+    });
+
+    context('when including an update with all undefined atomic operators', function () {
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+      });
+
+      it('throws an error', async function () {
+        const error = await collection
+          .updateMany({ a: 1 }, { $set: undefined, $unset: undefined })
+          .catch(error => error);
+        expect(error.message).to.include('All atomic operators provided have undefined values.');
+      });
+    });
+  });
+
   describe('#findOneAndUpdate', function () {
     let collection;
 
@@ -906,6 +958,19 @@ describe('CRUD API', function () {
 
     afterEach(async function () {
       await collection.drop();
+    });
+
+    context('when including an update with all undefined atomic operators', function () {
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+      });
+
+      it('throws an error', async function () {
+        const error = await collection
+          .findOneAndUpdate({ a: 1 }, { $set: undefined, $unset: undefined })
+          .catch(error => error);
+        expect(error.message).to.include('All atomic operators provided have undefined values.');
+      });
     });
 
     context('when includeResultMetadata is true', function () {

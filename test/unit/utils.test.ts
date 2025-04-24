@@ -28,7 +28,7 @@ import {
 import { sleep } from '../tools/utils';
 
 describe('driver utils', function () {
-  describe.only('.hasAtomicOperators', function () {
+  describe('.hasAtomicOperators', function () {
     context('when ignoreUndefined is true', function () {
       const options = { ignoreUndefined: true };
 
