@@ -899,7 +899,6 @@ describe('CRUD API', function () {
     let collection;
 
     beforeEach(async function () {
-      await client.connect();
       collection = client.db().collection('updateOneTest');
     });
 
@@ -924,7 +923,6 @@ describe('CRUD API', function () {
     let collection;
 
     beforeEach(async function () {
-      await client.connect();
       collection = client.db().collection('updateManyTest');
     });
 
@@ -949,7 +947,6 @@ describe('CRUD API', function () {
     let collection;
 
     beforeEach(async function () {
-      await client.connect();
       collection = client.db().collection('findAndModifyTest');
     });
 
