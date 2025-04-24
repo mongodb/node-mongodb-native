@@ -15,6 +15,7 @@ import {
   ReturnDocument
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
+import { assert as test } from '../shared';
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
 // backwards compatibility in a fundamental way
