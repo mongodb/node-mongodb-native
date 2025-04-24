@@ -903,10 +903,6 @@ describe('CRUD API', function () {
       collection = client.db().collection('updateOneTest');
     });
 
-    afterEach(async function () {
-      await collection.drop();
-    });
-
     context(
       'when including an update with all undefined atomic operators ignoring undefined',
       function () {
@@ -932,10 +928,6 @@ describe('CRUD API', function () {
       collection = client.db().collection('updateManyTest');
     });
 
-    afterEach(async function () {
-      await collection.drop();
-    });
-
     context(
       'when including an update with all undefined atomic operators ignoring undefined',
       function () {
@@ -959,10 +951,6 @@ describe('CRUD API', function () {
     beforeEach(async function () {
       await client.connect();
       collection = client.db().collection('findAndModifyTest');
-    });
-
-    afterEach(async function () {
-      await collection.drop();
     });
 
     context(
