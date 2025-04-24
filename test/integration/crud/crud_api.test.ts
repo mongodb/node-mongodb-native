@@ -959,7 +959,11 @@ describe('CRUD API', function () {
 
         it('throws an error', async function () {
           const error = await collection
-            .findOneAndUpdate({ a: 1 }, { $set: undefined, $unset: undefined })
+            .findOneAndUpdate(
+              { a: 1 },
+              { $set: undefined, $unset: undefined },
+              { ignoreUndefined: true }
+            )
             .catch(error => error);
           expect(error.message).to.include('All atomic operators provided have undefined values.');
         });
