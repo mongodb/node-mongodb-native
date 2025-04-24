@@ -98,7 +98,7 @@ export class Encrypter {
   async close(client: MongoClient): Promise<void> {
     let error;
     try {
-      await this.autoEncrypter.teardown();
+      await this.autoEncrypter.close();
     } catch (autoEncrypterError) {
       error = autoEncrypterError;
     }
