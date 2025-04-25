@@ -46,6 +46,56 @@ describe('Bulk', function () {
     client = null;
   });
 
+  describe('#bulkWrite', function () {
+    context('when including an update with all undefined atomic operators', function () {
+      context('when ignoreUndefined is true', function () {
+        context('when performing an update many', function () {
+          it('throws an error', async function () {
+            const collection = client.db('test').collection('test');
+            const error = await collection
+              .bulkWrite(
+                [
+                  {
+                    updateMany: {
+                      filter: { age: { $lte: 5 } },
+                      update: { $set: undefined, $unset: undefined }
+                    }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'Update operations require that all atomic operators have defined values, but none were provided'
+            );
+          });
+        });
+
+        context('when performing an update one', function () {
+          it('throws an error', async function () {
+            const collection = client.db('test').collection('test');
+            const error = await collection
+              .bulkWrite(
+                [
+                  {
+                    updateOne: {
+                      filter: { age: { $lte: 5 } },
+                      update: { $set: undefined, $unset: undefined }
+                    }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'Update operations require that all atomic operators have defined values, but none were provided'
+            );
+          });
+        });
+      });
+    });
+  });
+
   describe('BulkOperationBase', () => {
     describe('#raw()', function () {
       context('when called with an undefined operation', function () {

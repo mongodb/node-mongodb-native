@@ -31,7 +31,63 @@ describe('Client Bulk Write', function () {
 
   afterEach(async function () {
     await client?.close();
-    await clearFailPoint(this.configuration);
+    await clearFailPoint(this.configuration).catch(() => null);
+  });
+
+  describe('#bulkWrite', function () {
+    context('when ignoreUndefined is true', function () {
+      context('when including an update with all undefined atomic operators', function () {
+        context('when performing an update many', function () {
+          beforeEach(async function () {
+            client = this.configuration.newClient();
+          });
+
+          it('throws an error', async function () {
+            const error = await client
+              .bulkWrite(
+                [
+                  {
+                    name: 'updateMany',
+                    namespace: 'foo.bar',
+                    filter: { age: { $lte: 5 } },
+                    update: { $set: undefined, $unset: undefined }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'Update operations require that all atomic operators have defined values, but none were provided'
+            );
+          });
+        });
+
+        context('when performing an update one', function () {
+          beforeEach(async function () {
+            client = this.configuration.newClient();
+          });
+
+          it('throws an error', async function () {
+            const error = await client
+              .bulkWrite(
+                [
+                  {
+                    name: 'updateOne',
+                    namespace: 'foo.bar',
+                    filter: { age: { $lte: 5 } },
+                    update: { $set: undefined, $unset: undefined }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'Update operations require that all atomic operators have defined values, but none were provided'
+            );
+          });
+        });
+      });
+    });
   });
 
   describe('CSOT enabled', function () {

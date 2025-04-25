@@ -476,7 +476,10 @@ export function calculateDurationInMs(started: number | undefined): number {
 }
 
 /** @internal */
-export function hasAtomicOperators(doc: Document | Document[]): boolean {
+export function hasAtomicOperators(
+  doc: Document | Document[],
+  options?: CommandOperationOptions
+): boolean {
   if (Array.isArray(doc)) {
     for (const document of doc) {
       if (hasAtomicOperators(document)) {
@@ -487,6 +490,23 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
   }
 
   const keys = Object.keys(doc);
+  // In this case we need to throw if all the atomic operators are undefined.
+  if (options?.ignoreUndefined) {
+    let allUndefined = true;
+    for (const key of keys) {
+      // eslint-disable-next-line no-restricted-syntax
+      if (doc[key] !== undefined) {
+        allUndefined = false;
+        break;
+      }
+    }
+    if (allUndefined) {
+      throw new MongoInvalidArgumentError(
+        'Update operations require that all atomic operators have defined values, but none were provided.'
+      );
+    }
+  }
+
   return keys.length > 0 && keys[0][0] === '$';
 }
 

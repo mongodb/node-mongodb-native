@@ -11,6 +11,7 @@ import {
   compareObjectId,
   decorateWithExplain,
   Explain,
+  hasAtomicOperators,
   HostAddress,
   hostMatchesWildcards,
   isHello,
@@ -19,6 +20,7 @@ import {
   List,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
+  MongoInvalidArgumentError,
   MongoRuntimeError,
   ObjectId,
   shuffle
@@ -26,6 +28,66 @@ import {
 import { sleep } from '../tools/utils';
 
 describe('driver utils', function () {
+  describe('.hasAtomicOperators', function () {
+    context('when ignoreUndefined is true', function () {
+      const options = { ignoreUndefined: true };
+
+      context('when no operator is undefined', function () {
+        const document = { $set: { n: 1 }, $unset: '' };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+
+      context('when some operators are undefined', function () {
+        const document = { $set: { n: 1 }, $unset: undefined };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+
+      context('when all operators are undefined', function () {
+        const document = { $set: undefined, $unset: undefined };
+
+        it('throws an error', function () {
+          expect(() => {
+            hasAtomicOperators(document, options);
+          }).to.throw(MongoInvalidArgumentError);
+        });
+      });
+    });
+
+    context('when ignoreUndefined is false', function () {
+      const options = { ignoreUndefined: false };
+
+      context('when no operator is undefined', function () {
+        const document = { $set: { n: 1 }, $unset: '' };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+
+      context('when some operators are undefined', function () {
+        const document = { $set: { n: 1 }, $unset: undefined };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+
+      context('when all operators are undefined', function () {
+        const document = { $set: undefined, $unset: undefined };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+    });
+  });
+
   describe('.hostMatchesWildcards', function () {
     context('when using domains', function () {
       context('when using exact match', function () {

@@ -16,7 +16,6 @@ import {
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
-
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
 // backwards compatibility in a fundamental way
@@ -896,17 +895,86 @@ describe('CRUD API', function () {
     });
   });
 
+  describe('#updateOne', function () {
+    let collection;
+
+    beforeEach(async function () {
+      collection = client.db().collection('updateOneTest');
+    });
+
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
+
+        it('throws an error', async function () {
+          const error = await collection
+            .updateOne({ a: 1 }, { $set: undefined, $unset: undefined }, { ignoreUndefined: true })
+            .catch(error => error);
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
+        });
+      }
+    );
+  });
+
+  describe('#updateMany', function () {
+    let collection;
+
+    beforeEach(async function () {
+      collection = client.db().collection('updateManyTest');
+    });
+
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
+
+        it('throws an error', async function () {
+          const error = await collection
+            .updateMany({ a: 1 }, { $set: undefined, $unset: undefined }, { ignoreUndefined: true })
+            .catch(error => error);
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
+        });
+      }
+    );
+  });
+
   describe('#findOneAndUpdate', function () {
     let collection;
 
     beforeEach(async function () {
-      await client.connect();
       collection = client.db().collection('findAndModifyTest');
     });
 
-    afterEach(async function () {
-      await collection.drop();
-    });
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
+
+        it('throws an error', async function () {
+          const error = await collection
+            .findOneAndUpdate(
+              { a: 1 },
+              { $set: undefined, $unset: undefined },
+              { ignoreUndefined: true }
+            )
+            .catch(error => error);
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
+        });
+      }
+    );
 
     context('when includeResultMetadata is true', function () {
       beforeEach(async function () {
