@@ -17,7 +17,7 @@ import {
 } from '../constants';
 import {
   type AnyError,
-  ConnectionPoolClosedError,
+  MongoClientClosedError,
   type MongoError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
@@ -496,7 +496,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         ConnectionPool.CONNECTION_CLOSED,
         new ConnectionClosedEvent(this, conn, 'poolClosed')
       );
-      conn.onError(new ConnectionPoolClosedError());
+      conn.onError(new MongoClientClosedError());
     }
   }
 

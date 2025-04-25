@@ -36,7 +36,6 @@ const EXPECTED_EXPORTS = [
   'ConnectionClosedEvent',
   'ConnectionCreatedEvent',
   'ConnectionPoolClearedEvent',
-  'ConnectionPoolClosedError',
   'ConnectionPoolClosedEvent',
   'ConnectionPoolCreatedEvent',
   'ConnectionPoolMonitoringEvent',

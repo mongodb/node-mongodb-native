@@ -11,7 +11,7 @@ const { Writable } = require('stream');
 const { once, on } = require('events');
 const { setTimeout } = require('timers');
 const { ReadPreference } = require('../../mongodb');
-const { ServerType, ConnectionPoolClosedError } = require('../../mongodb');
+const { ServerType, MongoClientClosedError } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
 
 describe('Cursor', function () {
@@ -1873,7 +1873,7 @@ describe('Cursor', function () {
 
     const error = await rejectedEarlyBecauseClientClosed;
     if (this.configuration.topologyType === 'LoadBalanced') {
-      expect(error).to.be.instanceOf(ConnectionPoolClosedError);
+      expect(error).to.be.instanceOf(MongoClientClosedError);
     } else {
       expect(error).to.be.null;
     }
