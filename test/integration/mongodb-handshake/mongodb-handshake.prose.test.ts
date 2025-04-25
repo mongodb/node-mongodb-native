@@ -8,6 +8,24 @@ import {
   LEGACY_HELLO_COMMAND,
   type MongoClient
 } from '../../mongodb';
+
+type EnvironmentVariables = Array<[string, string]>;
+
+function stubEnv(env: EnvironmentVariables) {
+  let cachedEnv: NodeJS.ProcessEnv;
+  before(function () {
+    cachedEnv = process.env;
+    process.env = {
+      ...process.env,
+      ...Object.fromEntries(env)
+    };
+  });
+
+  after(function () {
+    process.env = cachedEnv;
+  });
+}
+
 describe('Handshake Prose Tests', function () {
   let client: MongoClient;
 
@@ -15,7 +33,6 @@ describe('Handshake Prose Tests', function () {
     await client?.close();
   });
 
-  type EnvironmentVariables = Array<[string, string]>;
   const tests: Array<{
     context: string;
     expectedProvider: string | undefined;
@@ -86,16 +103,7 @@ describe('Handshake Prose Tests', function () {
 
   for (const { context: name, env, expectedProvider } of tests) {
     context(name, function () {
-      before(() => {
-        for (const [key, value] of env) {
-          process.env[key] = value;
-        }
-      });
-      after(() => {
-        for (const [key] of env) {
-          delete process.env[key];
-        }
-      });
+      stubEnv(env);
 
       it(`metadata confirmation test for ${name}`, function () {
         expect(getFAASEnv()?.get('name')).to.equal(
@@ -117,22 +125,12 @@ describe('Handshake Prose Tests', function () {
   }
 
   context('Test 9: Valid container and FaaS provider', function () {
-    const env = [
+    stubEnv([
       ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
       ['AWS_REGION', 'us-east-2'],
       ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '1024'],
       ['KUBERNETES_SERVICE_HOST', '1']
-    ] as EnvironmentVariables;
-    before(() => {
-      for (const [key, value] of env) {
-        process.env[key] = value;
-      }
-    });
-    after(() => {
-      for (const [key] of env) {
-        delete process.env[key];
-      }
-    });
+    ]);
 
     it('runs a hello successfully', async function () {
       client = this.configuration.newClient({
