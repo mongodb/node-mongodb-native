@@ -2,7 +2,14 @@ import { once } from 'node:events';
 
 import { expect } from 'chai';
 
-import { type ConnectionPoolCreatedEvent, type Db, type MongoClient } from '../../mongodb';
+import {
+  type ConnectionCheckedInEvent,
+  type ConnectionCheckedOutEvent,
+  type ConnectionPoolCreatedEvent,
+  type Db,
+  type MongoClient
+} from '../../mongodb';
+import { clearFailPoint, configureFailPoint, sleep } from '../../tools/utils';
 
 describe('Connection Pool', function () {
   let client: MongoClient;
@@ -64,5 +71,70 @@ describe('Connection Pool', function () {
         });
       });
     });
+
+    describe(
+      'ConnectionCheckedInEvent',
+      { requires: { mongodb: '>=4.4', topology: 'single' } },
+      function () {
+        let client: MongoClient;
+
+        beforeEach(async function () {
+          await configureFailPoint(this.configuration, {
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['insert'],
+              blockConnection: true,
+              blockTimeMS: 500
+            }
+          });
+
+          client = this.configuration.newClient();
+          await client.connect();
+          await Promise.all(Array.from({ length: 100 }, () => client.db().command({ ping: 1 })));
+        });
+
+        afterEach(async function () {
+          await clearFailPoint(this.configuration);
+          await client.close();
+        });
+
+        describe('when a MongoClient is closed', function () {
+          it(
+            'a connection pool emits checked in events for closed connections',
+            { requires: { mongodb: '>=4.4', topology: 'single' } },
+            async () => {
+              const connectionCheckedOutEvents: ConnectionCheckedOutEvent[] = [];
+              client.on('connectionCheckedOut', event => connectionCheckedOutEvents.push(event));
+              const connectionCheckedInEvents: ConnectionCheckedInEvent[] = [];
+              client.on('connectionCheckedIn', event => connectionCheckedInEvents.push(event));
+
+              const inserts = Promise.allSettled([
+                client.db('test').collection('test').insertOne({ a: 1 }),
+                client.db('test').collection('test').insertOne({ a: 1 }),
+                client.db('test').collection('test').insertOne({ a: 1 })
+              ]);
+
+              // wait until all pings are pending on the server
+              while (connectionCheckedOutEvents.length < 3) await sleep(1);
+
+              const insertConnectionIds = connectionCheckedOutEvents.map(
+                ({ address, connectionId }) => `${address} + ${connectionId}`
+              );
+
+              await client.close();
+
+              const insertCheckIns = connectionCheckedInEvents.filter(({ address, connectionId }) =>
+                insertConnectionIds.includes(`${address} + ${connectionId}`)
+              );
+
+              expect(insertCheckIns).to.have.lengthOf(3);
+
+              await inserts;
+            }
+          );
+        });
+      }
+    );
   });
 });
