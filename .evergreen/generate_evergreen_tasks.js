@@ -529,8 +529,7 @@ SINGLETON_TASKS.push(
       tags: ['lint-checks'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9
+          NODE_LTS_VERSION: LATEST_LTS
         }),
         { func: 'install dependencies' },
         { func: 'run lint checks' }

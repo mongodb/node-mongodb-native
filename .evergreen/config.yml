@@ -2066,8 +2066,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: run lint checks
   - name: run-resource-management-no-async-dispose

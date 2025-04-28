@@ -262,7 +262,7 @@ export class OnDemandDocument {
   public get<const T extends keyof JSTypeOf>(
     name: string | number,
     as: T,
-    required?: boolean | undefined
+    required?: boolean
   ): JSTypeOf[T] | null;
 
   /** `required` will make `get` throw if name does not exist or is null/undefined */
