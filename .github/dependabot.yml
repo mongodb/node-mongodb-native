@@ -38,6 +38,9 @@ updates:
       # stay on the supported major version of gcp-metadata
       - dependency-name: "gcp-metadata"
         versions: [">=6.0.0"]
+      # NODE-3773: sinon 19+ breaks the srv polling unit tests
+      - dependency-name: "sinon"
+        versions: ["18.x"]
 
     versioning-strategy: increase
     allow:
