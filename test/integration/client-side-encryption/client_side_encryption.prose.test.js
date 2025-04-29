@@ -853,7 +853,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const invalidKmsProviders = getKmsProviders();
       invalidKmsProviders.azure.identityPlatformEndpoint = 'doesnotexist.invalid:443';
       invalidKmsProviders.gcp.endpoint = 'doesnotexist.invalid:443';
-      invalidKmsProviders.kmip.endpoint = 'doesnotexist.local:5698';
+      invalidKmsProviders.kmip.endpoint = 'doesnotexist.invalid:5698';
 
       return this.client.connect().then(() => {
         this.clientEncryption = new ClientEncryption(this.client, {
@@ -918,14 +918,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         succeed: true
       },
       {
-        description: '4. aws: custom endpoint with bad url',
-        provider: 'aws',
-        masterKey: {
-          region: 'us-east-1',
-          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-          endpoint: 'kms.us-east-1.amazonaws.com:12345'
-        },
-        skipReason: 'TODO(NODE-6928): Fix failing aws bad URI test',
+        description: '4. bad url',
+        provider: 'kmip',
+        masterKey: { keyId: '1', endpoint: 'localhost:12345' },
         succeed: false,
         errorValidator: err => {
           expect(err)
@@ -1029,7 +1024,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         provider: 'kmip',
         masterKey: {
           keyId: '1',
-          endpoint: 'doesnotexist.local:5698'
+          endpoint: 'doesnotexist.invalid:5698'
         },
         succeed: false,
         errorValidator: err => {
@@ -1043,10 +1038,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     testCases.forEach(testCase => {
       it(testCase.description, metadata, function () {
-        if (testCase.skipReason) {
-          this.skipReason = testCase.skipReason;
-          this.skip();
-        }
         // Call `client_encryption.createDataKey()` with <provider> as the provider and the following masterKey:
         // .. code:: javascript
         //    {
@@ -1564,7 +1555,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     // Case 2.
     context('Case 2: Azure', metadata, function () {
       const masterKey = {
-        keyVaultEndpoint: 'doesnotexist.local',
+        keyVaultEndpoint: 'doesnotexist.invalid',
         keyName: 'foo'
       };
 
@@ -1834,7 +1825,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
           const error = await clientEncryptionWithNames
             .createDataKey('azure:no_client_cert', {
-              masterKey: { keyVaultEndpoint: 'doesnotexist.local', keyName: 'foo' }
+              masterKey: { keyVaultEndpoint: 'doesnotexist.invalid', keyName: 'foo' }
             })
             .catch(e => e);
 
@@ -1846,7 +1837,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           // Call `client_encryption_with_names.createDataKey()` with "aws:with_tls" as the provider and the same masterKey.
           const error = await clientEncryptionWithNames
             .createDataKey('azure:with_tls', {
-              masterKey: { keyVaultEndpoint: 'doesnotexist.local', keyName: 'foo' }
+              masterKey: { keyVaultEndpoint: 'doesnotexist.invalid', keyName: 'foo' }
             })
             .catch(e => e);
 
