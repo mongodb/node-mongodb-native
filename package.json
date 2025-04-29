@@ -107,7 +107,7 @@
     "socks": "^2.8.1",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
-    "tsd": "^0.32.0",
+    "tsd": "^0.31.2",
     "typescript": "5.5",
     "typescript-cached-transpile": "^0.0.6",
     "v8-heapsnapshot": "^1.3.1",
