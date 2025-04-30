@@ -492,10 +492,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   closeCheckedOutConnections() {
     for (const conn of this.checkedOut) {
-      this.emitAndLog(
-        ConnectionPool.CONNECTION_CLOSED,
-        new ConnectionClosedEvent(this, conn, 'poolClosed')
-      );
       conn.onError(new MongoClientClosedError());
     }
   }

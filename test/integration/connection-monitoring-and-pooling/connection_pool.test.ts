@@ -2,13 +2,7 @@ import { once } from 'node:events';
 
 import { expect } from 'chai';
 
-import {
-  type ConnectionCheckedInEvent,
-  type ConnectionCheckedOutEvent,
-  type ConnectionPoolCreatedEvent,
-  type Db,
-  type MongoClient
-} from '../../mongodb';
+import { type ConnectionPoolCreatedEvent, type Db, type MongoClient } from '../../mongodb';
 import { clearFailPoint, configureFailPoint, sleep } from '../../tools/utils';
 
 describe('Connection Pool', function () {
@@ -104,10 +98,13 @@ describe('Connection Pool', function () {
             'a connection pool emits checked in events for closed connections',
             { requires: { mongodb: '>=4.4', topology: 'single' } },
             async () => {
-              const connectionCheckedOutEvents: ConnectionCheckedOutEvent[] = [];
-              client.on('connectionCheckedOut', event => connectionCheckedOutEvents.push(event));
-              const connectionCheckedInEvents: ConnectionCheckedInEvent[] = [];
-              client.on('connectionCheckedIn', event => connectionCheckedInEvents.push(event));
+              const allClientEvents = [];
+              const pushToClientEvents = e => allClientEvents.push(e);
+
+              client
+                .on('connectionCheckedOut', pushToClientEvents)
+                .on('connectionCheckedIn', pushToClientEvents)
+                .on('connectionClosed', pushToClientEvents);
 
               const inserts = Promise.allSettled([
                 client.db('test').collection('test').insertOne({ a: 1 }),
@@ -116,19 +113,28 @@ describe('Connection Pool', function () {
               ]);
 
               // wait until all pings are pending on the server
-              while (connectionCheckedOutEvents.length < 3) await sleep(1);
+              while (allClientEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
+                await sleep(1);
+              }
 
-              const insertConnectionIds = connectionCheckedOutEvents.map(
-                ({ address, connectionId }) => `${address} + ${connectionId}`
-              );
+              const insertConnectionIds = allClientEvents
+                .filter(e => e.name === 'connectionCheckedOut')
+                .map(({ address, connectionId }) => `${address} + ${connectionId}`);
 
               await client.close();
 
-              const insertCheckIns = connectionCheckedInEvents.filter(({ address, connectionId }) =>
-                insertConnectionIds.includes(`${address} + ${connectionId}`)
-              );
+              const insertCheckInAndCloses = allClientEvents
+                .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
+                .filter(({ address, connectionId }) =>
+                  insertConnectionIds.includes(`${address} + ${connectionId}`)
+                );
 
-              expect(insertCheckIns).to.have.lengthOf(3);
+              expect(insertCheckInAndCloses).to.have.lengthOf(6);
+
+              // check that each check-in is followed by a close (not proceeded by one)
+              expect(insertCheckInAndCloses.map(e => e.name)).to.deep.equal(
+                Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat(1)
+              );
 
               await inserts;
             }
