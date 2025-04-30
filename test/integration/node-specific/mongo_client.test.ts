@@ -12,13 +12,14 @@ import {
   Db,
   getTopology,
   MongoClient,
+  MongoClientClosedError,
   MongoNotConnectedError,
   MongoServerSelectionError,
   ReadPreference,
   ServerDescription,
   Topology
 } from '../../mongodb';
-import { runLater } from '../../tools/utils';
+import { clearFailPoint, configureFailPoint, runLater } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('class MongoClient', function () {
@@ -1064,6 +1065,55 @@ describe('class MongoClient', function () {
         expect(client.s.activeCursors).to.have.lengthOf(1);
       });
     });
+
+    describe(
+      'maxPoolSize is not fully used when running clean up operations',
+      { requires: { mongodb: '>=4.4', topology: 'single' } },
+      function () {
+        let client;
+
+        beforeEach(async function () {
+          await configureFailPoint(this.configuration, {
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['insert'],
+              blockConnection: true,
+              blockTimeMS: 500
+            }
+          });
+
+          client = this.configuration.newClient({}, { maxPoolSize: 1, monitorCommands: true });
+        });
+
+        afterEach(async function () {
+          await clearFailPoint(this.configuration);
+          await client.close();
+        });
+
+        it(
+          'closes in-use connections before running clean up operations avoiding a deadlock',
+          { requires: { mongodb: '>=4.4', topology: 'single' } },
+          async () => {
+            const inserted = client
+              .db('t')
+              .collection('t')
+              .insertOne({ a: 1 })
+              .catch(error => error);
+
+            await once(client, 'commandStarted');
+
+            const start = performance.now();
+            await client.close();
+            const error = await inserted;
+            const end = performance.now();
+
+            expect(end - start).to.be.lessThan(100);
+            expect(error).to.be.instanceOf(MongoClientClosedError);
+          }
+        );
+      }
+    );
   });
 
   context('when connecting', function () {
