@@ -26,12 +26,17 @@ export type RunCommandOptions = {
 
 /** @internal */
 export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
+  command: Document;
+  override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor };
+
   constructor(
     parent: Db,
-    public command: Document,
-    public override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor }
+    command: Document,
+    options: RunCommandOptions & { responseType?: MongoDBResponseConstructor }
   ) {
     super(options);
+    this.command = command;
+    this.options = options;
     this.ns = parent.s.namespace.withCollection('$cmd');
   }
 
@@ -62,14 +67,22 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
 }
 
 export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T> {
+  command: Document;
+  override options: RunCommandOptions & {
+    noResponse?: boolean;
+    bypassPinningCheck?: boolean;
+  };
+
   constructor(
-    public command: Document,
-    public override options: RunCommandOptions & {
+    command: Document,
+    options: RunCommandOptions & {
       noResponse?: boolean;
       bypassPinningCheck?: boolean;
     }
   ) {
     super(options);
+    this.command = command;
+    this.options = options;
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
