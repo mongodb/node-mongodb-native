@@ -66,81 +66,88 @@ describe('Connection Pool', function () {
       });
     });
 
-    describe(
-      'ConnectionCheckedInEvent',
-      { requires: { mongodb: '>=4.4', topology: 'single' } },
-      function () {
-        let client: MongoClient;
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', topology: 'single' } };
 
-        beforeEach(async function () {
-          await configureFailPoint(this.configuration, {
-            configureFailPoint: 'failCommand',
-            mode: 'alwaysOn',
-            data: {
-              failCommands: ['insert'],
-              blockConnection: true,
-              blockTimeMS: 500
-            }
-          });
+    describe('ConnectionCheckedInEvent', metadata, function () {
+      let client: MongoClient;
 
-          client = this.configuration.newClient();
-          await client.connect();
-          await Promise.all(Array.from({ length: 100 }, () => client.db().command({ ping: 1 })));
+      beforeEach(async function () {
+        if (!this.configuration.filters.MongoDBVersionFilter.filter({ metadata })) {
+          return;
+        }
+        if (!this.configuration.filters.MongoDBTopologyFilter.filter({ metadata })) {
+          return;
+        }
+
+        await configureFailPoint(this.configuration, {
+          configureFailPoint: 'failCommand',
+          mode: 'alwaysOn',
+          data: {
+            failCommands: ['insert'],
+            blockConnection: true,
+            blockTimeMS: 500
+          }
         });
 
-        afterEach(async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+        await Promise.all(Array.from({ length: 100 }, () => client.db().command({ ping: 1 })));
+      });
+
+      afterEach(async function () {
+        if (this.configuration.filters.MongoDBVersionFilter.filter({ metadata })) {
           await clearFailPoint(this.configuration);
-          await client.close();
-        });
+        }
+        await client.close();
+      });
 
-        describe('when a MongoClient is closed', function () {
-          it(
-            'a connection pool emits checked in events for closed connections',
-            { requires: { mongodb: '>=4.4', topology: 'single' } },
-            async () => {
-              const allClientEvents = [];
-              const pushToClientEvents = e => allClientEvents.push(e);
+      describe('when a MongoClient is closed', function () {
+        it(
+          'a connection pool emits checked in events for closed connections',
+          metadata,
+          async () => {
+            const allClientEvents = [];
+            const pushToClientEvents = e => allClientEvents.push(e);
 
-              client
-                .on('connectionCheckedOut', pushToClientEvents)
-                .on('connectionCheckedIn', pushToClientEvents)
-                .on('connectionClosed', pushToClientEvents);
+            client
+              .on('connectionCheckedOut', pushToClientEvents)
+              .on('connectionCheckedIn', pushToClientEvents)
+              .on('connectionClosed', pushToClientEvents);
 
-              const inserts = Promise.allSettled([
-                client.db('test').collection('test').insertOne({ a: 1 }),
-                client.db('test').collection('test').insertOne({ a: 1 }),
-                client.db('test').collection('test').insertOne({ a: 1 })
-              ]);
+            const inserts = Promise.allSettled([
+              client.db('test').collection('test').insertOne({ a: 1 }),
+              client.db('test').collection('test').insertOne({ a: 1 }),
+              client.db('test').collection('test').insertOne({ a: 1 })
+            ]);
 
-              // wait until all pings are pending on the server
-              while (allClientEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
-                await sleep(1);
-              }
+            // wait until all pings are pending on the server
+            while (allClientEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
+              await sleep(1);
+            }
 
-              const insertConnectionIds = allClientEvents
-                .filter(e => e.name === 'connectionCheckedOut')
-                .map(({ address, connectionId }) => `${address} + ${connectionId}`);
+            const insertConnectionIds = allClientEvents
+              .filter(e => e.name === 'connectionCheckedOut')
+              .map(({ address, connectionId }) => `${address} + ${connectionId}`);
 
-              await client.close();
+            await client.close();
 
-              const insertCheckInAndCloses = allClientEvents
-                .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
-                .filter(({ address, connectionId }) =>
-                  insertConnectionIds.includes(`${address} + ${connectionId}`)
-                );
-
-              expect(insertCheckInAndCloses).to.have.lengthOf(6);
-
-              // check that each check-in is followed by a close (not proceeded by one)
-              expect(insertCheckInAndCloses.map(e => e.name)).to.deep.equal(
-                Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat(1)
+            const insertCheckInAndCloses = allClientEvents
+              .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
+              .filter(({ address, connectionId }) =>
+                insertConnectionIds.includes(`${address} + ${connectionId}`)
               );
 
-              await inserts;
-            }
-          );
-        });
-      }
-    );
+            expect(insertCheckInAndCloses).to.have.lengthOf(6);
+
+            // check that each check-in is followed by a close (not proceeded by one)
+            expect(insertCheckInAndCloses.map(e => e.name)).to.deep.equal(
+              Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat(1)
+            );
+
+            await inserts;
+          }
+        );
+      });
+    });
   });
 });

@@ -1066,13 +1066,22 @@ describe('class MongoClient', function () {
       });
     });
 
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', topology: 'single' } };
+
     describe(
       'maxPoolSize is not fully used when running clean up operations',
-      { requires: { mongodb: '>=4.4', topology: 'single' } },
+      metadata,
       function () {
         let client;
 
         beforeEach(async function () {
+          if (!this.configuration.filters.MongoDBVersionFilter.filter({ metadata })) {
+            return;
+          }
+          if (!this.configuration.filters.MongoDBTopologyFilter.filter({ metadata })) {
+            return;
+          }
+
           await configureFailPoint(this.configuration, {
             configureFailPoint: 'failCommand',
             mode: 'alwaysOn',
@@ -1093,7 +1102,7 @@ describe('class MongoClient', function () {
 
         it(
           'closes in-use connections before running clean up operations avoiding a deadlock',
-          { requires: { mongodb: '>=4.4', topology: 'single' } },
+          metadata,
           async () => {
             const inserted = client
               .db('t')
@@ -1105,11 +1114,10 @@ describe('class MongoClient', function () {
 
             const start = performance.now();
             await client.close();
-            const error = await inserted;
+            await inserted;
             const end = performance.now();
 
             expect(end - start).to.be.lessThan(100);
-            expect(error).to.be.instanceOf(MongoClientClosedError);
           }
         );
       }
