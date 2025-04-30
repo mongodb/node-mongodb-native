@@ -485,12 +485,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     for (const connection of this.checkedOut) {
       if (connection.generation <= minGeneration) {
         connection.onError(new PoolClearedOnNetworkError(this));
-        this.checkIn(connection);
       }
     }
   }
 
-  closeCheckedOutConnections() {
+  /** For MongoClient.close() procedures */
+  public closeCheckedOutConnections() {
     for (const conn of this.checkedOut) {
       conn.onError(new MongoClientClosedError());
     }
