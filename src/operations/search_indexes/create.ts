@@ -21,11 +21,13 @@ export interface SearchIndexDescription extends Document {
 
 /** @internal */
 export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
-  constructor(
-    private readonly collection: Collection,
-    private readonly descriptions: ReadonlyArray<SearchIndexDescription>
-  ) {
+  private readonly collection: Collection;
+  private readonly descriptions: ReadonlyArray<SearchIndexDescription>;
+
+  constructor(collection: Collection, descriptions: ReadonlyArray<SearchIndexDescription>) {
     super();
+    this.collection = collection;
+    this.descriptions = descriptions;
   }
 
   override get commandName() {

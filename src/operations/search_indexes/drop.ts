@@ -8,11 +8,13 @@ import { AbstractOperation } from '../operation';
 
 /** @internal */
 export class DropSearchIndexOperation extends AbstractOperation<void> {
-  constructor(
-    private readonly collection: Collection,
-    private readonly name: string
-  ) {
+  private readonly collection: Collection;
+  private readonly name: string;
+
+  constructor(collection: Collection, name: string) {
     super();
+    this.collection = collection;
+    this.name = name;
   }
 
   override get commandName() {

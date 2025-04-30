@@ -8,6 +8,7 @@
         "verbatimModuleSyntax": true,
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
+        "erasableSyntaxOnly": true,
         "skipLibCheck": true,
         // We don't make use of tslib helpers, all syntax used is supported by target engine
         "importHelpers": false,
