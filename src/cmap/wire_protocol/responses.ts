@@ -20,14 +20,14 @@ import {
   type OnDemandDocumentDeserializeOptions
 } from './on_demand/document';
 
-// eslint-disable-next-line no-restricted-syntax
-const enum BSONElementOffset {
-  type = 0,
-  nameOffset = 1,
-  nameLength = 2,
-  offset = 3,
-  length = 4
-}
+const BSONElementOffset = {
+  type: 0,
+  nameOffset: 1,
+  nameLength: 2,
+  offset: 3,
+  length: 4
+} as const;
+
 /**
  * Accepts a BSON payload and checks for na "ok: 0" element.
  * This utility is intended to prevent calling response class constructors

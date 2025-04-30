@@ -8,6 +8,7 @@
     "module": "commonJS",
     "moduleResolution": "node",
     "skipLibCheck": true,
+    "erasableSyntaxOnly": true,
     "lib": [
       "es2021",
       "ES2022.Error",
