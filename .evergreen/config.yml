@@ -2108,7 +2108,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: check resource management feature integration
-  - name: check-types-typescript-next-node-types-22.13.0
+  - name: check-types-typescript-next-node-types-22.15.3
     tags:
       - check-types-typescript-next
       - typescript-compilation
@@ -2120,10 +2120,10 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: next}
-            - {key: TYPES_VERSION, value: 22.13.0}
+            - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
       - func: check types
-  - name: check-types-typescript-current-node-types-22.13.0
+  - name: check-types-typescript-current-node-types-22.15.3
     tags:
       - check-types-typescript-current
       - typescript-compilation
@@ -2135,7 +2135,7 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: current}
-            - {key: TYPES_VERSION, value: 22.13.0}
+            - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
       - func: check types
   - name: check-types-typescript-next-node-types-16.x
@@ -2183,7 +2183,7 @@ tasks:
             - {key: TYPES_VERSION, value: 18.11.9}
       - func: install dependencies
       - func: check types
-  - name: compile-driver-typescript-current-node-types-22.13.0
+  - name: compile-driver-typescript-current-node-types-22.15.3
     tags:
       - compile-driver-typescript-current
       - typescript-compilation
@@ -2195,7 +2195,7 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '16'}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: current}
-            - {key: TYPES_VERSION, value: 22.13.0}
+            - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
       - func: compile driver
   - name: download-and-merge-coverage
