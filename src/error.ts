@@ -1037,7 +1037,7 @@ export class MongoClientClosedError extends MongoAPIError {
    *
    * @public
    **/
-  constructor(message = 'MongoClient is closed') {
+  constructor(message = 'Operation interrupted because client was closed') {
     super(message);
   }
 
