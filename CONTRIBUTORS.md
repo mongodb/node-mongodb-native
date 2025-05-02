@@ -52,10 +52,10 @@
 - heroic
 - gitfy
 - Eric Adum
+- Neal Beeken - https://github.com/nbbeeken
 
 ## Maintainers
 
-- Neal Beeken <<neal.beeken@mongodb.com>>
 - Durran Jordan <<durran@gmail.com>>
 - Daria Pardue <<daria.pardue@mongodb.com>>
 - Bailey Pearson <<bailey.pearson@mongodb.com>>
