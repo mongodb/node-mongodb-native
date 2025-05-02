@@ -1848,36 +1848,44 @@ describe('Cursor', function () {
     }
   });
 
-  it('closes cursors when client is closed even if it has not been exhausted', async function () {
-    await client
-      .db()
-      .dropCollection('test_cleanup_tailable')
-      .catch(() => null);
+  it(
+    'closes cursors when client is closed even if it has not been exhausted',
+    { requires: { topology: '!replicaset' } },
+    async function () {
+      await client
+        .db()
+        .dropCollection('test_cleanup_tailable')
+        .catch(() => null);
 
-    const collection = await client
-      .db()
-      .createCollection('test_cleanup_tailable', { capped: true, size: 1000, max: 3 });
+      const collection = await client
+        .db()
+        .createCollection('test_cleanup_tailable', { capped: true, size: 1000, max: 3 });
 
-    // insert only 2 docs in capped coll of 3
-    await collection.insertMany([{ a: 1 }, { a: 1 }]);
+      // insert only 2 docs in capped coll of 3
+      await collection.insertMany([{ a: 1 }, { a: 1 }]);
 
-    const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS: 2000 });
+      const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS: 2000 });
 
-    await cursor.next();
-    await cursor.next();
-    // will block for maxAwaitTimeMS (except we are closing the client)
-    const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
+      await cursor.next();
+      await cursor.next();
 
-    await client.close();
-    expect(cursor).to.have.property('closed', true);
+      const nextCommand = once(client, 'commandStarted');
+      // will block for maxAwaitTimeMS (except we are closing the client)
+      const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
 
-    const error = await rejectedEarlyBecauseClientClosed;
-    if (this.configuration.topologyType === 'LoadBalanced') {
+      for (
+        let [{ commandName }] = await nextCommand;
+        commandName !== 'getMore';
+        [{ commandName }] = await once(client, 'commandStarted')
+      );
+
+      await client.close();
+      expect(cursor).to.have.property('closed', true);
+
+      const error = await rejectedEarlyBecauseClientClosed;
       expect(error).to.be.instanceOf(MongoClientClosedError);
-    } else {
-      expect(error).to.be.null;
     }
-  });
+  );
 
   it('shouldAwaitData', {
     // Add a tag that our runner can trigger on

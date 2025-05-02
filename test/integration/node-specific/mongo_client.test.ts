@@ -12,7 +12,6 @@ import {
   Db,
   getTopology,
   MongoClient,
-  MongoClientClosedError,
   MongoNotConnectedError,
   MongoServerSelectionError,
   ReadPreference,
