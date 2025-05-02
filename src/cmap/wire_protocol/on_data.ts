@@ -87,6 +87,10 @@ export function onData(
 
     [Symbol.asyncIterator]() {
       return this;
+    },
+
+    [Symbol.asyncDispose]: function (): PromiseLike<void> {
+      return closeHandler().then(() => undefined);
     }
   };
 
