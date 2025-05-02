@@ -12,7 +12,8 @@
     "lib": [
       "es2021",
       "ES2022.Error",
-      "ES2022.Object"
+      "ES2022.Object",
+      "esnext.disposable"
     ],
     // We don't make use of tslib helpers, all syntax used is supported by target engine
     "importHelpers": false,
