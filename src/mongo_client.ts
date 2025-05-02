@@ -676,7 +676,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    *     - _Pitfall_: `killCursors` may have to build a new connection if the in-use closure ended all pooled connections.
    *   - **End active sessions**: In-use sessions created with `client.startSession()` or `client.withSession()` or implicitly by the driver will have their `.endSession()` method called.
    *     Contrary to the name of the method, `endSession()` returns the session to the client's pool of sessions rather than end them on the server.
-   *     - _Ideal_: Transaction outcomes are awaited and their corresponding explcit session is ended before `client.close()` is called.
+   *     - _Ideal_: Transaction outcomes are awaited and their corresponding explicit sessions are ended before `client.close()` is called.
    *     - _Pitfall_: **This step aborts in-progress transactions**. It is advisable to observe the outcome of a transaction before closing your client.
    *   - **End all pooled sessions**: The `endSessions` command with all session IDs the client has pooled is sent to the server to inform the cluster it can clean them up.
    *     - _Ideal_: No user intervention is expected.
