@@ -656,45 +656,46 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /**
    * Cleans up resources managed by the MongoClient.
    *
-   * The close method clears and closes all resources that client is responsible for.
+   * The close method clears and closes all resources that the client is responsible for.
    * Please refer to the `MongoClient` class documentation for a breakdown of resource responsibilities.
    *
-   * **However,** the close method should not serve as a replacement for clean up of all created resources.
+   * **However,** the close method is not a replacement for clean up of explicitly created resources.
    * This method is written as a "best effort" attempt to leave behind the least amount of resources server-side when possible.
    *
-   * The following list defines ideal preconditions and pitfalls if they are not met.
+   * The following list defines ideal preconditions and consequent pitfalls if they are not met.
    *
    * The close method performs the following in the order listed:
    * - Client-side:
    *   - **Close in-use connections**: Any connections that are currently waiting on a response from the server will be closed.
-   *     This is performed _first_ to avoid reaching the next step (server-side clean up) and having no available connections to checkout.
-   *     - _Ideal_: All operations have been awaited or cancelled, the outcome regardless of success or failure have been processed before closing the client servicing the operation.
-   *     - _Pitfall_: If all connections are in-use when client.close is called then no connections will remain for re-use for the next steps.
+   *     This is performed _first_ to avoid reaching the next step (server-side clean up) and having no available connections to check out.
+   *     - _Ideal_: All operations have been awaited or cancelled, and the outcomes, regardless of success or failure, have been processed before closing the client servicing the operation.
+   *     - _Pitfall_: When `client.close()` is called and all connections are in use, after closing them, the client must create new connections for cleanup operations, which comes at the cost of new TLS/TCP handshakes and authentication steps.
    * - Server-side:
-   *   - **Close active cursors**: All cursors that haven't been completed will have a `killCursor` operation sent to the server they were initialized on, freeing the server side resource.
-   *     - _Ideal_: Cursors are closed before MongoClient close is called.
+   *   - **Close active cursors**: All cursors that haven't been completed will have a `killCursor` operation sent to the server they were initialized on, freeing the server-side resource.
+   *     - _Ideal_: Cursors are explicitly closed or completed before `client.close()` is called.
    *     - _Pitfall_: `killCursors` may have to build a new connection if the in-use closure ended all pooled connections.
-   *   - **End active sessions**: Sessions created with `client.startSession()` or `client.withSession()` will have their `.endSession()` method called.
-   *     Contrary to the name of the method `endSession()` returns the session to the client's pool of sessions rather than inform the server.
-   *     - _Ideal_: Transactions are settled and sessions are ended before `client.close()`
+   *   - **End active sessions**: In-use sessions created with `client.startSession()` or `client.withSession()` or implicitly by the driver will have their `.endSession()` method called.
+   *     Contrary to the name of the method, `endSession()` returns the session to the client's pool of sessions rather than end them on the server.
+   *     - _Ideal_: Transaction outcomes are awaited and their corresponding explcit session is ended before `client.close()` is called.
    *     - _Pitfall_: **This step aborts in-progress transactions**. It is advisable to observe the outcome of a transaction before closing your client.
-   *   - **End all pooled sessions**: The `endSessions` command with all session IDs the client has pooled are sent to the server to inform the cluster it can clean them up.
-   *     - _Ideal_: No user intervention is expected, session pooling is intended to be transparent along with their clean up.
+   *   - **End all pooled sessions**: The `endSessions` command with all session IDs the client has pooled is sent to the server to inform the cluster it can clean them up.
+   *     - _Ideal_: No user intervention is expected.
    *     - _Pitfall_: None.
    *
    * The remaining shutdown is of the MongoClient resources that are intended to be entirely internal but is documented here as their existence relates to the JS event loop.
    *
    * - Client-side (again):
    *   - **Stop all server monitoring**: Connections kept live for detecting cluster changes and roundtrip time measurements are shutdown.
-   *   - **Close all pooled connections**: Each server node in the cluster has a corresponding connection pool and all connections in the pool are closed. Any operations waiting to checkout will have an error thrown instead of a connection returned.
+   *   - **Close all pooled connections**: Each server node in the cluster has a corresponding connection pool and all connections in the pool are closed. Any operations waiting to check out a connection will have an error thrown instead of a connection returned.
    *   - **Clear out server selection queue**: Any operations that are in the process of waiting for a server to be selected will have an error thrown instead of a server returned.
-   *   - **Close encryption-related resources**: An internal MongoClient created for communicating with `mongocryptd` or other encryption purposes is closed. (using this same method of course!)
+   *   - **Close encryption-related resources**: An internal MongoClient created for communicating with `mongocryptd` or other encryption purposes is closed. (Using this same method of course!)
    *
    * After the close method completes there should be no MongoClient related resources [ref-ed in Node.js' event loop](https://docs.libuv.org/en/v1.x/handle.html#reference-counting).
    * This should allow Node.js to exit gracefully if MongoClient resources were the only active handles in the event loop.
    *
    * @param _force - currently an unused flag that has no effect. Defaults to `false`.
    */
+
   async close(_force = false): Promise<void> {
     if (this.closeLock) {
       return await this.closeLock;
