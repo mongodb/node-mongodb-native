@@ -18,7 +18,7 @@ import {
   ServerDescription,
   Topology
 } from '../../mongodb';
-import { runLater } from '../../tools/utils';
+import { clearFailPoint, configureFailPoint, runLater } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('class MongoClient', function () {
@@ -1035,7 +1035,7 @@ describe('class MongoClient', function () {
         client.on('commandStarted', ev => ev.commandName === 'killCursors' && kills.push(ev));
       });
 
-      it('are all closed', async () => {
+      it('are all closed', async function () {
         const cursors = Array.from({ length: 30 }, (_, skip) =>
           collection.find({}, { skip, batchSize: 1 })
         );
@@ -1043,7 +1043,7 @@ describe('class MongoClient', function () {
         expect(client.s.activeCursors).to.have.lengthOf(30);
         await client.close();
         expect(client.s.activeCursors).to.have.lengthOf(0);
-        expect(kills).to.have.lengthOf(30);
+        expect(kills).to.have.lengthOf(this.configuration.topologyType === 'LoadBalanced' ? 0 : 30);
       });
 
       it('creating cursors after close adds to activeCursors', async () => {
@@ -1064,6 +1064,63 @@ describe('class MongoClient', function () {
         expect(client.s.activeCursors).to.have.lengthOf(1);
       });
     });
+
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', topology: 'single' } };
+
+    describe(
+      'maxPoolSize is not fully used when running clean up operations',
+      metadata,
+      function () {
+        let client;
+
+        beforeEach(async function () {
+          if (!this.configuration.filters.MongoDBVersionFilter.filter({ metadata })) {
+            return;
+          }
+          if (!this.configuration.filters.MongoDBTopologyFilter.filter({ metadata })) {
+            return;
+          }
+
+          await configureFailPoint(this.configuration, {
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['insert'],
+              blockConnection: true,
+              blockTimeMS: 500
+            }
+          });
+
+          client = this.configuration.newClient({}, { maxPoolSize: 1, monitorCommands: true });
+        });
+
+        afterEach(async function () {
+          await clearFailPoint(this.configuration);
+          await client.close();
+        });
+
+        it(
+          'closes in-use connections before running clean up operations avoiding a deadlock',
+          metadata,
+          async () => {
+            const inserted = client
+              .db('t')
+              .collection('t')
+              .insertOne({ a: 1 })
+              .catch(error => error);
+
+            await once(client, 'commandStarted');
+
+            const start = performance.now();
+            await client.close();
+            await inserted;
+            const end = performance.now();
+
+            expect(end - start).to.be.lessThan(100);
+          }
+        );
+      }
+    );
   });
 
   context('when connecting', function () {

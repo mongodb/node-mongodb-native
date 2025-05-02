@@ -63,6 +63,7 @@ describe('Change Streams', function () {
     await csDb.createCollection('test').catch(() => null);
     collection = csDb.collection('test');
     changeStream = collection.watch();
+    changeStream.on('error', () => null);
   });
 
   afterEach(async () => {
@@ -702,15 +703,19 @@ describe('Change Streams', function () {
 
       const outStream = new PassThrough({ objectMode: true });
 
-      // @ts-expect-error: transform requires a Document return type
-      changeStream.stream({ transform: JSON.stringify }).pipe(outStream);
+      const transform = doc => ({ doc: JSON.stringify(doc) });
+      changeStream
+        .stream({ transform })
+        .on('error', () => null)
+        .pipe(outStream)
+        .on('error', () => null);
 
       const willBeData = once(outStream, 'data');
 
       await collection.insertMany([{ a: 1 }]);
 
       const [data] = await willBeData;
-      const parsedEvent = JSON.parse(data);
+      const parsedEvent = JSON.parse(data.doc);
       expect(parsedEvent).to.have.nested.property('fullDocument.a', 1);
 
       outStream.destroy();

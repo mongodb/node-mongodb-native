@@ -375,8 +375,8 @@ export class AutoEncrypter {
   /**
    * Cleans up the `_mongocryptdClient`, if present.
    */
-  async teardown(force: boolean): Promise<void> {
-    await this._mongocryptdClient?.close(force);
+  async close(): Promise<void> {
+    await this._mongocryptdClient?.close();
   }
 
   /**
