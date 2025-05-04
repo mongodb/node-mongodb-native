@@ -183,30 +183,6 @@ describe('Transactions', function () {
   });
 
   describe('startTransaction', function () {
-    it('should error if transactions are not supported', {
-      metadata: { requires: { topology: ['sharded'], mongodb: '4.0.x' } },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.url());
-
-        client.connect((err, client) => {
-          const session = client.startSession();
-          const db = client.db(configuration.db);
-          const coll = db.collection('transaction_error_test');
-          coll.insertOne({ a: 1 }, err => {
-            expect(err).to.not.exist;
-            expect(() => session.startTransaction()).to.throw(
-              'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
-            );
-
-            session.endSession(() => {
-              client.close(done);
-            });
-          });
-        });
-      }
-    });
-
     it('should not error if transactions are supported', {
       metadata: { requires: { topology: ['sharded'], mongodb: '>=4.1.0' } },
       test: function (done) {
