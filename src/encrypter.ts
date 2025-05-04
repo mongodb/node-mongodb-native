@@ -1,11 +1,8 @@
-import { callbackify } from 'util';
-
 import { AutoEncrypter, type AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { getMongoDBClientEncryption } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
 import { MongoClient, type MongoClientOptions } from './mongo_client';
-import { type Callback } from './utils';
 
 /** @internal */
 export interface EncrypterOptions {
@@ -98,20 +95,16 @@ export class Encrypter {
     }
   }
 
-  closeCallback(client: MongoClient, force: boolean, callback: Callback<void>) {
-    callbackify(this.close.bind(this))(client, force, callback);
-  }
-
-  async close(client: MongoClient, force: boolean): Promise<void> {
+  async close(client: MongoClient): Promise<void> {
     let error;
     try {
-      await this.autoEncrypter.teardown(force);
+      await this.autoEncrypter.close();
     } catch (autoEncrypterError) {
       error = autoEncrypterError;
     }
     const internalClient = this.internalClient;
     if (internalClient != null && client !== internalClient) {
-      return await internalClient.close(force);
+      return await internalClient.close();
     }
     if (error != null) {
       throw error;

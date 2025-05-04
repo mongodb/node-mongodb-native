@@ -11,7 +11,7 @@ const { Writable } = require('stream');
 const { once, on } = require('events');
 const { setTimeout } = require('timers');
 const { ReadPreference } = require('../../mongodb');
-const { ServerType } = require('../../mongodb');
+const { ServerType, MongoClientClosedError } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
 
 describe('Cursor', function () {
@@ -1848,32 +1848,44 @@ describe('Cursor', function () {
     }
   });
 
-  it('closes cursors when client is closed even if it has not been exhausted', async function () {
-    await client
-      .db()
-      .dropCollection('test_cleanup_tailable')
-      .catch(() => null);
+  it(
+    'closes cursors when client is closed even if it has not been exhausted',
+    { requires: { topology: '!replicaset' } },
+    async function () {
+      await client
+        .db()
+        .dropCollection('test_cleanup_tailable')
+        .catch(() => null);
 
-    const collection = await client
-      .db()
-      .createCollection('test_cleanup_tailable', { capped: true, size: 1000, max: 3 });
+      const collection = await client
+        .db()
+        .createCollection('test_cleanup_tailable', { capped: true, size: 1000, max: 3 });
 
-    // insert only 2 docs in capped coll of 3
-    await collection.insertMany([{ a: 1 }, { a: 1 }]);
+      // insert only 2 docs in capped coll of 3
+      await collection.insertMany([{ a: 1 }, { a: 1 }]);
 
-    const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS: 2000 });
+      const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS: 2000 });
 
-    await cursor.next();
-    await cursor.next();
-    // will block for maxAwaitTimeMS (except we are closing the client)
-    const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
+      await cursor.next();
+      await cursor.next();
 
-    await client.close();
-    expect(cursor).to.have.property('closed', true);
+      const nextCommand = once(client, 'commandStarted');
+      // will block for maxAwaitTimeMS (except we are closing the client)
+      const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
 
-    const error = await rejectedEarlyBecauseClientClosed;
-    expect(error).to.be.null; // TODO(NODE-6632): This should throw again after the client signal aborts the in-progress next call
-  });
+      for (
+        let [{ commandName }] = await nextCommand;
+        commandName !== 'getMore';
+        [{ commandName }] = await once(client, 'commandStarted')
+      );
+
+      await client.close();
+      expect(cursor).to.have.property('closed', true);
+
+      const error = await rejectedEarlyBecauseClientClosed;
+      expect(error).to.be.instanceOf(MongoClientClosedError);
+    }
+  );
 
   it('shouldAwaitData', {
     // Add a tag that our runner can trigger on
