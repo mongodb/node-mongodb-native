@@ -20,7 +20,7 @@
               "$oid": "000000000000000000000001"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 25
+            "maxWireVersion": 16
           }
         ]
       ],
@@ -64,7 +64,7 @@
             "setName": "rs",
             "setVersion": 2,
             "minWireVersion": 0,
-            "maxWireVersion": 25
+            "maxWireVersion": 16
           }
         ]
       ],
@@ -109,7 +109,7 @@
               "$oid": "000000000000000000000002"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 25
+            "maxWireVersion": 16
           }
         ]
       ],
