@@ -659,7 +659,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * The close method clears and closes all resources whose lifetimes are managed by the MongoClient.
    * Please refer to the `MongoClient` class documentation for a high level overview of the client's key features and responsibilities.
    *
-   * **However,** the close method does not handle the cleanup of resources explicitly created by the user.  
+   * **However,** the close method does not handle the cleanup of resources explicitly created by the user.
    * Any user-created driver resource with its own `close()` method should be explicitly closed by the user before calling MongoClient.close().
    * This method is written as a "best effort" attempt to leave behind the least amount of resources server-side when possible.
    *
