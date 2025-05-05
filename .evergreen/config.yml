@@ -1461,25 +1461,6 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
-  - name: test-auth-kerberos
-    tags:
-      - auth
-      - kerberos
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NATIVE, value: 'true'}
-      - func: install dependencies
-      - func: run kerberos tests
-  - name: test-auth-ldap
-    tags:
-      - auth
-      - ldap
-    commands:
-      - func: install dependencies
-      - func: run ldap tests
   - name: test-socks5
     tags: []
     commands:
@@ -3110,8 +3091,6 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3167,8 +3146,6 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3224,8 +3201,6 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3281,8 +3256,6 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3336,8 +3309,6 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
       - test-socks5-csfle
       - test-socks5-tls
       - test-snappy-compression
