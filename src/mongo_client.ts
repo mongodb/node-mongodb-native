@@ -656,13 +656,16 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /**
    * Cleans up resources managed by the MongoClient.
    *
-   * The close method clears and closes all resources that the client is responsible for.
-   * Please refer to the `MongoClient` class documentation for a breakdown of resource responsibilities.
+   * The close method clears and closes all resources whose lifetimes are managed by the MongoClient.
+   * Please refer to the `MongoClient` class documentation for a high level overview of the client's key features and responsibilities.
    *
-   * **However,** the close method is not a replacement for clean up of explicitly created resources.
+   * **However,** the close method does not handle the cleanup of resources explicitly created by the user.  
+   * Any user-created driver resource with its own `close()` method should be explicitly closed by the user before calling MongoClient.close().
    * This method is written as a "best effort" attempt to leave behind the least amount of resources server-side when possible.
    *
    * The following list defines ideal preconditions and consequent pitfalls if they are not met.
+   * The MongoClient, ClientSession, Cursors and ChangeStreams all support [explicit resource management](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-2.html).
+   * By using explicit resource management to manage the lifetime of driver resources instead of manually managing their lifetimes, the pitfalls outlined below can be avoided.
    *
    * The close method performs the following in the order listed:
    * - Client-side:
