@@ -157,6 +157,7 @@ TASKS.push(
         { func: 'stop-load-balancer' }
       ]
     })),
+    // TODO(NODE-6944): Unskip when devprod updates ldaptest servers.
     // {
     //   name: 'test-auth-kerberos',
     //   tags: ['auth', 'kerberos'],
