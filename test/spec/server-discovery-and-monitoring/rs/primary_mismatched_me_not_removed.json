@@ -18,7 +18,7 @@
             "primary": "localhost:27017",
             "me": "a:27017",
             "minWireVersion": 0,
-            "maxWireVersion": 25
+            "maxWireVersion": 7
           }
         ]
       ],
@@ -55,7 +55,7 @@
             "primary": "localhost:27017",
             "me": "localhost:27018",
             "minWireVersion": 0,
-            "maxWireVersion": 25
+            "maxWireVersion": 7
           }
         ]
       ],
