@@ -15,7 +15,7 @@ phases: [
                 setName: "rs",
                 setVersion: 2,
                 minWireVersion: 0,
-                maxWireVersion: 7
+                maxWireVersion: 25
             }]
         ],
 
@@ -52,7 +52,7 @@ phases: [
                 setName: "rs",
                 setVersion: 1,
                 minWireVersion: 0,
-                maxWireVersion: 7
+                maxWireVersion: 25
             }]
         ],
 
