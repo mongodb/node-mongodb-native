@@ -517,8 +517,7 @@ describe('MongoClient.close() Integration', () => {
 
     const metadata: MongoDBMetadataUI = {
       requires: {
-        topology: ['replicaset', 'sharded'],
-        mongodb: '>=4.2'
+        topology: ['replicaset', 'sharded']
       }
     };
 
@@ -581,7 +580,6 @@ describe('MongoClient.close() Integration', () => {
   describe('AutoEncrypter', () => {
     const metadata: MongoDBMetadataUI = {
       requires: {
-        mongodb: '>=4.2.0',
         clientSideEncryption: true
       }
     };
@@ -682,13 +680,7 @@ describe('MongoClient.close() Integration', () => {
   });
 
   describe('Server resource: Cursor', () => {
-    const metadata: MongoDBMetadataUI = {
-      requires: {
-        mongodb: '>=4.2.0' // MongoServerError: Unrecognized option 'idleCursors' in $currentOp stage. on 4.0
-      }
-    };
-
-    describe('after cursors are created', metadata, () => {
+    describe('after cursors are created', () => {
       let client: MongoClient;
       let coll: Collection;
       let cursor: FindCursor;
@@ -713,31 +705,27 @@ describe('MongoClient.close() Integration', () => {
         await cursor?.close();
       });
 
-      it(
-        'all active server-side cursors are closed by client.close()',
-        metadata,
-        async function () {
-          const getCursors = async function () {
-            const cursors = await utilClient
-              .db('admin')
-              .aggregate([{ $currentOp: { idleCursors: true } }])
-              .toArray();
+      it('all active server-side cursors are closed by client.close()', async function () {
+        const getCursors = async function () {
+          const cursors = await utilClient
+            .db('admin')
+            .aggregate([{ $currentOp: { idleCursors: true } }])
+            .toArray();
 
-            return cursors.filter(c => c.ns === 'close_db.close_coll');
-          };
+          return cursors.filter(c => c.ns === 'close_db.close_coll');
+        };
 
-          cursor = coll.find({}, { batchSize: 1 });
-          await cursor.next();
+        cursor = coll.find({}, { batchSize: 1 });
+        await cursor.next();
 
-          // assert creation
-          expect(await getCursors()).to.not.be.empty;
+        // assert creation
+        expect(await getCursors()).to.not.be.empty;
 
-          await client.close();
+        await client.close();
 
-          // assert clean-up
-          expect(await getCursors()).to.be.empty;
-        }
-      );
+        // assert clean-up
+        expect(await getCursors()).to.be.empty;
+      });
     });
   });
 });

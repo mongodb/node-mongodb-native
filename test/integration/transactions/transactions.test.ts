@@ -32,7 +32,6 @@ describe('Transactions', function () {
       {
         requires: {
           topology: ['replicaset', 'sharded'],
-          mongodb: '>=4.1.5',
           serverless: 'forbid'
         }
       },
@@ -55,7 +54,7 @@ describe('Transactions', function () {
 
     it('should return readable error if promise rejected with no reason', {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.2.0', serverless: 'forbid' }
+        requires: { topology: ['replicaset', 'sharded'], serverless: 'forbid' }
       },
       test: function (done) {
         function fnThatReturnsBadPromise() {
@@ -72,74 +71,70 @@ describe('Transactions', function () {
       }
     });
 
-    describe(
-      'return value semantics',
-      { requires: { mongodb: '>=4.2.0', topology: '!single' } },
-      () => {
-        let client: MongoClient;
-        let collection: Collection<{ a: number }>;
+    describe('return value semantics', { requires: { topology: '!single' } }, () => {
+      let client: MongoClient;
+      let collection: Collection<{ a: number }>;
 
-        beforeEach(async function () {
-          client = this.configuration.newClient();
-          await client.connect();
-          collection = await client
-            .db('withTransactionReturnType')
-            .createCollection('withTransactionReturnType');
-        });
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+        collection = await client
+          .db('withTransactionReturnType')
+          .createCollection('withTransactionReturnType');
+      });
 
-        afterEach(async function () {
-          await collection.drop();
-          await client.close();
-        });
+      afterEach(async function () {
+        await collection.drop();
+        await client.close();
+      });
 
-        it('returns result of executor when transaction is aborted explicitly', async () => {
-          const session = client.startSession();
+      it('returns result of executor when transaction is aborted explicitly', async () => {
+        const session = client.startSession();
 
-          const withTransactionResult = await session
-            .withTransaction(async session => {
-              await collection.insertOne({ a: 1 }, { session });
-              await collection.findOne({ a: 1 }, { session });
-              await session.abortTransaction();
-              return 'aborted!';
-            })
-            .finally(async () => await session.endSession());
+        const withTransactionResult = await session
+          .withTransaction(async session => {
+            await collection.insertOne({ a: 1 }, { session });
+            await collection.findOne({ a: 1 }, { session });
+            await session.abortTransaction();
+            return 'aborted!';
+          })
+          .finally(async () => await session.endSession());
 
-          expect(withTransactionResult).to.equal('aborted!');
-        });
+        expect(withTransactionResult).to.equal('aborted!');
+      });
 
-        it('returns result of executor when transaction is successfully committed', async () => {
-          const session = client.startSession();
+      it('returns result of executor when transaction is successfully committed', async () => {
+        const session = client.startSession();
 
-          const withTransactionResult = await session
-            .withTransaction(async session => {
-              await collection.insertOne({ a: 1 }, { session });
-              await collection.findOne({ a: 1 }, { session });
-              return 'committed!';
-            })
-            .finally(async () => await session.endSession());
+        const withTransactionResult = await session
+          .withTransaction(async session => {
+            await collection.insertOne({ a: 1 }, { session });
+            await collection.findOne({ a: 1 }, { session });
+            return 'committed!';
+          })
+          .finally(async () => await session.endSession());
 
-          expect(withTransactionResult).to.equal('committed!');
-        });
+        expect(withTransactionResult).to.equal('committed!');
+      });
 
-        it('should throw when transaction is aborted due to an error', async () => {
-          const session = client.startSession();
+      it('should throw when transaction is aborted due to an error', async () => {
+        const session = client.startSession();
 
-          const withTransactionResult = await session
-            .withTransaction(async session => {
-              await collection.insertOne({ a: 1 }, { session });
-              await collection.findOne({ a: 1 }, { session });
-              throw new Error("I don't wanna transact anymore!");
-            })
-            .catch(error => error)
-            .finally(async () => await session.endSession());
+        const withTransactionResult = await session
+          .withTransaction(async session => {
+            await collection.insertOne({ a: 1 }, { session });
+            await collection.findOne({ a: 1 }, { session });
+            throw new Error("I don't wanna transact anymore!");
+          })
+          .catch(error => error)
+          .finally(async () => await session.endSession());
 
-          expect(withTransactionResult).to.be.instanceOf(Error);
-          expect(withTransactionResult.message).to.equal("I don't wanna transact anymore!");
-        });
-      }
-    );
+        expect(withTransactionResult).to.be.instanceOf(Error);
+        expect(withTransactionResult.message).to.equal("I don't wanna transact anymore!");
+      });
+    });
 
-    context('when retried', { requires: { mongodb: '>=4.2.0', topology: '!single' } }, () => {
+    context('when retried', { requires: { topology: '!single' } }, () => {
       let client: MongoClient;
       let collection: Collection<{ a: number }>;
 
@@ -184,7 +179,7 @@ describe('Transactions', function () {
 
   describe('startTransaction', function () {
     it('should not error if transactions are supported', {
-      metadata: { requires: { topology: ['sharded'], mongodb: '>=4.1.0' } },
+      metadata: { requires: { topology: ['sharded'] } },
       test: function (done) {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.url());
@@ -221,31 +216,25 @@ describe('Transactions', function () {
       await client.close();
     });
 
-    it(
-      'commitTransaction() resolves void',
-      { requires: { mongodb: '>=4.2.0', topology: '!single' } },
-      async () =>
-        client.withSession(async session =>
-          session.withTransaction(async session => {
-            expect(await session.commitTransaction()).to.be.undefined;
-          })
-        )
+    it('commitTransaction() resolves void', { requires: { topology: '!single' } }, async () =>
+      client.withSession(async session =>
+        session.withTransaction(async session => {
+          expect(await session.commitTransaction()).to.be.undefined;
+        })
+      )
     );
 
-    it(
-      'abortTransaction() resolves void',
-      { requires: { mongodb: '>=4.2.0', topology: '!single' } },
-      async () =>
-        client.withSession(async session =>
-          session.withTransaction(async session => {
-            expect(await session.abortTransaction()).to.be.undefined;
-          })
-        )
+    it('abortTransaction() resolves void', { requires: { topology: '!single' } }, async () =>
+      client.withSession(async session =>
+        session.withTransaction(async session => {
+          expect(await session.abortTransaction()).to.be.undefined;
+        })
+      )
     );
 
     it(
       'commitTransaction does not override write concern on initial attempt',
-      { requires: { mongodb: '>=4.2.0', topology: '!single' } },
+      { requires: { topology: '!single' } },
       async function () {
         await client
           .db('test')

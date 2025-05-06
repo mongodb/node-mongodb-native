@@ -247,56 +247,8 @@ describe('ReadConcern', function () {
     });
   });
 
-  it('Should set majority readConcern aggregate command but ignore due to out', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2 < 4.1' } },
-
-    test: function (done) {
-      const started = [];
-      const succeeded = [];
-      // Get a new instance
-      const configuration = this.configuration;
-      client = configuration.newClient(
-        { w: 1 },
-        { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
-      );
-
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-
-        const db = client.db(configuration.db);
-        expect(db.readConcern).to.deep.equal({ level: 'majority' });
-
-        // Get a collection
-        const collection = db.collection('readConcernCollectionAggregate1');
-        // Validate readConcern
-        expect(collection.readConcern).to.deep.equal({ level: 'majority' });
-
-        // Listen to apm events
-        client.on('commandStarted', filterForCommands('aggregate', started));
-        client.on('commandSucceeded', filterForCommands('aggregate', succeeded));
-
-        // Execute find
-        collection
-          .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }])
-          .toArray(err => {
-            expect(err).to.not.exist;
-            validateTestResults(started, succeeded, 'aggregate');
-
-            // Execute find
-            collection
-              .aggregate([{ $match: {} }], { out: 'readConcernCollectionAggregate2Output' })
-              .toArray(err => {
-                expect(err).to.not.exist;
-                validateTestResults(started, succeeded, 'aggregate');
-                done();
-              });
-          });
-      });
-    }
-  });
-
   it('Should set majority readConcern aggregate command against server >= 4.1', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.1' } },
+    metadata: { requires: { topology: 'replicaset' } },
 
     test: function (done) {
       const started = [];

@@ -603,7 +603,7 @@ describe('Change Stream prose tests', function () {
     // - MUST NOT include a resumeAfter option
     // when resuming a change stream.
     it('$changeStream without results must include startAfter and not resumeAfter', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      metadata: { requires: { topology: 'replicaset' } },
       test: async function () {
         const events = [];
         client.on('commandStarted', e => recordEvent(events, e));
@@ -643,7 +643,7 @@ describe('Change Stream prose tests', function () {
     // - MUST NOT include a startAfter option
     // when resuming a change stream.
     it('$changeStream with results must include resumeAfter and not startAfter', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      metadata: { requires: { topology: 'replicaset' } },
       test: function (done) {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));

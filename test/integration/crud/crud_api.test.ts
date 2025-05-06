@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import * as semver from 'semver';
 import * as sinon from 'sinon';
 import { finished } from 'stream/promises';
 
@@ -113,13 +112,6 @@ describe('CRUD API', function () {
 
     describe('when the find operation fails', () => {
       beforeEach(async function () {
-        if (semver.lt(this.configuration.version, '4.2.0')) {
-          if (this.currentTest) {
-            this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
-          }
-          return this.skip();
-        }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
@@ -133,10 +125,6 @@ describe('CRUD API', function () {
       });
 
       afterEach(async function () {
-        if (semver.lt(this.configuration.version, '4.2.0')) {
-          return;
-        }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'off',
@@ -194,13 +182,6 @@ describe('CRUD API', function () {
 
     describe('when the aggregation operation fails', () => {
       beforeEach(async function () {
-        if (semver.lt(this.configuration.version, '4.2.0')) {
-          if (this.currentTest) {
-            this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
-          }
-          this.skip();
-        }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
@@ -214,10 +195,6 @@ describe('CRUD API', function () {
       });
 
       afterEach(async function () {
-        if (semver.lt(this.configuration.version, '4.2.0')) {
-          return;
-        }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'off',

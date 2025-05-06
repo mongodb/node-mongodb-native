@@ -647,32 +647,21 @@ describe('Collection', function () {
     }
   });
 
-  it('should correctly update with pipeline', {
-    metadata: {
-      requires: { mongodb: '>=4.2.0' }
-    },
+  it('should correctly update with pipeline', async function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), {
+      maxPoolSize: 1
+    });
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
+    const db = client.db(configuration.db);
 
-      const db = client.db(configuration.db);
-
-      db.createCollection('test_should_correctly_do_update_with_pipeline', (err, collection) => {
-        collection.updateOne(
-          {},
-          [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
-          { writeConcern: { w: 'majority' } },
-          (err, r) => {
-            expect(err).to.not.exist;
-            expect(r).property('matchedCount').to.equal(0);
-
-            client.close(done);
-          }
-        );
-      });
-    }
+    const collection = await db.createCollection('test_should_correctly_do_update_with_pipeline');
+    const result = await collection.updateOne(
+      {},
+      [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
+      { writeConcern: { w: 'majority' } }
+    );
+    expect(result).property('matchedCount').to.equal(0);
+    await client.close();
   });
 });

@@ -3,7 +3,7 @@ const { assert: test } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { setTimeout } = require('timers');
-const { Code, ObjectId, Long, Binary, ReturnDocument, CursorResponse } = require('../../mongodb');
+const { ObjectId, Long, Binary, ReturnDocument, CursorResponse } = require('../../mongodb');
 
 describe('Find', function () {
   let client;
@@ -445,52 +445,6 @@ describe('Find', function () {
             // Let's close the db
             client.close(done);
           });
-        });
-      });
-    }
-  });
-
-  it('shouldCorrectlyPerformFindByWhere', {
-    metadata: {
-      requires: {
-        mongodb: '<=4.2.x',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('test_where', function (err, collection) {
-          collection.insert(
-            [{ a: 1 }, { a: 2 }, { a: 3 }],
-            configuration.writeConcernMax(),
-            function (err) {
-              expect(err).to.not.exist;
-              collection.count(function (err, count) {
-                expect(err).to.not.exist;
-                test.equal(3, count);
-
-                // Let's test usage of the $where statement
-                collection.find({ $where: new Code('this.a > 2') }).count(function (err, count) {
-                  expect(err).to.not.exist;
-                  test.equal(1, count);
-
-                  collection
-                    .find({ $where: new Code('this.a > i', { i: 1 }) })
-                    .count(function (err, count) {
-                      expect(err).to.not.exist;
-                      test.equal(2, count);
-
-                      // Let's close the db
-                      client.close(done);
-                    });
-                });
-              });
-            }
-          );
         });
       });
     }

@@ -104,7 +104,6 @@ function deadlockTest(
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
-    mongodb: '>=4.2.0',
     topology: '!load-balanced'
   }
 };

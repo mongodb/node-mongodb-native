@@ -43,7 +43,6 @@ const noop = () => {};
 const metadata = {
   requires: {
     clientSideEncryption: true,
-    mongodb: '>=4.2.0',
     topology: '!load-balanced'
   }
 };
