@@ -269,7 +269,7 @@ describe('Transactions', function () {
     });
 
     it('should have a TransientTransactionError label inside of a transaction', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
+      metadata: { requires: { topology: 'replicaset' } },
       test: async function () {
         const session = client.startSession();
         const db = client.db();
@@ -304,7 +304,7 @@ describe('Transactions', function () {
     });
 
     it('should not have a TransientTransactionError label outside of a transaction', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
+      metadata: { requires: { topology: 'replicaset' } },
       test: async function () {
         const db = client.db();
         const coll = db.collection('test');

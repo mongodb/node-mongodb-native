@@ -32,7 +32,7 @@ describe('CRUD Prose Spec Tests', () => {
   });
 
   // TODO(NODE-3888): Implement this test
-  it.skip('1. WriteConcernError.details exposes writeConcernError.errInfo', {
+  it.skip('1. WriteConcernError.details exposes writeConcernError.errInfo', async function () {
     /**
      * Test that writeConcernError.errInfo in a command response is propagated as WriteConcernError.details (or equivalent) in the driver.
      * Using a 4.0+ server, set the following failpoint:
@@ -62,10 +62,7 @@ describe('CRUD Prose Spec Tests', () => {
      * Then, perform an insert operation and assert that a WriteConcernError occurs and that
      * its details property is both accessible and matches the errInfo object from the failpoint.
      */
-    metadata: { requires: { mongodb: '>=4.0.0' } },
-    async test() {
-      throw new Error('This test is not implemented!');
-    }
+    throw new Error('This test is not implemented!');
   }).skipReason = 'TODO(NODE-3888): Implement this test';
 
   describe('2. WriteError.details exposes writeErrors[].errInfo', () => {

@@ -72,26 +72,23 @@ describe('Aggregation', function () {
     });
   });
 
-  it('should correctly execute db.aggregate() with $currentOp', {
-    metadata: { requires: { mongodb: '>=4.0.0' } },
-    test: function (done) {
-      const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+  it('should correctly execute db.aggregate() with $currentOp', function (done) {
+    const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
-      const db = client.db('admin');
-      const cursor = db.aggregate([{ $currentOp: { localOps: true } }]);
+    const db = client.db('admin');
+    const cursor = db.aggregate([{ $currentOp: { localOps: true } }]);
 
-      cursor.toArray((err, result) => {
-        expect(err).to.not.exist;
+    cursor.toArray((err, result) => {
+      expect(err).to.not.exist;
 
-        const aggregateOperation = result.filter(op => op.command && op.command.aggregate)[0];
-        expect(aggregateOperation.command.aggregate).to.equal(1);
-        expect(aggregateOperation.command.pipeline).to.eql([{ $currentOp: { localOps: true } }]);
-        expect(aggregateOperation.command.cursor).to.deep.equal({});
-        expect(aggregateOperation.command['$db']).to.equal('admin');
+      const aggregateOperation = result.filter(op => op.command && op.command.aggregate)[0];
+      expect(aggregateOperation.command.aggregate).to.equal(1);
+      expect(aggregateOperation.command.pipeline).to.eql([{ $currentOp: { localOps: true } }]);
+      expect(aggregateOperation.command.cursor).to.deep.equal({});
+      expect(aggregateOperation.command['$db']).to.equal('admin');
 
-        client.close(done);
-      });
-    }
+      client.close(done);
+    });
   });
 
   it('should fail when executing simple aggregation pipeline using arguments not an array', function (done) {

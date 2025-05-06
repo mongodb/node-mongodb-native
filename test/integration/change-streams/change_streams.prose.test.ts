@@ -332,11 +332,10 @@ describe('Change Stream prose tests', function () {
     }
 
     // 11. For a ChangeStream under these conditions:
-    //   Running against a server >=4.0.7.
     //   The batch is empty or has been iterated to the last document.
     // Expected result:
     //   getResumeToken must return the postBatchResumeToken from the current command response.
-    describe('for emptied batch on server >= 4.0.7', function () {
+    describe('for emptied batch on server', function () {
       it('must return the postBatchResumeToken from the current command response', function () {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function* () {

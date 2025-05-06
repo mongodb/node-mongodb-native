@@ -140,7 +140,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
 
   context(
     'Shutdown in progress - Reset Connection Pool',
-    { requires: { mongodb: '>=4.0', topology: ['replicaset'] } },
+    { requires: { topology: ['replicaset'] } },
     () => {
       // This test should be run on all server versions >= 4.0.
 
@@ -168,7 +168,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
 
   context(
     'Interrupted at shutdown - Reset Connection Pool',
-    { requires: { mongodb: '>=4.0', topology: ['replicaset'] } },
+    { requires: { topology: ['replicaset'] } },
     () => {
       // This test should be run on all server versions >= 4.0.
 

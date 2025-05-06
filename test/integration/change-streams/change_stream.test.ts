@@ -1255,7 +1255,6 @@ describe('Change Streams', function () {
 
   UnifiedTestSuiteBuilder.describe('document shapes')
     .runOnRequirement({
-      minServerVersion: '4.0.0',
       auth: true,
       // Running on replicaset because other topologies are finiky with the cluster-wide events
       // Dropping and renaming and creating collections in order to achieve a clean slate isn't worth the goal of these tests
