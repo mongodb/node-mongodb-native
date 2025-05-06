@@ -5,6 +5,7 @@ import { alphabetically } from '../utils';
 export const flakyTests = [
   'Change Streams should properly handle a changeStream event being processed mid-close when invoked with promises',
   'Client Side Encryption (Unified) namedKMS-rewrapManyDataKey rewrap to azure:name1',
+  'Client Side Encryption (Unified) rewrapManyDataKey rewrap with new GCP KMS provider',
   'Client Side Encryption Prose Tests 16. Rewrap Case 1: Rewrap with separate ClientEncryption should rewrap data key from aws to aws',
   'Client Side Encryption Prose Tests 16. Rewrap Case 1: Rewrap with separate ClientEncryption should rewrap data key from aws to azure',
   'Client Side Encryption Prose Tests 16. Rewrap Case 1: Rewrap with separate ClientEncryption should rewrap data key from aws to gcp',
