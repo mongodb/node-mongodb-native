@@ -34,6 +34,12 @@ describe('Driver Resources', () => {
 
   context('on MongoClient.close()', () => {
     before('create leak reproduction script', async function () {
+      if (process.version.includes('v24')) {
+        if (this.test) {
+          this.test.skipReason = 'TODO(NODE-6945): Fix v24 heap snapshot parsing';
+        }
+        this.test?.skip();
+      }
       if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
         return;
       }
