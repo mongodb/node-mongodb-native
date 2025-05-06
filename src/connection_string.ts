@@ -605,6 +605,7 @@ function setOption(
       if (values[0] == null) {
         break;
       }
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       mongoOptions[name] = String(values[0]);
       break;
     case 'record':

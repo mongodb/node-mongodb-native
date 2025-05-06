@@ -275,7 +275,7 @@ export class StateMachine {
             // See docs on EMPTY_V
             result = EMPTY_V ??= serialize({ v: [] });
           }
-          for await (const key of keys) {
+          for (const key of keys) {
             context.addMongoOperationResponse(serialize(key));
           }
 

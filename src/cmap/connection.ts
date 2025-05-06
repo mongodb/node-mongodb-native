@@ -864,7 +864,7 @@ export class CryptoConnection extends Connection {
     ns: MongoDBNamespace,
     cmd: Document,
     options?: CommandOptions,
-    responseType?: T | undefined
+    responseType?: T
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {

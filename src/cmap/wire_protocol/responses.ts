@@ -77,7 +77,7 @@ export class MongoDBResponse extends OnDemandDocument {
   public override get<const T extends keyof JSTypeOf>(
     name: string | number,
     as: T,
-    required?: false | undefined
+    required?: false
   ): JSTypeOf[T] | null;
   public override get<const T extends keyof JSTypeOf>(
     name: string | number,
@@ -87,7 +87,7 @@ export class MongoDBResponse extends OnDemandDocument {
   public override get<const T extends keyof JSTypeOf>(
     name: string | number,
     as: T,
-    required?: boolean | undefined
+    required?: boolean
   ): JSTypeOf[T] | null {
     try {
       return super.get(name, as, required);
