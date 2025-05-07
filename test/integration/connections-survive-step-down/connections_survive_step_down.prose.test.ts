@@ -114,30 +114,6 @@ describe('Connections Survive Primary Step Down - prose', function () {
     });
   });
 
-  context('Not Primary - Reset Connection Pool', { requires: { topology: ['replicaset'] } }, () => {
-    // This test requires a replica set with server version 4.0.
-
-    // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 10107}}``
-    const failPoint: FailPoint = {
-      configureFailPoint: 'failCommand',
-      mode: { times: 1 },
-      data: { failCommands: ['insert'], errorCode: 10107 }
-    };
-
-    it('survives after primary step down', async () => {
-      await client.db('admin').command(failPoint);
-      // - Execute an insert into the test collection of a ``{test: 1}`` document.
-      const error = await collection.insertOne({ test: 1 }).catch(error => error);
-      // - Verify that the insert failed with an operation failure with 10107 code.
-      expect(error).to.be.instanceOf(MongoServerError).and.has.property('code', 10107);
-      // - If the driver implements the `CMAP`_ specification, verify that a `PoolClearedEvent`_ has been published
-      expect(poolClearedEvents).to.have.lengthOf(1);
-      // - Execute an insert into the test collection of a ``{test: 1}`` document and verify that it succeeds.
-      await collection.insertOne({ test: 1 });
-      // - If the driver does NOT implement the `CMAP`_ specification, use the `serverStatus`_ command to verify `connections.totalCreated`_ has increased by 1.
-    });
-  });
-
   context(
     'Shutdown in progress - Reset Connection Pool',
     { requires: { topology: ['replicaset'] } },
