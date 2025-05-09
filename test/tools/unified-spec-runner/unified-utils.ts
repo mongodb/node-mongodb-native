@@ -520,6 +520,7 @@ export async function createClientEncryption(
   const {
     keyVaultClient,
     keyVaultNamespace,
+    keyExpirationMS,
     kmsProviders: kmsProvidersFromTest
   } = clientEncryptionOpts;
 
@@ -571,6 +572,7 @@ export async function createClientEncryption(
     keyVaultClient: clientEntity,
     kmsProviders,
     keyVaultNamespace,
+    keyExpirationMS,
     tlsOptions: parseTLSOptions()
   };
 

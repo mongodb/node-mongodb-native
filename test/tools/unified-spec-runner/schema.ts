@@ -221,6 +221,7 @@ export interface ClientEncryptionEntity {
         | UnnamedKMSProviders['local']
         | undefined;
     };
+    keyExpirationMS?: number;
   };
 }
 

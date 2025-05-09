@@ -886,6 +886,11 @@ export interface ClientEncryptionOptions {
   tlsOptions?: CSFLEKMSTlsOptions;
 
   /**
+   * Sets the expiration time for the DEK in the cache in milliseconds. Defaults to 60000.
+   */
+  keyExpirationMS?: number;
+
+  /**
    * @experimental
    *
    * The timeout setting to be used for all the operations on ClientEncryption.
