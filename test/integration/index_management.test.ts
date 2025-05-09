@@ -358,18 +358,10 @@ describe('Indexes', function () {
         });
     });
 
-    it(
-      'should return false',
-      {
-        requires: {
-          mongodb: '>4.0'
-        }
-      },
-      async function () {
-        const result = await collection.dropIndexes();
-        expect(result).to.equal(false);
-      }
-    );
+    it('should return false', async function () {
+      const result = await collection.dropIndexes();
+      expect(result).to.equal(false);
+    });
   });
 
   context('indexExists', function () {

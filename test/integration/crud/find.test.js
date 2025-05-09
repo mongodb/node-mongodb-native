@@ -453,7 +453,7 @@ describe('Find', function () {
   it('shouldCorrectlyPerformFindByWhere', {
     metadata: {
       requires: {
-        mongodb: '<=4.2.x',
+        mongodb: '4.2.x',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },

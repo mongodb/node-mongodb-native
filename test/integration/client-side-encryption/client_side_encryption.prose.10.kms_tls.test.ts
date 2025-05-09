@@ -5,8 +5,7 @@ import { ClientEncryption, type MongoClient } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
-    clientSideEncryption: true,
-    mongodb: '>=4.2.0'
+    clientSideEncryption: true
   }
 };
 

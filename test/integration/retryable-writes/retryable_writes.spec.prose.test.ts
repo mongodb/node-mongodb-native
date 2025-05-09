@@ -58,9 +58,8 @@ describe('Retryable Writes Spec Prose', () => {
     });
 
     for (const testTopology of ['replicaset', 'sharded'] as const) {
-      const minFailPointVersion = testTopology === 'replicaset' ? '>=4.0.0' : '>=4.1.5';
       it(`should error with the correct error message when topology is ${testTopology}`, {
-        metadata: { requires: { mongodb: minFailPointVersion, topology: [testTopology] } },
+        metadata: { requires: { topology: [testTopology] } },
         test: async function () {
           const error = await client
             .db('test')

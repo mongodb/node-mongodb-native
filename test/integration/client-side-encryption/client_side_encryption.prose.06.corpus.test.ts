@@ -14,7 +14,6 @@ import { getEncryptExtraOptions } from '../../tools/utils';
 describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {
     requires: {
-      mongodb: '>=4.2.0',
       clientSideEncryption: true as const
     }
   };

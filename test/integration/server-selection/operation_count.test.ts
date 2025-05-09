@@ -11,15 +11,13 @@ import { type FailPoint } from '../../tools/utils';
 
 const testMetadata: MongoDBMetadataUI = {
   requires: {
-    topology: 'single',
-    mongodb: '>=4.0.0'
+    topology: 'single'
   }
 };
 
 const loadBalancedTestMetadata: MongoDBMetadataUI = {
   requires: {
-    topology: 'load-balanced',
-    mongodb: '>=4.0.0'
+    topology: 'load-balanced'
   }
 };
 

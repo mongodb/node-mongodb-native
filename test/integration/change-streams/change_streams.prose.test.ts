@@ -10,7 +10,6 @@ import {
   type CommandStartedEvent,
   type CommandSucceededEvent,
   type Document,
-  isHello,
   LEGACY_HELLO_COMMAND,
   Long,
   type MongoClient,
@@ -85,13 +84,6 @@ async function waitForStarted(changeStream, callback) {
   await callback();
 }
 
-// Define the pipeline processing changes
-const pipeline = [
-  { $addFields: { addedField: 'This is a field added using $addFields' } },
-  { $project: { documentKey: false } },
-  { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
-];
-
 describe('Change Stream prose tests', function () {
   before(async function () {
     return await setupDatabase(this.configuration, ['integration_tests']);
@@ -116,165 +108,7 @@ describe('Change Stream prose tests', function () {
   // TODO(NODE-3884): Add tests 1-4, 6-8. (#5 is removed from spec)
   // Note: #3 is partially contained in change_stream.test.js > Change Stream Resume Error Tests
 
-  // 9. $changeStream stage for ChangeStream against a server >=4.0 and <4.0.7 that has not received
-  // any results yet MUST include a startAtOperationTime option when resuming a change stream.
-  it('should include a startAtOperationTime field when resuming if no changes have been received', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0 <4.0.7' } },
-    test: function (done) {
-      const configuration = this.configuration;
-
-      const OPERATION_TIME = new Timestamp({ i: 4, t: 1501511802 });
-
-      const makeHello = server => ({
-        __nodejs_mock_server__: true,
-        [LEGACY_HELLO_COMMAND]: true,
-        secondary: false,
-        me: server.uri(),
-        primary: server.uri(),
-        tags: { loc: 'ny' },
-        setName: 'rs',
-        setVersion: 1,
-        electionId: new ObjectId(0),
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 7,
-        minWireVersion: 0,
-        ok: 1,
-        hosts: [server.uri()],
-        operationTime: OPERATION_TIME,
-        $clusterTime: {
-          clusterTime: OPERATION_TIME
-        }
-      });
-
-      const AGGREGATE_RESPONSE = {
-        ok: 1,
-        cursor: {
-          firstBatch: [],
-          id: new Long('9064341847921713401'),
-          ns: 'test.test'
-        },
-        operationTime: OPERATION_TIME,
-        $clusterTime: {
-          clusterTime: OPERATION_TIME
-        }
-      };
-
-      const CHANGE_DOC = {
-        _id: {
-          ts: OPERATION_TIME,
-          ns: 'integration_tests.docsDataEvent',
-          _id: new ObjectId('597f407a8fd4abb616feca93')
-        },
-        operationType: 'insert',
-        ns: {
-          db: 'integration_tests',
-          coll: 'docsDataEvent'
-        },
-        fullDocument: {
-          _id: new ObjectId('597f407a8fd4abb616feca93'),
-          a: 1,
-          counter: 0
-        }
-      };
-
-      const GET_MORE_RESPONSE = {
-        ok: 1,
-        cursor: {
-          nextBatch: [CHANGE_DOC],
-          id: new Long('9064341847921713401'),
-          ns: 'test.test'
-        },
-        cursorId: new Long('9064341847921713401')
-      };
-
-      const dbName = 'integration_tests';
-      const collectionName = 'resumeWithStartAtOperationTime';
-      const connectOptions = { monitorCommands: true };
-
-      let getMoreCounter = 0;
-      let changeStream;
-      let server;
-      let client;
-
-      let finish = (err?: Error) => {
-        finish = () => {
-          // ignore
-        };
-        Promise.resolve()
-          .then(() => changeStream && changeStream.close())
-          .then(() => client && client.close())
-          .then(() => done(err));
-      };
-
-      function primaryServerHandler(request) {
-        try {
-          const doc = request.document;
-          if (isHello(doc)) {
-            return request.reply(makeHello(server));
-          } else if (doc.aggregate) {
-            return request.reply(AGGREGATE_RESPONSE);
-          } else if (doc.getMore) {
-            if (getMoreCounter++ === 0) {
-              request.reply({ ok: 0 });
-              return;
-            }
-
-            request.reply(GET_MORE_RESPONSE);
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          } else if (doc.killCursors) {
-            request.reply({ ok: 1 });
-          }
-        } catch (e) {
-          finish(e);
-        }
-      }
-
-      const started = [];
-
-      mock
-        .createServer()
-        .then(_server => (server = _server))
-        .then(() => server.setMessageHandler(primaryServerHandler))
-        .then(() => (client = configuration.newClient(`mongodb://${server.uri()}`, connectOptions)))
-        .then(() => {
-          client.on('commandStarted', e => {
-            if (e.commandName === 'aggregate') {
-              started.push(e);
-            }
-          });
-        })
-        .then(() => client.db(dbName))
-        .then(db => db.collection(collectionName))
-        .then(col => col.watch(pipeline))
-        .then(_changeStream => (changeStream = _changeStream))
-        .then(() => changeStream.next())
-        .then(() => {
-          const first = started[0].command;
-          expect(first).to.have.nested.property('pipeline[0].$changeStream');
-          const firstStage = first.pipeline[0].$changeStream;
-          expect(firstStage).to.not.have.property('resumeAfter');
-          expect(firstStage).to.not.have.property('startAtOperationTime');
-
-          const second = started[1].command;
-          expect(second).to.have.nested.property('pipeline[0].$changeStream');
-          const secondStage = second.pipeline[0].$changeStream;
-          expect(secondStage).to.not.have.property('resumeAfter');
-          expect(secondStage).to.have.property('startAtOperationTime');
-          expect(secondStage.startAtOperationTime.equals(OPERATION_TIME)).to.be.ok;
-        })
-        .then(
-          () => finish(),
-          err => finish(err)
-        );
-    }
-  });
-
   // 10 removed by spec
-
   describe('Change Stream prose 11-14', () => {
     class MockServerManager {
       config: any;
@@ -498,11 +332,10 @@ describe('Change Stream prose tests', function () {
     }
 
     // 11. For a ChangeStream under these conditions:
-    //   Running against a server >=4.0.7.
     //   The batch is empty or has been iterated to the last document.
     // Expected result:
     //   getResumeToken must return the postBatchResumeToken from the current command response.
-    describe('for emptied batch on server >= 4.0.7', function () {
+    describe('for emptied batch on server', function () {
       it('must return the postBatchResumeToken from the current command response', function () {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function* () {
@@ -543,130 +376,6 @@ describe('Change Stream prose tests', function () {
             expect(tokens[1])
               .to.deep.equal(successes[1].postBatchResumeToken)
               .and.to.not.deep.equal(successes[1].nextBatch[0]._id);
-          });
-      });
-    });
-
-    // 12. For a ChangeStream under these conditions:
-    //   Running against a server <4.0.7.
-    //   The batch is empty or has been iterated to the last document.
-    // Expected result:
-    //   getResumeToken must return the _id of the last document returned if one exists.
-    //   getResumeToken must return resumeAfter from the initial aggregate if the option was specified.
-    //   If ``resumeAfter`` was not specified, the ``getResumeToken`` result must be empty.
-    describe('for emptied batch on server <= 4.0.7', function () {
-      it('must return the _id of the last document returned if one exists', function () {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function* () {
-            yield { numDocuments: 1, postBatchResumeToken: false };
-          })()
-        });
-
-        return manager
-          .ready()
-          .then(() => manager.makeChangeStream().next())
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
-            const successes = manager.apm.succeeded.map(e => {
-              try {
-                // @ts-expect-error: e.reply is unknown
-                return e.reply.cursor;
-              } catch {
-                return {};
-              }
-            });
-
-            expect(successes).to.have.a.lengthOf(2);
-            expect(successes[1]).to.have.a.nested.property('nextBatch[0]._id');
-
-            expect(tokens).to.have.a.lengthOf(1);
-            expect(tokens[0]).to.deep.equal(successes[1].nextBatch[0]._id);
-          });
-      });
-
-      it('must return resumeAfter from the initial aggregate if the option was specified', function () {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-        const resumeAfter = manager.resumeToken();
-
-        return manager
-          .ready()
-          .then(() => {
-            return new Promise<void>(resolve => {
-              const changeStream = manager.makeChangeStream({ resumeAfter });
-              let counter = 0;
-              changeStream.cursor.on('response', () => {
-                if (counter === 1) {
-                  token = changeStream.resumeToken;
-                  resolve();
-                }
-                counter += 1;
-              });
-
-              changeStream.next().catch(() => {
-                // Note: this is expected to fail
-              });
-            });
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token).to.deep.equal(resumeAfter);
-          });
-      });
-
-      it('must be empty if resumeAfter options was not specified', function () {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-
-        return manager
-          .ready()
-          .then(() => {
-            return new Promise<void>(resolve => {
-              const changeStream = manager.makeChangeStream();
-              let counter = 0;
-              changeStream.cursor.on('response', () => {
-                if (counter === 1) {
-                  token = changeStream.resumeToken;
-                  resolve();
-                }
-                counter += 1;
-              });
-
-              changeStream.next().catch(() => {
-                // Note: this is expected to fail
-              });
-            });
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token).to.not.exist;
           });
       });
     });
@@ -893,7 +602,7 @@ describe('Change Stream prose tests', function () {
     // - MUST NOT include a resumeAfter option
     // when resuming a change stream.
     it('$changeStream without results must include startAfter and not resumeAfter', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      metadata: { requires: { topology: 'replicaset' } },
       test: async function () {
         const events = [];
         client.on('commandStarted', e => recordEvent(events, e));
@@ -933,7 +642,7 @@ describe('Change Stream prose tests', function () {
     // - MUST NOT include a startAfter option
     // when resuming a change stream.
     it('$changeStream with results must include resumeAfter and not startAfter', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
+      metadata: { requires: { topology: 'replicaset' } },
       test: function (done) {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));

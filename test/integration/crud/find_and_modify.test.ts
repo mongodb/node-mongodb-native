@@ -347,27 +347,15 @@ describe('Collection (#findOneAnd...)', function () {
           await client?.close();
         });
 
-        it(
-          'the aggregation pipeline updates the matching document',
-          {
-            requires: {
-              mongodb: '>4.0'
-            }
-          },
-          async function () {
-            const {
-              value: { _id, ...document }
-            } = await collection.findOneAndUpdate(
-              { a: 1 },
-              [{ $set: { a: { $add: [1, '$a'] } } }],
-              {
-                includeResultMetadata: true,
-                returnDocument: 'after'
-              }
-            );
-            expect(document).to.deep.equal({ a: 2, b: 1 });
-          }
-        );
+        it('the aggregation pipeline updates the matching document', async function () {
+          const {
+            value: { _id, ...document }
+          } = await collection.findOneAndUpdate({ a: 1 }, [{ $set: { a: { $add: [1, '$a'] } } }], {
+            includeResultMetadata: true,
+            returnDocument: 'after'
+          });
+          expect(document).to.deep.equal({ a: 2, b: 1 });
+        });
       });
 
       context('when passing includeResultMetadata: false', function () {
@@ -385,22 +373,14 @@ describe('Collection (#findOneAnd...)', function () {
           await client?.close();
         });
 
-        it(
-          'the aggregation pipeline updates the matching document',
-          {
-            requires: {
-              mongodb: '>4.0'
-            }
-          },
-          async function () {
-            const { _id, ...document } = await collection.findOneAndUpdate(
-              { a: 1 },
-              [{ $set: { a: { $add: [1, '$a'] } } }],
-              { returnDocument: 'after' }
-            );
-            expect(document).to.deep.equal({ a: 2, b: 1 });
-          }
-        );
+        it('the aggregation pipeline updates the matching document', async function () {
+          const { _id, ...document } = await collection.findOneAndUpdate(
+            { a: 1 },
+            [{ $set: { a: { $add: [1, '$a'] } } }],
+            { returnDocument: 'after' }
+          );
+          expect(document).to.deep.equal({ a: 2, b: 1 });
+        });
       });
     });
   });

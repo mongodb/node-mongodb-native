@@ -33,7 +33,6 @@ import { filterForCommands } from '../shared';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
-    mongodb: '>=4.2.0',
     clientSideEncryption: true
   }
 };
@@ -699,7 +698,6 @@ describe('CSOT', function () {
 
     const metadata: MongoDBMetadataUI = {
       requires: {
-        mongodb: '>=4.2.0',
         clientSideEncryption: true
       }
     };
@@ -802,12 +800,6 @@ describe('CSOT', function () {
 
     const timeoutMS = 1000;
 
-    const metadata: MongoDBMetadataUI = {
-      requires: {
-        mongodb: '>=4.2.0'
-      }
-    };
-
     describe('#markCommand', function () {
       context(
         'when csot is enabled and markCommand() takes longer than the remaining timeoutMS',
@@ -837,7 +829,7 @@ describe('CSOT', function () {
             sinon.restore();
           });
 
-          it('the command should fail due to a timeout error', metadata, async function () {
+          it('the command should fail due to a timeout error', async function () {
             const { duration, result: error } = await measureDuration(() =>
               stateMachine
                 .markCommand(
