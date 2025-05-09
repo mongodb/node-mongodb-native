@@ -605,6 +605,8 @@ function setOption(
       if (values[0] == null) {
         break;
       }
+      // The value should always be a string here, but since the array is typed as unknown
+      // there still needs to be an explicit cast.
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       mongoOptions[name] = String(values[0]);
       break;

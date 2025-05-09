@@ -96,6 +96,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
 
     const result = await super.executeCommand(server, session, cmd, timeoutContext);
 
+    // @ts-expect-error: Explain always returns a document
     return this.explain ? result : result.values;
   }
 }

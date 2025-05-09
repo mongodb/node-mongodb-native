@@ -17,12 +17,15 @@ export interface RenameOptions extends CommandOperationOptions {
 
 /** @internal */
 export class RenameOperation extends CommandOperation<Document> {
-  constructor(
-    public collection: Collection,
-    public newName: string,
-    public override options: RenameOptions
-  ) {
+  collection: Collection;
+  newName: string;
+  override options: RenameOptions;
+
+  constructor(collection: Collection, newName: string, options: RenameOptions) {
     super(collection, options);
+    this.collection = collection;
+    this.newName = newName;
+    this.options = options;
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 

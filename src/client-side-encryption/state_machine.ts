@@ -186,10 +186,13 @@ export type StateMachineOptions = {
  */
 // TODO(DRIVERS-2671): clarify CSOT behavior for FLE APIs
 export class StateMachine {
-  constructor(
-    private options: StateMachineOptions,
-    private bsonOptions = pluckBSONSerializeOptions(options)
-  ) {}
+  private options: StateMachineOptions;
+  private bsonOptions: BSONSerializeOptions;
+
+  constructor(options: StateMachineOptions, bsonOptions = pluckBSONSerializeOptions(options)) {
+    this.options = options;
+    this.bsonOptions = bsonOptions;
+  }
 
   /**
    * Executes the state machine according to the specification
