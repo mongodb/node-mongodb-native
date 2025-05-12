@@ -53,7 +53,7 @@ export interface AutoEncryptionOptions {
   /** Allows users to bypass query analysis */
   bypassQueryAnalysis?: boolean;
   /**
-   * Sets the expiration time for the DEK in the cache in milliseconds. Defaults to 60000.
+   * Sets the expiration time for the DEK in the cache in milliseconds. Defaults to 60000.  0 means no timeout.
    */
   keyExpirationMS?: number;
   options?: {
