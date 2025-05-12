@@ -289,7 +289,7 @@ export class AutoEncrypter {
       mongoCryptOptions.bypassQueryAnalysis = options.bypassQueryAnalysis;
     }
 
-    if (options.keyExpirationMS) {
+    if (options.keyExpirationMS != null) {
       mongoCryptOptions.keyExpirationMS = options.keyExpirationMS;
     }
 
