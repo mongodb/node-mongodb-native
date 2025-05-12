@@ -15,8 +15,6 @@ const skippedAuthTests = [
   'Insert a document with auto encryption using the AWS provider with temporary credentials',
   'Insert a document with auto encryption using Azure KMS provider',
   '$rename works if target value has same encryption options',
-  'Insert with deterministic encryption, then find it',
-  'Insert with randomized encryption, then find it',
   'Bulk write with encryption',
   'Insert with bypassAutoEncryption',
   'Insert with bypassAutoEncryption for local schema',
