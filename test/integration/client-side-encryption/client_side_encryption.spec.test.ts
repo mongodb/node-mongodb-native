@@ -15,8 +15,6 @@ const skippedAuthTests = [
   'Insert a document with auto encryption using the AWS provider with temporary credentials',
   'Insert a document with auto encryption using Azure KMS provider',
   '$rename works if target value has same encryption options',
-  'Insert with deterministic encryption, then find it',
-  'Insert with randomized encryption, then find it',
   'Bulk write with encryption',
   'Insert with bypassAutoEncryption',
   'Insert with bypassAutoEncryption for local schema',
@@ -109,6 +107,13 @@ describe('Client Side Encryption (Legacy)', function () {
       if (typeof result === 'string') return result;
     }
 
+    if (['Insert with deterministic encryption, then find it'].includes(description)) {
+      const result = configuration.filters.ClientSideEncryptionFilter.filter({
+        metadata: { requires: { clientSideEncryption: '>=6.4.0' } }
+      });
+
+      if (typeof result === 'string') return result;
+    }
     return true;
   });
 });
@@ -142,9 +147,16 @@ describe('Client Side Encryption (Unified)', function () {
         'rewrap from aws:name1 to aws:name2',
         'can explicitly encrypt with a named KMS provider'
       ];
+      const dekExpirationTests = ['decrypt, wait, and decrypt again'];
       if (delegatedKMIPTests.includes(description)) {
         const shouldSkip = configuration.filters.ClientSideEncryptionFilter.filter({
           metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
+        });
+        if (typeof shouldSkip === 'string') return shouldSkip;
+      }
+      if (dekExpirationTests.includes(description)) {
+        const shouldSkip = configuration.filters.ClientSideEncryptionFilter.filter({
+          metadata: { requires: { clientSideEncryption: '>=6.4.0' } }
         });
         if (typeof shouldSkip === 'string') return shouldSkip;
       }

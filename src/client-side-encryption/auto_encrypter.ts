@@ -52,6 +52,10 @@ export interface AutoEncryptionOptions {
   bypassAutoEncryption?: boolean;
   /** Allows users to bypass query analysis */
   bypassQueryAnalysis?: boolean;
+  /**
+   * Sets the expiration time for the DEK in the cache in milliseconds. Defaults to 60000.  0 means no timeout.
+   */
+  keyExpirationMS?: number;
   options?: {
     /** An optional hook to catch logging messages from the underlying encryption engine */
     logger?: (level: AutoEncryptionLoggerLevel, message: string) => void;
@@ -283,6 +287,10 @@ export class AutoEncrypter {
 
     if (options.bypassQueryAnalysis) {
       mongoCryptOptions.bypassQueryAnalysis = options.bypassQueryAnalysis;
+    }
+
+    if (options.keyExpirationMS != null) {
+      mongoCryptOptions.keyExpirationMS = options.keyExpirationMS;
     }
 
     this._bypassMongocryptdAndCryptShared = this._bypassEncryption || !!options.bypassQueryAnalysis;
