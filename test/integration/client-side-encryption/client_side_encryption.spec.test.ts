@@ -107,6 +107,13 @@ describe('Client Side Encryption (Legacy)', function () {
       if (typeof result === 'string') return result;
     }
 
+    if (['Insert with deterministic encryption, then find it'].includes(description)) {
+      const result = configuration.filters.ClientSideEncryptionFilter.filter({
+        metadata: { requires: { clientSideEncryption: '>=6.4.0' } }
+      });
+
+      if (typeof result === 'string') return result;
+    }
     return true;
   });
 });
