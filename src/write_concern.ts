@@ -143,6 +143,7 @@ export class WriteConcern {
     const parentOpts: WriteConcern | WriteConcernSettings | undefined =
       inherit instanceof WriteConcern ? inherit : inherit.writeConcern;
 
+    const mergedOpts = { ...parentOpts, ...opts } as WriteConcernSettings;
     const {
       w = undefined,
       wtimeout = undefined,
@@ -150,10 +151,7 @@ export class WriteConcern {
       fsync = undefined,
       journal = undefined,
       wtimeoutMS = undefined
-    } = {
-      ...parentOpts,
-      ...opts
-    };
+    } = mergedOpts;
     if (
       w != null ||
       wtimeout != null ||

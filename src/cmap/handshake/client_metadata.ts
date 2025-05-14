@@ -53,7 +53,11 @@ export class LimitedSizeDocument {
   private document = new Map();
   /** BSON overhead: Int32 + Null byte */
   private documentSize = 5;
-  constructor(private maxSize: number) {}
+  private maxSize: number;
+
+  constructor(maxSize: number) {
+    this.maxSize = maxSize;
+  }
 
   /** Only adds key/value if the bsonByteLength is less than MAX_SIZE */
   public ifItFitsItSits(key: string, value: Record<string, any> | string): boolean {
