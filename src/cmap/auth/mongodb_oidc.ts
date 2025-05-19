@@ -93,6 +93,8 @@ type EnvironmentName = 'test' | 'azure' | 'gcp' | 'k8s' | undefined;
 
 /** @internal */
 export interface Workflow {
+  cache: TokenCache;
+
   /**
    * All device workflows must implement this method in order to get the access
    * token and then call authenticate with it.
