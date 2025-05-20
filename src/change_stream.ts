@@ -184,6 +184,14 @@ export interface ChangeStreamDocumentCommon {
   clusterTime?: Timestamp;
 
   /**
+   * The server date and time of the database operation. 
+   * wallTime differs from clusterTime in that clusterTime is a timestamp taken from the oplog entry associated with the database operation event.
+   * The format is "YYYY-MM-DD HH:MM.SS.millis".
+   */
+  wallTime?: string;
+
+
+  /**
    * The transaction number.
    * Only present if the operation is part of a multi-document transaction.
    *
