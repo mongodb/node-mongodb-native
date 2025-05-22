@@ -48,6 +48,8 @@ gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
 >[!Note]
 No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
 
+The MongoDB Node.js driver follows [semantic versioning](https://semver.org/) for its releases.
+
 ### Bugs / Feature Requests
 
 Think you’ve found a bug? Want to see a new feature in `node-mongodb-native`? Please open a
