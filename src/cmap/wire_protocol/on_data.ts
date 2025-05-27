@@ -89,8 +89,9 @@ export function onData(
       return this;
     },
 
-    [Symbol.asyncDispose]: function (): PromiseLike<void> {
-      return closeHandler().then(() => undefined);
+    // Note this should currently not be used, but is required by the AsyncGenerator interface.
+    async [Symbol.asyncDispose]() {
+      await closeHandler();
     }
   };
 

@@ -732,7 +732,7 @@ const COMPRESSION_DETAILS_SIZE = 9; // originalOpcode + uncompressedSize, compre
  */
 export class OpCompressedRequest {
   private command: WriteProtocolMessageType;
-  private options: { zLibCompressionLevel: number; agreedCompressor: CompressorName };
+  private options: { zlibCompressionLevel: number; agreedCompressor: CompressorName };
 
   constructor(
     command: WriteProtocolMessageType,
@@ -740,7 +740,7 @@ export class OpCompressedRequest {
   ) {
     this.command = command;
     this.options = {
-      zLibCompressionLevel: options.zlibCompressionLevel,
+      zlibCompressionLevel: options.zlibCompressionLevel,
       agreedCompressor: options.agreedCompressor
     };
   }
@@ -762,13 +762,7 @@ export class OpCompressedRequest {
     const originalCommandOpCode = concatenatedOriginalCommandBuffer.readInt32LE(12);
 
     // Compress the message body
-    const compressedMessage = await compress(
-      {
-        zlibCompressionLevel: this.options.zLibCompressionLevel,
-        agreedCompressor: this.options.agreedCompressor
-      },
-      messageToBeCompressed
-    );
+    const compressedMessage = await compress(this.options, messageToBeCompressed);
     // Create the msgHeader of OP_COMPRESSED
     const msgHeader = Buffer.alloc(MESSAGE_HEADER_SIZE);
     msgHeader.writeInt32LE(
