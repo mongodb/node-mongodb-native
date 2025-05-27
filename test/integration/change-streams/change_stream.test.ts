@@ -1259,7 +1259,8 @@ describe('Change Streams', function () {
       // Running on replicaset because other topologies are finiky with the cluster-wide events
       // Dropping and renaming and creating collections in order to achieve a clean slate isn't worth the goal of these tests
       // We just want to show that the new ChangeStreamDocument type information can reproduced in a real env
-      topologies: ['replicaset']
+      topologies: ['replicaset'],
+      minServerVersion: '6.0'
     })
     .createEntities([
       { client: { id: 'client0' } },
@@ -1325,6 +1326,7 @@ describe('Change Streams', function () {
             operationType: 'drop',
             ns: { db: 'dbToDrop', coll: 'collInDbToDrop' },
             clusterTime: { $$type: 'timestamp' },
+            wallTime: { $$type: 'date' },
             txnNumber: { $$exists: false },
             lsid: { $$exists: false }
           }
@@ -1337,6 +1339,7 @@ describe('Change Streams', function () {
             operationType: 'dropDatabase',
             ns: { db: 'dbToDrop', coll: { $$exists: false } },
             clusterTime: { $$type: 'timestamp' },
+            wallTime: { $$type: 'date' },
             txnNumber: { $$exists: false },
             lsid: { $$exists: false }
           }
@@ -1349,6 +1352,7 @@ describe('Change Streams', function () {
             operationType: 'drop',
             ns: { db: 'dbToDrop', coll: 'collInDbToDrop' },
             clusterTime: { $$type: 'timestamp' },
+            wallTime: { $$type: 'date' },
             txnNumber: { $$exists: false },
             lsid: { $$exists: false }
           }
@@ -1360,6 +1364,7 @@ describe('Change Streams', function () {
             _id: { $$exists: true },
             operationType: 'invalidate',
             clusterTime: { $$type: 'timestamp' },
+            wallTime: { $$type: 'date' },
             txnNumber: { $$exists: false },
             lsid: { $$exists: false }
           }
@@ -1420,6 +1425,7 @@ describe('Change Streams', function () {
             documentKey: { _id: 3 },
             ns: { db: 'changeStreamDocShape', coll: 'collection0' },
             clusterTime: { $$type: 'timestamp' },
+            wallTime: { $$type: 'date' },
             txnNumber: { $$type: ['long', 'int'] },
             lsid: { $$sessionLsid: 'session0' }
           }
@@ -1472,6 +1478,7 @@ describe('Change Streams', function () {
             documentKey: { _id: 3 },
             ns: { db: 'renameDb', coll: 'collToRename' },
             clusterTime: { $$type: 'timestamp' },
+            wallTime: { $$type: 'date' },
             txnNumber: { $$exists: false },
             lsid: { $$exists: false }
           }
@@ -1497,6 +1504,7 @@ describe('Change Streams', function () {
             ns: { db: 'renameDb', coll: 'collToRename' },
             to: { db: 'renameDb', coll: 'newCollectionName' },
             clusterTime: { $$type: 'timestamp' },
+            wallTime: { $$type: 'date' },
             txnNumber: { $$exists: false },
             lsid: { $$exists: false }
           }
