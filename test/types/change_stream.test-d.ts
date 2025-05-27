@@ -63,6 +63,7 @@ expectType<ResumeToken>(change._id);
 expectType<Timestamp | undefined>(change.clusterTime);
 expectType<number | undefined>(change.txnNumber); // Could be a Long if promoteLongs is off
 expectType<ServerSessionId | undefined>(change.lsid);
+expectType<string | undefined>(change.wallTime);
 
 type CrudChangeDoc =
   | ChangeStreamInsertDocument<Schema> //  C
