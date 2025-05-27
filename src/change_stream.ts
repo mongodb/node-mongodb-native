@@ -189,7 +189,7 @@ export interface ChangeStreamDocumentCommon {
    * The format is "YYYY-MM-DD HH:MM.SS.millis".
    * @sinceServerVersion 6.0.0
    */
-  wallTime?: string;
+  wallTime?: Date;
 
   /**
    * The transaction number.
