@@ -393,7 +393,7 @@ functions:
           export MONGODB_URI="${MONGODB_URI}"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
-  assume secrets manager rule:
+  assume secrets manager role:
     - command: ec2.assume_role
       params:
         role_arn: ${DRIVERS_SECRETS_ARN}
@@ -714,7 +714,7 @@ tasks:
         params:
           updates:
             - {key: NPM_VERSION, value: '9'}
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: install dependencies
       - command: subprocess.exec
         type: setup
@@ -747,7 +747,7 @@ tasks:
             - src/.evergreen/run-gcp-kms-tests.sh
   - name: test-azurekms-task
     commands:
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: expansions.update
         type: setup
         params:
@@ -2818,7 +2818,7 @@ task_groups:
     setup_group_timeout_secs: 1800
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
@@ -2840,7 +2840,7 @@ task_groups:
     setup_group_timeout_secs: 1800
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
@@ -2865,7 +2865,7 @@ task_groups:
   - name: testk8soidc_task_group_eks
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
@@ -2886,7 +2886,7 @@ task_groups:
   - name: testk8soidc_task_group_gke
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
@@ -2907,7 +2907,7 @@ task_groups:
   - name: testk8soidc_task_group_aks
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
@@ -2928,7 +2928,7 @@ task_groups:
   - name: testtestoidc_task_group
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
@@ -2949,7 +2949,7 @@ task_groups:
   - name: testazureoidc_task_group
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: shell.exec
         params:
           shell: bash
@@ -2974,7 +2974,7 @@ task_groups:
   - name: testgcpoidc_task_group
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: shell.exec
         params:
           shell: bash
@@ -2999,7 +2999,7 @@ task_groups:
   - name: test_atlas_task_group
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
@@ -3030,7 +3030,7 @@ task_groups:
   - name: test_atlas_task_group_search_indexes
     setup_group:
       - func: fetch source
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
