@@ -1687,7 +1687,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with regular aws credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
@@ -1702,7 +1702,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with assume role credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
@@ -1717,7 +1717,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws EC2 credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
@@ -1732,7 +1732,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws credentials as environment variables
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
@@ -1747,7 +1747,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-latest-auth-test-run-aws-ECS-auth-test
     commands:
@@ -1762,7 +1762,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws ECS auth test
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
     commands:
@@ -1777,7 +1777,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
     commands:
@@ -1792,7 +1792,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
   - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
     commands:
@@ -1807,7 +1807,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with regular aws credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
@@ -1822,7 +1822,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with assume role credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
@@ -1837,7 +1837,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
       aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
@@ -1853,7 +1853,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
@@ -1868,7 +1868,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws ECS auth test
   - name: run-spec-benchmark-tests-node-server
     tags:
@@ -2177,7 +2177,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: install mongodb-client-encryption
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run custom csfle tests
   - name: run-custom-csfle-tests-rapid
     tags:
@@ -2195,7 +2195,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: install mongodb-client-encryption
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run custom csfle tests
   - name: run-custom-csfle-tests-latest
     tags:
@@ -2213,7 +2213,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: install mongodb-client-encryption
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run custom csfle tests
   - name: test-latest-driver-mongodb-client-encryption-6.0.0
     tags:
@@ -2250,7 +2250,7 @@ tasks:
             - {key: MONGODB_BINARIES, value: '${PROJECT_DIRECTORY}/mongodb/bin'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: build and test alpine FLE
   - name: test-latest-server-noauth
     tags:
@@ -2667,7 +2667,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run lambda handler example tests with aws auth
   - name: test-latest-csfle-mongocryptd
     tags:
