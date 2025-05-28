@@ -662,21 +662,21 @@ BUILD_VARIANTS.push({
 
 const customDependencyTests = [];
 
-for (const version of ['5.0', 'rapid', 'latest']) {
+for (const serverVersion of ['5.0', 'rapid', 'latest']) {
   customDependencyTests.push({
-    name: `run-custom-csfle-tests-${version}`,
+    name: `run-custom-csfle-tests-${serverVersion}`,
     tags: ['run-custom-dependency-tests'],
     commands: [
       updateExpansions({
         NODE_LTS_VERSION: LOWEST_LTS,
         NPM_VERSION: 9,
-        VERSION: version,
+        VERSION: serverVersion,
         TOPOLOGY: 'replica_set',
         CLIENT_ENCRYPTION: true
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'install mongodb-client-encryption' },
+      { func: 'install mongodb-client-encryption from source' },
       { func: 'assume secrets manager role' },
       { func: 'run custom csfle tests' }
     ]

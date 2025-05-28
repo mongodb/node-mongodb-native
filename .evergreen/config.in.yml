@@ -366,8 +366,6 @@ functions:
       params:
         working_dir: "src"
         binary: bash
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         add_expansions_to_env: true
         args:
           - -c
@@ -377,9 +375,7 @@ functions:
       params:
         working_dir: "src"
         binary: bash
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
+        add_expansions_to_env: true
         args:
           - .evergreen/run-atlas-tests.sh
 
@@ -739,15 +735,12 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
 
-  install mongodb-client-encryption:
+  install mongodb-client-encryption from source:
     - command: subprocess.exec
       type: setup
       params:
         working_dir: "src"
-        env:
-          INSTALL_DIR: mongodb-client-encryption
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        add_expansions_to_env: true
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
@@ -760,12 +753,6 @@ functions:
       type: test
       params:
         working_dir: "src"
-        env:
-          INSTALL_DIR: mongodb-client-encryption
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          NODE_VERSION: ${NODE_VERSION}
-          MONGODB_URI: ${MONGODB_URI}
         binary: bash
         add_expansions_to_env: true
         args:
@@ -800,8 +787,6 @@ tasks:
         params:
           binary: bash
           add_expansions_to_env: true
-          env:
-            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           args:
             - src/.evergreen/run-deployed-gcp-kms-tests.sh
 
@@ -830,19 +815,17 @@ tasks:
 
   - name: "test-azurekms-task"
     commands:
-      - func: assume secrets manager role
       - command: expansions.update
         type: setup
         params:
           updates:
             - { key: NPM_VERSION, value: "9" }
       - func: "install dependencies"
+      - func: assume secrets manager role
       - command: subprocess.exec
         type: setup
         params:
           binary: bash
-          env:
-            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           add_expansions_to_env: true
           args:
             - src/.evergreen/run-deployed-azure-kms-tests.sh
