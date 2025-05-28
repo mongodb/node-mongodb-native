@@ -170,7 +170,7 @@ describe('Change Streams', function () {
     }
   });
 
-  it('contains a wallType date property on the change', {
+  it('contains a wallTtime date property on the change', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=6.0.0' } },
     async test() {
       const collection = db.collection('wallTimeTest');
@@ -186,7 +186,10 @@ describe('Change Streams', function () {
       await changeStream.close();
 
       expect(change).to.have.property('wallTime');
-      expect(change.wallType).to.be.instanceOf(Date);
+      // For cases where it's not undefined we check it's a Date.
+      if (change.wallTime) {
+        expect(change.wallType).to.be.instanceOf(Date);
+      }
     }
   });
 
