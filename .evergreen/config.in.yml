@@ -22,6 +22,11 @@ timeout:
         - "-la"
 
 functions:
+  "assume secrets manager role": &assume_secrets_manager_role
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
+
   "fetch source":
     # Executes git clone and applies the submitted patch, if any
     - command: git.get_project
@@ -78,9 +83,7 @@ functions:
           bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
 
   "bootstrap mongohoused":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: shell.exec
       params:
         add_expansions_to_env: true
@@ -97,9 +100,7 @@ functions:
           docker ps
 
   "run tests":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
@@ -137,9 +138,7 @@ functions:
     - command: timeout.update
       params:
         exec_timeout_secs: 1800
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
@@ -358,9 +357,7 @@ functions:
           rm -rf ./node_modules/@aws-sdk/credential-providers
 
   "run atlas tests":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     # This creates secrets-export.sh, which is later sourced by run-tests.sh
     - command: subprocess.exec
       params:
@@ -380,9 +377,7 @@ functions:
           - .evergreen/run-atlas-tests.sh
 
   "run socks5 tests":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
@@ -404,9 +399,7 @@ functions:
           - .evergreen/run-kerberos-tests.sh
 
   "run ldap tests":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
@@ -444,11 +437,6 @@ functions:
           export MONGODB_URI="${MONGODB_URI}"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
-
-  "assume secrets manager role":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
 
   "run aws auth test with regular aws credentials":
     - command: subprocess.exec
@@ -746,9 +734,7 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
 
   "build and test alpine FLE":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:

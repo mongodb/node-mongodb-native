@@ -8,6 +8,10 @@ timeout:
       args:
         - '-la'
 functions:
+  assume secrets manager role:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
   fetch source:
     - command: git.get_project
       params:
@@ -389,10 +393,6 @@ functions:
           export MONGODB_URI="${MONGODB_URI}"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
-  assume secrets manager role:
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
   run aws auth test with regular aws credentials:
     - command: subprocess.exec
       type: test
