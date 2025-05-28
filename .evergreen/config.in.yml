@@ -1230,7 +1230,7 @@ task_groups:
     setup_group:
       - func: fetch source
       - command: expansions.update
-        type: 'setup'
+        type: "setup"
         params:
           updates:
             - { key: MONGODB_VERSION, value: "7.0" }
@@ -1265,7 +1265,7 @@ task_groups:
     setup_group:
       - func: fetch source
       - command: expansions.update
-        type: 'setup'
+        type: "setup"
         params:
           updates:
             - { key: MONGODB_VERSION, value: "7.0" }
