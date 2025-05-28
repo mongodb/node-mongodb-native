@@ -22,6 +22,11 @@ timeout:
         - "-la"
 
 functions:
+  "assume secrets manager role": &assume_secrets_manager_role
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
+
   "fetch source":
     # Executes git clone and applies the submitted patch, if any
     - command: git.get_project
@@ -78,8 +83,10 @@ functions:
           bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
 
   "bootstrap mongohoused":
+    - <<: *assume_secrets_manager_role
     - command: shell.exec
       params:
+        add_expansions_to_env: true
         script: |
           ${PREPARE_SHELL}
           DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/pull-mongohouse-image.sh
@@ -93,9 +100,7 @@ functions:
           docker ps
 
   "run tests":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
@@ -133,9 +138,7 @@ functions:
     - command: timeout.update
       params:
         exec_timeout_secs: 1800
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
@@ -354,13 +357,13 @@ functions:
           rm -rf ./node_modules/@aws-sdk/credential-providers
 
   "run atlas tests":
+    - <<: *assume_secrets_manager_role
     # This creates secrets-export.sh, which is later sourced by run-tests.sh
     - command: subprocess.exec
       params:
         working_dir: "src"
         binary: bash
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        add_expansions_to_env: true
         args:
           - -c
           - ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/atlas_connect
@@ -369,16 +372,12 @@ functions:
       params:
         working_dir: "src"
         binary: bash
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
+        add_expansions_to_env: true
         args:
           - .evergreen/run-atlas-tests.sh
 
   "run socks5 tests":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
@@ -400,9 +399,7 @@ functions:
           - .evergreen/run-kerberos-tests.sh
 
   "run ldap tests":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
@@ -440,11 +437,6 @@ functions:
           export MONGODB_URI="${MONGODB_URI}"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
-
-  "assume secrets manager rule":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
 
   "run aws auth test with regular aws credentials":
     - command: subprocess.exec
@@ -623,6 +615,9 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_ACCESS_KEY_ID
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: env-creds
           MONGODB_AWS_SDK: "true"
@@ -728,31 +723,24 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
 
-  install mongodb-client-encryption:
+  install mongodb-client-encryption from source:
     - command: subprocess.exec
       type: setup
       params:
         working_dir: "src"
-        env:
-          INSTALL_DIR: mongodb-client-encryption
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        add_expansions_to_env: true
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
 
   "build and test alpine FLE":
+    - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
       params:
         working_dir: "src"
-        env:
-          INSTALL_DIR: mongodb-client-encryption
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          NODE_VERSION: ${NODE_VERSION}
-          MONGODB_URI: ${MONGODB_URI}
         binary: bash
+        add_expansions_to_env: true
         args:
           - .evergreen/docker/alpine.sh
 
@@ -777,14 +765,14 @@ tasks:
         params:
           updates:
             - { key: NPM_VERSION, value: "9" }
+      - func: assume secrets manager role
       - func: "install dependencies"
       # Upload node driver to a GCP instance
       - command: subprocess.exec
         type: setup
         params:
           binary: bash
-          env:
-            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          add_expansions_to_env: true
           args:
             - src/.evergreen/run-deployed-gcp-kms-tests.sh
 
@@ -819,12 +807,12 @@ tasks:
           updates:
             - { key: NPM_VERSION, value: "9" }
       - func: "install dependencies"
+      - func: assume secrets manager role
       - command: subprocess.exec
         type: setup
         params:
           binary: bash
-          env:
-            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          add_expansions_to_env: true
           args:
             - src/.evergreen/run-deployed-azure-kms-tests.sh
 
@@ -1051,10 +1039,12 @@ task_groups:
     setup_group_timeout_secs: 1800 # 30 minutes
     setup_group:
       - func: fetch source
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: "src"
           binary: bash
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
 
@@ -1073,12 +1063,14 @@ task_groups:
     setup_group_timeout_secs: 1800 # 30 minutes
     setup_group:
       - func: fetch source
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: "src"
           binary: bash
           env:
             AZUREKMS_VMNAME_PREFIX: "NODE_DRIVER"
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
 
@@ -1099,12 +1091,11 @@ task_groups:
   - name: testk8soidc_task_group_eks
     setup_group:
       - func: fetch source
-      - command: ec2.assume_role
-        params:
-          role_arn: ${DRIVERS_SECRETS_ARN}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
@@ -1122,12 +1113,11 @@ task_groups:
   - name: testk8soidc_task_group_gke
     setup_group:
       - func: fetch source
-      - command: ec2.assume_role
-        params:
-          role_arn: ${DRIVERS_SECRETS_ARN}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
@@ -1145,12 +1135,11 @@ task_groups:
   - name: testk8soidc_task_group_aks
     setup_group:
       - func: fetch source
-      - command: ec2.assume_role
-        params:
-          role_arn: ${DRIVERS_SECRETS_ARN}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
@@ -1168,9 +1157,7 @@ task_groups:
   - name: testtestoidc_task_group
     setup_group:
       - func: fetch source
-      - command: ec2.assume_role
-        params:
-          role_arn: ${DRIVERS_SECRETS_ARN}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
@@ -1190,9 +1177,11 @@ task_groups:
   - name: testazureoidc_task_group
     setup_group:
       - func: fetch source
+      - func: assume secrets manager role
       - command: shell.exec
         params:
           shell: bash
+          add_expansions_to_env: true
           script: |-
             set -o errexit
             ${PREPARE_SHELL}
@@ -1214,9 +1203,11 @@ task_groups:
   - name: testgcpoidc_task_group
     setup_group:
       - func: fetch source
+      - func: assume secrets manager role
       - command: shell.exec
         params:
           shell: bash
+          add_expansions_to_env: true
           script: |-
             set -o errexit
             ${PREPARE_SHELL}
@@ -1238,14 +1229,19 @@ task_groups:
   - name: test_atlas_task_group
     setup_group:
       - func: fetch source
+      - command: expansions.update
+        type: "setup"
+        params:
+          updates:
+            - { key: MONGODB_VERSION, value: "7.0" }
+            - { key: LAMBDA_STACK_NAME, value: "dbx-node-lambda" }
+            - { key: CLUSTER_PREFIX, value: "dbx-node-lambda" }
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
           binary: bash
-          env:
-            MONGODB_VERSION: "7.0"
-            LAMBDA_STACK_NAME: dbx-node-lambda
-            CLUSTER_PREFIX: dbx-node-lambda
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
             - atlas
@@ -1268,13 +1264,18 @@ task_groups:
   - name: test_atlas_task_group_search_indexes
     setup_group:
       - func: fetch source
+      - command: expansions.update
+        type: "setup"
+        params:
+          updates:
+            - { key: MONGODB_VERSION, value: "7.0" }
+            - { key: CLUSTER_PREFIX, value: "dbx-node-lambda" }
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
           binary: bash
-          env:
-            MONGODB_VERSION: "7.0"
-            CLUSTER_PREFIX: dbx-node-search
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update

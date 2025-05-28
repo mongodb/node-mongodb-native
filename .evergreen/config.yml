@@ -8,6 +8,10 @@ timeout:
       args:
         - '-la'
 functions:
+  assume secrets manager role:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
   fetch source:
     - command: git.get_project
       params:
@@ -52,8 +56,12 @@ functions:
         script: |
           bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
   bootstrap mongohoused:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
     - command: shell.exec
       params:
+        add_expansions_to_env: true
         script: |
           ${PREPARE_SHELL}
           DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/pull-mongohouse-image.sh
@@ -305,12 +313,14 @@ functions:
           source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
           rm -rf ./node_modules/@aws-sdk/credential-providers
   run atlas tests:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
     - command: subprocess.exec
       params:
         working_dir: src
         binary: bash
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        add_expansions_to_env: true
         args:
           - '-c'
           - ${DRIVERS_TOOLS}/.evergreen/secrets_handling/setup-secrets.sh drivers/atlas_connect
@@ -319,9 +329,7 @@ functions:
       params:
         working_dir: src
         binary: bash
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
+        add_expansions_to_env: true
         args:
           - .evergreen/run-atlas-tests.sh
   run socks5 tests:
@@ -385,10 +393,6 @@ functions:
           export MONGODB_URI="${MONGODB_URI}"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh
-  assume secrets manager rule:
-    - command: ec2.assume_role
-      params:
-        role_arn: ${DRIVERS_SECRETS_ARN}
   run aws auth test with regular aws credentials:
     - command: subprocess.exec
       type: test
@@ -556,6 +560,9 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_ACCESS_KEY_ID
+          - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: env-creds
           MONGODB_AWS_SDK: 'true'
@@ -651,30 +658,25 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
-  install mongodb-client-encryption:
+  install mongodb-client-encryption from source:
     - command: subprocess.exec
       type: setup
       params:
         working_dir: src
-        env:
-          INSTALL_DIR: mongodb-client-encryption
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        add_expansions_to_env: true
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/install-mongodb-client-encryption.sh
   build and test alpine FLE:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
     - command: subprocess.exec
       type: test
       params:
         working_dir: src
-        env:
-          INSTALL_DIR: mongodb-client-encryption
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          NODE_VERSION: ${NODE_VERSION}
-          MONGODB_URI: ${MONGODB_URI}
         binary: bash
+        add_expansions_to_env: true
         args:
           - .evergreen/docker/alpine.sh
 tasks:
@@ -699,13 +701,13 @@ tasks:
         params:
           updates:
             - {key: NPM_VERSION, value: '9'}
+      - func: assume secrets manager role
       - func: install dependencies
       - command: subprocess.exec
         type: setup
         params:
           binary: bash
-          env:
-            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          add_expansions_to_env: true
           args:
             - src/.evergreen/run-deployed-gcp-kms-tests.sh
   - name: test-gcpkms-fail-task
@@ -736,12 +738,12 @@ tasks:
           updates:
             - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
+      - func: assume secrets manager role
       - command: subprocess.exec
         type: setup
         params:
           binary: bash
-          env:
-            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          add_expansions_to_env: true
           args:
             - src/.evergreen/run-deployed-azure-kms-tests.sh
   - name: test-azurekms-fail-task
@@ -1668,7 +1670,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with regular aws credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
@@ -1683,7 +1685,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with assume role credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
@@ -1698,7 +1700,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws EC2 credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
@@ -1713,7 +1715,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws credentials as environment variables
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
@@ -1728,7 +1730,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-latest-auth-test-run-aws-ECS-auth-test
     commands:
@@ -1743,7 +1745,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws ECS auth test
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
     commands:
@@ -1758,7 +1760,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
     commands:
@@ -1773,7 +1775,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
   - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
     commands:
@@ -1788,7 +1790,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with regular aws credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
@@ -1803,7 +1805,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with assume role credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
@@ -1818,7 +1820,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
       aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
@@ -1834,7 +1836,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
@@ -1849,7 +1851,7 @@ tasks:
             - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run aws ECS auth test
   - name: run-spec-benchmark-tests-node-server
     tags:
@@ -2157,8 +2159,8 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: install mongodb-client-encryption
-      - func: assume secrets manager rule
+      - func: install mongodb-client-encryption from source
+      - func: assume secrets manager role
       - func: run custom csfle tests
   - name: run-custom-csfle-tests-rapid
     tags:
@@ -2175,8 +2177,8 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: install mongodb-client-encryption
-      - func: assume secrets manager rule
+      - func: install mongodb-client-encryption from source
+      - func: assume secrets manager role
       - func: run custom csfle tests
   - name: run-custom-csfle-tests-latest
     tags:
@@ -2193,8 +2195,8 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: install mongodb-client-encryption
-      - func: assume secrets manager rule
+      - func: install mongodb-client-encryption from source
+      - func: assume secrets manager role
       - func: run custom csfle tests
   - name: test-latest-driver-mongodb-client-encryption-6.0.0
     tags:
@@ -2231,7 +2233,7 @@ tasks:
             - {key: MONGODB_BINARIES, value: '${PROJECT_DIRECTORY}/mongodb/bin'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: build and test alpine FLE
   - name: test-latest-server-noauth
     tags:
@@ -2648,7 +2650,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: assume secrets manager rule
+      - func: assume secrets manager role
       - func: run lambda handler example tests with aws auth
   - name: test-latest-csfle-mongocryptd
     tags:
@@ -2799,10 +2801,12 @@ task_groups:
     setup_group_timeout_secs: 1800
     setup_group:
       - func: fetch source
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
           binary: bash
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
     teardown_group:
@@ -2819,12 +2823,14 @@ task_groups:
     setup_group_timeout_secs: 1800
     setup_group:
       - func: fetch source
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
           binary: bash
           env:
             AZUREKMS_VMNAME_PREFIX: NODE_DRIVER
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
     teardown_group:
@@ -2842,12 +2848,11 @@ task_groups:
   - name: testk8soidc_task_group_eks
     setup_group:
       - func: fetch source
-      - command: ec2.assume_role
-        params:
-          role_arn: ${DRIVERS_SECRETS_ARN}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
@@ -2864,12 +2869,11 @@ task_groups:
   - name: testk8soidc_task_group_gke
     setup_group:
       - func: fetch source
-      - command: ec2.assume_role
-        params:
-          role_arn: ${DRIVERS_SECRETS_ARN}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
@@ -2886,12 +2890,11 @@ task_groups:
   - name: testk8soidc_task_group_aks
     setup_group:
       - func: fetch source
-      - command: ec2.assume_role
-        params:
-          role_arn: ${DRIVERS_SECRETS_ARN}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
     teardown_group:
@@ -2908,9 +2911,7 @@ task_groups:
   - name: testtestoidc_task_group
     setup_group:
       - func: fetch source
-      - command: ec2.assume_role
-        params:
-          role_arn: ${DRIVERS_SECRETS_ARN}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           binary: bash
@@ -2931,9 +2932,11 @@ task_groups:
   - name: testazureoidc_task_group
     setup_group:
       - func: fetch source
+      - func: assume secrets manager role
       - command: shell.exec
         params:
           shell: bash
+          add_expansions_to_env: true
           script: |-
             set -o errexit
             ${PREPARE_SHELL}
@@ -2954,9 +2957,11 @@ task_groups:
   - name: testgcpoidc_task_group
     setup_group:
       - func: fetch source
+      - func: assume secrets manager role
       - command: shell.exec
         params:
           shell: bash
+          add_expansions_to_env: true
           script: |-
             set -o errexit
             ${PREPARE_SHELL}
@@ -2977,14 +2982,19 @@ task_groups:
   - name: test_atlas_task_group
     setup_group:
       - func: fetch source
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: MONGODB_VERSION, value: '7.0'}
+            - {key: LAMBDA_STACK_NAME, value: dbx-node-lambda}
+            - {key: CLUSTER_PREFIX, value: dbx-node-lambda}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
           binary: bash
-          env:
-            MONGODB_VERSION: '7.0'
-            LAMBDA_STACK_NAME: dbx-node-lambda
-            CLUSTER_PREFIX: dbx-node-lambda
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
             - atlas
@@ -3006,13 +3016,18 @@ task_groups:
   - name: test_atlas_task_group_search_indexes
     setup_group:
       - func: fetch source
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: MONGODB_VERSION, value: '7.0'}
+            - {key: CLUSTER_PREFIX, value: dbx-node-lambda}
+      - func: assume secrets manager role
       - command: subprocess.exec
         params:
           working_dir: src
           binary: bash
-          env:
-            MONGODB_VERSION: '7.0'
-            CLUSTER_PREFIX: dbx-node-search
+          add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
