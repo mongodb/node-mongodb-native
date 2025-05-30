@@ -87,6 +87,11 @@ export function onData(
 
     [Symbol.asyncIterator]() {
       return this;
+    },
+
+    // Note this should currently not be used, but is required by the AsyncGenerator interface.
+    async [Symbol.asyncDispose]() {
+      await closeHandler();
     }
   };
 

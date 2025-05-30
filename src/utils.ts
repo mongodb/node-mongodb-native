@@ -281,16 +281,16 @@ export function ns(ns: string): MongoDBNamespace {
 
 /** @public */
 export class MongoDBNamespace {
+  db: string;
+  collection?: string;
   /**
    * Create a namespace object
    *
    * @param db - database name
    * @param collection - collection name
    */
-  constructor(
-    public db: string,
-    public collection?: string
-  ) {
+  constructor(db: string, collection?: string) {
+    this.db = db;
     this.collection = collection === '' ? undefined : collection;
   }
 
@@ -322,11 +322,11 @@ export class MongoDBNamespace {
  * used in scenarios where this can be guaranteed.
  */
 export class MongoDBCollectionNamespace extends MongoDBNamespace {
-  constructor(
-    db: string,
-    override collection: string
-  ) {
+  override collection: string;
+
+  constructor(db: string, collection: string) {
     super(db, collection);
+    this.collection = collection;
   }
 
   static override fromString(namespace?: string): MongoDBCollectionNamespace {

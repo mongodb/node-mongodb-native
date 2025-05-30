@@ -1213,11 +1213,13 @@ configureResourceManagement(AbstractCursor.prototype);
  * All timeout behavior is exactly the same as the wrapped timeout context's.
  */
 export class CursorTimeoutContext extends TimeoutContext {
-  constructor(
-    public timeoutContext: TimeoutContext,
-    public owner: symbol | AbstractCursor
-  ) {
+  timeoutContext: TimeoutContext;
+  owner: symbol | AbstractCursor;
+
+  constructor(timeoutContext: TimeoutContext, owner: symbol | AbstractCursor) {
     super();
+    this.timeoutContext = timeoutContext;
+    this.owner = owner;
   }
   override get serverSelectionTimeout(): Timeout | null {
     return this.timeoutContext.serverSelectionTimeout;
