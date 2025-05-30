@@ -257,7 +257,7 @@ export class BulkWriteResult {
     return this.result.writeErrors.length > 0;
   }
 
-  /** Returns the number of write errors off the bulk operation */
+  /** Returns the number of write errors from the bulk operation */
   getWriteErrorCount(): number {
     return this.result.writeErrors.length;
   }
