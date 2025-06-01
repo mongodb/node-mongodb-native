@@ -4,8 +4,8 @@ import { expect } from 'chai';
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/azure_machine_workflow';
 import { OIDC_VERSION, type OIDCCallbackParams } from '../../../../mongodb';
 
-describe('AzureMachineFlow', function () {
-  describe('#execute', function () {
+describe('Azure machine workflow', function () {
+  describe('#callback', function () {
     context('when TOKEN_RESOURCE is not set', function () {
       const controller = new AbortController();
       const params: OIDCCallbackParams = {

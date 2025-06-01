@@ -3,7 +3,7 @@ import { expect } from 'chai';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/token_machine_workflow';
 
-describe('TokenMachineFlow', function () {
+describe('Token machine workflow', function () {
   describe('#callback', function () {
     context('when OIDC_TOKEN_FILE is not in the env', function () {
       let file;

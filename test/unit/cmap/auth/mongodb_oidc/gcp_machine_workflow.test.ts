@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
 import { OIDC_VERSION, type OIDCCallbackParams } from '../../../../mongodb';
 
-describe('GCPMachineFlow', function () {
+describe('GCP machine workflow', function () {
   describe('#callback', function () {
     context('when TOKEN_RESOURCE is not set', function () {
       const controller = new AbortController();
