@@ -39,6 +39,7 @@ import {
   now,
   promiseWithResolvers
 } from '../utils';
+import type { MongoDBOIDC } from './auth/mongodb_oidc';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -61,7 +62,6 @@ import {
   WaitQueueTimeoutError
 } from './errors';
 import { ConnectionPoolMetrics } from './metrics';
-import { MongoDBOIDC } from './auth/mongodb_oidc';
 
 /** @public */
 export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'generation'> {

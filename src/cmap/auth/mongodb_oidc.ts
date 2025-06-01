@@ -4,11 +4,12 @@ import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
-import { AzureMachineWorkflow } from './mongodb_oidc/azure_machine_workflow';
-import { GCPMachineWorkflow } from './mongodb_oidc/gcp_machine_workflow';
-import { K8SMachineWorkflow } from './mongodb_oidc/k8s_machine_workflow';
+import { AutomatedCallbackWorkflow } from './mongodb_oidc/automated_callback_workflow';
+import { callback as azureCallback } from './mongodb_oidc/azure_machine_workflow';
+import { callback as gcpCallback } from './mongodb_oidc/gcp_machine_workflow';
+import { callback as k8sCallback } from './mongodb_oidc/k8s_machine_workflow';
 import { TokenCache } from './mongodb_oidc/token_cache';
-import { TokenMachineWorkflow } from './mongodb_oidc/token_machine_workflow';
+import { callback as testCallback } from './mongodb_oidc/token_machine_workflow';
 
 /** Error when credentials are missing. */
 const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
@@ -78,6 +79,8 @@ export interface OIDCCallbackParams {
   idpInfo?: IdPInfo;
   /** The refresh token, if applicable, to be used by the callback to request a new token from the issuer. */
   refreshToken?: string;
+  /** The token audience for GCP and Azure. */
+  tokenAudience?: string;
 }
 
 /**
@@ -118,10 +121,10 @@ export interface Workflow {
 
 /** @internal */
 export const OIDC_WORKFLOWS: Map<EnvironmentName, () => Workflow> = new Map();
-OIDC_WORKFLOWS.set('test', () => new TokenMachineWorkflow(new TokenCache()));
-OIDC_WORKFLOWS.set('azure', () => new AzureMachineWorkflow(new TokenCache()));
-OIDC_WORKFLOWS.set('gcp', () => new GCPMachineWorkflow(new TokenCache()));
-OIDC_WORKFLOWS.set('k8s', () => new K8SMachineWorkflow(new TokenCache()));
+OIDC_WORKFLOWS.set('test', () => new AutomatedCallbackWorkflow(new TokenCache(), testCallback));
+OIDC_WORKFLOWS.set('azure', () => new AutomatedCallbackWorkflow(new TokenCache(), azureCallback));
+OIDC_WORKFLOWS.set('gcp', () => new AutomatedCallbackWorkflow(new TokenCache(), gcpCallback));
+OIDC_WORKFLOWS.set('k8s', () => new AutomatedCallbackWorkflow(new TokenCache(), k8sCallback));
 
 /**
  * OIDC auth provider.
