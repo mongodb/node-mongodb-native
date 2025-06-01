@@ -39,7 +39,6 @@ import {
   now,
   promiseWithResolvers
 } from '../utils';
-import type { MongoDBOIDC } from './auth/mongodb_oidc';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -427,19 +426,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   clear(options: { serviceId?: ObjectId; interruptInUseConnections?: boolean } = {}): void {
     if (this.closed) {
       return;
-    }
-
-    // If we are clearing the connnection pool when using OIDC, we need to remove the access token
-    // from the cache so we dont' try to use the same token again for initial auth on a new connection
-    // when the token may have expired.
-    const clientState = this.server.topology.client.s;
-    const credentials = clientState.options.credentials;
-    if (credentials?.mechanism === 'MONGODB-OIDC') {
-      const provider = this.server.topology.client.s.authProviders.getOrCreateProvider(
-        credentials.mechanism,
-        credentials.mechanismProperties
-      ) as MongoDBOIDC;
-      provider.workflow.cache.removeAccessToken();
     }
 
     // handle load balanced case
