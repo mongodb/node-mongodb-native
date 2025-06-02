@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {
-  ClientSession,
+  type ClientSession,
   type Collection,
   MongoClient,
   type MongoDBOIDC,
