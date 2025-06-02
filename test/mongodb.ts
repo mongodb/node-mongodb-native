@@ -119,6 +119,7 @@ export * from '../src/cmap/auth/gssapi';
 export * from '../src/cmap/auth/mongo_credentials';
 export * from '../src/cmap/auth/mongodb_aws';
 export * from '../src/cmap/auth/mongodb_oidc';
+export * from '../src/cmap/auth/mongodb_oidc/automated_callback_workflow';
 export * from '../src/cmap/auth/mongodb_oidc/azure_machine_workflow';
 export * from '../src/cmap/auth/mongodb_oidc/callback_workflow';
 export * from '../src/cmap/auth/plain';
