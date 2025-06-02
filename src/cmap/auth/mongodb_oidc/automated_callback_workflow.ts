@@ -34,6 +34,9 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     // If the server fails for any other reason, do not clear the cache.
     if (this.cache.hasAccessToken) {
       const token = this.cache.getAccessToken();
+      if (!connection.accessToken) {
+        connection.accessToken = token;
+      }
       try {
         return await this.finishAuthentication(connection, credentials, token);
       } catch (error) {
