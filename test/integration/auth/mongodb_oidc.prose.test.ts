@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {
+  ClientSession,
   type Collection,
   MongoClient,
   type MongoDBOIDC,
@@ -637,6 +638,73 @@ describe('OIDC Auth Spec Tests', function () {
           await collection.insertOne({ name: 'test' });
           expect(callbackSpy).to.have.been.calledOnce;
           expect(saslStarts.length).to.equal(1);
+        });
+      });
+
+      describe('4.5 Reauthentication Succeeds when a Session is involved', function () {
+        let utilClient: MongoClient;
+        let session: ClientSession;
+        const callbackSpy = sinon.spy(createCallback());
+        // Create an OIDC configured client.
+        // Set a fail point for find commands of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find"
+        //     ],
+        //     errorCode: 391 // ReauthenticationRequired
+        //   }
+        // }
+        // Start a new session.
+        // In the started session perform a find operation that succeeds.
+        // Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
+        // Close the session and the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: callbackSpy
+            },
+            retryReads: false
+          });
+          utilClient = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: createCallback()
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('test');
+          await utilClient
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
+          session = client.startSession();
+        });
+
+        afterEach(async function () {
+          await utilClient.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          await utilClient.close();
+          await session.endSession();
+        });
+
+        it('successfully authenticates', async function () {
+          await collection.findOne({}, { session });
+          expect(callbackSpy).to.have.been.calledTwice;
         });
       });
     });
