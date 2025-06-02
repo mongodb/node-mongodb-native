@@ -66,6 +66,9 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     if (credentials.username) {
       params.username = credentials.username;
     }
+    if (credentials.mechanismProperties.TOKEN_RESOURCE) {
+      params.tokenAudience = credentials.mechanismProperties.TOKEN_RESOURCE;
+    }
     const timeout = Timeout.expires(AUTOMATED_TIMEOUT_MS);
     try {
       return await Promise.race([this.executeAndValidateCallback(params), timeout]);
