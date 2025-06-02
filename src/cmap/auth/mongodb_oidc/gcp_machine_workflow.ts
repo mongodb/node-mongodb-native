@@ -1,6 +1,6 @@
 import { MongoGCPError } from '../../../error';
 import { get } from '../../../utils';
-import type { OIDCCallbackParams, OIDCResponse } from '../mongodb_oidc';
+import type { OIDCCallbackFunction, OIDCCallbackParams, OIDCResponse } from '../mongodb_oidc';
 
 /** GCP base URL. */
 const GCP_BASE_URL =
@@ -18,13 +18,15 @@ const TOKEN_RESOURCE_MISSING_ERROR =
  * @param params - The OIDC callback parameters.
  * @returns The OIDC response.
  */
-export async function callback(params: OIDCCallbackParams): Promise<OIDCResponse> {
+export const callback: OIDCCallbackFunction = async (
+  params: OIDCCallbackParams
+): Promise<OIDCResponse> => {
   const tokenAudience = params.tokenAudience;
   if (!tokenAudience) {
     throw new MongoGCPError(TOKEN_RESOURCE_MISSING_ERROR);
   }
   return await getGcpTokenData(tokenAudience);
-}
+};
 
 /**
  * Hit the GCP endpoint to get the token data.

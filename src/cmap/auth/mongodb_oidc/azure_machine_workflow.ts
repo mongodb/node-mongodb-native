@@ -1,7 +1,7 @@
 import { addAzureParams, AZURE_BASE_URL } from '../../../client-side-encryption/providers/azure';
 import { MongoAzureError } from '../../../error';
 import { get } from '../../../utils';
-import type { OIDCCallbackParams, OIDCResponse } from '../mongodb_oidc';
+import type { OIDCCallbackFunction, OIDCCallbackParams, OIDCResponse } from '../mongodb_oidc';
 
 /** Azure request headers. */
 const AZURE_HEADERS = Object.freeze({ Metadata: 'true', Accept: 'application/json' });
@@ -19,7 +19,9 @@ const TOKEN_RESOURCE_MISSING_ERROR =
  * @param params - The OIDC callback parameters.
  * @returns The OIDC response.
  */
-export async function callback(params: OIDCCallbackParams): Promise<OIDCResponse> {
+export const callback: OIDCCallbackFunction = async (
+  params: OIDCCallbackParams
+): Promise<OIDCResponse> => {
   const tokenAudience = params.tokenAudience;
   const username = params.username;
   if (!tokenAudience) {
@@ -30,7 +32,7 @@ export async function callback(params: OIDCCallbackParams): Promise<OIDCResponse
     throw new MongoAzureError(ENDPOINT_RESULT_ERROR);
   }
   return response;
-}
+};
 
 /**
  * Hit the Azure endpoint to get the token data.

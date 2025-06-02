@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 
-import type { OIDCResponse } from '../mongodb_oidc';
+import type { OIDCCallbackFunction, OIDCResponse } from '../mongodb_oidc';
 
 /** The fallback file name */
 const FALLBACK_FILENAME = '/var/run/secrets/kubernetes.io/serviceaccount/token';
@@ -16,7 +16,7 @@ const AWS_FILENAME = 'AWS_WEB_IDENTITY_TOKEN_FILE';
  * @param params - The OIDC callback parameters.
  * @returns The OIDC response.
  */
-export async function callback(): Promise<OIDCResponse> {
+export const callback: OIDCCallbackFunction = async (): Promise<OIDCResponse> => {
   let filename: string;
   if (process.env[AZURE_FILENAME]) {
     filename = process.env[AZURE_FILENAME];
@@ -27,4 +27,4 @@ export async function callback(): Promise<OIDCResponse> {
   }
   const token = await readFile(filename, 'utf8');
   return { accessToken: token };
-}
+};
