@@ -63,9 +63,9 @@ function isEndpointResultValid(
 ): token is { access_token: unknown; expires_in: unknown } {
   if (token == null || typeof token !== 'object') return false;
   return (
-    'access_token' in token &&
-    typeof token.access_token === 'string' &&
-    'expires_in' in token &&
-    typeof token.expires_in === 'number'
+    'accessToken' in token &&
+    typeof token.accessToken === 'string' &&
+    'expiresInSeconds' in token &&
+    typeof token.expiresInSeconds === 'number'
   );
 }
