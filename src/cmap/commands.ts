@@ -727,17 +727,22 @@ const COMPRESSION_DETAILS_SIZE = 9; // originalOpcode + uncompressedSize, compre
 
 /**
  * @internal
+ */
+export interface OpCompressesRequestOptions {
+  zlibCompressionLevel: number;
+  agreedCompressor: CompressorName;
+}
+
+/**
+ * @internal
  *
  * An OP_COMPRESSED request wraps either an OP_QUERY or OP_MSG message.
  */
 export class OpCompressedRequest {
   private command: WriteProtocolMessageType;
-  private options: { zlibCompressionLevel: number; agreedCompressor: CompressorName };
+  private options: OpCompressesRequestOptions;
 
-  constructor(
-    command: WriteProtocolMessageType,
-    options: { zlibCompressionLevel: number; agreedCompressor: CompressorName }
-  ) {
+  constructor(command: WriteProtocolMessageType, options: OpCompressesRequestOptions) {
     this.command = command;
     this.options = {
       zlibCompressionLevel: options.zlibCompressionLevel,
