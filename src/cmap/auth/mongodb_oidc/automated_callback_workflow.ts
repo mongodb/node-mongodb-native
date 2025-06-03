@@ -34,6 +34,9 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     // If the server fails for any other reason, do not clear the cache.
     if (this.cache.hasAccessToken) {
       const token = this.cache.getAccessToken();
+      if (!connection.accessToken) {
+        connection.accessToken = token;
+      }
       try {
         return await this.finishAuthentication(connection, credentials, token);
       } catch (error) {
@@ -65,6 +68,9 @@ export class AutomatedCallbackWorkflow extends CallbackWorkflow {
     };
     if (credentials.username) {
       params.username = credentials.username;
+    }
+    if (credentials.mechanismProperties.TOKEN_RESOURCE) {
+      params.tokenAudience = credentials.mechanismProperties.TOKEN_RESOURCE;
     }
     const timeout = Timeout.expires(AUTOMATED_TIMEOUT_MS);
     try {

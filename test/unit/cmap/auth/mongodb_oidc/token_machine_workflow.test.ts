@@ -1,18 +1,12 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
-import { Connection, MongoCredentials, TokenMachineWorkflow } from '../../../../mongodb';
+import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/token_machine_workflow';
 
-describe('TokenMachineFlow', function () {
-  describe('#execute', function () {
-    const workflow = new TokenMachineWorkflow(new TokenCache());
-
+describe('Token machine workflow', function () {
+  describe('#callback', function () {
     context('when OIDC_TOKEN_FILE is not in the env', function () {
       let file;
-      const connection = sinon.createStubInstance(Connection);
-      const credentials = sinon.createStubInstance(MongoCredentials);
 
       before(function () {
         file = process.env.OIDC_TOKEN_FILE;
@@ -26,7 +20,7 @@ describe('TokenMachineFlow', function () {
       });
 
       it('throws an error', async function () {
-        const error = await workflow.execute(connection, credentials).catch(error => error);
+        const error = await callback().catch(error => error);
         expect(error.message).to.include('OIDC_TOKEN_FILE');
       });
     });
