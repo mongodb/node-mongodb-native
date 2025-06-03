@@ -40,6 +40,7 @@ about the types of tests and how to run them.
       - [Deployed Lambda Tests](#deployed-lambda-tests)
     - [Kerberos Tests](#kerberos-tests)
     - [AWS Authentication tests](#aws-authentication-tests)
+    - [Container Tests](#container-tests)
     - [TODO Special Env Sections](#todo-special-env-sections)
   - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
     - [Point mongosh to the driver](#point-mongosh-to-the-driver)
@@ -650,6 +651,30 @@ Choose your AWS authentication credential type and export the `AWS_CREDENTIAL_TY
 | session-creds       | Similar to env-creds, but the credentials are temporary and include a session token             |
 
 1. Run the `bash .evergreen/run-mongodb-aws-tests.sh`.
+
+### Container Tests
+
+It may become required to run tests or debug code inside a live Azure or GCP container. The best way to do this is to leverage
+our existing integration test suite and run Evergreen patches against a single integration test.
+
+_Note that in cases where the tests need to run longer than one hour to ensure that tokens expire
+that the mocha timeout must be increased in order for the test not to timeout._
+
+## GCP
+
+1. Add a new GCP prose test to `test/integration/auth/mongodb_oidc_gcp.prose.06.test.ts` that mimics the behaviour that
+needs to be tested.
+2. Ensure that the test has the `only` attribute so only it will run.
+3. For additional Node.js options (like HTTP debug), add them to `GCPOIDC_TEST_CMD` in `.evergreen/run-oidc-tests-gcp.sh`
+4. Create an evergreen patch and schedule only the `oidc-auth-test-gcp-latest` variant.
+
+## Azure
+
+1. Add a new Azure prose test to `test/integration/auth/mongodb_oidc_azure.prose.05.test.ts` that mimics the behaviour that
+needs to be tested.
+2. Ensure that the test has the `only` attribute so only it will run.
+3. For additional Node.js options (like HTTP debug), add them to `AZUREOIDC_TEST_CMD` in `.evergreen/run-oidc-tests-azure.sh`
+4. Create an evergreen patch and schedule only the `oidc-auth-test-azure-latest` variant.
 
 ### TODO Special Env Sections
 
