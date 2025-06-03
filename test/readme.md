@@ -676,6 +676,15 @@ needs to be tested.
 3. For additional Node.js options (like HTTP debug), add them to `AZUREOIDC_TEST_CMD` in `.evergreen/run-oidc-tests-azure.sh`
 4. Create an evergreen patch and schedule only the `oidc-auth-test-azure-latest` variant.
 
+## AWS
+
+1. Add a new AWS prose test to `test/integration/auth/mongodb_oidc_k8s.prose.07.test.ts` that mimics the behaviour that
+needs to be tested.
+2. Ensure that the test has the `only` attribute so only it will run.
+3. For additional Node.js options (like HTTP debug), add them to `K8S_TEST_CMD` in `.evergreen/run-oidc-tests-k8s.sh`
+4. Create an evergreen patch and schedule only the `oidc-auth-test-k8s-latest-aks` variant.
+
+
 ### TODO Special Env Sections
 
 - TLS
