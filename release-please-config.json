@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "pull-request-title-pattern": "chore${scope}: release ${version} [skip-ci]",
+  "pull-request-title-pattern": "chore${scope}: release ${version}",
   "pull-request-header": "Please run the release_notes action before releasing to generate release highlights",
   "packages": {
     ".": {
