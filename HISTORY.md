@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.17.0](https://github.com/mongodb/node-mongodb-native/compare/v6.16.0...v6.17.0) (2025-06-03)
+
+
+### Features
+
+* **NODE-6245:** add keepAliveInitialDelay config ([#4510](https://github.com/mongodb/node-mongodb-native/issues/4510)) ([d6c0eb3](https://github.com/mongodb/node-mongodb-native/commit/d6c0eb31c21fc89856c7c2a3cab7a8b22d23c267))
+* **NODE-6290:** add sort support to updateOne and replaceOne ([#4515](https://github.com/mongodb/node-mongodb-native/issues/4515)) ([28857b7](https://github.com/mongodb/node-mongodb-native/commit/28857b79898d6a6040b7d48f3781ebc2710f0279))
+* **NODE-6882:** eagerly close checked out connections when client is closed ([#4499](https://github.com/mongodb/node-mongodb-native/issues/4499)) ([64fdb3e](https://github.com/mongodb/node-mongodb-native/commit/64fdb3ef40262d7cf321175c3ae0c4079b889624))
+* **NODE-6884:** remove support for 4.0 ([#4534](https://github.com/mongodb/node-mongodb-native/issues/4534)) ([6fe6ccc](https://github.com/mongodb/node-mongodb-native/commit/6fe6ccc8e1a2d5cc605e7467ec7b3f83628c8095))
+* **NODE-6952:** support configuring DEK cache expiration ([#4538](https://github.com/mongodb/node-mongodb-native/issues/4538)) ([c529f07](https://github.com/mongodb/node-mongodb-native/commit/c529f07c510f16abc158cbf33ba03230629e34d5))
+* **NODE-6963:** use BSON 6.10.4 ([#4549](https://github.com/mongodb/node-mongodb-native/issues/4549)) ([aee490a](https://github.com/mongodb/node-mongodb-native/commit/aee490a453dc0acec7f673bdb3ca7be16d555092))
+
+
+### Bug Fixes
+
+* **NODE-6638:** throw if all atomic updates are undefined ([#4519](https://github.com/mongodb/node-mongodb-native/issues/4519)) ([9625b2d](https://github.com/mongodb/node-mongodb-native/commit/9625b2d10a7d3548b423cf130fba89b383eeb8db))
+* **NODE-6864:** socket errors are not always converted to MongoNetworkErrors ([#4473](https://github.com/mongodb/node-mongodb-native/issues/4473)) ([2d86095](https://github.com/mongodb/node-mongodb-native/commit/2d860953096e8f4e18896bef92843f1a0a3ccb04))
+* **NODE-6962:** OIDC machine workflows use OIDCCallbacks internally ([#4546](https://github.com/mongodb/node-mongodb-native/issues/4546)) ([bd6030f](https://github.com/mongodb/node-mongodb-native/commit/bd6030f2da079df0e36f011ead91e178647d6ac1))
+
 ## [6.16.0](https://github.com/mongodb/node-mongodb-native/compare/v6.15.0...v6.16.0) (2025-04-21)
 
 
