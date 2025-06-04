@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.17.1](https://github.com/mongodb/node-mongodb-native/compare/v6.17.0...v6.17.1) (2025-06-04)
+
+
+### Bug Fixes
+
+* **NODE-6955:** add missing `wallTime` property TS change stream event interfaces ([#4541](https://github.com/mongodb/node-mongodb-native/issues/4541)) ([f153c6f](https://github.com/mongodb/node-mongodb-native/commit/f153c6f3df8c7c440af3bc0f862a30c53f9c5fc8))
+
 ## [6.17.0](https://github.com/mongodb/node-mongodb-native/compare/v6.16.0...v6.17.0) (2025-06-03)
 
 
