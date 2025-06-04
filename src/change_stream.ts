@@ -206,6 +206,16 @@ export interface ChangeStreamDocumentCommon {
 }
 
 /** @public */
+export interface ChangeStreamDocumentWallTime {
+  /**
+   * The server date and time of the database operation.
+   * wallTime differs from clusterTime in that clusterTime is a timestamp taken from the oplog entry associated with the database operation event.
+   * @sinceServerVersion 6.0.0
+   */
+  wallTime?: Date;
+}
+
+/** @public */
 export interface ChangeStreamDocumentCollectionUUID {
   /**
    * The UUID (Binary subtype 4) of the collection that the operation was performed on.
@@ -239,7 +249,8 @@ export interface ChangeStreamDocumentOperationDescription {
 export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
     ChangeStreamDocumentKey<TSchema>,
-    ChangeStreamDocumentCollectionUUID {
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'insert';
   /** This key will contain the document being inserted */
@@ -255,7 +266,8 @@ export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
 export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
     ChangeStreamDocumentKey<TSchema>,
-    ChangeStreamDocumentCollectionUUID {
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'update';
   /**
@@ -285,7 +297,8 @@ export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
  */
 export interface ChangeStreamReplaceDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentKey<TSchema> {
+    ChangeStreamDocumentKey<TSchema>,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'replace';
   /** The fullDocument of a replace event represents the document after the insert of the replacement document */
@@ -309,7 +322,8 @@ export interface ChangeStreamReplaceDocument<TSchema extends Document = Document
 export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
     ChangeStreamDocumentKey<TSchema>,
-    ChangeStreamDocumentCollectionUUID {
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'delete';
   /** Namespace the delete event occurred on */
@@ -330,7 +344,8 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
  */
 export interface ChangeStreamDropDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID {
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'drop';
   /** Namespace the drop event occurred on */
@@ -343,7 +358,8 @@ export interface ChangeStreamDropDocument
  */
 export interface ChangeStreamRenameDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID {
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'rename';
   /** The new name for the `ns.coll` collection */
@@ -356,7 +372,9 @@ export interface ChangeStreamRenameDocument
  * @public
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#dropdatabase-event
  */
-export interface ChangeStreamDropDatabaseDocument extends ChangeStreamDocumentCommon {
+export interface ChangeStreamDropDatabaseDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'dropDatabase';
   /** The database dropped */
@@ -367,7 +385,9 @@ export interface ChangeStreamDropDatabaseDocument extends ChangeStreamDocumentCo
  * @public
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
  */
-export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentCommon {
+export interface ChangeStreamInvalidateDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'invalidate';
 }
@@ -380,7 +400,8 @@ export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentComm
 export interface ChangeStreamCreateIndexDocument
   extends ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
-    ChangeStreamDocumentOperationDescription {
+    ChangeStreamDocumentOperationDescription,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'createIndexes';
 }
@@ -393,7 +414,8 @@ export interface ChangeStreamCreateIndexDocument
 export interface ChangeStreamDropIndexDocument
   extends ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
-    ChangeStreamDocumentOperationDescription {
+    ChangeStreamDocumentOperationDescription,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'dropIndexes';
 }
@@ -405,7 +427,8 @@ export interface ChangeStreamDropIndexDocument
  */
 export interface ChangeStreamCollModDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID {
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'modify';
 }
@@ -416,7 +439,8 @@ export interface ChangeStreamCollModDocument
  */
 export interface ChangeStreamCreateDocument
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentCollectionUUID {
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'create';
 
@@ -435,7 +459,8 @@ export interface ChangeStreamCreateDocument
 export interface ChangeStreamShardCollectionDocument
   extends ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
-    ChangeStreamDocumentOperationDescription {
+    ChangeStreamDocumentOperationDescription,
+    ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'shardCollection';
 }

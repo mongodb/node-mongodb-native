@@ -170,6 +170,26 @@ describe('Change Streams', function () {
     }
   });
 
+  it('contains a wallTime date property on the change', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=6.0.0' } },
+    async test() {
+      const collection = db.collection('wallTimeTest');
+      const changeStream = collection.watch(pipeline);
+
+      const willBeChanges = on(changeStream, 'change');
+      await once(changeStream.cursor, 'init');
+
+      await collection.insertOne({ d: 4 });
+
+      const change = (await willBeChanges.next()).value[0];
+
+      await changeStream.close();
+
+      expect(change).to.have.property('wallTime');
+      expect(change.wallTime).to.be.instanceOf(Date);
+    }
+  });
+
   it('should create a ChangeStream on a collection and emit change events', {
     metadata: { requires: { topology: 'replicaset' } },
     async test() {
