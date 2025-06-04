@@ -7,6 +7,7 @@ import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error'
 import {
   type MessageHeader,
   OpCompressedRequest,
+  type OpCompressesRequestOptions,
   OpMsgResponse,
   OpReply,
   type WriteProtocolMessageType
@@ -60,7 +61,7 @@ function loadSnappy() {
 
 // Facilitate compressing a message using an agreed compressor
 export async function compress(
-  options: { zlibCompressionLevel: number; agreedCompressor: CompressorName },
+  options: OpCompressesRequestOptions,
   dataToBeCompressed: Buffer
 ): Promise<Buffer> {
   const zlibOptions = {} as zlib.ZlibOptions;

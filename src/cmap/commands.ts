@@ -76,12 +76,10 @@ export class OpQueryRequest {
   partial: boolean;
   /** moreToCome is an OP_MSG only concept */
   moreToCome = false;
+  databaseName: string;
+  query: Document;
 
-  constructor(
-    public databaseName: string,
-    public query: Document,
-    options: OpQueryOptions
-  ) {
+  constructor(databaseName: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     // TODO(NODE-3483): Replace with MongoCommandError
     const ns = `${databaseName}.$cmd`;
@@ -97,7 +95,9 @@ export class OpQueryRequest {
       throw new MongoRuntimeError('Namespace cannot contain a null character');
     }
 
-    // Basic options
+    // Basic optionsa
+    this.databaseName = databaseName;
+    this.query = query;
     this.ns = ns;
 
     // Additional options
@@ -496,17 +496,18 @@ export class OpMsgRequest {
   checksumPresent: boolean;
   moreToCome: boolean;
   exhaustAllowed: boolean;
+  databaseName: string;
+  command: Document;
+  options: OpQueryOptions;
 
-  constructor(
-    public databaseName: string,
-    public command: Document,
-    public options: OpQueryOptions
-  ) {
+  constructor(databaseName: string, command: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     if (command == null)
       throw new MongoInvalidArgumentError('Query document must be specified for query');
 
-    // Basic options
+    // Basic optionsa
+    this.databaseName = databaseName;
+    this.command = command;
     this.command.$db = databaseName;
 
     // Ensure empty options
@@ -726,14 +727,28 @@ const COMPRESSION_DETAILS_SIZE = 9; // originalOpcode + uncompressedSize, compre
 
 /**
  * @internal
+ */
+export interface OpCompressesRequestOptions {
+  zlibCompressionLevel: number;
+  agreedCompressor: CompressorName;
+}
+
+/**
+ * @internal
  *
  * An OP_COMPRESSED request wraps either an OP_QUERY or OP_MSG message.
  */
 export class OpCompressedRequest {
-  constructor(
-    private command: WriteProtocolMessageType,
-    private options: { zlibCompressionLevel: number; agreedCompressor: CompressorName }
-  ) {}
+  private command: WriteProtocolMessageType;
+  private options: OpCompressesRequestOptions;
+
+  constructor(command: WriteProtocolMessageType, options: OpCompressesRequestOptions) {
+    this.command = command;
+    this.options = {
+      zlibCompressionLevel: options.zlibCompressionLevel,
+      agreedCompressor: options.agreedCompressor
+    };
+  }
 
   // Return whether a command contains an uncompressible command term
   // Will return true if command contains no uncompressible command terms

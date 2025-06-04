@@ -7,12 +7,15 @@ import { AbstractOperation } from '../operation';
 
 /** @internal */
 export class UpdateSearchIndexOperation extends AbstractOperation<void> {
-  constructor(
-    private readonly collection: Collection,
-    private readonly name: string,
-    private readonly definition: Document
-  ) {
+  private readonly collection: Collection;
+  private readonly name: string;
+  private readonly definition: Document;
+
+  constructor(collection: Collection, name: string, definition: Document) {
     super();
+    this.collection = collection;
+    this.name = name;
+    this.definition = definition;
   }
 
   override get commandName() {

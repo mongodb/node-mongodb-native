@@ -894,16 +894,14 @@ export abstract class BulkOperationBase {
   /** @internal */
   s: BulkOperationPrivate;
   operationId?: number;
+  private collection: Collection;
 
   /**
    * Create a new OrderedBulkOperation or UnorderedBulkOperation instance
    * @internal
    */
-  constructor(
-    private collection: Collection,
-    options: BulkWriteOptions,
-    isOrdered: boolean
-  ) {
+  constructor(collection: Collection, options: BulkWriteOptions, isOrdered: boolean) {
+    this.collection = collection;
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 

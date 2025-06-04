@@ -288,6 +288,7 @@ export type { TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 export type {
   MessageHeader,
   OpCompressedRequest,
+  OpCompressesRequestOptions,
   OpMsgOptions,
   OpMsgRequest,
   OpMsgResponse,

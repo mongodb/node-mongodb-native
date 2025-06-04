@@ -108,8 +108,6 @@ export interface SlowModelBase {
   prop10: boolean;
   prop11: string | null;
   prop12: string[];
-  prop13: ExtraType4 | null;
-  prop14: ExtraType5 | null;
   prop15: ExtraType6 | null;
   prop16: string[];
   prop17: string | null;
@@ -253,13 +251,15 @@ export interface ExtraType2 {
 
 export type ExtraType9 = ExtraType6;
 
-export enum UnitType3 {
-  unit_ = 'unit_',
-  unit__ = 'unit__',
-  unit___ = 'unit___',
-  unit____ = 'unit____',
-  unit_____ = 'unit_____'
-}
+const UnitType3 = {
+  unit_: 'unit_',
+  unit__: 'unit__',
+  unit___: 'unit___',
+  unit____: 'unit____',
+  unit_____: 'unit_____'
+} as const;
+
+export type UnitType3 = (typeof UnitType3)[keyof typeof UnitType3];
 
 export interface ExtraType10 {
   prop34?: UnitType3;
@@ -306,54 +306,6 @@ export interface SlowModel extends SlowModelBase {
 
 export interface SpecialType extends SlowModel {
   prop51: string;
-}
-
-export enum ExtraType17 {
-  Key16 = 'key16',
-  Key17 = 'key17'
-}
-
-export interface IType1 {
-  type: ExtraType17;
-}
-export interface Key17IType1 extends IType1 {
-  type: ExtraType17.Key17;
-  prop52: string;
-  prop53?: string;
-  prop54?: string;
-}
-export interface Key16IType1 extends IType1 {
-  type: ExtraType17.Key16;
-  prop55: string;
-  prop56: string | null;
-}
-
-export type ExtraType4 = Key17IType1 | Key16IType1;
-
-export enum ExtraType18 {
-  Key18 = 'key18',
-  Key19 = 'key19'
-}
-
-interface IType2 {
-  type: ExtraType18;
-}
-export type ExtraType5 = Key18IType2 | Key19IType2;
-
-export interface Key18IType2 extends IType2 {
-  type: ExtraType18.Key18;
-  prop57: string;
-  prop58: string;
-  prop59: boolean;
-  prop60: string | null;
-  prop61: boolean;
-  prop62?: string;
-}
-export interface Key19IType2 extends IType2 {
-  type: ExtraType18.Key19;
-  prop63: string;
-  prop64?: string;
-  prop65: boolean;
 }
 
 export type ExtraType19 = ExtraType15[] | ExtraType20;
