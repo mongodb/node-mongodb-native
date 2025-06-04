@@ -208,6 +208,7 @@ export type {
   ChangeStreamDocumentCommon,
   ChangeStreamDocumentKey,
   ChangeStreamDocumentOperationDescription,
+  ChangeStreamDocumentWallTime,
   ChangeStreamDropDatabaseDocument,
   ChangeStreamDropDocument,
   ChangeStreamDropIndexDocument,

@@ -1,8 +1,6 @@
 import { MongoGCPError } from '../../../error';
 import { get } from '../../../utils';
-import { type MongoCredentials } from '../mongo_credentials';
-import { type AccessToken, MachineWorkflow } from './machine_workflow';
-import { type TokenCache } from './token_cache';
+import type { OIDCCallbackFunction, OIDCCallbackParams, OIDCResponse } from '../mongodb_oidc';
 
 /** GCP base URL. */
 const GCP_BASE_URL =
@@ -15,30 +13,25 @@ const GCP_HEADERS = Object.freeze({ 'Metadata-Flavor': 'Google' });
 const TOKEN_RESOURCE_MISSING_ERROR =
   'TOKEN_RESOURCE must be set in the auth mechanism properties when ENVIRONMENT is gcp.';
 
-export class GCPMachineWorkflow extends MachineWorkflow {
-  /**
-   * Instantiate the machine workflow.
-   */
-  constructor(cache: TokenCache) {
-    super(cache);
+/**
+ * The callback function to be used in the automated callback workflow.
+ * @param params - The OIDC callback parameters.
+ * @returns The OIDC response.
+ */
+export const callback: OIDCCallbackFunction = async (
+  params: OIDCCallbackParams
+): Promise<OIDCResponse> => {
+  const tokenAudience = params.tokenAudience;
+  if (!tokenAudience) {
+    throw new MongoGCPError(TOKEN_RESOURCE_MISSING_ERROR);
   }
-
-  /**
-   * Get the token from the environment.
-   */
-  async getToken(credentials?: MongoCredentials): Promise<AccessToken> {
-    const tokenAudience = credentials?.mechanismProperties.TOKEN_RESOURCE;
-    if (!tokenAudience) {
-      throw new MongoGCPError(TOKEN_RESOURCE_MISSING_ERROR);
-    }
-    return await getGcpTokenData(tokenAudience);
-  }
-}
+  return await getGcpTokenData(tokenAudience);
+};
 
 /**
  * Hit the GCP endpoint to get the token data.
  */
-async function getGcpTokenData(tokenAudience: string): Promise<AccessToken> {
+async function getGcpTokenData(tokenAudience: string): Promise<OIDCResponse> {
   const url = new URL(GCP_BASE_URL);
   url.searchParams.append('audience', tokenAudience);
   const response = await get(url, {
@@ -49,5 +42,5 @@ async function getGcpTokenData(tokenAudience: string): Promise<AccessToken> {
       `Status code ${response.status} returned from the GCP endpoint. Response body: ${response.body}`
     );
   }
-  return { access_token: response.body };
+  return { accessToken: response.body };
 }
