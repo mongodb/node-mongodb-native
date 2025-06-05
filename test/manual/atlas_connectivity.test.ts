@@ -22,8 +22,6 @@ describe('Atlas Connectivity', function () {
   });
 
   const environments = [
-    'ATLAS_SERVERLESS',
-    'ATLAS_SRV_SERVERLESS',
     'ATLAS_FREE',
     'ATLAS_SRV_FREE',
     'ATLAS_REPL',

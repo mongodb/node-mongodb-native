@@ -126,34 +126,7 @@ export function getEnvironmentalOptions() {
       serverApi: { version: process.env.MONGODB_API_VERSION }
     });
   }
-  if (process.env.SERVERLESS) {
-    Object.assign(options, {
-      auth: {
-        username: process.env.SERVERLESS_ATLAS_USER,
-        password: process.env.SERVERLESS_ATLAS_PASSWORD
-      },
-      tls: true,
-      compressors: 'snappy,zlib'
-    });
-  }
   return options;
-}
-
-export function shouldRunServerlessTest(testRequirement: any, isServerless: any) {
-  if (!testRequirement) return true;
-  switch (testRequirement) {
-    case 'forbid':
-      // return true if the configuration is NOT serverless
-      return !isServerless;
-    case 'allow':
-      // always return true
-      return true;
-    case 'require':
-      // only return true if the configuration is serverless
-      return isServerless;
-    default:
-      throw new Error(`Invalid serverless filter: ${testRequirement}`);
-  }
 }
 
 /**

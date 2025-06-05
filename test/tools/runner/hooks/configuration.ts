@@ -20,7 +20,6 @@ import { MongoDBTopologyFilter } from '../filters/mongodb_topology_filter';
 import { MongoDBVersionFilter } from '../filters/mongodb_version_filter';
 import { NodeVersionFilter } from '../filters/node_version_filter';
 import { OSFilter } from '../filters/os_filter';
-import { ServerlessFilter } from '../filters/serverless_filter';
 import { type Filter } from '../filters/filter';
 import { type Context } from 'mocha';
 import { flakyTests } from '../flaky';
@@ -63,8 +62,7 @@ async function initializeFilters(client): Promise<Record<string, any>> {
       new MongoDBTopologyFilter(),
       new MongoDBVersionFilter(),
       new NodeVersionFilter(),
-      new OSFilter(),
-      new ServerlessFilter()
+      new OSFilter()
     ]
   };
 
@@ -176,7 +174,6 @@ const testConfigBeforeHook = async function () {
     alpineLinux: Boolean(process.env.ALPINE),
     cryptdUri: process.env.MONGOCRYPTD_URI,
     pid: process.pid,
-    serverless: process.env.SERVERLESS === '1',
     auth: process.env.AUTH === 'auth',
     tls: process.env.SSL === 'ssl',
     csfle: {

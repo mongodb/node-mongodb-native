@@ -13,7 +13,7 @@ describe('abstract operation', function () {
       correctCommandName: string;
     }
 
-    const WrapperandServerlessSubclasses = [
+    const WrapperSubclasses = [
       'RunAdminCommandOperation',
       'RunCommandOperation',
       'OptionsOperation',
@@ -313,7 +313,7 @@ describe('abstract operation', function () {
           expect(subclassInstance.commandName).to.equal(correctCommandName);
         });
 
-        if (!WrapperandServerlessSubclasses.includes(subclassType.name.toString())) {
+        if (!WrapperSubclasses.includes(subclassType.name.toString())) {
           it(`operation.commandName equals key in command document`, async function () {
             const subclassInstance = subclassCreator();
             const yieldDoc =

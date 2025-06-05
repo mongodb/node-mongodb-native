@@ -31,9 +31,8 @@ async function isAtlasDataLake(client: MongoClient): Promise<boolean> {
 }
 
 async function terminateOpenTransactions(client: MongoClient) {
-  // Note: killAllSession is not supported on serverless, see CLOUDP-84298
-  // killAllSession is not allowed in ADL either.
-  if (process.env.SERVERLESS || (await isAtlasDataLake(client))) {
+  // killAllSessions is not allowed in ADL.
+  if (await isAtlasDataLake(client)) {
     return;
   }
   // TODO(NODE-3491): on sharded clusters this has to be run on each mongos
