@@ -31,8 +31,7 @@ describe('Transactions', function () {
       'should provide a useful error if a Promise is not returned',
       {
         requires: {
-          topology: ['replicaset', 'sharded'],
-          serverless: 'forbid'
+          topology: ['replicaset', 'sharded']
         }
       },
       async function () {
@@ -54,7 +53,7 @@ describe('Transactions', function () {
 
     it('should return readable error if promise rejected with no reason', {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'], serverless: 'forbid' }
+        requires: { topology: ['replicaset', 'sharded'] }
       },
       test: function (done) {
         function fnThatReturnsBadPromise() {

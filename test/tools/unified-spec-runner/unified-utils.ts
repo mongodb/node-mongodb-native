@@ -15,7 +15,6 @@ import {
   type MongoClient,
   ReturnDocument
 } from '../../mongodb';
-import { shouldRunServerlessTest } from '../../tools/utils';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
 import { MalformedOperationError } from './operations';
@@ -114,11 +113,6 @@ export async function topologySatisfies(
       ok &&= process.env.AUTH === 'noauth' || process.env.AUTH == null;
       if (!ok && skipReason == null) skipReason = `requires no auth but auth is enabled`;
     }
-  }
-
-  if (r.serverless) {
-    ok &&= shouldRunServerlessTest(r.serverless, config.isServerless);
-    if (!ok && skipReason == null) skipReason = `has serverless set to ${r.serverless}`;
   }
 
   if (typeof r.csfle === 'boolean') {

@@ -134,24 +134,6 @@ functions:
         args:
           - .evergreen/perf-send.sh
 
-  "run serverless tests":
-    - command: timeout.update
-      params:
-        exec_timeout_secs: 1800
-    - <<: *assume_secrets_manager_role
-    - command: subprocess.exec
-      type: test
-      params:
-        timeout_secs: 300
-        working_dir: src
-        binary: bash
-        env:
-          AUTH: "auth"
-          SSL: "ssl"
-        add_expansions_to_env: true
-        args:
-          - .evergreen/run-serverless-tests.sh
-
   "start-load-balancer":
     - command: shell.exec
       params:
@@ -752,12 +734,6 @@ tasks:
       - func: "bootstrap mongohoused"
       - func: "run data lake tests"
 
-  - name: "test-serverless"
-    tags: ["serverless"]
-    commands:
-      - func: install dependencies
-      - func: "run serverless tests"
-
   - name: "test-gcpkms-task"
     commands:
       - command: expansions.update
@@ -1006,33 +982,6 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
-
-task_groups:
-  - name: serverless_task_group
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800 # 30 minutes
-    setup_group:
-      - func: "fetch source"
-      - command: subprocess.exec
-        params:
-          working_dir: "src"
-          binary: bash
-          env:
-            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          args:
-            - .evergreen/setup-serverless.sh
-
-    teardown_group:
-      - func: "upload test results"
-      - command: subprocess.exec
-        params:
-          working_dir: "src"
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
-
-    tasks:
-      - ".serverless"
 
   - name: test_gcpkms_task_group
     setup_group_can_fail_task: true

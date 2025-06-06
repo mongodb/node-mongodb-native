@@ -255,23 +255,20 @@ function prepareDatabaseForSuite(suite, context) {
 
   if (context.skipPrepareDatabase) return Promise.resolve();
 
-  // Note: killAllSession is not supported on serverless, see CLOUDP-84298
-  const setupPromise = context.serverless
-    ? Promise.resolve()
-    : db
-        .admin()
-        .command({ killAllSessions: [] })
-        .catch(err => {
-          if (
-            err.message.match(/no such (cmd|command)/) ||
-            err.message.match(/Failed to kill on some hosts/) ||
-            err.code === 11601
-          ) {
-            return;
-          }
+  const setupPromise = db
+    .admin()
+    .command({ killAllSessions: [] })
+    .catch(err => {
+      if (
+        err.message.match(/no such (cmd|command)/) ||
+        err.message.match(/Failed to kill on some hosts/) ||
+        err.code === 11601
+      ) {
+        return;
+      }
 
-          throw err;
-        });
+      throw err;
+    });
 
   if (context.collectionName == null || context.dbName === 'admin') {
     return setupPromise;

@@ -70,9 +70,6 @@ lib/
 .vscode
 output
 
-serverless-expansion.yml
-serverless.env
-
 expansion.yml
 mo-expansion.yml
 lb-expansion.yml

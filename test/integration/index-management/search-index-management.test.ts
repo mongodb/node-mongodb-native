@@ -25,8 +25,7 @@ describe('Search Index Management Integration Tests', function () {
         metadata: {
           requires: {
             topology: '!single',
-            mongodb: '>=7.0',
-            serverless: 'forbid'
+            mongodb: '>=7.0'
           }
         },
         test: async function () {
@@ -47,8 +46,7 @@ describe('Search Index Management Integration Tests', function () {
         metadata: {
           requires: {
             topology: ['replicaset', 'sharded'],
-            mongodb: '>=7.0',
-            serverless: 'forbid'
+            mongodb: '>=7.0'
           }
         },
         test: async function () {

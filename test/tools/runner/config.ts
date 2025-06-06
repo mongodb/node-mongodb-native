@@ -75,7 +75,6 @@ export class TestConfiguration {
   parameters: Record<string, any>;
   singleMongosLoadBalancerUri: string;
   multiMongosLoadBalancerUri: string;
-  isServerless: boolean;
   topologyType: TopologyType;
   buildInfo: Record<string, any>;
   options: {
@@ -108,7 +107,6 @@ export class TestConfiguration {
     this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
-    this.isServerless = !!process.env.SERVERLESS;
     this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.buildInfo = context.buildInfo;
     this.serverApi = context.serverApi;
@@ -118,10 +116,7 @@ export class TestConfiguration {
       hostAddresses,
       hostAddress: hostAddresses[0],
       host: hostAddresses[0].host,
-      port:
-        typeof hostAddresses[0].host === 'string' && !this.isServerless
-          ? hostAddresses[0].port
-          : undefined,
+      port: typeof hostAddresses[0].host === 'string' && hostAddresses[0].port,
       db: url.pathname.slice(1) ? url.pathname.slice(1) : 'integration_tests',
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
@@ -143,17 +138,10 @@ export class TestConfiguration {
     this.filters = Object.fromEntries(
       context.filters.map(filter => [filter.constructor.name, filter])
     );
-
-    if (context.serverlessCredentials) {
-      const { username, password } = context.serverlessCredentials;
-      this.options.auth = { username, password, authSource: 'admin' };
-    }
   }
 
   get isLoadBalanced() {
-    return (
-      !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri && !this.isServerless
-    );
+    return !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri;
   }
 
   writeConcern() {
@@ -268,15 +256,15 @@ export class TestConfiguration {
       delete queryOptions.writeConcern;
     }
 
-    if (this.topologyType === TopologyType.LoadBalanced && !this.isServerless) {
+    if (this.topologyType === TopologyType.LoadBalanced) {
       queryOptions.loadBalanced = true;
     }
 
     const urlOptions: url.UrlObject = {
-      protocol: this.isServerless ? 'mongodb+srv' : 'mongodb',
+      protocol: 'mongodb',
       slashes: true,
       hostname: dbHost,
-      port: this.isServerless ? null : dbPort,
+      port: dbPort,
       query: queryOptions,
       pathname: '/'
     };
@@ -337,7 +325,7 @@ export class TestConfiguration {
 
     const FILLER_HOST = 'fillerHost';
 
-    const protocol = this.isServerless ? 'mongodb+srv' : 'mongodb';
+    const protocol = 'mongodb';
     const url = new URL(`${protocol}://${FILLER_HOST}`);
 
     if (options.replicaSet) {
@@ -365,7 +353,7 @@ export class TestConfiguration {
       url.password = password;
     }
 
-    if (this.isLoadBalanced && !this.isServerless) {
+    if (this.isLoadBalanced) {
       url.searchParams.append('loadBalanced', 'true');
     }
 
@@ -384,14 +372,10 @@ export class TestConfiguration {
       if (options.authSource) {
         url.searchParams.append('authSource', options.authSource);
       }
-    } else if (this.isServerless) {
-      url.searchParams.append('ssl', 'true');
-      url.searchParams.append('authSource', 'admin');
     }
 
     let actualHostsString;
-    // Ignore multi mongos options in serverless testing.
-    if (options.useMultipleMongoses && !this.isServerless) {
+    if (options.useMultipleMongoses) {
       if (this.isLoadBalanced) {
         const multiUri = new ConnectionString(this.multiMongosLoadBalancerUri);
         if (multiUri.isSRV) {
@@ -403,7 +387,7 @@ export class TestConfiguration {
         actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
       }
     } else {
-      if (this.isLoadBalanced || this.isServerless) {
+      if (this.isLoadBalanced) {
         const singleUri = new ConnectionString(this.singleMongosLoadBalancerUri);
         actualHostsString = singleUri.hosts[0].toString();
       } else {

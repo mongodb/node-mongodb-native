@@ -55,8 +55,6 @@ const SKIPPED_TESTS = new Set([
   ]
 ]);
 
-const isServerless = !!process.env.SERVERLESS;
-
 describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
@@ -82,16 +80,6 @@ describe('Client Side Encryption (Legacy)', function () {
       ].includes(description)
     ) {
       return 'TODO(NODE-5686): add CSOT support to FLE';
-    }
-
-    if (isServerless) {
-      // TODO(NODE-4730): Fix failing csfle tests against serverless
-      const isSkippedTest = [
-        'BypassQueryAnalysis decrypts',
-        'encryptedFieldsMap is preferred over remote encryptedFields'
-      ].includes(description);
-
-      return isSkippedTest ? 'TODO(NODE-4730): Fix failing csfle tests against serverless' : true;
     }
 
     if (
@@ -161,7 +149,7 @@ describe('Client Side Encryption (Unified)', function () {
         if (typeof shouldSkip === 'string') return shouldSkip;
       }
 
-      return isServerless ? 'Unified CSFLE tests to not run on serverless' : false;
+      return false;
     }
   );
 });

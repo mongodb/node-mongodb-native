@@ -28,7 +28,6 @@ about the types of tests and how to run them.
     - [Configuration](#configuration)
   - [Secrets](#secrets)
   - [Testing with Special Environments](#testing-with-special-environments)
-    - [Serverless](#serverless)
     - [Load Balanced](#load-balanced)
     - [Client-Side Field-Level Encryption (CSFLE)](#client-side-field-level-encryption-csfle)
     - [Deployed KMS Tests](#deployed-kms-tests)
@@ -380,32 +379,6 @@ We recommend creating an environment variable named `DRIVERS_TOOLS` that stores 
 export DRIVERS_TOOLS="./drivers-evergreen-tools"
 ```
 
-### Serverless
-
-The following steps will walk you through how to create and test a MongoDB Serverless instance.
-
-> [!IMPORTANT]
-> If you set up an Atlas cluster for local use, you MUST delete it when you are finished with it using the [delete-instance script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/delete-instance.sh).
-
-This script uses aws secrets manager to fetch credentials.  Make sure you are logged into AWS and have your profile set correctly.
-
-1. Run the setup-serverless script:
-
-```bash
-bash .evergreen/setup-serverless.sh
-```
-
-2. Source the expansions and secrets:
-
-```bash
-source secrets-export.sh
-source serverless.env
-```
-
-3. Comment out the line in `.evergreen/run-serverless-tests.sh` that sources `install-dependencies.sh` (this downloads node and npm and is only used in CI).
-
-4. Run the `.evergreen/run-serverless-tests.sh` script directly to test serverless instances from your local machine.
-
 ### Load Balanced
 
 The following steps will walk you through how to start and test a load balancer.
@@ -704,7 +677,6 @@ needs to be tested.
 [driver-specs]: https://github.com/mongodb/specifications
 [node-quick-start]: https://github.com/mongodb-developer/nodejs-quickstart
 [js-bson]: https://github.com/mongodb/js-bson
-[create-instance-script]: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/create-instance.sh
 [npm-csfle]: https://www.npmjs.com/package/mongodb-client-encryption
 [atlas-api-key]: https://docs.atlas.mongodb.com/tutorial/configure-api-access/organization/create-one-api-key
 [scram-auth]: https://docs.atlas.mongodb.com/security-add-mongodb-users/#database-user-authentication

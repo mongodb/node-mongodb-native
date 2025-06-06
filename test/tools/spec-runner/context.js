@@ -47,12 +47,6 @@ class TestRunnerContext {
     this.user = opts.user;
     this.password = opts.password;
     this.authSource = opts.authSource;
-    if (process.env.SERVERLESS) {
-      this.user = process.env.SERVERLESS_ATLAS_USER;
-      this.password = process.env.SERVERLESS_ATLAS_PASSWORD;
-      this.authSource = 'admin';
-      this.serverless = true;
-    }
     this.sharedClient = null;
     this.failPointClients = [];
     this.appliedFailPoints = [];

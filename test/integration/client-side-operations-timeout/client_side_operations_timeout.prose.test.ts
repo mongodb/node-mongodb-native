@@ -1342,7 +1342,7 @@ describe('CSOT spec prose tests', function () {
 
   describe(
     '11. Multi-batch bulkWrites',
-    { requires: { mongodb: '>=8.0', serverless: 'forbid', topology: 'single' } },
+    { requires: { mongodb: '>=8.0', topology: 'single' } },
     function () {
       /**
        * ### 11. Multi-batch bulkWrites
