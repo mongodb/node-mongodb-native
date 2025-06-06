@@ -677,7 +677,6 @@ needs to be tested.
 [driver-specs]: https://github.com/mongodb/specifications
 [node-quick-start]: https://github.com/mongodb-developer/nodejs-quickstart
 [js-bson]: https://github.com/mongodb/js-bson
-[create-instance-script]: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/create-instance.sh
 [npm-csfle]: https://www.npmjs.com/package/mongodb-client-encryption
 [atlas-api-key]: https://docs.atlas.mongodb.com/tutorial/configure-api-access/organization/create-one-api-key
 [scram-auth]: https://docs.atlas.mongodb.com/security-add-mongodb-users/#database-user-authentication
