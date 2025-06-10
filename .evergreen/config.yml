@@ -3612,6 +3612,7 @@ buildvariants:
       - run-spec-benchmark-tests-node-server-logging
     tags:
       - performance
+    activate: true
   - name: rhel8-custom-dependency-tests
     display_name: Custom Dependency Version Test
     run_on: rhel80-large
