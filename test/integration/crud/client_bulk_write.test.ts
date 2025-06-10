@@ -21,8 +21,7 @@ import { filterForCommands } from '../shared';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
-    mongodb: '>=8.0',
-    serverless: 'forbid'
+    mongodb: '>=8.0'
   }
 };
 

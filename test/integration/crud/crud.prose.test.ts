@@ -201,7 +201,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('splits the commands into 2 operations', {
-      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      metadata: { requires: { mongodb: '>=8.0.0' } },
       async test() {
         const result = await client.bulkWrite(models);
         expect(result.insertedCount).to.equal(maxWriteBatchSize + 1);
@@ -273,7 +273,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('splits the commands into 2 operations', {
-      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      metadata: { requires: { mongodb: '>=8.0.0' } },
       async test() {
         const result = await client.bulkWrite(models);
         expect(result.insertedCount).to.equal(numModels);
@@ -351,7 +351,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('splits the commands into 2 operations and handles the errors', {
-      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      metadata: { requires: { mongodb: '>=8.0.0' } },
       async test() {
         const error = await client.bulkWrite(models).catch(error => error);
         expect(error).to.be.instanceOf(MongoClientBulkWriteError);
@@ -416,7 +416,7 @@ describe('CRUD Prose Spec Tests', () => {
       // Assert that unorderedError.writeErrors has a length of maxWriteBatchSize + 1.
       // Assert that two CommandStartedEvents were observed for the bulkWrite command.
       it('splits the commands into 2 operations and handles the errors', {
-        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        metadata: { requires: { mongodb: '>=8.0.0' } },
         async test() {
           const error = await client.bulkWrite(models, { ordered: false }).catch(error => error);
           expect(error).to.be.instanceOf(MongoClientBulkWriteError);
@@ -434,7 +434,7 @@ describe('CRUD Prose Spec Tests', () => {
       // Assert that orderedError.writeErrors has a length of 1.
       // Assert that one CommandStartedEvent was observed for the bulkWrite command.
       it('splits the commands into 2 operations and halts on first error', {
-        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        metadata: { requires: { mongodb: '>=8.0.0' } },
         async test() {
           const error = await client.bulkWrite(models, { ordered: true }).catch(error => error);
           expect(error).to.be.instanceOf(MongoClientBulkWriteError);
@@ -504,7 +504,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('handles a getMore on the results', {
-      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      metadata: { requires: { mongodb: '>=8.0.0' } },
       async test() {
         const result = await client.bulkWrite(models, { verboseResults: true });
         expect(result.upsertedCount).to.equal(2);
@@ -582,7 +582,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('handles a getMore on the results in a transaction', {
-      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid', topology: '!single' } },
+      metadata: { requires: { mongodb: '>=8.0.0', topology: '!single' } },
       async test() {
         const result = await client.bulkWrite(models, { verboseResults: true, session });
         expect(result.upsertedCount).to.equal(2);
@@ -677,7 +677,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('handles a getMore that errors', {
-      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      metadata: { requires: { mongodb: '>=8.0.0' } },
       async test() {
         const error = await client
           .bulkWrite(models, { verboseResults: true })
@@ -733,7 +733,7 @@ describe('CRUD Prose Spec Tests', () => {
       // Call MongoClient.bulkWrite with models and BulkWriteOptions.writeConcern set to an unacknowledged write concern.
       // Expect a client-side error due the size.
       it('throws an error', {
-        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        metadata: { requires: { mongodb: '>=8.0.0' } },
         async test() {
           const error = await client
             .bulkWrite([{ name: 'insertOne', namespace: 'db.coll', document: document }], {
@@ -758,7 +758,7 @@ describe('CRUD Prose Spec Tests', () => {
       // Call MongoClient.bulkWrite with models and BulkWriteOptions.writeConcern set to an unacknowledged write concern.
       // Expect a client-side error due the size.
       it('throws an error', {
-        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        metadata: { requires: { mongodb: '>=8.0.0' } },
         async test() {
           const error = await client
             .bulkWrite(
@@ -856,7 +856,7 @@ describe('CRUD Prose Spec Tests', () => {
       // Assert that the length of event.command.ops is numModels + 1. Assert that the length of event.command.nsInfo is 1.
       // Assert that the namespace contained in event.command.nsInfo is "db.coll".
       it('executes in a single batch', {
-        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        metadata: { requires: { mongodb: '>=8.0.0' } },
         async test() {
           const sameNamespaceModel: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
@@ -892,7 +892,7 @@ describe('CRUD Prose Spec Tests', () => {
       // Assert that the length of secondEvent.command.ops is equal to 1. Assert that the length of secondEvent.command.nsInfo
       // is equal to 1. Assert that the namespace contained in secondEvent.command.nsInfo is namespace.
       it('executes in multiple batches', {
-        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        metadata: { requires: { mongodb: '>=8.0.0' } },
         async test() {
           const namespace = `db.${'c'.repeat(200)}`;
           const newNamespaceModel: ClientBulkWriteModel<Document> = {
@@ -947,7 +947,7 @@ describe('CRUD Prose Spec Tests', () => {
       // Execute bulkWrite on client with largeDocumentModel. Assert that an error (referred to as error) is returned.
       // Assert that error is a client error.
       it('raises a client error', {
-        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        metadata: { requires: { mongodb: '>=8.0.0' } },
         async test() {
           const model: ClientBulkWriteModel<Document> = {
             name: 'insertOne',
@@ -972,7 +972,7 @@ describe('CRUD Prose Spec Tests', () => {
       // Execute bulkWrite on client with largeNamespaceModel. Assert that an error (referred to as error) is returned.
       // Assert that error is a client error.
       it('raises a client error', {
-        metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+        metadata: { requires: { mongodb: '>=8.0.0' } },
         async test() {
           const namespace = `db.${'c'.repeat(maxMessageSizeBytes)}`;
           const model: ClientBulkWriteModel<Document> = {
@@ -1151,7 +1151,7 @@ describe('CRUD Prose Spec Tests', () => {
     });
 
     it('performs all writes unacknowledged', {
-      metadata: { requires: { mongodb: '>=8.0.0', serverless: 'forbid' } },
+      metadata: { requires: { mongodb: '>=8.0.0' } },
       async test() {
         const result = await client.bulkWrite(models, { ordered: false, writeConcern: { w: 0 } });
         expect(result.acknowledged).to.be.false;
