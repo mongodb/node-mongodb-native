@@ -496,71 +496,50 @@ describe('Find', function () {
     }
   });
 
-  it('shouldCorrectlyPerformFindsWithHintTurnedOn', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  for (let i = 0; i < 500; ++i) {
+    it('shouldCorrectlyPerformFindsWithHintTurnedOn' + i, async function () {
+      const configuration = this.configuration;
+      client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      await client.connect();
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('test_hint', function (err, collection) {
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-            db.createIndex(
-              collection.collectionName,
-              'a',
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
-                collection.find({ a: 1 }, { hint: 'a' }).toArray(function (err) {
-                  test.ok(err != null);
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_hint');
 
-                  collection.find({ a: 1 }, { hint: ['a'] }).toArray(function (err, items) {
-                    expect(err).to.not.exist;
-                    test.equal(1, items.length);
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-                    collection.find({ a: 1 }, { hint: { a: 1 } }).toArray(function (err, items) {
-                      test.equal(1, items.length);
+      await db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax());
 
-                      // Modify hints
-                      collection.hint = 'a_1';
-                      test.equal('a_1', collection.hint);
-                      collection.find({ a: 1 }).toArray(function (err, items) {
-                        test.equal(1, items.length);
+      expect(
+        await collection
+          .find({ a: 1 }, { hint: 'a' })
+          .toArray()
+          .catch(e => e)
+      ).to.be.instanceOf(Error);
 
-                        collection.hint = ['a'];
-                        test.equal(1, collection.hint['a']);
-                        collection.find({ a: 1 }).toArray(function (err, items) {
-                          test.equal(1, items.length);
+      // Test with hint as array
+      expect(await collection.find({ a: 1 }, { hint: ['a'] }).toArray()).to.have.lengthOf(1);
 
-                          collection.hint = { a: 1 };
-                          test.equal(1, collection.hint['a']);
-                          collection.find({ a: 1 }).toArray(function (err, items) {
-                            test.equal(1, items.length);
+      // Test with hint as object
+      expect(await collection.find({ a: 1 }, { hint: { a: 1 } }).toArray()).to.have.lengthOf(1);
 
-                            collection.hint = null;
-                            test.ok(collection.hint == null);
-                            collection.find({ a: 1 }).toArray(function (err, items) {
-                              test.equal(1, items.length);
-                              // Let's close the db
-                              client.close(done);
-                            });
-                          });
-                        });
-                      });
-                    });
-                  });
-                });
-              }
-            );
-          });
-        });
-      });
-    }
-  });
+      // Modify hints
+      collection.hint = 'a_1';
+      expect(collection.hint).to.equal('a_1');
+      expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+
+      collection.hint = ['a'];
+      expect(collection.hint['a']).to.equal(1);
+      expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+
+      collection.hint = { a: 1 };
+      expect(collection.hint['a']).to.equal(1);
+      expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+
+      collection.hint = null;
+      expect(collection.hint).to.be.null;
+      expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+    });
+  }
 
   it('shouldCorrectlyPerformFindByObjectId', {
     metadata: {
