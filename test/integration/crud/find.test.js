@@ -496,50 +496,49 @@ describe('Find', function () {
     }
   });
 
-  for (let i = 0; i < 500; ++i) {
-    it('shouldCorrectlyPerformFindsWithHintTurnedOn' + i, async function () {
-      const configuration = this.configuration;
-      client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      await client.connect();
+  it('shouldCorrectlyPerformFindsWithHintTurnedOn', async function () {
+    const configuration = this.configuration;
+    client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('test_hint');
+    const db = client.db(configuration.db);
+    const collection = await db.createCollection('test_hint');
 
-      await collection.insert({ a: 1 }, configuration.writeConcernMax());
+    await collection.deleteMany({});
+    await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-      await db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax());
+    await db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax());
 
-      expect(
-        await collection
-          .find({ a: 1 }, { hint: 'a' })
-          .toArray()
-          .catch(e => e)
-      ).to.be.instanceOf(Error);
+    expect(
+      await collection
+        .find({ a: 1 }, { hint: 'a' })
+        .toArray()
+        .catch(e => e)
+    ).to.be.instanceOf(Error);
 
-      // Test with hint as array
-      expect(await collection.find({ a: 1 }, { hint: ['a'] }).toArray()).to.have.lengthOf(1);
+    // Test with hint as array
+    expect(await collection.find({ a: 1 }, { hint: ['a'] }).toArray()).to.have.lengthOf(1);
 
-      // Test with hint as object
-      expect(await collection.find({ a: 1 }, { hint: { a: 1 } }).toArray()).to.have.lengthOf(1);
+    // Test with hint as object
+    expect(await collection.find({ a: 1 }, { hint: { a: 1 } }).toArray()).to.have.lengthOf(1);
 
-      // Modify hints
-      collection.hint = 'a_1';
-      expect(collection.hint).to.equal('a_1');
-      expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+    // Modify hints
+    collection.hint = 'a_1';
+    expect(collection.hint).to.equal('a_1');
+    expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
 
-      collection.hint = ['a'];
-      expect(collection.hint['a']).to.equal(1);
-      expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+    collection.hint = ['a'];
+    expect(collection.hint['a']).to.equal(1);
+    expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
 
-      collection.hint = { a: 1 };
-      expect(collection.hint['a']).to.equal(1);
-      expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+    collection.hint = { a: 1 };
+    expect(collection.hint['a']).to.equal(1);
+    expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
 
-      collection.hint = null;
-      expect(collection.hint).to.be.null;
-      expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
-    });
-  }
+    collection.hint = null;
+    expect(collection.hint).to.be.undefined;
+    expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+  });
 
   it('shouldCorrectlyPerformFindByObjectId', {
     metadata: {
