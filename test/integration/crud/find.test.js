@@ -6,6 +6,7 @@ const { setTimeout } = require('timers');
 const { Code, ObjectId, Long, Binary, ReturnDocument, CursorResponse } = require('../../mongodb');
 
 describe('Find', function () {
+  /** @type(import('../../mongodb').MongoClient */
   let client;
 
   beforeEach(async function () {
