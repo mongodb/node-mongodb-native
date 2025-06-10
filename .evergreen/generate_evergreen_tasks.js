@@ -788,7 +788,8 @@ function addPerformanceTasks() {
     display_name: 'Performance Test',
     run_on: 'rhel90-dbx-perf-large',
     tasks: tasks.map(({ name }) => name),
-    tags: ['performance']
+    tags: ['performance'],
+    activate: true
   });
 }
 addPerformanceTasks();
