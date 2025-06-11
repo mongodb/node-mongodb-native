@@ -1,9 +1,17 @@
 'use strict';
-const { assert: test } = require('../shared');
+const { assert: test, filterForCommands } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { setTimeout } = require('timers');
-const { Code, ObjectId, Long, Binary, ReturnDocument, CursorResponse } = require('../../mongodb');
+const {
+  Code,
+  ObjectId,
+  Long,
+  Binary,
+  ReturnDocument,
+  CursorResponse,
+  MongoServerError
+} = require('../../mongodb');
 
 describe('Find', function () {
   /** @type(import('../../mongodb').MongoClient */
@@ -499,7 +507,13 @@ describe('Find', function () {
 
   it('shouldCorrectlyPerformFindsWithHintTurnedOn', async function () {
     const configuration = this.configuration;
-    client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client = configuration.newClient(configuration.writeConcernMax(), {
+      monitorCommands: true
+    });
+
+    const finds = [];
+    client.on('commandStarted', filterForCommands('find', finds));
+
     await client.connect();
 
     const db = client.db(configuration.db);
@@ -515,30 +529,16 @@ describe('Find', function () {
         .find({ a: 1 }, { hint: 'a' })
         .toArray()
         .catch(e => e)
-    ).to.be.instanceOf(Error);
+    ).to.be.instanceOf(MongoServerError);
+    expect(finds[0].command.hint).to.equal('a');
 
     // Test with hint as array
     expect(await collection.find({ a: 1 }, { hint: ['a'] }).toArray()).to.have.lengthOf(1);
+    expect(finds[1].command.hint).to.deep.equal({ a: 1 });
 
     // Test with hint as object
     expect(await collection.find({ a: 1 }, { hint: { a: 1 } }).toArray()).to.have.lengthOf(1);
-
-    // Modify hints
-    collection.hint = 'a_1';
-    expect(collection.hint).to.equal('a_1');
-    expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
-
-    collection.hint = ['a'];
-    expect(collection.hint['a']).to.equal(1);
-    expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
-
-    collection.hint = { a: 1 };
-    expect(collection.hint['a']).to.equal(1);
-    expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
-
-    collection.hint = null;
-    expect(collection.hint).to.be.undefined;
-    expect(await collection.find({ a: 1 }).toArray()).to.have.lengthOf(1);
+    expect(finds[2].command.hint).to.deep.equal({ a: 1 });
   });
 
   it('shouldCorrectlyPerformFindByObjectId', {
