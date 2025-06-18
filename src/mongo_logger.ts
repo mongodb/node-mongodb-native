@@ -240,7 +240,7 @@ export function createStdioLogger(stream: {
   write: NodeJS.WriteStream['write'];
 }): MongoDBLogWritable {
   return {
-    write: promisify((log: Log, cb: (error?: Error) => void): unknown => {
+    write: promisify((log: Log, cb: (error?: Error | null) => void): unknown => {
       const logLine = inspect(log, { compact: true, breakLength: Infinity });
       stream.write(`${logLine}\n`, 'utf-8', cb);
       return;
@@ -584,7 +584,7 @@ export function stringifyWithMaxLen(
     maxDocumentLength !== 0 &&
     strToTruncate.length > maxDocumentLength &&
     strToTruncate.charCodeAt(maxDocumentLength - 1) !==
-      strToTruncate.codePointAt(maxDocumentLength - 1)
+    strToTruncate.codePointAt(maxDocumentLength - 1)
   ) {
     maxDocumentLength--;
     if (maxDocumentLength === 0) {

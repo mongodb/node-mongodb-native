@@ -19,7 +19,7 @@
     "noEmitHelpers": true,
     // Never emit error filled code
     "noEmitOnError": true,
-    "outDir": "lib",
+    "outDir": "lib/dist",
     // We want the sourcemaps in a separate file
     "inlineSourceMap": false,
     "sourceMap": true,
