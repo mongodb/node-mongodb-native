@@ -1,0 +1,232 @@
+{
+  "description": "replaceOne-sort",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "ReplaceOne with sort option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "replaceOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "sort": {
+              "_id": -1
+            },
+            "replacement": {
+              "x": 1
+            }
+          },
+          "expectResult": {
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "upsertedCount": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "u": {
+                        "x": 1
+                      },
+                      "sort": {
+                        "_id": -1
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 1
+                },
+                "commandName": "update"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "replaceOne with sort option unsupported (server-side error)",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "7.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "replaceOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "sort": {
+              "_id": -1
+            },
+            "replacement": {
+              "x": 1
+            }
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "u": {
+                        "x": 1
+                      },
+                      "sort": {
+                        "_id": -1
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

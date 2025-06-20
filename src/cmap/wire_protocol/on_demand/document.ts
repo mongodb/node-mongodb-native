@@ -14,14 +14,13 @@ import {
   toUTF8
 } from '../../../bson';
 
-// eslint-disable-next-line no-restricted-syntax
-const enum BSONElementOffset {
-  type = 0,
-  nameOffset = 1,
-  nameLength = 2,
-  offset = 3,
-  length = 4
-}
+const BSONElementOffset = {
+  type: 0,
+  nameOffset: 1,
+  nameLength: 2,
+  offset: 3,
+  length: 4
+} as const;
 
 /** @internal */
 export type JSTypeOf = {
@@ -67,17 +66,23 @@ export class OnDemandDocument {
 
   /** All bson elements in this document */
   private readonly elements: ReadonlyArray<BSONElement>;
+  /** BSON bytes, this document begins at offset */
+  protected readonly bson: Uint8Array;
+  /** The start of the document */
+  private readonly offset: number;
+  /** If this is an embedded document, indicates if this was a BSON array */
+  public readonly isArray: boolean;
 
   constructor(
-    /** BSON bytes, this document begins at offset */
-    protected readonly bson: Uint8Array,
-    /** The start of the document */
-    private readonly offset = 0,
-    /** If this is an embedded document, indicates if this was a BSON array */
-    public readonly isArray = false,
+    bson: Uint8Array,
+    offset = 0,
+    isArray = false,
     /** If elements was already calculated */
     elements?: BSONElement[]
   ) {
+    this.bson = bson;
+    this.offset = offset;
+    this.isArray = isArray;
     this.elements = elements ?? parseToElementsToArray(this.bson, offset);
   }
 
@@ -262,7 +267,7 @@ export class OnDemandDocument {
   public get<const T extends keyof JSTypeOf>(
     name: string | number,
     as: T,
-    required?: boolean | undefined
+    required?: boolean
   ): JSTypeOf[T] | null;
 
   /** `required` will make `get` throw if name does not exist or is null/undefined */

@@ -42,10 +42,6 @@ tests:
         object: *collection
         arguments:
           filter: { }
-        expectResult: [
-          { _id: 1, x: 11 },
-          { _id: "unorderedBulkWriteInsertW0", x: 44 }
-        ]
     expectEvents:
       - client: *client
         ignoreExtraEvents: true

@@ -22,7 +22,7 @@ import {
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
-import { sleep } from '../../tools/utils';
+import { processTick, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
 const commonConnectOptions = {
@@ -248,6 +248,54 @@ describe('Connection', function () {
 
       client.connect();
     });
+
+    describe(
+      'when a monitoring Connection receives many hellos in one chunk',
+      { requires: { topology: 'replicaset', mongodb: '>=4.4' } }, // need to be on a streaming hello version
+      function () {
+        let client: MongoClient;
+
+        beforeEach(async function () {
+          // set heartbeatFrequencyMS just so we don't have to wait so long for a hello
+          client = this.configuration.newClient({}, { heartbeatFrequencyMS: 10 });
+        });
+
+        afterEach(async function () {
+          await client.close();
+        });
+
+        // In the future we may want to skip processing concatenated heartbeats.
+        // This test exists to prevent regression of processing many messages inside one chunk.
+        it(
+          'processes all of them and emits heartbeats',
+          { requires: { topology: 'replicaset', mongodb: '>=4.4' } },
+          async function () {
+            let hbSuccess = 0;
+            client.on('serverHeartbeatSucceeded', () => (hbSuccess += 1));
+            expect(hbSuccess).to.equal(0);
+
+            await client.db().command({ ping: 1 }); // start monitoring.
+            const monitor = [...client.topology.s.servers.values()][0].monitor;
+
+            // @ts-expect-error: accessing private property
+            const messageStream = monitor.connection.messageStream;
+            // @ts-expect-error: accessing private property
+            const socket = monitor.connection.socket;
+
+            const [hello] = (await once(messageStream, 'data')) as [Buffer];
+
+            const thousandHellos = Array.from({ length: 1000 }, () => [...hello]).flat(1);
+
+            // pretend this came from the server
+            socket.emit('data', Buffer.from(thousandHellos));
+
+            // All of the hb will be emitted synchronously in the next tick as the entire chunk is processed.
+            await processTick();
+            expect(hbSuccess).to.be.greaterThan(1000);
+          }
+        );
+      }
+    );
 
     context(
       'when a large message is written to the socket',

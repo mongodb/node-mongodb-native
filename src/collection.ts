@@ -14,6 +14,7 @@ import type { Db } from './db';
 import { MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
+  Abortable,
   Filter,
   Flatten,
   OptionalUnlessRequiredId,
@@ -86,6 +87,7 @@ import {
 } from './operations/update';
 import { ReadConcern, type ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceLike } from './read_preference';
+import { type Sort } from './sort';
 import {
   DEFAULT_PK_FACTORY,
   MongoDBCollectionNamespace,
@@ -364,7 +366,7 @@ export class Collection<TSchema extends Document = Document> {
   async updateOne(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Document[],
-    options?: UpdateOptions
+    options?: UpdateOptions & { sort?: Sort }
   ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
@@ -388,7 +390,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
     options?: ReplaceOptions
-  ): Promise<UpdateResult<TSchema> | Document> {
+  ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
       new ReplaceOneOperation(
@@ -505,7 +507,7 @@ export class Collection<TSchema extends Document = Document> {
   async findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
   async findOne(
     filter: Filter<TSchema>,
-    options: Omit<FindOptions, 'timeoutMode'>
+    options: Omit<FindOptions, 'timeoutMode'> & Abortable
   ): Promise<WithId<TSchema> | null>;
 
   // allow an override of the schema.
@@ -513,12 +515,12 @@ export class Collection<TSchema extends Document = Document> {
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
   async findOne<T = TSchema>(
     filter: Filter<TSchema>,
-    options?: Omit<FindOptions, 'timeoutMode'>
+    options?: Omit<FindOptions, 'timeoutMode'> & Abortable
   ): Promise<T | null>;
 
   async findOne(
     filter: Filter<TSchema> = {},
-    options: FindOptions = {}
+    options: FindOptions & Abortable = {}
   ): Promise<WithId<TSchema> | null> {
     const cursor = this.find(filter, options).limit(-1).batchSize(1);
     const res = await cursor.next();
@@ -532,9 +534,15 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter predicate. If unspecified, then all documents in the collection will match the predicate
    */
   find(): FindCursor<WithId<TSchema>>;
-  find(filter: Filter<TSchema>, options?: FindOptions): FindCursor<WithId<TSchema>>;
-  find<T extends Document>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
-  find(filter: Filter<TSchema> = {}, options: FindOptions = {}): FindCursor<WithId<TSchema>> {
+  find(filter: Filter<TSchema>, options?: FindOptions & Abortable): FindCursor<WithId<TSchema>>;
+  find<T extends Document>(
+    filter: Filter<TSchema>,
+    options?: FindOptions & Abortable
+  ): FindCursor<T>;
+  find(
+    filter: Filter<TSchema> = {},
+    options: FindOptions & Abortable = {}
+  ): FindCursor<WithId<TSchema>> {
     return new FindCursor<WithId<TSchema>>(
       this.client,
       this.s.namespace,
@@ -792,7 +800,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async countDocuments(
     filter: Filter<TSchema> = {},
-    options: CountDocumentsOptions = {}
+    options: CountDocumentsOptions & Abortable = {}
   ): Promise<number> {
     const pipeline = [];
     pipeline.push({ $match: filter });
@@ -959,32 +967,40 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Find a document and update it in one atomic operation. Requires a write lock for the duration of the operation.
    *
+   * The value of `update` can be either:
+   * - UpdateFilter<TSchema> - A document that contains update operator expressions,
+   * - Document[] - an aggregation pipeline consisting of the following stages:
+   *   - $addFields and its alias $set
+   *   - $project and its alias $unset
+   *   - $replaceRoot and its alias $replaceWith.
+   * See the [findAndModify command documentation](https://www.mongodb.com/docs/manual/reference/command/findAndModify) for details.
+   *
    * @param filter - The filter used to select the document to update
-   * @param update - Update operations to be performed on the document
+   * @param update - The modifications to apply
    * @param options - Optional settings for the command
    */
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions & { includeResultMetadata: true }
   ): Promise<ModifyResult<TSchema>>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions & { includeResultMetadata: false }
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options: FindOneAndUpdateOptions
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>
+    update: UpdateFilter<TSchema> | Document[]
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    update: UpdateFilter<TSchema> | Document[],
     options?: FindOneAndUpdateOptions
   ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return await executeOperation(
@@ -1006,7 +1022,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   aggregate<T extends Document = Document>(
     pipeline: Document[] = [],
-    options?: AggregateOptions
+    options?: AggregateOptions & Abortable
   ): AggregationCursor<T> {
     if (!Array.isArray(pipeline)) {
       throw new MongoInvalidArgumentError(

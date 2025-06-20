@@ -1,4 +1,4 @@
-import { type Binary, EJSON, UUID } from 'bson';
+import { UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
 import * as sinon from 'sinon';
@@ -6,6 +6,7 @@ import { setTimeout } from 'timers/promises';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   BSON,
   type Collection,
@@ -32,17 +33,12 @@ import { filterForCommands } from '../shared';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
-    mongodb: '>=4.2.0',
     clientSideEncryption: true
   }
 };
 
-const getLocalKmsProvider = (): { local: { key: Binary } } => {
-  const { local } = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as {
-    local: { key: Binary };
-    [key: string]: unknown;
-  };
-
+const getLocalKmsProvider = (): { local: { key: Buffer } } => {
+  const { local } = getCSFLEKMSProviders();
   return { local };
 };
 
@@ -52,41 +48,6 @@ describe('Client Side Encryption Functional', function () {
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-
-  it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
-    const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
-    if (typeof CSFLE_KMS_PROVIDERS === 'string') {
-      /**
-       * The shape of CSFLE_KMS_PROVIDERS is as follows:
-       *
-       * ```ts
-       * interface CSFLE_kms_providers {
-       *    aws: {
-       *      accessKeyId: string;
-       *      secretAccessKey: string;
-       *   };
-       *   azure: {
-       *     tenantId: string;
-       *     clientId: string;
-       *     clientSecret: string;
-       *   };
-       *   gcp: {
-       *     email: string;
-       *     privateKey: string;
-       *   };
-       *   local: {
-       *     // EJSON handle converting this, its actually the canonical -> { $binary: { base64: string; subType: string } }
-       *     // **NOTE**: The dollar sign has to be escaped when using this as an ENV variable
-       *     key: Binary;
-       *   }
-       * }
-       * ```
-       */
-      expect(() => EJSON.parse(CSFLE_KMS_PROVIDERS)).to.not.throw(SyntaxError);
-    } else {
-      this.skip();
-    }
-  });
 
   describe('Collection', metadata, function () {
     describe('#bulkWrite()', metadata, function () {
@@ -640,10 +601,8 @@ describe('Range Explicit Encryption with JS native types', function () {
     }
   };
 
-  const getKmsProviders = (): { local: { key: string } } => {
-    const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
-      local: { key: string };
-    };
+  const getKmsProviders = (): { local: { key: Buffer } } => {
+    const result = getCSFLEKMSProviders();
 
     return { local: result.local };
   };
@@ -739,7 +698,6 @@ describe('CSOT', function () {
 
     const metadata: MongoDBMetadataUI = {
       requires: {
-        mongodb: '>=4.2.0',
         clientSideEncryption: true
       }
     };
@@ -758,6 +716,7 @@ describe('CSOT', function () {
                 keyVaultClient,
                 keyVaultNamespace: 'keyvault.datakeys',
                 kmsProviders: getLocalKmsProvider(),
+                extraOptions: getEncryptExtraOptions(),
                 schemaMap: {
                   'test.test': {
                     bsonType: 'object',
@@ -811,14 +770,15 @@ describe('CSOT', function () {
               autoEncryption: {
                 keyVaultClient,
                 keyVaultNamespace: 'admin.datakeys',
-                kmsProviders: getLocalKmsProvider()
+                kmsProviders: getLocalKmsProvider(),
+                extraOptions: getEncryptExtraOptions()
               }
             }
           );
         });
 
         afterEach(async function () {
-          await encryptedClient.close();
+          await encryptedClient?.close();
         });
 
         it('the command succeeds', metadata, async function () {
@@ -831,20 +791,14 @@ describe('CSOT', function () {
   describe('State machine', function () {
     const stateMachine = new StateMachine({} as any);
 
-    const timeoutContext = () => {
-      return new CSOTTimeoutContext({
+    const timeoutContext = () => ({
+      timeoutContext: new CSOTTimeoutContext({
         timeoutMS: 1000,
         serverSelectionTimeoutMS: 30000
-      });
-    };
+      })
+    });
 
     const timeoutMS = 1000;
-
-    const metadata: MongoDBMetadataUI = {
-      requires: {
-        mongodb: '>=4.2.0'
-      }
-    };
 
     describe('#markCommand', function () {
       context(
@@ -865,7 +819,7 @@ describe('CSOT', function () {
               // @ts-expect-error accessing private method
               .stub(Connection.prototype, 'sendCommand')
               .callsFake(async function* (...args) {
-                await sleep(1000);
+                await sleep(1010);
                 yield* stub.wrappedMethod.call(this, ...args);
               });
           });
@@ -875,7 +829,7 @@ describe('CSOT', function () {
             sinon.restore();
           });
 
-          it('the command should fail due to a timeout error', metadata, async function () {
+          it('the command should fail due to a timeout error', async function () {
             const { duration, result: error } = await measureDuration(() =>
               stateMachine
                 .markCommand(
@@ -1001,7 +955,7 @@ describe('CSOT', function () {
 
             const { result: error } = await measureDuration(() =>
               stateMachine
-                .fetchKeys(client, 'test.test', BSON.serialize({}), timeoutContext)
+                .fetchKeys(client, 'test.test', BSON.serialize({}), { timeoutContext })
                 .catch(e => e)
             );
             expect(error).to.be.instanceOf(MongoOperationTimeoutError);
@@ -1085,11 +1039,19 @@ describe('CSOT', function () {
           });
 
           it('the command should fail due to a timeout error', metadata, async function () {
-            const { duration, result: error } = await measureDuration(() =>
-              stateMachine
-                .fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 }, timeoutContext())
-                .catch(e => e)
-            );
+            const { duration, result: error } = await measureDuration(async () => {
+              try {
+                const cursor = stateMachine.fetchCollectionInfo(
+                  encryptedClient,
+                  'test.test',
+                  { a: 1 },
+                  timeoutContext()
+                );
+                for await (const doc of cursor) void doc;
+              } catch (error) {
+                return error;
+              }
+            });
             expect(error).to.be.instanceOf(MongoOperationTimeoutError);
             expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
           });
@@ -1112,7 +1074,8 @@ describe('CSOT', function () {
           });
 
           it('the command succeeds', metadata, async function () {
-            await stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
+            const cursor = stateMachine.fetchCollectionInfo(encryptedClient, 'test.test', { a: 1 });
+            for await (const doc of cursor) void doc;
           });
         }
       );
@@ -1135,7 +1098,7 @@ describe('CSOT', function () {
       };
 
       beforeEach(async function () {
-        local_key = { local: EJSON.parse(process.env.CSFLE_KMS_PROVIDERS).local };
+        local_key = { local: getCSFLEKMSProviders().local };
         client = this.configuration.newClient({ timeoutMS });
         await client.connect();
         await client.db('keyvault').createCollection('datakeys');

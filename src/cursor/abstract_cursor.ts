@@ -12,7 +12,7 @@ import {
   MongoTailableCursorError
 } from '../error';
 import type { MongoClient } from '../mongo_client';
-import { TypedEventEmitter } from '../mongo_types';
+import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
@@ -22,7 +22,14 @@ import { type AsyncDisposable, configureResourceManagement } from '../resource_m
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type CSOTTimeoutContext, type Timeout, TimeoutContext } from '../timeout';
-import { type MongoDBNamespace, squashError } from '../utils';
+import {
+  addAbortListener,
+  type Disposable,
+  kDispose,
+  type MongoDBNamespace,
+  noop,
+  squashError
+} from '../utils';
 
 /**
  * @internal
@@ -60,6 +67,10 @@ export interface CursorStreamOptions {
 
 /** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
+
+function removeActiveCursor(this: AbstractCursor) {
+  this.client.s.activeCursors.delete(this);
+}
 
 /**
  * @public
@@ -247,14 +258,17 @@ export abstract class AbstractCursor<
 
   /** @internal */
   protected deserializationOptions: OnDemandDocumentDeserializeOptions;
+  protected signal: AbortSignal | undefined;
+  private abortListener: Disposable | undefined;
 
   /** @internal */
   protected constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
-    options: AbstractCursorOptions = {}
+    options: AbstractCursorOptions & Abortable = {}
   ) {
     super();
+    this.on('error', noop);
 
     if (!client.s.isMongoClient) {
       throw new MongoRuntimeError('Cursor must be constructed with MongoClient');
@@ -352,6 +366,12 @@ export abstract class AbstractCursor<
     };
 
     this.timeoutContext = options.timeoutContext;
+    this.signal = options.signal;
+    this.abortListener = addAbortListener(
+      this.signal,
+      () => void this.close().then(undefined, squashError)
+    );
+    this.trackCursor();
   }
 
   /**
@@ -431,6 +451,14 @@ export abstract class AbstractCursor<
     await this.close();
   }
 
+  /** Adds cursor to client's tracking so it will be closed by MongoClient.close() */
+  private trackCursor() {
+    this.cursorClient.s.activeCursors.add(this);
+    if (!this.listeners('close').includes(removeActiveCursor)) {
+      this.once('close', removeActiveCursor);
+    }
+  }
+
   /** Returns current buffered documents length */
   bufferedCount(): number {
     return this.documents?.length ?? 0;
@@ -455,6 +483,8 @@ export abstract class AbstractCursor<
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<TSchema, void, void> {
+    this.signal?.throwIfAborted();
+
     if (this.closed) {
       return;
     }
@@ -481,6 +511,8 @@ export abstract class AbstractCursor<
         }
 
         yield document;
+
+        this.signal?.throwIfAborted();
       }
     } finally {
       // Only close the cursor if it has not already been closed. This finally clause handles
@@ -496,9 +528,16 @@ export abstract class AbstractCursor<
   }
 
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
+    const readable = new ReadableCursorStream(this);
+    const abortListener = addAbortListener(this.signal, function () {
+      readable.destroy(this.reason);
+    });
+    readable.once('end', () => {
+      abortListener?.[kDispose]();
+    });
+
     if (options?.transform) {
       const transform = options.transform;
-      const readable = new ReadableCursorStream(this);
 
       const transformedStream = readable.pipe(
         new Transform({
@@ -522,10 +561,12 @@ export abstract class AbstractCursor<
       return transformedStream;
     }
 
-    return new ReadableCursorStream(this);
+    return readable;
   }
 
   async hasNext(): Promise<boolean> {
+    this.signal?.throwIfAborted();
+
     if (this.cursorId === Long.ZERO) {
       return false;
     }
@@ -551,6 +592,8 @@ export abstract class AbstractCursor<
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
   async next(): Promise<TSchema | null> {
+    this.signal?.throwIfAborted();
+
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
@@ -581,6 +624,8 @@ export abstract class AbstractCursor<
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
   async tryNext(): Promise<TSchema | null> {
+    this.signal?.throwIfAborted();
+
     if (this.cursorId === Long.ZERO) {
       throw new MongoCursorExhaustedError();
     }
@@ -620,6 +665,8 @@ export abstract class AbstractCursor<
    * @deprecated - Will be removed in a future release. Use for await...of instead.
    */
   async forEach(iterator: (doc: TSchema) => boolean | void): Promise<void> {
+    this.signal?.throwIfAborted();
+
     if (typeof iterator !== 'function') {
       throw new MongoInvalidArgumentError('Argument "iterator" must be a function');
     }
@@ -645,6 +692,8 @@ export abstract class AbstractCursor<
    * cursor.rewind() can be used to reset the cursor.
    */
   async toArray(): Promise<TSchema[]> {
+    this.signal?.throwIfAborted();
+
     const array: TSchema[] = [];
     // at the end of the loop (since readBufferedDocuments is called) the buffer will be empty
     // then, the 'await of' syntax will run a getMore call
@@ -824,16 +873,15 @@ export abstract class AbstractCursor<
     this.isClosed = false;
     this.isKilled = false;
     this.initialized = false;
+    this.hasEmittedClose = false;
+    this.trackCursor();
 
-    const session = this.cursorSession;
-    if (session) {
-      // We only want to end this session if we created it, and it hasn't ended yet
-      if (session.explicit === false) {
-        if (!session.hasEnded) {
-          session.endSession().then(undefined, squashError);
-        }
-        this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
+    // We only want to end this session if we created it, and it hasn't ended yet
+    if (this.cursorSession.explicit === false) {
+      if (!this.cursorSession.hasEnded) {
+        this.cursorSession.endSession().then(undefined, squashError);
       }
+      this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
     }
   }
 
@@ -968,8 +1016,8 @@ export abstract class AbstractCursor<
 
   /** @internal */
   private async cleanup(timeoutMS?: number, error?: Error) {
+    this.abortListener?.[kDispose]();
     this.isClosed = true;
-    const session = this.cursorSession;
     const timeoutContextForKillCursors = (): CursorTimeoutContext | undefined => {
       if (timeoutMS != null) {
         this.timeoutContext?.clear();
@@ -991,7 +1039,7 @@ export abstract class AbstractCursor<
         !this.cursorId.isZero() &&
         this.cursorNamespace &&
         this.selectedServer &&
-        !session.hasEnded
+        !this.cursorSession.hasEnded
       ) {
         this.isKilled = true;
         const cursorId = this.cursorId;
@@ -1000,7 +1048,7 @@ export abstract class AbstractCursor<
         await executeOperation(
           this.cursorClient,
           new KillCursorsOperation(cursorId, this.cursorNamespace, this.selectedServer, {
-            session
+            session: this.cursorSession
           }),
           timeoutContextForKillCursors()
         );
@@ -1008,14 +1056,16 @@ export abstract class AbstractCursor<
     } catch (error) {
       squashError(error);
     } finally {
-      if (session?.owner === this) {
-        await session.endSession({ error });
+      try {
+        if (this.cursorSession?.owner === this) {
+          await this.cursorSession.endSession({ error });
+        }
+        if (!this.cursorSession?.inTransaction()) {
+          maybeClearPinnedConnection(this.cursorSession, { error });
+        }
+      } finally {
+        this.emitClose();
       }
-      if (!session?.inTransaction()) {
-        maybeClearPinnedConnection(session, { error });
-      }
-
-      this.emitClose();
     }
   }
 
@@ -1096,50 +1146,59 @@ class ReadableCursorStream extends Readable {
       return;
     }
 
-    this._cursor.next().then(
-      result => {
-        if (result == null) {
-          this.push(null);
-        } else if (this.destroyed) {
-          this._cursor.close().then(undefined, squashError);
-        } else {
-          if (this.push(result)) {
-            return this._readNext();
+    this._cursor
+      .next()
+      .then(
+        // result from next()
+        result => {
+          if (result == null) {
+            this.push(null);
+          } else if (this.destroyed) {
+            this._cursor.close().then(undefined, squashError);
+          } else {
+            if (this.push(result)) {
+              return this._readNext();
+            }
+
+            this._readInProgress = false;
+          }
+        },
+        // error from next()
+        err => {
+          // NOTE: This is questionable, but we have a test backing the behavior. It seems the
+          //       desired behavior is that a stream ends cleanly when a user explicitly closes
+          //       a client during iteration. Alternatively, we could do the "right" thing and
+          //       propagate the error message by removing this special case.
+          if (err.message.match(/server is closed/)) {
+            this._cursor.close().then(undefined, squashError);
+            return this.push(null);
           }
 
-          this._readInProgress = false;
-        }
-      },
-      err => {
-        // NOTE: This is questionable, but we have a test backing the behavior. It seems the
-        //       desired behavior is that a stream ends cleanly when a user explicitly closes
-        //       a client during iteration. Alternatively, we could do the "right" thing and
-        //       propagate the error message by removing this special case.
-        if (err.message.match(/server is closed/)) {
-          this._cursor.close().then(undefined, squashError);
-          return this.push(null);
-        }
+          // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
+          //       to be "operation was interrupted", where a cursor has been closed but there is an
+          //       active getMore in-flight. This used to check if the cursor was killed but once
+          //       that changed to happen in cleanup legitimate errors would not destroy the
+          //       stream. There are change streams test specifically test these cases.
+          if (err.message.match(/operation was interrupted/)) {
+            return this.push(null);
+          }
 
-        // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
-        //       to be "operation was interrupted", where a cursor has been closed but there is an
-        //       active getMore in-flight. This used to check if the cursor was killed but once
-        //       that changed to happen in cleanup legitimate errors would not destroy the
-        //       stream. There are change streams test specifically test these cases.
-        if (err.message.match(/operation was interrupted/)) {
-          return this.push(null);
+          // NOTE: The two above checks on the message of the error will cause a null to be pushed
+          //       to the stream, thus closing the stream before the destroy call happens. This means
+          //       that either of those error messages on a change stream will not get a proper
+          //       'error' event to be emitted (the error passed to destroy). Change stream resumability
+          //       relies on that error event to be emitted to create its new cursor and thus was not
+          //       working on 4.4 servers because the error emitted on failover was "interrupted at
+          //       shutdown" while on 5.0+ it is "The server is in quiesce mode and will shut down".
+          //       See NODE-4475.
+          return this.destroy(err);
         }
-
-        // NOTE: The two above checks on the message of the error will cause a null to be pushed
-        //       to the stream, thus closing the stream before the destroy call happens. This means
-        //       that either of those error messages on a change stream will not get a proper
-        //       'error' event to be emitted (the error passed to destroy). Change stream resumability
-        //       relies on that error event to be emitted to create its new cursor and thus was not
-        //       working on 4.4 servers because the error emitted on failover was "interrupted at
-        //       shutdown" while on 5.0+ it is "The server is in quiesce mode and will shut down".
-        //       See NODE-4475.
-        return this.destroy(err);
-      }
-    );
+      )
+      // if either of the above handlers throw
+      .catch(error => {
+        this._readInProgress = false;
+        this.destroy(error);
+      });
   }
 }
 
@@ -1154,11 +1213,13 @@ configureResourceManagement(AbstractCursor.prototype);
  * All timeout behavior is exactly the same as the wrapped timeout context's.
  */
 export class CursorTimeoutContext extends TimeoutContext {
-  constructor(
-    public timeoutContext: TimeoutContext,
-    public owner: symbol | AbstractCursor
-  ) {
+  timeoutContext: TimeoutContext;
+  owner: symbol | AbstractCursor;
+
+  constructor(timeoutContext: TimeoutContext, owner: symbol | AbstractCursor) {
     super();
+    this.timeoutContext = timeoutContext;
+    this.owner = owner;
   }
   override get serverSelectionTimeout(): Timeout | null {
     return this.timeoutContext.serverSelectionTimeout;

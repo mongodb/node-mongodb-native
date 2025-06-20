@@ -8,6 +8,7 @@ import {
   parseToElementsToArray,
   parseUtf8ValidationOption,
   pluckBSONSerializeOptions,
+  serialize,
   type Timestamp
 } from '../../bson';
 import { MONGODB_ERROR_CODES, MongoUnexpectedServerResponseError } from '../../error';
@@ -19,14 +20,14 @@ import {
   type OnDemandDocumentDeserializeOptions
 } from './on_demand/document';
 
-// eslint-disable-next-line no-restricted-syntax
-const enum BSONElementOffset {
-  type = 0,
-  nameOffset = 1,
-  nameLength = 2,
-  offset = 3,
-  length = 4
-}
+const BSONElementOffset = {
+  type: 0,
+  nameOffset: 1,
+  nameLength: 2,
+  offset: 3,
+  length: 4
+} as const;
+
 /**
  * Accepts a BSON payload and checks for na "ok: 0" element.
  * This utility is intended to prevent calling response class constructors
@@ -76,7 +77,7 @@ export class MongoDBResponse extends OnDemandDocument {
   public override get<const T extends keyof JSTypeOf>(
     name: string | number,
     as: T,
-    required?: false | undefined
+    required?: false
   ): JSTypeOf[T] | null;
   public override get<const T extends keyof JSTypeOf>(
     name: string | number,
@@ -86,7 +87,7 @@ export class MongoDBResponse extends OnDemandDocument {
   public override get<const T extends keyof JSTypeOf>(
     name: string | number,
     as: T,
-    required?: boolean | undefined
+    required?: boolean
   ): JSTypeOf[T] | null {
     try {
       return super.get(name, as, required);
@@ -230,11 +231,9 @@ export class CursorResponse extends MongoDBResponse {
    * This supports a feature of the FindCursor.
    * It is an optimization to avoid an extra getMore when the limit has been reached
    */
-  static emptyGetMore: CursorResponse = {
-    id: new Long(0),
-    length: 0,
-    shift: () => null
-  } as unknown as CursorResponse;
+  static get emptyGetMore(): CursorResponse {
+    return new CursorResponse(serialize({ ok: 1, cursor: { id: 0n, nextBatch: [] } }));
+  }
 
   static override is(value: unknown): value is CursorResponse {
     return value instanceof CursorResponse || value === CursorResponse.emptyGetMore;

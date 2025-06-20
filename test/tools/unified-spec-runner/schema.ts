@@ -106,7 +106,6 @@ export const TopologyName = Object.freeze({
 
 export type TopologyName = (typeof TopologyName)[keyof typeof TopologyName];
 export interface RunOnRequirement {
-  serverless?: 'forbid' | 'allow' | 'require';
   auth?: boolean;
   authMechanism?: string;
   maxServerVersion?: string;
@@ -221,6 +220,7 @@ export interface ClientEncryptionEntity {
         | UnnamedKMSProviders['local']
         | undefined;
     };
+    keyExpirationMS?: number;
   };
 }
 

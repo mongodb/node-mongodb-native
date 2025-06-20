@@ -1,7 +1,6 @@
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
-import { ClientSideEncryptionFilter } from '../../tools/runner/filters/client_encryption_filter';
 import {
   gatherTestSuites,
   generateTopologyTests,
@@ -16,8 +15,6 @@ const skippedAuthTests = [
   'Insert a document with auto encryption using the AWS provider with temporary credentials',
   'Insert a document with auto encryption using Azure KMS provider',
   '$rename works if target value has same encryption options',
-  'Insert with deterministic encryption, then find it',
-  'Insert with randomized encryption, then find it',
   'Bulk write with encryption',
   'Insert with bypassAutoEncryption',
   'Insert with bypassAutoEncryption for local schema',
@@ -58,10 +55,6 @@ const SKIPPED_TESTS = new Set([
   ]
 ]);
 
-const isServerless = !!process.env.SERVERLESS;
-
-const filter = new ClientSideEncryptionFilter();
-
 describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
@@ -75,11 +68,7 @@ describe('Client Side Encryption (Legacy)', function () {
     return testContext.setup(this.configuration);
   });
 
-  before(async function () {
-    await filter.initializeFilter({} as any, {});
-  });
-
-  generateTopologyTests(testSuites, testContext, test => {
+  generateTopologyTests(testSuites, testContext, (test, configuration) => {
     const { description } = test;
     if (SKIPPED_TESTS.has(description)) {
       return 'Skipped by generic test name skip filter.';
@@ -93,41 +82,34 @@ describe('Client Side Encryption (Legacy)', function () {
       return 'TODO(NODE-5686): add CSOT support to FLE';
     }
 
-    if (isServerless) {
-      // TODO(NODE-4730): Fix failing csfle tests against serverless
-      const isSkippedTest = [
-        'BypassQueryAnalysis decrypts',
-        'encryptedFieldsMap is preferred over remote encryptedFields'
-      ].includes(description);
-
-      return isSkippedTest ? 'TODO(NODE-4730): Fix failing csfle tests against serverless' : true;
-    }
-
     if (
       [
         'Insert a document with auto encryption using KMIP delegated KMS provider',
         'Automatically encrypt and decrypt with a named KMS provider'
       ].includes(description)
     ) {
-      const result = filter.filter({
+      const result = configuration.filters.ClientSideEncryptionFilter.filter({
         metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
       });
 
       if (typeof result === 'string') return result;
     }
 
+    if (['Insert with deterministic encryption, then find it'].includes(description)) {
+      const result = configuration.filters.ClientSideEncryptionFilter.filter({
+        metadata: { requires: { clientSideEncryption: '>=6.4.0' } }
+      });
+
+      if (typeof result === 'string') return result;
+    }
     return true;
   });
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  before(async function () {
-    await filter.initializeFilter({} as any, {});
-  });
-
   runUnifiedSuite(
     loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
-    ({ description }) => {
+    ({ description }, configuration) => {
       const delegatedKMIPTests = [
         'rewrap with current KMS provider',
         'rewrap with new local KMS provider',
@@ -153,14 +135,21 @@ describe('Client Side Encryption (Unified)', function () {
         'rewrap from aws:name1 to aws:name2',
         'can explicitly encrypt with a named KMS provider'
       ];
+      const dekExpirationTests = ['decrypt, wait, and decrypt again'];
       if (delegatedKMIPTests.includes(description)) {
-        const shouldSkip = filter.filter({
+        const shouldSkip = configuration.filters.ClientSideEncryptionFilter.filter({
           metadata: { requires: { clientSideEncryption: '>=6.0.1' } }
         });
         if (typeof shouldSkip === 'string') return shouldSkip;
       }
+      if (dekExpirationTests.includes(description)) {
+        const shouldSkip = configuration.filters.ClientSideEncryptionFilter.filter({
+          metadata: { requires: { clientSideEncryption: '>=6.4.0' } }
+        });
+        if (typeof shouldSkip === 'string') return shouldSkip;
+      }
 
-      return isServerless ? 'Unified CSFLE tests to not run on serverless' : false;
+      return false;
     }
   );
 });

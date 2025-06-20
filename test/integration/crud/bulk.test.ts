@@ -46,6 +46,56 @@ describe('Bulk', function () {
     client = null;
   });
 
+  describe('#bulkWrite', function () {
+    context('when including an update with all undefined atomic operators', function () {
+      context('when ignoreUndefined is true', function () {
+        context('when performing an update many', function () {
+          it('throws an error', async function () {
+            const collection = client.db('test').collection('test');
+            const error = await collection
+              .bulkWrite(
+                [
+                  {
+                    updateMany: {
+                      filter: { age: { $lte: 5 } },
+                      update: { $set: undefined, $unset: undefined }
+                    }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'Update operations require that all atomic operators have defined values, but none were provided'
+            );
+          });
+        });
+
+        context('when performing an update one', function () {
+          it('throws an error', async function () {
+            const collection = client.db('test').collection('test');
+            const error = await collection
+              .bulkWrite(
+                [
+                  {
+                    updateOne: {
+                      filter: { age: { $lte: 5 } },
+                      update: { $set: undefined, $unset: undefined }
+                    }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'Update operations require that all atomic operators have defined values, but none were provided'
+            );
+          });
+        });
+      });
+    });
+  });
+
   describe('BulkOperationBase', () => {
     describe('#raw()', function () {
       context('when called with an undefined operation', function () {
@@ -1972,22 +2022,19 @@ describe('Bulk', function () {
     }
   });
 
-  it('should accept pipeline-style updates', {
-    metadata: { requires: { mongodb: '>= 4.2' } },
-    async test() {
-      const coll = client.db().collection('coll');
-      const bulk = coll.initializeOrderedBulkOp();
+  it('should accept pipeline-style updates', async function () {
+    const coll = client.db().collection('coll');
+    const bulk = coll.initializeOrderedBulkOp();
 
-      await coll.insertMany([{ a: 1 }, { a: 2 }]);
+    await coll.insertMany([{ a: 1 }, { a: 2 }]);
 
-      bulk.find({ a: 1 }).updateOne([{ $project: { a: { $add: ['$a', 10] } } }]);
-      bulk.find({ a: 2 }).update([{ $project: { a: { $add: ['$a', 100] } } }]);
+    bulk.find({ a: 1 }).updateOne([{ $project: { a: { $add: ['$a', 10] } } }]);
+    bulk.find({ a: 2 }).update([{ $project: { a: { $add: ['$a', 100] } } }]);
 
-      await bulk.execute();
+    await bulk.execute();
 
-      const contents = await coll.find().project({ _id: 0 }).toArray();
-      expect(contents).to.deep.equal([{ a: 11 }, { a: 102 }]);
-    }
+    const contents = await coll.find().project({ _id: 0 }).toArray();
+    expect(contents).to.deep.equal([{ a: 11 }, { a: 102 }]);
   });
 
   it('should throw an error if raw operations are passed to bulkWrite', function () {
@@ -2028,7 +2075,7 @@ describe('Bulk', function () {
     });
 
     it('should abort ordered bulk operation writes', {
-      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      metadata: { requires: { topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
         session.startTransaction({
@@ -2055,7 +2102,7 @@ describe('Bulk', function () {
     });
 
     it('should abort unordered bulk operation writes', {
-      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      metadata: { requires: { topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
         session.startTransaction({
@@ -2082,7 +2129,7 @@ describe('Bulk', function () {
     });
 
     it('should abort unordered bulk operation writes using withTransaction', {
-      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      metadata: { requires: { topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
 
@@ -2110,7 +2157,7 @@ describe('Bulk', function () {
     });
 
     it('should abort ordered bulk operation writes using withTransaction', {
-      metadata: { requires: { mongodb: '>= 4.2', topology: ['replicaset'] } },
+      metadata: { requires: { topology: ['replicaset'] } },
       async test() {
         const session = client.startSession();
 

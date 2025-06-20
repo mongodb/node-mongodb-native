@@ -27,13 +27,14 @@ import {
   MongoNetworkTimeoutError,
   MongoOperationTimeoutError,
   MongoParseError,
+  MongoRuntimeError,
   MongoServerError,
   MongoUnexpectedServerResponseError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
-import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { type Abortable, type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
@@ -46,6 +47,7 @@ import {
   HostAddress,
   maxWireVersion,
   type MongoDBNamespace,
+  noop,
   now,
   once,
   squashError,
@@ -229,6 +231,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
+    this.on('error', noop);
 
     this.socket = stream;
     this.id = options.id;
@@ -244,9 +247,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.lastUseTime = now();
 
     this.messageStream = this.socket
-      .on('error', this.onError.bind(this))
+      .on('error', this.onSocketError.bind(this))
       .pipe(new SizedMessageTransform({ connection: this }))
-      .on('error', this.onError.bind(this));
+      .on('error', this.onTransformError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
 
@@ -299,6 +302,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   public markAvailable(): void {
     this.lastUseTime = now();
+  }
+
+  private onSocketError(cause: Error) {
+    this.onError(new MongoNetworkError(cause.message, { cause }));
+  }
+
+  private onTransformError(error: Error) {
+    this.onError(error);
   }
 
   public onError(error: Error) {
@@ -438,7 +449,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   private async *sendWire(
     message: WriteProtocolMessageType,
-    options: CommandOptions,
+    options: CommandOptions & Abortable,
     responseType?: MongoDBResponseConstructor
   ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
@@ -453,7 +464,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       await this.writeCommand(message, {
         agreedCompressor: this.description.compressor ?? 'none',
         zlibCompressionLevel: this.description.zlibCompressionLevel,
-        timeoutContext: options.timeoutContext
+        timeoutContext: options.timeoutContext,
+        signal: options.signal
       });
 
       if (options.noResponse || message.moreToCome) {
@@ -473,7 +485,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         );
       }
 
-      for await (const response of this.readMany({ timeoutContext: options.timeoutContext })) {
+      for await (const response of this.readMany(options)) {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
@@ -492,9 +504,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *sendCommand(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions,
+    options: CommandOptions & Abortable,
     responseType?: MongoDBResponseConstructor
   ) {
+    options?.signal?.throwIfAborted();
+
     const message = this.prepareCommand(ns.db, command, options);
     let started = 0;
     if (this.shouldEmitAndLogCommand) {
@@ -610,10 +624,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {},
+    options: CommandOptions & Abortable = {},
     responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     this.throwIfAborted();
+    options.signal?.throwIfAborted();
+
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
       if (options.timeoutContext?.csotEnabled()) {
         if (MongoDBResponse.is(document)) {
@@ -676,7 +692,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       agreedCompressor?: CompressorName;
       zlibCompressionLevel?: number;
       timeoutContext?: TimeoutContext;
-    }
+    } & Abortable
   ): Promise<void> {
     const finalCommand =
       options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
@@ -701,23 +717,23 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     if (this.socket.write(buffer)) return;
 
-    const drainEvent = once<void>(this.socket, 'drain');
+    const drainEvent = once<void>(this.socket, 'drain', options);
     const timeout = options?.timeoutContext?.timeoutForSocketWrite;
-    if (timeout) {
-      try {
-        return await Promise.race([drainEvent, timeout]);
-      } catch (error) {
-        let err = error;
-        if (TimeoutError.is(error)) {
-          err = new MongoOperationTimeoutError('Timed out at socket write');
-          this.cleanup(err);
-        }
-        throw error;
-      } finally {
-        timeout.clear();
+    const drained = timeout ? Promise.race([drainEvent, timeout]) : drainEvent;
+    try {
+      return await drained;
+    } catch (writeError) {
+      if (TimeoutError.is(writeError)) {
+        const timeoutError = new MongoOperationTimeoutError('Timed out at socket write');
+        this.onError(timeoutError);
+        throw timeoutError;
+      } else if (writeError === options.signal?.reason) {
+        this.onError(writeError);
       }
+      throw writeError;
+    } finally {
+      timeout?.clear();
     }
-    return await drainEvent;
   }
 
   /**
@@ -729,9 +745,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    *
    * Note that `for-await` loops call `return` automatically when the loop is exited.
    */
-  private async *readMany(options: {
-    timeoutContext?: TimeoutContext;
-  }): AsyncGenerator<OpMsgResponse | OpReply> {
+  private async *readMany(
+    options: {
+      timeoutContext?: TimeoutContext;
+    } & Abortable
+  ): AsyncGenerator<OpMsgResponse | OpReply> {
     try {
       this.dataEvents = onData(this.messageStream, options);
       this.messageStream.resume();
@@ -745,20 +763,20 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
       }
     } catch (readError) {
-      const err = readError;
       if (TimeoutError.is(readError)) {
-        const error = new MongoOperationTimeoutError(
+        const timeoutError = new MongoOperationTimeoutError(
           `Timed out during socket read (${readError.duration}ms)`
         );
         this.dataEvents = null;
-        this.onError(error);
-        throw error;
+        this.onError(timeoutError);
+        throw timeoutError;
+      } else if (readError === options.signal?.reason) {
+        this.onError(readError);
       }
-      throw err;
+      throw readError;
     } finally {
       this.dataEvents = null;
       this.messageStream.pause();
-      this.throwIfAborted();
     }
   }
 }
@@ -781,22 +799,41 @@ export class SizedMessageTransform extends Transform {
     }
 
     this.bufferPool.append(chunk);
-    const sizeOfMessage = this.bufferPool.getInt32();
 
-    if (sizeOfMessage == null) {
-      return callback();
+    while (this.bufferPool.length) {
+      // While there are any bytes in the buffer
+
+      // Try to fetch a size from the top 4 bytes
+      const sizeOfMessage = this.bufferPool.getInt32();
+
+      if (sizeOfMessage == null) {
+        // Not even an int32 worth of data. Stop the loop, we need more chunks.
+        break;
+      }
+
+      if (sizeOfMessage < 0) {
+        // The size in the message has a negative value, this is probably corruption, throw:
+        return callback(new MongoParseError(`Message size cannot be negative: ${sizeOfMessage}`));
+      }
+
+      if (sizeOfMessage > this.bufferPool.length) {
+        // We do not have enough bytes to make a sizeOfMessage chunk
+        break;
+      }
+
+      // Add a message to the stream
+      const message = this.bufferPool.read(sizeOfMessage);
+
+      if (!this.push(message)) {
+        // We only subscribe to data events so we should never get backpressure
+        // if we do, we do not have the handling for it.
+        return callback(
+          new MongoRuntimeError(`SizedMessageTransform does not support backpressure`)
+        );
+      }
     }
 
-    if (sizeOfMessage < 0) {
-      return callback(new MongoParseError(`Invalid message size: ${sizeOfMessage}, too small`));
-    }
-
-    if (sizeOfMessage > this.bufferPool.length) {
-      return callback();
-    }
-
-    const message = this.bufferPool.read(sizeOfMessage);
-    return callback(null, message);
+    callback();
   }
 }
 
@@ -827,7 +864,7 @@ export class CryptoConnection extends Connection {
     ns: MongoDBNamespace,
     cmd: Document,
     options?: CommandOptions,
-    responseType?: T | undefined
+    responseType?: T
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {

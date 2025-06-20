@@ -1,5 +1,3 @@
-import { type Test } from 'mocha';
-
 import { type MongoClient } from '../../../mongodb';
 
 export abstract class Filter {
@@ -7,5 +5,5 @@ export abstract class Filter {
     return;
   }
 
-  abstract filter(test: Test): string | boolean;
+  abstract filter(test: { metadata?: MongoDBMetadataUI }): string | boolean;
 }

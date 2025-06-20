@@ -289,6 +289,7 @@ export const LEGAL_TLS_SOCKET_OPTIONS = [
 export const LEGAL_TCP_SOCKET_OPTIONS = [
   'autoSelectFamily',
   'autoSelectFamilyAttemptTimeout',
+  'keepAliveInitialDelay',
   'family',
   'hints',
   'localAddress',
@@ -306,6 +307,9 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
       (result as Document)[name] = options[name];
     }
   }
+  result.keepAliveInitialDelay ??= 120000;
+  result.keepAlive = true;
+  result.noDelay = options.noDelay ?? true;
 
   if (typeof hostAddress.socketPath === 'string') {
     result.path = hostAddress.socketPath;
@@ -347,7 +351,6 @@ function parseSslOptions(options: MakeConnectionOptions): TLSConnectionOpts {
 
 export async function makeSocket(options: MakeConnectionOptions): Promise<Stream> {
   const useTLS = options.tls ?? false;
-  const noDelay = options.noDelay ?? true;
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
   const existingSocket = options.existingSocket;
 
@@ -376,9 +379,7 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     socket = net.createConnection(parseConnectOptions(options));
   }
 
-  socket.setKeepAlive(true, 300000);
   socket.setTimeout(connectTimeoutMS);
-  socket.setNoDelay(noDelay);
 
   let cancellationHandler: ((err: Error) => void) | null = null;
 
@@ -427,7 +428,6 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     throw error;
   } finally {
     socket.setTimeout(0);
-    socket.removeAllListeners();
     if (cancellationHandler != null) {
       options.cancellationToken?.removeListener('cancel', cancellationHandler);
     }

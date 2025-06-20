@@ -15,7 +15,7 @@ const {
   HEARTBEAT_EVENTS
 } = require('../../mongodb');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
-const { ClientSideEncryptionFilter } = require('../runner/filters/client_encryption_filter');
+const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -57,7 +57,7 @@ function translateClientOptions(options) {
       }
 
       if (options.autoEncryptOpts.kmsProviders) {
-        const kmsProviders = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
+        const kmsProviders = getCSFLEKMSProviders();
         if (options.autoEncryptOpts.kmsProviders.local) {
           kmsProviders.local = options.autoEncryptOpts.kmsProviders.local;
         }
@@ -83,8 +83,8 @@ function translateClientOptions(options) {
           };
           options.autoEncryption.tlsOptions = {
             kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           };
         }
@@ -93,8 +93,8 @@ function translateClientOptions(options) {
           kmsProviders['local:name2'] = options.autoEncryptOpts.kmsProviders['local:name2'];
           options.autoEncryption.tlsOptions = {
             'local:name2': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           };
         }
@@ -152,7 +152,7 @@ function legacyRunOnToRunOnRequirement(runOn) {
 }
 
 /**
- * @param {((test: { description: string }) => true | string)?} filter a function that returns true for any tests that should run, false otherwise.
+ * @param {((test: { description: string }, configuration: TestConfiguration) => true | string)?} filter a function that returns true for any tests that should run, false otherwise.
  */
 function generateTopologyTests(testSuites, testContext, filter) {
   for (const testSuite of testSuites) {
@@ -197,10 +197,8 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
       let csfleFilterError = null;
       if (shouldRun && testContext.requiresCSFLE) {
-        const csfleFilter = new ClientSideEncryptionFilter();
-        await csfleFilter.initializeFilter(null, {});
         try {
-          const filterResult = csfleFilter.filter({
+          const filterResult = this.configuration.filters.ClientSideEncryptionFilter.filter({
             metadata: { requires: { clientSideEncryption: true } }
           });
           if (typeof filterResult === 'string') {
@@ -257,23 +255,20 @@ function prepareDatabaseForSuite(suite, context) {
 
   if (context.skipPrepareDatabase) return Promise.resolve();
 
-  // Note: killAllSession is not supported on serverless, see CLOUDP-84298
-  const setupPromise = context.serverless
-    ? Promise.resolve()
-    : db
-        .admin()
-        .command({ killAllSessions: [] })
-        .catch(err => {
-          if (
-            err.message.match(/no such (cmd|command)/) ||
-            err.message.match(/Failed to kill on some hosts/) ||
-            err.code === 11601
-          ) {
-            return;
-          }
+  const setupPromise = db
+    .admin()
+    .command({ killAllSessions: [] })
+    .catch(err => {
+      if (
+        err.message.match(/no such (cmd|command)/) ||
+        err.message.match(/Failed to kill on some hosts/) ||
+        err.code === 11601
+      ) {
+        return;
+      }
 
-          throw err;
-        });
+      throw err;
+    });
 
   if (context.collectionName == null || context.dbName === 'admin') {
     return setupPromise;
@@ -363,7 +358,7 @@ function runTestSuiteTest(configuration, spec, context) {
     minHeartbeatFrequencyMS: 100,
     monitorCommands: true,
     ...spec.clientOptions,
-    [Symbol.for('@@mdb.skipPingOnConnect')]: true
+    __skipPingOnConnect: true
   });
 
   if (context.requiresCSFLE) {

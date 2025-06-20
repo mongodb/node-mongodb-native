@@ -1,0 +1,25 @@
+# Regression test for bug discovered in HELP-68823.
+description: Secondary with IPv6 literal
+uri: mongodb://[::1]/?replicaSet=rs
+phases:
+- responses:
+  - - "[::1]:27017"
+    - ok: 1
+      helloOk: true
+      isWritablePrimary: false
+      secondary: true
+      setName: rs
+      me: "[::1]:27017"
+      hosts:
+      - "[::1]:27017"
+      minWireVersion: 0
+      maxWireVersion: 26
+  outcome:
+    servers:
+      "[::1]:27017":
+        type: RSSecondary
+        setName: rs
+    topologyType: ReplicaSetNoPrimary
+    setName: rs
+    logicalSessionTimeoutMinutes: null
+    compatible: true

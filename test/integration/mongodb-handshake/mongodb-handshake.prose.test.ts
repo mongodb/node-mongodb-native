@@ -1,7 +1,31 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { Connection, getFAASEnv, LEGACY_HELLO_COMMAND, type MongoClient } from '../../mongodb';
+import {
+  Connection,
+  getFAASEnv,
+  Int32,
+  LEGACY_HELLO_COMMAND,
+  type MongoClient
+} from '../../mongodb';
+
+type EnvironmentVariables = Array<[string, string]>;
+
+function stubEnv(env: EnvironmentVariables) {
+  let cachedEnv: NodeJS.ProcessEnv;
+  before(function () {
+    cachedEnv = process.env;
+    process.env = {
+      ...process.env,
+      ...Object.fromEntries(env)
+    };
+  });
+
+  after(function () {
+    process.env = cachedEnv;
+  });
+}
+
 describe('Handshake Prose Tests', function () {
   let client: MongoClient;
 
@@ -9,7 +33,6 @@ describe('Handshake Prose Tests', function () {
     await client?.close();
   });
 
-  type EnvironmentVariables = Array<[string, string]>;
   const tests: Array<{
     context: string;
     expectedProvider: string | undefined;
@@ -80,16 +103,7 @@ describe('Handshake Prose Tests', function () {
 
   for (const { context: name, env, expectedProvider } of tests) {
     context(name, function () {
-      before(() => {
-        for (const [key, value] of env) {
-          process.env[key] = value;
-        }
-      });
-      after(() => {
-        for (const [key] of env) {
-          delete process.env[key];
-        }
-      });
+      stubEnv(env);
 
       it(`metadata confirmation test for ${name}`, function () {
         expect(getFAASEnv()?.get('name')).to.equal(
@@ -109,6 +123,39 @@ describe('Handshake Prose Tests', function () {
       });
     });
   }
+
+  context('Test 9: Valid container and FaaS provider', function () {
+    stubEnv([
+      ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
+      ['AWS_REGION', 'us-east-2'],
+      ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '1024'],
+      ['KUBERNETES_SERVICE_HOST', '1']
+    ]);
+
+    it('runs a hello successfully', async function () {
+      client = this.configuration.newClient({
+        // if the handshake is not truncated, the `hello`s fail and the client does
+        // not connect.  Lowering the server selection timeout causes the tests
+        // to fail more quickly in that scenario.
+        serverSelectionTimeoutMS: 3000
+      });
+      await client.connect();
+    });
+
+    it('includes both container and FAAS provider information in the client metadata', async function () {
+      client = this.configuration.newClient();
+      await client.connect();
+      expect(client.topology?.s.options.extendedMetadata).to.exist;
+      const { env } = await client.topology.s.options.extendedMetadata;
+
+      expect(env).to.deep.equal({
+        region: 'us-east-2',
+        name: 'aws.lambda',
+        memory_mb: new Int32(1024),
+        container: { orchestrator: 'kubernetes' }
+      });
+    });
+  });
 
   context(`Test 2: Test that the driver accepts an arbitrary auth mechanism`, function () {
     let stubCalled = false;

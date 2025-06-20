@@ -13,7 +13,7 @@ app.use((req, res, next) => {
 app.use(express.static('docs'));
 app.use('/node-mongodb-native', express.static('docs'));
 
-app.get('*', (req, res) => res.redirect('404.html'));
+app.get('*path', (req, res) => res.redirect('404.html'));
 
 app.listen(8080, () => {
   log('listening on port 8080');

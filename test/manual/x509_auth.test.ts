@@ -54,19 +54,6 @@ describe('x509 Authentication', function () {
     });
   });
 
-  context(
-    'when a valid cert is provided but the certificate does not correspond to a user',
-    function () {
-      it('fails to authenticate', async function () {
-        client = new MongoClient(connectionString.toString(), validOptions);
-        const error = await client.connect().catch(e => e);
-
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(error.codeName).to.match(/UserNotFound/i);
-      });
-    }
-  );
-
   context('when the client connects with an invalid certificate', function () {
     // unlike other authentication mechanisms, x509 authentication 1) requires TLS and
     // 2) the server uses the client certificate to derive a username to authenticate with
@@ -90,6 +77,19 @@ describe('x509 Authentication', function () {
       expect(error).to.be.instanceOf(MongoServerSelectionError);
     });
   });
+
+  context(
+    'when a valid cert is provided but the certificate does not correspond to a user',
+    function () {
+      it('fails to authenticate', async function () {
+        client = new MongoClient(connectionString.toString(), validOptions);
+        const error = await client.connect().catch(error => error);
+
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error.codeName).to.match(/UserNotFound/i);
+      });
+    }
+  );
 });
 
 async function createX509User() {
@@ -107,8 +107,7 @@ async function createX509User() {
       roles: [
         { role: 'readWrite', db: 'test' },
         { role: 'userAdminAnyDatabase', db: 'admin' }
-      ],
-      writeConcern: { w: 'majority', wtimeout: 5000 }
+      ]
     });
   } finally {
     await utilClient.close();
@@ -125,8 +124,7 @@ async function dropX509User() {
   try {
     await utilClient.connect();
     await utilClient.db('$external').command({
-      dropUser: process.env.SUBJECT,
-      writeConcern: { w: 'majority', wtimeout: 5000 }
+      dropUser: process.env.SUBJECT
     });
   } finally {
     await utilClient.close();

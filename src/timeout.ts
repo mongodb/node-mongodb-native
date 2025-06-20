@@ -3,7 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { type Document } from './bson';
 import { MongoInvalidArgumentError, MongoOperationTimeoutError, MongoRuntimeError } from './error';
 import { type ClientSession } from './sessions';
-import { csotMin, noop } from './utils';
+import { csotMin, noop, squashError } from './utils';
 
 /** @internal */
 export class TimeoutError extends Error {
@@ -102,7 +102,13 @@ export class Timeout extends Promise<never> {
   }
 
   throwIfExpired(): void {
-    if (this.timedOut) throw new TimeoutError('Timed out', { duration: this.duration });
+    if (this.timedOut) {
+      // This method is invoked when someone wants to throw immediately instead of await the result of this promise
+      // Since they won't be handling the rejection from the promise (because we're about to throw here)
+      // attach handling to prevent this from bubbling up to Node.js
+      this.then(undefined, squashError);
+      throw new TimeoutError('Timed out', { duration: this.duration });
+    }
   }
 
   public static expires(duration: number, unref?: true): Timeout {

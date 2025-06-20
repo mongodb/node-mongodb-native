@@ -52,13 +52,14 @@ tests:
             component: command
             data:
               message: "Command succeeded"
+              databaseName: *databaseName
               commandName: *commandName
               reply: { $$type: string }
               requestId: { $$type: [int, long] }
               serverHost: { $$type: string }
               serverPort: { $$type: [int, long] }
               durationMS: { $$type: [double, int, long] }
-        
+
   - description: "A failed command"
     operations:
       - name: &commandName find
@@ -85,10 +86,10 @@ tests:
             component: command
             data:
               message: "Command failed"
+              databaseName: *databaseName
               commandName: *commandName
               failure: { $$exists: true }
               requestId:  { $$type: [int, long] }
               serverHost: { $$type: string }
               serverPort: { $$type: [int, long] }
               durationMS: { $$type: [double, int, long] }
-

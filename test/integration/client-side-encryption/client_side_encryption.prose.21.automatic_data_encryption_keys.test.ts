@@ -4,7 +4,12 @@ import { expect } from 'chai';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptCreateEncryptedCollectionError } from '../../../src/client-side-encryption/errors';
-import { BSON, Collection, type Db, MongoServerError } from '../../mongodb';
+import {
+  getCSFLEKMSProviders,
+  kmsCredentialsPresent,
+  missingKeys
+} from '../../csfle-kms-providers';
+import { Collection, type Db, MongoServerError } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
@@ -33,14 +38,15 @@ describe('21. Automatic Data Encryption Keys', () => {
     beforeEach(async function () {
       client = this.configuration.newClient();
 
-      if (typeof process.env.CSFLE_KMS_PROVIDERS !== 'string') {
+      if (!kmsCredentialsPresent) {
         if (this.currentTest) {
-          this.currentTest.skipReason = 'This test requires env CSFLE_KMS_PROVIDERS to be set';
+          this.currentTest.skipReason =
+            'This test requires FLE environment variables.  Missing keys: ' + missingKeys;
         }
         return this.currentTest?.skip();
       }
 
-      const { aws, local } = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
+      const { aws, local } = getCSFLEKMSProviders();
 
       clientEncryption = new ClientEncryption(client, {
         keyVaultClient: client,

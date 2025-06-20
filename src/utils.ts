@@ -27,6 +27,7 @@ import {
   MongoRuntimeError
 } from './error';
 import type { MongoClient } from './mongo_client';
+import { type Abortable } from './mongo_types';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
 import { ReadConcern } from './read_concern';
@@ -280,16 +281,16 @@ export function ns(ns: string): MongoDBNamespace {
 
 /** @public */
 export class MongoDBNamespace {
+  db: string;
+  collection?: string;
   /**
    * Create a namespace object
    *
    * @param db - database name
    * @param collection - collection name
    */
-  constructor(
-    public db: string,
-    public collection?: string
-  ) {
+  constructor(db: string, collection?: string) {
+    this.db = db;
     this.collection = collection === '' ? undefined : collection;
   }
 
@@ -321,11 +322,11 @@ export class MongoDBNamespace {
  * used in scenarios where this can be guaranteed.
  */
 export class MongoDBCollectionNamespace extends MongoDBNamespace {
-  constructor(
-    db: string,
-    override collection: string
-  ) {
+  override collection: string;
+
+  constructor(db: string, collection: string) {
     super(db, collection);
+    this.collection = collection;
   }
 
   static override fromString(namespace?: string): MongoDBCollectionNamespace {
@@ -475,7 +476,10 @@ export function calculateDurationInMs(started: number | undefined): number {
 }
 
 /** @internal */
-export function hasAtomicOperators(doc: Document | Document[]): boolean {
+export function hasAtomicOperators(
+  doc: Document | Document[],
+  options?: CommandOperationOptions
+): boolean {
   if (Array.isArray(doc)) {
     for (const document of doc) {
       if (hasAtomicOperators(document)) {
@@ -486,6 +490,23 @@ export function hasAtomicOperators(doc: Document | Document[]): boolean {
   }
 
   const keys = Object.keys(doc);
+  // In this case we need to throw if all the atomic operators are undefined.
+  if (options?.ignoreUndefined) {
+    let allUndefined = true;
+    for (const key of keys) {
+      // eslint-disable-next-line no-restricted-syntax
+      if (doc[key] !== undefined) {
+        allUndefined = false;
+        break;
+      }
+    }
+    if (allUndefined) {
+      throw new MongoInvalidArgumentError(
+        'Update operations require that all atomic operators have defined values, but none were provided.'
+      );
+    }
+  }
+
   return keys.length > 0 && keys[0][0] === '$';
 }
 
@@ -530,9 +551,11 @@ export function resolveOptions<T extends CommandOperationOptions>(
     if (writeConcern) {
       if (timeoutMS != null) {
         writeConcern = WriteConcern.fromOptions({
-          ...writeConcern,
-          wtimeout: undefined,
-          wtimeoutMS: undefined
+          writeConcern: {
+            ...writeConcern,
+            wtimeout: undefined,
+            wtimeoutMS: undefined
+          }
         });
       }
       result.writeConcern = writeConcern;
@@ -618,43 +641,6 @@ export function isRecord(
   }
 
   return true;
-}
-
-/**
- * Make a deep copy of an object
- *
- * NOTE: This is not meant to be the perfect implementation of a deep copy,
- * but instead something that is good enough for the purposes of
- * command monitoring.
- */
-export function deepCopy<T>(value: T): T {
-  if (value == null) {
-    return value;
-  } else if (Array.isArray(value)) {
-    return value.map(item => deepCopy(item)) as unknown as T;
-  } else if (isRecord(value)) {
-    const res = {} as any;
-    for (const key in value) {
-      res[key] = deepCopy(value[key]);
-    }
-    return res;
-  }
-
-  const ctor = (value as any).constructor;
-  if (ctor) {
-    switch (ctor.name.toLowerCase()) {
-      case 'date':
-        return new ctor(Number(value));
-      case 'map':
-        return new Map(value as any) as unknown as T;
-      case 'set':
-        return new Set(value as any) as unknown as T;
-      case 'buffer':
-        return Buffer.from(value as unknown as Buffer) as unknown as T;
-    }
-  }
-
-  return value;
 }
 
 type ListNode<T> = {
@@ -1349,19 +1335,24 @@ export const randomBytes = promisify(crypto.randomBytes);
  * @param ee - An event emitter that may emit `ev`
  * @param name - An event name to wait for
  */
-export async function once<T>(ee: EventEmitter, name: string): Promise<T> {
+export async function once<T>(ee: EventEmitter, name: string, options?: Abortable): Promise<T> {
+  options?.signal?.throwIfAborted();
+
   const { promise, resolve, reject } = promiseWithResolvers<T>();
   const onEvent = (data: T) => resolve(data);
   const onError = (error: Error) => reject(error);
+  const abortListener = addAbortListener(options?.signal, function () {
+    reject(this.reason);
+  });
 
   ee.once(name, onEvent).once('error', onError);
+
   try {
-    const res = await promise;
-    ee.off('error', onError);
-    return res;
-  } catch (error) {
+    return await promise;
+  } finally {
     ee.off(name, onEvent);
-    throw error;
+    ee.off('error', onError);
+    abortListener?.[kDispose]();
   }
 }
 
@@ -1466,5 +1457,72 @@ export function decorateDecryptionResult(
     }
 
     decorateDecryptionResult(decrypted[k], originalValue, false);
+  }
+}
+
+/** @internal */
+export const kDispose: unique symbol = (Symbol.dispose as any) ?? Symbol('dispose');
+
+/** @internal */
+export interface Disposable {
+  [kDispose](): void;
+}
+
+/**
+ * A utility that helps with writing listener code idiomatically
+ *
+ * @example
+ * ```js
+ * using listener = addAbortListener(signal, function () {
+ *   console.log('aborted', this.reason);
+ * });
+ * ```
+ *
+ * @param signal - if exists adds an abort listener
+ * @param listener - the listener to be added to signal
+ * @returns A disposable that will remove the abort listener
+ */
+export function addAbortListener(
+  signal: AbortSignal | undefined | null,
+  listener: (this: AbortSignal, event: Event) => void
+): Disposable | undefined {
+  if (signal == null) return;
+  signal.addEventListener('abort', listener, { once: true });
+  return { [kDispose]: () => signal.removeEventListener('abort', listener) };
+}
+
+/**
+ * Takes a promise and races it with a promise wrapping the abort event of the optionally provided signal.
+ * The given promise is _always_ ordered before the signal's abort promise.
+ * When given an already rejected promise and an already aborted signal, the promise's rejection takes precedence.
+ *
+ * Any asynchronous processing in `promise` will continue even after the abort signal has fired,
+ * but control will be returned to the caller
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race
+ *
+ * @param promise - A promise to discard if the signal aborts
+ * @param options - An options object carrying an optional signal
+ */
+export async function abortable<T>(
+  promise: Promise<T>,
+  { signal }: { signal?: AbortSignal }
+): Promise<T> {
+  if (signal == null) {
+    return await promise;
+  }
+
+  const { promise: aborted, reject } = promiseWithResolvers<never>();
+
+  const abortListener = signal.aborted
+    ? reject(signal.reason)
+    : addAbortListener(signal, function () {
+        reject(this.reason);
+      });
+
+  try {
+    return await Promise.race([promise, aborted]);
+  } finally {
+    abortListener?.[kDispose]();
   }
 }

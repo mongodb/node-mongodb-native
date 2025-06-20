@@ -10,4 +10,10 @@ export MONGODB_URI=$MONGODB_URI
 export MONGODB_CLIENT_OPTIONS=$MONGODB_CLIENT_OPTIONS
 
 npm run build:ts
-npm run check:bench
+
+# If MONGODB_CLIENT_OPTIONS contains mongodbLogComponentSeverities redirect stderr to a file
+if [[ $MONGODB_CLIENT_OPTIONS == *"mongodbLogComponentSeverities"* ]]; then
+  npm run check:bench 2> bench.log
+else
+  npm run check:bench
+fi

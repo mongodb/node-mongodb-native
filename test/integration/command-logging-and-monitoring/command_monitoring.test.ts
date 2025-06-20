@@ -1,11 +1,17 @@
 import { expect } from 'chai';
 
-import { ReadPreference } from '../../mongodb';
+import { type MongoClient, ObjectId, ReadPreference } from '../../mongodb';
 import { filterForCommands, ignoreNsNotFound, setupDatabase } from '../shared';
 
 describe('Command Monitoring', function () {
+  let client: MongoClient;
+
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  afterEach(async function () {
+    await client?.close();
   });
 
   it('should correctly receive the APM events for an insert', {
@@ -65,47 +71,40 @@ describe('Command Monitoring', function () {
     }
   });
 
-  it('should correctly receive the APM events for a listCollections command', {
-    metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
+  it('records APM events for a listIndexes command', async function () {
+    const started = [];
+    const succeeded = [];
+    client = this.configuration.newClient(
+      { writeConcern: { w: 'majority' } },
+      { maxPoolSize: 1, monitorCommands: true }
+    );
 
-    test: function () {
-      const started = [];
-      const succeeded = [];
-      const client = this.configuration.newClient(
-        { writeConcern: { w: 1 } },
-        { maxPoolSize: 1, monitorCommands: true }
-      );
+    const desiredEvents = ['listIndexes'];
+    client.on('commandStarted', filterForCommands(desiredEvents, started));
+    client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      client.on('commandStarted', filterForCommands('listCollections', started));
-      client.on('commandSucceeded', filterForCommands('listCollections', succeeded));
+    const db = client.db(new ObjectId().toHexString());
 
-      const db = client.db(this.configuration.db);
+    const collection = db.collection('apm_test_list_collections');
+    const session = client.startSession({ causalConsistency: true });
 
-      return db
-        .collection('apm_test_list_collections')
-        .insertOne({ a: 1 }, this.configuration.writeConcernMax())
-        .then(r => {
-          expect(r).property('insertedId').to.exist;
-          return db.listCollections({}, { readPreference: ReadPreference.primary }).toArray();
-        })
-        .then(() => db.listCollections({}, { readPreference: ReadPreference.secondary }).toArray())
-        .then(() => {
-          expect(started).to.have.lengthOf(2);
-          expect(started[0]).property('address').to.not.equal(started[1].address);
+    const r = await collection.insertOne({ a: 1 }, { writeConcern: { w: 'majority' }, session });
+    expect(r).property('insertedId').to.exist;
 
-          return client.close();
-        });
-    }
+    expect(await collection.listIndexes({ session }).toArray()).to.have.lengthOf(1);
+
+    const [{ commandName }] = started;
+    expect(commandName).to.equal('listIndexes');
   });
 
-  it('should correctly receive the APM events for a listIndexes command', {
-    metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
-
-    test: function () {
+  it(
+    'records APM events for reads on secondaries',
+    { requires: { topology: ['replicaset'] } },
+    async function () {
       const started = [];
       const succeeded = [];
-      const client = this.configuration.newClient(
-        { writeConcern: { w: 1 } },
+      client = this.configuration.newClient(
+        { writeConcern: { w: 'majority' } },
         { maxPoolSize: 1, monitorCommands: true }
       );
 
@@ -113,33 +112,34 @@ describe('Command Monitoring', function () {
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      const db = client.db(this.configuration.db);
+      const db = client.db(new ObjectId().toHexString());
 
-      return db
-        .collection('apm_test_list_collections')
-        .insertOne({ a: 1 }, this.configuration.writeConcernMax())
-        .then(r => {
-          expect(r).property('insertedId').to.exist;
+      const collection = db.collection('apm_test_list_collections');
+      const session = client.startSession({ causalConsistency: true });
 
-          return db
-            .collection('apm_test_list_collections')
-            .listIndexes({ readPreference: ReadPreference.PRIMARY })
-            .toArray();
-        })
-        .then(() =>
-          db
-            .collection('apm_test_list_collections')
-            .listIndexes({ readPreference: ReadPreference.SECONDARY })
-            .toArray()
-        )
-        .then(() => {
-          expect(started).to.have.lengthOf(2);
-          expect(started[0]).property('address').to.not.equal(started[1].address);
+      const r = await collection.insertOne({ a: 1 }, { writeConcern: { w: 'majority' }, session });
+      expect(r).property('insertedId').to.exist;
 
-          return client.close();
+      await collection
+        .listIndexes({ readPreference: ReadPreference.PRIMARY, session })
+        .toArray()
+        .catch(e => {
+          throw new Error('primary listIndexes failed', { cause: e });
         });
+
+      await collection
+        .listIndexes({ readPreference: ReadPreference.SECONDARY, session })
+        .toArray()
+        .catch(() => {
+          // reading with secondary read preference means the data may or may not have been propagated to the seconary
+          // node yet.  for this test, we are asserting that we did correctly send commands to different nodes, so
+          // the actual outcome of this listIndexes doesn't matter.
+        });
+
+      const [{ address: primaryAddress }, { address: secondaryAddress }] = started;
+      expect(primaryAddress).not.to.equal(secondaryAddress);
     }
-  });
+  );
 
   it('should correctly receive the APM events for a find with getmore and killcursor', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
@@ -602,50 +602,5 @@ describe('Command Monitoring', function () {
           return client.close();
         });
     }
-  });
-
-  describe('Internal state references', function () {
-    let client;
-
-    beforeEach(function () {
-      client = this.configuration.newClient(
-        { writeConcern: { w: 1 } },
-        { maxPoolSize: 1, monitorCommands: true }
-      );
-    });
-
-    afterEach(function (done) {
-      client.close(done);
-    });
-
-    // NODE-1502
-    it('should not allow mutation of internal state from commands returned by event monitoring', function () {
-      const started = [];
-      const succeeded = [];
-      client.on('commandStarted', filterForCommands('insert', started));
-      client.on('commandSucceeded', filterForCommands('insert', succeeded));
-      const documentToInsert = { a: { b: 1 } };
-      const db = client.db(this.configuration.db);
-      return db
-        .collection('apm_test')
-        .insertOne(documentToInsert)
-        .then(r => {
-          expect(r).to.have.property('insertedId').that.is.an('object');
-          expect(started).to.have.lengthOf(1);
-          // Check if contents of returned document are equal to document inserted (by value)
-          expect(documentToInsert).to.deep.equal(started[0].command.documents[0]);
-          // Check if the returned document is a clone of the original. This confirms that the
-          // reference is not the same.
-          expect(documentToInsert !== started[0].command.documents[0]).to.equal(true);
-          expect(documentToInsert.a !== started[0].command.documents[0].a).to.equal(true);
-
-          started[0].command.documents[0].a.b = 2;
-          expect(documentToInsert.a.b).to.equal(1);
-
-          expect(started[0].commandName).to.equal('insert');
-          expect(started[0].command.insert).to.equal('apm_test');
-          expect(succeeded).to.have.lengthOf(1);
-        });
-    });
   });
 });

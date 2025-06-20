@@ -7,13 +7,13 @@ import * as path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type MongoClient, WriteConcern } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {
     requires: {
-      mongodb: '>=4.2.0',
       clientSideEncryption: true as const
     }
   };
@@ -25,17 +25,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
     });
   }
 
-  const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
-  const kmsProviders = CSFLE_KMS_PROVIDERS ? EJSON.parse(CSFLE_KMS_PROVIDERS) : {};
-  kmsProviders.local = {
-    key: Buffer.from(
-      'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-      'base64'
-    )
-  };
-  kmsProviders.kmip = {
-    endpoint: 'localhost:5698'
-  };
+  const kmsProviders = getCSFLEKMSProviders();
 
   // TODO: build this into EJSON
   // TODO: make a custom chai assertion for this
@@ -201,8 +191,8 @@ describe('Client Side Encryption Prose Corpus Test', function () {
       //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
       const tlsOptions = {
         kmip: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+          tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
         }
       };
       const extraOptions = getEncryptExtraOptions();

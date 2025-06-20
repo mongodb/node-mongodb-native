@@ -53,6 +53,7 @@ export {
   MongoClientBulkWriteCursorError,
   MongoClientBulkWriteError,
   MongoClientBulkWriteExecutionError,
+  MongoClientClosedError,
   MongoCompatibilityError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
@@ -120,6 +121,7 @@ export { CURSOR_FLAGS, CursorTimeoutMode } from './cursor/abstract_cursor';
 export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { ServerApiVersion } from './mongo_client';
+export { MongoLoggableComponent, SeverityLevel } from './mongo_logger';
 export { ReturnDocument } from './operations/find_and_modify';
 export { ProfilingLevel } from './operations/set_profiling_level';
 export { ReadConcernLevel } from './read_concern';
@@ -127,10 +129,11 @@ export { ReadPreferenceMode } from './read_preference';
 export { ServerType, TopologyType } from './sdam/common';
 
 // Helper classes
+export type { AWSCredentialProvider } from './cmap/auth/aws_temporary_credentials';
+export type { AWSCredentials } from './deps';
 export { ReadConcern } from './read_concern';
 export { ReadPreference } from './read_preference';
 export { WriteConcern } from './write_concern';
-
 // events
 export {
   CommandFailedEvent,
@@ -205,6 +208,7 @@ export type {
   ChangeStreamDocumentCommon,
   ChangeStreamDocumentKey,
   ChangeStreamDocumentOperationDescription,
+  ChangeStreamDocumentWallTime,
   ChangeStreamDropDatabaseDocument,
   ChangeStreamDropDocument,
   ChangeStreamDropIndexDocument,
@@ -254,6 +258,7 @@ export type {
   AWSKMSProviderConfiguration,
   AzureKMSProviderConfiguration,
   ClientEncryptionDataKeyProvider,
+  CredentialProviders,
   GCPKMSProviderConfiguration,
   KMIPKMSProviderConfiguration,
   KMSProviders,
@@ -283,6 +288,7 @@ export type { TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 export type {
   MessageHeader,
   OpCompressedRequest,
+  OpCompressesRequestOptions,
   OpMsgOptions,
   OpMsgRequest,
   OpMsgResponse,
@@ -422,14 +428,13 @@ export type {
   LoggableServerHeartbeatStartedEvent,
   LoggableServerHeartbeatSucceededEvent,
   MongoDBLogWritable,
-  MongoLoggableComponent,
   MongoLogger,
   MongoLoggerEnvOptions,
   MongoLoggerMongoClientOptions,
-  MongoLoggerOptions,
-  SeverityLevel
+  MongoLoggerOptions
 } from './mongo_logger';
 export type {
+  Abortable,
   CommonEvents,
   EventsDescription,
   GenericListener,

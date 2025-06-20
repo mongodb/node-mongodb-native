@@ -28,6 +28,7 @@ import {
   type HostAddress,
   type Log,
   MongoClient,
+  type MongoClientOptions,
   type MongoCredentials,
   ReadConcern,
   ReadPreference,
@@ -126,7 +127,7 @@ export class UnifiedMongoClient extends MongoClient {
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
-  logCollector: { buffer: LogMessage[]; write: (log: Log) => void };
+  logCollector?: { buffer: LogMessage[]; write: (log: Log) => void };
 
   ignoredEvents: string[];
   observeSensitiveCommands: boolean;
@@ -197,40 +198,46 @@ export class UnifiedMongoClient extends MongoClient {
     topology: 'MONGODB_LOG_TOPOLOGY'
   } as const;
 
-  constructor(uri: string, description: ClientEntity) {
-    const logCollector: { buffer: LogMessage[]; write: (log: Log) => void } = {
-      buffer: [],
-      write(log: Log): void {
-        const transformedLog = {
-          level: log.s,
-          component: log.c,
-          data: { ...log }
-        };
-
-        this.buffer.push(transformedLog);
-      }
-    };
-    const componentSeverities = {
-      MONGODB_LOG_ALL: 'off'
-    };
-
-    // NOTE: this is done to override the logger environment variables
-    for (const key in description.observeLogMessages) {
-      componentSeverities[UnifiedMongoClient.LOGGING_COMPONENT_TO_ENV_VAR_NAME[key]] =
-        description.observeLogMessages[key];
+  constructor(
+    uri: string,
+    description: ClientEntity,
+    config: {
+      loggingEnabled?: boolean;
+      setupLogging?: (options: Record<string, any>, id: string) => Record<string, any>;
     }
-
-    super(uri, {
+  ) {
+    const options: MongoClientOptions = {
       monitorCommands: true,
-      [Symbol.for('@@mdb.skipPingOnConnect')]: true,
-      [Symbol.for('@@mdb.enableMongoLogger')]: true,
-      [Symbol.for('@@mdb.internalLoggerConfig')]: componentSeverities,
+      __skipPingOnConnect: true,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {}),
-      mongodbLogPath: logCollector,
       // TODO(NODE-5785): We need to increase the truncation length because signature.hash is a Buffer making hellos too long
       mongodbLogMaxDocumentLength: 1250
-    } as any);
+    };
+
+    let logCollector: { buffer: LogMessage[]; write: (log: Log) => void } | undefined;
+
+    if (description.observeLogMessages != null) {
+      options.mongodbLogComponentSeverities = description.observeLogMessages;
+      logCollector = {
+        buffer: [],
+        write(log: Log): void {
+          const transformedLog = {
+            level: log.s,
+            component: log.c,
+            data: { ...log }
+          };
+
+          this.buffer.push(transformedLog);
+        }
+      };
+      options.mongodbLogPath = logCollector;
+    } else if (config.loggingEnabled) {
+      config.setupLogging?.(options, description.id);
+    }
+
+    super(uri, options);
+    this.observedEventEmitter.on('error', () => null);
     this.logCollector = logCollector;
     this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
@@ -344,7 +351,7 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   get collectedLogs(): LogMessage[] {
-    return this.logCollector.buffer;
+    return this.logCollector?.buffer ?? [];
   }
 }
 
@@ -399,7 +406,7 @@ export class FailPointMap extends Map<string, Document> {
     const entries = Array.from(this.entries());
     await Promise.all(
       entries.map(async ([hostAddress, configureFailPoint]) => {
-        if (process.env.SERVERLESS || process.env.LOAD_BALANCER) {
+        if (process.env.LOAD_BALANCER) {
           hostAddress += '?loadBalanced=true';
         }
         const client = getClient(hostAddress);
@@ -585,7 +592,8 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         } else {
           uri = makeConnectionString(config.url({ useMultipleMongoses }), entity.client.uriOptions);
         }
-        const client = new UnifiedMongoClient(uri, entity.client);
+
+        const client = new UnifiedMongoClient(uri, entity.client, config);
         try {
           new EntityEventRegistry(client, entity.client, map).register();
           await client.connect();

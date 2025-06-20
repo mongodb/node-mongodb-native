@@ -3,7 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoRuntimeError } from '../error';
 import { TypedEventEmitter } from '../mongo_types';
-import { checkParentDomainMatch, HostAddress, squashError } from '../utils';
+import { checkParentDomainMatch, HostAddress, noop, squashError } from '../utils';
 
 /**
  * @internal
@@ -49,6 +49,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
 
   constructor(options: SrvPollerOptions) {
     super();
+    this.on('error', noop);
 
     if (!options || !options.srvHost) {
       throw new MongoRuntimeError('Options for SrvPoller must exist and include srvHost');

@@ -6,10 +6,9 @@
 
 # This script prepares a shell to run the remaining scripts in this folder
 # It MUST be kept idempotent! It will overwrite the orchestration config and expansion.yml file upon every run
-# and it will only clone drivers-tools if they do not exist one directory above our driver src
 
 PROJECT_DIRECTORY="$(pwd)"
-DRIVERS_TOOLS=$(cd .. && echo "$(pwd)/drivers-tools")
+DRIVERS_TOOLS="$(pwd)/drivers-evergreen-tools"
 MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
 MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
 UPLOAD_BUCKET="${project}"
@@ -30,12 +29,12 @@ export MONGODB_BINARIES
 export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
 export PATH="$MONGODB_BINARIES:$PATH"
 
-if [ ! -d "$DRIVERS_TOOLS" ]; then
-  # Only clone driver tools if it does not exist
-  git clone --depth=1 "https://github.com/mongodb-labs/drivers-evergreen-tools.git" "${DRIVERS_TOOLS}"
-fi
-
-echo "installed DRIVERS_TOOLS from commit $(git -C "${DRIVERS_TOOLS}" rev-parse HEAD)"
+# Note the evergreen option on git.get_project recurse_submodules does not work, so do it here.
+# We ignore errors in case we are running in a container where git doesn't trust the tmp directory.
+set +e
+git submodule init
+git submodule update
+set -e
 
 cat <<EOT > "$MONGO_ORCHESTRATION_HOME/orchestration.config"
 {

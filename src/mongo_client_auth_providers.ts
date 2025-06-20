@@ -13,8 +13,14 @@ import { X509 } from './cmap/auth/x509';
 import { MongoInvalidArgumentError } from './error';
 
 /** @internal */
-const AUTH_PROVIDERS = new Map<AuthMechanism | string, (workflow?: Workflow) => AuthProvider>([
-  [AuthMechanism.MONGODB_AWS, () => new MongoDBAWS()],
+const AUTH_PROVIDERS = new Map<
+  AuthMechanism | string,
+  (authMechanismProperties: AuthMechanismProperties) => AuthProvider
+>([
+  [
+    AuthMechanism.MONGODB_AWS,
+    ({ AWS_CREDENTIAL_PROVIDER }) => new MongoDBAWS(AWS_CREDENTIAL_PROVIDER)
+  ],
   [
     AuthMechanism.MONGODB_CR,
     () => {
@@ -24,7 +30,7 @@ const AUTH_PROVIDERS = new Map<AuthMechanism | string, (workflow?: Workflow) => 
     }
   ],
   [AuthMechanism.MONGODB_GSSAPI, () => new GSSAPI()],
-  [AuthMechanism.MONGODB_OIDC, (workflow?: Workflow) => new MongoDBOIDC(workflow)],
+  [AuthMechanism.MONGODB_OIDC, properties => new MongoDBOIDC(getWorkflow(properties))],
   [AuthMechanism.MONGODB_PLAIN, () => new Plain()],
   [AuthMechanism.MONGODB_SCRAM_SHA1, () => new ScramSHA1()],
   [AuthMechanism.MONGODB_SCRAM_SHA256, () => new ScramSHA256()],
@@ -62,37 +68,28 @@ export class MongoClientAuthProviders {
       throw new MongoInvalidArgumentError(`authMechanism ${name} not supported`);
     }
 
-    let provider;
-    if (name === AuthMechanism.MONGODB_OIDC) {
-      provider = providerFunction(this.getWorkflow(authMechanismProperties));
-    } else {
-      provider = providerFunction();
-    }
-
+    const provider = providerFunction(authMechanismProperties);
     this.existingProviders.set(name, provider);
     return provider;
   }
+}
 
-  /**
-   * Gets either a device workflow or callback workflow.
-   */
-  getWorkflow(authMechanismProperties: AuthMechanismProperties): Workflow {
-    if (authMechanismProperties.OIDC_HUMAN_CALLBACK) {
-      return new HumanCallbackWorkflow(
-        new TokenCache(),
-        authMechanismProperties.OIDC_HUMAN_CALLBACK
+/**
+ * Gets either a device workflow or callback workflow.
+ */
+function getWorkflow(authMechanismProperties: AuthMechanismProperties): Workflow {
+  if (authMechanismProperties.OIDC_HUMAN_CALLBACK) {
+    return new HumanCallbackWorkflow(new TokenCache(), authMechanismProperties.OIDC_HUMAN_CALLBACK);
+  } else if (authMechanismProperties.OIDC_CALLBACK) {
+    return new AutomatedCallbackWorkflow(new TokenCache(), authMechanismProperties.OIDC_CALLBACK);
+  } else {
+    const environment = authMechanismProperties.ENVIRONMENT;
+    const workflow = OIDC_WORKFLOWS.get(environment)?.();
+    if (!workflow) {
+      throw new MongoInvalidArgumentError(
+        `Could not load workflow for environment ${authMechanismProperties.ENVIRONMENT}`
       );
-    } else if (authMechanismProperties.OIDC_CALLBACK) {
-      return new AutomatedCallbackWorkflow(new TokenCache(), authMechanismProperties.OIDC_CALLBACK);
-    } else {
-      const environment = authMechanismProperties.ENVIRONMENT;
-      const workflow = OIDC_WORKFLOWS.get(environment)?.();
-      if (!workflow) {
-        throw new MongoInvalidArgumentError(
-          `Could not load workflow for environment ${authMechanismProperties.ENVIRONMENT}`
-        );
-      }
-      return workflow;
     }
+    return workflow;
   }
 }

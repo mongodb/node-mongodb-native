@@ -77,19 +77,17 @@ describe('TLS Support', function () {
 
         it('sets the default options', async function () {
           await client.connect();
-          expect(tlsSpy).to.have.been.calledWith({
-            autoSelectFamily: true,
-            host: 'localhost',
-            port: 27017,
-            servername: 'localhost',
-            ca: sinon.match.defined,
-            cert: sinon.match.defined,
-            key: sinon.match.defined
-          });
+          expect(tlsSpy).to.have.been.calledWith(
+            sinon.match({
+              ca: sinon.match.defined,
+              cert: sinon.match.defined,
+              key: sinon.match.defined
+            })
+          );
         });
       });
 
-      context('when auto family options are set', function () {
+      context('when auto select family options are set', function () {
         let tlsSpy;
 
         afterEach(function () {
@@ -107,16 +105,15 @@ describe('TLS Support', function () {
 
         it('sets the provided options', async function () {
           await client.connect();
-          expect(tlsSpy).to.have.been.calledWith({
-            autoSelectFamily: false,
-            autoSelectFamilyAttemptTimeout: 100,
-            host: 'localhost',
-            port: 27017,
-            servername: 'localhost',
-            ca: sinon.match.defined,
-            cert: sinon.match.defined,
-            key: sinon.match.defined
-          });
+          expect(tlsSpy).to.have.been.calledWith(
+            sinon.match({
+              autoSelectFamily: false,
+              autoSelectFamilyAttemptTimeout: 100,
+              ca: sinon.match.defined,
+              cert: sinon.match.defined,
+              key: sinon.match.defined
+            })
+          );
         });
       });
 

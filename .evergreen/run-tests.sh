@@ -1,26 +1,33 @@
 #!/bin/bash
 # set -o xtrace   # Write all commands first to stderr
-set -o errexit  # Exit the script with error if any of the commands fail
+set -o errexit # Exit the script with error if any of the commands fail
 
 # Supported/used environment variables:
 #       AUTH                    Set to enable authentication. Defaults to "noauth"
 #       SSL                     Set to enable SSL. Defaults to "nossl"
 #       MONGODB_URI             Set the suggested connection MONGODB_URI (including credentials and topology info)
 #       MARCH                   Machine Architecture. Defaults to lowercase uname -m
-#       TEST_NPM_SCRIPT         Script to npm run. Defaults to "integration-coverage"
 #       SKIP_DEPS               Skip installing dependencies
 #       TEST_CSFLE              Set to enforce running csfle tests
 
 AUTH=${AUTH:-noauth}
 MONGODB_URI=${MONGODB_URI:-}
-TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:integration-coverage}
 COMPRESSOR=${COMPRESSOR:-}
+SKIP_DEPS=${SKIP_DEPS:-true}
+
+if [ "${CLIENT_ENCRYPTION}" == "true" ]; then
+  export RUN_WITH_MONGOCRYPTD
+  source .evergreen/setup-fle.sh
+elif [ "${CLIENT_ENCRYPTION}" != "false" ]; then
+  echo "Invalid configuration for CLIENT_ENCRYPTION: ${CLIENT_ENCRYPTION}"
+  exit 1
+fi
 
 # ssl setup
 SSL=${SSL:-nossl}
 if [ "$SSL" != "nossl" ]; then
-   export SSL_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
-   export SSL_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
+  export SSL_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
+  export SSL_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
 fi
 
 # run tests
@@ -40,20 +47,6 @@ if [ "$COMPRESSOR" != "" ]; then
   fi
 fi
 
-# only run FLE tets on hosts we explicitly choose to test on
-if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
-  unset AWS_ACCESS_KEY_ID;
-  unset AWS_SECRET_ACCESS_KEY;
-else
-  pushd "$DRIVERS_TOOLS/.evergreen/csfle"
-  . ./activate-kmstlsvenv.sh
-  # Get access to the AWS temporary credentials:
-  echo "adding temporary AWS credentials to environment"
-  # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
-  source set-temp-creds.sh
-  popd
-fi
-
 npm install @mongodb-js/zstd
 npm install snappy
 
@@ -65,4 +58,4 @@ export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
 export TEST_CSFLE=${TEST_CSFLE}
 export COMPRESSOR=${COMPRESSOR}
-npm run "${TEST_NPM_SCRIPT}"
+npm run check:integration-coverage

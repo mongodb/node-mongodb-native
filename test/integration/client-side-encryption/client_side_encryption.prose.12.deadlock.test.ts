@@ -5,7 +5,8 @@ import * as path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { type CommandStartedEvent, MongoClient, type MongoClientOptions } from '../../mongodb';
+import { type CommandStartedEvent, type MongoClient, type MongoClientOptions } from '../../mongodb';
+import { type TestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { dropCollection } from '../shared';
 
@@ -30,20 +31,26 @@ const $jsonSchema = BSON.EJSON.parse(
   )
 );
 
-class CapturingMongoClient extends MongoClient {
-  commandStartedEvents: Array<CommandStartedEvent> = [];
-  clientsCreated = 0;
-  constructor(url: string, options: MongoClientOptions = {}) {
-    options = { ...options, monitorCommands: true, [Symbol.for('@@mdb.skipPingOnConnect')]: true };
-    if (process.env.MONGODB_API_VERSION) {
-      options.serverApi = process.env.MONGODB_API_VERSION as MongoClientOptions['serverApi'];
-    }
-
-    super(url, options);
-
-    this.on('commandStarted', ev => this.commandStartedEvents.push(ev));
-    this.on('topologyOpening', () => this.clientsCreated++);
+function makeClient(
+  configuration: TestConfiguration,
+  options: MongoClientOptions = {}
+): MongoClient & {
+  commandStartedEvents: Array<CommandStartedEvent>;
+  clientsCreated: number;
+} {
+  options = { ...options, monitorCommands: true, __skipPingOnConnect: true };
+  if (process.env.MONGODB_API_VERSION) {
+    options.serverApi = process.env.MONGODB_API_VERSION as MongoClientOptions['serverApi'];
   }
+
+  const client = configuration.newClient(undefined, options) as ReturnType<typeof makeClient>;
+
+  client.commandStartedEvents = [];
+  client.clientsCreated = 0;
+  client.on('commandStarted', ev => client.commandStartedEvents.push(ev));
+  client.on('topologyOpening', () => client.clientsCreated++);
+
+  return client;
 }
 
 function deadlockTest(
@@ -55,11 +62,10 @@ function deadlockTest(
   assertions
 ) {
   return async function () {
-    const url = this.configuration.url();
     const clientTest = this.clientTest;
     const ciphertext = this.ciphertext;
 
-    const clientEncryptedOpts = {
+    const clientEncryptedOpts: MongoClientOptions = {
       autoEncryption: {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: { local: { key: LOCAL_KEY } },
@@ -70,7 +76,7 @@ function deadlockTest(
       maxPoolSize
     };
 
-    const clientEncrypted = new CapturingMongoClient(url, clientEncryptedOpts);
+    const clientEncrypted = makeClient(this.configuration, clientEncryptedOpts);
 
     await clientEncrypted.connect();
 
@@ -95,19 +101,17 @@ function deadlockTest(
   };
 }
 
-const metadata = {
+const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
-    mongodb: '>=4.2.0',
     topology: '!load-balanced'
   }
 };
+
 describe('Connection Pool Deadlock Prevention', function () {
   beforeEach(async function () {
-    const url: string = this.configuration.url();
-
-    this.clientTest = new CapturingMongoClient(url);
-    this.clientKeyVault = new CapturingMongoClient(url, {
+    this.clientTest = makeClient(this.configuration);
+    this.clientKeyVault = makeClient(this.configuration, {
       monitorCommands: true,
       maxPoolSize: 1
     });
@@ -132,8 +136,7 @@ describe('Connection Pool Deadlock Prevention', function () {
     this.clientEncryption = new ClientEncryption(this.clientTest, {
       kmsProviders: { local: { key: LOCAL_KEY } },
       keyVaultNamespace: 'keyvault.datakeys',
-      keyVaultClient: this.keyVaultClient,
-      extraOptions: getEncryptExtraOptions()
+      keyVaultClient: this.keyVaultClient
     });
 
     this.ciphertext = await this.clientEncryption.encrypt('string0', {
@@ -143,7 +146,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   });
 
   afterEach(function () {
-    return Promise.all([this.clientKeyVault.close(), this.clientTest.close()]).then(() => {
+    return Promise.all([this.clientKeyVault?.close(), this.clientTest?.close()]).then(() => {
       this.clientKeyVault = undefined;
       this.clientTest = undefined;
       this.clientEncryption = undefined;

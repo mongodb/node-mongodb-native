@@ -2,6 +2,113 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.17.0](https://github.com/mongodb/node-mongodb-native/compare/v6.16.0...v6.17.0) (2025-06-03)
+
+
+### Features
+
+* **NODE-6245:** add keepAliveInitialDelay config ([#4510](https://github.com/mongodb/node-mongodb-native/issues/4510)) ([d6c0eb3](https://github.com/mongodb/node-mongodb-native/commit/d6c0eb31c21fc89856c7c2a3cab7a8b22d23c267))
+* **NODE-6290:** add sort support to updateOne and replaceOne ([#4515](https://github.com/mongodb/node-mongodb-native/issues/4515)) ([28857b7](https://github.com/mongodb/node-mongodb-native/commit/28857b79898d6a6040b7d48f3781ebc2710f0279))
+* **NODE-6882:** eagerly close checked out connections when client is closed ([#4499](https://github.com/mongodb/node-mongodb-native/issues/4499)) ([64fdb3e](https://github.com/mongodb/node-mongodb-native/commit/64fdb3ef40262d7cf321175c3ae0c4079b889624))
+* **NODE-6884:** remove support for 4.0 ([#4534](https://github.com/mongodb/node-mongodb-native/issues/4534)) ([6fe6ccc](https://github.com/mongodb/node-mongodb-native/commit/6fe6ccc8e1a2d5cc605e7467ec7b3f83628c8095))
+* **NODE-6952:** support configuring DEK cache expiration ([#4538](https://github.com/mongodb/node-mongodb-native/issues/4538)) ([c529f07](https://github.com/mongodb/node-mongodb-native/commit/c529f07c510f16abc158cbf33ba03230629e34d5))
+* **NODE-6963:** use BSON 6.10.4 ([#4549](https://github.com/mongodb/node-mongodb-native/issues/4549)) ([aee490a](https://github.com/mongodb/node-mongodb-native/commit/aee490a453dc0acec7f673bdb3ca7be16d555092))
+
+
+### Bug Fixes
+
+* **NODE-6638:** throw if all atomic updates are undefined ([#4519](https://github.com/mongodb/node-mongodb-native/issues/4519)) ([9625b2d](https://github.com/mongodb/node-mongodb-native/commit/9625b2d10a7d3548b423cf130fba89b383eeb8db))
+* **NODE-6864:** socket errors are not always converted to MongoNetworkErrors ([#4473](https://github.com/mongodb/node-mongodb-native/issues/4473)) ([2d86095](https://github.com/mongodb/node-mongodb-native/commit/2d860953096e8f4e18896bef92843f1a0a3ccb04))
+* **NODE-6962:** OIDC machine workflows use OIDCCallbacks internally ([#4546](https://github.com/mongodb/node-mongodb-native/issues/4546)) ([bd6030f](https://github.com/mongodb/node-mongodb-native/commit/bd6030f2da079df0e36f011ead91e178647d6ac1))
+
+## [6.16.0](https://github.com/mongodb/node-mongodb-native/compare/v6.15.0...v6.16.0) (2025-04-21)
+
+
+### Features
+
+* **NODE-6494:** add support for `hint` on distinct commands ([#4487](https://github.com/mongodb/node-mongodb-native/issues/4487)) ([40d0e87](https://github.com/mongodb/node-mongodb-native/commit/40d0e87199d75df93284a1802e54e118539f7e0e))
+* **NODE-6515:** deprecate driver support for server 4.0 ([#4517](https://github.com/mongodb/node-mongodb-native/issues/4517)) ([4c1a8a7](https://github.com/mongodb/node-mongodb-native/commit/4c1a8a71d67cb201dbb3c7101ebf6e316e4dbc50))
+
+
+### Bug Fixes
+
+* **NODE-6630:** read all messages in buffer when chunk arrives ([#4512](https://github.com/mongodb/node-mongodb-native/issues/4512)) ([8c86e30](https://github.com/mongodb/node-mongodb-native/commit/8c86e303594bad8c7b8cd9033fe47afe1e813388))
+* **NODE-6878:** documents.clear() throws a TypeError after cursor is rewound ([#4488](https://github.com/mongodb/node-mongodb-native/issues/4488)) ([a1fffeb](https://github.com/mongodb/node-mongodb-native/commit/a1fffeb0e7fbd41832e6ae751a3f7369ea585b20))
+
+## [6.15.0](https://github.com/mongodb/node-mongodb-native/compare/v6.14.2...v6.15.0) (2025-03-18)
+
+
+### Features
+
+* **NODE-6141:** allow custom aws sdk config ([#4373](https://github.com/mongodb/node-mongodb-native/issues/4373)) ([3d047ed](https://github.com/mongodb/node-mongodb-native/commit/3d047ed19f6bf5c06e441fdf3a9c90b05ef9c15d))
+
+
+### Bug Fixes
+
+* **NODE-6845:** ensure internal rejections are handled ([#4448](https://github.com/mongodb/node-mongodb-native/issues/4448)) ([06e941a](https://github.com/mongodb/node-mongodb-native/commit/06e941a87c5278d0a7baedccc646924bf64ddfb7))
+
+## [6.14.2](https://github.com/mongodb/node-mongodb-native/compare/v6.14.1...v6.14.2) (2025-03-04)
+
+
+### Bug Fixes
+
+* **NODE-6803:** kms proxy socket creates unhandled rejection ([#4444](https://github.com/mongodb/node-mongodb-native/issues/4444)) ([ed69cf9](https://github.com/mongodb/node-mongodb-native/commit/ed69cf914435ebc96c44b265704571e3d34629ef))
+
+## [6.14.1](https://github.com/mongodb/node-mongodb-native/compare/v6.14.0...v6.14.1) (2025-03-03)
+
+
+### Bug Fixes
+
+* **NODE-6801:** set token on connection from cache ([#4438](https://github.com/mongodb/node-mongodb-native/issues/4438)) ([cb13746](https://github.com/mongodb/node-mongodb-native/commit/cb1374649858ae2e0f3f3e109d7bf7e4bcd193c2))
+
+## [6.14.0](https://github.com/mongodb/node-mongodb-native/compare/v6.13.1...v6.14.0) (2025-02-28)
+
+
+### Features
+
+* **NODE-6676:** add support for `nsType` in change stream create events ([#4431](https://github.com/mongodb/node-mongodb-native/issues/4431)) ([7800067](https://github.com/mongodb/node-mongodb-native/commit/7800067ad0ea4e24e3180fe264da4951b883e08d))
+* **NODE-6773:** add support for $lookup with automatic encryption ([#4427](https://github.com/mongodb/node-mongodb-native/issues/4427)) ([965b21a](https://github.com/mongodb/node-mongodb-native/commit/965b21a20eff38c7fe7d9036f912b31c10e5ba21))
+
+
+### Bug Fixes
+
+* **NODE-6765:** FindOneAndUpdateOptions supports aggregation expressions ([#4423](https://github.com/mongodb/node-mongodb-native/issues/4423)) ([421ddeb](https://github.com/mongodb/node-mongodb-native/commit/421ddeb329169f47b567cbe432c39737551bd234))
+* **NODE-6792:** use isUint8Array from driver's utils instead of util/types ([#4436](https://github.com/mongodb/node-mongodb-native/issues/4436)) ([dfe1fba](https://github.com/mongodb/node-mongodb-native/commit/dfe1fba777d89a53106487e38aaf5072978096b5))
+* **NODE-6794:** revert `@aws-sdk/credential-providers` peer compatibility change ([#4437](https://github.com/mongodb/node-mongodb-native/issues/4437)) ([488c407](https://github.com/mongodb/node-mongodb-native/commit/488c4071632c29960de8955bfbefbaab163b45ba))
+
+## [6.13.1](https://github.com/mongodb/node-mongodb-native/compare/v6.13.0...v6.13.1) (2025-02-20)
+
+
+### Bug Fixes
+
+* **NODE-6407:** use conversationId returned from server in saslContinue ([#4368](https://github.com/mongodb/node-mongodb-native/issues/4368)) ([fbefa6b](https://github.com/mongodb/node-mongodb-native/commit/fbefa6b6265bf3c5019e07626dd298c265ad4746))
+* **NODE-6613:** Update error messages when primaries go stale ([#4397](https://github.com/mongodb/node-mongodb-native/issues/4397)) ([6528c8d](https://github.com/mongodb/node-mongodb-native/commit/6528c8db3acfb28fa58a7cd587703d3d40c065aa))
+* **NODE-6690:** Remove extraneous Document in replaceOne return type ([#4383](https://github.com/mongodb/node-mongodb-native/issues/4383)) ([6c81d4e](https://github.com/mongodb/node-mongodb-native/commit/6c81d4e839589dd51cea0dca10d4163a13744c94))
+* **NODE-6763:** pass WriteConcernOptions instead on WriteConcernSettings ([#4421](https://github.com/mongodb/node-mongodb-native/issues/4421)) ([26f15d7](https://github.com/mongodb/node-mongodb-native/commit/26f15d7edc109154b1064299299158a8327a73da))
+* **NODE-6777:** update BSON to 6.10.3 ([#4428](https://github.com/mongodb/node-mongodb-native/issues/4428)) ([db5b9e0](https://github.com/mongodb/node-mongodb-native/commit/db5b9e00c3966019fc79d7b275e585f07c59144c))
+
+## [6.13.0](https://github.com/mongodb/node-mongodb-native/compare/v6.12.0...v6.13.0) (2025-01-30)
+
+
+### Features
+
+* **NODE-5672:** support standardized logging ([#4387](https://github.com/mongodb/node-mongodb-native/issues/4387)) ([d1b2453](https://github.com/mongodb/node-mongodb-native/commit/d1b2453daeed50cd9edd5b8a631789a36429d6b2))
+* **NODE-6258:** add signal support to find and aggregate ([#4364](https://github.com/mongodb/node-mongodb-native/issues/4364)) ([73def18](https://github.com/mongodb/node-mongodb-native/commit/73def18d3fa0aea1fdd5122088493f948addaa42))
+* **NODE-6451:** retry SRV and TXT lookup for DNS timeout errors ([#4375](https://github.com/mongodb/node-mongodb-native/issues/4375)) ([fd902d3](https://github.com/mongodb/node-mongodb-native/commit/fd902d31d5cb65100f1c8b6f8811886b44ba19d5))
+* **NODE-6633:** MongoClient.close closes active cursors ([#4372](https://github.com/mongodb/node-mongodb-native/issues/4372)) ([654069f](https://github.com/mongodb/node-mongodb-native/commit/654069fc1750b6c3336f1002e3d3fb18bbc1451d))
+
+
+### Bug Fixes
+
+* **NODE-5225:** concurrent MongoClient.close() calls each attempt to close the client ([#4376](https://github.com/mongodb/node-mongodb-native/issues/4376)) ([9419af7](https://github.com/mongodb/node-mongodb-native/commit/9419af7b3bcbf134d0740c4282f83d1d5a717418))
+* **NODE-6340:** OIDC reauth uses caches speculative auth result ([#4379](https://github.com/mongodb/node-mongodb-native/issues/4379)) ([8b2b7fd](https://github.com/mongodb/node-mongodb-native/commit/8b2b7fdc6366ee9b6b595daf074d6b88362df5e6))
+
+
+### Performance Improvements
+
+* **NODE-6452:** Optimize CommandStartedEvent and CommandSucceededEvent constructors ([#4371](https://github.com/mongodb/node-mongodb-native/issues/4371)) ([41b066b](https://github.com/mongodb/node-mongodb-native/commit/41b066b2b286879085b05a58c0486aa1d24303bc))
+* **NODE-6616:** shortcircuit logging ejson.stringify ([#4377](https://github.com/mongodb/node-mongodb-native/issues/4377)) ([c1bcf0d](https://github.com/mongodb/node-mongodb-native/commit/c1bcf0de991096975a5151bf780faa9803ddd765))
+
 ## [6.12.0](https://github.com/mongodb/node-mongodb-native/compare/v6.11.0...v6.12.0) (2024-12-10)
 
 

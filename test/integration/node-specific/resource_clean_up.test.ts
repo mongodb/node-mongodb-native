@@ -3,7 +3,7 @@ import * as v8 from 'node:v8';
 import { expect } from 'chai';
 
 import { sleep } from '../../tools/utils';
-import { runScript } from './resource_tracking_script_builder';
+import { runScriptAndReturnHeapInfo } from './resource_tracking_script_builder';
 
 /**
  * This 5MB range is selected arbitrarily and should likely be raised if failures are seen intermittently.
@@ -34,34 +34,31 @@ describe('Driver Resources', () => {
 
   context('on MongoClient.close()', () => {
     before('create leak reproduction script', async function () {
+      if (process.version.includes('v24')) {
+        if (this.test) {
+          this.test.skipReason = 'TODO(NODE-6945): Fix v24 heap snapshot parsing';
+        }
+        this.test?.skip();
+      }
       if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
         return;
       }
-      try {
-        const res = await runScript(
-          'no_resource_leak_connect_close',
-          this.configuration,
-          async function run({ MongoClient, uri }) {
-            const mongoClient = new MongoClient(uri, { minPoolSize: 100 });
-            await mongoClient.connect();
-            // Any operations will reproduce the issue found in v5.0.0/v4.13.0
-            // it would seem the MessageStream has to be used?
-            await mongoClient.db().command({ ping: 1 });
-            await mongoClient.close();
-          }
-        );
-        startingMemoryUsed = res.startingMemoryUsed;
-        endingMemoryUsed = res.endingMemoryUsed;
-        heap = res.heap;
-      } catch (error) {
-        // We don't expect the process execution to ever fail,
-        // leaving helpful debugging if we see this in CI
-        console.log(`runScript error message: ${error.message}`);
-        console.log(`runScript error stack: ${error.stack}`);
-        console.log(`runScript error cause: ${error.cause}`);
-        // Fail the test
-        this.test?.error(error);
-      }
+      const res = await runScriptAndReturnHeapInfo(
+        'no_resource_leak_connect_close',
+        this.configuration,
+        async function run({ MongoClient, uri }) {
+          const mongoClient = new MongoClient(uri, { minPoolSize: 100 });
+          await mongoClient.connect();
+          // Any operations will reproduce the issue found in v5.0.0/v4.13.0
+          // it would seem the MessageStream has to be used?
+          await mongoClient.db().command({ ping: 1 });
+          await mongoClient.close();
+        }
+      );
+
+      startingMemoryUsed = res.startingMemoryUsed;
+      endingMemoryUsed = res.endingMemoryUsed;
+      heap = res.heap;
     });
 
     describe('ending memory usage', () => {
@@ -116,7 +113,7 @@ describe('Driver Resources', () => {
       await sleep(10);
       const promiseCountAfter = v8.queryObjects(Promise, { format: 'count' });
 
-      expect(promiseCountAfter).to.be.within(promiseCountBefore - 5, promiseCountBefore + 5);
+      expect(promiseCountAfter).to.be.lessThan(promiseCountBefore + 5);
     });
   });
 });

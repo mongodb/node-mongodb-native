@@ -43,6 +43,7 @@ import {
   isPromiseLike,
   List,
   maxWireVersion,
+  noop,
   now,
   squashError,
   uuidV4
@@ -161,6 +162,7 @@ export class ClientSession
     clientOptions: MongoOptions
   ) {
     super();
+    this.on('error', noop);
 
     if (client == null) {
       // TODO(NODE-3483)

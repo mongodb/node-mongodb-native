@@ -6,7 +6,7 @@ require('source-map-support').install({
 });
 
 import { MongoClient } from '../../../mongodb';
-import { AstrolabeTestConfiguration, TestConfiguration } from '../config';
+import { AlpineTestConfiguration, AstrolabeTestConfiguration, TestConfiguration } from '../config';
 import { getEnvironmentalOptions } from '../../utils';
 import * as mock from '../../mongodb-mock/index';
 import { inspect } from 'util';
@@ -20,8 +20,9 @@ import { MongoDBTopologyFilter } from '../filters/mongodb_topology_filter';
 import { MongoDBVersionFilter } from '../filters/mongodb_version_filter';
 import { NodeVersionFilter } from '../filters/node_version_filter';
 import { OSFilter } from '../filters/os_filter';
-import { ServerlessFilter } from '../filters/serverless_filter';
 import { type Filter } from '../filters/filter';
+import { type Context } from 'mocha';
+import { flakyTests } from '../flaky';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -51,20 +52,21 @@ async function initializeFilters(client): Promise<Record<string, any>> {
     return {};
   }
   initializedFilters = true;
-  const context = {};
+  const context = {
+    filters: [
+      new ApiVersionFilter(),
+      new AuthFilter(),
+      new ClientSideEncryptionFilter(),
+      new GenericPredicateFilter(),
+      new IDMSMockServerFilter(),
+      new MongoDBTopologyFilter(),
+      new MongoDBVersionFilter(),
+      new NodeVersionFilter(),
+      new OSFilter()
+    ]
+  };
 
-  for (const filter of [
-    new ApiVersionFilter(),
-    new AuthFilter(),
-    new ClientSideEncryptionFilter(),
-    new GenericPredicateFilter(),
-    new IDMSMockServerFilter(),
-    new MongoDBTopologyFilter(),
-    new MongoDBVersionFilter(),
-    new NodeVersionFilter(),
-    new OSFilter(),
-    new ServerlessFilter()
-  ]) {
+  for (const filter of context.filters) {
     filters.push(filter);
     await filter.initializeFilter(client, context);
   }
@@ -153,10 +155,10 @@ const testConfigBeforeHook = async function () {
     .command({ getParameter: '*' })
     .catch(error => ({ noReply: error }));
 
-  this.configuration = new TestConfiguration(
-    loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
-    context
-  );
+  const Config: typeof TestConfiguration = process.env.ALPINE
+    ? AlpineTestConfiguration
+    : TestConfiguration;
+  this.configuration = new Config(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, context);
 
   await client.close();
 
@@ -169,14 +171,13 @@ const testConfigBeforeHook = async function () {
     version: this.configuration.buildInfo.version,
     node: process.version,
     os: process.platform,
+    alpineLinux: Boolean(process.env.ALPINE),
+    cryptdUri: process.env.MONGOCRYPTD_URI,
     pid: process.pid,
-    serverless: process.env.SERVERLESS === '1',
     auth: process.env.AUTH === 'auth',
     tls: process.env.SSL === 'ssl',
     csfle: {
-      enabled: this.configuration.clientSideEncryption.enabled,
-      version: this.configuration.clientSideEncryption.version,
-      libmongocrypt: this.configuration.clientSideEncryption.libmongocrypt
+      ...this.configuration.clientSideEncryption
     },
     serverApi: MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,
@@ -186,9 +187,8 @@ const testConfigBeforeHook = async function () {
     adl: this.configuration.buildInfo.dataLake
       ? this.configuration.buildInfo.dataLake.version
       : false,
-    kerberos: process.env.KRB5_PRINCIPAL != null,
+    kerberos: process.env.PRINCIPAL != null,
     ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
-    ocsp: process.env.OCSP_TLS_SHOULD_SUCCEED != null && process.env.CA_FILE != null,
     socks5: MONGODB_URI.includes('proxyHost='),
     compressor: process.env.COMPRESSOR,
     cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH,
@@ -210,8 +210,42 @@ const beforeAllPluginImports = () => {
   require('mocha-sinon');
 };
 
+async function beforeEachLogging(this: Context) {
+  if (this.currentTest == null) return;
+  this.configuration.beforeEachLogging(this);
+}
+
+async function afterEachLogging(this: Context) {
+  if (this.currentTest == null) return;
+  this.configuration.afterEachLogging(this);
+}
+
+function checkFlakyTestList(this: Context) {
+  const allTests: string[] = [];
+
+  const stack = [this.test.parent];
+  while (stack.length) {
+    const suite = stack.pop();
+    allTests.push(...suite.tests.map(test => test.fullTitle()));
+    stack.push(...suite.suites);
+  }
+  allTests.reverse(); // Doesn't matter but when debugging easier to see this in the expected order.
+
+  const flakyTestDoesNotExist = flakyTests.find(testName => !allTests.includes(testName));
+  if (flakyTestDoesNotExist != null) {
+    console.error(
+      '\n' + '='.repeat(100) + '\n',
+      'Flaky test:',
+      JSON.stringify(flakyTestDoesNotExist),
+      'is not run at all',
+      '\n' + '='.repeat(100) + '\n'
+    );
+  }
+}
+
 export const mochaHooks = {
-  beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
-  beforeEach: [testSkipBeforeEachHook],
+  beforeAll: [beforeAllPluginImports, testConfigBeforeHook, checkFlakyTestList],
+  beforeEach: [testSkipBeforeEachHook, beforeEachLogging],
+  afterEach: [afterEachLogging],
   afterAll: [cleanUpMocksAfterHook]
 };

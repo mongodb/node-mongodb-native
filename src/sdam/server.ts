@@ -36,16 +36,19 @@ import {
   needsRetryableWriteLabel
 } from '../error';
 import type { ServerApi } from '../mongo_client';
-import { TypedEventEmitter } from '../mongo_types';
+import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { isTransactionCommand } from '../transactions';
 import {
+  abortable,
   type EventEmitterWithState,
   makeStateMachine,
   maxWireVersion,
   type MongoDBNamespace,
+  noop,
+  squashError,
   supportsRetryableWrites
 } from '../utils';
 import { throwIfWriteConcernError } from '../write_concern';
@@ -107,7 +110,7 @@ export type ServerEvents = {
 /** @internal */
 export type ServerCommandOptions = Omit<CommandOptions, 'timeoutContext' | 'socketTimeoutMS'> & {
   timeoutContext: TimeoutContext;
-};
+} & Abortable;
 
 /** @internal */
 export class Server extends TypedEventEmitter<ServerEvents> {
@@ -141,6 +144,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   constructor(topology: Topology, description: ServerDescription, options: ServerOptions) {
     super();
+    this.on('error', noop);
 
     this.serverApi = options.serverApi;
 
@@ -242,8 +246,12 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
+  closeCheckedOutConnections() {
+    return this.pool.closeCheckedOutConnections();
+  }
+
   /** Destroy the server connection */
-  destroy(): void {
+  close(): void {
     if (this.s.state === STATE_CLOSED) {
       return;
     }
@@ -285,7 +293,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   public async command(
     ns: MongoDBNamespace,
     cmd: Document,
-    options: ServerCommandOptions,
+    { ...options }: ServerCommandOptions,
     responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     if (ns.db == null || typeof ns === 'string') {
@@ -296,25 +304,21 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       throw new MongoServerClosedError();
     }
 
-    // Clone the options
-    const finalOptions = Object.assign({}, options, {
-      wireProtocolCommand: false,
-      directConnection: this.topology.s.options.directConnection
-    });
+    options.directConnection = this.topology.s.options.directConnection;
 
     // There are cases where we need to flag the read preference not to get sent in
     // the command, such as pre-5.0 servers attempting to perform an aggregate write
     // with a non-primary read preference. In this case the effective read preference
     // (primary) is not the same as the provided and must be removed completely.
-    if (finalOptions.omitReadPreference) {
-      delete finalOptions.readPreference;
+    if (options.omitReadPreference) {
+      delete options.readPreference;
     }
 
     if (this.description.iscryptd) {
-      finalOptions.omitMaxTimeMS = true;
+      options.omitMaxTimeMS = true;
     }
 
-    const session = finalOptions.session;
+    const session = options.session;
     let conn = session?.pinnedConnection;
 
     this.incrementOperationCount();
@@ -331,26 +335,36 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       }
     }
 
+    let reauthPromise: Promise<void> | null = null;
+
     try {
       try {
-        const res = await conn.command(ns, cmd, finalOptions, responseType);
+        const res = await conn.command(ns, cmd, options, responseType);
         throwIfWriteConcernError(res);
         return res;
       } catch (commandError) {
-        throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
+        throw this.decorateCommandError(conn, cmd, options, commandError);
       }
     } catch (operationError) {
       if (
         operationError instanceof MongoError &&
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
-        await this.pool.reauthenticate(conn);
+        reauthPromise = this.pool.reauthenticate(conn);
+        reauthPromise.then(undefined, error => {
+          reauthPromise = null;
+          squashError(error);
+        });
+
+        await abortable(reauthPromise, options);
+        reauthPromise = null; // only reachable if reauth succeeds
+
         try {
-          const res = await conn.command(ns, cmd, finalOptions, responseType);
+          const res = await conn.command(ns, cmd, options, responseType);
           throwIfWriteConcernError(res);
           return res;
         } catch (commandError) {
-          throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
+          throw this.decorateCommandError(conn, cmd, options, commandError);
         }
       } else {
         throw operationError;
@@ -358,7 +372,15 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     } finally {
       this.decrementOperationCount();
       if (session?.pinnedConnection !== conn) {
-        this.pool.checkIn(conn);
+        if (reauthPromise != null) {
+          // The reauth promise only exists if it hasn't thrown.
+          const checkBackIn = () => {
+            this.pool.checkIn(conn);
+          };
+          void reauthPromise.then(checkBackIn, checkBackIn);
+        } else {
+          this.pool.checkIn(conn);
+        }
       }
     }
   }

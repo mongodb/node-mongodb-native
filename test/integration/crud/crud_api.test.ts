@@ -1,11 +1,11 @@
 import { expect } from 'chai';
-import { on } from 'events';
-import * as semver from 'semver';
 import * as sinon from 'sinon';
+import { finished } from 'stream/promises';
 
 import {
   Collection,
   CommandFailedEvent,
+  type CommandStartedEvent,
   CommandSucceededEvent,
   MongoBulkWriteError,
   type MongoClient,
@@ -15,7 +15,6 @@ import {
 } from '../../mongodb';
 import { type FailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
-
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
 // backwards compatibility in a fundamental way
@@ -113,13 +112,6 @@ describe('CRUD API', function () {
 
     describe('when the find operation fails', () => {
       beforeEach(async function () {
-        if (semver.lt(this.configuration.version, '4.2.0')) {
-          if (this.currentTest) {
-            this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
-          }
-          return this.skip();
-        }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
@@ -133,10 +125,6 @@ describe('CRUD API', function () {
       });
 
       afterEach(async function () {
-        if (semver.lt(this.configuration.version, '4.2.0')) {
-          return;
-        }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'off',
@@ -194,13 +182,6 @@ describe('CRUD API', function () {
 
     describe('when the aggregation operation fails', () => {
       beforeEach(async function () {
-        if (semver.lt(this.configuration.version, '4.2.0')) {
-          if (this.currentTest) {
-            this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
-          }
-          this.skip();
-        }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
@@ -214,10 +195,6 @@ describe('CRUD API', function () {
       });
 
       afterEach(async function () {
-        if (semver.lt(this.configuration.version, '4.2.0')) {
-          return;
-        }
-
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'off',
@@ -238,7 +215,7 @@ describe('CRUD API', function () {
   });
 
   context('when creating a cursor with find', () => {
-    let collection;
+    let collection: Collection;
 
     beforeEach(async () => {
       collection = client.db().collection('t');
@@ -307,13 +284,14 @@ describe('CRUD API', function () {
 
     describe('#stream()', () => {
       it('creates a node stream that emits data events', async () => {
-        const count = 0;
-        const cursor = makeCursor();
-        const stream = cursor.stream();
-        on(stream, 'data');
-        cursor.once('close', function () {
-          expect(count).to.equal(2);
+        let count = 0;
+        const stream = makeCursor().stream();
+        const willFinish = finished(stream, { cleanup: true });
+        stream.on('data', () => {
+          count++;
         });
+        await willFinish;
+        expect(count).to.equal(2);
       });
     });
 
@@ -894,17 +872,86 @@ describe('CRUD API', function () {
     });
   });
 
+  describe('#updateOne', function () {
+    let collection;
+
+    beforeEach(async function () {
+      collection = client.db().collection('updateOneTest');
+    });
+
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
+
+        it('throws an error', async function () {
+          const error = await collection
+            .updateOne({ a: 1 }, { $set: undefined, $unset: undefined }, { ignoreUndefined: true })
+            .catch(error => error);
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
+        });
+      }
+    );
+  });
+
+  describe('#updateMany', function () {
+    let collection;
+
+    beforeEach(async function () {
+      collection = client.db().collection('updateManyTest');
+    });
+
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
+
+        it('throws an error', async function () {
+          const error = await collection
+            .updateMany({ a: 1 }, { $set: undefined, $unset: undefined }, { ignoreUndefined: true })
+            .catch(error => error);
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
+        });
+      }
+    );
+  });
+
   describe('#findOneAndUpdate', function () {
     let collection;
 
     beforeEach(async function () {
-      await client.connect();
       collection = client.db().collection('findAndModifyTest');
     });
 
-    afterEach(async function () {
-      await collection.drop();
-    });
+    context(
+      'when including an update with all undefined atomic operators ignoring undefined',
+      function () {
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+        });
+
+        it('throws an error', async function () {
+          const error = await collection
+            .findOneAndUpdate(
+              { a: 1 },
+              { $set: undefined, $unset: undefined },
+              { ignoreUndefined: true }
+            )
+            .catch(error => error);
+          expect(error.message).to.include(
+            'Update operations require that all atomic operators have defined values, but none were provided'
+          );
+        });
+      }
+    );
 
     context('when includeResultMetadata is true', function () {
       beforeEach(async function () {
@@ -1150,5 +1197,54 @@ describe('CRUD API', function () {
         );
       });
     }
+  });
+
+  describe('sort support', function () {
+    let client: MongoClient;
+    let events: Array<CommandStartedEvent>;
+    let collection: Collection;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      events = [];
+      client.on('commandStarted', commandStarted =>
+        commandStarted.commandName === 'update' ? events.push(commandStarted) : null
+      );
+
+      collection = client.db('updateManyTest').collection('updateManyTest');
+      await collection.drop().catch(() => null);
+      await collection.insertMany([{ a: 1 }, { a: 2 }]);
+    });
+
+    afterEach(async function () {
+      await collection.drop().catch(() => null);
+      await client.close();
+    });
+
+    describe('collection.updateMany()', () => {
+      it('does not attach a sort property if one is specified', async function () {
+        // @ts-expect-error: sort is not supported
+        await collection.updateMany({ a: { $gte: 1 } }, { $set: { b: 1 } }, { sort: { a: 1 } });
+
+        expect(events).to.have.lengthOf(1);
+        const [updateEvent] = events;
+        expect(updateEvent.commandName).to.equal('update');
+        expect(updateEvent.command.updates[0]).to.not.have.property('sort');
+      });
+    });
+
+    describe('collection.bulkWrite([{updateMany}])', () => {
+      it('does not attach a sort property if one is specified', async function () {
+        await collection.bulkWrite([
+          // @ts-expect-error: sort is not supported
+          { updateMany: { filter: { a: { $gte: 1 } }, update: { $set: { b: 1 } }, sort: { a: 1 } } }
+        ]);
+
+        expect(events).to.have.lengthOf(1);
+        const [updateEvent] = events;
+        expect(updateEvent.commandName).to.equal('update');
+        expect(updateEvent.command.updates[0]).to.not.have.property('sort');
+      });
+    });
   });
 });

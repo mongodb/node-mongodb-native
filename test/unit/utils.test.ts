@@ -1,12 +1,17 @@
+import { setTimeout } from 'node:timers';
+
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 import {
+  abortable,
   BufferPool,
   ByteUtils,
   checkParentDomainMatch,
   compareObjectId,
   decorateWithExplain,
   Explain,
+  hasAtomicOperators,
   HostAddress,
   hostMatchesWildcards,
   isHello,
@@ -15,12 +20,74 @@ import {
   List,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
+  MongoInvalidArgumentError,
   MongoRuntimeError,
   ObjectId,
   shuffle
 } from '../mongodb';
+import { sleep } from '../tools/utils';
 
 describe('driver utils', function () {
+  describe('.hasAtomicOperators', function () {
+    context('when ignoreUndefined is true', function () {
+      const options = { ignoreUndefined: true };
+
+      context('when no operator is undefined', function () {
+        const document = { $set: { n: 1 }, $unset: '' };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+
+      context('when some operators are undefined', function () {
+        const document = { $set: { n: 1 }, $unset: undefined };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+
+      context('when all operators are undefined', function () {
+        const document = { $set: undefined, $unset: undefined };
+
+        it('throws an error', function () {
+          expect(() => {
+            hasAtomicOperators(document, options);
+          }).to.throw(MongoInvalidArgumentError);
+        });
+      });
+    });
+
+    context('when ignoreUndefined is false', function () {
+      const options = { ignoreUndefined: false };
+
+      context('when no operator is undefined', function () {
+        const document = { $set: { n: 1 }, $unset: '' };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+
+      context('when some operators are undefined', function () {
+        const document = { $set: { n: 1 }, $unset: undefined };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+
+      context('when all operators are undefined', function () {
+        const document = { $set: undefined, $unset: undefined };
+
+        it('returns true', function () {
+          expect(hasAtomicOperators(document, options)).to.be.true;
+        });
+      });
+    });
+  });
+
   describe('.hostMatchesWildcards', function () {
     context('when using domains', function () {
       context('when using exact match', function () {
@@ -1088,6 +1155,135 @@ describe('driver utils', function () {
       expect(result).to.deep.equal({
         explain: { ping: 1 },
         verbosity: 'queryPlanner'
+      });
+    });
+  });
+
+  describe('abortable()', () => {
+    const goodError = new Error('good error');
+    const badError = new Error('unexpected bad error!');
+    const expectedValue = "don't panic";
+
+    describe('always removes the abort listener it attaches', () => {
+      let controller;
+      let removeEventListenerSpy;
+      let addEventListenerSpy;
+
+      beforeEach(() => {
+        controller = new AbortController();
+        addEventListenerSpy = sinon.spy(controller.signal, 'addEventListener');
+        removeEventListenerSpy = sinon.spy(controller.signal, 'removeEventListener');
+      });
+
+      afterEach(() => sinon.restore());
+
+      const expectListenerCleanup = () => {
+        expect(addEventListenerSpy).to.have.been.calledOnce;
+        expect(removeEventListenerSpy).to.have.been.calledOnce;
+      };
+
+      it('when promise rejects', async () => {
+        await abortable(Promise.reject(goodError), { signal: controller.signal }).catch(e => e);
+        expectListenerCleanup();
+      });
+
+      it('when promise resolves', async () => {
+        await abortable(Promise.resolve(expectedValue), { signal: controller.signal });
+        expectListenerCleanup();
+      });
+
+      it('when signal aborts', async () => {
+        setTimeout(() => controller.abort(goodError));
+        await abortable(new Promise(() => null), { signal: controller.signal }).catch(e => e);
+        expectListenerCleanup();
+      });
+    });
+
+    describe('when given already rejected promise with already aborted signal', () => {
+      it('returns promise rejection', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        controller.abort(badError);
+        const result = await abortable(Promise.reject(goodError), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
+      });
+    });
+
+    describe('when given already resolved promise with already aborted signal', () => {
+      it('returns promise resolution', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        controller.abort(badError);
+        const result = await abortable(Promise.resolve(expectedValue), { signal }).catch(e => e);
+        expect(result).to.deep.equal(expectedValue);
+      });
+    });
+
+    describe('when given already rejected promise with not yet aborted signal', () => {
+      it('returns promise rejection', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const result = await abortable(Promise.reject(goodError), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
+      });
+    });
+
+    describe('when given already resolved promise with not yet aborted signal', () => {
+      it('returns promise resolution', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const result = await abortable(Promise.resolve(expectedValue), { signal }).catch(e => e);
+        expect(result).to.deep.equal(expectedValue);
+      });
+    });
+
+    describe('when given unresolved promise with an already aborted signal', () => {
+      it('returns signal reason', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        controller.abort(goodError);
+        const result = await abortable(new Promise(() => null), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
+      });
+    });
+
+    describe('when given eventually rejecting promise with not yet aborted signal', () => {
+      const eventuallyReject = async () => {
+        await sleep(10);
+        throw goodError;
+      };
+
+      it('returns promise rejection', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const result = await abortable(eventuallyReject(), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
+      });
+    });
+
+    describe('when given eventually resolving promise with not yet aborted signal', () => {
+      const eventuallyResolve = async () => {
+        await sleep(1);
+        return expectedValue;
+      };
+
+      it('returns promise resolution', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const result = await abortable(eventuallyResolve(), { signal }).catch(e => e);
+        expect(result).to.deep.equal(expectedValue);
+      });
+    });
+
+    describe('when given unresolved promise with eventually aborted signal', () => {
+      it('returns signal reason', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        setTimeout(() => controller.abort(goodError), 1);
+
+        const result = await abortable(new Promise(() => null), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
       });
     });
   });

@@ -16,7 +16,6 @@ declare global {
        * of mongodb-client-encryption.  Ex: `clientSideEncryption: '>=6.0.1'`
        */
       clientSideEncryption?: string | true;
-      serverless?: 'forbid' | 'allow' | 'require';
       auth?: 'enabled' | 'disabled';
       idmsMockServer?: true;
       nodejs?: string;
@@ -84,6 +83,8 @@ declare global {
 
     interface Context {
       configuration: TestConfiguration;
+      /** @deprecated Please use afterEach hooks instead */
+      defer(fn: () => Promise<unknown>): void;
     }
 
     interface Test {

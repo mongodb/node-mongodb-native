@@ -4,6 +4,7 @@ import * as net from 'net';
 import * as sinon from 'sinon';
 
 import {
+  type Collection,
   type CommandFailedEvent,
   type CommandStartedEvent,
   type CommandSucceededEvent,
@@ -17,7 +18,7 @@ import {
   ServerDescription,
   Topology
 } from '../../mongodb';
-import { runLater } from '../../tools/utils';
+import { clearFailPoint, configureFailPoint, runLater } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('class MongoClient', function () {
@@ -30,7 +31,6 @@ describe('class MongoClient', function () {
   afterEach(async () => {
     sinon.restore();
     await client?.close();
-    // @ts-expect-error: Put this variable back to undefined to force tests to make their own client
     client = undefined;
   });
 
@@ -133,6 +133,206 @@ describe('class MongoClient', function () {
 
     const error = await client.connect().catch(error => error);
     expect(error).to.be.instanceOf(MongoServerSelectionError);
+  });
+
+  describe('#connect', function () {
+    context('when keepAliveInitialDelay is provided', function () {
+      context('when the value is 0', function () {
+        const options = { keepAliveInitialDelay: 0 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('passes through the option', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 0
+              })
+            );
+          }
+        });
+      });
+
+      context('when the value is positive', function () {
+        const options = { keepAliveInitialDelay: 100 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('passes through the option', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 100
+              })
+            );
+          }
+        });
+      });
+
+      context('when the value is negative', function () {
+        const options = { keepAliveInitialDelay: -100 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+          await client.connect();
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('the Node.js runtime sets the option to 0', {
+          metadata: { requires: { apiVersion: false } },
+          test: function () {
+            expect(spy).to.have.been.calledWith(
+              sinon.match({
+                keepAlive: true,
+                keepAliveInitialDelay: 0
+              })
+            );
+          }
+        });
+      });
+
+      context('when the value is mistyped', function () {
+        // Set server selection timeout to get the error quicker.
+        const options = { keepAliveInitialDelay: 'test', serverSelectionTimeoutMS: 1000 };
+        let client;
+        let spy;
+
+        beforeEach(async function () {
+          spy = sinon.spy(net, 'createConnection');
+          const uri = this.configuration.url();
+          client = new MongoClient(uri, options);
+        });
+
+        afterEach(async function () {
+          await client?.close();
+          spy.restore();
+        });
+
+        it('throws an error', {
+          metadata: { requires: { apiVersion: false } },
+          test: async function () {
+            const error = await client.connect().catch(error => error);
+            expect(error.message).to.include(
+              'property must be of type number. Received type string'
+            );
+          }
+        });
+      });
+    });
+
+    context('when keepAliveInitialDelay is not provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        spy = sinon.spy(net, 'createConnection');
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets keepalive to 120000', function () {
+        expect(spy).to.have.been.calledWith(
+          sinon.match({
+            keepAlive: true,
+            keepAliveInitialDelay: 120000
+          })
+        );
+      });
+    });
+
+    context('when noDelay is not provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        spy = sinon.spy(net, 'createConnection');
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets noDelay to true', function () {
+        expect(spy).to.have.been.calledWith(
+          sinon.match({
+            noDelay: true
+          })
+        );
+      });
+    });
+
+    context('when noDelay is provided', function () {
+      let client;
+      let spy;
+
+      beforeEach(async function () {
+        const options = { noDelay: false };
+        spy = sinon.spy(net, 'createConnection');
+        const uri = this.configuration.url();
+        client = new MongoClient(uri, options);
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+        spy.restore();
+      });
+
+      it('sets noDelay', {
+        metadata: { requires: { apiVersion: false } },
+        test: function () {
+          expect(spy).to.have.been.calledWith(
+            sinon.match({
+              noDelay: false
+            })
+          );
+        }
+      });
+    });
   });
 
   it('Should correctly pass through appname', {
@@ -456,8 +656,8 @@ describe('class MongoClient', function () {
         const [findCommandStarted] = await findCommandToBeStarted;
 
         expect(findCommandStarted).to.have.property('commandName', 'find');
-        expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-        expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+        expect(client.options).to.not.have.property('__skipPingOnConnect');
+        expect(client.s.options).to.not.have.property('__skipPingOnConnect');
 
         // Assertion is redundant but it shows that no initial ping is run
         expect(findCommandStarted.commandName).to.not.equal('ping');
@@ -475,8 +675,8 @@ describe('class MongoClient', function () {
         const [insertCommandStarted] = await insertOneCommandToBeStarted;
 
         expect(insertCommandStarted).to.have.property('commandName', 'insert');
-        expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-        expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+        expect(client.options).to.not.have.property('__skipPingOnConnect');
+        expect(client.s.options).to.not.have.property('__skipPingOnConnect');
 
         // Assertion is redundant but it shows that no initial ping is run
         expect(insertCommandStarted.commandName).to.not.equal('ping');
@@ -566,7 +766,44 @@ describe('class MongoClient', function () {
     });
   });
 
-  context('#close()', () => {
+  describe('active cursors', function () {
+    let client: MongoClient;
+    let collection: Collection<{ _id: number }>;
+    const kills = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      collection = client.db('activeCursors').collection('activeCursors');
+      await collection.drop().catch(() => null);
+      await collection.insertMany(Array.from({ length: 50 }, (_, _id) => ({ _id })));
+
+      kills.length = 0;
+      client.on('commandStarted', ev => ev.commandName === 'killCursors' && kills.push(ev));
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('are tracked upon creation and removed upon exhaustion', async () => {
+      const cursors = Array.from({ length: 30 }, (_, skip) =>
+        collection.find({}, { skip, batchSize: 1 })
+      );
+      expect(client.s.activeCursors).to.have.lengthOf(30);
+      await Promise.all(cursors.map(c => c.toArray()));
+      expect(client.s.activeCursors).to.have.lengthOf(0);
+      expect(kills).to.have.lengthOf(0);
+    });
+
+    it('are removed from tracking if exhausted in first batch', async () => {
+      const cursors = Array.from({ length: 30 }, () => collection.find());
+      expect(client.s.activeCursors).to.have.lengthOf(30);
+      await Promise.all(cursors.map(c => c.next())); // only one document pulled from each.
+      expect(client.s.activeCursors).to.have.lengthOf(0);
+    });
+  });
+
+  describe('#close()', () => {
     let client: MongoClient;
     let db: Db;
 
@@ -701,7 +938,7 @@ describe('class MongoClient', function () {
       expect(endEvents[0]).to.have.property('reply', undefined); // noReponse: true
     });
 
-    context('when server selection would return no servers', () => {
+    describe('when server selection would return no servers', () => {
       const serverDescription = new ServerDescription('a:1');
 
       it('short circuits and does not end sessions', async () => {
@@ -721,6 +958,169 @@ describe('class MongoClient', function () {
         expect(client.s.sessionPool.sessions).to.have.lengthOf(1);
       });
     });
+
+    context('concurrent calls', () => {
+      let topologyClosedSpy;
+      beforeEach(async function () {
+        await client.connect();
+        const coll = client.db('db').collection('concurrentCalls');
+        const session = client.startSession();
+        await coll.findOne({}, { session: session });
+        topologyClosedSpy = sinon.spy(Topology.prototype, 'close');
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+      });
+
+      context('when two concurrent calls to close() occur', () => {
+        it('does not throw', async function () {
+          await Promise.all([client.close(), client.close()]);
+        });
+
+        it('clean-up logic is performed only once', async function () {
+          await Promise.all([client.close(), client.close()]);
+          expect(topologyClosedSpy).to.have.been.calledOnce;
+        });
+      });
+
+      context('when more than two concurrent calls to close() occur', () => {
+        it('does not throw', async function () {
+          await Promise.all([client.close(), client.close(), client.close(), client.close()]);
+        });
+
+        it('clean-up logic is performed only once', async function () {
+          await client.connect();
+          await Promise.all([
+            client.close(),
+            client.close(),
+            client.close(),
+            client.close(),
+            client.close()
+          ]);
+          expect(topologyClosedSpy).to.have.been.calledOnce;
+        });
+      });
+
+      it('when connect rejects lock is released regardless', async function () {
+        expect(client.topology?.isConnected()).to.be.true;
+
+        const closeStub = sinon.stub(client, 'close');
+        closeStub.onFirstCall().rejects(new Error('cannot close'));
+
+        // first call rejected to simulate a close failure
+        const error = await client.close().catch(error => error);
+        expect(error).to.match(/cannot close/);
+
+        expect(client.topology?.isConnected()).to.be.true;
+        closeStub.restore();
+
+        // second call should close
+        await client.close();
+
+        expect(client.topology).to.be.undefined;
+      });
+    });
+
+    describe('active cursors', function () {
+      let collection: Collection<{ _id: number }>;
+      const kills = [];
+
+      beforeEach(async () => {
+        collection = client.db('test').collection('activeCursors');
+        await collection.drop().catch(() => null);
+        await collection.insertMany(Array.from({ length: 50 }, (_, _id) => ({ _id })));
+
+        kills.length = 0;
+        client.on('commandStarted', ev => ev.commandName === 'killCursors' && kills.push(ev));
+      });
+
+      it('are all closed', async function () {
+        const cursors = Array.from({ length: 30 }, (_, skip) =>
+          collection.find({}, { skip, batchSize: 1 })
+        );
+        await Promise.all(cursors.map(c => c.next()));
+        expect(client.s.activeCursors).to.have.lengthOf(30);
+        await client.close();
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        expect(kills).to.have.lengthOf(this.configuration.topologyType === 'LoadBalanced' ? 0 : 30);
+      });
+
+      it('creating cursors after close adds to activeCursors', async () => {
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        await client.close();
+        collection.find({});
+        expect(client.s.activeCursors).to.have.lengthOf(1);
+      });
+
+      it('rewinding cursors after close adds to activeCursors', async () => {
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        const cursor = collection.find({}, { batchSize: 1 });
+        await cursor.next();
+        expect(client.s.activeCursors).to.have.lengthOf(1);
+        await client.close();
+        expect(client.s.activeCursors).to.have.lengthOf(0);
+        cursor.rewind();
+        expect(client.s.activeCursors).to.have.lengthOf(1);
+      });
+    });
+
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', topology: 'single' } };
+
+    describe(
+      'maxPoolSize is not fully used when running clean up operations',
+      metadata,
+      function () {
+        let client;
+
+        beforeEach(async function () {
+          if (!this.configuration.filters.MongoDBVersionFilter.filter({ metadata })) {
+            return;
+          }
+          if (!this.configuration.filters.MongoDBTopologyFilter.filter({ metadata })) {
+            return;
+          }
+
+          await configureFailPoint(this.configuration, {
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['insert'],
+              blockConnection: true,
+              blockTimeMS: 500
+            }
+          });
+
+          client = this.configuration.newClient({}, { maxPoolSize: 1, monitorCommands: true });
+        });
+
+        afterEach(async function () {
+          await clearFailPoint(this.configuration);
+          await client.close();
+        });
+
+        it(
+          'closes in-use connections before running clean up operations avoiding a deadlock',
+          metadata,
+          async () => {
+            const inserted = client
+              .db('t')
+              .collection('t')
+              .insertOne({ a: 1 })
+              .catch(error => error);
+
+            await once(client, 'commandStarted');
+
+            const start = performance.now();
+            await client.close();
+            await inserted;
+            const end = performance.now();
+
+            expect(end - start).to.be.lessThan(100);
+          }
+        );
+      }
+    );
   });
 
   context('when connecting', function () {
@@ -746,12 +1146,12 @@ describe('class MongoClient', function () {
         metadata: { requires: { topology: ['single'] } },
         test: async function () {
           await client.connect();
-          expect(netSpy).to.have.been.calledWith({
-            autoSelectFamily: false,
-            autoSelectFamilyAttemptTimeout: 100,
-            host: 'localhost',
-            port: 27017
-          });
+          expect(netSpy).to.have.been.calledWith(
+            sinon.match({
+              autoSelectFamily: false,
+              autoSelectFamilyAttemptTimeout: 100
+            })
+          );
         }
       });
     });
@@ -765,13 +1165,60 @@ describe('class MongoClient', function () {
         metadata: { requires: { topology: ['single'] } },
         test: async function () {
           await client.connect();
-          expect(netSpy).to.have.been.calledWith({
-            autoSelectFamily: true,
-            host: 'localhost',
-            port: 27017
-          });
+          expect(netSpy).to.have.been.calledWith(
+            sinon.match({
+              autoSelectFamily: true
+            })
+          );
         }
       });
+    });
+  });
+
+  describe('internal options', function () {
+    describe('__skipPingOnConnect', () => {
+      beforeEach(function () {
+        if (process.env.AUTH !== 'auth') {
+          this.currentTest.skipReason = 'ping count relies on auth to be enabled';
+          this.skip();
+        }
+      });
+
+      const tests = [
+        // only skipInitialPing=true will have no events upon connect
+        { description: 'should skip ping command when set to true', value: true, expectEvents: 0 },
+        {
+          description: 'should not skip ping command when set to false',
+          value: false,
+          expectEvents: 1
+        },
+        {
+          description: 'should not skip ping command when unset',
+          value: undefined,
+          expectEvents: 1
+        }
+      ];
+      for (const { description, value, expectEvents } of tests) {
+        it(description, async function () {
+          const options = value === undefined ? {} : { __skipPingOnConnect: value };
+          const client = this.configuration.newClient({}, { ...options, monitorCommands: true });
+          const events = [];
+          client.on('commandStarted', event => events.push(event));
+
+          try {
+            await client.connect();
+          } finally {
+            await client.close();
+          }
+
+          expect(events).to.have.lengthOf(expectEvents);
+          if (expectEvents > 1) {
+            for (const event of events) {
+              expect(event).to.have.property('commandName', 'ping');
+            }
+          }
+        });
+      }
     });
   });
 });

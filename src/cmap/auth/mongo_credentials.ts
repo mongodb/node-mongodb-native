@@ -6,6 +6,7 @@ import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError
 } from '../../error';
+import type { AWSCredentialProvider } from './aws_temporary_credentials';
 import { GSSAPICanonicalizationValue } from './gssapi';
 import type { OIDCCallbackFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
@@ -68,6 +69,33 @@ export interface AuthMechanismProperties extends Document {
   ALLOWED_HOSTS?: string[];
   /** The resource token for OIDC auth in Azure and GCP. */
   TOKEN_RESOURCE?: string;
+  /**
+   * A custom AWS credential provider to use. An example using the AWS SDK default provider chain:
+   *
+   * ```ts
+   * const client = new MongoClient(process.env.MONGODB_URI, {
+   *   authMechanismProperties: {
+   *     AWS_CREDENTIAL_PROVIDER: fromNodeProviderChain()
+   *   }
+   * });
+   * ```
+   *
+   * Using a custom function that returns AWS credentials:
+   *
+   * ```ts
+   * const client = new MongoClient(process.env.MONGODB_URI, {
+   *   authMechanismProperties: {
+   *     AWS_CREDENTIAL_PROVIDER: async () => {
+   *       return {
+   *         accessKeyId: process.env.ACCESS_KEY_ID,
+   *         secretAccessKey: process.env.SECRET_ACCESS_KEY
+   *       }
+   *     }
+   *   }
+   * });
+   * ```
+   */
+  AWS_CREDENTIAL_PROVIDER?: AWSCredentialProvider;
 }
 
 /** @public */

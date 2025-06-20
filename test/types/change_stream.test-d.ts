@@ -75,6 +75,7 @@ declare const crudChange: CrudChangeDoc;
 expectType<CrudChangeDoc extends ChangeStreamDocumentKey<Schema> ? true : false>(true);
 expectType<number>(crudChange.documentKey._id); // _id will get typed
 expectType<any>(crudChange.documentKey.blah); // shard keys could be anything
+expectType<Date | undefined>(crudChange.wallTime);
 
 // ChangeStreamFullNameSpace
 expectType<ChangeStreamNameSpace>(crudChange.ns);
@@ -87,12 +88,14 @@ switch (change.operationType) {
     expectType<number>(change.documentKey._id);
     expectType<any>(change.documentKey.blah);
     expectType<Schema>(change.fullDocument);
+    expectType<Date | undefined>(change.wallTime);
     break;
   }
   case 'update': {
     expectType<ChangeStreamUpdateDocument<Schema>>(change);
     expectType<'update'>(change.operationType);
     expectType<Schema | undefined>(change.fullDocument); // Update only attaches fullDocument if configured
+    expectType<Date | undefined>(change.wallTime);
     expectType<UpdateDescription<Schema>>(change.updateDescription);
     expectType<Partial<Schema> | undefined>(change.updateDescription.updatedFields);
     expectType<string[] | undefined>(change.updateDescription.removedFields);
@@ -104,23 +107,27 @@ switch (change.operationType) {
   case 'replace': {
     expectType<ChangeStreamReplaceDocument<Schema>>(change);
     expectType<'replace'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     expectType<Schema>(change.fullDocument);
     break;
   }
   case 'delete': {
     expectType<ChangeStreamDeleteDocument<Schema>>(change);
+    expectType<Date | undefined>(change.wallTime);
     expectType<'delete'>(change.operationType);
     break;
   }
   case 'drop': {
     expectType<ChangeStreamDropDocument>(change);
     expectType<'drop'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     expectType<{ db: string; coll: string }>(change.ns);
     break;
   }
   case 'rename': {
     expectType<ChangeStreamRenameDocument>(change);
     expectType<'rename'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     expectType<{ db: string; coll: string }>(change.ns);
     expectType<{ db: string; coll: string }>(change.to);
     break;
@@ -128,37 +135,44 @@ switch (change.operationType) {
   case 'dropDatabase': {
     expectType<ChangeStreamDropDatabaseDocument>(change);
     expectType<'dropDatabase'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     expectError(change.ns.coll);
     break;
   }
   case 'invalidate': {
     expectType<ChangeStreamInvalidateDocument>(change);
     expectType<'invalidate'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     break;
   }
   case 'create': {
     expectType<ChangeStreamCreateDocument>(change);
     expectType<'create'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     break;
   }
   case 'modify': {
     expectType<ChangeStreamCollModDocument>(change);
     expectType<'modify'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     break;
   }
   case 'createIndexes': {
     expectType<ChangeStreamCreateIndexDocument>(change);
     expectType<'createIndexes'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     break;
   }
   case 'dropIndexes': {
     expectType<ChangeStreamDropIndexDocument>(change);
     expectType<'dropIndexes'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     break;
   }
   case 'shardCollection': {
     expectType<ChangeStreamShardCollectionDocument>(change);
     expectType<'shardCollection'>(change.operationType);
+    expectType<Date | undefined>(change.wallTime);
     break;
   }
   case 'reshardCollection': {

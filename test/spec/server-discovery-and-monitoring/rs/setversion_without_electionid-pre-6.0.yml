@@ -15,7 +15,7 @@ phases: [
                 setName: "rs",
                 setVersion: 2,
                 minWireVersion: 0,
-                maxWireVersion: 7
+                maxWireVersion: 16
             }]
         ],
 
@@ -52,7 +52,7 @@ phases: [
                 setName: "rs",
                 setVersion: 1,
                 minWireVersion: 0,
-                maxWireVersion: 7
+                maxWireVersion: 16
             }]
         ],
 
@@ -62,7 +62,7 @@ phases: [
                     type: "Unknown",
                     setName: ,
                     electionId:,
-                    error: "primary marked stale due to electionId/setVersion mismatch"
+                    error: "primary marked stale due to discovery of newer primary"
                 },
                 "b:27017": {
                     type: "RSPrimary",

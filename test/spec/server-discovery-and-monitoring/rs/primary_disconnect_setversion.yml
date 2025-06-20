@@ -37,7 +37,7 @@ phases: [
                     type: "Unknown",
                     setName: ,
                     electionId:,
-                    error: "primary marked stale due to electionId/setVersion mismatch"
+                    error: "primary marked stale due to discovery of newer primary"
                 },
                 "b:27017": {
                     type: "RSPrimary",
@@ -100,6 +100,7 @@ phases: [
                 "a:27017": {
                     type: "Unknown",
                     setName: ,
+                    error: "primary marked stale due to electionId/setVersion mismatch",
                     electionId:
                 },
                 "b:27017": {

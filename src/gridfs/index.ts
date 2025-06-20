@@ -7,7 +7,7 @@ import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
 import { CSOTTimeoutContext } from '../timeout';
-import { resolveOptions } from '../utils';
+import { noop, resolveOptions } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -87,6 +87,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
 
   constructor(db: Db, options?: GridFSBucketOptions) {
     super();
+    this.on('error', noop);
     this.setMaxListeners(0);
     const privateOptions = resolveOptions(db, {
       ...DEFAULT_GRIDFS_BUCKET_OPTIONS,

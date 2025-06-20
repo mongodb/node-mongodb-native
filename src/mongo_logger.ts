@@ -1,6 +1,23 @@
 import { inspect, promisify } from 'util';
 
-import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
+import {
+  type Binary,
+  type BSONRegExp,
+  type BSONSymbol,
+  type Code,
+  type DBRef,
+  type Decimal128,
+  type Document,
+  type Double,
+  EJSON,
+  type EJSONOptions,
+  type Int32,
+  type Long,
+  type MaxKey,
+  type MinKey,
+  type ObjectId,
+  type Timestamp
+} from './bson';
 import type { CommandStartedEvent } from './cmap/command_monitoring_events';
 import type {
   ConnectionCheckedInEvent,
@@ -57,9 +74,13 @@ import type {
   ServerSelectionSucceededEvent,
   WaitingForSuitableServerEvent
 } from './sdam/server_selection_events';
-import { HostAddress, isPromiseLike, parseUnsignedInteger } from './utils';
+import { HostAddress, isPromiseLike, isUint8Array, parseUnsignedInteger } from './utils';
 
-/** @internal */
+/**
+ * @public
+ * Severity levels align with unix syslog.
+ * Most typical driver functions will log to debug.
+ */
 export const SeverityLevel = Object.freeze({
   EMERGENCY: 'emergency',
   ALERT: 'alert',
@@ -75,7 +96,7 @@ export const SeverityLevel = Object.freeze({
 
 /** @internal */
 export const DEFAULT_MAX_DOCUMENT_LENGTH = 1000;
-/** @internal */
+/** @public */
 export type SeverityLevel = (typeof SeverityLevel)[keyof typeof SeverityLevel];
 
 /** @internal */
@@ -113,7 +134,7 @@ export const SEVERITY_LEVEL_MAP = new SeverityLevelMap([
   [SeverityLevel.TRACE, 8]
 ]);
 
-/** @internal */
+/** @public */
 export const MongoLoggableComponent = Object.freeze({
   COMMAND: 'command',
   TOPOLOGY: 'topology',
@@ -122,7 +143,7 @@ export const MongoLoggableComponent = Object.freeze({
   CLIENT: 'client'
 } as const);
 
-/** @internal */
+/** @public */
 export type MongoLoggableComponent =
   (typeof MongoLoggableComponent)[keyof typeof MongoLoggableComponent];
 
@@ -146,13 +167,13 @@ export interface MongoLoggerEnvOptions {
   MONGODB_LOG_PATH?: string;
 }
 
-/** @internal */
+/** @public */
 export interface LogComponentSeveritiesClientOptions {
   /** Optional severity level for command component */
   command?: SeverityLevel;
   /** Optional severity level for topology component */
   topology?: SeverityLevel;
-  /** Optionsl severity level for server selection component */
+  /** Optional severity level for server selection component */
   serverSelection?: SeverityLevel;
   /** Optional severity level for connection component */
   connection?: SeverityLevel;
@@ -274,7 +295,7 @@ function resolveSeverityConfiguration(
   );
 }
 
-/** @internal */
+/** @public */
 export interface Log extends Record<string, any> {
   t: Date;
   c: MongoLoggableComponent;
@@ -283,10 +304,27 @@ export interface Log extends Record<string, any> {
 }
 
 /**
- * @internal
- * TODO: NODE-5671 - remove internal flag and add API comments
+ * @public
+ *
+ * A custom destination for structured logging messages.
  */
 export interface MongoDBLogWritable {
+  /**
+   * This function will be called for every enabled log message.
+   *
+   * It can be sync or async:
+   * - If it is synchronous it will block the driver from proceeding until this method returns.
+   * - If it is asynchronous the driver will not await the returned promise. It will attach fulfillment handling (`.then`).
+   *   If the promise rejects the logger will write an error message to stderr and stop functioning.
+   *   If the promise resolves the driver proceeds to the next log message (or waits for new ones to occur).
+   *
+   * Tips:
+   * - We recommend writing an async `write` function that _never_ rejects.
+   *   Instead handle logging errors as necessary to your use case and make the write function a noop, until it can be recovered.
+   * - The Log messages are structured but **subject to change** since the intended purpose is informational.
+   *   Program against this defensively and err on the side of stringifying whatever is passed in to write in some form or another.
+   *
+   */
   write(log: Log): PromiseLike<unknown> | unknown;
 }
 
@@ -413,6 +451,20 @@ export interface LogConvertible extends Record<string, any> {
   toLog(): Record<string, any>;
 }
 
+type BSONObject =
+  | BSONRegExp
+  | BSONSymbol
+  | Code
+  | DBRef
+  | Decimal128
+  | Double
+  | Int32
+  | Long
+  | MaxKey
+  | MinKey
+  | ObjectId
+  | Timestamp
+  | Binary;
 /** @internal */
 export function stringifyWithMaxLen(
   value: any,
@@ -421,13 +473,107 @@ export function stringifyWithMaxLen(
 ): string {
   let strToTruncate = '';
 
+  let currentLength = 0;
+  const maxDocumentLengthEnsurer = function maxDocumentLengthEnsurer(key: string, value: any) {
+    if (currentLength >= maxDocumentLength) {
+      return undefined;
+    }
+    // Account for root document
+    if (key === '') {
+      // Account for starting brace
+      currentLength += 1;
+      return value;
+    }
+
+    // +4 accounts for 2 quotation marks, colon and comma after value
+    // Note that this potentially undercounts since it does not account for escape sequences which
+    // will have an additional backslash added to them once passed through JSON.stringify.
+    currentLength += key.length + 4;
+
+    if (value == null) return value;
+
+    switch (typeof value) {
+      case 'string':
+        // +2 accounts for quotes
+        // Note that this potentially undercounts similarly to the key length calculation
+        currentLength += value.length + 2;
+        break;
+      case 'number':
+      case 'bigint':
+        currentLength += String(value).length;
+        break;
+      case 'boolean':
+        currentLength += value ? 4 : 5;
+        break;
+      case 'object':
+        if (isUint8Array(value)) {
+          // '{"$binary":{"base64":"<base64 string>","subType":"XX"}}'
+          // This is an estimate based on the fact that the base64 is approximately 1.33x the length of
+          // the actual binary sequence https://en.wikipedia.org/wiki/Base64
+          currentLength += (22 + value.byteLength + value.byteLength * 0.33 + 18) | 0;
+        } else if ('_bsontype' in value) {
+          const v = value as BSONObject;
+          switch (v._bsontype) {
+            case 'Int32':
+              currentLength += String(v.value).length;
+              break;
+            case 'Double':
+              // Account for representing integers as <value>.0
+              currentLength +=
+                (v.value | 0) === v.value ? String(v.value).length + 2 : String(v.value).length;
+              break;
+            case 'Long':
+              currentLength += v.toString().length;
+              break;
+            case 'ObjectId':
+              // '{"$oid":"XXXXXXXXXXXXXXXXXXXXXXXX"}'
+              currentLength += 35;
+              break;
+            case 'MaxKey':
+            case 'MinKey':
+              // '{"$maxKey":1}' or '{"$minKey":1}'
+              currentLength += 13;
+              break;
+            case 'Binary':
+              // '{"$binary":{"base64":"<base64 string>","subType":"XX"}}'
+              // This is an estimate based on the fact that the base64 is approximately 1.33x the length of
+              // the actual binary sequence https://en.wikipedia.org/wiki/Base64
+              currentLength += (22 + value.position + value.position * 0.33 + 18) | 0;
+              break;
+            case 'Timestamp':
+              // '{"$timestamp":{"t":<t>,"i":<i>}}'
+              currentLength += 19 + String(v.t).length + 5 + String(v.i).length + 2;
+              break;
+            case 'Code':
+              // '{"$code":"<code>"}' or '{"$code":"<code>","$scope":<scope>}'
+              if (v.scope == null) {
+                currentLength += v.code.length + 10 + 2;
+              } else {
+                // Ignoring actual scope object, so this undercounts by a significant amount
+                currentLength += v.code.length + 10 + 11;
+              }
+              break;
+            case 'BSONRegExp':
+              // '{"$regularExpression":{"pattern":"<pattern>","options":"<options>"}}'
+              currentLength += 34 + v.pattern.length + 13 + v.options.length + 3;
+              break;
+          }
+        }
+    }
+    return value;
+  };
+
   if (typeof value === 'string') {
     strToTruncate = value;
   } else if (typeof value === 'function') {
     strToTruncate = value.name;
   } else {
     try {
-      strToTruncate = EJSON.stringify(value, options);
+      if (maxDocumentLength !== 0) {
+        strToTruncate = EJSON.stringify(value, maxDocumentLengthEnsurer, 0, options);
+      } else {
+        strToTruncate = EJSON.stringify(value, options);
+      }
     } catch (e) {
       strToTruncate = `Extended JSON serialization failed with: ${e.message}`;
     }

@@ -19,6 +19,7 @@ import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../o
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
+import { type Sort } from '../sort';
 import { type TimeoutContext } from '../timeout';
 import {
   applyRetryableWrites,
@@ -68,7 +69,7 @@ export interface DeleteManyModel<TSchema extends Document = Document> {
 
 /** @public */
 export interface ReplaceOneModel<TSchema extends Document = Document> {
-  /** The filter to limit the replaced document. */
+  /** The filter that specifies which document to replace. In the case of multiple matches, the first document matched is replaced. */
   filter: Filter<TSchema>;
   /** The document with which to replace the matched document. */
   replacement: WithoutId<TSchema>;
@@ -78,11 +79,13 @@ export interface ReplaceOneModel<TSchema extends Document = Document> {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
+  /** Specifies the sort order for the documents matched by the filter. */
+  sort?: Sort;
 }
 
 /** @public */
 export interface UpdateOneModel<TSchema extends Document = Document> {
-  /** The filter to limit the updated documents. */
+  /** The filter that specifies which document to update. In the case of multiple matches, the first document matched is updated. */
   filter: Filter<TSchema>;
   /**
    * The modifications to apply. The value can be either:
@@ -98,6 +101,8 @@ export interface UpdateOneModel<TSchema extends Document = Document> {
   hint?: Hint;
   /** When true, creates a new document if no document matches the query. */
   upsert?: boolean;
+  /** Specifies the sort order for the documents matched by the filter. */
+  sort?: Sort;
 }
 
 /** @public */
@@ -252,7 +257,7 @@ export class BulkWriteResult {
     return this.result.writeErrors.length > 0;
   }
 
-  /** Returns the number of write errors off the bulk operation */
+  /** Returns the number of write errors from the bulk operation */
   getWriteErrorCount(): number {
     return this.result.writeErrors.length;
   }
@@ -285,7 +290,7 @@ export class BulkWriteResult {
         if (i === 0) errmsg = errmsg + ' and ';
       }
 
-      return new WriteConcernError({ errmsg, code: MONGODB_ERROR_CODES.WriteConcernFailed });
+      return new WriteConcernError({ errmsg, code: MONGODB_ERROR_CODES.WriteConcernTimeout });
     }
   }
 
@@ -700,7 +705,7 @@ export class FindOperators {
 
   /** Add a single update operation to the bulk operation */
   updateOne(updateDocument: Document | Document[]): BulkOperationBase {
-    if (!hasAtomicOperators(updateDocument)) {
+    if (!hasAtomicOperators(updateDocument, this.bulkOperation.bsonOptions)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
 
@@ -889,16 +894,14 @@ export abstract class BulkOperationBase {
   /** @internal */
   s: BulkOperationPrivate;
   operationId?: number;
+  private collection: Collection;
 
   /**
    * Create a new OrderedBulkOperation or UnorderedBulkOperation instance
    * @internal
    */
-  constructor(
-    private collection: Collection,
-    options: BulkWriteOptions,
-    isOrdered: boolean
-  ) {
+  constructor(collection: Collection, options: BulkWriteOptions, isOrdered: boolean) {
+    this.collection = collection;
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
@@ -1110,7 +1113,7 @@ export abstract class BulkOperationBase {
           ...op.updateOne,
           multi: false
         });
-        if (!hasAtomicOperators(updateStatement.u)) {
+        if (!hasAtomicOperators(updateStatement.u, this.bsonOptions)) {
           throw new MongoInvalidArgumentError('Update document requires atomic operators');
         }
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);
@@ -1124,7 +1127,7 @@ export abstract class BulkOperationBase {
           ...op.updateMany,
           multi: true
         });
-        if (!hasAtomicOperators(updateStatement.u)) {
+        if (!hasAtomicOperators(updateStatement.u, this.bsonOptions)) {
           throw new MongoInvalidArgumentError('Update document requires atomic operators');
         }
         return this.addToOperationsList(BatchType.UPDATE, updateStatement);

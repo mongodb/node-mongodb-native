@@ -15,6 +15,7 @@ import {
   type Document,
   type HostAddress,
   MongoClient,
+  type MongoClientOptions,
   now,
   OP_MSG,
   Topology,
@@ -108,9 +109,7 @@ export class EventCollector {
   }
 }
 
-export function getEncryptExtraOptions(): {
-  cryptSharedLibPath?: string;
-} {
+export function getEncryptExtraOptions(): MongoClientOptions['autoEncryption']['extraOptions'] {
   if (
     typeof process.env.CRYPT_SHARED_LIB_PATH === 'string' &&
     process.env.CRYPT_SHARED_LIB_PATH.length > 0
@@ -127,34 +126,7 @@ export function getEnvironmentalOptions() {
       serverApi: { version: process.env.MONGODB_API_VERSION }
     });
   }
-  if (process.env.SERVERLESS) {
-    Object.assign(options, {
-      auth: {
-        username: process.env.SERVERLESS_ATLAS_USER,
-        password: process.env.SERVERLESS_ATLAS_PASSWORD
-      },
-      tls: true,
-      compressors: 'snappy,zlib'
-    });
-  }
   return options;
-}
-
-export function shouldRunServerlessTest(testRequirement: any, isServerless: any) {
-  if (!testRequirement) return true;
-  switch (testRequirement) {
-    case 'forbid':
-      // return true if the configuration is NOT serverless
-      return !isServerless;
-    case 'allow':
-      // always return true
-      return true;
-    case 'require':
-      // only return true if the configuration is serverless
-      return isServerless;
-    default:
-      throw new Error(`Invalid serverless filter: ${testRequirement}`);
-  }
 }
 
 /**
@@ -622,7 +594,7 @@ export async function clearFailPoint(configuration: TestConfiguration, url = con
 
 export async function makeMultiBatchWrite(
   configuration: TestConfiguration
-): Promise<AnyClientBulkWriteModel[]> {
+): Promise<AnyClientBulkWriteModel<any>[]> {
   const { maxBsonObjectSize, maxMessageSizeBytes } = await configuration.hello();
 
   const length = maxMessageSizeBytes / maxBsonObjectSize + 1;
@@ -637,10 +609,10 @@ export async function makeMultiBatchWrite(
 
 export async function makeMultiResponseBatchModelArray(
   configuration: TestConfiguration
-): Promise<AnyClientBulkWriteModel[]> {
+): Promise<AnyClientBulkWriteModel<any>[]> {
   const { maxBsonObjectSize } = await configuration.hello();
   const namespace = `foo.${new BSON.ObjectId().toHexString()}`;
-  const models: AnyClientBulkWriteModel[] = [
+  const models: AnyClientBulkWriteModel<any>[] = [
     {
       name: 'updateOne',
       namespace,
@@ -693,3 +665,35 @@ export function mergeTestMetadata(
     }
   };
 }
+
+export function findLast<T, S extends T>(
+  array: T[],
+  predicate: (value: T, index: number, array: T[]) => value is S,
+  thisArg?: any
+): S | undefined;
+export function findLast<T>(
+  array: T[],
+  predicate: (value: T, index: number, array: T[]) => boolean,
+  thisArg?: any
+): T | undefined;
+export function findLast(
+  array: unknown[],
+  predicate: (value: unknown, index: number, array: unknown[]) => boolean,
+  thisArg?: any
+): unknown | undefined {
+  if (typeof array.findLast === 'function') return array.findLast(predicate, thisArg);
+  return array.slice().reverse().find(predicate, thisArg);
+}
+
+// Node.js 16 doesn't make this global, but it can still be obtained.
+export const DOMException: {
+  new: (
+    message?: string,
+    nameOrOptions?: string | { name?: string; cause?: unknown }
+  ) => DOMException;
+} = (() => {
+  if (globalThis.DOMException != null) return globalThis.DOMException;
+  const ac = new AbortController();
+  ac.abort();
+  return ac.signal.reason.constructor;
+})();

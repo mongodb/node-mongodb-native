@@ -1,0 +1,20 @@
+{
+    "escCollection": "enxcol_.qe.esc",
+    "ecocCollection": "enxcol_.qe.ecoc",
+    "fields": [
+        {
+            "keyId": {
+                "$binary": {
+                    "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                    "subType": "04"
+                }
+            },
+            "path": "qe",
+            "bsonType": "string",
+            "queries": {
+                "queryType": "equality",
+                "contention": 0
+            }
+        }
+    ]
+}

@@ -77,7 +77,7 @@
             "type": "Unknown",
             "setName": null,
             "electionId": null,
-            "error": "primary marked stale due to electionId/setVersion mismatch"
+            "error": "primary marked stale due to discovery of newer primary"
           },
           "b:27017": {
             "type": "RSPrimary",

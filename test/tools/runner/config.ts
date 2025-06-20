@@ -1,18 +1,27 @@
+import * as util from 'node:util';
+import * as types from 'node:util/types';
+
 import { expect } from 'chai';
+import { type Context } from 'mocha';
 import ConnectionString from 'mongodb-connection-string-url';
 import * as qs from 'querystring';
 import * as url from 'url';
 
 import {
   type AuthMechanism,
+  Double,
   HostAddress,
+  Long,
   MongoClient,
   type MongoClientOptions,
+  ObjectId,
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
 } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
+import { type Filter } from './filters/filter';
+import { flakyTests } from './flaky';
 
 interface ProxyParams {
   proxyHost?: string;
@@ -60,14 +69,12 @@ export class TestConfiguration {
   clientSideEncryption: {
     enabled: boolean;
     mongodbClientEncryption: any;
-    CSFLE_KMS_PROVIDERS: string | undefined;
     version: string;
     libmongocrypt: string | null;
   };
   parameters: Record<string, any>;
   singleMongosLoadBalancerUri: string;
   multiMongosLoadBalancerUri: string;
-  isServerless: boolean;
   topologyType: TopologyType;
   buildInfo: Record<string, any>;
   options: {
@@ -86,7 +93,7 @@ export class TestConfiguration {
   serverApi?: ServerApi;
   activeResources: number;
   isSrv: boolean;
-  serverlessCredentials: { username: string | undefined; password: string | undefined };
+  filters: Record<string, Filter>;
 
   constructor(
     private uri: string,
@@ -100,7 +107,6 @@ export class TestConfiguration {
     this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
-    this.isServerless = !!process.env.SERVERLESS;
     this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.buildInfo = context.buildInfo;
     this.serverApi = context.serverApi;
@@ -110,10 +116,7 @@ export class TestConfiguration {
       hostAddresses,
       hostAddress: hostAddresses[0],
       host: hostAddresses[0].host,
-      port:
-        typeof hostAddresses[0].host === 'string' && !this.isServerless
-          ? hostAddresses[0].port
-          : undefined,
+      port: typeof hostAddresses[0].host === 'string' && hostAddresses[0].port,
       db: url.pathname.slice(1) ? url.pathname.slice(1) : 'integration_tests',
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
@@ -131,16 +134,14 @@ export class TestConfiguration {
         password: url.password
       };
     }
-    if (context.serverlessCredentials) {
-      const { username, password } = context.serverlessCredentials;
-      this.options.auth = { username, password, authSource: 'admin' };
-    }
+
+    this.filters = Object.fromEntries(
+      context.filters.map(filter => [filter.constructor.name, filter])
+    );
   }
 
   get isLoadBalanced() {
-    return (
-      !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri && !this.isServerless
-    );
+    return !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri;
   }
 
   writeConcern() {
@@ -201,6 +202,10 @@ export class TestConfiguration {
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
     serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
 
+    if (this.loggingEnabled && !Object.hasOwn(serverOptions, 'mongodbLogPath')) {
+      serverOptions = this.setupLogging(serverOptions);
+    }
+
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {
       if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
@@ -251,15 +256,15 @@ export class TestConfiguration {
       delete queryOptions.writeConcern;
     }
 
-    if (this.topologyType === TopologyType.LoadBalanced && !this.isServerless) {
+    if (this.topologyType === TopologyType.LoadBalanced) {
       queryOptions.loadBalanced = true;
     }
 
     const urlOptions: url.UrlObject = {
-      protocol: this.isServerless ? 'mongodb+srv' : 'mongodb',
+      protocol: 'mongodb',
       slashes: true,
       hostname: dbHost,
-      port: this.isServerless ? null : dbPort,
+      port: dbPort,
       query: queryOptions,
       pathname: '/'
     };
@@ -320,7 +325,7 @@ export class TestConfiguration {
 
     const FILLER_HOST = 'fillerHost';
 
-    const protocol = this.isServerless ? 'mongodb+srv' : 'mongodb';
+    const protocol = 'mongodb';
     const url = new URL(`${protocol}://${FILLER_HOST}`);
 
     if (options.replicaSet) {
@@ -348,7 +353,7 @@ export class TestConfiguration {
       url.password = password;
     }
 
-    if (this.isLoadBalanced && !this.isServerless) {
+    if (this.isLoadBalanced) {
       url.searchParams.append('loadBalanced', 'true');
     }
 
@@ -367,14 +372,10 @@ export class TestConfiguration {
       if (options.authSource) {
         url.searchParams.append('authSource', options.authSource);
       }
-    } else if (this.isServerless) {
-      url.searchParams.append('ssl', 'true');
-      url.searchParams.append('authSource', 'admin');
     }
 
     let actualHostsString;
-    // Ignore multi mongos options in serverless testing.
-    if (options.useMultipleMongoses && !this.isServerless) {
+    if (options.useMultipleMongoses) {
       if (this.isLoadBalanced) {
         const multiUri = new ConnectionString(this.multiMongosLoadBalancerUri);
         if (multiUri.isSRV) {
@@ -386,7 +387,7 @@ export class TestConfiguration {
         actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
       }
     } else {
-      if (this.isLoadBalanced || this.isServerless) {
+      if (this.isLoadBalanced) {
         const singleUri = new ConnectionString(this.singleMongosLoadBalancerUri);
         actualHostsString = singleUri.hosts[0].toString();
       } else {
@@ -423,6 +424,59 @@ export class TestConfiguration {
   makeAtlasTestConfiguration(): AtlasTestConfiguration {
     return new AtlasTestConfiguration(this.uri, this.context);
   }
+
+  loggingEnabled = false;
+  logs = [];
+  /**
+   * Known flaky tests that we want to turn on logging for
+   * so that we can get a better idea of what is failing when it fails
+   */
+  testsToEnableLogging = flakyTests;
+
+  setupLogging(options: MongoClientOptions, id?: string) {
+    id ??= new ObjectId().toString();
+    this.logs = [];
+    const write = log => this.logs.push({ t: log.t, id, ...log });
+    options.mongodbLogPath = { write };
+    options.mongodbLogComponentSeverities = { default: 'trace' };
+    options.mongodbLogMaxDocumentLength = 300;
+    return options;
+  }
+
+  beforeEachLogging(ctx: Context) {
+    this.loggingEnabled = this.testsToEnableLogging.includes(ctx.currentTest.fullTitle());
+  }
+
+  afterEachLogging(ctx: Context) {
+    if (this.loggingEnabled && ctx.currentTest.state === 'failed') {
+      for (const log of this.logs) {
+        console.error(
+          JSON.stringify(
+            log,
+            function (_, value) {
+              if (types.isMap(value)) return { Map: Array.from(value.entries()) };
+              if (types.isSet(value)) return { Set: Array.from(value.values()) };
+              if (types.isNativeError(value)) return { [value.name]: util.inspect(value) };
+              if (typeof value === 'bigint') return { bigint: new Long(value).toExtendedJSON() };
+              if (typeof value === 'symbol') return `Symbol(${value.description})`;
+              if (typeof value === 'number') {
+                if (Number.isNaN(value) || !Number.isFinite(value) || Object.is(value, -0))
+                  // @ts-expect-error: toExtendedJSON internal on double but not on long
+                  return { number: new Double(value).toExtendedJSON() };
+              }
+              if (Buffer.isBuffer(value))
+                return { [value.constructor.name]: Buffer.prototype.base64Slice.call(value) };
+              if (value === undefined) return { undefined: 'key was set but equal to undefined' };
+              return value;
+            },
+            0
+          )
+        );
+      }
+    }
+    this.loggingEnabled = false;
+    this.logs = [];
+  }
 }
 
 /**
@@ -454,5 +508,25 @@ export class AstrolabeTestConfiguration extends TestConfiguration {
   override url(): string {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return process.env.DRIVERS_ATLAS_TESTING_URI!;
+  }
+}
+
+export class AlpineTestConfiguration extends TestConfiguration {
+  override newClient(
+    urlOrQueryOptions?: string | Record<string, any>,
+    serverOptions?: MongoClientOptions
+  ): MongoClient {
+    const options = serverOptions ?? {};
+
+    if (options.autoEncryption) {
+      const extraOptions: MongoClientOptions['autoEncryption']['extraOptions'] = {
+        ...options.autoEncryption.extraOptions,
+        mongocryptdBypassSpawn: true,
+        mongocryptdURI: process.env.MONGOCRYPTD_URI
+      };
+      options.autoEncryption.extraOptions = extraOptions;
+    }
+
+    return super.newClient(urlOrQueryOptions, options);
   }
 }

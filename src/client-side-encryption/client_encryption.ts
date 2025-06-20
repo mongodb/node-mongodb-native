@@ -34,6 +34,8 @@ import {
 } from './errors';
 import {
   type ClientEncryptionDataKeyProvider,
+  type CredentialProviders,
+  isEmptyCredentials,
   type KMSProviders,
   refreshKMSCredentials
 } from './providers/index';
@@ -82,6 +84,9 @@ export class ClientEncryption {
   _mongoCrypt: MongoCrypt;
 
   /** @internal */
+  _credentialProviders?: CredentialProviders;
+
+  /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {
     const encryption = getMongoDBClientEncryption();
     if ('kModuleError' in encryption) {
@@ -125,6 +130,13 @@ export class ClientEncryption {
     this._kmsProviders = options.kmsProviders || {};
     const { timeoutMS } = resolveTimeoutOptions(client, options);
     this._timeoutMS = timeoutMS;
+    this._credentialProviders = options.credentialProviders;
+
+    if (options.credentialProviders?.aws && !isEmptyCredentials('aws', this._kmsProviders)) {
+      throw new MongoCryptInvalidArgumentError(
+        'Can only provide a custom AWS credential provider when the state machine is configured for automatic AWS credential fetching'
+      );
+    }
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -225,7 +237,7 @@ export class ClientEncryption {
       TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }));
 
     const dataKey = deserialize(
-      await stateMachine.execute(this, context, timeoutContext)
+      await stateMachine.execute(this, context, { timeoutContext })
     ) as DataKey;
 
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
@@ -293,7 +305,9 @@ export class ClientEncryption {
       resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS })
     );
 
-    const { v: dataKeys } = deserialize(await stateMachine.execute(this, context, timeoutContext));
+    const { v: dataKeys } = deserialize(
+      await stateMachine.execute(this, context, { timeoutContext })
+    );
     if (dataKeys.length === 0) {
       return {};
     }
@@ -696,7 +710,7 @@ export class ClientEncryption {
         ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
         : undefined;
 
-    const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
+    const { v } = deserialize(await stateMachine.execute(this, context, { timeoutContext }));
 
     return v;
   }
@@ -710,7 +724,7 @@ export class ClientEncryption {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._credentialProviders);
   }
 
   static get libmongocryptVersion() {
@@ -780,7 +794,7 @@ export class ClientEncryption {
       this._timeoutMS != null
         ? TimeoutContext.create(resolveTimeoutOptions(this._client, { timeoutMS: this._timeoutMS }))
         : undefined;
-    const { v } = deserialize(await stateMachine.execute(this, context, timeoutContext));
+    const { v } = deserialize(await stateMachine.execute(this, context, { timeoutContext }));
     return v;
   }
 }
@@ -857,6 +871,11 @@ export interface ClientEncryptionOptions {
   kmsProviders?: KMSProviders;
 
   /**
+   * Options for user provided custom credential providers.
+   */
+  credentialProviders?: CredentialProviders;
+
+  /**
    * Options for specifying a Socks5 proxy to use for connecting to the KMS.
    */
   proxyOptions?: ProxyOptions;
@@ -865,6 +884,11 @@ export interface ClientEncryptionOptions {
    * TLS options for kms providers to use.
    */
   tlsOptions?: CSFLEKMSTlsOptions;
+
+  /**
+   * Sets the expiration time for the DEK in the cache in milliseconds. Defaults to 60000. 0 means no timeout.
+   */
+  keyExpirationMS?: number;
 
   /**
    * @experimental

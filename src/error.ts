@@ -1,10 +1,10 @@
-import type { Document, ObjectId } from './bson';
+import type { Document } from './bson';
 import {
   type ClientBulkWriteError,
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
 import type { ServerType } from './sdam/common';
-import type { ServerDescription, TopologyVersion } from './sdam/server_description';
+import type { TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
 
 /** @public */
@@ -56,7 +56,8 @@ export const MONGODB_ERROR_CODES = Object.freeze({
   FailedToSatisfyReadPreference: 133,
   CursorNotFound: 43,
   LegacyNotPrimary: 10058,
-  WriteConcernFailed: 64,
+  // WriteConcernTimeout is WriteConcernFailed on pre-8.1 servers
+  WriteConcernTimeout: 64,
   NamespaceNotFound: 26,
   IllegalOperation: 20,
   MaxTimeMSExpired: 50,
@@ -355,16 +356,8 @@ export class MongoStalePrimaryError extends MongoRuntimeError {
    *
    * @public
    **/
-  constructor(
-    serverDescription: ServerDescription,
-    maxSetVersion: number | null,
-    maxElectionId: ObjectId | null,
-    options?: { cause?: Error }
-  ) {
-    super(
-      `primary marked stale due to electionId/setVersion mismatch: server setVersion: ${serverDescription.setVersion}, server electionId: ${serverDescription.electionId}, topology setVersion: ${maxSetVersion}, topology electionId: ${maxElectionId}`,
-      options
-    );
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -1022,6 +1015,34 @@ export class MongoTopologyClosedError extends MongoAPIError {
 
   override get name(): string {
     return 'MongoTopologyClosedError';
+  }
+}
+
+/**
+ * An error generated when the MongoClient is closed and async
+ * operations are interrupted.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoClientClosedError extends MongoAPIError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor() {
+    super('Operation interrupted because client was closed');
+  }
+
+  override get name(): string {
+    return 'MongoClientClosedError';
   }
 }
 

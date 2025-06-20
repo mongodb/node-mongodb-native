@@ -18,6 +18,7 @@ import type { ClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
+import { type AbstractCursor } from './cursor/abstract_cursor';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
@@ -56,6 +57,7 @@ import {
   hostMatchesWildcards,
   isHostMatch,
   type MongoDBNamespace,
+  noop,
   ns,
   resolveOptions,
   squashError
@@ -113,7 +115,12 @@ export type SupportedTLSSocketOptions = Pick<
 
 /** @public */
 export type SupportedSocketOptions = Pick<
-  TcpNetConnectOpts & { autoSelectFamily?: boolean; autoSelectFamilyAttemptTimeout?: number },
+  TcpNetConnectOpts & {
+    autoSelectFamily?: boolean;
+    autoSelectFamilyAttemptTimeout?: number;
+    /** Node.JS socket option to set the time the first keepalive probe is sent on an idle socket. Defaults to 120000ms */
+    keepAliveInitialDelay?: number;
+  },
   (typeof LEGAL_TCP_SOCKET_OPTIONS)[number]
 >;
 
@@ -277,29 +284,29 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   proxyPassword?: string;
   /** Instructs the driver monitors to use a specific monitoring mode */
   serverMonitoringMode?: ServerMonitoringMode;
+  /**
+   * @public
+   * Specifies the destination of the driver's logging. The default is stderr.
+   */
+  mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  /**
+   * @public
+   * Enable logging level per component or use `default` to control any unset components.
+   */
+  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
+  /**
+   * @public
+   * All BSON documents are stringified to EJSON. This controls the maximum length of those strings.
+   * It is defaulted to 1000.
+   */
+  mongodbLogMaxDocumentLength?: number;
 
   /** @internal */
   srvPoller?: SrvPoller;
   /** @internal */
   connectionType?: typeof Connection;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
-  /**
-   * @internal
-   * TODO: NODE-5671 - remove internal flag
-   */
-  mongodbLogMaxDocumentLength?: number;
-
   /** @internal */
-  [featureFlag: symbol]: any;
+  __skipPingOnConnect?: boolean;
 }
 
 /** @public */
@@ -318,6 +325,12 @@ export interface MongoClientPrivate {
    * - used to notify the leak checker in our tests if test author forgot to clean up explicit sessions
    */
   readonly activeSessions: Set<ClientSession>;
+  /**
+   * We keep a reference to the cursors that are created from this client.
+   * - used to track and close all cursors in client.close().
+   *   Cursors in this set are ones that still need to have their close method invoked (no other conditions are considered)
+   */
+  readonly activeCursors: Set<AbstractCursor>;
   readonly sessionPool: ServerSessionPool;
   readonly options: MongoOptions;
   readonly readConcern?: ReadConcern;
@@ -334,22 +347,35 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
 };
 
 /**
- * The **MongoClient** class is a class that allows for making Connections to MongoDB.
  * @public
  *
+ * The **MongoClient** class is a class that allows for making Connections to MongoDB.
+ *
+ * **NOTE:** The programmatically provided options take precedence over the URI options.
+ *
  * @remarks
- * The programmatically provided options take precedence over the URI options.
+ *
+ * A MongoClient is the entry point to connecting to a MongoDB server.
+ *
+ * It handles a multitude of features on your application's behalf:
+ * - **Server Host Connection Configuration**: A MongoClient is responsible for reading TLS cert, ca, and crl files if provided.
+ * - **SRV Record Polling**: A "`mongodb+srv`" style connection string is used to have the MongoClient resolve DNS SRV records of all server hostnames which the driver periodically monitors for changes and adjusts its current view of hosts correspondingly.
+ * - **Server Monitoring**: The MongoClient automatically keeps monitoring the health of server nodes in your cluster to reach out to the correct and lowest latency one available.
+ * - **Connection Pooling**: To avoid paying the cost of rebuilding a connection to the server on every operation the MongoClient keeps idle connections preserved for reuse.
+ * - **Session Pooling**: The MongoClient creates logical sessions that enable retryable writes, causal consistency, and transactions. It handles pooling these sessions for reuse in subsequent operations.
+ * - **Cursor Operations**: A MongoClient's cursors use the health monitoring system to send the request for more documents to the same server the query began on.
+ * - **Mongocryptd process**: When using auto encryption, a MongoClient will launch a `mongocryptd` instance for handling encryption if the mongocrypt shared library isn't in use.
+ *
+ * There are many more features of a MongoClient that are not listed above.
+ *
+ * In order to enable these features, a number of asynchronous Node.js resources are established by the driver: Timers, FS Requests, Sockets, etc.
+ * For details on cleanup, please refer to the MongoClient `close()` documentation.
  *
  * @example
  * ```ts
  * import { MongoClient } from 'mongodb';
- *
  * // Enable command monitoring for debugging
- * const client = new MongoClient('mongodb://localhost:27017', { monitorCommands: true });
- *
- * client.on('commandStarted', started => console.log(started));
- * client.db().collection('pets');
- * await client.insertOne({ name: 'spot', kind: 'dog' });
+ * const client = new MongoClient('mongodb://localhost:27017?appName=mflix', { monitorCommands: true });
  * ```
  */
 export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements AsyncDisposable {
@@ -361,6 +387,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   override readonly mongoLogger: MongoLogger | undefined;
   /** @internal */
   private connectionLock?: Promise<this>;
+  /** @internal */
+  private closeLock?: Promise<void>;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -372,6 +400,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   constructor(url: string, options?: MongoClientOptions) {
     super();
+    this.on('error', noop);
 
     this.options = parseOptions(url, this, options);
 
@@ -393,6 +422,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       hasBeenClosed: false,
       sessionPool: new ServerSessionPool(this),
       activeSessions: new Set(),
+      activeCursors: new Set(),
       authProviders: new MongoClientAuthProviders(),
 
       get options() {
@@ -516,6 +546,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
    * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
    *
+   * @remarks
+   * The driver will look up corresponding SRV and TXT records if the connection string starts with `mongodb+srv://`.
+   * If those look ups throw a DNS Timeout error, the driver will retry the look up once.
+   *
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   async connect(): Promise<this> {
@@ -620,19 +654,66 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * Cleans up client-side resources used by the MongoCLient and .  This includes:
+   * Cleans up resources managed by the MongoClient.
    *
-   * - Closes all open, unused connections (see note).
-   * - Ends all in-use sessions with {@link ClientSession#endSession|ClientSession.endSession()}.
-   * - Ends all unused sessions server-side.
-   * - Cleans up any resources being used for auto encryption if auto encryption is enabled.
+   * The close method clears and closes all resources whose lifetimes are managed by the MongoClient.
+   * Please refer to the `MongoClient` class documentation for a high level overview of the client's key features and responsibilities.
    *
-   * @remarks Any in-progress operations are not killed and any connections used by in progress operations
-   * will be cleaned up lazily as operations finish.
+   * **However,** the close method does not handle the cleanup of resources explicitly created by the user.
+   * Any user-created driver resource with its own `close()` method should be explicitly closed by the user before calling MongoClient.close().
+   * This method is written as a "best effort" attempt to leave behind the least amount of resources server-side when possible.
    *
-   * @param force - Force close, emitting no events
+   * The following list defines ideal preconditions and consequent pitfalls if they are not met.
+   * The MongoClient, ClientSession, Cursors and ChangeStreams all support [explicit resource management](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-2.html).
+   * By using explicit resource management to manage the lifetime of driver resources instead of manually managing their lifetimes, the pitfalls outlined below can be avoided.
+   *
+   * The close method performs the following in the order listed:
+   * - Client-side:
+   *   - **Close in-use connections**: Any connections that are currently waiting on a response from the server will be closed.
+   *     This is performed _first_ to avoid reaching the next step (server-side clean up) and having no available connections to check out.
+   *     - _Ideal_: All operations have been awaited or cancelled, and the outcomes, regardless of success or failure, have been processed before closing the client servicing the operation.
+   *     - _Pitfall_: When `client.close()` is called and all connections are in use, after closing them, the client must create new connections for cleanup operations, which comes at the cost of new TLS/TCP handshakes and authentication steps.
+   * - Server-side:
+   *   - **Close active cursors**: All cursors that haven't been completed will have a `killCursor` operation sent to the server they were initialized on, freeing the server-side resource.
+   *     - _Ideal_: Cursors are explicitly closed or completed before `client.close()` is called.
+   *     - _Pitfall_: `killCursors` may have to build a new connection if the in-use closure ended all pooled connections.
+   *   - **End active sessions**: In-use sessions created with `client.startSession()` or `client.withSession()` or implicitly by the driver will have their `.endSession()` method called.
+   *     Contrary to the name of the method, `endSession()` returns the session to the client's pool of sessions rather than end them on the server.
+   *     - _Ideal_: Transaction outcomes are awaited and their corresponding explicit sessions are ended before `client.close()` is called.
+   *     - _Pitfall_: **This step aborts in-progress transactions**. It is advisable to observe the outcome of a transaction before closing your client.
+   *   - **End all pooled sessions**: The `endSessions` command with all session IDs the client has pooled is sent to the server to inform the cluster it can clean them up.
+   *     - _Ideal_: No user intervention is expected.
+   *     - _Pitfall_: None.
+   *
+   * The remaining shutdown is of the MongoClient resources that are intended to be entirely internal but is documented here as their existence relates to the JS event loop.
+   *
+   * - Client-side (again):
+   *   - **Stop all server monitoring**: Connections kept live for detecting cluster changes and roundtrip time measurements are shutdown.
+   *   - **Close all pooled connections**: Each server node in the cluster has a corresponding connection pool and all connections in the pool are closed. Any operations waiting to check out a connection will have an error thrown instead of a connection returned.
+   *   - **Clear out server selection queue**: Any operations that are in the process of waiting for a server to be selected will have an error thrown instead of a server returned.
+   *   - **Close encryption-related resources**: An internal MongoClient created for communicating with `mongocryptd` or other encryption purposes is closed. (Using this same method of course!)
+   *
+   * After the close method completes there should be no MongoClient related resources [ref-ed in Node.js' event loop](https://docs.libuv.org/en/v1.x/handle.html#reference-counting).
+   * This should allow Node.js to exit gracefully if MongoClient resources were the only active handles in the event loop.
+   *
+   * @param _force - currently an unused flag that has no effect. Defaults to `false`.
    */
-  async close(force = false): Promise<void> {
+  async close(_force = false): Promise<void> {
+    if (this.closeLock) {
+      return await this.closeLock;
+    }
+
+    try {
+      this.closeLock = this._close();
+      await this.closeLock;
+    } finally {
+      // release
+      this.closeLock = undefined;
+    }
+  }
+
+  /* @internal */
+  private async _close(): Promise<void> {
     // There's no way to set hasBeenClosed back to false
     Object.defineProperty(this.s, 'hasBeenClosed', {
       value: true,
@@ -640,6 +721,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       configurable: false,
       writable: false
     });
+
+    this.topology?.closeCheckedOutConnections();
+
+    const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
+    this.s.activeCursors.clear();
+
+    await Promise.all(activeCursorCloses);
 
     const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
     this.s.activeSessions.clear();
@@ -681,7 +769,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
     const { encrypter } = this.options;
     if (encrypter) {
-      await encrypter.close(this, force);
+      await encrypter.close(this);
     }
   }
 
@@ -721,6 +809,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    *
    * @remarks
    * The programmatically provided options take precedence over the URI options.
+   *
+   * @remarks
+   * The driver will look up corresponding SRV and TXT records if the connection string starts with `mongodb+srv://`.
+   * If those look ups throw a DNS Timeout error, the driver will retry the look up once.
    *
    * @see https://www.mongodb.com/docs/manual/reference/connection-string/
    */
@@ -1006,9 +1098,6 @@ export interface MongoOptions
   tlsCRLFile?: string;
   tlsCertificateKeyFile?: string;
 
-  /** @internal */
-  [featureFlag: symbol]: any;
-
   /**
    * @internal
    * TODO: NODE-5671 - remove internal flag
@@ -1020,4 +1109,6 @@ export interface MongoOptions
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
   timeoutMS?: number;
+  /** @internal */
+  __skipPingOnConnect?: boolean;
 }

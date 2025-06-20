@@ -11,12 +11,18 @@ import { kDecorateResult } from '../constants';
 import { getMongoDBClientEncryption } from '../deps';
 import { MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
+import { type Abortable } from '../mongo_types';
 import { MongoDBCollectionNamespace } from '../utils';
 import { autoSelectSocketOptions } from './client_encryption';
 import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
-import { type KMSProviders, refreshKMSCredentials } from './providers';
+import {
+  type CredentialProviders,
+  isEmptyCredentials,
+  type KMSProviders,
+  refreshKMSCredentials
+} from './providers';
 import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /** @public */
@@ -29,6 +35,8 @@ export interface AutoEncryptionOptions {
   keyVaultNamespace?: string;
   /** Configuration options that are used by specific KMS providers during key generation, encryption, and decryption. */
   kmsProviders?: KMSProviders;
+  /** Configuration options for custom credential providers. */
+  credentialProviders?: CredentialProviders;
   /**
    * A map of namespaces to a local JSON schema for encryption
    *
@@ -44,6 +52,10 @@ export interface AutoEncryptionOptions {
   bypassAutoEncryption?: boolean;
   /** Allows users to bypass query analysis */
   bypassQueryAnalysis?: boolean;
+  /**
+   * Sets the expiration time for the DEK in the cache in milliseconds. Defaults to 60000.  0 means no timeout.
+   */
+  keyExpirationMS?: number;
   options?: {
     /** An optional hook to catch logging messages from the underlying encryption engine */
     logger?: (level: AutoEncryptionLoggerLevel, message: string) => void;
@@ -152,6 +164,7 @@ export class AutoEncrypter {
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
+  _credentialProviders?: CredentialProviders;
 
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
@@ -236,8 +249,16 @@ export class AutoEncrypter {
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
+    this._credentialProviders = options.credentialProviders;
+
+    if (options.credentialProviders?.aws && !isEmptyCredentials('aws', this._kmsProviders)) {
+      throw new MongoCryptInvalidArgumentError(
+        'Can only provide a custom AWS credential provider when the state machine is configured for automatic AWS credential fetching'
+      );
+    }
 
     const mongoCryptOptions: MongoCryptOptions = {
+      enableMultipleCollinfo: true,
       cryptoCallbacks
     };
     if (options.schemaMap) {
@@ -266,6 +287,10 @@ export class AutoEncrypter {
 
     if (options.bypassQueryAnalysis) {
       mongoCryptOptions.bypassQueryAnalysis = options.bypassQueryAnalysis;
+    }
+
+    if (options.keyExpirationMS != null) {
+      mongoCryptOptions.keyExpirationMS = options.keyExpirationMS;
     }
 
     this._bypassMongocryptdAndCryptShared = this._bypassEncryption || !!options.bypassQueryAnalysis;
@@ -348,22 +373,18 @@ export class AutoEncrypter {
       const client = await this._mongocryptdClient.connect();
       return client;
     } catch (error) {
-      const { message } = error;
-      if (message && (message.match(/timed out after/) || message.match(/ENOTFOUND/))) {
-        throw new MongoRuntimeError(
-          'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
-          { cause: error }
-        );
-      }
-      throw error;
+      throw new MongoRuntimeError(
+        'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
+        { cause: error }
+      );
     }
   }
 
   /**
    * Cleans up the `_mongocryptdClient`, if present.
    */
-  async teardown(force: boolean): Promise<void> {
-    await this._mongocryptdClient?.close(force);
+  async close(): Promise<void> {
+    await this._mongocryptdClient?.close();
   }
 
   /**
@@ -372,8 +393,10 @@ export class AutoEncrypter {
   async encrypt(
     ns: string,
     cmd: Document,
-    options: CommandOptions = {}
+    options: CommandOptions & Abortable = {}
   ): Promise<Document | Uint8Array> {
+    options.signal?.throwIfAborted();
+
     if (this._bypassEncryption) {
       // If `bypassAutoEncryption` has been specified, don't encrypt
       return cmd;
@@ -398,7 +421,7 @@ export class AutoEncrypter {
       socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
-    return deserialize(await stateMachine.execute(this, context, options.timeoutContext), {
+    return deserialize(await stateMachine.execute(this, context, options), {
       promoteValues: false,
       promoteLongs: false
     });
@@ -407,7 +430,12 @@ export class AutoEncrypter {
   /**
    * Decrypt a command response
    */
-  async decrypt(response: Uint8Array, options: CommandOptions = {}): Promise<Uint8Array> {
+  async decrypt(
+    response: Uint8Array,
+    options: CommandOptions & Abortable = {}
+  ): Promise<Uint8Array> {
+    options.signal?.throwIfAborted();
+
     const context = this._mongocrypt.makeDecryptionContext(response);
 
     context.id = this._contextCounter++;
@@ -419,11 +447,7 @@ export class AutoEncrypter {
       socketOptions: autoSelectSocketOptions(this._client.s.options)
     });
 
-    return await stateMachine.execute(
-      this,
-      context,
-      options.timeoutContext?.csotEnabled() ? options.timeoutContext : undefined
-    );
+    return await stateMachine.execute(this, context, options);
   }
 
   /**
@@ -434,7 +458,7 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders, this._credentialProviders);
   }
 
   /**

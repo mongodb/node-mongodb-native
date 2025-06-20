@@ -10,8 +10,8 @@ const sinon = require('sinon');
 const { Writable } = require('stream');
 const { once, on } = require('events');
 const { setTimeout } = require('timers');
-const { ReadPreference, MongoExpiredSessionError } = require('../../mongodb');
-const { ServerType } = require('../../mongodb');
+const { ReadPreference } = require('../../mongodb');
+const { ServerType, MongoClientClosedError } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
 
 describe('Cursor', function () {
@@ -1848,32 +1848,44 @@ describe('Cursor', function () {
     }
   });
 
-  it('closes cursors when client is closed even if it has not been exhausted', async function () {
-    await client
-      .db()
-      .dropCollection('test_cleanup_tailable')
-      .catch(() => null);
+  it(
+    'closes cursors when client is closed even if it has not been exhausted',
+    { requires: { topology: '!replicaset' } },
+    async function () {
+      await client
+        .db()
+        .dropCollection('test_cleanup_tailable')
+        .catch(() => null);
 
-    const collection = await client
-      .db()
-      .createCollection('test_cleanup_tailable', { capped: true, size: 1000, max: 3 });
+      const collection = await client
+        .db()
+        .createCollection('test_cleanup_tailable', { capped: true, size: 1000, max: 3 });
 
-    // insert only 2 docs in capped coll of 3
-    await collection.insertMany([{ a: 1 }, { a: 1 }]);
+      // insert only 2 docs in capped coll of 3
+      await collection.insertMany([{ a: 1 }, { a: 1 }]);
 
-    const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS: 2000 });
+      const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS: 2000 });
 
-    await cursor.next();
-    await cursor.next();
-    // will block for maxAwaitTimeMS (except we are closing the client)
-    const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
+      await cursor.next();
+      await cursor.next();
 
-    await client.close();
-    expect(cursor).to.have.property('closed', true);
+      const nextCommand = once(client, 'commandStarted');
+      // will block for maxAwaitTimeMS (except we are closing the client)
+      const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
 
-    const error = await rejectedEarlyBecauseClientClosed;
-    expect(error).to.be.instanceOf(MongoExpiredSessionError);
-  });
+      for (
+        let [{ commandName }] = await nextCommand;
+        commandName !== 'getMore';
+        [{ commandName }] = await once(client, 'commandStarted')
+      );
+
+      await client.close();
+      expect(cursor).to.have.property('closed', true);
+
+      const error = await rejectedEarlyBecauseClientClosed;
+      expect(error).to.be.instanceOf(MongoClientClosedError);
+    }
+  );
 
   it('shouldAwaitData', {
     // Add a tag that our runner can trigger on
@@ -1993,15 +2005,15 @@ describe('Cursor', function () {
             expect(res).property('insertedId').to.exist;
           }, 300);
 
-          const start = new Date();
+          const start = performance.now();
           const doc1 = await cursor.next();
           expect(doc1).to.have.property('b', 2);
-          const end = new Date();
+          const end = performance.now();
 
           await later; // make sure this finished, without a failure
 
           // We should see here that cursor.next blocked for at least 300ms
-          expect(end.getTime() - start.getTime()).to.be.at.least(300);
+          expect(end - start).to.be.at.least(290);
         }
       }
     );

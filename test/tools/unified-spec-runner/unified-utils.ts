@@ -1,4 +1,3 @@
-import { EJSON } from 'bson';
 import { AssertionError, expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
 import { gte as semverGte, lte as semverLte } from 'semver';
@@ -6,6 +5,7 @@ import { isDeepStrictEqual } from 'util';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   type AutoEncryptionOptions,
   type CollectionOptions,
@@ -15,7 +15,6 @@ import {
   type MongoClient,
   ReturnDocument
 } from '../../mongodb';
-import { shouldRunServerlessTest } from '../../tools/utils';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
 import { MalformedOperationError } from './operations';
@@ -114,11 +113,6 @@ export async function topologySatisfies(
       ok &&= process.env.AUTH === 'noauth' || process.env.AUTH == null;
       if (!ok && skipReason == null) skipReason = `requires no auth but auth is enabled`;
     }
-  }
-
-  if (r.serverless) {
-    ok &&= shouldRunServerlessTest(r.serverless, config.isServerless);
-    if (!ok && skipReason == null) skipReason = `has serverless set to ${r.serverless}`;
   }
 
   if (typeof r.csfle === 'boolean') {
@@ -247,9 +241,8 @@ export function getMatchingEventCount(event, client, entities): number {
 /**
  * parses the process.env for three required environment variables
  *
- * - CSFLE_KMS_PROVIDERS
- * - KMIP_TLS_CA_FILE
- * - KMIP_TLS_CERT_FILE
+ * - CSFLE_TLS_CA_FILE
+ * - CSFLE_TLS_CLIENT_CERT_FILE
  *
  * @throws if any required environment variable is undefined, or if we are unable to
  *   parse the CLSFE_KMS_PROVIDERS from the environment
@@ -258,38 +251,26 @@ export function getCSFLETestDataFromEnvironment(environment: Record<string, stri
   kmsProviders: Document;
   tlsOptions: AutoEncryptionOptions['tlsOptions'];
 } {
-  if (environment.CSFLE_KMS_PROVIDERS == null) {
-    throw new AssertionError(
-      'CSFLE_KMS_PROVIDERS is required to run the csfle tests.  Please make sure it is set in the environment.'
-    );
-  }
-  let parsedKMSProviders;
-  try {
-    parsedKMSProviders = EJSON.parse(environment.CSFLE_KMS_PROVIDERS ?? '', {
-      relaxed: false
-    });
-  } catch {
-    throw new AssertionError('Malformed CSFLE_KMS_PROVIDERS provided to unified tests.');
-  }
+  const kmsProviders = getCSFLEKMSProviders();
 
-  if (environment.KMIP_TLS_CA_FILE == null) {
+  if (environment.CSFLE_TLS_CA_FILE == null) {
     throw new AssertionError(
-      'KMIP_TLS_CA_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
+      'CSFLE_TLS_CA_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
     );
   }
 
-  if (environment.KMIP_TLS_CERT_FILE == null) {
+  if (environment.CSFLE_TLS_CLIENT_CERT_FILE == null) {
     throw new AssertionError(
-      'KMIP_TLS_CERT_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
+      'CSFLE_TLS_CLIENT_CERT_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
     );
   }
 
   return {
-    kmsProviders: parsedKMSProviders,
+    kmsProviders: kmsProviders,
     tlsOptions: {
       kmip: {
-        tlsCAFile: environment.KMIP_TLS_CA_FILE,
-        tlsCertificateKeyFile: environment.KMIP_TLS_CERT_FILE
+        tlsCAFile: environment.CSFLE_TLS_CA_FILE,
+        tlsCertificateKeyFile: environment.CSFLE_TLS_CLIENT_CERT_FILE
       }
     }
   };
@@ -533,6 +514,7 @@ export async function createClientEncryption(
   const {
     keyVaultClient,
     keyVaultNamespace,
+    keyExpirationMS,
     kmsProviders: kmsProvidersFromTest
   } = clientEncryptionOpts;
 
@@ -584,6 +566,7 @@ export async function createClientEncryption(
     keyVaultClient: clientEntity,
     kmsProviders,
     keyVaultNamespace,
+    keyExpirationMS,
     tlsOptions: parseTLSOptions()
   };
 

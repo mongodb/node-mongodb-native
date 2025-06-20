@@ -70,10 +70,9 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
-      updateExpansions({ NPM_VERSION: 9, VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth }),
+      updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'bootstrap kms servers' },
       { func: 'run tests' }
     ]
   };
@@ -105,11 +104,12 @@ BASE_TASKS.push({
       TOPOLOGY: 'server',
       REQUIRE_API_VERSION: '1',
       MONGODB_API_VERSION: '1',
-      AUTH: 'auth'
+      AUTH: 'auth',
+      TEST_CSFLE: 'true',
+      CLIENT_ENCRYPTION: 'true'
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'bootstrap kms servers' },
     { func: 'run tests' }
   ]
 });
@@ -120,7 +120,7 @@ BASE_TASKS.push({
   commands: [
     updateExpansions({
       VERSION: 'latest',
-      TOPOLOGY: 'sharded_cluster',
+      TOPOLOGY: 'server',
       AUTH: 'noauth',
       SSL: 'ssl'
     }),
@@ -128,7 +128,7 @@ BASE_TASKS.push({
     { func: 'bootstrap mongo-orchestration' },
     { func: 'run x509 auth tests' }
   ]
-})
+});
 
 // manually added tasks
 TASKS.push(
@@ -146,7 +146,9 @@ TASKS.push(
           VERSION: ver,
           TOPOLOGY: 'sharded_cluster',
           AUTH: 'auth',
-          LOAD_BALANCER: 'true'
+          LOAD_BALANCER: 'true',
+          CLIENT_ENCRYPTION: 'false',
+          TEST_CSFLE: 'false'
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
@@ -155,16 +157,23 @@ TASKS.push(
         { func: 'stop-load-balancer' }
       ]
     })),
-    {
-      name: 'test-auth-kerberos',
-      tags: ['auth', 'kerberos'],
-      commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
-    },
-    {
-      name: 'test-auth-ldap',
-      tags: ['auth', 'ldap'],
-      commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
-    },
+    // TODO(NODE-6944): Unskip when devprod updates ldaptest servers.
+    // {
+    //   name: 'test-auth-kerberos',
+    //   tags: ['auth', 'kerberos'],
+    //   commands: [
+    //     updateExpansions({
+    //       NATIVE: 'true'
+    //     }),
+    //     { func: 'install dependencies' },
+    //     { func: 'run kerberos tests' }
+    //   ]
+    // },
+    // {
+    //   name: 'test-auth-ldap',
+    //   tags: ['auth', 'ldap'],
+    //   commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
+    // },
     {
       name: 'test-socks5',
       tags: [],
@@ -175,7 +184,6 @@ TASKS.push(
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
-        { func: 'bootstrap kms servers' },
         { func: 'run socks5 tests' }
       ]
     },
@@ -190,7 +198,6 @@ TASKS.push(
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
-        { func: 'bootstrap kms servers' },
         { func: 'run socks5 tests' }
       ]
     },
@@ -219,7 +226,9 @@ TASKS.push({
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
-      COMPRESSOR: 'snappy'
+      COMPRESSOR: 'snappy',
+      CLIENT_ENCRYPTION: 'false',
+      TEST_CSFLE: 'false'
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
@@ -235,7 +244,9 @@ TASKS.push({
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
-      COMPRESSOR: 'zstd'
+      COMPRESSOR: 'zstd',
+      CLIENT_ENCRYPTION: 'false',
+      TEST_CSFLE: 'false'
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
@@ -257,7 +268,9 @@ TASKS.push({
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
-      COMPRESSOR: 'zstd'
+      COMPRESSOR: 'zstd',
+      CLIENT_ENCRYPTION: 'false',
+      TEST_CSFLE: 'false'
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
@@ -297,8 +310,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'add aws auth variables to file' },
-    { func: 'setup aws env' },
+    { func: 'assume secrets manager role' },
     { func: 'run lambda handler example tests with aws auth' }
   ]
 });
@@ -355,8 +367,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'add aws auth variables to file' },
-      { func: 'setup aws env' },
+      { func: 'assume secrets manager role' },
       { func: fn.func }
     ]
   }));
@@ -375,9 +386,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
-        { func: 'add aws auth variables to file' },
-        { func: 'setup aws env' },
-        { func: 'remove aws-credential-providers' },
+        { func: 'assume secrets manager role' },
         { func: fn.func }
       ]
     }));
@@ -416,12 +425,14 @@ for (const {
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const expansions = { NODE_LTS_VERSION, NPM_VERSION: NODE_LTS_VERSION === 16 ? 9 : 'latest' };
+    const NPM_VERSION = versions.find(
+      ({ versionNumber }) => versionNumber === NODE_LTS_VERSION
+    ).npmVersion;
+    const expansions = { NODE_LTS_VERSION, NPM_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
-    if (clientEncryption) {
-      expansions.CLIENT_ENCRYPTION = true;
-    }
+    expansions.CLIENT_ENCRYPTION = String(!!clientEncryption);
+    expansions.TEST_CSFLE = expansions.CLIENT_ENCRYPTION;
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
   }
@@ -438,7 +449,6 @@ for (const {
     if (clientEncryption) {
       buildVariantData.expansions.CLIENT_ENCRYPTION = true;
     }
-
     BUILD_VARIANTS.push(buildVariantData);
   }
 }
@@ -455,12 +465,10 @@ const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
       updateExpansions({
         VERSION: mongoVersion,
         TOPOLOGY: 'sharded_cluster',
-        AUTH: 'auth',
-        TEST_NPM_SCRIPT: 'check:csfle'
+        AUTH: 'auth'
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'bootstrap kms servers' },
       { func: 'run tests' }
     ]
   };
@@ -485,7 +493,7 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
 
 BUILD_VARIANTS.push({
   name: MACOS_OS,
-  display_name: `MacOS 11 Node${LATEST_LTS}`,
+  display_name: `MacOS 14 ARM Node${LATEST_LTS}`,
   run_on: MACOS_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
@@ -522,8 +530,7 @@ SINGLETON_TASKS.push(
       tags: ['lint-checks'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9
+          NODE_LTS_VERSION: LATEST_LTS
         }),
         { func: 'install dependencies' },
         { func: 'run lint checks' }
@@ -534,7 +541,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: "v16.20.2",
+          NODE_LTS_VERSION: 'v16.20.2',
           NPM_VERSION: 9
         }),
         { func: 'install dependencies' },
@@ -546,7 +553,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: 'latest',
+          NODE_LTS_VERSION: LATEST_LTS,
           NPM_VERSION: 9
         }),
         { func: 'install dependencies' },
@@ -560,7 +567,7 @@ SINGLETON_TASKS.push(
         updateExpansions({
           VERSION: 'latest',
           TOPOLOGY: 'replica_set',
-          NODE_LTS_VERSION: 'latest'
+          NODE_LTS_VERSION: LATEST_LTS
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
@@ -586,7 +593,7 @@ function* makeTypescriptTasks() {
         { func: 'install dependencies' },
         { func: 'compile driver' }
       ]
-    }
+    };
   }
   function makeCheckTypesTask(TS_VERSION, TYPES_VERSION) {
     return {
@@ -602,10 +609,10 @@ function* makeTypescriptTasks() {
         { func: 'install dependencies' },
         { func: 'check types' }
       ]
-    }
+    };
   }
 
-  const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1)
+  const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1);
   yield makeCheckTypesTask('next', typesVersion);
   yield makeCheckTypesTask('current', typesVersion);
 
@@ -655,21 +662,22 @@ BUILD_VARIANTS.push({
 
 const customDependencyTests = [];
 
-for (const version of ['5.0', 'rapid', 'latest']) {
+for (const serverVersion of ['5.0', 'rapid', 'latest']) {
   customDependencyTests.push({
-    name: `run-custom-csfle-tests-${version}`,
+    name: `run-custom-csfle-tests-${serverVersion}`,
     tags: ['run-custom-dependency-tests'],
     commands: [
       updateExpansions({
         NODE_LTS_VERSION: LOWEST_LTS,
         NPM_VERSION: 9,
-        VERSION: version,
+        VERSION: serverVersion,
         TOPOLOGY: 'replica_set',
+        CLIENT_ENCRYPTION: true
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'bootstrap kms servers' },
-      { func: 'install mongodb-client-encryption' },
+      { func: 'install mongodb-client-encryption from source' },
+      { func: 'assume secrets manager role' },
       { func: 'run custom csfle tests' }
     ]
   });
@@ -688,7 +696,6 @@ customDependencyTests.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'bootstrap kms servers' },
     {
       func: 'install package',
       vars: {
@@ -707,29 +714,91 @@ const coverageTask = {
       func: 'download and merge coverage'
     }
   ],
-  depends_on: [{ name: '*', variant: '*', status: '*', patch_optional: true }]
+  depends_on: [
+    {
+      name: '*',
+      variant: '* !performance-tests',
+      status: '*',
+      patch_optional: true
+    }
+  ]
 };
 
 SINGLETON_TASKS.push(coverageTask);
 SINGLETON_TASKS.push(...customDependencyTests);
+
+SINGLETON_TASKS.push({
+  name: `test-alpine-fle`,
+  tags: ['alpine-fle'],
+  commands: [
+    updateExpansions({
+      NODE_VERSION: '16.20.1',
+      VERSION: 'latest',
+      TOPOLOGY: 'replica_set',
+      CLIENT_ENCRYPTION: true,
+      TEST_CSFLE: true,
+      MONGODB_BINARIES: '${PROJECT_DIRECTORY}/mongodb/bin'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
+    { func: 'assume secrets manager role' },
+    { func: 'build and test alpine FLE' }
+  ]
+});
+
+function addPerformanceTasks() {
+  const makePerfTask = (name, MONGODB_CLIENT_OPTIONS) => ({
+    name,
+    tags: ['run-spec-benchmark-tests', 'performance'],
+    exec_timeout_secs: 7200,
+    commands: [
+      updateExpansions({
+        NODE_LTS_VERSION: 'v22.11.0',
+        VERSION: 'v6.0-perf',
+        TOPOLOGY: 'server',
+        AUTH: 'noauth',
+        MONGODB_CLIENT_OPTIONS: JSON.stringify(MONGODB_CLIENT_OPTIONS)
+      }),
+      ...[
+        'install dependencies',
+        'bootstrap mongo-orchestration',
+        'run spec driver benchmarks',
+        'perf send'
+      ].map(func => ({ func }))
+    ]
+  });
+
+  const tasks = [
+    makePerfTask('run-spec-benchmark-tests-node-server', {}),
+    makePerfTask('run-spec-benchmark-tests-node-server-timeoutMS-120000', { timeoutMS: 120000 }),
+    makePerfTask('run-spec-benchmark-tests-node-server-timeoutMS-0', { timeoutMS: 0 }),
+    makePerfTask('run-spec-benchmark-tests-node-server-monitorCommands-true', {
+      monitorCommands: true
+    }),
+    makePerfTask('run-spec-benchmark-tests-node-server-logging', {
+      mongodbLogPath: 'stderr',
+      mongodbLogComponentSeverities: { default: 'trace' }
+    })
+  ];
+
+  TASKS.push(...tasks);
+
+  BUILD_VARIANTS.push({
+    name: 'performance-tests',
+    display_name: 'Performance Test',
+    run_on: 'rhel90-dbx-perf-large',
+    tasks: tasks.map(({ name }) => name),
+    tags: ['performance'],
+    activate: true
+  });
+}
+addPerformanceTasks();
 
 BUILD_VARIANTS.push({
   name: 'rhel8-custom-dependency-tests',
   display_name: 'Custom Dependency Version Test',
   run_on: DEFAULT_OS,
   tasks: customDependencyTests.map(({ name }) => name)
-});
-
-// special case for serverless testing
-BUILD_VARIANTS.push({
-  name: 'rhel8-test-serverless',
-  display_name: 'Serverless Test',
-  run_on: DEFAULT_OS,
-  expansions: {
-    NODE_LTS_VERSION: LOWEST_LTS,
-    NPM_VERSION: 9
-  },
-  tasks: ['serverless_task_group']
 });
 
 BUILD_VARIANTS.push({
@@ -811,15 +880,17 @@ for (const variant of BUILD_VARIANTS.filter(
 }
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.in.yml`, 'utf8'));
-fileData.tasks = (fileData.tasks || [])
-  .concat(BASE_TASKS)
-  .concat(TASKS)
-  .concat(SINGLETON_TASKS)
-  .concat(AUTH_DISABLED_TASKS)
-  .concat(AWS_LAMBDA_HANDLER_TASKS)
-  .concat(MONGOCRYPTD_CSFLE_TASKS);
+fileData.tasks = [
+  ...(fileData.tasks ?? []),
+  ...BASE_TASKS,
+  ...TASKS,
+  ...SINGLETON_TASKS,
+  ...AUTH_DISABLED_TASKS,
+  ...AWS_LAMBDA_HANDLER_TASKS,
+  ...MONGOCRYPTD_CSFLE_TASKS
+];
 
-fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
+fileData.buildvariants = [...(fileData.buildvariants ?? []), ...BUILD_VARIANTS];
 
 fs.writeFileSync(
   `${__dirname}/config.yml`,

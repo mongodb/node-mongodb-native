@@ -1,0 +1,145 @@
+{
+  "description": "change-streams-nsType",
+  "schemaVersion": "1.7",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "8.1.0",
+      "topologies": [
+        "replicaset",
+        "sharded"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "nsType is present when creating collections",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "foo"
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "database0",
+          "arguments": {
+            "pipeline": [],
+            "showExpandedEvents": true
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "foo"
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "create",
+            "nsType": "collection"
+          }
+        }
+      ]
+    },
+    {
+      "description": "nsType is present when creating timeseries",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "foo"
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "database0",
+          "arguments": {
+            "pipeline": [],
+            "showExpandedEvents": true
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "foo",
+            "timeseries": {
+              "timeField": "time",
+              "metaField": "meta",
+              "granularity": "minutes"
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "create",
+            "nsType": "timeseries"
+          }
+        }
+      ]
+    },
+    {
+      "description": "nsType is present when creating views",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "foo"
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "database0",
+          "arguments": {
+            "pipeline": [],
+            "showExpandedEvents": true
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "foo",
+            "viewOn": "testName"
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "create",
+            "nsType": "view"
+          }
+        }
+      ]
+    }
+  ]
+}

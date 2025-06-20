@@ -21,8 +21,7 @@ import { filterForCommands } from '../shared';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
-    mongodb: '>=8.0',
-    serverless: 'forbid'
+    mongodb: '>=8.0'
   }
 };
 
@@ -31,7 +30,63 @@ describe('Client Bulk Write', function () {
 
   afterEach(async function () {
     await client?.close();
-    await clearFailPoint(this.configuration);
+    await clearFailPoint(this.configuration).catch(() => null);
+  });
+
+  describe('#bulkWrite', function () {
+    context('when ignoreUndefined is true', function () {
+      context('when including an update with all undefined atomic operators', function () {
+        context('when performing an update many', function () {
+          beforeEach(async function () {
+            client = this.configuration.newClient();
+          });
+
+          it('throws an error', async function () {
+            const error = await client
+              .bulkWrite(
+                [
+                  {
+                    name: 'updateMany',
+                    namespace: 'foo.bar',
+                    filter: { age: { $lte: 5 } },
+                    update: { $set: undefined, $unset: undefined }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'Update operations require that all atomic operators have defined values, but none were provided'
+            );
+          });
+        });
+
+        context('when performing an update one', function () {
+          beforeEach(async function () {
+            client = this.configuration.newClient();
+          });
+
+          it('throws an error', async function () {
+            const error = await client
+              .bulkWrite(
+                [
+                  {
+                    name: 'updateOne',
+                    namespace: 'foo.bar',
+                    filter: { age: { $lte: 5 } },
+                    update: { $set: undefined, $unset: undefined }
+                  }
+                ],
+                { ignoreUndefined: true }
+              )
+              .catch(error => error);
+            expect(error.message).to.include(
+              'Update operations require that all atomic operators have defined values, but none were provided'
+            );
+          });
+        });
+      });
+    });
   });
 
   describe('CSOT enabled', function () {
@@ -289,12 +344,13 @@ describe('Client Bulk Write', function () {
             }
           }),
           async function () {
+            const timeoutMS = 1500;
             const models = await makeMultiResponseBatchModelArray(this.configuration);
             const start = now();
             const timeoutError = await client
               .bulkWrite(models, {
                 verboseResults: true,
-                timeoutMS: 1500
+                timeoutMS
               })
               .catch(e => e);
 
@@ -304,7 +360,7 @@ describe('Client Bulk Write', function () {
             // DRIVERS-3005 - killCursors causes cursor cleanup to extend past timeoutMS.
             // The amount of time killCursors takes is wildly variable and can take up to almost
             // 600-700ms sometimes.
-            expect(end - start).to.be.within(1500, 1500 + 800);
+            expect(end - start).to.be.within(timeoutMS - 100, timeoutMS + 800);
             expect(commands.map(({ commandName }) => commandName)).to.have.lengthOf(2);
           }
         );
@@ -394,5 +450,40 @@ describe('Client Bulk Write', function () {
         );
       });
     });
+  });
+
+  describe('sort support', () => {
+    describe(
+      'updateMany does not support sort option',
+      { requires: { mongodb: '>=8.0' } },
+      function () {
+        const commands: CommandStartedEvent[] = [];
+
+        beforeEach(async function () {
+          client = this.configuration.newClient({}, { monitorCommands: true });
+
+          client.on('commandStarted', filterForCommands('bulkWrite', commands));
+          await client.connect();
+        });
+
+        it('should not include sort field in the command', async function () {
+          await client.bulkWrite([
+            {
+              name: 'updateMany',
+              namespace: 'foo.bar',
+              filter: { age: { $lte: 5 } },
+              update: { $set: { puppy: true } },
+              // @ts-expect-error: sort is not supported in updateMany
+              sort: { age: 1 } // This sort option should be ignored
+            }
+          ]);
+
+          expect(commands).to.have.lengthOf(1);
+          const [updateCommand] = commands;
+          expect(updateCommand.commandName).to.equal('bulkWrite');
+          expect(updateCommand.command.ops[0]).to.not.have.property('sort');
+        });
+      }
+    );
   });
 });

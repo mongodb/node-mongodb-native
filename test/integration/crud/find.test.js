@@ -1,11 +1,20 @@
 'use strict';
-const { assert: test } = require('../shared');
+const { assert: test, filterForCommands } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { setTimeout } = require('timers');
-const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../mongodb');
+const {
+  Code,
+  ObjectId,
+  Long,
+  Binary,
+  ReturnDocument,
+  CursorResponse,
+  MongoServerError
+} = require('../../mongodb');
 
 describe('Find', function () {
+  /** @type(import('../../mongodb').MongoClient */
   let client;
 
   beforeEach(async function () {
@@ -453,7 +462,7 @@ describe('Find', function () {
   it('shouldCorrectlyPerformFindByWhere', {
     metadata: {
       requires: {
-        mongodb: '<=4.2.x',
+        mongodb: '4.2.x',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
@@ -496,70 +505,40 @@ describe('Find', function () {
     }
   });
 
-  it('shouldCorrectlyPerformFindsWithHintTurnedOn', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('shouldCorrectlyPerformFindsWithHintTurnedOn', async function () {
+    const configuration = this.configuration;
+    client = configuration.newClient(configuration.writeConcernMax(), {
+      monitorCommands: true
+    });
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('test_hint', function (err, collection) {
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-            db.createIndex(
-              collection.collectionName,
-              'a',
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
-                collection.find({ a: 1 }, { hint: 'a' }).toArray(function (err) {
-                  test.ok(err != null);
+    const finds = [];
+    client.on('commandStarted', filterForCommands('find', finds));
 
-                  collection.find({ a: 1 }, { hint: ['a'] }).toArray(function (err, items) {
-                    expect(err).to.not.exist;
-                    test.equal(1, items.length);
+    await client.connect();
 
-                    collection.find({ a: 1 }, { hint: { a: 1 } }).toArray(function (err, items) {
-                      test.equal(1, items.length);
+    const db = client.db(configuration.db);
+    const collection = await db.createCollection('test_hint');
 
-                      // Modify hints
-                      collection.hint = 'a_1';
-                      test.equal('a_1', collection.hint);
-                      collection.find({ a: 1 }).toArray(function (err, items) {
-                        test.equal(1, items.length);
+    await collection.deleteMany({});
+    await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-                        collection.hint = ['a'];
-                        test.equal(1, collection.hint['a']);
-                        collection.find({ a: 1 }).toArray(function (err, items) {
-                          test.equal(1, items.length);
+    await db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax());
 
-                          collection.hint = { a: 1 };
-                          test.equal(1, collection.hint['a']);
-                          collection.find({ a: 1 }).toArray(function (err, items) {
-                            test.equal(1, items.length);
+    expect(
+      await collection
+        .find({ a: 1 }, { hint: 'a' })
+        .toArray()
+        .catch(e => e)
+    ).to.be.instanceOf(MongoServerError);
+    expect(finds[0].command.hint).to.equal('a');
 
-                            collection.hint = null;
-                            test.ok(collection.hint == null);
-                            collection.find({ a: 1 }).toArray(function (err, items) {
-                              test.equal(1, items.length);
-                              // Let's close the db
-                              client.close(done);
-                            });
-                          });
-                        });
-                      });
-                    });
-                  });
-                });
-              }
-            );
-          });
-        });
-      });
-    }
+    // Test with hint as array
+    expect(await collection.find({ a: 1 }, { hint: ['a'] }).toArray()).to.have.lengthOf(1);
+    expect(finds[1].command.hint).to.deep.equal({ a: 1 });
+
+    // Test with hint as object
+    expect(await collection.find({ a: 1 }, { hint: { a: 1 } }).toArray()).to.have.lengthOf(1);
+    expect(finds[2].command.hint).to.deep.equal({ a: 1 });
   });
 
   it('shouldCorrectlyPerformFindByObjectId', {
@@ -2388,4 +2367,32 @@ describe('Find', function () {
       });
     });
   });
+
+  it(
+    'regression test (NODE-6878): CursorResponse.emptyGetMore contains all CursorResponse fields',
+    { requires: { topology: 'sharded' } },
+    async function () {
+      const collection = client.db('rewind-regression').collection('bar');
+
+      await collection.deleteMany({});
+      await collection.insertMany(Array.from({ length: 4 }, (_, i) => ({ x: i })));
+
+      const getMoreSpy = sinon.spy(CursorResponse, 'emptyGetMore', ['get']);
+
+      const cursor = collection.find({}, { batchSize: 1, limit: 3 });
+      // emptyGetMore is used internally after limit + 1 documents have been iterated
+      await cursor.next();
+      await cursor.next();
+      await cursor.next();
+      await cursor.next();
+
+      // assert that `emptyGetMore` is called.  if it is not, this test
+      // always passes, even without the fix in NODE-6878.
+      expect(getMoreSpy.get).to.have.been.called;
+
+      cursor.rewind();
+
+      await cursor.toArray();
+    }
+  );
 });

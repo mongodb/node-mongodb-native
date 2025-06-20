@@ -18,6 +18,7 @@ import {
   CSOTTimeoutContext,
   type MongoClient,
   MongoOperationTimeoutError,
+  ObjectId,
   Timeout,
   TimeoutContext,
   Topology
@@ -138,7 +139,7 @@ describe('CSOT spec unit tests', function () {
             timeoutMS: 500,
             serverSelectionTimeoutMS: 30000
           });
-          const err = await stateMachine.kmsRequest(request, timeoutContext).catch(e => e);
+          const err = await stateMachine.kmsRequest(request, { timeoutContext }).catch(e => e);
           expect(err).to.be.instanceOf(MongoOperationTimeoutError);
           expect(err.errmsg).to.equal('KMS request timed out');
         });
@@ -195,12 +196,12 @@ describe('CSOT spec unit tests', function () {
               {
                 autoEncryption: {
                   extraOptions: {
-                    mongocryptdBypassSpawn: true,
-                    mongocryptdURI: 'mongodb://localhost:27017/db?serverSelectionTimeoutMS=1000',
+                    mongocryptdURI: 'mongodb://localhost:27020/db?serverSelectionTimeoutMS=2000',
                     mongocryptdSpawnArgs: [
-                      '--pidfilepath=bypass-spawning-mongocryptd.pid',
-                      '--port=27017'
-                    ]
+                      `--pidfilepath=${new ObjectId().toHexString()}.pid`,
+                      '--port=27020'
+                    ],
+                    cryptSharedLibSearchPaths: []
                   },
                   keyVaultNamespace: 'admin.datakeys',
                   kmsProviders: {
@@ -211,6 +212,7 @@ describe('CSOT spec unit tests', function () {
                 timeoutMS
               }
             );
+
             await encryptedClient.connect();
 
             const stub = sinon
@@ -227,20 +229,16 @@ describe('CSOT spec unit tests', function () {
             sinon.restore();
           });
 
-          it(
-            'the command should fail due to a timeout error',
-            { requires: { mongodb: '>=4.2' } },
-            async function () {
-              const { duration, result: error } = await measureDuration(() =>
-                encryptedClient
-                  .db()
-                  .command({ ping: 1 })
-                  .catch(e => e)
-              );
-              expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-              expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
-            }
-          );
+          it('the command should fail due to a timeout error', async function () {
+            const { duration, result: error } = await measureDuration(() =>
+              encryptedClient
+                .db()
+                .command({ ping: 1 })
+                .catch(e => e)
+            );
+            expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+            expect(duration).to.be.within(timeoutMS - 100, timeoutMS + 100);
+          });
         }
       );
     });

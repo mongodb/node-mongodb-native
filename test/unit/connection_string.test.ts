@@ -12,7 +12,6 @@ import {
   COSMOS_DB_MSG,
   DEFAULT_ALLOWED_HOSTS,
   DOCUMENT_DB_MSG,
-  FEATURE_FLAGS,
   type Log,
   MongoAPIError,
   MongoClient,
@@ -748,43 +747,6 @@ describe('Connection String', function () {
     });
   });
 
-  describe('feature flags', () => {
-    it('should be stored in the FEATURE_FLAGS Set', () => {
-      expect(FEATURE_FLAGS.size).to.equal(3);
-      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.skipPingOnConnect'))).to.be.true;
-      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.enableMongoLogger'))).to.be.true;
-      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.internalLoggerConfig'))).to.be.true;
-      // Add more flags here
-    });
-
-    it('should should ignore unknown symbols', () => {
-      const randomFlag = Symbol();
-      const client = new MongoClient('mongodb://iLoveJavaScript', { [randomFlag]: 23n });
-      expect(client.s.options).to.not.have.property(randomFlag);
-    });
-
-    it('should be prefixed with @@mdb.', () => {
-      for (const flag of FEATURE_FLAGS) {
-        expect(flag).to.be.a('symbol');
-        expect(flag).to.have.property('description');
-        expect(flag.description).to.match(/@@mdb\..+/);
-      }
-    });
-
-    it('should only exist if specified on options', () => {
-      const flag = Array.from(FEATURE_FLAGS)[0]; // grab a random supported flag
-      const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: true });
-      expect(client.s.options).to.have.property(flag, true);
-      expect(client.options).to.have.property(flag, true);
-    });
-
-    it('should support nullish values', () => {
-      const flag = Array.from(FEATURE_FLAGS.keys())[0]; // grab a random supported flag
-      const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: null });
-      expect(client.s.options).to.have.property(flag, null);
-    });
-  });
-
   describe('IPv6 host addresses', () => {
     it('should not allow multiple unbracketed portless localhost IPv6 addresses', () => {
       // Note there is no "port-full" version of this test, there's no way to distinguish when a port begins without brackets
@@ -874,8 +836,6 @@ describe('Connection String', function () {
   });
 
   describe('when mongodbLogPath is in options', function () {
-    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-
     let stderrStub;
     let stdoutStub;
 
@@ -890,9 +850,7 @@ describe('Connection String', function () {
 
     context('when option is `stderr`', function () {
       it('it is accessible through mongoLogger.logDestination', function () {
-        const client = new MongoClient('mongodb://a/?mongodbLogPath=stderr', {
-          [loggerFeatureFlag]: true
-        });
+        const client = new MongoClient('mongodb://a/?mongodbLogPath=stderr');
         const log: Log = { t: new Date(), c: 'ConnectionStringStdErr', s: 'error' };
         client.options.mongoLoggerOptions.logDestination.write(log);
         const logLine = inspect(log, { breakLength: Infinity, compact: true });
@@ -902,9 +860,7 @@ describe('Connection String', function () {
 
     context('when option is `stdout`', function () {
       it('it is accessible through mongoLogger.logDestination', function () {
-        const client = new MongoClient('mongodb://a/?mongodbLogPath=stdout', {
-          [loggerFeatureFlag]: true
-        });
+        const client = new MongoClient('mongodb://a/?mongodbLogPath=stdout');
         const log: Log = { t: new Date(), c: 'ConnectionStringStdOut', s: 'error' };
         client.options.mongoLoggerOptions.logDestination.write(log);
         const logLine = inspect(log, { breakLength: Infinity, compact: true });
@@ -914,10 +870,9 @@ describe('Connection String', function () {
 
     context('when option is invalid', function () {
       it('should throw error at construction', function () {
-        expect(
-          () =>
-            new MongoClient('mongodb://a/?mongodbLogPath=stdnothing', { [loggerFeatureFlag]: true })
-        ).to.throw(MongoAPIError);
+        expect(() => new MongoClient('mongodb://a/?mongodbLogPath=stdnothing')).to.throw(
+          MongoAPIError
+        );
       });
     });
   });
@@ -931,7 +886,6 @@ describe('Connection String', function () {
       process.env.MONGODB_LOG_CLIENT = undefined;
     });
 
-    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
     const test_cases = [
       ['non-SRV example uri', 'mongodb://a.example.com:27017,b.example.com:27017/', ''],
       ['non-SRV default uri', 'mongodb://a.mongodb.net:27017', ''],
@@ -960,7 +914,6 @@ describe('Connection String', function () {
             }
           };
           new MongoClient(uri, {
-            [loggerFeatureFlag]: true,
             mongodbLogPath: stream
           });
 

@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {
+  type ClientSession,
   type Collection,
   MongoClient,
   type MongoDBOIDC,
@@ -543,6 +544,166 @@ describe('OIDC Auth Spec Tests', function () {
         it('does not successfully authenticate', async function () {
           const error = await collection.insertOne({ n: 2 }).catch(error => error);
           expect(error).to.exist;
+          expect(callbackSpy).to.have.been.calledTwice;
+        });
+      });
+
+      describe('4.4 Speculative Authentication should be ignored on Reauthentication', function () {
+        let utilClient: MongoClient;
+        const callbackSpy = sinon.spy(createCallback());
+        const saslStarts = [];
+        // - Create an OIDC configured client.
+        // - Populate the *Client Cache* with a valid access token to enforce Speculative Authentication.
+        // - Perform an `insert` operation that succeeds.
+        // - Assert that the callback was not called.
+        // - Assert there were no `SaslStart` commands executed.
+        // - Set a fail point for `insert` commands of the form:
+        // ```javascript
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "insert"
+        //     ],
+        //     errorCode: 391 // ReauthenticationRequired
+        //   }
+        // }
+        // ```
+        // - Perform an `insert` operation that succeeds.
+        // - Assert that the callback was called once.
+        // - Assert there were `SaslStart` commands executed.
+        // - Close the client.
+        beforeEach(async function () {
+          utilClient = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: createCallback()
+            },
+            retryReads: false
+          });
+
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: callbackSpy
+            },
+            retryReads: false,
+            monitorCommands: true
+          });
+          client.on('commandStarted', event => {
+            if (event.commandName === 'saslStart') {
+              saslStarts.push(event);
+            }
+          });
+
+          const provider = client.s.authProviders.getOrCreateProvider('MONGODB-OIDC', {
+            OIDC_CALLBACK: callbackSpy
+          }) as MongoDBOIDC;
+          const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
+            encoding: 'utf8'
+          });
+
+          provider.workflow.cache.put({ accessToken: token });
+          collection = client.db('test').collection('test');
+        });
+
+        afterEach(async function () {
+          await utilClient.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          await utilClient.close();
+        });
+
+        it('successfully authenticates', async function () {
+          await collection.insertOne({ name: 'test' });
+          expect(callbackSpy).to.not.have.been.called;
+          expect(saslStarts).to.be.empty;
+
+          await utilClient
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['insert'],
+                errorCode: 391
+              }
+            });
+
+          await collection.insertOne({ name: 'test' });
+          expect(callbackSpy).to.have.been.calledOnce;
+          expect(saslStarts.length).to.equal(1);
+        });
+      });
+
+      describe('4.5 Reauthentication Succeeds when a Session is involved', function () {
+        let utilClient: MongoClient;
+        let session: ClientSession;
+        const callbackSpy = sinon.spy(createCallback());
+        // Create an OIDC configured client.
+        // Set a fail point for find commands of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find"
+        //     ],
+        //     errorCode: 391 // ReauthenticationRequired
+        //   }
+        // }
+        // Start a new session.
+        // In the started session perform a find operation that succeeds.
+        // Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
+        // Close the session and the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: callbackSpy
+            },
+            retryReads: false
+          });
+          utilClient = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: createCallback()
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('test');
+          await utilClient
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
+          session = client.startSession();
+        });
+
+        afterEach(async function () {
+          await utilClient.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          await utilClient.close();
+          await session.endSession();
+        });
+
+        it('successfully authenticates', async function () {
+          await collection.findOne({}, { session });
           expect(callbackSpy).to.have.been.calledTwice;
         });
       });

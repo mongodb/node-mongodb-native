@@ -1,0 +1,14 @@
+ARG ARCH=arm64
+ARG NODE_VERSION=16.20.1
+
+FROM ${ARCH}/node:${NODE_VERSION}-alpine AS dependencies
+
+RUN apk --no-cache add make g++ libc-dev curl bash python3 py3-pip cmake git vim ranger
+
+# useful debugging output
+RUN <<EOF
+python3 --version
+git --version
+c++ --version
+g++ --version
+EOF

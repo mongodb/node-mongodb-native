@@ -1,0 +1,10 @@
+{
+  "name": "driver_bench",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "prestart": "rm -rf lib && tsc",
+    "start": "node lib/main.mjs",
+    "clean": "rm -f results*.json"
+  }
+}

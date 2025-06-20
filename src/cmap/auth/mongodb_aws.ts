@@ -9,6 +9,7 @@ import {
 import { ByteUtils, maxWireVersion, ns, randomBytes } from '../../utils';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import {
+  type AWSCredentialProvider,
   AWSSDKCredentialProvider,
   type AWSTempCredentials,
   AWSTemporaryCredentialProvider,
@@ -34,11 +35,14 @@ interface AWSSaslContinuePayload {
 
 export class MongoDBAWS extends AuthProvider {
   private credentialFetcher: AWSTemporaryCredentialProvider;
-  constructor() {
+  private credentialProvider?: AWSCredentialProvider;
+
+  constructor(credentialProvider?: AWSCredentialProvider) {
     super();
 
+    this.credentialProvider = credentialProvider;
     this.credentialFetcher = AWSTemporaryCredentialProvider.isAWSSDKInstalled
-      ? new AWSSDKCredentialProvider()
+      ? new AWSSDKCredentialProvider(credentialProvider)
       : new LegacyAWSTemporaryCredentialProvider();
   }
 
@@ -148,7 +152,7 @@ export class MongoDBAWS extends AuthProvider {
 
     const saslContinue = {
       saslContinue: 1,
-      conversationId: 1,
+      conversationId: saslStartResponse.conversationId,
       payload: BSON.serialize(payload, bsonOptions)
     };
 

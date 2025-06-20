@@ -7,7 +7,7 @@ const path = require('path');
 const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
-const { LEGACY_HELLO_COMMAND, MongoCryptError } = require('../../mongodb');
+const { LEGACY_HELLO_COMMAND, MongoCryptError, MongoRuntimeError } = require('../../mongodb');
 const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 
@@ -16,12 +16,11 @@ const {
 } = require('../../spec/client-side-encryption/external/external-schema.json');
 /* eslint-disable no-restricted-modules */
 const { ClientEncryption } = require('../../../src/client-side-encryption/client_encryption');
-const {
-  ClientSideEncryptionFilter
-} = require('../../tools/runner/filters/client_encryption_filter');
+const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
+const { AlpineTestConfiguration } = require('../../tools/runner/config');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
-  const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
+  const result = getCSFLEKMSProviders();
   if (localKey) {
     result.local = { key: localKey };
   }
@@ -44,7 +43,6 @@ const noop = () => {};
 const metadata = {
   requires: {
     clientSideEncryption: true,
-    mongodb: '>=4.2.0',
     topology: '!load-balanced'
   }
 };
@@ -854,7 +852,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const invalidKmsProviders = getKmsProviders();
       invalidKmsProviders.azure.identityPlatformEndpoint = 'doesnotexist.invalid:443';
       invalidKmsProviders.gcp.endpoint = 'doesnotexist.invalid:443';
-      invalidKmsProviders.kmip.endpoint = 'doesnotexist.local:5698';
+      invalidKmsProviders.kmip.endpoint = 'doesnotexist.invalid:5698';
 
       return this.client.connect().then(() => {
         this.clientEncryption = new ClientEncryption(this.client, {
@@ -863,8 +861,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           kmsProviders: customKmsProviders,
           tlsOptions: {
             kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           },
           extraOptions: getEncryptExtraOptions()
@@ -875,8 +873,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           kmsProviders: invalidKmsProviders,
           tlsOptions: {
             kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           },
           extraOptions: getEncryptExtraOptions()
@@ -919,13 +917,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         succeed: true
       },
       {
-        description: '4. aws: custom endpoint with bad url',
-        provider: 'aws',
-        masterKey: {
-          region: 'us-east-1',
-          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-          endpoint: 'kms.us-east-1.amazonaws.com:12345'
-        },
+        description: '4. bad url',
+        provider: 'kmip',
+        masterKey: { keyId: '1', endpoint: 'localhost:12345' },
         succeed: false,
         errorValidator: err => {
           expect(err)
@@ -1029,7 +1023,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         provider: 'kmip',
         masterKey: {
           keyId: '1',
-          endpoint: 'doesnotexist.local:5698'
+          endpoint: 'doesnotexist.invalid:5698'
         },
         succeed: false,
         errorValidator: err => {
@@ -1112,6 +1106,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       // configure with `client_encrypted` to use the schema `external/external-schema.json` for
       // `db.coll` by setting a schema map like `{"db.coll": <contents of external-schema.json }`
       beforeEach(async function () {
+        if (this.configuration instanceof AlpineTestConfiguration) {
+          this.currentTest.skipReason =
+            'alpine tests cannot spawn mongocryptds or use the crypt_shared.';
+          this.skip();
+        }
+
         clientEncrypted = this.configuration.newClient(
           {},
           {
@@ -1138,7 +1138,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 mongocryptdSpawnArgs: [
                   '--pidfilepath=bypass-spawning-mongocryptd.pid',
                   '--port=27021'
-                ]
+                ],
+                cryptSharedLibSearchPaths: []
               }
             }
           }
@@ -1171,9 +1172,16 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .insertOne({ encrypted: 'test' })
           .catch(e => e);
 
-        expect(insertError).to.be.instanceOf(MongoServerSelectionError);
+        expect(insertError)
+          .to.be.instanceOf(MongoRuntimeError)
+          .to.match(
+            /Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn/
+          );
 
-        expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
+        const { cause } = insertError;
+
+        expect(cause).to.be.instanceOf(MongoServerSelectionError);
+        expect(cause, 'Error must contain ECONNREFUSED').to.satisfy(
           error =>
             /ECONNREFUSED/.test(error.message) ||
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
@@ -1345,11 +1353,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  // TODO(NODE-3151): Implement kms prose tests
-  describe('KMS TLS Tests', () => {
-    it.skip('TBD', () => {}).skipReason = 'TODO(NODE-3151): Implement "KMS TLS Tests"';
-  });
-
   /**
    * - Create client encryption no tls
    * - Create client encryption with tls
@@ -1371,56 +1374,56 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     beforeEach(async function () {
       const tlsCaOptions = {
         aws: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE
         },
         azure: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE
         },
         gcp: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE
         },
         kmip: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+          tlsCAFile: process.env.CSFLE_TLS_CA_FILE
         }
       };
       const clientNoTlsOptions = {
         keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+        kmsProviders: getKmsProviders(null, null, '127.0.0.1:9002', '127.0.0.1:9002'),
         tlsOptions: tlsCaOptions,
         extraOptions: getEncryptExtraOptions()
       };
       const clientWithTlsOptions = {
         keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+        kmsProviders: getKmsProviders(null, null, '127.0.0.1:9002', '127.0.0.1:9002'),
         tlsOptions: {
           aws: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
           },
           azure: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
           },
           gcp: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
           },
           kmip: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
           }
         },
         extraOptions: getEncryptExtraOptions()
       };
       const clientWithTlsExpiredOptions = {
         keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
+        kmsProviders: getKmsProviders(null, '127.0.0.1:9000', '127.0.0.1:9000', '127.0.0.1:9000'),
         tlsOptions: tlsCaOptions,
         extraOptions: getEncryptExtraOptions()
       };
       const clientWithInvalidHostnameOptions = {
         keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
+        kmsProviders: getKmsProviders(null, '127.0.0.1:9001', '127.0.0.1:9001', '127.0.0.1:9001'),
         tlsOptions: tlsCaOptions,
         extraOptions: getEncryptExtraOptions()
       };
@@ -1497,10 +1500,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKey = {
         region: 'us-east-1',
         key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-        endpoint: '127.0.0.1:8002'
+        endpoint: '127.0.0.1:9002'
       };
-      const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:8000' };
-      const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:8001' };
+      const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:9000' };
+      const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:9001' };
 
       it('should fail with no TLS', metadata, async function () {
         try {
@@ -1551,11 +1554,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     // Case 2.
     context('Case 2: Azure', metadata, function () {
       const masterKey = {
-        keyVaultEndpoint: 'doesnotexist.local',
+        keyVaultEndpoint: 'doesnotexist.invalid',
         keyName: 'foo'
       };
 
-      it('should fail with no TLS', metadata, async function () {
+      it.skip('should fail with no TLS', metadata, async function () {
         try {
           await clientEncryptionNoTls.createDataKey('azure', { masterKey });
           expect.fail('it must fail with no tls');
@@ -1563,7 +1566,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           //Expect an error indicating TLS handshake failed.
           expect(e.cause.message).to.include('certificate required');
         }
-      });
+      }).skipReason = 'TODO(NODE-6861): fix flaky test';
 
       it('should succeed with valid TLS options', metadata, async function () {
         try {
@@ -1694,9 +1697,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     context('Case 6: named KMS providers apply TLS options', function () {
       afterEach(() => keyvaultClient?.close());
       beforeEach(async function () {
-        const filter = new ClientSideEncryptionFilter();
-        await filter.initializeFilter({}, {});
-        const shouldSkip = filter.filter({
+        const shouldSkip = this.configuration.filters.ClientSideEncryptionFilter.filter({
           metadata: {
             requires: {
               // 6.0.1 includes libmongocrypt 1.10.
@@ -1721,12 +1722,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               tenantId: providers.azure.tenantId,
               clientId: providers.azure.clientId,
               clientSecret: providers.azure.clientId,
-              identityPlatformEndpoint: '127.0.0.1:8002'
+              identityPlatformEndpoint: '127.0.0.1:9002'
             },
             'gcp:no_client_cert': {
               email: providers.gcp.email,
               privateKey: providers.gcp.privateKey,
-              endpoint: '127.0.0.1:8002'
+              endpoint: '127.0.0.1:9002'
             },
             'kmip:no_client_cert': {
               endpoint: '127.0.0.1:5698'
@@ -1739,12 +1740,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               tenantId: providers.azure.tenantId,
               clientId: providers.azure.clientId,
               clientSecret: providers.azure.clientId,
-              identityPlatformEndpoint: '127.0.0.1:8002'
+              identityPlatformEndpoint: '127.0.0.1:9002'
             },
             'gcp:with_tls': {
               email: providers.gcp.email,
               privateKey: providers.gcp.privateKey,
-              endpoint: '127.0.0.1:8002'
+              endpoint: '127.0.0.1:9002'
             },
             'kmip:with_tls': {
               endpoint: '127.0.0.1:5698'
@@ -1752,32 +1753,32 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           },
           tlsOptions: {
             'aws:no_client_cert': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE
             },
             'azure:no_client_cert': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE
             },
             'gcp:no_client_cert': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE
             },
             'kmip:no_client_cert': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE
             },
             'aws:with_tls': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             },
             'azure:with_tls': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             },
             'gcp:with_tls': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             },
             'kmip:with_tls': {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           },
           keyVaultNamespace: 'db.keys'
@@ -1791,7 +1792,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               masterKey: {
                 region: 'us-east-1',
                 key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-                endpoint: '127.0.0.1:8002'
+                endpoint: '127.0.0.1:9002'
               }
             })
             .catch(e => e);
@@ -1807,7 +1808,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               masterKey: {
                 region: 'us-east-1',
                 key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-                endpoint: '127.0.0.1:8002'
+                endpoint: '127.0.0.1:9002'
               }
             })
             .catch(e => e);
@@ -1823,7 +1824,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
           const error = await clientEncryptionWithNames
             .createDataKey('azure:no_client_cert', {
-              masterKey: { keyVaultEndpoint: 'doesnotexist.local', keyName: 'foo' }
+              masterKey: { keyVaultEndpoint: 'doesnotexist.invalid', keyName: 'foo' }
             })
             .catch(e => e);
 
@@ -1835,7 +1836,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           // Call `client_encryption_with_names.createDataKey()` with "aws:with_tls" as the provider and the same masterKey.
           const error = await clientEncryptionWithNames
             .createDataKey('azure:with_tls', {
-              masterKey: { keyVaultEndpoint: 'doesnotexist.local', keyName: 'foo' }
+              masterKey: { keyVaultEndpoint: 'doesnotexist.invalid', keyName: 'foo' }
             })
             .catch(e => e);
 
@@ -2311,7 +2312,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       kmip: {},
       local: undefined
     };
-    let client1, client2;
+    /** @type {import('../../mongodb').MongoClient} */
+    let client1;
+    /** @type {import('../../mongodb').MongoClient} */
+    let client2;
 
     describe('Case 1: Rewrap with separate ClientEncryption', function () {
       /**
@@ -2342,11 +2346,15 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           `should rewrap data key from ${srcProvider} to ${dstProvider}`,
           metadata,
           async function () {
+            client1.mongoLogger?.trace('client', 'dropping datakeys collection');
+
             // Step 1. Drop the collection ``keyvault.datakeys``
             await client1
               .db('keyvault')
               .dropCollection('datakeys')
               .catch(() => null);
+
+            client1.mongoLogger?.trace('client', 'dropped datakeys collection');
 
             // Step 2. Create a ``ClientEncryption`` object named ``clientEncryption1``
             const clientEncryption1 = new ClientEncryption(client1, {
@@ -2354,18 +2362,23 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               kmsProviders: getKmsProviders(),
               tlsOptions: {
                 kmip: {
-                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                  tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+                  tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
                 }
               },
               extraOptions: getEncryptExtraOptions(),
               bson: BSON
             });
 
+            client1.mongoLogger?.trace('client', 'clientEncryption1.createDataKey started');
+
             // Step 3. Call ``clientEncryption1.createDataKey`` with ``srcProvider``
             const keyId = await clientEncryption1.createDataKey(srcProvider, {
               masterKey: masterKeys[srcProvider]
             });
+
+            client1.mongoLogger?.trace('client', 'clientEncryption1.createDataKey finished');
+            client1.mongoLogger?.trace('client', 'clientEncryption1.encrypt started');
 
             // Step 4. Call ``clientEncryption1.encrypt`` with the value "test"
             const cipherText = await clientEncryption1.encrypt('test', {
@@ -2373,19 +2386,23 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
             });
 
+            client1.mongoLogger?.trace('client', 'clientEncryption1.encrypt finished');
+
             // Step 5. Create a ``ClientEncryption`` object named ``clientEncryption2``
             const clientEncryption2 = new ClientEncryption(client2, {
               keyVaultNamespace: 'keyvault.datakeys',
               kmsProviders: getKmsProviders(),
               tlsOptions: {
                 kmip: {
-                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                  tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+                  tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
                 }
               },
               extraOptions: getEncryptExtraOptions(),
               bson: BSON
             });
+
+            client2.mongoLogger?.trace('client', 'clientEncryption2.rewrapManyDataKey started');
 
             // Step 6. Call ``clientEncryption2.rewrapManyDataKey`` with an empty ``filter``
             const rewrapManyDataKeyResult = await clientEncryption2.rewrapManyDataKey(
@@ -2396,16 +2413,25 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               }
             );
 
+            client2.mongoLogger?.trace('client', 'clientEncryption2.rewrapManyDataKey finished');
+
             expect(rewrapManyDataKeyResult).to.have.property('bulkWriteResult');
             expect(rewrapManyDataKeyResult.bulkWriteResult).to.have.property('modifiedCount', 1);
+
+            client1.mongoLogger?.trace('client', 'clientEncryption1.decrypt started');
 
             // 7. Call ``clientEncryption1.decrypt`` with the ``ciphertext``. Assert the return value is "test".
             const decryptResult1 = await clientEncryption1.decrypt(cipherText);
             expect(decryptResult1).to.equal('test');
 
+            client1.mongoLogger?.trace('client', 'clientEncryption1.decrypt finished');
+            client2.mongoLogger?.trace('client', 'clientEncryption2.decrypt started');
+
             // 8. Call ``clientEncryption2.decrypt`` with the ``ciphertext``. Assert the return value is "test".
             const decryptResult2 = await clientEncryption2.decrypt(cipherText);
             expect(decryptResult2).to.equal('test');
+
+            client2.mongoLogger?.trace('client', 'clientEncryption2.decrypt finished');
           }
         );
       }

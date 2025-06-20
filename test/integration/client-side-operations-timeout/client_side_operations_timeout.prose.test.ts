@@ -115,59 +115,55 @@ describe('CSOT spec prose tests', function () {
     });
   });
 
-  context(
-    '2. maxTimeMS is not set for commands sent to mongocryptd',
-    { requires: { mongodb: '>=4.2' } },
-    () => {
-      /**
-       * This test MUST only be run against enterprise server versions 4.2 and higher.
-       *
-       * 1. Launch a mongocryptd process on 23000.
-       * 1. Create a MongoClient (referred to as `client`) using the URI `mongodb://localhost:23000/?timeoutMS=1000`.
-       * 1. Using `client`, execute the `{ ping: 1 }` command against the `admin` database.
-       * 1. Verify via command monitoring that the `ping` command sent did not contain a `maxTimeMS` field.
-       */
+  context('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
+    /**
+     * This test MUST only be run against enterprise server versions 4.2 and higher.
+     *
+     * 1. Launch a mongocryptd process on 23000.
+     * 1. Create a MongoClient (referred to as `client`) using the URI `mongodb://localhost:23000/?timeoutMS=1000`.
+     * 1. Using `client`, execute the `{ ping: 1 }` command against the `admin` database.
+     * 1. Verify via command monitoring that the `ping` command sent did not contain a `maxTimeMS` field.
+     */
 
-      let client: MongoClient;
-      const mongocryptdTestPort = '23000';
-      let childProcess: ChildProcess;
+    let client: MongoClient;
+    const mongocryptdTestPort = '23000';
+    let childProcess: ChildProcess;
 
-      beforeEach(async function () {
-        const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
-        childProcess = spawn(
-          'mongocryptd',
-          ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
-          {
-            stdio: 'ignore',
-            detached: true
-          }
-        );
+    beforeEach(async function () {
+      const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
+      childProcess = spawn(
+        'mongocryptd',
+        ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
+        {
+          stdio: 'ignore',
+          detached: true
+        }
+      );
 
-        childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
-        client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
-          monitorCommands: true
-        });
+      childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
+      client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
+        monitorCommands: true
       });
+    });
 
-      afterEach(async function () {
-        await client.close();
-        childProcess.kill('SIGKILL');
-        sinon.restore();
-      });
+    afterEach(async function () {
+      await client.close();
+      childProcess.kill('SIGKILL');
+      sinon.restore();
+    });
 
-      it('maxTimeMS is not set', async function () {
-        const commandStarted = [];
-        client.on('commandStarted', ev => commandStarted.push(ev));
-        await client.connect();
-        await client
-          .db('admin')
-          .command({ ping: 1 })
-          .catch(e => squashError(e));
-        expect(commandStarted).to.have.lengthOf(1);
-        expect(commandStarted[0].command).to.not.have.property('maxTimeMS');
-      });
-    }
-  );
+    it('maxTimeMS is not set', async function () {
+      const commandStarted = [];
+      client.on('commandStarted', ev => commandStarted.push(ev));
+      await client.connect();
+      await client
+        .db('admin')
+        .command({ ping: 1 })
+        .catch(e => squashError(e));
+      expect(commandStarted).to.have.lengthOf(1);
+      expect(commandStarted[0].command).to.not.have.property('maxTimeMS');
+    });
+  });
 
   context('3. ClientEncryption', () => {
     /**
@@ -1346,7 +1342,7 @@ describe('CSOT spec prose tests', function () {
 
   describe(
     '11. Multi-batch bulkWrites',
-    { requires: { mongodb: '>=8.0', serverless: 'forbid', topology: 'single' } },
+    { requires: { mongodb: '>=8.0', topology: 'single' } },
     function () {
       /**
        * ### 11. Multi-batch bulkWrites

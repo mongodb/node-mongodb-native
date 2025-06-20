@@ -17,6 +17,7 @@ import {
 } from '../constants';
 import {
   type AnyError,
+  MongoClientClosedError,
   type MongoError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
@@ -25,10 +26,19 @@ import {
   MongoRuntimeError,
   MongoServerError
 } from '../error';
-import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { type Abortable, CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { type TimeoutContext, TimeoutError } from '../timeout';
-import { type Callback, List, makeCounter, now, promiseWithResolvers } from '../utils';
+import {
+  addAbortListener,
+  type Callback,
+  kDispose,
+  List,
+  makeCounter,
+  noop,
+  now,
+  promiseWithResolvers
+} from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -192,6 +202,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   constructor(server: Server, options: ConnectionPoolOptions) {
     super();
+    this.on('error', noop);
 
     this.options = Object.freeze({
       connectionType: Connection,
@@ -316,7 +327,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
    */
-  async checkOut(options: { timeoutContext: TimeoutContext }): Promise<Connection> {
+  async checkOut(options: { timeoutContext: TimeoutContext } & Abortable): Promise<Connection> {
     const checkoutTime = now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
@@ -333,6 +344,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       cancelled: false,
       checkoutTime
     };
+
+    const abortListener = addAbortListener(options.signal, function () {
+      waitQueueMember.cancelled = true;
+      reject(this.reason);
+    });
 
     this.waitQueue.push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());
@@ -364,6 +380,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       throw error;
     } finally {
+      abortListener?.[kDispose]();
       timeout?.clear();
     }
   }
@@ -468,8 +485,14 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     for (const connection of this.checkedOut) {
       if (connection.generation <= minGeneration) {
         connection.onError(new PoolClearedOnNetworkError(this));
-        this.checkIn(connection);
       }
+    }
+  }
+
+  /** For MongoClient.close() procedures */
+  public closeCheckedOutConnections() {
+    for (const conn of this.checkedOut) {
+      conn.onError(new MongoClientClosedError());
     }
   }
 

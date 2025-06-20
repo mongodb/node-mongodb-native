@@ -48,6 +48,8 @@ gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
 >[!Note]
 No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
 
+The MongoDB Node.js driver follows [semantic versioning](https://semver.org/) for its releases.
+
 ### Bugs / Feature Requests
 
 Think you’ve found a bug? Want to see a new feature in `node-mongodb-native`? Please open a
@@ -70,9 +72,9 @@ Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mo
 
 ### Compatibility
 
-The driver currently supports 3.6+ servers.
+The driver currently supports 4.0+ servers.
 
-** 3.6 support is deprecated and support will be removed in a future version **
+** 4.0 support is deprecated and support will be removed in an upcoming driver release. **
 
 For exhaustive server and runtime version compatibility matrices, please refer to the following links:
 
@@ -83,13 +85,13 @@ For exhaustive server and runtime version compatibility matrices, please refer t
 
 The following table describes add-on component version compatibility for the Node.js driver. Only packages with versions in these supported ranges are stable when used in combination.
 
-| Component                                                                            | `mongodb@3.x`      | `mongodb@4.x`      | `mongodb@5.x`      | `mongodb@<6.12` | `mongodb@>=6.12`|
-| ------------------------------------------------------------------------------------ | ------------------ | ------------------ | ------------------ | --------------- | --------------- |
-| [bson](https://www.npmjs.com/package/bson)                                           | ^1.0.0             | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0          |
-| [bson-ext](https://www.npmjs.com/package/bson-ext)                                   | ^1.0.0 \|\| ^2.0.0 | ^4.0.0             | N/A                | N/A             | N/A             |
-| [kerberos](https://www.npmjs.com/package/kerberos)                                   | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^1.0.0 \|\| ^2.0.0 | ^2.0.1          | ^2.0.1          |
-| [mongodb-client-encryption](https://www.npmjs.com/package/mongodb-client-encryption) | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^2.3.0             | ^6.0.0          | ^6.0.0          |
-| [mongodb-legacy](https://www.npmjs.com/package/mongodb-legacy)                       | N/A                | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0          |
+| Component                                                                            | `mongodb@3.x`      | `mongodb@4.x`      | `mongodb@5.x`      | `mongodb@<6.12` | `mongodb@>=6.12`   |
+| ------------------------------------------------------------------------------------ | ------------------ | ------------------ | ------------------ | --------------- | ------------------ |
+| [bson](https://www.npmjs.com/package/bson)                                           | ^1.0.0             | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             |
+| [bson-ext](https://www.npmjs.com/package/bson-ext)                                   | ^1.0.0 \|\| ^2.0.0 | ^4.0.0             | N/A                | N/A             | N/A                |
+| [kerberos](https://www.npmjs.com/package/kerberos)                                   | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^1.0.0 \|\| ^2.0.0 | ^2.0.1          | ^2.0.1             |
+| [mongodb-client-encryption](https://www.npmjs.com/package/mongodb-client-encryption) | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^2.3.0             | ^6.0.0          | ^6.0.0             |
+| [mongodb-legacy](https://www.npmjs.com/package/mongodb-legacy)                       | N/A                | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             |
 | [@mongodb-js/zstd](https://www.npmjs.com/package/@mongodb-js/zstd)                   | N/A                | ^1.0.0             | ^1.0.0             | ^1.1.0          | ^1.1.0 \|\| ^2.0.0 |
 
 
@@ -110,8 +112,6 @@ After you've created your own project using `npm init`, you can run:
 
 ```bash
 npm install mongodb
-# or ...
-yarn add mongodb
 ```
 
 This will download the MongoDB driver and add a dependency entry in your `package.json` file.

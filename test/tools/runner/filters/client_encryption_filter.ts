@@ -3,8 +3,44 @@ import { dirname, resolve } from 'path';
 import * as process from 'process';
 import { satisfies } from 'semver';
 
-import { type MongoClient } from '../../../mongodb';
+import { kmsCredentialsPresent } from '../../../csfle-kms-providers';
+import { type AutoEncrypter, MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
+
+function getCryptSharedVersion(): AutoEncrypter['cryptSharedLibVersionInfo'] | null {
+  try {
+    const mc = new MongoClient('mongodb://localhost:27017', {
+      autoEncryption: {
+        kmsProviders: {
+          local: {
+            key: Buffer.alloc(96)
+          }
+        },
+        extraOptions: {
+          cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
+        }
+      }
+    });
+    return mc.autoEncrypter.cryptSharedLibVersionInfo;
+  } catch {
+    try {
+      const mc = new MongoClient('mongodb://localhost:27017', {
+        autoEncryption: {
+          kmsProviders: {
+            local: {
+              key: Buffer.alloc(96)
+            }
+          }
+        }
+      });
+      return mc.autoEncrypter.cryptSharedLibVersionInfo;
+    } catch {
+      // squash errors
+    }
+  }
+
+  return null;
+}
 
 /**
  * Filter for whether or not a test needs / doesn't need Client Side Encryption
@@ -23,18 +59,18 @@ export class ClientSideEncryptionFilter extends Filter {
   enabled: boolean;
   static version = null;
   static libmongocrypt: string | null = null;
-
-  csfleKMSProviders = null;
+  static cryptShared: AutoEncrypter['cryptSharedLibVersionInfo'] | null = null;
 
   override async initializeFilter(client: MongoClient, context: Record<string, any>) {
-    this.csfleKMSProviders = process.env.CSFLE_KMS_PROVIDERS;
-    let mongodbClientEncryption;
+    let mongodbClientEncryption: typeof import('mongodb-client-encryption');
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       mongodbClientEncryption = require('mongodb-client-encryption');
       ClientSideEncryptionFilter.libmongocrypt = (
         mongodbClientEncryption as typeof import('mongodb-client-encryption')
       ).MongoCrypt.libmongocryptVersion;
+
+      ClientSideEncryptionFilter.cryptShared = getCryptSharedVersion();
     } catch (failedToGetFLELib) {
       if (process.env.TEST_CSFLE) {
         console.error({ failedToGetFLELib });
@@ -48,15 +84,15 @@ export class ClientSideEncryptionFilter extends Filter {
       )
     ).version;
 
-    this.enabled = !!(this.csfleKMSProviders && mongodbClientEncryption);
+    this.enabled = !!(kmsCredentialsPresent && mongodbClientEncryption);
 
     // Adds these fields onto the context so that they can be reused by tests
     context.clientSideEncryption = {
       enabled: this.enabled,
       mongodbClientEncryption,
-      CSFLE_KMS_PROVIDERS: this.csfleKMSProviders,
       version: ClientSideEncryptionFilter.version,
-      libmongocrypt: ClientSideEncryptionFilter.libmongocrypt
+      libmongocrypt: ClientSideEncryptionFilter.libmongocrypt,
+      cryptShared: ClientSideEncryptionFilter.cryptShared
     };
   }
 
@@ -76,15 +112,12 @@ export class ClientSideEncryptionFilter extends Filter {
 
     // TODO(NODE-3401): unskip csfle tests on windows
     if (process.env.TEST_CSFLE && process.platform !== 'win32') {
-      if (!this.csfleKMSProviders) {
-        throw new Error('FLE tests must run, but no KMS providers were set in the environment.');
-      }
       if (ClientSideEncryptionFilter.version == null) {
         throw new Error('FLE tests must run, but mongodb client encryption was not installed.');
       }
     }
 
-    if (this.csfleKMSProviders == null) return 'Test requires FLE environment variables.';
+    if (!kmsCredentialsPresent) return 'Test requires FLE kms credentials';
     if (ClientSideEncryptionFilter.version == null)
       return 'Test requires mongodb-client-encryption to be installed.';
 

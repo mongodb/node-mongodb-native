@@ -1,4 +1,5 @@
 import type { Binary } from '../../bson';
+import { type AWSCredentialProvider } from '../../cmap/auth/aws_temporary_credentials';
 import { loadAWSCredentials } from './aws';
 import { loadAzureCredentials } from './azure';
 import { loadGCPCredentials } from './gcp';
@@ -114,6 +115,15 @@ export type GCPKMSProviderConfiguration =
 
 /**
  * @public
+ * Configuration options for custom credential providers for KMS requests.
+ */
+export interface CredentialProviders {
+  /* A custom AWS credential provider */
+  aws?: AWSCredentialProvider;
+}
+
+/**
+ * @public
  * Configuration options that are used by specific KMS providers during key generation, encryption, and decryption.
  *
  * Named KMS providers _are not supported_ for automatic KMS credential fetching.
@@ -176,11 +186,14 @@ export function isEmptyCredentials(
  *
  * @internal
  */
-export async function refreshKMSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
+export async function refreshKMSCredentials(
+  kmsProviders: KMSProviders,
+  credentialProviders?: CredentialProviders
+): Promise<KMSProviders> {
   let finalKMSProviders = kmsProviders;
 
   if (isEmptyCredentials('aws', kmsProviders)) {
-    finalKMSProviders = await loadAWSCredentials(finalKMSProviders);
+    finalKMSProviders = await loadAWSCredentials(finalKMSProviders, credentialProviders?.aws);
   }
 
   if (isEmptyCredentials('gcp', kmsProviders)) {

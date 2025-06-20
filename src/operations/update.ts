@@ -4,6 +4,7 @@ import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } 
 import type { InferIdType, TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { formatSort, type Sort, type SortForCmd } from '../sort';
 import { type TimeoutContext } from '../timeout';
 import { hasAtomicOperators, type MongoDBNamespace } from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
@@ -58,6 +59,8 @@ export interface UpdateStatement {
   arrayFilters?: Document[];
   /** A document or string that specifies the index to use to support the query predicate. */
   hint?: Hint;
+  /** Specifies the sort order for the documents matched by the filter. */
+  sort?: SortForCmd;
 }
 
 /**
@@ -141,7 +144,7 @@ export class UpdateOneOperation extends UpdateOperation {
       options
     );
 
-    if (!hasAtomicOperators(update)) {
+    if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
@@ -176,7 +179,7 @@ export class UpdateManyOperation extends UpdateOperation {
       options
     );
 
-    if (!hasAtomicOperators(update)) {
+    if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
@@ -214,6 +217,8 @@ export interface ReplaceOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /** Specifies the sort order for the documents matched by the filter. */
+  sort?: Sort;
 }
 
 /** @internal */
@@ -259,7 +264,7 @@ export class ReplaceOneOperation extends UpdateOperation {
 export function makeUpdateStatement(
   filter: Document,
   update: Document | Document[],
-  options: UpdateOptions & { multi?: boolean }
+  options: UpdateOptions & { multi?: boolean } & { sort?: Sort }
 ): UpdateStatement {
   if (filter == null || typeof filter !== 'object') {
     throw new MongoInvalidArgumentError('Selector must be a valid JavaScript object');
@@ -288,6 +293,10 @@ export function makeUpdateStatement(
 
   if (options.collation) {
     op.collation = options.collation;
+  }
+
+  if (!options.multi && options.sort != null) {
+    op.sort = formatSort(options.sort);
   }
 
   return op;

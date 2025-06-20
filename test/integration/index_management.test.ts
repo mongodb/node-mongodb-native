@@ -358,18 +358,10 @@ describe('Indexes', function () {
         });
     });
 
-    it(
-      'should return false',
-      {
-        requires: {
-          mongodb: '>4.0'
-        }
-      },
-      async function () {
-        const result = await collection.dropIndexes();
-        expect(result).to.equal(false);
-      }
-    );
+    it('should return false', async function () {
+      const result = await collection.dropIndexes();
+      expect(result).to.equal(false);
+    });
   });
 
   context('indexExists', function () {
@@ -770,20 +762,19 @@ describe('Indexes', function () {
 
           expect(events).to.be.an('array').with.lengthOf(1);
           expect(events[0]).nested.property('command.commitQuorum').to.equal(0);
-          await collection.drop(err => {
-            expect(err).to.not.exist;
-          });
+          await collection.drop();
         }
       };
     }
     it(
       'should run command with commitQuorum if specified on db.createIndex',
-      commitQuorumTest((db, collection) =>
-        db.createIndex(collection.collectionName, 'a', {
-          // @ts-expect-error revaluate this?
-          writeConcern: { w: 'majority' },
-          commitQuorum: 0
-        })
+      commitQuorumTest(
+        async (db, collection) =>
+          await db.createIndex(collection.collectionName, 'a', {
+            // @ts-expect-error revaluate this?
+            writeConcern: { w: 'majority' },
+            commitQuorum: 0
+          })
       )
     );
     it(

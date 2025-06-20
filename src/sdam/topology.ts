@@ -3,7 +3,7 @@ import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents } from '../cmap/connection';
 import type { ConnectionPoolEvents } from '../cmap/connection_pool';
 import type { ClientMetadata } from '../cmap/handshake/client_metadata';
-import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
+import { DEFAULT_OPTIONS } from '../connection_string';
 import {
   CLOSE,
   CONNECT,
@@ -31,17 +31,20 @@ import {
 } from '../error';
 import type { MongoClient, ServerApi } from '../mongo_client';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
-import { TypedEventEmitter } from '../mongo_types';
+import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { Timeout, TimeoutContext, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
+  addAbortListener,
   type Callback,
   type EventEmitterWithState,
   HostAddress,
+  kDispose,
   List,
   makeStateMachine,
+  noop,
   now,
   ns,
   promiseWithResolvers,
@@ -153,7 +156,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   serverMonitoringMode: ServerMonitoringMode;
   /** MongoDB server API version */
   serverApi?: ServerApi;
-  [featureFlag: symbol]: any;
+  __skipPingOnConnect?: boolean;
 }
 
 /** @public */
@@ -246,13 +249,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     options: TopologyOptions
   ) {
     super();
+    this.on('error', noop);
 
     this.client = client;
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
       hosts: [HostAddress.fromString('localhost:27017')],
-      ...Object.fromEntries(DEFAULT_OPTIONS.entries()),
-      ...Object.fromEntries(FEATURE_FLAGS.entries())
+      ...Object.fromEntries(DEFAULT_OPTIONS.entries())
     };
 
     if (typeof seeds === 'string') {
@@ -466,7 +469,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         readPreferenceServerSelector(readPreference),
         selectServerOptions
       );
-      const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
+      const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
       if (!skipPingOnConnect && this.s.credentials) {
         await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
         stateTransition(this, STATE_CONNECTED);
@@ -487,6 +490,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
   }
 
+  closeCheckedOutConnections() {
+    for (const server of this.s.servers.values()) {
+      return server.closeCheckedOutConnections();
+    }
+  }
+
   /** Close this topology */
   close(): void {
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
@@ -494,7 +503,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     for (const server of this.s.servers.values()) {
-      destroyServer(server, this);
+      closeServer(server, this);
     }
 
     this.s.servers.clear();
@@ -526,7 +535,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    */
   async selectServer(
     selector: string | ReadPreference | ServerSelector,
-    options: SelectServerOptions
+    options: SelectServerOptions & Abortable
   ): Promise<Server> {
     let serverSelector;
     if (typeof selector !== 'function') {
@@ -603,6 +612,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       previousServer: options.previousServer
     };
 
+    const abortListener = addAbortListener(options.signal, function () {
+      waitQueueMember.cancelled = true;
+      reject(this.reason);
+    });
+
     this.waitQueue.push(waitQueueMember);
     processWaitQueue(this);
 
@@ -648,6 +662,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       // Other server selection error
       throw error;
     } finally {
+      abortListener?.[kDispose]();
       if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
     }
   }
@@ -782,12 +797,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 }
 
 /** Destroys a server, and removes all event listeners from the instance */
-function destroyServer(server: Server, topology: Topology) {
+function closeServer(server: Server, topology: Topology) {
   for (const event of LOCAL_SERVER_EVENTS) {
     server.removeAllListeners(event);
   }
 
-  server.destroy();
+  server.close();
   topology.emitAndLog(
     Topology.SERVER_CLOSED,
     new ServerClosedEvent(topology.s.id, server.description.address)
@@ -894,7 +909,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
 
     // prepare server for garbage collection
     if (server) {
-      destroyServer(server, topology);
+      closeServer(server, topology);
     }
   }
 }
