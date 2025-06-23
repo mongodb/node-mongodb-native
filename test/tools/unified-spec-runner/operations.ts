@@ -456,6 +456,10 @@ operations.set('listIndexNames', async ({ entities, operation }) => {
   return indexes.map(index => index.name);
 });
 
+/**
+ * This function was scheduled to be removed in NODE-6783, but we've decideded to keep it
+ * as the removal is optional and has utility for testing and debugging.
+ */
 operations.set('loop', async ({ entities, operation, client, testConfig }) => {
   const controller = new AbortController();
   // We always want the process to exit on SIGINT last, so all other
