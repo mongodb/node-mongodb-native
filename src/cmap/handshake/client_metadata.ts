@@ -11,6 +11,7 @@ const NODE_DRIVER_VERSION = require('../../../package.json').version;
 
 /**
  * @public
+ * @deprecated This interface will be made internal in the next major release.
  * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#hello-command
  */
 export interface ClientMetadata {
@@ -38,7 +39,10 @@ export interface ClientMetadata {
   };
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated This interface will be made internal in the next major release.
+ */
 export interface ClientMetadataOptions {
   driverInfo?: {
     name?: string;

@@ -472,7 +472,10 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
   }
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated Will be removed in favor of `AbortSignal` in the next major release.
+ */
 export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {
   constructor(...args: any[]) {
     super(...args);
