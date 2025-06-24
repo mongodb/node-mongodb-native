@@ -150,6 +150,7 @@ export interface ClientEntity {
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
   observeSensitiveCommands?: boolean;
+  // Was optionally scheduled for removal in NODE-6783, but opted to keep it for potential future use.
   storeEventsAsEntities?: StoreEventsAsEntity[];
 }
 export interface DatabaseEntity {
