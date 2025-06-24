@@ -122,26 +122,33 @@ export class Transaction {
     return this._pinnedServer;
   }
 
+  /** @internal */
   get recoveryToken(): Document | undefined {
     return this._recoveryToken;
   }
 
+  /** @internal */
   get isPinned(): boolean {
     return !!this.server;
   }
 
-  /** @returns Whether the transaction has started */
+  /**
+   * @internal
+   * @returns Whether the transaction has started
+   */
   get isStarting(): boolean {
     return this.state === TxnState.STARTING_TRANSACTION;
   }
 
   /**
+   * @internal
    * @returns Whether this session is presently in a transaction
    */
   get isActive(): boolean {
     return ACTIVE_STATES.has(this.state);
   }
 
+  /** @internal */
   get isCommitted(): boolean {
     return COMMITTED_STATES.has(this.state);
   }
