@@ -4,19 +4,18 @@ source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 set -o errexit
 
-export SSL_KEY_FILE=$DRIVERS_TOOLS/.evergreen/x509gen/client.pem
-export SSL_CA_FILE=$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem
-export SSL_KEY_FILE_EXPIRED=$DRIVERS_TOOLS/.evergreen/x509gen/expired.pem
-export SSL_KEY_NO_USER=$DRIVERS_TOOLS/.evergreen/x509gen/crl.pem
+bash drivers-evergreen-tools/.evergreen/secrets_handling/setup-secrets.sh drivers/atlas_connect
+source secrets-export.sh
 
-SUBJECT=$(openssl x509 -subject -nameopt RFC2253 -noout -inform PEM -in $SSL_KEY_FILE)
+echo "${ATLAS_X509_DEV_CERT_BASE64}" | base64 --decode >clientcert.pem
+echo "${ATLAS_X509_DEV_CERT_NOUSER_BASE64}" | base64 --decode >nouser.pem
 
-# Strip `subject=` prefix from the subject
-SUBJECT=${SUBJECT#"subject="}
+SSL_KEY_FILE_EXPIRED=$DRIVERS_TOOLS/.evergreen/x509gen/expired.pem
+MONGODB_URI="$ATLAS_X509_DEV"
 
-# Remove any leading or trailing whitespace
-SUBJECT=$(echo "$SUBJECT" | awk '{$1=$1;print}')
-
-export SUBJECT
+export MONGODB_URI
+export SSL_KEY_FILE_EXPIRED
+export SSL_KEY_FILE_NO_USER="nouser.pem"
+export SSL_KEY_FILE="clientcert.pem"
 
 npm run check:x509

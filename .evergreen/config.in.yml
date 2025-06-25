@@ -697,10 +697,12 @@ functions:
       type: test
       params:
         working_dir: "src"
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        include_expansions_in_env:
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+          - PROJECT_DIRECTORY
+          - DRIVERS_TOOLS
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
