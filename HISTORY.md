@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.18.0](https://github.com/mongodb/node-mongodb-native/compare/v6.17.0...v6.18.0) (2025-06-26)
+
+
+### Features
+
+* **NODE-6865:** deprecate transaction getters ([#4567](https://github.com/mongodb/node-mongodb-native/issues/4567)) ([da46aea](https://github.com/mongodb/node-mongodb-native/commit/da46aeafe857f0bbfe8935abb497ff8c92f692ca))
+* **NODE-6991:** deprecate unintentionally public client metadata types ([#4566](https://github.com/mongodb/node-mongodb-native/issues/4566)) ([ca6554b](https://github.com/mongodb/node-mongodb-native/commit/ca6554b203595cd195ea80b24b1bb662d88abee9))
+
+
+### Bug Fixes
+
+* **NODE-6955:** add missing `wallTime` property TS change stream event interfaces ([#4541](https://github.com/mongodb/node-mongodb-native/issues/4541)) ([f153c6f](https://github.com/mongodb/node-mongodb-native/commit/f153c6f3df8c7c440af3bc0f862a30c53f9c5fc8))
+
 ## [6.17.0](https://github.com/mongodb/node-mongodb-native/compare/v6.16.0...v6.17.0) (2025-06-03)
 
 
