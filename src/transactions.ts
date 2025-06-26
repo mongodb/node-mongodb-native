@@ -79,6 +79,7 @@ export interface TransactionOptions extends Omit<CommandOperationOptions, 'timeo
 export class Transaction {
   /** @internal */
   state: TxnState;
+  /** @internal */
   options: TransactionOptions;
   /** @internal */
   _pinnedServer?: Server;
