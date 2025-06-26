@@ -1035,6 +1035,7 @@ export interface MongoOptions
   compressors: CompressorName[];
   writeConcern: WriteConcern;
   dbName: string;
+  /** @deprecated - Will be made internal in a future major release. */
   metadata: ClientMetadata;
   /** @internal */
   extendedMetadata: Promise<Document>;
