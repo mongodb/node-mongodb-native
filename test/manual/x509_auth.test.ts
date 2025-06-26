@@ -14,11 +14,7 @@ const connectionString = new ConnectionString(process.env.MONGODB_URI!);
 describe('x509 Authentication', function () {
   let client: MongoClient;
   const validOptions: MongoClientOptions = {
-    tls: true,
-    tlsCertificateKeyFile: process.env.SSL_KEY_FILE,
-    tlsCAFile: process.env.SSL_CA_FILE,
-    authMechanism: 'MONGODB-X509' as const,
-    authSource: '$external'
+    tlsCertificateKeyFile: process.env.SSL_KEY_FILE
   };
 
   this.afterEach(() => {
@@ -26,9 +22,6 @@ describe('x509 Authentication', function () {
   });
 
   context('When the user provides a valid certificate', function () {
-    before('create x509 user', createX509User);
-    after('drop x509 user', dropX509User);
-
     it('successfully authenticates using x509', async function () {
       client = new MongoClient(connectionString.toString(), validOptions);
       const result = await client
@@ -64,9 +57,7 @@ describe('x509 Authentication', function () {
       const invalidOptions: MongoClientOptions = {
         // use an expired key file
         tlsCertificateKeyFile: process.env.SSL_KEY_FILE_EXPIRED,
-        tlsCAFile: process.env.SSL_CA_FILE,
-        authMechanism: 'MONGODB-X509' as const,
-        authSource: '$external'
+        serverSelectionTimeoutMS: 2000
       };
       client = new MongoClient(connectionString.toString(), {
         ...invalidOptions,
@@ -82,7 +73,10 @@ describe('x509 Authentication', function () {
     'when a valid cert is provided but the certificate does not correspond to a user',
     function () {
       it('fails to authenticate', async function () {
-        client = new MongoClient(connectionString.toString(), validOptions);
+        client = new MongoClient(connectionString.toString(), {
+          tlsCertificateKeyFile: process.env.SSL_KEY_FILE_NO_USER,
+          serverSelectionTimeoutMS: 2000
+        });
         const error = await client.connect().catch(error => error);
 
         expect(error).to.be.instanceOf(MongoServerError);
@@ -91,42 +85,3 @@ describe('x509 Authentication', function () {
     }
   );
 });
-
-async function createX509User() {
-  const utilClient = new MongoClient(connectionString.toString(), {
-    tls: true,
-    tlsCertificateKeyFile: process.env.SSL_KEY_FILE,
-    tlsCAFile: process.env.SSL_CA_FILE,
-    serverSelectionTimeoutMS: 2000
-  });
-
-  try {
-    await utilClient.connect();
-    await utilClient.db('$external').command({
-      createUser: process.env.SUBJECT,
-      roles: [
-        { role: 'readWrite', db: 'test' },
-        { role: 'userAdminAnyDatabase', db: 'admin' }
-      ]
-    });
-  } finally {
-    await utilClient.close();
-  }
-}
-
-async function dropX509User() {
-  const utilClient = new MongoClient(connectionString.toString(), {
-    tls: true,
-    tlsCertificateKeyFile: process.env.SSL_KEY_FILE,
-    tlsCAFile: process.env.SSL_CA_FILE,
-    serverSelectionTimeoutMS: 2000
-  });
-  try {
-    await utilClient.connect();
-    await utilClient.db('$external').command({
-      dropUser: process.env.SUBJECT
-    });
-  } finally {
-    await utilClient.close();
-  }
-}

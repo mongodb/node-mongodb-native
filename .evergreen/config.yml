@@ -632,10 +632,12 @@ functions:
       type: test
       params:
         working_dir: src
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        include_expansions_in_env:
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+          - PROJECT_DIRECTORY
+          - DRIVERS_TOOLS
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
@@ -1544,16 +1546,8 @@ tasks:
       - auth
       - x509
     commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: SSL, value: ssl}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: assume secrets manager role
       - func: run x509 auth tests
   - name: test-atlas-connectivity
     tags:
