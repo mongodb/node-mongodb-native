@@ -121,6 +121,7 @@ export class ClientSession
   /** @internal */
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
+  /** @deprecated - Will be made internal in the next major release */
   transaction: Transaction;
   /**
    * @internal
