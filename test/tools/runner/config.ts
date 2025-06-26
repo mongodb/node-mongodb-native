@@ -4,6 +4,7 @@ import * as types from 'node:util/types';
 import { expect } from 'chai';
 import { type Context } from 'mocha';
 import ConnectionString from 'mongodb-connection-string-url';
+import { type CompressorName } from 'mongodb-legacy';
 import * as qs from 'querystring';
 import * as url from 'url';
 
@@ -64,6 +65,19 @@ function convertToConnStringMap(obj: Record<string, any>) {
   return result.join(',');
 }
 
+function getCompressor(compressor: string): CompressorName {
+  switch (compressor) {
+    case 'zstd':
+      return 'zstd';
+    case 'zlib':
+      return 'zlib';
+    case 'snappy':
+      return 'snappy';
+    default:
+      return 'none';
+  }
+}
+
 export class TestConfiguration {
   version: string;
   clientSideEncryption: {
@@ -94,6 +108,7 @@ export class TestConfiguration {
   activeResources: number;
   isSrv: boolean;
   filters: Record<string, Filter>;
+  compressor: CompressorName | null;
 
   constructor(
     private uri: string,
@@ -111,6 +126,7 @@ export class TestConfiguration {
     this.buildInfo = context.buildInfo;
     this.serverApi = context.serverApi;
     this.isSrv = uri.indexOf('mongodb+srv') > -1;
+    this.compressor = getCompressor(process.env.COMPRESSOR);
     this.options = {
       hosts,
       hostAddresses,
@@ -121,11 +137,11 @@ export class TestConfiguration {
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
         ? {
-            proxyHost: url.searchParams.get('proxyHost'),
-            proxyPort: Number(url.searchParams.get('proxyPort')),
-            proxyUsername: url.searchParams.get('proxyUsername'),
-            proxyPassword: url.searchParams.get('proxyPassword')
-          }
+          proxyHost: url.searchParams.get('proxyHost'),
+          proxyPort: Number(url.searchParams.get('proxyPort')),
+          proxyUsername: url.searchParams.get('proxyUsername'),
+          proxyPassword: url.searchParams.get('proxyPassword')
+        }
         : undefined
     };
     if (url.username) {
@@ -200,7 +216,13 @@ export class TestConfiguration {
   }
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
-    serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
+    serverOptions = Object.assign(
+      <MongoClientOptions>{
+        compressors: this.compressor
+      },
+      getEnvironmentalOptions(),
+      serverOptions
+    );
 
     if (this.loggingEnabled && !Object.hasOwn(serverOptions, 'mongodbLogPath')) {
       serverOptions = this.setupLogging(serverOptions);
@@ -314,12 +336,14 @@ export class TestConfiguration {
       authSource?: string;
       authMechanism?: string;
       authMechanismProperties?: Record<string, any>;
+      compressors?: CompressorName;
     }
   ) {
     options = {
       db: this.options.db,
       replicaSet: this.options.replicaSet,
       proxyURIParams: this.options.proxyURIParams,
+      compressors: this.compressor,
       ...options
     };
 
