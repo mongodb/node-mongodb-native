@@ -65,7 +65,9 @@ function convertToConnStringMap(obj: Record<string, any>) {
   return result.join(',');
 }
 
-function getCompressor(compressor: string): CompressorName {
+function getCompressor(compressor: string | undefined): CompressorName {
+  if (!compressor) return null;
+
   switch (compressor) {
     case 'zstd':
       return 'zstd';
@@ -74,7 +76,7 @@ function getCompressor(compressor: string): CompressorName {
     case 'snappy':
       return 'snappy';
     default:
-      return 'none';
+      throw new Error('unsupported test runner compressor, would default to no compression');
   }
 }
 
@@ -137,11 +139,11 @@ export class TestConfiguration {
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
         ? {
-          proxyHost: url.searchParams.get('proxyHost'),
-          proxyPort: Number(url.searchParams.get('proxyPort')),
-          proxyUsername: url.searchParams.get('proxyUsername'),
-          proxyPassword: url.searchParams.get('proxyPassword')
-        }
+            proxyHost: url.searchParams.get('proxyHost'),
+            proxyPort: Number(url.searchParams.get('proxyPort')),
+            proxyUsername: url.searchParams.get('proxyUsername'),
+            proxyPassword: url.searchParams.get('proxyPassword')
+          }
         : undefined
     };
     if (url.username) {
@@ -216,13 +218,13 @@ export class TestConfiguration {
   }
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
-    serverOptions = Object.assign(
-      <MongoClientOptions>{
-        compressors: this.compressor
-      },
-      getEnvironmentalOptions(),
-      serverOptions
-    );
+    const baseOptions: MongoClientOptions = this.compressor
+      ? {
+          compressors: this.compressor
+        }
+      : {};
+
+    serverOptions = Object.assign(baseOptions, getEnvironmentalOptions(), serverOptions);
 
     if (this.loggingEnabled && !Object.hasOwn(serverOptions, 'mongodbLogPath')) {
       serverOptions = this.setupLogging(serverOptions);
@@ -336,14 +338,12 @@ export class TestConfiguration {
       authSource?: string;
       authMechanism?: string;
       authMechanismProperties?: Record<string, any>;
-      compressors?: CompressorName;
     }
   ) {
     options = {
       db: this.options.db,
       replicaSet: this.options.replicaSet,
       proxyURIParams: this.options.proxyURIParams,
-      compressors: this.compressor,
       ...options
     };
 
@@ -422,6 +422,8 @@ export class TestConfiguration {
     if (!options.authSource) {
       url.searchParams.append('authSource', 'admin');
     }
+
+    this.compressor && url.searchParams.append('compressors', this.compressor);
 
     // Secrets setup for OIDC always sets the workload URI as MONGODB_URI_SINGLE.
     if (process.env.MONGODB_URI_SINGLE?.includes('MONGODB-OIDC')) {
