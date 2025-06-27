@@ -461,14 +461,16 @@ function compareCommandStartedEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
   if (expected!.databaseName) {
     expect(
       expected!.databaseName,
-      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${actual.databaseName
+      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${
+        actual.databaseName
       }`
     ).to.equal(actual.databaseName);
   }
@@ -486,7 +488,8 @@ function compareCommandSucceededEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
@@ -501,7 +504,8 @@ function compareCommandFailedEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
       }`
     ).to.equal(actual.commandName);
   }

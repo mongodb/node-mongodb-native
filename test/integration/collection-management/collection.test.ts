@@ -547,7 +547,7 @@ describe('Collection', function () {
       const capped = await collection.isCapped();
       expect(capped).to.be.false;
     } finally {
-      client.close();
+      await client.close();
     }
   }
 

@@ -95,8 +95,9 @@ describe('parsing of utf8-invalid documents with cursors', function () {
       if (providedBuffer.includes(targetBytes)) {
         if (providedBuffer.split(targetBytes).length !== 2) {
           sinon.restore();
-          const message = `too many target bytes sequences: received ${providedBuffer.split(targetBytes).length
-            }`;
+          const message = `too many target bytes sequences: received ${
+            providedBuffer.split(targetBytes).length
+          }`;
           throw new Error(message);
         }
         const buffer = Buffer.from(providedBuffer.replace(targetBytes, 'c301'.repeat(8)), 'hex');
