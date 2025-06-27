@@ -123,7 +123,7 @@ async function executeServerSelectionTest(testDefinition) {
       const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
       selector = ServerSelectors.readPreferenceServerSelector(readPreference);
     } catch (e) {
-      if (testDefinition.error) return;
+      if (testDefinition.error) return topology.close();
       throw e;
     }
   } else {
@@ -179,6 +179,8 @@ async function executeServerSelectionTest(testDefinition) {
     // this is another expected error case
     if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return;
     throw err;
+  } finally {
+    topology.close();
   }
 }
 

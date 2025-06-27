@@ -1825,7 +1825,7 @@ describe('crud - insert', function () {
           .toArray();
         const doc = docs.pop();
         expect(doc.a._bsontype).to.equal('Long');
-        client.close();
+        await client.close();
       }
     });
 

@@ -15,6 +15,7 @@ const { TimeoutContext } = require('../../mongodb');
 describe('Connection Pool', function () {
   let timeoutContext;
   let mockMongod;
+  let pool;
   const stubServer = {
     topology: {
       client: {
@@ -50,6 +51,8 @@ describe('Connection Pool', function () {
     timeoutContext = TimeoutContext.create({ waitQueueTimeoutMS: 0, serverSelectionTimeoutMS: 0 });
   });
 
+  afterEach(() => pool?.close());
+
   it('should destroy connections which have been closed', async function () {
     mockMongod.setMessageHandler(request => {
       const doc = request.document;
@@ -61,7 +64,7 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool(stubServer, {
+    pool = new ConnectionPool(stubServer, {
       maxPoolSize: 1,
       hostAddress: mockMongod.hostAddress()
     });
@@ -81,6 +84,8 @@ describe('Connection Pool', function () {
     expect(events).to.have.length(1);
     const closeEvent = events[0];
     expect(closeEvent).have.property('reason').equal('error');
+
+    conn.destroy();
   });
 
   it('should propagate socket timeouts to connections', async function () {
@@ -93,7 +98,7 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool(stubServer, {
+    pool = new ConnectionPool(stubServer, {
       maxPoolSize: 1,
       socketTimeoutMS: 200,
       hostAddress: mockMongod.hostAddress()
@@ -117,7 +122,7 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool(stubServer, {
+    pool = new ConnectionPool(stubServer, {
       maxPoolSize: 1,
       waitQueueTimeoutMS: 200,
       hostAddress: mockMongod.hostAddress()
@@ -157,7 +162,7 @@ describe('Connection Pool', function () {
     });
 
     it('should respect the minPoolSizeCheckFrequencyMS option', function () {
-      const pool = new ConnectionPool(stubServer, {
+      pool = new ConnectionPool(stubServer, {
         minPoolSize: 2,
         minPoolSizeCheckFrequencyMS: 42,
         hostAddress: mockMongod.hostAddress()
@@ -193,7 +198,7 @@ describe('Connection Pool', function () {
     });
 
     it('should default minPoolSizeCheckFrequencyMS to 100ms', function () {
-      const pool = new ConnectionPool(stubServer, {
+      pool = new ConnectionPool(stubServer, {
         minPoolSize: 2,
         hostAddress: mockMongod.hostAddress()
       });

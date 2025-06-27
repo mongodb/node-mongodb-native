@@ -1,8 +1,14 @@
 import { once } from 'node:events';
 
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import { type ConnectionPoolCreatedEvent, type Db, type MongoClient } from '../../mongodb';
+import {
+  type ConnectionPoolCreatedEvent,
+  type Db,
+  type MongoClient,
+  type Server
+} from '../../mongodb';
 import { clearFailPoint, configureFailPoint, sleep } from '../../tools/utils';
 
 describe('Connection Pool', function () {
@@ -150,4 +156,51 @@ describe('Connection Pool', function () {
       });
     });
   });
+
+  describe(
+    'background task cleans up connections when minPoolSize=0',
+    { requires: { topology: 'single' } },
+    function () {
+      let server: Server;
+      let ensureMinPoolSizeSpy: sinon.SinonSpy;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient(
+          {},
+          {
+            maxConnecting: 10,
+            minPoolSize: 0,
+            maxIdleTimeMS: 100
+          }
+        );
+
+        await client.connect();
+
+        await Promise.all(
+          Array.from({ length: 10 }).map(() => {
+            return client.db('foo').collection('bar').insertOne({ a: 1 });
+          })
+        );
+
+        server = Array.from(client.topology.s.servers.entries())[0][1];
+        expect(
+          server.pool.availableConnectionCount,
+          'pool was not filled with connections'
+        ).to.be.greaterThan(0);
+
+        ensureMinPoolSizeSpy = sinon.spy(server.pool, 'ensureMinPoolSize');
+      });
+
+      it(
+        'prunes idle connections when minPoolSize=0',
+        { requires: { topology: 'single' } },
+        async function () {
+          await sleep(500);
+          expect(server.pool.availableConnectionCount).to.equal(0);
+
+          expect(ensureMinPoolSizeSpy).to.have.been.called;
+        }
+      );
+    }
+  );
 });

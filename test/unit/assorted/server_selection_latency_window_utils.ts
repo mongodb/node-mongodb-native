@@ -145,4 +145,6 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
   const observedFrequencies = calculateObservedFrequencies(selectedServers);
 
   compareResultsToExpected(test.outcome, observedFrequencies);
+
+  await topology.close();
 }
