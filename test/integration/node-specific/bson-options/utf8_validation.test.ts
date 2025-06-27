@@ -95,9 +95,8 @@ describe('parsing of utf8-invalid documents with cursors', function () {
       if (providedBuffer.includes(targetBytes)) {
         if (providedBuffer.split(targetBytes).length !== 2) {
           sinon.restore();
-          const message = `too many target bytes sequences: received ${
-            providedBuffer.split(targetBytes).length
-          }`;
+          const message = `too many target bytes sequences: received ${providedBuffer.split(targetBytes).length
+            }`;
           throw new Error(message);
         }
         const buffer = Buffer.from(providedBuffer.replace(targetBytes, 'c301'.repeat(8)), 'hex');
@@ -121,7 +120,7 @@ describe('parsing of utf8-invalid documents with cursors', function () {
   beforeEach(async function () {
     if (typeof compressionPredicate() === 'string') {
       this.currentTest.skipReason = compressionPredicate() as string;
-      this.currentTest.skip();
+      this.skip();
     }
     client = this.configuration.newClient();
     await client.connect();
@@ -134,7 +133,7 @@ describe('parsing of utf8-invalid documents with cursors', function () {
 
   afterEach(async function () {
     sinon.restore();
-    await client.close();
+    await client?.close();
   });
 
   context('when utf-8 validation is explicitly disabled', function () {

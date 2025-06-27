@@ -268,7 +268,15 @@ describe('Connection', function () {
         // This test exists to prevent regression of processing many messages inside one chunk.
         it(
           'processes all of them and emits heartbeats',
-          { requires: { topology: 'replicaset', mongodb: '>=4.4' } },
+          {
+            requires: {
+              topology: 'replicaset',
+              mongodb: '>=4.4',
+              // When compression is enabled, processing heartbeat events is asynchronous.
+              predicate: () =>
+                process.env.COMPRESSOR ? 'test requires that compression is disabled' : true
+            }
+          },
           async function () {
             let hbSuccess = 0;
             client.on('serverHeartbeatSucceeded', () => (hbSuccess += 1));
@@ -291,6 +299,7 @@ describe('Connection', function () {
 
             // All of the hb will be emitted synchronously in the next tick as the entire chunk is processed.
             await processTick();
+
             expect(hbSuccess).to.be.greaterThan(1000);
           }
         );
