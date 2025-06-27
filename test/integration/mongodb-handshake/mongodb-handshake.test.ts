@@ -55,7 +55,7 @@ describe('MongoDB Handshake', () => {
     after(() => sinon.restore());
 
     it('constructs a handshake with the specified compressors', async function () {
-      client = this.configuration.newClient({ compressors: ['snappy'] });
+      client = this.configuration.newClient({}, { compressors: ['snappy'] });
       // The load-balanced mode doesn’t perform SDAM,
       // so `connect` doesn’t do anything unless authentication is enabled.
       // Force the driver to send a command to the server in the noauth mode.

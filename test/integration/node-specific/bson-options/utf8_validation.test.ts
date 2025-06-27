@@ -79,6 +79,8 @@ describe('class MongoDBResponse', () => {
 describe('parsing of utf8-invalid documents with cursors', function () {
   let client: MongoClient;
   let collection: Collection;
+  const compressionPredicate = () =>
+    process.env.COMPRESSOR ? 'Test requires that compression is disabled' : true;
 
   /**
    * Inserts a document with malformed utf8 bytes.  This method spies on socket.write, and then waits
@@ -117,6 +119,10 @@ describe('parsing of utf8-invalid documents with cursors', function () {
   }
 
   beforeEach(async function () {
+    if (typeof compressionPredicate() === 'string') {
+      this.currentTest.skipReason = compressionPredicate() as string;
+      this.skip();
+    }
     client = this.configuration.newClient();
     await client.connect();
     const db = client.db('test');
@@ -128,7 +134,7 @@ describe('parsing of utf8-invalid documents with cursors', function () {
 
   afterEach(async function () {
     sinon.restore();
-    await client.close();
+    await client?.close();
   });
 
   context('when utf-8 validation is explicitly disabled', function () {
