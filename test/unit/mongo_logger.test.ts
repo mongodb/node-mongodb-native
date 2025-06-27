@@ -1613,7 +1613,7 @@ describe('class MongoLogger', function () {
   });
 });
 
-describe.skip('stringifyWithMaxLen', function () {
+describe('stringifyWithMaxLen', function () {
   describe('when stringifying a string field', function () {
     it('does not prematurely redact the next key', function () {
       const doc = {
