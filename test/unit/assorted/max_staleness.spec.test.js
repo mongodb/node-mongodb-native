@@ -45,13 +45,12 @@ describe('Max Staleness (spec)', function () {
   });
 
   const specTests = collectStalenessTests(maxStalenessDir);
-  Object.keys(specTests).forEach(specTestName => {
+  for (const [specTestName, test] of Object.entries(specTests)) {
     describe(specTestName, () => {
-      specTests[specTestName].forEach(testData => {
+      for (const testData of test)
         it(testData.description, async function () {
           return executeServerSelectionTest(testData);
         });
-      });
     });
-  });
+  }
 });

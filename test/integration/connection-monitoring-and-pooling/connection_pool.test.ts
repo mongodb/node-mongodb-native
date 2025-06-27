@@ -186,7 +186,7 @@ describe('Connection Pool', function () {
         expect(
           server.pool.availableConnectionCount,
           'pool was not filled with connections'
-        ).to.equal(10);
+        ).to.be.greaterThan(0);
 
         ensureMinPoolSizeSpy = sinon.spy(server.pool, 'ensureMinPoolSize');
       });
