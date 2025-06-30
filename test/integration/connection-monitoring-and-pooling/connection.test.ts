@@ -14,6 +14,7 @@ import {
   makeClientMetadata,
   MongoClient,
   MongoClientAuthProviders,
+  type MongoClientOptions,
   MongoDBResponse,
   MongoServerError,
   ns,
@@ -172,16 +173,16 @@ describe('Connection', function () {
       metadata: {
         requires: { topology: 'single', os: '!win32' }
       },
-
       test: function (done) {
         const configuration = this.configuration;
-        client = configuration.newClient(
-          `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
-          {
-            maxPoolSize: 1,
-            auth: { ...this.configuration.options.auth }
-          }
-        );
+        const uri = `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`;
+        const options: MongoClientOptions = {
+          maxPoolSize: 1
+        };
+        if (this.configuration.options.auth) {
+          options.auth = this.configuration.options.auth;
+        }
+        client = configuration.newClient(uri, options);
 
         const db = client.db(configuration.db);
 
