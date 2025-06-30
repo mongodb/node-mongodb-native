@@ -9,7 +9,7 @@ const ignoredCommands = [LEGACY_HELLO_COMMAND, 'endSessions'];
 const test = { commands: { started: [], succeeded: [] } };
 
 // TODO(NODE-3882) - properly implement all prose tests and add missing cases 1, 8, 9, 11, 12
-describe.only('Causal Consistency - prose tests', function () {
+describe('Causal Consistency - prose tests', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

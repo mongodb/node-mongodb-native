@@ -1788,6 +1788,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1802,6 +1803,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1816,6 +1818,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1830,6 +1833,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1844,6 +1848,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1858,6 +1863,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1872,6 +1878,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
