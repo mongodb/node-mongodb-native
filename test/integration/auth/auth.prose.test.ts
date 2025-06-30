@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import { Connection, LEGACY_HELLO_COMMAND, type MongoClient, ScramSHA256 } from '../../mongodb';
+import { type TestConfiguration } from '../../tools/runner/config';
 
 function makeConnectionString(config, username, password) {
   return `mongodb://${username}:${password}@${config.host}:${config.port}/admin?`;
@@ -321,7 +322,6 @@ describe('Authentication Spec Prose Tests', function () {
        * mongodb://%E2%85%A8:IV\@mongodb.example.com/admin
        * mongodb://%E2%85%A8:I%C2%ADV\@mongodb.example.com/admin
        */
-      let utilClient: MongoClient;
       let client: MongoClient;
       const users = [
         {
@@ -336,13 +336,18 @@ describe('Authentication Spec Prose Tests', function () {
         }
       ];
 
-      beforeEach(async function () {
-        utilClient = this.configuration.newClient(this.configuration.url());
+      async function cleanUpUsers(configuration: TestConfiguration) {
+        const utilClient = configuration.newClient();
         const db = utilClient.db('admin');
 
-        // We do not care if this fails - this is just cleanup for any
-        // previous test iterations or previous test runs.
         await Promise.allSettled(users.map(user => db.removeUser(user.username)));
+
+        await utilClient.close();
+      }
+
+      async function createUsers(configuration: TestConfiguration) {
+        const utilClient = configuration.newClient();
+        const db = utilClient.db('admin');
 
         const createUserCommands = users.map(user => ({
           createUser: user.username,
@@ -355,15 +360,25 @@ describe('Authentication Spec Prose Tests', function () {
           createUserCommands.map(cmd => db.command(cmd))
         ).then(resolutions => resolutions.filter(resolution => resolution.status === 'rejected'));
 
+        await utilClient.close();
+
         if (failures.length) {
           throw new Error(
             'Error(s) creating users: ' + failures.map(failure => failure.reason).join(' | ')
           );
         }
+      }
+
+      before(async function () {
+        await cleanUpUsers(this.configuration);
+        await createUsers(this.configuration);
+      });
+
+      after(function () {
+        return cleanUpUsers(this.configuration);
       });
 
       afterEach(async function () {
-        await utilClient?.close();
         await client?.close();
       });
 
