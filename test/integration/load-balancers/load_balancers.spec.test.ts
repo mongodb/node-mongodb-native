@@ -28,7 +28,7 @@ const filter = ({ description }) => {
     process.env.AUTH === 'auth' &&
     ['errors during authentication are processed'].includes(description)
   ) {
-    return 'TODO a;sdhfa;sjkdf';
+    return 'TODO(NODE-7014): clear pool after handshake error in lb mode';
   }
 
   return false;
