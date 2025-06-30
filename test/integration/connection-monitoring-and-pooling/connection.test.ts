@@ -21,7 +21,6 @@ import {
   Topology
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { processTick, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
@@ -37,15 +36,6 @@ const commonConnectOptions = {
 };
 
 describe('Connection', function () {
-  beforeEach(
-    skipBrokenAuthTestBeforeEachHook({
-      skippedTests: [
-        'should support calling back multiple times on exhaust commands',
-        'should correctly connect to server using domain socket'
-      ]
-    })
-  );
-
   before(function () {
     return setupDatabase(this.configuration);
   });
@@ -187,7 +177,10 @@ describe('Connection', function () {
         const configuration = this.configuration;
         client = configuration.newClient(
           `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
-          { maxPoolSize: 1 }
+          {
+            maxPoolSize: 1,
+            auth: { ...this.configuration.options.auth }
+          }
         );
 
         const db = client.db(configuration.db);

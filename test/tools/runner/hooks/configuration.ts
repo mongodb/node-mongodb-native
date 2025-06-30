@@ -107,22 +107,6 @@ const testSkipBeforeEachHook = async function () {
   }
 };
 
-/**
- * TODO: NODE-3891 - fix tests that are broken with auth enabled and remove this hook
- * @param skippedTests - define list of tests to skip
- * @returns
- */
-export const skipBrokenAuthTestBeforeEachHook = function (
-  { skippedTests }: { skippedTests: string[] } = { skippedTests: [] }
-) {
-  return function () {
-    if (process.env.AUTH === 'auth' && skippedTests.includes(this.currentTest.title)) {
-      this.currentTest.skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
-      this.skip();
-    }
-  };
-};
-
 const testConfigBeforeHook = async function () {
   if (process.env.DRIVERS_ATLAS_TESTING_URI) {
     this.configuration = new AstrolabeTestConfiguration(process.env.DRIVERS_ATLAS_TESTING_URI, {});
