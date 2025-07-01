@@ -26,15 +26,9 @@ const filter = ({ description }) => {
 
   if (
     process.env.AUTH === 'auth' &&
-    [
-      'errors during authentication are processed',
-      'wait queue timeout errors include cursor statistics',
-      'wait queue timeout errors include transaction statistics',
-      'operations against non-load balanced clusters fail if URI contains loadBalanced=true',
-      'operations against non-load balanced clusters succeed if URI contains loadBalanced=false'
-    ].includes(description)
+    ['errors during authentication are processed'].includes(description)
   ) {
-    return 'TODO(NODE-3891): fix tests broken when AUTH enabled';
+    return 'TODO(NODE-7014): clear pool after handshake error in lb mode';
   }
 
   return false;

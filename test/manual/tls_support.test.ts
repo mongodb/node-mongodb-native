@@ -3,6 +3,7 @@ import * as tls from 'node:tls';
 
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
+import ConnectionString from 'mongodb-connection-string-url';
 import * as sinon from 'sinon';
 
 import {
@@ -33,7 +34,7 @@ describe('TLS Support', function () {
 
   it(
     'should connect with tls via client options',
-    makeConnectionTest(CONNECTION_STRING, tlsSettings)
+    makeConnectionTest(CONNECTION_STRING, {}, tlsSettings)
   );
 
   beforeEach(function () {
@@ -48,11 +49,7 @@ describe('TLS Support', function () {
 
   it(
     'should connect with tls via url options',
-    makeConnectionTest(
-      `${CONNECTION_STRING}?${Object.keys(tlsSettings)
-        .map(key => `${key}=${tlsSettings[key]}`)
-        .join('&')}`
-    )
+    makeConnectionTest(CONNECTION_STRING, tlsSettings, {})
   );
 
   context('when tls filepaths are provided', () => {
@@ -283,9 +280,17 @@ describe('TLS Support', function () {
   });
 });
 
-function makeConnectionTest(connectionString: string, clientOptions?: MongoClientOptions) {
+function makeConnectionTest(
+  connectionString: string,
+  uriOptions: Record<string, any>,
+  clientOptions?: MongoClientOptions
+) {
+  const uri = new ConnectionString(connectionString);
+  for (const [k, v] of Object.entries(uriOptions)) {
+    uri.searchParams.set(k, v);
+  }
   return async function () {
-    const client = new MongoClient(connectionString, clientOptions);
+    const client = new MongoClient(uri.toString(), clientOptions);
 
     await client.connect();
     await client.db('admin').command({ [LEGACY_HELLO_COMMAND]: 1 });

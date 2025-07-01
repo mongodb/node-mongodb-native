@@ -8,53 +8,6 @@ import {
 } from '../../tools/spec-runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
-const isAuthEnabled = process.env.AUTH === 'auth';
-
-// 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
-const skippedAuthTests = [
-  'Insert a document with auto encryption using the AWS provider with temporary credentials',
-  'Insert a document with auto encryption using Azure KMS provider',
-  '$rename works if target value has same encryption options',
-  'Bulk write with encryption',
-  'Insert with bypassAutoEncryption',
-  'Insert with bypassAutoEncryption for local schema',
-  'ping is bypassed',
-  'deleteOne with deterministic encryption',
-  'deleteMany with deterministic encryption',
-  'distinct with deterministic encryption',
-  'Find with deterministic encryption',
-  'Find with $in with deterministic encryption',
-  'findOneAndReplace with deterministic encryption',
-  'findOneAndUpdate with deterministic encryption',
-  'Insert a document with auto encryption using GCP KMS provider',
-  'getMore with encryption',
-  'unset works with an encrypted field',
-  'updateOne with deterministic encryption',
-  'updateMany with deterministic encryption',
-  'replaceOne with encryption',
-  'Insert with encryption on a missing key',
-  'A local schema should override',
-  'Count with deterministic encryption',
-  'Insert a document with auto encryption using local KMS provider',
-  'Insert with encryption using key alt name',
-  'insertMany with encryption',
-  'insertOne with encryption',
-  'findOneAndDelete with deterministic encryption',
-  '$unset works with an encrypted field',
-  'Insert a document with auto encryption using KMIP KMS provider'
-];
-
-// TODO(NODE-6048): Int32 and Long not allowed as batchSize option to cursor.
-const skippedNoAuthTests = ['getMore with encryption'];
-
-const SKIPPED_TESTS = new Set([
-  ...(isAuthEnabled ? skippedAuthTests.concat(skippedNoAuthTests) : skippedNoAuthTests),
-  ...[
-    // the node driver does not have a mapReduce helper
-    'mapReduce deterministic encryption (unsupported)'
-  ]
-]);
-
 describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
@@ -70,8 +23,11 @@ describe('Client Side Encryption (Legacy)', function () {
 
   generateTopologyTests(testSuites, testContext, (test, configuration) => {
     const { description } = test;
-    if (SKIPPED_TESTS.has(description)) {
-      return 'Skipped by generic test name skip filter.';
+    if (description === 'getMore with encryption') {
+      return `TODO(NODE-6048): Int32 and Long not allowed as batchSize option to cursor`;
+    }
+    if (description === 'mapReduce deterministic encryption (unsupported)') {
+      return `the Node driver does not have a mapReduce helper.`;
     }
     if (
       [

@@ -6,11 +6,7 @@ import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
-    auth: 'enabled',
-
-    // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
-    //   These tests should work on a load balanced topology
-    topology: '!load-balanced'
+    auth: 'enabled'
   }
 };
 
