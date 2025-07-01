@@ -20,7 +20,7 @@ import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { type AsyncDisposable, configureResourceManagement } from '../resource_management';
 import type { Server } from '../sdam/server';
-import { ClientSession, maybeClearPinnedConnection } from '../sessions';
+import { type ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type CSOTTimeoutContext, type Timeout, TimeoutContext } from '../timeout';
 import {
   addAbortListener,
@@ -227,7 +227,7 @@ export abstract class AbstractCursor<
   /** @internal */
   private cursorId: Long | null;
   /** @internal */
-  private cursorSession: ClientSession;
+  private cursorSession: ClientSession | null;
   /** @internal */
   private selectedServer?: Server;
   /** @internal */
@@ -352,11 +352,7 @@ export abstract class AbstractCursor<
       this.cursorOptions.maxAwaitTimeMS = options.maxAwaitTimeMS;
     }
 
-    if (options.session instanceof ClientSession) {
-      this.cursorSession = options.session;
-    } else {
-      this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
-    }
+    this.cursorSession = options.session ?? null;
 
     this.deserializationOptions = {
       ...this.cursorOptions,
@@ -413,7 +409,7 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
-  get session(): ClientSession {
+  get session(): ClientSession | null {
     return this.cursorSession;
   }
 
@@ -877,11 +873,12 @@ export abstract class AbstractCursor<
     this.trackCursor();
 
     // We only want to end this session if we created it, and it hasn't ended yet
-    if (this.cursorSession.explicit === false) {
+    if (this.cursorSession?.explicit === false) {
       if (!this.cursorSession.hasEnded) {
         this.cursorSession.endSession().then(undefined, squashError);
       }
-      this.cursorSession = this.cursorClient.startSession({ owner: this, explicit: false });
+
+      this.cursorSession = null;
     }
   }
 
@@ -907,6 +904,13 @@ export abstract class AbstractCursor<
         'Unexpected null selectedServer. A cursor creating command should have set this'
       );
     }
+
+    if (!this.cursorSession) {
+      throw new MongoRuntimeError(
+        'Unexpected null session. A cursor creating command should have set this'
+      );
+    }
+
     const getMoreOptions = {
       ...this.cursorOptions,
       session: this.cursorSession,
@@ -941,6 +945,7 @@ export abstract class AbstractCursor<
       );
     }
     try {
+      this.cursorSession ??= this.cursorClient.startSession({ owner: this, explicit: false });
       const state = await this._initialize(this.cursorSession);
       // Set omitMaxTimeMS to the value needed for subsequent getMore calls
       this.cursorOptions.omitMaxTimeMS = this.cursorOptions.timeoutMS != null;
@@ -1032,41 +1037,57 @@ export abstract class AbstractCursor<
         return this.timeoutContext?.refreshed();
       }
     };
-    try {
-      if (
-        !this.isKilled &&
-        this.cursorId &&
-        !this.cursorId.isZero() &&
-        this.cursorNamespace &&
-        this.selectedServer &&
-        !this.cursorSession.hasEnded
-      ) {
-        this.isKilled = true;
-        const cursorId = this.cursorId;
-        this.cursorId = Long.ZERO;
 
-        await executeOperation(
-          this.cursorClient,
-          new KillCursorsOperation(cursorId, this.cursorNamespace, this.selectedServer, {
-            session: this.cursorSession
-          }),
-          timeoutContextForKillCursors()
-        );
-      }
-    } catch (error) {
-      squashError(error);
-    } finally {
+    const withEmitClose = async (fn: () => Promise<void>) => {
       try {
-        if (this.cursorSession?.owner === this) {
-          await this.cursorSession.endSession({ error });
-        }
-        if (!this.cursorSession?.inTransaction()) {
-          maybeClearPinnedConnection(this.cursorSession, { error });
-        }
+        await fn();
       } finally {
         this.emitClose();
       }
-    }
+    };
+
+    const close = async () => {
+      // if no session has been defined on the cursor, the cursor was never initialized
+      // or the cursor was re-wound and never re-iterated.  In either case, we
+      //   1. do not need to end the session (there is no session after all)
+      //   2. do not need to kill the cursor server-side
+      const session = this.cursorSession;
+      if (!session) return;
+
+      try {
+        if (
+          !this.isKilled &&
+          this.cursorId &&
+          !this.cursorId.isZero() &&
+          this.cursorNamespace &&
+          this.selectedServer &&
+          !session.hasEnded
+        ) {
+          this.isKilled = true;
+          const cursorId = this.cursorId;
+          this.cursorId = Long.ZERO;
+
+          await executeOperation(
+            this.cursorClient,
+            new KillCursorsOperation(cursorId, this.cursorNamespace, this.selectedServer, {
+              session
+            }),
+            timeoutContextForKillCursors()
+          );
+        }
+      } catch (error) {
+        squashError(error);
+      } finally {
+        if (session.owner === this) {
+          await session.endSession({ error });
+        }
+        if (!session?.inTransaction()) {
+          maybeClearPinnedConnection(session, { error });
+        }
+      }
+    };
+
+    await withEmitClose(close);
   }
 
   /** @internal */

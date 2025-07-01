@@ -23,6 +23,43 @@ import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 describe('class AbstractCursor', function () {
+  describe('lazy implicit session acquisition', function () {
+    let client: MongoClient;
+    let collection: Collection;
+    const docs = [{ count: 0 }, { count: 10 }];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+
+      collection = client.db('abstract_cursor_integration').collection('test');
+
+      await collection.insertMany(docs);
+    });
+
+    afterEach(async function () {
+      await collection.deleteMany({});
+      await client.close();
+    });
+
+    it('does not allocate a session when the cursor is constructed', function () {
+      const cursor = collection.find();
+      expect(cursor.session).to.be.null;
+    });
+
+    it('allocates a session once the cursor is initialized', async function () {
+      const cursor = collection.find({}, { batchSize: 1 });
+      await cursor.next();
+      expect(cursor.session).not.to.be.null;
+    });
+
+    it('sets the session to `null` when rewound', async function () {
+      const cursor = collection.find({}, { batchSize: 1 });
+      await cursor.next();
+      cursor.rewind();
+      expect(cursor.session).to.be.null;
+    });
+  });
+
   describe('regression tests NODE-5372', function () {
     let client: MongoClient;
     let collection: Collection;

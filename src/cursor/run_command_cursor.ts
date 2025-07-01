@@ -1,7 +1,7 @@
 import type { BSONSerializeOptions, Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
-import { MongoAPIError } from '../error';
+import { MongoAPIError, MongoRuntimeError } from '../error';
 import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { RunCommandOperation } from '../operations/run_command';
@@ -161,6 +161,12 @@ export class RunCommandCursor extends AbstractCursor {
 
   /** @internal */
   override async getMore(_batchSize: number): Promise<CursorResponse> {
+    if (!this.session) {
+      throw new MongoRuntimeError(
+        'Unexpected null session. A cursor creating command should have set this'
+      );
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const getMoreOperation = new GetMoreOperation(this.namespace, this.id!, this.server!, {
       ...this.cursorOptions,
