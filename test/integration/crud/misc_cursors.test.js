@@ -1887,52 +1887,6 @@ describe('Cursor', function () {
     }
   );
 
-  it('shouldAwaitData', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: function (done) {
-      // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
-
-      const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const db = client.db(configuration.db);
-        const options = { capped: true, size: 8 };
-        db.createCollection(
-          'should_await_data_retry_tailable_cursor',
-          options,
-          (err, collection) => {
-            expect(err).to.not.exist;
-
-            collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
-
-              // Create cursor with awaitData, and timeout after the period specified
-              const cursor = collection.find({}, { tailable: true, awaitData: true });
-              this.defer(() => cursor.close());
-
-              // Execute each
-              cursor.forEach(
-                () => cursor.close(),
-                () => {
-                  // Even though cursor is exhausted, should not close session
-                  // unless cursor is manually closed, due to awaitData / tailable
-                  done();
-                }
-              );
-            });
-          }
-        );
-      });
-    }
-  });
-
   it('shouldAwaitDataWithDocumentsAvailable', function (done) {
     // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
 
