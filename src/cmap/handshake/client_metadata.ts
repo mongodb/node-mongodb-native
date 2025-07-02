@@ -123,7 +123,7 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   };
 
   // This is where we handle additional driver info added after client construction.
-  if (options.additionalDriverInfo.length > 0) {
+  if (options.additionalDriverInfo?.length > 0) {
     for (const { name: n = '', version: v = '' } of options.additionalDriverInfo) {
       if (n.length > 0) {
         driverInfo.name = `${driverInfo.name}|${n}`;
@@ -145,7 +145,7 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     runtimeInfo = `${runtimeInfo}|${platform}`;
   }
 
-  if (options.additionalDriverInfo.length > 0) {
+  if (options.additionalDriverInfo?.length > 0) {
     for (const { platform: p = '' } of options.additionalDriverInfo) {
       if (p.length > 0) {
         runtimeInfo = `${runtimeInfo}|${p}`;
