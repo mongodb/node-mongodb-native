@@ -32,9 +32,9 @@ describe('class AbstractCursor', () => {
   });
 
   context('#constructor', () => {
-    it('creates a session if none passed in', () => {
+    it('does not create a session if none passed in', () => {
       const cursor = new ConcreteCursor(client);
-      expect(cursor).to.have.property('session').that.is.instanceOf(ClientSession);
+      expect(cursor).to.have.property('session').that.is.null;
     });
 
     it('uses the passed in session', async () => {
