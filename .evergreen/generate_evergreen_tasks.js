@@ -317,9 +317,8 @@ for (const VERSION of TLS_VERSIONS) {
       updateExpansions({
         VERSION,
         SSL: 'ssl',
-        TOPOLOGY: 'server'
-        // TODO: NODE-3891 - fix tests broken when AUTH enabled
-        // AUTH: 'auth'
+        TOPOLOGY: 'server',
+        AUTH: 'auth'
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },

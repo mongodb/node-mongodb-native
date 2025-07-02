@@ -27,17 +27,6 @@ const filter: TestFilter = ({ description }) => {
     return 'TODO(NODE-5962): fix migration conflict in transaction tests';
   }
 
-  if (
-    process.env.AUTH === 'auth' &&
-    [
-      'FindOneAndUpdate is committed on first attempt',
-      'FindOneAndUpdate is not committed on first attempt',
-      'FindOneAndUpdate is never committed'
-    ].includes(description)
-  ) {
-    return 'TODO(NODE-3891): fix tests broken when AUTH enabled';
-  }
-
   return false;
 };
 

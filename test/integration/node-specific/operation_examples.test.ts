@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { format as f } from 'util';
 
 import {
   Code,
@@ -8,7 +7,6 @@ import {
   ProfilingLevel,
   ReturnDocument
 } from '../../mongodb';
-import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { sleep as delay } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
@@ -26,16 +24,6 @@ describe('Operations', function () {
   before(function () {
     return setupDatabase(this.configuration, ['integration_tests_2', 'hr', 'reporting']);
   });
-
-  beforeEach(
-    skipBrokenAuthTestBeforeEachHook({
-      skippedTests: [
-        'Should correctly connect to a replicaset',
-        'Should connect to mongos proxies using connectiong string With Promises',
-        'Should correctly connect to a replicaset With Promises'
-      ]
-    })
-  );
 
   /**************************************************************************
    *
@@ -3244,14 +3232,7 @@ describe('Operations', function () {
 
     test: function () {
       const configuration = this.configuration;
-      const url = f(
-        'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
-        f('%s:%s', configuration.host, configuration.port),
-        f('%s:%s', configuration.host, configuration.port + 1),
-        'integration_test_',
-        configuration.replicasetName,
-        'primary'
-      );
+      const url = configuration.url();
 
       const client = configuration.newClient(url);
       return client.connect().then(function (client) {
@@ -3291,13 +3272,7 @@ describe('Operations', function () {
 
     test: function () {
       const configuration = this.configuration;
-      const url = f(
-        'mongodb://%s:%s,%s:%s/sharded_test_db?w=1',
-        configuration.host,
-        configuration.port,
-        configuration.host,
-        configuration.port + 1
-      );
+      const url = configuration.url();
 
       const client = configuration.newClient(url);
       return client.connect().then(function (client) {
