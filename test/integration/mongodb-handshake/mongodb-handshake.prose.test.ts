@@ -194,3 +194,11 @@ describe('Handshake Prose Tests', function () {
     });
   });
 });
+
+describe('Client Metadata Update Prose Tests', function () {
+  let client: MongoClient;
+
+  afterEach(async function () {
+    await client?.close();
+  });
+});

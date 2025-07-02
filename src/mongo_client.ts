@@ -14,7 +14,7 @@ import { type TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
-import type { ClientMetadata } from './cmap/handshake/client_metadata';
+import { type ClientMetadata, makeClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
@@ -457,6 +457,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /** @internal */
   async asyncDispose() {
     await this.close();
+  }
+
+  /**
+   * Append metadata to the client metadata after instantiation.
+   * @param driverInfo - Information abou the application or libraary.
+   */
+  appendMetadata(driverInfo: DriverInfo) {
+    this.s.options.driverInfo = driverInfo;
+    this.s.options.metadata = makeClientMetadata(this.s.options);
   }
 
   /** @internal */
