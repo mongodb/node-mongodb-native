@@ -123,13 +123,14 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   };
 
   // This is where we handle additional driver info added after client construction.
-  if (options.additionalDriverInfo) {
-    const { name: n = '', version: v = '' } = options.additionalDriverInfo;
-    if (n.length > 0) {
-      driverInfo.name = `${driverInfo.name}|${n}`;
-    }
-    if (v.length > 0) {
-      driverInfo.version = `${driverInfo.version}|${v}`;
+  if (options.additionalDriverInfo.length > 0) {
+    for (const { name: n = '', version: v = '' } of options.additionalDriverInfo) {
+      if (n.length > 0) {
+        driverInfo.name = `${driverInfo.name}|${n}`;
+      }
+      if (v.length > 0) {
+        driverInfo.version = `${driverInfo.version}|${v}`;
+      }
     }
   }
 
@@ -143,10 +144,12 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   if (platform.length > 0) {
     runtimeInfo = `${runtimeInfo}|${platform}`;
   }
-  if (options.additionalDriverInfo) {
-    const { platform: p = '' } = options.additionalDriverInfo;
-    if (p.length > 0) {
-      runtimeInfo = `${runtimeInfo}|${p}`;
+
+  if (options.additionalDriverInfo.length > 0) {
+    for (const { platform: p = '' } of options.additionalDriverInfo) {
+      if (p.length > 0) {
+        runtimeInfo = `${runtimeInfo}|${p}`;
+      }
     }
   }
 

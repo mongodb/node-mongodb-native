@@ -409,6 +409,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       | 'crl'
       | 'key'
       | 'cert'
+      | 'driverInfo'
       | 'additionalDriverInfo'
       | 'metadata'
       | 'extendedMetadata'
@@ -421,6 +422,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       | 'crl'
       | 'key'
       | 'cert'
+      | 'driverInfo'
       | 'additionalDriverInfo'
       | 'metadata'
       | 'extendedMetadata'
@@ -488,7 +490,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * @param driverInfo - Information abou the application or libraary.
    */
   appendMetadata(driverInfo: DriverInfo) {
-    this.options.additionalDriverInfo = driverInfo;
+    this.options.additionalDriverInfo.push(driverInfo);
     this.options.metadata = makeClientMetadata(this.options);
     this.options.extendedMetadata = addContainerMetadata(this.options.metadata)
       .then(undefined, squashError)
@@ -1077,10 +1079,8 @@ export interface MongoOptions
   dbName: string;
   /** @deprecated - Will be made internal in a future major release. */
   metadata: ClientMetadata;
-  /** @internal */
   extendedMetadata: Promise<Document>;
-  /** @internal */
-  additionalDriverInfo: DriverInfo;
+  additionalDriverInfo: DriverInfo[];
   /** @internal */
   autoEncrypter?: AutoEncrypter;
   /** @internal */
