@@ -8,6 +8,7 @@ import {
   LEGACY_HELLO_COMMAND,
   type MongoClient
 } from '../../mongodb';
+import { sleep } from '../../tools/utils';
 
 type EnvironmentVariables = Array<[string, string]>;
 
@@ -200,5 +201,88 @@ describe('Client Metadata Update Prose Tests', function () {
 
   afterEach(async function () {
     await client?.close();
+    sinon.restore();
+  });
+
+  describe('Test 1: Test that the driver updates metadata', function () {
+    let initialClientMetadata;
+    let updatedClientMetadata;
+
+    const tests = [
+      { testCase: 1, name: 'framework', version: '2.0', platform: 'Framework Platform' },
+      { testCase: 2, name: 'framework', version: '2.0' },
+      { testCase: 3, name: 'framework', platform: 'Framework Platform' },
+      { testCase: 4, name: 'framework' }
+    ];
+
+    for (const { testCase, name, version, platform } of tests) {
+      context(`Case: ${testCase}`, function () {
+        // 1. Create a `MongoClient` instance with the following:
+        //     - `maxIdleTimeMS` set to `1ms`
+        //     - Wrapping library metadata:
+        //         | Field    | Value            |
+        //         | -------- | ---------------- |
+        //         | name     | library          |
+        //         | version  | 1.2              |
+        //         | platform | Library Platform |
+        // 2. Send a `ping` command to the server and verify that the command succeeds.
+        // 3. Save intercepted `client` document as `initialClientMetadata`.
+        // 4. Wait 5ms for the connection to become idle.
+        beforeEach(async function () {
+          client = this.configuration.newClient(
+            {},
+            {
+              maxIdleTimeMS: 1,
+              monitorCommands: true,
+              driverInfo: { name: 'library', version: '1.2', platform: 'Library Platform' }
+            }
+          );
+
+          sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
+            // @ts-expect-error: sinon will place wrappedMethod on the command method.
+            const command = Connection.prototype.command.wrappedMethod.bind(this);
+
+            if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+              if (!initialClientMetadata) {
+                initialClientMetadata = cmd.client;
+              } else {
+                updatedClientMetadata = cmd.client;
+              }
+            }
+            return command(ns, cmd, options);
+          });
+
+          await client.db('test').command({ ping: 1 });
+          await sleep(5);
+        });
+
+        it('appends the metadata', async function () {
+          // 1. Append the `DriverInfoOptions` from the selected test case to the `MongoClient` metadata.
+          // 2. Send a `ping` command to the server and verify:
+          // - The command succeeds.
+          // - The framework metadata is appended to the existing `DriverInfoOptions` in the `client.driver` fields of the `hello`
+          // command, with values separated by a pipe `|`.
+          client.appendMetadata({ name, version, platform });
+          await client.db('test').command({ ping: 1 });
+
+          expect(updatedClientMetadata.driver.name).to.equal(
+            name
+              ? `${initialClientMetadata.driver.name}|${name}`
+              : initialClientMetadata.driver.name
+          );
+          expect(updatedClientMetadata.driver.version).to.equal(
+            version
+              ? `${initialClientMetadata.driver.version}|${version}`
+              : initialClientMetadata.driver.version
+          );
+          expect(updatedClientMetadata.platform).to.equal(
+            platform
+              ? `${initialClientMetadata.platform}|${platform}`
+              : initialClientMetadata.platform
+          );
+          expect(updatedClientMetadata.os).to.deep.equal(initialClientMetadata.os);
+        });
+      });
+    }
   });
 });
