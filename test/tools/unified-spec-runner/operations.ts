@@ -665,6 +665,11 @@ operations.set('recordTopologyDescription', async ({ entities, operation }) => {
   entities.set(id, description!);
 });
 
+operations.set('appendMetadata', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.object);
+  client.appendMetadata(operation.arguments.driverInfoOptions);
+});
+
 operations.set('assertTopologyType', async ({ entities, operation }) => {
   const {
     topologyDescription,
