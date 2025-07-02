@@ -540,6 +540,9 @@ export function parseOptions(
     }
   );
 
+  // Set the default for the additional driver info.
+  mongoOptions.additionalDriverInfo = [];
+
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
 
   mongoOptions.extendedMetadata = addContainerMetadata(mongoOptions.metadata).then(
