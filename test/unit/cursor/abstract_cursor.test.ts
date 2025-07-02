@@ -4,7 +4,7 @@ import {
   AbstractCursor,
   type AbstractCursorOptions,
   type Callback,
-  ClientSession,
+  type ClientSession,
   type ExecutionResult,
   MongoClient,
   ns,
