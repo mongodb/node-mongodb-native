@@ -905,7 +905,7 @@ export abstract class AbstractCursor<
       );
     }
 
-    if (!this.cursorSession) {
+    if (this.cursorSession == null) {
       throw new MongoRuntimeError(
         'Unexpected null session. A cursor creating command should have set this'
       );
@@ -1081,7 +1081,7 @@ export abstract class AbstractCursor<
         if (session.owner === this) {
           await session.endSession({ error });
         }
-        if (!session?.inTransaction()) {
+        if (!session.inTransaction()) {
           maybeClearPinnedConnection(session, { error });
         }
       }
