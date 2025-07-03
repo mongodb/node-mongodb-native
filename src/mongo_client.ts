@@ -487,7 +487,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /**
    * Append metadata to the client metadata after instantiation.
-   * @param driverInfo - Information abou the application or libraary.
+   * @param driverInfo - Information about the application or library.
    */
   appendMetadata(driverInfo: DriverInfo) {
     this.options.additionalDriverInfo.push(driverInfo);
