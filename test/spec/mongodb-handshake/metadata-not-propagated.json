@@ -1,0 +1,100 @@
+{
+  "description": "client metadata is not propagated to the server",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "6.0"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandSucceededEvent",
+          "commandFailedEvent",
+          "connectionClosedEvent",
+          "connectionCreatedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "metadata append does not create new connections or close existing ones and no hello command is sent",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        },
+        {
+          "name": "appendMetadata",
+          "object": "client",
+          "arguments": {
+            "driverInfoOptions": {
+              "name": "framework",
+              "version": "2.0",
+              "platform": "Framework Platform"
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionCreatedEvent": {}
+            }
+          ]
+        },
+        {
+          "client": "client",
+          "eventType": "command",
+          "events": [
+            {
+              "commandSucceededEvent": {
+                "commandName": "ping"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
