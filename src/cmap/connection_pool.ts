@@ -620,7 +620,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       cancellationToken: this.cancellationToken,
       mongoLogger: this.mongoLogger,
       authProviders: this.server.topology.client.s.authProviders,
-      extendedMetadata: this.server.topology.client.options.extendedMetadata
+      extendedMetadata: this.server.topology.client.options?.extendedMetadata
     };
 
     this.pending++;
