@@ -68,12 +68,7 @@ const stateToString = new Map([
 const INSECURE_TLS_OPTIONS = [
   'tlsInsecure',
   'tlsAllowInvalidCertificates',
-  'tlsAllowInvalidHostnames',
-
-  // These options are disallowed by the spec, so we explicitly filter them out if provided, even
-  // though the StateMachine does not declare support for these options.
-  'tlsDisableOCSPEndpointCheck',
-  'tlsDisableCertificateRevocationCheck'
+  'tlsAllowInvalidHostnames'
 ];
 
 /**
