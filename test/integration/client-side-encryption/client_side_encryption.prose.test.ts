@@ -1,25 +1,24 @@
-'use strict';
-const BSON = require('bson');
-const { expect } = require('chai');
-const fs = require('fs');
-const path = require('path');
+import { BSON, EJSON } from 'bson';
+import { expect } from 'chai';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
-const { dropCollection, APMEventCollector } = require('../shared');
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+import {
+  LEGACY_HELLO_COMMAND,
+  MongoClient,
+  MongoCryptError,
+  MongoRuntimeError,
+  MongoServerError,
+  MongoServerSelectionError
+} from '../../mongodb';
+import { AlpineTestConfiguration } from '../../tools/runner/config';
+import { getEncryptExtraOptions } from '../../tools/utils';
+import { APMEventCollector, dropCollection } from '../shared';
 
-const { EJSON } = BSON;
-const { LEGACY_HELLO_COMMAND, MongoCryptError, MongoRuntimeError } = require('../../mongodb');
-const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
-const { getEncryptExtraOptions } = require('../../tools/utils');
-
-const {
-  externalSchema
-} = require('../../spec/client-side-encryption/external/external-schema.json');
-/* eslint-disable no-restricted-modules */
-const { ClientEncryption } = require('../../../src/client-side-encryption/client_encryption');
-const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
-const { AlpineTestConfiguration } = require('../../tools/runner/config');
-
-const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
+export const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = getCSFLEKMSProviders();
   if (localKey) {
     result.local = { key: localKey };
@@ -39,6 +38,7 @@ const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => 
   return result;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {};
 /** @type { MongoDBMetadataUI } */
 const metadata = {
@@ -56,6 +56,24 @@ const eeMetadata = {
   }
 };
 
+async function loadExternal(file) {
+  return EJSON.parse(
+    await fs.readFile(
+      path.resolve(__dirname, '../../spec/client-side-encryption/external', file),
+      'utf8'
+    )
+  );
+}
+
+async function loadLimits(file) {
+  return EJSON.parse(
+    await fs.readFile(
+      path.resolve(__dirname, '../../spec/client-side-encryption/limits', file),
+      'utf8'
+    )
+  );
+}
+
 // Tests for the ClientEncryption type are not included as part of the YAML tests.
 
 // In the prose tests LOCAL_MASTERKEY refers to the following base64:
@@ -64,6 +82,9 @@ const eeMetadata = {
 
 //   Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
 describe('Client Side Encryption Prose Tests', metadata, function () {
+  let externalKey;
+  let externalSchema;
+
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const dataNamespace = `${dataDbName}.${dataCollName}`;
@@ -75,6 +96,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
     'base64'
   );
+
+  before(async function () {
+    externalKey = await loadExternal('external-key.json');
+    externalSchema = await loadExternal('external-schema.json');
+  });
 
   describe('Data key and double encryption', function () {
     // Data key and double encryption
@@ -351,18 +377,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   // and confirming that the externalClient is firing off keyVault requests during
   // encrypted operations
   describe('External Key Vault Test', function () {
-    function loadExternal(file) {
-      return EJSON.parse(
-        fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/external', file))
-      );
-    }
-
-    const externalKey = loadExternal('external-key.json');
-    const externalSchema = loadExternal('external-schema.json');
-
-    beforeEach(function () {
+    beforeEach(async function () {
       this.client = this.configuration.newClient();
-
       // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
       return (
         this.client
@@ -552,15 +568,15 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   });
 
   describe('BSON size limits and batch splitting', function () {
-    function loadLimits(file) {
-      return EJSON.parse(
-        fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/limits', file))
-      );
-    }
+    let limitsSchema;
+    let limitsKey;
+    let limitsDoc;
 
-    const limitsSchema = loadLimits('limits-schema.json');
-    const limitsKey = loadLimits('limits-key.json');
-    const limitsDoc = loadLimits('limits-doc.json');
+    before(async function () {
+      limitsSchema = await loadLimits('limits-schema.json');
+      limitsKey = await loadLimits('limits-key.json');
+      limitsDoc = await loadLimits('limits-doc.json');
+    });
 
     let hasRunFirstTimeSetup = false;
 
@@ -827,9 +843,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
   describe('Corpus Test', function () {
     it('runs in a separate suite', () => {
-      expect(() =>
-        fs.statSync(path.resolve(__dirname, './client_side_encryption.prose.06.corpus.test.ts'))
-      ).not.to.throw();
+      expect(async () => {
+        await fs.stat(path.resolve(__dirname, './client_side_encryption.prose.06.corpus.test.ts'));
+      }).not.to.throw();
     });
   });
 
@@ -1687,6 +1703,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     context(
       'Case 5: `tlsDisableOCSPEndpointCheck` is permitted',
       metadata,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       function () {}
     ).skipReason = 'TODO(NODE-4840): Node does not support any OCSP options';
 
@@ -1907,12 +1924,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     beforeEach(async function () {
       // Load the file encryptedFields.json as encryptedFields.
       encryptedFields = EJSON.parse(
-        await fs.promises.readFile(path.join(data, 'encryptedFields.json')),
+        await fs.readFile(path.join(data, 'encryptedFields.json'), 'utf8'),
         { relaxed: false }
       );
       // Load the file key1-document.json as key1Document.
       key1Document = EJSON.parse(
-        await fs.promises.readFile(path.join(data, 'keys', 'key1-document.json')),
+        await fs.readFile(path.join(data, 'keys', 'key1-document.json'), 'utf8'),
         { relaxed: false }
       );
       // Read the "_id" field of key1Document as key1ID.
@@ -2308,15 +2325,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       kmip: {},
       local: undefined
     };
-    /** @type {import('../../mongodb').MongoClient} */
     let client1;
-    /** @type {import('../../mongodb').MongoClient} */
     let client2;
 
     describe('Case 1: Rewrap with separate ClientEncryption', function () {
       /**
-       * Run the following test case for each pair of KMS providers (referred to as ``srcProvider`` and ``dstProvider``).
-       * Include pairs where ``srcProvider`` equals ``dstProvider``.
+       * Run the following test case for each pair of KMS providers (referred to as `srcProvider` and `dstProvider`).
+       * Include pairs where `srcProvider` equals `dstProvider`.
        */
       function* generateTestCombinations() {
         const providers = Object.keys(masterKeys);
