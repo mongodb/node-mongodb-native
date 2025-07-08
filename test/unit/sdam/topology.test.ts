@@ -53,7 +53,8 @@ describe('Topology (unit)', function () {
       const server: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
         metadata: makeClientMetadata({
           appName: 'My application name',
-          driverInfo: {}
+          driverInfo: {},
+          additionalDriverInfo: []
         })
       });
 
