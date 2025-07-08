@@ -204,7 +204,7 @@ describe('Client Metadata Update Prose Tests', function () {
     sinon.restore();
   });
 
-  describe('Test 2: Multiple Successive Metadata Updates', function () {
+  describe('Test 1: Test that the driver updates metadata', function () {
     let initialClientMetadata;
     let updatedClientMetadata;
 
@@ -279,13 +279,15 @@ describe('Client Metadata Update Prose Tests', function () {
               ? `${initialClientMetadata.platform}|${platform}`
               : initialClientMetadata.platform
           );
+          // - All other subfields in the client document remain unchanged from initialClientMetadata.
+          // (Note os is the only one getting set in these tests)
           expect(updatedClientMetadata.os).to.deep.equal(initialClientMetadata.os);
         });
       });
     }
   });
 
-  describe('Test 1: Test that the driver updates metadata', function () {
+  describe('Test 2: Multiple Successive Metadata Updates', function () {
     let initialClientMetadata;
     let updatedClientMetadata;
 
@@ -355,6 +357,8 @@ describe('Client Metadata Update Prose Tests', function () {
               ? `${initialClientMetadata.platform}|${platform}`
               : initialClientMetadata.platform
           );
+          // - All other subfields in the client document remain unchanged from initialClientMetadata.
+          // (Note os is the only one getting set in these tests)
           expect(updatedClientMetadata.os).to.deep.equal(initialClientMetadata.os);
         });
       });

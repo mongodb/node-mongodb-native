@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as process from 'process';
 
 import { BSON, type Document, Int32 } from '../../bson';
-import { MongoInvalidArgumentError } from '../../error';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
 import { fileIsAccessible } from '../../utils';
 
@@ -122,15 +122,19 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     version: version.length > 0 ? `${NODE_DRIVER_VERSION}|${version}` : NODE_DRIVER_VERSION
   };
 
+  if (options.additionalDriverInfo == null) {
+    throw new MongoRuntimeError(
+      'Client options `additionalDriverInfo` must always default to an empty array'
+    );
+  }
+
   // This is where we handle additional driver info added after client construction.
-  if (options.additionalDriverInfo?.length > 0) {
-    for (const { name: n = '', version: v = '' } of options.additionalDriverInfo) {
-      if (n.length > 0) {
-        driverInfo.name = `${driverInfo.name}|${n}`;
-      }
-      if (v.length > 0) {
-        driverInfo.version = `${driverInfo.version}|${v}`;
-      }
+  for (const { name: n = '', version: v = '' } of options.additionalDriverInfo) {
+    if (n.length > 0) {
+      driverInfo.name = `${driverInfo.name}|${n}`;
+    }
+    if (v.length > 0) {
+      driverInfo.version = `${driverInfo.version}|${v}`;
     }
   }
 
@@ -145,11 +149,9 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     runtimeInfo = `${runtimeInfo}|${platform}`;
   }
 
-  if (options.additionalDriverInfo?.length > 0) {
-    for (const { platform: p = '' } of options.additionalDriverInfo) {
-      if (p.length > 0) {
-        runtimeInfo = `${runtimeInfo}|${p}`;
-      }
+  for (const { platform: p = '' } of options.additionalDriverInfo) {
+    if (p.length > 0) {
+      runtimeInfo = `${runtimeInfo}|${p}`;
     }
   }
 

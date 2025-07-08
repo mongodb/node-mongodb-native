@@ -14,7 +14,7 @@
     },
     "data": {
       "failCommands": [
-        "ismaster",
+        "isMaster",
         "hello"
       ],
       "closeConnection": true,

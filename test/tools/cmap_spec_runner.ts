@@ -376,8 +376,6 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     delete poolOptions.backgroundThreadIntervalMS;
   }
 
-  //const metadata = makeClientMetadata({ appName: poolOptions.appName });
-  //const extendedMetadata = addContainerMetadata(metadata);
   delete poolOptions.appName;
 
   const operations = test.operations;
