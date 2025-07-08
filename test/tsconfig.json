@@ -3,7 +3,8 @@
     "compilerOptions": {
         "strict": false,
         "allowJs": true,
-        "checkJs": false
+        "checkJs": false,
+        "resolveJsonModule": true
     },
     "include": [
         "../node_modules/@types/mocha/index.d.ts",

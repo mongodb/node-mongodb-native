@@ -1,8 +1,10 @@
 import { UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
+import * as fs from 'fs/promises';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
+import * as tls from 'tls';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
@@ -1240,6 +1242,138 @@ describe('CSOT', function () {
           );
         }
       );
+    });
+  });
+
+  context('when providing node specific TLS options', function () {
+    const dataDbName = 'db';
+    const dataCollName = 'coll';
+    const dataNamespace = `${dataDbName}.${dataCollName}`;
+    const keyVaultDbName = 'keyvault';
+    const keyVaultCollName = 'datakeys';
+    const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
+    const masterKey = {
+      region: 'us-east-1',
+      key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+    };
+    const schemaMap = {
+      [dataNamespace]: {
+        bsonType: 'object',
+        properties: {
+          encrypted_placeholder: {
+            encrypt: {
+              keyId: '/placeholder',
+              bsonType: 'string',
+              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
+            }
+          }
+        }
+      }
+    };
+    let secureContextOptions;
+
+    beforeEach(async function () {
+      const caFile = await fs.readFile(process.env.CSFLE_TLS_CA_FILE);
+      const certFile = await fs.readFile(process.env.CSFLE_TLS_CLIENT_CERT_FILE);
+      secureContextOptions = {
+        ca: caFile,
+        key: certFile,
+        cert: certFile
+      };
+    });
+
+    context('when no driver specific TLS options are provided', function () {
+      let client;
+      let clientEncryption;
+      const options = {
+        keyVaultNamespace,
+        kmsProviders: { aws: getCSFLEKMSProviders().aws },
+        tlsOptions: {
+          aws: {
+            secureContext: tls.createSecureContext(secureContextOptions)
+          }
+        },
+        extraOptions: getEncryptExtraOptions()
+      };
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({}, { autoEncryption: { ...options, schemaMap } });
+        clientEncryption = new ClientEncryption(client, options);
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client.db(keyVaultDbName).collection(keyVaultCollName).deleteMany();
+        await client.close();
+      });
+
+      it('succeeds to connect', metadata, async function () {
+        // Use client encryption to create a data key. If this succeeds, then TLS worked.
+        const awsDatakeyId = await clientEncryption.createDataKey('aws', {
+          masterKey,
+          keyAltNames: ['aws_altname']
+        });
+        expect(awsDatakeyId).to.have.property('sub_type', 4);
+        // Use the client to get the data key. If this succeeds, then the TLS connection
+        // for auto encryption worked.
+        const results = await client
+          .db(keyVaultDbName)
+          .collection(keyVaultCollName)
+          .find({ _id: awsDatakeyId })
+          .toArray();
+        expect(results)
+          .to.have.a.lengthOf(1)
+          .and.to.have.nested.property('0.masterKey.provider', 'aws');
+      });
+    });
+
+    context('when driver specific TLS options are provided', function () {
+      let client;
+      let clientEncryption;
+      // Note we set tlsCAFile and tlsCertificateKeyFile to 'nofilename' to also
+      // test that the driver does not attempt to read these files in this case.
+      const options = {
+        keyVaultNamespace,
+        kmsProviders: { aws: getCSFLEKMSProviders().aws },
+        tlsOptions: {
+          aws: {
+            secureContext: tls.createSecureContext(secureContextOptions),
+            tlsCAFile: 'nofilename',
+            tlsCertificateKeyFile: 'nofilename'
+          }
+        },
+        extraOptions: getEncryptExtraOptions()
+      };
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({}, { autoEncryption: { ...options, schemaMap } });
+        clientEncryption = new ClientEncryption(client, options);
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await client.db(keyVaultDbName).collection(keyVaultCollName).deleteMany();
+        await client.close();
+      });
+
+      it('succeeds to connect', metadata, async function () {
+        // Use client encryption to create a data key. If this succeeds, then TLS worked.
+        const awsDatakeyId = await clientEncryption.createDataKey('aws', {
+          masterKey,
+          keyAltNames: ['aws_altname']
+        });
+        expect(awsDatakeyId).to.have.property('sub_type', 4);
+        // Use the client to get the data key. If this succeeds, then the TLS connection
+        // for auto encryption worked.
+        const results = await client
+          .db(keyVaultDbName)
+          .collection(keyVaultCollName)
+          .find({ _id: awsDatakeyId })
+          .toArray();
+        expect(results)
+          .to.have.a.lengthOf(1)
+          .and.to.have.nested.property('0.masterKey.provider', 'aws');
+      });
     });
   });
 });
