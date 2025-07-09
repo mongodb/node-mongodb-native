@@ -33,7 +33,8 @@ export class FindOneOperation<TSchema = any> extends CommandOperation<TSchema> {
   constructor(db: Db, collectionName: string, filter: Document, options: FindOneOptions = {}) {
     super(db, options);
     this.namespace = new MongoDBNamespace(db.databaseName, collectionName);
-    this.filter = filter;
+    // special case passing in an ObjectId as a filter
+    this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
     this.options = { ...options };
     this.deserializationOptions = {
       ...pluckBSONSerializeOptions(options),
