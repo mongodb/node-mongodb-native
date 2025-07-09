@@ -39,7 +39,7 @@ import {
   type EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
 import { executeOperation } from './operations/execute_operation';
-import { type FindOneOptions, type FindOptions } from './operations/find';
+import { type FindOptions } from './operations/find';
 import {
   FindOneAndDeleteOperation,
   type FindOneAndDeleteOptions,
@@ -48,7 +48,7 @@ import {
   FindOneAndUpdateOperation,
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
-import { FindOneOperation } from './operations/find_one_operation';
+import { FindOneOperation, type FindOneOptions } from './operations/find_one';
 import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
