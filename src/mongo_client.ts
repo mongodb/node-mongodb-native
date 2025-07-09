@@ -186,7 +186,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   maxConnecting?: number;
   /**
    * The maximum number of milliseconds that a connection can remain idle in the pool before being removed and closed.
-   * Note that idle connections in the pool can be cleaned up even whe minPoolSize is set to 0. For errors that happen
+   * Note that idle connections in the pool can be cleaned up even when minPoolSize is set to 0. For errors that happen
    * that include the InterruptInUseConnections label, all non idle connections will be closed as well.
    */
   maxIdleTimeMS?: number;
