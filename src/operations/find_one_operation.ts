@@ -1,6 +1,7 @@
 import { type Db } from '..';
 import { type Document, pluckBSONSerializeOptions } from '../bson';
 import { type OnDemandDocumentDeserializeOptions } from '../cmap/wire_protocol/on_demand/document';
+import { CursorResponse, ExplainResponse } from '../cmap/wire_protocol/responses';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
@@ -64,12 +65,25 @@ export class FindOneOperation<TSchema = any> extends CommandOperation<TSchema> {
       delete command.batchSize;
     }
 
-    const response = await super.executeCommand(server, session, command, timeoutContext);
-    // In this case since we are just running a command, the response is a document with
-    // a single batch cursor, not an OnDemandDocument. If we are explaining, we just
-    // return the response as is.
-    const document = this.explain ? response : (response.cursor?.firstBatch?.[0] ?? null);
-    return document;
+    if (this.explain) {
+      const response = await super.executeCommand(
+        server,
+        session,
+        command,
+        timeoutContext,
+        ExplainResponse
+      );
+      return response.toObject() as TSchema;
+    } else {
+      const response = await super.executeCommand(
+        server,
+        session,
+        command,
+        timeoutContext,
+        CursorResponse
+      );
+      return response.shift(this.deserializationOptions);
+    }
   }
 }
 
