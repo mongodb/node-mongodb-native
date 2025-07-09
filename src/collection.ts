@@ -52,7 +52,6 @@ import {
   FindOneAndUpdateOperation,
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
-import { FindOneOperation } from './operations/find_one_operation';
 import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
