@@ -66,10 +66,11 @@ export class FindOneOperation<TSchema = any> extends CommandOperation<TSchema> {
 
     const response = await super.executeCommand(server, session, command, timeoutContext);
     // In this case since we are just running a command, the response is a document with
-    // a single batch cursor, not an OnDemandDocument.
-    const document = response.cursor?.firstBatch?.[0] ?? null;
+    // a single batch cursor, not an OnDemandDocument. If we are explaining, we just
+    // return the response as is.
+    const document = this.explain ? response : (response.cursor?.firstBatch?.[0] ?? null);
     return document;
   }
 }
 
-defineAspects(FindOneOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(FindOneOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);

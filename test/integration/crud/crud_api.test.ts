@@ -98,50 +98,6 @@ describe('CRUD API', function () {
       await collection.drop().catch(() => null);
       await client.close();
     });
-
-    describe('when the operation succeeds', () => {
-      it('the cursor for findOne is closed', async function () {
-        const spy = sinon.spy(Collection.prototype, 'find');
-        const result = await collection.findOne({});
-        expect(result).to.deep.equal({ _id: 1 });
-        expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
-        expect(spy.returnValues.at(0)).to.have.property('closed', true);
-        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
-      });
-    });
-
-    describe('when the find operation fails', () => {
-      beforeEach(async function () {
-        const failPoint: FailPoint = {
-          configureFailPoint: 'failCommand',
-          mode: 'alwaysOn',
-          data: {
-            failCommands: ['find'],
-            // 1 == InternalError, but this value not important to the test
-            errorCode: 1
-          }
-        };
-        await client.db().admin().command(failPoint);
-      });
-
-      afterEach(async function () {
-        const failPoint: FailPoint = {
-          configureFailPoint: 'failCommand',
-          mode: 'off',
-          data: { failCommands: ['find'] }
-        };
-        await client.db().admin().command(failPoint);
-      });
-
-      it('the cursor for findOne is closed', async function () {
-        const spy = sinon.spy(Collection.prototype, 'find');
-        const error = await collection.findOne({}).catch(error => error);
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
-        expect(spy.returnValues.at(0)).to.have.property('closed', true);
-        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
-      });
-    });
   });
 
   describe('countDocuments()', () => {
