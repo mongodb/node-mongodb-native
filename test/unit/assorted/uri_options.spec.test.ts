@@ -10,7 +10,11 @@ describe('URI option spec tests', function () {
     // Skipped because this does not apply to Node
     'Valid options specific to single-threaded drivers are parsed correctly',
 
-    // TODO(NODE-3922): have not implemented option support
+    // These options are specific to OCSP which the driver does not implement
+    // and will not be implemented in the future. Note that the other URI
+    // option tests that are testing these options are passing, simply because
+    // they are testing error conditions and the driver is throwing a MongoParseError
+    // when either of these options are provided.
     'tlsDisableCertificateRevocationCheck can be set to true',
     'tlsDisableCertificateRevocationCheck can be set to false',
     'tlsDisableOCSPEndpointCheck can be set to true',
