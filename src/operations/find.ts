@@ -81,6 +81,16 @@ export interface FindOptions<TSchema extends Document = Document>
   timeoutMode?: CursorTimeoutMode;
 }
 
+/** @public */
+export interface FindOneOptions extends FindOptions {
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  batchSize?: number;
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  limit?: number;
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  noCursorTimeout?: boolean;
+}
+
 /** @internal */
 export class FindOperation extends CommandOperation<CursorResponse> {
   /**
@@ -142,7 +152,11 @@ export class FindOperation extends CommandOperation<CursorResponse> {
   }
 }
 
-function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOptions): Document {
+export function makeFindCommand(
+  ns: MongoDBNamespace,
+  filter: Document,
+  options: FindOptions
+): Document {
   const findCommand: Document = {
     find: ns.collection,
     filter
@@ -195,7 +209,13 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
 
       findCommand.singleBatch = true;
     } else {
-      findCommand.batchSize = options.batchSize;
+      if (options.batchSize === options.limit) {
+        // Spec dictates that if these are equal the batchSize should be one more than the
+        // limit to avoid leaving the cursor open.
+        findCommand.batchSize = options.batchSize + 1;
+      } else {
+        findCommand.batchSize = options.batchSize;
+      }
     }
   }
 
