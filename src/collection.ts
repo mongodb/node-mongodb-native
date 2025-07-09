@@ -43,7 +43,7 @@ import {
   type EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
 import { autoConnect, executeOperation } from './operations/execute_operation';
-import type { FindOptions } from './operations/find';
+import { type FindOneOptions, type FindOptions } from './operations/find';
 import {
   FindOneAndDeleteOperation,
   type FindOneAndDeleteOptions,
@@ -52,6 +52,7 @@ import {
   FindOneAndUpdateOperation,
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
+import { FindOneOperation } from './operations/find_one_operation';
 import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
@@ -536,7 +537,7 @@ export class Collection<TSchema extends Document = Document> {
   async findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
   async findOne(
     filter: Filter<TSchema>,
-    options: Omit<FindOptions, 'timeoutMode'> & Abortable
+    options: Omit<FindOneOptions, 'timeoutMode'> & Abortable
   ): Promise<WithId<TSchema> | null>;
 
   // allow an override of the schema.
@@ -544,17 +545,25 @@ export class Collection<TSchema extends Document = Document> {
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
   async findOne<T = TSchema>(
     filter: Filter<TSchema>,
-    options?: Omit<FindOptions, 'timeoutMode'> & Abortable
+    options?: Omit<FindOneOptions, 'timeoutMode'> & Abortable
   ): Promise<T | null>;
 
   async findOne(
     filter: Filter<TSchema> = {},
-    options: FindOptions & Abortable = {}
+    options: Omit<FindOneOptions, ''> & Abortable = {}
   ): Promise<WithId<TSchema> | null> {
-    const cursor = this.find(filter, options).limit(-1).batchSize(1);
-    const res = await cursor.next();
-    await cursor.close();
-    return res;
+    //const cursor = this.find(filter, options).limit(-1).batchSize(1);
+    //const res = await cursor.next();
+    //await cursor.close();
+    return await executeOperation(
+      this.client,
+      new FindOneOperation(
+        this.s.db,
+        this.collectionName,
+        filter,
+        resolveOptions(this as TODO_NODE_3286, options)
+      )
+    );
   }
 
   /**
