@@ -852,6 +852,12 @@ export interface BulkWriteOptions extends CommandOperationOptions {
 
   /** @internal */
   timeoutContext?: TimeoutContext;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /**

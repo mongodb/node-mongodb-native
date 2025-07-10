@@ -1,0 +1,186 @@
+{
+  "description": "index management-rawData",
+  "schemaVersion": "1.4",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "index management with rawData option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.2.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "createIndex",
+          "arguments": {
+            "keys": {
+              "x": 1
+            },
+            "rawData": true
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "listIndexes",
+          "arguments": {
+            "rawData": true
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "dropIndex",
+          "arguments": {
+            "name": "x_1",
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "createIndexes": "collection0",
+                  "indexes": [
+                    {
+                      "name": "x_1",
+                      "key": {
+                        "x": 1
+                      }
+                    }
+                  ],
+                  "rawData": true
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listIndexes": "collection0",
+                  "rawData": true
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "dropIndexes": "collection0",
+                  "index": "x_1",
+                  "rawData": true
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "index management with rawData option on less than 8.2.0 - ignore argument",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "8.1.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "createIndex",
+          "arguments": {
+            "keys": {
+              "x": 1
+            },
+            "rawData": true
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "listIndexes",
+          "arguments": {
+            "rawData": true
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "dropIndex",
+          "arguments": {
+            "name": "x_1",
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "createIndexes": "collection0",
+                  "indexes": [
+                    {
+                      "name": "x_1",
+                      "key": {
+                        "x": 1
+                      }
+                    }
+                  ],
+                  "rawData": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listIndexes": "collection0",
+                  "rawData": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "dropIndexes": "collection0",
+                  "index": "x_1",
+                  "rawData": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

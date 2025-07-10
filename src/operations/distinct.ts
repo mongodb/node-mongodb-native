@@ -3,7 +3,12 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { decorateWithCollation, decorateWithReadConcern } from '../utils';
+import {
+  decorateRawData,
+  decorateWithCollation,
+  decorateWithReadConcern,
+  maxWireVersion
+} from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -21,6 +26,12 @@ export type DistinctOptions = CommandOperationOptions & {
    * See https://www.mongodb.com/docs/manual/reference/command/distinct/#command-fields.
    */
   hint?: Document | string;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 };
 
 /**
@@ -61,6 +72,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<any[]> {
+    const serverWireVersion = maxWireVersion(server);
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
@@ -93,6 +105,8 @@ export class DistinctOperation extends CommandOperation<any[]> {
 
     // Have we specified collation
     decorateWithCollation(cmd, coll, options);
+
+    decorateRawData(cmd, !!this.options.rawData, serverWireVersion);
 
     const result = await super.executeCommand(server, session, cmd, timeoutContext);
 

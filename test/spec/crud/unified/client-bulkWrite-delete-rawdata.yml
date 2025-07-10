@@ -1,0 +1,94 @@
+description: "client bulkWrite delete-rawData"
+
+schemaVersion: "1.4"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+  filter: &filter {}
+
+tests:
+  - description: "client bulk write delete with rawData option"
+    runOnRequirements:
+      - minServerVersion: "8.2.0"
+        serverless: forbid
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - deleteOne:
+                namespace: *namespace
+                filter: *filter
+            - deleteMany:
+                namespace: *namespace
+                filter: *filter
+          rawData: &rawdata true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                ordered: true
+                ops:
+                  - delete: 0
+                    filter: *filter
+                    multi: false
+                  - delete: 0
+                    filter: *filter
+                    multi: true
+                nsInfo:
+                  - ns: *namespace
+                rawData: *rawdata
+  - description: "client bulk write delete with rawData option on less than 8.2.0 - ignore argument"
+    runOnRequirements:
+      - minServerVersion: "8.0"
+        maxServerVersion: "8.1.99"
+        serverless: forbid
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - deleteOne:
+                namespace: *namespace
+                filter: *filter
+            - deleteMany:
+                namespace: *namespace
+                filter: *filter
+          rawData: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                ordered: true
+                ops:
+                  - delete: 0
+                    filter: *filter
+                    multi: false
+                  - delete: 0
+                    filter: *filter
+                    multi: true
+                nsInfo:
+                  - ns: *namespace
+                rawData:
+                  $$exists: false
