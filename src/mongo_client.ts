@@ -184,7 +184,11 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   minPoolSize?: number;
   /** The maximum number of connections that may be in the process of being established concurrently by the connection pool. */
   maxConnecting?: number;
-  /** The maximum number of milliseconds that a connection can remain idle in the pool before being removed and closed. */
+  /**
+   * The maximum amount of time a connection should remain idle in the connection pool before being marked idle, in milliseconds.
+   * If specified, this must be a number greater than or equal to 0, where 0 means there is no limit. Defaults to 0. After this
+   * time passes, the idle collection can be automatically cleaned up in the background.
+   */
   maxIdleTimeMS?: number;
   /** The maximum time in milliseconds that a thread can wait for a connection to become available. */
   waitQueueTimeoutMS?: number;
