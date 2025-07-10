@@ -39,7 +39,7 @@ const loadBalancedCollationTests = [
   'Distinct with a collation'
 ];
 
-describe.only('CRUD unified', function () {
+describe('CRUD unified', function () {
   runUnifiedSuite(
     loadSpecTests(path.join('crud', 'unified')),
     ({ description }, { isLoadBalanced }) => {
