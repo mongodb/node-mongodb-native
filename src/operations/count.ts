@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import type { MongoDBNamespace } from '../utils';
+import { decorateRawData, maxWireVersion, type MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -19,6 +19,12 @@ export interface CountOptions extends CommandOperationOptions {
   maxTimeMS?: number;
   /** An index name hint for the query. */
   hint?: string | Document;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */
@@ -45,6 +51,7 @@ export class CountOperation extends CommandOperation<number> {
     timeoutContext: TimeoutContext
   ): Promise<number> {
     const options = this.options;
+    const serverWireVersion = maxWireVersion(server);
     const cmd: Document = {
       count: this.collectionName,
       query: this.query
@@ -65,6 +72,8 @@ export class CountOperation extends CommandOperation<number> {
     if (typeof options.maxTimeMS === 'number') {
       cmd.maxTimeMS = options.maxTimeMS;
     }
+
+    decorateRawData(cmd, !!options.rawData, serverWireVersion);
 
     const result = await super.executeCommand(server, session, cmd, timeoutContext);
     return result ? result.n : 0;

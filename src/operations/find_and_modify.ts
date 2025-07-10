@@ -6,7 +6,12 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
 import { type TimeoutContext } from '../timeout';
-import { decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
+import {
+  decorateRawData,
+  decorateWithCollation,
+  hasAtomicOperators,
+  maxWireVersion
+} from '../utils';
 import { type WriteConcern, type WriteConcernSettings } from '../write_concern';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -34,6 +39,12 @@ export interface FindOneAndDeleteOptions extends CommandOperationOptions {
    * Return the ModifyResult instead of the modified document. Defaults to false
    */
   includeResultMetadata?: boolean;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @public */
@@ -56,6 +67,12 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
    * Return the ModifyResult instead of the modified document. Defaults to false
    */
   includeResultMetadata?: boolean;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @public */
@@ -80,6 +97,12 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
    * Return the ModifyResult instead of the modified document. Defaults to false
    */
   includeResultMetadata?: boolean;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */
@@ -186,6 +209,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<Document> {
+    const serverWireVersion = maxWireVersion(server);
     const coll = this.collection;
     const query = this.query;
     const options = { ...this.options, ...this.bsonOptions };
@@ -198,6 +222,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     };
 
     decorateWithCollation(cmd, coll, options);
+    decorateRawData(cmd, !!this.options.rawData, serverWireVersion);
 
     if (options.hint) {
       // TODO: once this method becomes a CommandOperation we will have the server

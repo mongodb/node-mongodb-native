@@ -6,7 +6,7 @@ import { type Abortable } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { maxWireVersion } from '../utils';
+import { decorateRawData, maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -25,6 +25,12 @@ export interface ListCollectionsOptions
 
   /** @internal */
   timeoutContext?: CursorTimeoutContext;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */
@@ -92,6 +98,7 @@ export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
       command.comment = this.options.comment;
     }
 
+    decorateRawData(command, !!this.options.rawData, wireVersion);
     return command;
   }
 }

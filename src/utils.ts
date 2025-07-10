@@ -10,7 +10,10 @@ import { promisify } from 'util';
 
 import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
-import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
+import {
+  MAX_SUPPORTED_WIRE_VERSION,
+  MIN_SUPPORTED_RAW_DATA_WIRE_VERSION
+} from './cmap/wire_protocol/constants';
 import type { Collection } from './collection';
 import { kDecoratedKeys, LEGACY_HELLO_COMMAND } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
@@ -78,6 +81,16 @@ export function isUint8Array(value: unknown): value is Uint8Array {
     Symbol.toStringTag in value &&
     value[Symbol.toStringTag] === 'Uint8Array'
   );
+}
+
+export function decorateRawData(
+  command: Document,
+  rawData: boolean,
+  serverWireVersion: number
+): void {
+  if (rawData && serverWireVersion >= MIN_SUPPORTED_RAW_DATA_WIRE_VERSION) {
+    command.rawData = rawData;
+  }
 }
 
 /**

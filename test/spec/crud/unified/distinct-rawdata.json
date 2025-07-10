@@ -1,0 +1,104 @@
+{
+  "description": "distinct-rawData",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "distinct with rawData option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.2.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {},
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "coll0",
+                  "key": "x",
+                  "query": {},
+                  "rawData": true
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "distinct with rawData option on less than 8.2.0 - ignore argument",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "8.1.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {},
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "coll0",
+                  "key": "x",
+                  "query": {},
+                  "rawData": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

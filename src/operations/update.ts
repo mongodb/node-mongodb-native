@@ -6,7 +6,12 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
 import { type TimeoutContext } from '../timeout';
-import { hasAtomicOperators, type MongoDBNamespace } from '../utils';
+import {
+  decorateRawData,
+  hasAtomicOperators,
+  maxWireVersion,
+  type MongoDBNamespace
+} from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
@@ -24,6 +29,12 @@ export interface UpdateOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /**
@@ -100,6 +111,7 @@ export class UpdateOperation extends CommandOperation<Document> {
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<Document> {
+    const serverWireVersion = maxWireVersion(server);
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -121,6 +133,8 @@ export class UpdateOperation extends CommandOperation<Document> {
     if (options.comment !== undefined) {
       command.comment = options.comment;
     }
+
+    decorateRawData(command, !!this.options.rawData, serverWireVersion);
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite) {
@@ -219,6 +233,12 @@ export interface ReplaceOptions extends CommandOperationOptions {
   let?: Document;
   /** Specifies the sort order for the documents matched by the filter. */
   sort?: Sort;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */

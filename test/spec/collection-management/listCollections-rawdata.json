@@ -1,0 +1,91 @@
+{
+  "description": "listCollections-rawData",
+  "schemaVersion": "1.4",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "listCollections with rawData option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.2.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "listCollections",
+          "object": "database0",
+          "arguments": {
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1,
+                  "filter": {},
+                  "rawData": true
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "listCollections with rawData option on less than 8.2.0 - ignore argument",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "8.1.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "listCollections",
+          "object": "database0",
+          "arguments": {
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1,
+                  "filter": {},
+                  "rawData": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

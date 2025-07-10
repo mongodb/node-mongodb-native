@@ -6,7 +6,12 @@ import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { maybeAddIdToDocuments, type MongoDBNamespace } from '../utils';
+import {
+  decorateRawData,
+  maxWireVersion,
+  maybeAddIdToDocuments,
+  type MongoDBNamespace
+} from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
 import { CommandOperation, type CommandOperationOptions } from './command';
@@ -33,6 +38,7 @@ export class InsertOperation extends CommandOperation<Document> {
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<Document> {
+    const serverWireVersion = maxWireVersion(server);
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -51,6 +57,8 @@ export class InsertOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
+    decorateRawData(command, !!options.rawData, serverWireVersion);
+
     return await super.executeCommand(server, session, command, timeoutContext);
   }
 }
@@ -61,6 +69,12 @@ export interface InsertOneOptions extends CommandOperationOptions {
   bypassDocumentValidation?: boolean;
   /** Force server to assign _id values instead of driver. */
   forceServerObjectId?: boolean;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @public */

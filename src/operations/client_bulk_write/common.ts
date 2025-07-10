@@ -24,6 +24,12 @@ export interface ClientBulkWriteOptions extends CommandOperationOptions {
    * BulkWriteResult.
    */
   verboseResults?: boolean;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @public */

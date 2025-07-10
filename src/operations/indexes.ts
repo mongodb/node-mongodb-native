@@ -7,7 +7,7 @@ import { type OneOrMore } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { decorateRawData, isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
   CommandOperation,
@@ -163,6 +163,12 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   wildcardProjection?: Document;
   /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. (MongoDB 4.4 or higher) */
   hidden?: boolean;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
@@ -320,6 +326,7 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
 
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
+    decorateRawData(cmd, !!this.options.rawData, serverWireVersion);
 
     await super.executeCommand(server, session, cmd, timeoutContext);
 
@@ -329,7 +336,14 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
 }
 
 /** @public */
-export type DropIndexesOptions = CommandOperationOptions;
+export interface DropIndexesOptions extends CommandOperationOptions {
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
+}
 
 /** @internal */
 export class DropIndexOperation extends CommandOperation<Document> {
@@ -354,7 +368,9 @@ export class DropIndexOperation extends CommandOperation<Document> {
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<Document> {
+    const serverWireVersion = maxWireVersion(server);
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
+    decorateRawData(cmd, !!this.options.rawData, serverWireVersion);
     return await super.executeCommand(server, session, cmd, timeoutContext);
   }
 }
@@ -363,6 +379,12 @@ export class DropIndexOperation extends CommandOperation<Document> {
 export type ListIndexesOptions = AbstractCursorOptions & {
   /** @internal */
   omitMaxTimeMS?: boolean;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 };
 
 /** @internal */
@@ -405,6 +427,7 @@ export class ListIndexesOperation extends CommandOperation<CursorResponse> {
     if (serverWireVersion >= 9 && this.options.comment !== undefined) {
       command.comment = this.options.comment;
     }
+    decorateRawData(command, !!this.options.rawData, serverWireVersion);
 
     return await super.executeCommand(server, session, command, timeoutContext, CursorResponse);
   }

@@ -3,7 +3,7 @@ import { ClientBulkWriteCursorResponse } from '../../cmap/wire_protocol/response
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { type TimeoutContext } from '../../timeout';
-import { MongoDBNamespace } from '../../utils';
+import { decorateRawData, maxWireVersion, MongoDBNamespace } from '../../utils';
 import { CommandOperation } from '../command';
 import { Aspect, defineAspects } from '../operation';
 import { type ClientBulkWriteCommandBuilder } from './command_builder';
@@ -47,6 +47,7 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<ClientBulkWriteCursorResponse> {
+    const serverWireVersion = maxWireVersion(server);
     let command;
 
     if (server.description.type === ServerType.LoadBalancer) {
@@ -95,6 +96,9 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
     if (!this.canRetryWrite) {
       this.options.willRetryWrite = false;
     }
+
+    decorateRawData(command, !!this.options.rawData, serverWireVersion);
+
     return await super.executeCommand(
       server,
       session,

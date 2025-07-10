@@ -1,0 +1,57 @@
+description: "deleteOne-rawData"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+tests:
+  - description: "deleteOne with rawData option"
+    runOnRequirements:
+      - minServerVersion: "8.2.0"
+    operations:
+      - name: deleteOne
+        object: *collection0
+        arguments:
+          filter: {}
+          rawData: &rawdata true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection0Name
+                deletes:
+                  - q: {}
+                    limit: 1
+                rawData: *rawdata
+  - description: "deleteOne with rawData option on less than 8.2.0 - ignore argument"
+    runOnRequirements:
+      - maxServerVersion: "8.1.99"
+    operations:
+      - name: deleteOne
+        object: *collection0
+        arguments:
+          filter: {}
+          rawData: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection0Name
+                deletes:
+                  - q: {}
+                    limit: 1
+                rawData:
+                  $$exists: false

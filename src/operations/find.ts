@@ -12,7 +12,12 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort } from '../sort';
 import { type TimeoutContext } from '../timeout';
-import { type MongoDBNamespace, normalizeHintField } from '../utils';
+import {
+  decorateRawData,
+  maxWireVersion,
+  type MongoDBNamespace,
+  normalizeHintField
+} from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
@@ -79,6 +84,12 @@ export interface FindOptions<TSchema extends Document = Document>
   explain?: ExplainOptions['explain'];
   /** @internal*/
   timeoutMode?: CursorTimeoutMode;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */
@@ -118,6 +129,7 @@ export class FindOperation extends CommandOperation<CursorResponse> {
     timeoutContext: TimeoutContext
   ): Promise<CursorResponse> {
     this.server = server;
+    const serverWireVersion = maxWireVersion(server);
 
     const options = this.options;
 
@@ -126,6 +138,7 @@ export class FindOperation extends CommandOperation<CursorResponse> {
       validateExplainTimeoutOptions(this.options, this.explain);
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
+    decorateRawData(findCommand, !!this.options.rawData, serverWireVersion);
 
     return await server.command(
       this.ns,
