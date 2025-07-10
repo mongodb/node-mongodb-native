@@ -14,7 +14,11 @@ import { type TokenCache } from './cmap/auth/mongodb_oidc/token_cache';
 import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
-import type { ClientMetadata } from './cmap/handshake/client_metadata';
+import {
+  addContainerMetadata,
+  type ClientMetadata,
+  makeClientMetadata
+} from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
@@ -398,9 +402,31 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * The consolidate, parsed, transformed and merged options.
    */
   public readonly options: Readonly<
-    Omit<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert'>
+    Omit<
+      MongoOptions,
+      | 'monitorCommands'
+      | 'ca'
+      | 'crl'
+      | 'key'
+      | 'cert'
+      | 'driverInfo'
+      | 'additionalDriverInfo'
+      | 'metadata'
+      | 'extendedMetadata'
+    >
   > &
-    Pick<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert'>;
+    Pick<
+      MongoOptions,
+      | 'monitorCommands'
+      | 'ca'
+      | 'crl'
+      | 'key'
+      | 'cert'
+      | 'driverInfo'
+      | 'additionalDriverInfo'
+      | 'metadata'
+      | 'extendedMetadata'
+    >;
 
   constructor(url: string, options?: MongoClientOptions) {
     super();
@@ -457,6 +483,18 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   /** @internal */
   async asyncDispose() {
     await this.close();
+  }
+
+  /**
+   * Append metadata to the client metadata after instantiation.
+   * @param driverInfo - Information about the application or library.
+   */
+  appendMetadata(driverInfo: DriverInfo) {
+    this.options.additionalDriverInfo.push(driverInfo);
+    this.options.metadata = makeClientMetadata(this.options);
+    this.options.extendedMetadata = addContainerMetadata(this.options.metadata)
+      .then(undefined, squashError)
+      .then(result => result ?? {}); // ensure Promise<Document>
   }
 
   /** @internal */
@@ -1041,8 +1079,8 @@ export interface MongoOptions
   dbName: string;
   /** @deprecated - Will be made internal in a future major release. */
   metadata: ClientMetadata;
-  /** @internal */
   extendedMetadata: Promise<Document>;
+  additionalDriverInfo: DriverInfo[];
   /** @internal */
   autoEncrypter?: AutoEncrypter;
   /** @internal */
