@@ -103,6 +103,8 @@ declare module 'mongodb-client-encryption' {
  *  - tlsInsecure
  *
  * These options are not included in the type, and are ignored if provided.
+ *
+ * Note that if a secureContext option is provided, all other TLS options will be ignored.
  */
 export type ClientEncryptionTlsOptions = Pick<
   MongoClientOptions,
