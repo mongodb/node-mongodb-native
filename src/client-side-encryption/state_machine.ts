@@ -103,10 +103,12 @@ declare module 'mongodb-client-encryption' {
  *  - tlsInsecure
  *
  * These options are not included in the type, and are ignored if provided.
+ *
+ * Note that if a secureContext option is provided, all other TLS options will be ignored.
  */
 export type ClientEncryptionTlsOptions = Pick<
   MongoClientOptions,
-  'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword'
+  'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword' | 'secureContext'
 >;
 
 /** @public */
@@ -521,15 +523,20 @@ export class StateMachine {
     tlsOptions: ClientEncryptionTlsOptions,
     options: tls.ConnectionOptions
   ): Promise<void> {
-    if (tlsOptions.tlsCertificateKeyFile) {
-      const cert = await fs.readFile(tlsOptions.tlsCertificateKeyFile);
-      options.cert = options.key = cert;
-    }
-    if (tlsOptions.tlsCAFile) {
-      options.ca = await fs.readFile(tlsOptions.tlsCAFile);
-    }
-    if (tlsOptions.tlsCertificateKeyFilePassword) {
-      options.passphrase = tlsOptions.tlsCertificateKeyFilePassword;
+    // If a secureContext is provided, it takes precedence over the other options.
+    if (tlsOptions.secureContext) {
+      options.secureContext = tlsOptions.secureContext;
+    } else {
+      if (tlsOptions.tlsCertificateKeyFile) {
+        const cert = await fs.readFile(tlsOptions.tlsCertificateKeyFile);
+        options.cert = options.key = cert;
+      }
+      if (tlsOptions.tlsCAFile) {
+        options.ca = await fs.readFile(tlsOptions.tlsCAFile);
+      }
+      if (tlsOptions.tlsCertificateKeyFilePassword) {
+        options.passphrase = tlsOptions.tlsCertificateKeyFilePassword;
+      }
     }
   }
 
