@@ -640,29 +640,31 @@ describe('Aggregation', function () {
     expect(error).to.be.instanceOf(MongoInvalidArgumentError);
   });
 
-  it(`should succeed if you try to use explain flag with { readConcern: { level: 'local' }, writeConcern: { j: true } }`, async function () {
+  it(`should fail if you try to use explain flag with { readConcern: { level: 'local' }, writeConcern: { j: true } }`, async function () {
     const db = client.db();
 
     const collection = db.collection('foo');
     Object.assign(collection.s, { writeConcern: { j: true } });
-    const result = await collection
+    const error = await collection
       .aggregate([{ $project: { _id: 0 } }, { $out: 'bar' }], { explain: true })
-      .toArray();
+      .toArray()
+      .catch(error => error);
 
-    expect(result).to.not.be.null;
+    expect(error).to.be.instanceOf(MongoInvalidArgumentError);
   });
 
-  it('should succeed if you try to use explain flag with { writeConcern: { j: true } }', async function () {
+  it('should fail if you try to use explain flag with { writeConcern: { j: true } }', async function () {
     const db = client.db();
 
     const collection = db.collection('foo');
     Object.assign(collection.s, { writeConcern: { j: true } });
 
-    const result = await collection
+    const error = await collection
       .aggregate([{ $project: { _id: 0 } }, { $out: 'bar' }], { explain: true })
-      .toArray();
+      .toArray()
+      .catch(error => error);
 
-    expect(result).to.not.be.null;
+    expect(error).to.be.instanceOf(MongoInvalidArgumentError);
   });
 
   it('should ensure MaxTimeMS is correctly passed down into command execution when using a cursor', function (done) {
