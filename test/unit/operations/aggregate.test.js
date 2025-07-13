@@ -7,6 +7,23 @@ describe('AggregateOperation', function () {
   const db = 'test';
 
   describe('#constructor', function () {
+    context('when explain is in the options', function () {
+      context('when writeConcern is set', function () {
+        const operation = new AggregateOperation(db, [], {
+          explain: 'verbose',
+          writeConcern: { w: 1 }
+        });
+
+        it('sets explain on the operation', function () {
+          expect(operation.explain.verbosity).to.equal('verbose');
+        });
+
+        it('sets the write concern on the operation', function () {
+          expect(operation.writeConcern.w).to.equal(1);
+        });
+      });
+    });
+
     context('when out is in the options', function () {
       const operation = new AggregateOperation(db, [], { out: 'test', dbName: db });
 
