@@ -391,3 +391,9 @@ export class ClientBulkWriteCursorResponse extends CursorResponse {
     return this.get('writeConcernError', BSONType.object, false);
   }
 }
+
+export class ExplainResponse extends MongoDBResponse {
+  get queryPlanner() {
+    return this.get('queryPlanner', BSONType.object, false);
+  }
+}

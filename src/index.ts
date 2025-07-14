@@ -529,6 +529,7 @@ export type {
   FindOneAndReplaceOptions,
   FindOneAndUpdateOptions
 } from './operations/find_and_modify';
+export type { FindOneOptions } from './operations/find_one';
 export type { IndexInformationOptions } from './operations/indexes';
 export type {
   CreateIndexesOptions,
