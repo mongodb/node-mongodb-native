@@ -1,0 +1,61 @@
+description: "countDocuments-rawData"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+tests:
+  - description: "Count documents with rawData option"
+    runOnRequirements:
+      - minServerVersion: "8.2.0"
+    operations:
+      - object: *collection0
+        name: countDocuments
+        arguments:
+          filter: {}
+          rawData: &rawdata true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline:
+                  - $match: {}
+                  - $group: { _id: 1, n: { $sum: 1 } }
+                rawData: *rawdata
+              commandName: aggregate
+              databaseName: *database0Name
+  - description: "Count documents with rawData option on less than 8.2.0 - ignore argument"
+    runOnRequirements:
+      - maxServerVersion: "8.1.99"
+    operations:
+      - object: *collection0
+        name: countDocuments
+        arguments:
+          filter: {}
+          rawData: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline:
+                  - $match: {}
+                  - $group: { _id: 1, n: { $sum: 1 } }
+                rawData:
+                  $$exists: false
+              commandName: aggregate
+              databaseName: *database0Name
