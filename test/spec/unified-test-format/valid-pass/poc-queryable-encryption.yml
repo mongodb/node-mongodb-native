@@ -1,0 +1,84 @@
+description: poc-queryable-encryption
+
+schemaVersion: "1.23"
+
+runOnRequirements:
+  - minServerVersion: "7.0"
+    csfle: true
+
+createEntities:
+  - client:
+      id: &client0 client0
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+  - database:
+      id: &encryptedDB encryptedDB
+      client: *client0
+      databaseName: &encryptedDBName poc-queryable-encryption
+  - collection:
+      id: &encryptedColl encryptedColl
+      database: *encryptedDB
+      collectionName: &encryptedCollName encrypted
+  - client:
+      id: &client1 client1
+  - database:
+      id: &unencryptedDB unencryptedDB
+      client: *client1
+      databaseName: *encryptedDBName
+  - collection:
+      id: &unencryptedColl unencryptedColl
+      database: *unencryptedDB
+      collectionName: *encryptedCollName
+
+initialData:
+  - databaseName: keyvault
+    collectionName: datakeys
+    documents:
+      - _id: &keyid { $binary: { base64: EjRWeBI0mHYSNBI0VniQEg==, subType: "04" } }
+        keyMaterial: { $binary: { base64: sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==, subType: "00" } }
+        creationDate: { $date: { $numberLong: "1641024000000" } }
+        updateDate: { $date: { $numberLong: "1641024000000" } }
+        status: 1
+        masterKey:
+          provider: local
+  - databaseName: *encryptedDBName
+    collectionName: *encryptedCollName
+    documents: []
+    createOptions:
+      encryptedFields:
+        fields:
+          - keyId: *keyid
+            path: 'encryptedInt'
+            bsonType: 'int'
+            queries: {'queryType': 'equality', 'contention': {'$numberLong': '0'}}
+
+tests:
+  - description: insert, replace, and find with queryable encryption
+    operations:
+      - object: *encryptedColl
+        name: insertOne
+        arguments:
+          document:
+            _id: 1
+            encryptedInt: 11
+      - object: *encryptedColl
+        name: replaceOne
+        arguments:
+          filter: { encryptedInt: 11 }
+          replacement: { encryptedInt: 22 }
+      - object: *encryptedColl
+        name: find
+        arguments:
+          filter: { encryptedInt: 22 }
+        expectResult:
+          - _id: 1
+            encryptedInt: 22
+      - object: *unencryptedColl
+        name: find
+        arguments:
+          filter: {}
+        expectResult:
+          - { _id: 1, encryptedInt: { $$type: binData }, __safeContent__: [ { "$binary" : { "base64" : "rhS16TJojgDDBtbluxBokvcotP1mQTGeYpNt8xd3MJQ=", "subType" : "00" } } ] }
