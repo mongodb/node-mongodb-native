@@ -96,6 +96,7 @@ export class CommandSucceededEvent {
   commandName: string;
   reply: unknown;
   serviceId?: ObjectId;
+  databaseName: string;
   /** @internal */
   name = COMMAND_SUCCEEDED;
 
@@ -127,6 +128,7 @@ export class CommandSucceededEvent {
     this.duration = calculateDurationInMs(started);
     this.reply = maybeRedact(commandName, cmd, extractReply(reply));
     this.serverConnectionId = serverConnectionId;
+    this.databaseName = command.databaseName;
   }
 
   /* @internal */
@@ -154,6 +156,7 @@ export class CommandFailedEvent {
   commandName: string;
   failure: Error;
   serviceId?: ObjectId;
+  databaseName: string;
   /** @internal */
   name = COMMAND_FAILED;
 
@@ -186,6 +189,7 @@ export class CommandFailedEvent {
     this.duration = calculateDurationInMs(started);
     this.failure = maybeRedact(commandName, cmd, error) as Error;
     this.serverConnectionId = serverConnectionId;
+    this.databaseName = command.databaseName;
   }
 
   /* @internal */
