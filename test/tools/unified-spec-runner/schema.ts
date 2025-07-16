@@ -312,10 +312,12 @@ export interface ExpectedCommandEvent {
   commandSucceededEvent?: {
     reply?: Document;
     commandName?: string;
+    databaseName?: string;
     hasServerConnectionId?: boolean;
   };
   commandFailedEvent?: {
     commandName?: string;
+    databaseName?: string;
     hasServerConnectionId?: boolean;
   };
 }
