@@ -809,7 +809,8 @@ export class ChangeStream<
       while (true) {
         try {
           const change = await this.cursor.tryNext();
-          return change ?? null;
+          const processedChange = this._processChange(change ?? null);
+          return processedChange;
         } catch (error) {
           try {
             await this._processErrorIteratorMode(error, this.cursor.id != null);
