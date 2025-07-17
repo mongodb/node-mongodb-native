@@ -99,4 +99,5 @@ tests:
         arguments:
           document: &doc0 { _id: 1, encrypted_string: "string0" }
         expectError:
-          isClientError: true
+          isError: true
+          errorContains: "JSON schema keyword 'required' is only allowed with a remote schema"

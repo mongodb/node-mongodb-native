@@ -774,6 +774,14 @@ function isMongoCryptError(err): boolean {
   if (err.constructor.name === 'MongoCryptError') {
     return true;
   }
+  if (
+    err instanceof TypeError &&
+    err.message.includes(
+      `csfle "analyze_query" failed: JSON schema keyword 'required' is only allowed with a remote schema`
+    )
+  ) {
+    return true;
+  }
   return err.stack.includes('at ClientEncryption');
 }
 

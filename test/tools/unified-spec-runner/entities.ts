@@ -45,14 +45,16 @@ import {
   type TopologyOpeningEvent,
   WriteConcern
 } from '../../mongodb';
-import { getEnvironmentalOptions } from '../../tools/utils';
+import { getEncryptExtraOptions, getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';
 import { trace } from './runner';
 import type { ClientEntity, EntityDescription, ExpectedLogMessage } from './schema';
 import {
   createClientEncryption,
+  getCSFLETestDataFromEnvironment,
   makeConnectionString,
+  mergeKMSProviders,
   patchCollectionOptions,
   patchDbOptions
 } from './unified-utils';
@@ -234,6 +236,29 @@ export class UnifiedMongoClient extends MongoClient {
       options.mongodbLogPath = logCollector;
     } else if (config.loggingEnabled) {
       config.setupLogging?.(options, description.id);
+    }
+
+    if (description.autoEncryptOpts) {
+      const { kmsProviders: kmsProvidersFromEnvironment } = getCSFLETestDataFromEnvironment(
+        process.env
+      );
+
+      const extraOptions =
+        getEncryptExtraOptions().cryptSharedLibPath != null
+          ? {
+              cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath,
+              ...description.autoEncryptOpts.extraOptions
+            }
+          : {};
+
+      options.autoEncryption = {
+        ...description.autoEncryptOpts,
+        kmsProviders: mergeKMSProviders(
+          description.autoEncryptOpts.kmsProviders,
+          kmsProvidersFromEnvironment
+        ),
+        extraOptions
+      };
     }
 
     super(uri, options);
