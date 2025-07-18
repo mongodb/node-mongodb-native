@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { type Collection, type CommandStartedEvent, Long, type MongoClient } from '../../mongodb';
-import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
+import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 
 const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;
 const falsyToString = (value: (typeof falsyValues)[number]) => {

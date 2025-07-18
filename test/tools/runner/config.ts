@@ -538,6 +538,12 @@ export class AstrolabeTestConfiguration extends TestConfiguration {
 }
 
 export class AlpineTestConfiguration extends TestConfiguration {
+  get encryptDefaultExtraOptions(): MongoClientOptions['autoEncryption']['extraOptions'] {
+    return {
+      mongocryptdBypassSpawn: true,
+      mongocryptdURI: process.env.MONGOCRYPTD_URI
+    };
+  }
   override newClient(
     urlOrQueryOptions?: string | Record<string, any>,
     serverOptions?: MongoClientOptions
@@ -547,8 +553,7 @@ export class AlpineTestConfiguration extends TestConfiguration {
     if (options.autoEncryption) {
       const extraOptions: MongoClientOptions['autoEncryption']['extraOptions'] = {
         ...options.autoEncryption.extraOptions,
-        mongocryptdBypassSpawn: true,
-        mongocryptdURI: process.env.MONGOCRYPTD_URI
+        ...this.encryptDefaultExtraOptions
       };
       options.autoEncryption.extraOptions = extraOptions;
     }

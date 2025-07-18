@@ -403,7 +403,6 @@ export class AutoEncrypter {
     }
 
     const commandBuffer = Buffer.isBuffer(cmd) ? cmd : serialize(cmd, options);
-
     const context = this._mongocrypt.makeEncryptionContext(
       MongoDBCollectionNamespace.fromString(ns).db,
       commandBuffer

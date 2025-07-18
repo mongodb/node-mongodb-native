@@ -1,0 +1,256 @@
+{
+  "description": "fle2v2-EncryptedFields-vs-EncryptedFieldsMap",
+  "schemaVersion": "1.23",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "7.0.0",
+      "serverless": "forbid",
+      "csfle": true,
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk"
+            }
+          },
+          "keyVaultNamespace": "keyvault.datakeys",
+          "encryptedFieldsMap": {
+            "default.default": {
+              "fields": []
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "encryptedDB",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "encryptedColl",
+        "database": "encryptedDB",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "q83vqxI0mHYSNBI0VniQEg==",
+              "subType": "04"
+            }
+          },
+          "keyMaterial": {
+            "$binary": {
+              "base64": "HBk9BWihXExNDvTp1lUxOuxuZK2Pe2ZdVdlsxPEBkiO1bS4mG5NNDsQ7zVxJAH8BtdOYp72Ku4Y3nwc0BUpIKsvAKX4eYXtlhv5zUQxWdeNFhg9qK7qb8nqhnnLeT0f25jFSqzWJoT379hfwDeu0bebJHr35QrJ8myZdPMTEDYF08QYQ48ShRBli0S+QzBHHAQiM2iJNr4svg2WR8JSeWQ==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1648914851981"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1648914851981"
+            }
+          },
+          "status": {
+            "$numberInt": "0"
+          },
+          "masterKey": {
+            "provider": "local"
+          }
+        }
+      ]
+    },
+    {
+      "databaseName": "default",
+      "collectionName": "default",
+      "documents": [],
+      "createOptions": {
+        "encryptedFields": {
+          "fields": [
+            {
+              "keyId": {
+                "$binary": {
+                  "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                  "subType": "04"
+                }
+              },
+              "path": "encryptedIndexed",
+              "bsonType": "string",
+              "queries": {
+                "queryType": "equality",
+                "contention": {
+                  "$numberLong": "0"
+                }
+              }
+            },
+            {
+              "keyId": {
+                "$binary": {
+                  "base64": "q83vqxI0mHYSNBI0VniQEg==",
+                  "subType": "04"
+                }
+              },
+              "path": "encryptedUnindexed",
+              "bsonType": "string"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "encryptedFieldsMap is preferred over remote encryptedFields",
+      "operations": [
+        {
+          "object": "encryptedColl",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedUnindexed": {
+                "$binary": {
+                  "base64": "BqvN76sSNJh2EjQSNFZ4kBICTQaVZPWgXp41I7mPV1rLFTtw1tXzjcdSEyxpKKqujlko5TeizkB9hHQ009dVY1+fgIiDcefh+eQrm3CkhQ==",
+                  "subType": "06"
+                }
+              }
+            }
+          }
+        },
+        {
+          "object": "encryptedColl",
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encryptedUnindexed": "value123"
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "default",
+                "commandName": "insert",
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encryptedUnindexed": {
+                        "$binary": {
+                          "base64": "BqvN76sSNJh2EjQSNFZ4kBICTQaVZPWgXp41I7mPV1rLFTtw1tXzjcdSEyxpKKqujlko5TeizkB9hHQ009dVY1+fgIiDcefh+eQrm3CkhQ==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "default",
+                "commandName": "find",
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "commandName": "find",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "q83vqxI0mHYSNBI0VniQEg==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "default",
+          "databaseName": "default",
+          "documents": [
+            {
+              "_id": 1,
+              "encryptedUnindexed": {
+                "$binary": {
+                  "base64": "BqvN76sSNJh2EjQSNFZ4kBICTQaVZPWgXp41I7mPV1rLFTtw1tXzjcdSEyxpKKqujlko5TeizkB9hHQ009dVY1+fgIiDcefh+eQrm3CkhQ==",
+                  "subType": "06"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
