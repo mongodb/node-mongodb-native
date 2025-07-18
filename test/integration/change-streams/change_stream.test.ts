@@ -23,7 +23,12 @@ import {
   type ResumeToken
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { type FailPoint, sleep, TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
+import {
+  type FailPoint,
+  sleep,
+  TestBuilder,
+  UnifiedTestSuiteBuilder
+} from '../../tools/unified_suite_builder';
 import { delay, filterForCommands } from '../shared';
 
 const initIteratorMode = async (cs: ChangeStream) => {
