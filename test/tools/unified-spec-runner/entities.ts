@@ -46,7 +46,7 @@ import {
   WriteConcern
 } from '../../mongodb';
 import { getEncryptExtraOptions, getEnvironmentalOptions } from '../../tools/utils';
-import type { TestConfiguration } from '../runner/config';
+import { AlpineTestConfiguration, type TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';
 import { trace } from './runner';
 import type { ClientEntity, EntityDescription, ExpectedLogMessage } from './schema';
@@ -200,14 +200,7 @@ export class UnifiedMongoClient extends MongoClient {
     topology: 'MONGODB_LOG_TOPOLOGY'
   } as const;
 
-  constructor(
-    uri: string,
-    description: ClientEntity,
-    config: {
-      loggingEnabled?: boolean;
-      setupLogging?: (options: Record<string, any>, id: string) => Record<string, any>;
-    }
-  ) {
+  constructor(uri: string, description: ClientEntity, config: TestConfiguration) {
     const options: MongoClientOptions = {
       monitorCommands: true,
       __skipPingOnConnect: true,
@@ -243,20 +236,27 @@ export class UnifiedMongoClient extends MongoClient {
         process.env
       );
 
-      const extraOptions =
-        getEncryptExtraOptions().cryptSharedLibPath != null
-          ? {
-              cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath,
-              ...description.autoEncryptOpts.extraOptions
-            }
-          : {};
+      let extraOptions = {};
+      if (config instanceof AlpineTestConfiguration) {
+        extraOptions = {
+          ...config.encryptDefaultExtraOptions,
+          ...description.autoEncryptOpts.extraOptions
+        };
+      } else if (getEncryptExtraOptions().cryptSharedLibPath != null) {
+        extraOptions = {
+          cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath,
+          ...description.autoEncryptOpts.extraOptions
+        };
+      }
+
+      const kmsProviders = mergeKMSProviders(
+        description.autoEncryptOpts.kmsProviders,
+        kmsProvidersFromEnvironment
+      );
 
       options.autoEncryption = {
         ...description.autoEncryptOpts,
-        kmsProviders: mergeKMSProviders(
-          description.autoEncryptOpts.kmsProviders,
-          kmsProvidersFromEnvironment
-        ),
+        kmsProviders,
         extraOptions
       };
     }

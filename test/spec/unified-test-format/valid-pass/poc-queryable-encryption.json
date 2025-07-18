@@ -4,7 +4,12 @@
   "runOnRequirements": [
     {
       "minServerVersion": "7.0",
-      "csfle": true
+      "csfle": true,
+      "topologies": [
+        "replicaset",
+        "load-balanced",
+        "sharded"
+      ]
     }
   ],
   "createEntities": [

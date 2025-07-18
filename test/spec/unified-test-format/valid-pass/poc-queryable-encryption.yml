@@ -5,6 +5,8 @@ schemaVersion: "1.23"
 runOnRequirements:
   - minServerVersion: "7.0"
     csfle: true
+    # QE is not supported on standalone servers
+    topologies: [ replicaset, load-balanced, sharded ]
 
 createEntities:
   - client:

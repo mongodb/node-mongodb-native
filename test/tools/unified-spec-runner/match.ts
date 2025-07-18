@@ -774,6 +774,8 @@ function isMongoCryptError(err): boolean {
   if (err.constructor.name === 'MongoCryptError') {
     return true;
   }
+
+  // TODO(NODE-7043): remove special handling for FLE errors in the UTR
   if (
     err instanceof TypeError &&
     err.message.includes(
