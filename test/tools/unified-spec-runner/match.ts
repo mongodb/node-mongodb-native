@@ -478,36 +478,52 @@ function compareCommandStartedEvents(
 
 function compareCommandSucceededEvents(
   actual: CommandSucceededEvent,
-  expected: ExpectedCommandEvent['commandSucceededEvent'],
+  expected: NonNullable<ExpectedCommandEvent['commandSucceededEvent']>,
   entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected!.reply) {
-    resultCheck(actual.reply as Document, expected!.reply, entities, [prefix]);
+  if (expected.reply) {
+    resultCheck(actual.reply as Document, expected.reply, entities, [prefix]);
   }
-  if (expected!.commandName) {
+  if (expected.commandName) {
     expect(
-      expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+      expected.commandName,
+      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${
         actual.commandName
       }`
     ).to.equal(actual.commandName);
+  }
+  if (expected.databaseName) {
+    expect(
+      expected.databaseName,
+      `expected ${prefix}.databaseName to equal ${expected.databaseName} but received ${
+        actual.databaseName
+      }`
+    ).to.equal(actual.databaseName);
   }
 }
 
 function compareCommandFailedEvents(
   actual: CommandFailedEvent,
-  expected: ExpectedCommandEvent['commandFailedEvent'],
-  entities: EntitiesMap,
+  expected: NonNullable<ExpectedCommandEvent['commandFailedEvent']>,
+  _entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected!.commandName) {
+  if (expected.commandName) {
     expect(
-      expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+      expected.commandName,
+      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${
         actual.commandName
       }`
     ).to.equal(actual.commandName);
+  }
+  if (expected.databaseName) {
+    expect(
+      expected.databaseName,
+      `expected ${prefix}.databaseName to equal ${expected.databaseName} but received ${
+        actual.databaseName
+      }`
+    ).to.equal(actual.databaseName);
   }
 }
 
