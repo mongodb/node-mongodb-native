@@ -809,7 +809,13 @@ export class ChangeStream<
       while (true) {
         try {
           const change = await this.cursor.tryNext();
-          const processedChange = this._processChange(change ?? null);
+
+          // Prevent _processChange from producing an error due to a `null` change
+          if (!change) {
+            return null;
+          }
+
+          const processedChange = this._processChange(change);
           return processedChange;
         } catch (error) {
           try {
