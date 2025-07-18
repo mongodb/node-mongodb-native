@@ -71,7 +71,7 @@ describe('20. Bypass creating mongocryptd client when shared library is loaded',
 
       // Note: this assertion is not in the spec test.  However, unlike other drivers, Node's client
       // does not connect when instantiated.  So, we won't receive any TCP connections to the
-      // server unless the mongocryptd client is only instantiated.  This assertion captures the
+      // server if the mongocryptd client is only instantiated.  This assertion captures the
       // spirit of this test, causing it to fail if we do instantiate a client.  I left the
       // TCP server in, although it isn't necessary for Node's test, just because its nice to have
       // in case Node's client behavior ever changes.
