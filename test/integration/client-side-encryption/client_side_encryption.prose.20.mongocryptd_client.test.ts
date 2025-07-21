@@ -4,7 +4,6 @@ import { createServer, type Server } from 'net';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type MongoClient } from '../../mongodb';
-import { ClientSideEncryptionFilter } from '../../tools/runner/filters/client_encryption_filter';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 describe('20. Bypass creating mongocryptd client when shared library is loaded', function () {
@@ -13,12 +12,6 @@ describe('20. Bypass creating mongocryptd client when shared library is loaded',
   let client: MongoClient;
 
   beforeEach(function () {
-    if (!ClientSideEncryptionFilter.cryptShared) {
-      this.currentTest.skipReason =
-        'test requires that the crypt shared be loaded into the current process.';
-      this.skip();
-    }
-
     // Start a new thread (referred to as listenerThread)
     // On listenerThread, create a TcpListener on 127.0.0.1 endpoint and port 27021. Start the listener and wait for establishing connections. If any connection is established, then signal about this to the main thread.
     // Drivers MAY pass a different port if they expect their testing infrastructure to be using port 27021. Pass a port that should be free.
@@ -59,7 +52,8 @@ describe('20. Bypass creating mongocryptd client when shared library is loaded',
     'does not create or use a mongocryptd client when the shared library is loaded',
     {
       requires: {
-        clientSideEncryption: true
+        clientSideEncryption: true,
+        crypt_shared: 'enabled'
       }
     },
     async function () {

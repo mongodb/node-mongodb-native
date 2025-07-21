@@ -88,6 +88,7 @@ export class TestConfiguration {
     version: string;
     libmongocrypt: string | null;
   };
+  cryptSharedVersion: MongoClient['autoEncrypter']['cryptSharedLibVersionInfo'] | null;
   parameters: Record<string, any>;
   singleMongosLoadBalancerUri: string;
   multiMongosLoadBalancerUri: string;
@@ -121,6 +122,7 @@ export class TestConfiguration {
     const hostAddresses = hosts.map(HostAddress.fromString);
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
+    this.cryptSharedVersion = context.cryptShared;
     this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
