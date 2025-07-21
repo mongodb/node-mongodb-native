@@ -1,0 +1,343 @@
+{
+  "description": "localSchema",
+  "schemaVersion": "1.23",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.10",
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "autoEncryptOpts": {
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_w_altname": {
+                  "encrypt": {
+                    "keyId": "/altname",
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
+                  }
+                },
+                "encrypted_string": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                },
+                "random": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
+                  }
+                },
+                "encrypted_string_equivalent": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "string",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              },
+              "sessionToken": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "client": {
+        "id": "client1",
+        "autoEncryptOpts": {
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "test": {
+                  "bsonType": "string"
+                }
+              },
+              "bsonType": "object",
+              "required": [
+                "test"
+              ]
+            }
+          },
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              },
+              "sessionToken": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "encryptedDB",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "encryptedColl",
+        "database": "encryptedDB",
+        "collectionName": "default"
+      }
+    },
+    {
+      "database": {
+        "id": "encryptedDB2",
+        "client": "client1",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "encryptedColl2",
+        "database": "encryptedDB2",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "status": 1,
+          "_id": {
+            "$binary": {
+              "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+              "subType": "04"
+            }
+          },
+          "masterKey": {
+            "provider": "aws",
+            "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+            "region": "us-east-1"
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1552949630483"
+            }
+          },
+          "keyMaterial": {
+            "$binary": {
+              "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gEqnsxXlR51T5EbEVezUqqKAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDHa4jo6yp0Z18KgbUgIBEIB74sKxWtV8/YHje5lv5THTl0HIbhSwM6EqRlmBiFFatmEWaeMk4tO4xBX65eq670I5TWPSLMzpp8ncGHMmvHqRajNBnmFtbYxN3E3/WjxmdbOOe+OXpnGJPcGsftc7cB2shRfA4lICPnE26+oVNXT6p0Lo20nY5XC7jyCO",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1552949630483"
+            }
+          },
+          "keyAltNames": [
+            "altname",
+            "another_altname"
+          ]
+        }
+      ]
+    },
+    {
+      "databaseName": "default",
+      "collectionName": "default",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "A local schema should override",
+      "operations": [
+        {
+          "object": "encryptedColl",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string": "string0"
+            }
+          }
+        },
+        {
+          "object": "encryptedColl",
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_string": "string0"
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "commandName": "find",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_string": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "default",
+          "databaseName": "default",
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_string": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
+                  "subType": "06"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "A local schema with no encryption is an error",
+      "operations": [
+        {
+          "object": "encryptedColl2",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string": "string0"
+            }
+          },
+          "expectError": {
+            "isError": true,
+            "errorContains": "JSON schema keyword 'required' is only allowed with a remote schema"
+          }
+        }
+      ]
+    }
+  ]
+}

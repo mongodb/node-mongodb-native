@@ -45,14 +45,16 @@ import {
   type TopologyOpeningEvent,
   WriteConcern
 } from '../../mongodb';
-import { getEnvironmentalOptions } from '../../tools/utils';
-import type { TestConfiguration } from '../runner/config';
+import { getEncryptExtraOptions, getEnvironmentalOptions } from '../../tools/utils';
+import { AlpineTestConfiguration, type TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';
 import { trace } from './runner';
 import type { ClientEntity, EntityDescription, ExpectedLogMessage } from './schema';
 import {
   createClientEncryption,
+  getCSFLETestDataFromEnvironment,
   makeConnectionString,
+  mergeKMSProviders,
   patchCollectionOptions,
   patchDbOptions
 } from './unified-utils';
@@ -198,14 +200,7 @@ export class UnifiedMongoClient extends MongoClient {
     topology: 'MONGODB_LOG_TOPOLOGY'
   } as const;
 
-  constructor(
-    uri: string,
-    description: ClientEntity,
-    config: {
-      loggingEnabled?: boolean;
-      setupLogging?: (options: Record<string, any>, id: string) => Record<string, any>;
-    }
-  ) {
+  constructor(uri: string, description: ClientEntity, config: TestConfiguration) {
     const options: MongoClientOptions = {
       monitorCommands: true,
       __skipPingOnConnect: true,
@@ -234,6 +229,36 @@ export class UnifiedMongoClient extends MongoClient {
       options.mongodbLogPath = logCollector;
     } else if (config.loggingEnabled) {
       config.setupLogging?.(options, description.id);
+    }
+
+    if (description.autoEncryptOpts) {
+      const { kmsProviders: kmsProvidersFromEnvironment } = getCSFLETestDataFromEnvironment(
+        process.env
+      );
+
+      let extraOptions = {};
+      if (config instanceof AlpineTestConfiguration) {
+        extraOptions = {
+          ...config.encryptDefaultExtraOptions,
+          ...description.autoEncryptOpts.extraOptions
+        };
+      } else if (getEncryptExtraOptions().cryptSharedLibPath != null) {
+        extraOptions = {
+          cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath,
+          ...description.autoEncryptOpts.extraOptions
+        };
+      }
+
+      const kmsProviders = mergeKMSProviders(
+        description.autoEncryptOpts.kmsProviders,
+        kmsProvidersFromEnvironment
+      );
+
+      options.autoEncryption = {
+        ...description.autoEncryptOpts,
+        kmsProviders,
+        extraOptions
+      };
     }
 
     super(uri, options);
