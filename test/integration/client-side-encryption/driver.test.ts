@@ -1326,7 +1326,7 @@ describe('CSOT', function () {
         });
       });
 
-      context('when driver specific TLS options are provided', function () {
+      context('when driver specific TLS options are provided with a secure context', function () {
         let client;
         let clientEncryption;
         // Note we set tlsCAFile and tlsCertificateKeyFile to 'nofilename' to also
@@ -1337,9 +1337,8 @@ describe('CSOT', function () {
           tlsOptions: {
             aws: {
               secureContext: tls.createSecureContext(secureContextOptions),
-              tlsCAFile: 'nofilename',
-              tlsCertificateKeyFile: 'nofilename',
-              tlsCertificateKeyFilePassword: 'invalid'
+              tlsCAFile: process.env.CSFLE_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.CSFLE_TLS_CLIENT_CERT_FILE
             }
           },
           extraOptions: getEncryptExtraOptions()
@@ -1356,28 +1355,24 @@ describe('CSOT', function () {
           await client.close();
         });
 
-        it(
-          'successfully connects with TLS without attempting to parse the driver specific options',
-          metadata,
-          async function () {
-            // Use client encryption to create a data key. If this succeeds, then TLS worked.
-            const awsDatakeyId = await clientEncryption.createDataKey('aws', {
-              masterKey,
-              keyAltNames: ['aws_altname']
-            });
-            expect(awsDatakeyId).to.have.property('sub_type', 4);
-            // Use the client to get the data key. If this succeeds, then the TLS connection
-            // for auto encryption worked.
-            const results = await client
-              .db(keyVaultDbName)
-              .collection(keyVaultCollName)
-              .find({ _id: awsDatakeyId })
-              .toArray();
-            expect(results)
-              .to.have.a.lengthOf(1)
-              .and.to.have.nested.property('0.masterKey.provider', 'aws');
-          }
-        );
+        it('successfully connects with TLS', metadata, async function () {
+          // Use client encryption to create a data key. If this succeeds, then TLS worked.
+          const awsDatakeyId = await clientEncryption.createDataKey('aws', {
+            masterKey,
+            keyAltNames: ['aws_altname']
+          });
+          expect(awsDatakeyId).to.have.property('sub_type', 4);
+          // Use the client to get the data key. If this succeeds, then the TLS connection
+          // for auto encryption worked.
+          const results = await client
+            .db(keyVaultDbName)
+            .collection(keyVaultCollName)
+            .find({ _id: awsDatakeyId })
+            .toArray();
+          expect(results)
+            .to.have.a.lengthOf(1)
+            .and.to.have.nested.property('0.masterKey.provider', 'aws');
+        });
       });
     });
   });
