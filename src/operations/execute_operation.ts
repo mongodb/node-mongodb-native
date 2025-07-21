@@ -232,6 +232,7 @@ async function tryOperation<
   let previousServer: ServerDescription | undefined;
 
   for (let tries = 0; tries < maxTries; tries++) {
+    console.log('trying', tries, maxTries, willRetry, operation.commandName);
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
         throw new MongoServerError({
@@ -248,8 +249,10 @@ async function tryOperation<
       if (hasWriteAspect && !isRetryableWriteError(previousOperationError))
         throw previousOperationError;
 
-      if (hasReadAspect && !isRetryableReadError(previousOperationError))
+      if (hasReadAspect && !isRetryableReadError(previousOperationError)) {
+        console.log(previousOperationError, isRetryableReadError(previousOperationError));
         throw previousOperationError;
+      }
 
       if (
         previousOperationError instanceof MongoNetworkError &&
@@ -280,8 +283,10 @@ async function tryOperation<
       if (tries > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
         operation.resetBatch();
       }
+      console.log('executing', operation.commandName);
       return await operation.execute(server, session, timeoutContext);
     } catch (operationError) {
+      console.log('operationError', operationError);
       if (!(operationError instanceof MongoError)) throw operationError;
       if (
         previousOperationError != null &&

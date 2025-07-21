@@ -551,18 +551,26 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema> = {},
     options: Omit<FindOneOptions, ''> & Abortable = {}
   ): Promise<WithId<TSchema> | null> {
-    //const cursor = this.find(filter, options).limit(-1).batchSize(1);
-    //const res = await cursor.next();
+    const opts = { ...options };
+    opts.singleBatch = true;
+    if (opts.noCursorTimeout != null) {
+      delete opts.noCursorTimeout;
+    }
+    if (opts.batchSize != null) {
+      delete opts.batchSize;
+    }
+    const cursor = this.find(filter, opts).limit(1);
+    return await cursor.next();
     //await cursor.close();
-    return await executeOperation(
-      this.client,
-      new FindOneOperation(
-        this.s.db,
-        this.collectionName,
-        filter,
-        resolveOptions(this as TODO_NODE_3286, options)
-      )
-    );
+    //return await executeOperation(
+    //  this.client,
+    //  new FindOneOperation(
+    //    this.s.db,
+    //    this.collectionName,
+    //    filter,
+    //    resolveOptions(this as TODO_NODE_3286, options)
+    //  )
+    //);
   }
 
   /**
