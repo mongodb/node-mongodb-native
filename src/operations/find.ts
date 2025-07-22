@@ -152,11 +152,7 @@ export class FindOperation extends CommandOperation<CursorResponse> {
   }
 }
 
-export function makeFindCommand(
-  ns: MongoDBNamespace,
-  filter: Document,
-  options: FindOptions
-): Document {
+function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOptions): Document {
   const findCommand: Document = {
     find: ns.collection,
     filter
