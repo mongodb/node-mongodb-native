@@ -59,6 +59,10 @@ export interface CommandOperationOptions
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
+  /**
+   * @deprecated
+   * This option is deprecated and will be removed in an upcoming major version.
+   */
   noResponse?: boolean;
 }
 
