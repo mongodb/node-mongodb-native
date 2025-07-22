@@ -1,0 +1,16 @@
+description: "expectedCommandEvent-commandFailedEvent-databaseName-type"
+
+schemaVersion: "1.15"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+
+tests:
+  - description: "foo"
+    operations: []
+    expectEvents:
+      - client: *client0
+        events:
+          - commandFailedEvent:
+              databaseName: 0

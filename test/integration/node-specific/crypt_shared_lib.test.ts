@@ -4,7 +4,6 @@ import { dirname } from 'path';
 
 import { BSON } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
-import { cryptShared } from './auto_encrypter.test';
 
 const { EJSON } = BSON;
 
@@ -30,7 +29,7 @@ describe('crypt shared library', () => {
     'should load a shared library by specifying its path',
     {
       requires: {
-        predicate: cryptShared('enabled')
+        crypt_shared: 'enabled'
       }
     },
     async function () {
@@ -57,7 +56,7 @@ describe('crypt shared library', () => {
     'should load a shared library by specifying a search path',
     {
       requires: {
-        predicate: cryptShared('enabled')
+        crypt_shared: 'enabled'
       }
     },
     async function () {

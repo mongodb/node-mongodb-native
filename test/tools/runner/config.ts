@@ -88,6 +88,7 @@ export class TestConfiguration {
     version: string;
     libmongocrypt: string | null;
   };
+  cryptSharedVersion: MongoClient['autoEncrypter']['cryptSharedLibVersionInfo'] | null;
   parameters: Record<string, any>;
   singleMongosLoadBalancerUri: string;
   multiMongosLoadBalancerUri: string;
@@ -121,6 +122,7 @@ export class TestConfiguration {
     const hostAddresses = hosts.map(HostAddress.fromString);
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
+    this.cryptSharedVersion = context.cryptShared;
     this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
@@ -538,6 +540,12 @@ export class AstrolabeTestConfiguration extends TestConfiguration {
 }
 
 export class AlpineTestConfiguration extends TestConfiguration {
+  get encryptDefaultExtraOptions(): MongoClientOptions['autoEncryption']['extraOptions'] {
+    return {
+      mongocryptdBypassSpawn: true,
+      mongocryptdURI: process.env.MONGOCRYPTD_URI
+    };
+  }
   override newClient(
     urlOrQueryOptions?: string | Record<string, any>,
     serverOptions?: MongoClientOptions
@@ -547,8 +555,7 @@ export class AlpineTestConfiguration extends TestConfiguration {
     if (options.autoEncryption) {
       const extraOptions: MongoClientOptions['autoEncryption']['extraOptions'] = {
         ...options.autoEncryption.extraOptions,
-        mongocryptdBypassSpawn: true,
-        mongocryptdURI: process.env.MONGOCRYPTD_URI
+        ...this.encryptDefaultExtraOptions
       };
       options.autoEncryption.extraOptions = extraOptions;
     }

@@ -1,4 +1,8 @@
-import { type FailPoint, TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
+import {
+  type FailPoint,
+  TestBuilder,
+  UnifiedTestSuiteBuilder
+} from '../../tools/unified_suite_builder';
 
 describe('Unified Test Runner', () => {
   UnifiedTestSuiteBuilder.describe('withTransaction error propagation')

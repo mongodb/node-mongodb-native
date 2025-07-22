@@ -1,5 +1,6 @@
 import type {
   Document,
+  MongoClientOptions,
   MongoLoggableComponent,
   ObjectId,
   ReadConcernLevel,
@@ -152,7 +153,19 @@ export interface ClientEntity {
   observeSensitiveCommands?: boolean;
   // Was optionally scheduled for removal in NODE-6783, but opted to keep it for potential future use.
   storeEventsAsEntities?: StoreEventsAsEntity[];
+  autoEncryptOpts?: Pick<
+    MongoClientOptions['autoEncryption'],
+    | 'keyVaultNamespace'
+    | 'bypassAutoEncryption'
+    | 'schemaMap'
+    | 'encryptedFieldsMap'
+    | 'extraOptions'
+    | 'bypassQueryAnalysis'
+    | 'keyExpirationMS'
+  > &
+    Pick<ClientEncryptionEntity['clientEncryptionOpts'], 'kmsProviders'>;
 }
+
 export interface DatabaseEntity {
   id: string;
   client: string;
@@ -312,10 +325,12 @@ export interface ExpectedCommandEvent {
   commandSucceededEvent?: {
     reply?: Document;
     commandName?: string;
+    databaseName?: string;
     hasServerConnectionId?: boolean;
   };
   commandFailedEvent?: {
     commandName?: string;
+    databaseName?: string;
     hasServerConnectionId?: boolean;
   };
 }
