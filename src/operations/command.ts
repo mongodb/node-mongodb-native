@@ -34,8 +34,8 @@ export interface CollationOptions {
 /** @public */
 export interface CommandOperationOptions
   extends OperationOptions,
-    WriteConcernOptions,
-    ExplainOptions {
+  WriteConcernOptions,
+  ExplainOptions {
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** Collation */
@@ -59,6 +59,10 @@ export interface CommandOperationOptions
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
+  /** 
+   * @deprecated 
+   * This option is deprecated and will be removed in an upcoming major version.
+   */
   noResponse?: boolean;
 }
 
