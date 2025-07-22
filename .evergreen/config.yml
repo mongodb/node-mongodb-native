@@ -331,6 +331,10 @@ functions:
       params:
         binary: bash
         working_dir: src
+        include_expansions_in_env:
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_ACCESS_KEY_ID
+          - AWS_SESSION_TOKEN
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         args:
@@ -344,6 +348,10 @@ functions:
       params:
         working_dir: src
         binary: bash
+        include_expansions_in_env:
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_ACCESS_KEY_ID
+          - AWS_SESSION_TOKEN
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           NODE_LTS_VERSION: ${NODE_LTS_VERSION}
