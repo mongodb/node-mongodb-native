@@ -159,13 +159,18 @@ TASKS.push(
           NATIVE: 'true'
         }),
         { func: 'install dependencies' },
+        { func: 'assume secrets manager role' },
         { func: 'run kerberos tests' }
       ]
     },
     {
       name: 'test-auth-ldap',
       tags: ['auth', 'ldap'],
-      commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
+      commands: [
+        { func: 'install dependencies' },
+        { func: 'assume secrets manager role' },
+        { func: 'run ldap tests' }
+      ]
     },
     {
       name: 'test-socks5',

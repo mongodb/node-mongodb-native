@@ -1692,6 +1692,7 @@ tasks:
           updates:
             - {key: NATIVE, value: 'true'}
       - func: install dependencies
+      - func: assume secrets manager role
       - func: run kerberos tests
   - name: test-auth-ldap
     tags:
@@ -1699,6 +1700,7 @@ tasks:
       - ldap
     commands:
       - func: install dependencies
+      - func: assume secrets manager role
       - func: run ldap tests
   - name: test-socks5
     tags: []
