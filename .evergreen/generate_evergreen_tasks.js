@@ -151,23 +151,22 @@ TASKS.push(
         { func: 'stop-load-balancer' }
       ]
     })),
-    // TODO(NODE-6944): Unskip when devprod updates ldaptest servers.
-    // {
-    //   name: 'test-auth-kerberos',
-    //   tags: ['auth', 'kerberos'],
-    //   commands: [
-    //     updateExpansions({
-    //       NATIVE: 'true'
-    //     }),
-    //     { func: 'install dependencies' },
-    //     { func: 'run kerberos tests' }
-    //   ]
-    // },
-    // {
-    //   name: 'test-auth-ldap',
-    //   tags: ['auth', 'ldap'],
-    //   commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
-    // },
+    {
+      name: 'test-auth-kerberos',
+      tags: ['auth', 'kerberos'],
+      commands: [
+        updateExpansions({
+          NATIVE: 'true'
+        }),
+        { func: 'install dependencies' },
+        { func: 'run kerberos tests' }
+      ]
+    },
+    {
+      name: 'test-auth-ldap',
+      tags: ['auth', 'ldap'],
+      commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
+    },
     {
       name: 'test-socks5',
       tags: [],
