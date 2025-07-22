@@ -7,18 +7,8 @@ import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { MongoDBNamespace } from '../utils';
 import { CommandOperation } from './command';
-import { type FindOptions, makeFindCommand } from './find';
+import { type FindOneOptions, makeFindCommand } from './find';
 import { Aspect, defineAspects } from './operation';
-
-/** @public */
-export interface FindOneOptions extends FindOptions {
-  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
-  batchSize?: number;
-  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
-  limit?: number;
-  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
-  noCursorTimeout?: boolean;
-}
 
 /** @internal */
 export class FindOneOperation<TSchema = any> extends CommandOperation<TSchema> {

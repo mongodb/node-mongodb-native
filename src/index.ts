@@ -523,13 +523,12 @@ export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
-export type { FindOptions } from './operations/find';
+export type { FindOneOptions, FindOptions } from './operations/find';
 export type {
   FindOneAndDeleteOptions,
   FindOneAndReplaceOptions,
   FindOneAndUpdateOptions
 } from './operations/find_and_modify';
-export type { FindOneOptions } from './operations/find_one';
 export type { IndexInformationOptions } from './operations/indexes';
 export type {
   CreateIndexesOptions,

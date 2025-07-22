@@ -81,6 +81,16 @@ export interface FindOptions<TSchema extends Document = Document>
   timeoutMode?: CursorTimeoutMode;
 }
 
+/** @public */
+export interface FindOneOptions extends FindOptions {
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  batchSize?: number;
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  limit?: number;
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  noCursorTimeout?: boolean;
+}
+
 /** @internal */
 export class FindOperation extends CommandOperation<CursorResponse> {
   /**
