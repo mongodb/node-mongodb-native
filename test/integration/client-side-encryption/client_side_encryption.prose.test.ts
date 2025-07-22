@@ -40,15 +40,14 @@ export const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoi
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {};
-/** @type { MongoDBMetadataUI } */
-const metadata = {
+const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
     topology: '!load-balanced'
   }
 };
 
-const eeMetadata = {
+const eeMetadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
     mongodb: '>=7.0.0',
