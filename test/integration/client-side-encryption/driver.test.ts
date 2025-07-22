@@ -1326,11 +1326,9 @@ describe('CSOT', function () {
         });
       });
 
-      context('when driver specific TLS options are provided with a secure context', function () {
+      context('when driver TLS options are provided with a valid secure context', function () {
         let client;
         let clientEncryption;
-        // Note we set tlsCAFile and tlsCertificateKeyFile to 'nofilename' to also
-        // test that the driver does not attempt to read these files in this case.
         const options = {
           keyVaultNamespace,
           kmsProviders: { aws: getCSFLEKMSProviders().aws },
@@ -1374,6 +1372,51 @@ describe('CSOT', function () {
             .and.to.have.nested.property('0.masterKey.provider', 'aws');
         });
       });
+
+      context(
+        'when invalid driver TLS options are provided with a valid secure context',
+        function () {
+          let client;
+          let clientEncryption;
+          const options = {
+            keyVaultNamespace,
+            kmsProviders: { aws: getCSFLEKMSProviders().aws },
+            tlsOptions: {
+              aws: {
+                secureContext: tls.createSecureContext(secureContextOptions),
+                tlsCAFile: 'invalid',
+                tlsCertificateKeyFile: 'invalid'
+              }
+            },
+            extraOptions: getEncryptExtraOptions()
+          };
+
+          beforeEach(async function () {
+            client = this.configuration.newClient(
+              {},
+              { autoEncryption: { ...options, schemaMap } }
+            );
+            clientEncryption = new ClientEncryption(client, options);
+            await client.connect();
+          });
+
+          afterEach(async function () {
+            await client.db(keyVaultDbName).collection(keyVaultCollName).deleteMany();
+            await client.close();
+          });
+
+          it('fails to connect with TLS', metadata, async function () {
+            // Use client encryption to create a data key. If this succeeds, then TLS worked.
+            const error = await clientEncryption
+              .createDataKey('aws', {
+                masterKey,
+                keyAltNames: ['aws_altname']
+              })
+              .catch(error => error);
+            expect(error.message).to.include('KMS request failed');
+          });
+        }
+      );
     });
   });
 });
