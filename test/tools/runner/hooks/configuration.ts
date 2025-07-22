@@ -115,12 +115,10 @@ const testConfigBeforeHook = async function () {
     return;
   }
 
-  const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
-    ...getEnvironmentalOptions(),
-    // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set
-    // the default dns resolution order for CI
-    family: 4
-  });
+  const client = new MongoClient(
+    loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
+    getEnvironmentalOptions()
+  );
 
   await client.db('test').command({ ping: 1 });
 
