@@ -23,6 +23,7 @@ import { OSFilter } from '../filters/os_filter';
 import { type Filter } from '../filters/filter';
 import { type Context } from 'mocha';
 import { flakyTests } from '../flaky';
+import { CryptSharedFilter } from '../filters/crypt_shared_filter';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -57,6 +58,7 @@ async function initializeFilters(client): Promise<Record<string, any>> {
       new ApiVersionFilter(),
       new AuthFilter(),
       new ClientSideEncryptionFilter(),
+      new CryptSharedFilter(),
       new GenericPredicateFilter(),
       new IDMSMockServerFilter(),
       new MongoDBTopologyFilter(),
@@ -163,6 +165,8 @@ const testConfigBeforeHook = async function () {
     csfle: {
       ...this.configuration.clientSideEncryption
     },
+    cryptSharedVersion: context.cryptSharedVersion,
+    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH,
     serverApi: MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,
     aws: MONGODB_URI.includes('authMechanism=MONGODB-AWS'),
@@ -175,7 +179,6 @@ const testConfigBeforeHook = async function () {
     ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
     socks5: MONGODB_URI.includes('proxyHost='),
     compressor: process.env.COMPRESSOR,
-    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH,
     zstdVersion
   };
 

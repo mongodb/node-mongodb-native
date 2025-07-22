@@ -40,6 +40,7 @@ const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => 
 };
 
 const noop = () => {};
+/** @type { MongoDBMetadataUI } */
 const metadata = {
   requires: {
     clientSideEncryption: true,
@@ -1146,47 +1147,43 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         );
       });
 
-      beforeEach('precondition: the shared library must NOT be loaded', function () {
-        const { cryptSharedLibPath } = getEncryptExtraOptions();
-        if (cryptSharedLibPath) {
-          this.currentTest.skipReason =
-            'test requires that the shared library NOT is present, but CRYPT_SHARED_LIB_PATH is set.';
-          this.skip();
-        }
-        // the presence of the shared library can only be reliably determine after
-        // libmongocrypt has been initialized, and can be detected with the
-        // cryptSharedLibVersionInfo getter on the autoEncrypter.
-        expect(!!clientEncrypted.autoEncrypter.cryptSharedLibVersionInfo).to.be.false;
-      });
-
       afterEach(async function () {
         await clientEncrypted?.close();
       });
 
-      it('does not spawn mongocryptd', metadata, async function () {
-        // Use client_encrypted to insert the document {"encrypted": "test"} into db.coll.
-        // Expect a server selection error propagated from the internal MongoClient failing to connect to mongocryptd on port 27021.
-        const insertError = await clientEncrypted
-          .db(dataDbName)
-          .collection(dataCollName)
-          .insertOne({ encrypted: 'test' })
-          .catch(e => e);
+      it(
+        'does not spawn mongocryptd',
+        {
+          requires: {
+            ...metadata.requires,
+            crypt_shared: 'enabled'
+          }
+        },
+        async function () {
+          // Use client_encrypted to insert the document {"encrypted": "test"} into db.coll.
+          // Expect a server selection error propagated from the internal MongoClient failing to connect to mongocryptd on port 27021.
+          const insertError = await clientEncrypted
+            .db(dataDbName)
+            .collection(dataCollName)
+            .insertOne({ encrypted: 'test' })
+            .catch(e => e);
 
-        expect(insertError)
-          .to.be.instanceOf(MongoRuntimeError)
-          .to.match(
-            /Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn/
+          expect(insertError)
+            .to.be.instanceOf(MongoRuntimeError)
+            .to.match(
+              /Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn/
+            );
+
+          const { cause } = insertError;
+
+          expect(cause).to.be.instanceOf(MongoServerSelectionError);
+          expect(cause, 'Error must contain ECONNREFUSED').to.satisfy(
+            error =>
+              /ECONNREFUSED/.test(error.message) ||
+              !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
           );
-
-        const { cause } = insertError;
-
-        expect(cause).to.be.instanceOf(MongoServerSelectionError);
-        expect(cause, 'Error must contain ECONNREFUSED').to.satisfy(
-          error =>
-            /ECONNREFUSED/.test(error.message) ||
-            !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
-        );
-      });
+        }
+      );
     });
 
     describe('via bypassAutoEncryption', function () {
@@ -1241,19 +1238,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         expect(insertResult).to.have.property('insertedId');
       });
 
-      beforeEach('precondition: the shared library must NOT be loaded', function () {
-        const { cryptSharedLibPath } = getEncryptExtraOptions();
-        if (cryptSharedLibPath) {
-          this.currentTest.skipReason =
-            'test requires that the shared library NOT is present, but CRYPT_SHARED_LIB_PATH is set.';
-          this.skip();
-        }
-        // the presence of the shared library can only be reliably determine after
-        // libmongocrypt has been initialized, and can be detected with the
-        // cryptSharedLibVersionInfo getter on the autoEncrypter.
-        expect(!!clientEncrypted.autoEncrypter.cryptSharedLibVersionInfo).to.be.false;
-      });
-
       afterEach(async function () {
         await clientEncrypted?.close();
         await client?.close();
@@ -1262,33 +1246,33 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       // Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021
       // (or whatever was passed via --port) with serverSelectionTimeoutMS=1000. Run a handshake
       // command and ensure it fails with a server selection timeout.
-      it('does not spawn mongocryptd', metadata, async function () {
-        client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
-        const error = await client.connect().catch(e => e);
+      it(
+        'does not spawn mongocryptd',
+        {
+          requires: {
+            ...metadata.requires,
+            crypt_shared: 'enabled'
+          }
+        },
+        async function () {
+          client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
+          const error = await client.connect().catch(e => e);
 
-        expect(error, 'Error MUST be a MongoServerSelectionError error').to.be.instanceOf(
-          MongoServerSelectionError
-        );
-        expect(error, 'Error MUST contain ECONNREFUSED information').to.satisfy(
-          error =>
-            /ECONNREFUSED/.test(error.message) ||
-            !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
-        );
-      });
+          expect(error, 'Error MUST be a MongoServerSelectionError error').to.be.instanceOf(
+            MongoServerSelectionError
+          );
+          expect(error, 'Error MUST contain ECONNREFUSED information').to.satisfy(
+            error =>
+              /ECONNREFUSED/.test(error.message) ||
+              !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
+          );
+        }
+      );
     });
 
     describe('via loading shared library', function () {
       let clientEncrypted;
       let client;
-
-      beforeEach(function () {
-        const { cryptSharedLibPath } = getEncryptExtraOptions();
-        if (!cryptSharedLibPath) {
-          this.currentTest.skipReason =
-            'test requires that the shared library is present, but CRYPT_SHARED_LIB_PATH is unset.';
-          this.skip();
-        }
-      });
 
       // Setup
       beforeEach(async function () {
@@ -1345,11 +1329,23 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       // 4. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or
       // whatever was passed via `--port` with serverSelectionTimeoutMS=1000.) Run a handshake
       // command and ensure it fails with a server selection timeout
-      it('should not spawn mongocryptd', metadata, async function () {
-        client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
-        const error = await client.connect().catch(e => e);
-        expect(error).to.be.instanceOf(MongoServerSelectionError, /'Server selection timed out'/i);
-      });
+      it(
+        'should not spawn mongocryptd',
+        {
+          requires: {
+            ...metadata.requires,
+            crypt_shared: 'enabled'
+          }
+        },
+        async function () {
+          client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
+          const error = await client.connect().catch(e => e);
+          expect(error).to.be.instanceOf(
+            MongoServerSelectionError,
+            /'Server selection timed out'/i
+          );
+        }
+      );
     });
   });
 
