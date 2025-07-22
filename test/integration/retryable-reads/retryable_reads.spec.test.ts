@@ -14,7 +14,7 @@ const UNIMPLEMENTED_APIS = [
 
 const skippedTests = ['collection.listIndexes succeeds after retryable handshake network error'];
 
-describe.only('Retryable Reads (unified)', function () {
+describe('Retryable Reads (unified)', function () {
   runUnifiedSuite(loadSpecTests(path.join('retryable-reads', 'unified')), ({ description }) => {
     for (const apiName of UNIMPLEMENTED_APIS) {
       if (description.toLowerCase().includes(apiName.toLowerCase())) {

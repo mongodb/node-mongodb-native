@@ -552,6 +552,9 @@ export class Collection<TSchema extends Document = Document> {
     options: Omit<FindOneOptions, ''> & Abortable = {}
   ): Promise<WithId<TSchema> | null> {
     const opts = { ...options };
+    // Explicitly set the limit to 1 and singleBatch to true for all commands, per the spec.
+    // noCursorTimeout must be unset as well as batchSize.
+    // See: https://github.com/mongodb/specifications/blob/master/source/crud/crud.md#findone-api-details
     opts.singleBatch = true;
     if (opts.noCursorTimeout != null) {
       delete opts.noCursorTimeout;
@@ -561,16 +564,6 @@ export class Collection<TSchema extends Document = Document> {
     }
     const cursor = this.find(filter, opts).limit(1);
     return await cursor.next();
-    //await cursor.close();
-    //return await executeOperation(
-    //  this.client,
-    //  new FindOneOperation(
-    //    this.s.db,
-    //    this.collectionName,
-    //    filter,
-    //    resolveOptions(this as TODO_NODE_3286, options)
-    //  )
-    //);
   }
 
   /**
