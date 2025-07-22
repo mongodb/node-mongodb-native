@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.18.0](https://github.com/mongodb/node-mongodb-native/compare/v6.17.0...v6.18.0) (2025-07-22)
+
+
+### Features
+
+* **NODE-5055:** Add databaseName property to command monitoring events ([#4586](https://github.com/mongodb/node-mongodb-native/issues/4586)) ([3faf0c9](https://github.com/mongodb/node-mongodb-native/commit/3faf0c967cd47b7fa6143aff914b4d2c47a584b3))
+* **NODE-6865:** deprecate transaction getters ([#4567](https://github.com/mongodb/node-mongodb-native/issues/4567)) ([da46aea](https://github.com/mongodb/node-mongodb-native/commit/da46aeafe857f0bbfe8935abb497ff8c92f692ca))
+* **NODE-6991:** deprecate unintentionally public client metadata types ([#4566](https://github.com/mongodb/node-mongodb-native/issues/4566)) ([ca6554b](https://github.com/mongodb/node-mongodb-native/commit/ca6554b203595cd195ea80b24b1bb662d88abee9))
+* **NODE-7009:** add client metadata on demand ([#4574](https://github.com/mongodb/node-mongodb-native/issues/4574)) ([b9636ee](https://github.com/mongodb/node-mongodb-native/commit/b9636ee3fe1daa54a65935f206f0c8fdac16ae86))
+* **NODE-7053:** deprecate noResponse option ([#4589](https://github.com/mongodb/node-mongodb-native/issues/4589)) ([1115319](https://github.com/mongodb/node-mongodb-native/commit/1115319a0913c136c688631a0cf9f6d3dfcb2e4c))
+
+
+### Bug Fixes
+
+* **NODE-4845:** allocate sessions lazily in cursors ([#4575](https://github.com/mongodb/node-mongodb-native/issues/4575)) ([5761703](https://github.com/mongodb/node-mongodb-native/commit/57617039c0275e25e607363fbdc971b0f94e99c7))
+* **NODE-6589:** background task does not prune idle connections when minPoolSize=0 ([#4569](https://github.com/mongodb/node-mongodb-native/issues/4569)) ([7cbb641](https://github.com/mongodb/node-mongodb-native/commit/7cbb641f848993788f5d11812518d1e360df1d53))
+* **NODE-6955:** add missing `wallTime` property TS change stream event interfaces ([#4541](https://github.com/mongodb/node-mongodb-native/issues/4541)) ([f153c6f](https://github.com/mongodb/node-mongodb-native/commit/f153c6f3df8c7c440af3bc0f862a30c53f9c5fc8))
+
 ## [6.17.0](https://github.com/mongodb/node-mongodb-native/compare/v6.16.0...v6.17.0) (2025-06-03)
 
 
