@@ -6,7 +6,7 @@ import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_command_cursor';
-import { MongoInvalidArgumentError } from './error';
+import { MONGODB_ERROR_CODES, MongoInvalidArgumentError, MongoServerError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { Abortable, TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
@@ -411,6 +411,43 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async dropCollection(name: string, options?: DropCollectionOptions): Promise<boolean> {
+    options = resolveOptions(this, options);
+    const encryptedFieldsMap = this.client.s.options.autoEncryption?.encryptedFieldsMap;
+    let encryptedFields: Document | undefined =
+      options?.encryptedFields ?? encryptedFieldsMap?.[`${this.databaseName}.${name}`];
+
+    if (!encryptedFields && encryptedFieldsMap) {
+      // If the MongoClient was configured with an encryptedFieldsMap,
+      // and no encryptedFields config was available in it or explicitly
+      // passed as an argument, the spec tells us to look one up using
+      // listCollections().
+      const listCollectionsResult = await this.listCollections(
+        { name },
+        { nameOnly: false }
+      ).toArray();
+      encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
+    }
+
+    if (encryptedFields) {
+      const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
+      const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
+
+      for (const collectionName of [escCollection, ecocCollection]) {
+        // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
+        const dropOp = new DropCollectionOperation(this, collectionName);
+        try {
+          await executeOperation(this.client, dropOp);
+        } catch (err) {
+          if (
+            !(err instanceof MongoServerError) ||
+            err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
+          ) {
+            throw err;
+          }
+        }
+      }
+    }
+
     return await executeOperation(
       this.client,
       new DropCollectionOperation(this, name, resolveOptions(this, options))

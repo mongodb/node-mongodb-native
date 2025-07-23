@@ -491,10 +491,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async drop(options?: DropCollectionOptions): Promise<boolean> {
-    return await executeOperation(
-      this.client,
-      new DropCollectionOperation(this.s.db, this.collectionName, options)
-    );
+    return await this.s.db.dropCollection(this.collectionName, options);
   }
 
   /**

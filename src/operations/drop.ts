@@ -35,53 +35,6 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<boolean> {
-    const db = this.db;
-    const options = this.options;
-    const name = this.name;
-
-    const encryptedFieldsMap = db.client.s.options.autoEncryption?.encryptedFieldsMap;
-    let encryptedFields: Document | undefined =
-      options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
-
-    if (!encryptedFields && encryptedFieldsMap) {
-      // If the MongoClient was configured with an encryptedFieldsMap,
-      // and no encryptedFields config was available in it or explicitly
-      // passed as an argument, the spec tells us to look one up using
-      // listCollections().
-      const listCollectionsResult = await db
-        .listCollections({ name }, { nameOnly: false })
-        .toArray();
-      encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
-    }
-
-    if (encryptedFields) {
-      const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
-      const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
-
-      for (const collectionName of [escCollection, ecocCollection]) {
-        // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
-        const dropOp = new DropCollectionOperation(db, collectionName);
-        try {
-          await dropOp.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
-        } catch (err) {
-          if (
-            !(err instanceof MongoServerError) ||
-            err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
-          ) {
-            throw err;
-          }
-        }
-      }
-    }
-
-    return await this.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
-  }
-
-  private async executeWithoutEncryptedFieldsCheck(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<boolean> {
     await super.executeCommand(server, session, { drop: this.name }, timeoutContext);
     return true;
   }
