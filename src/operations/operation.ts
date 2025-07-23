@@ -1,7 +1,8 @@
+import { type Connection, type MongoError } from '..';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
 import { type Abortable } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
-import type { Server } from '../sdam/server';
+import type { Server, ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
@@ -108,6 +109,10 @@ export abstract class AbstractOperation<TResult = any> {
     return this._session;
   }
 
+  set session(session: ClientSession) {
+    this._session = session;
+  }
+
   clearSession() {
     this._session = undefined;
   }
@@ -122,6 +127,37 @@ export abstract class AbstractOperation<TResult = any> {
 
   get canRetryWrite(): boolean {
     return this.hasAspect(Aspect.RETRYABLE) && this.hasAspect(Aspect.WRITE_OPERATION);
+  }
+}
+
+export abstract class ModernOperation<T> extends AbstractOperation<T> {
+  /** this will never be used - but we must implement it to satisfy AbstractOperation's interface */
+  override execute(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _timeoutContext: TimeoutContext
+  ): Promise<T> {
+    throw new Error('cannot execute!!');
+  }
+
+  abstract buildCommand(connection: Connection, session?: ClientSession): Document;
+
+  abstract buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions;
+
+  /**
+   * Optional - if the operation performs error handling, such as wrapping or renaming the error,
+   * this method can be overridden.
+   */
+  handleOk(response: Document) {
+    return response;
+  }
+
+  /**
+   * Optional - if the operation performs post-processing
+   * on the result document, this method can be overridden.
+   */
+  handleError(error: MongoError): void {
+    throw error;
   }
 }
 

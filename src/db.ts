@@ -6,7 +6,7 @@ import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_command_cursor';
-import { MongoInvalidArgumentError } from './error';
+import { MONGODB_ERROR_CODES, MongoInvalidArgumentError, MongoServerError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { Abortable, TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';

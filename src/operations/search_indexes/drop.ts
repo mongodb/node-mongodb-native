@@ -1,13 +1,14 @@
+import { type Connection, type MongoError } from '../..';
 import type { Document } from '../../bson';
 import type { Collection } from '../../collection';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
-import type { Server } from '../../sdam/server';
+import type { Server, ServerCommandOptions } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { type TimeoutContext } from '../../timeout';
-import { AbstractOperation } from '../operation';
+import { AbstractOperation, ModernOperation } from '../operation';
 
 /** @internal */
-export class DropSearchIndexOperation extends AbstractOperation<void> {
+export class DropSearchIndexOperation extends ModernOperation<void> {
   private readonly collection: Collection;
   private readonly name: string;
 
@@ -15,17 +16,14 @@ export class DropSearchIndexOperation extends AbstractOperation<void> {
     super();
     this.collection = collection;
     this.name = name;
+    this.ns = collection.fullNamespace;
   }
 
   override get commandName() {
     return 'dropSearchIndex' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<void> {
+  override buildCommand(_connection: Connection, _session?: ClientSession): Document {
     const namespace = this.collection.fullNamespace;
 
     const command: Document = {
@@ -35,15 +33,18 @@ export class DropSearchIndexOperation extends AbstractOperation<void> {
     if (typeof this.name === 'string') {
       command.name = this.name;
     }
+    return command;
+  }
 
-    try {
-      await server.command(namespace, command, { session, timeoutContext });
-    } catch (error) {
-      const isNamespaceNotFoundError =
-        error instanceof MongoServerError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound;
-      if (!isNamespaceNotFoundError) {
-        throw error;
-      }
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return { session: this.session, timeoutContext };
+  }
+
+  override handleError(error: MongoError): void {
+    const isNamespaceNotFoundError =
+      error instanceof MongoServerError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound;
+    if (!isNamespaceNotFoundError) {
+      throw error;
     }
   }
 }
