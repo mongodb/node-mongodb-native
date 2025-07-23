@@ -106,7 +106,7 @@ declare module 'mongodb-client-encryption' {
  */
 export type ClientEncryptionTlsOptions = Pick<
   MongoClientOptions,
-  'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword'
+  'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword' | 'secureContext'
 >;
 
 /** @public */
@@ -521,6 +521,10 @@ export class StateMachine {
     tlsOptions: ClientEncryptionTlsOptions,
     options: tls.ConnectionOptions
   ): Promise<void> {
+    // If a secureContext is provided, ensure it is set.
+    if (tlsOptions.secureContext) {
+      options.secureContext = tlsOptions.secureContext;
+    }
     if (tlsOptions.tlsCertificateKeyFile) {
       const cert = await fs.readFile(tlsOptions.tlsCertificateKeyFile);
       options.cert = options.key = cert;
