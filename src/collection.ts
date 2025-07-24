@@ -549,7 +549,7 @@ export class Collection<TSchema extends Document = Document> {
 
   async findOne(
     filter: Filter<TSchema> = {},
-    options: Omit<FindOneOptions, ''> & Abortable = {}
+    options: Omit<FindOneOptions, 'timeoutMode'> & Abortable = {}
   ): Promise<WithId<TSchema> | null> {
     const opts = { ...options };
     // Explicitly set the limit to 1 and singleBatch to true for all commands, per the spec.
