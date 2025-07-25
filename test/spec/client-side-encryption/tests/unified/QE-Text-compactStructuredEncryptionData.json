@@ -1,0 +1,259 @@
+{
+  "description": "QE-Text-compactStructuredEncryptionData",
+  "schemaVersion": "1.23",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "8.2.0",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ],
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "local": {
+              "key": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk"
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client",
+        "databaseName": "db"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll",
+        "database": "db",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "q83vqxI0mHYSNBI0VniQEg==",
+              "subType": "04"
+            }
+          },
+          "keyMaterial": {
+            "$binary": {
+              "base64": "HBk9BWihXExNDvTp1lUxOuxuZK2Pe2ZdVdlsxPEBkiO1bS4mG5NNDsQ7zVxJAH8BtdOYp72Ku4Y3nwc0BUpIKsvAKX4eYXtlhv5zUQxWdeNFhg9qK7qb8nqhnnLeT0f25jFSqzWJoT379hfwDeu0bebJHr35QrJ8myZdPMTEDYF08QYQ48ShRBli0S+QzBHHAQiM2iJNr4svg2WR8JSeWQ==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1648914851981"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1648914851981"
+            }
+          },
+          "status": {
+            "$numberInt": "0"
+          },
+          "masterKey": {
+            "provider": "local"
+          }
+        }
+      ]
+    },
+    {
+      "databaseName": "db",
+      "collectionName": "coll",
+      "documents": [],
+      "createOptions": {
+        "encryptedFields": {
+          "fields": [
+            {
+              "keyId": {
+                "$binary": {
+                  "base64": "q83vqxI0mHYSNBI0VniQEg==",
+                  "subType": "04"
+                }
+              },
+              "path": "encryptedText",
+              "bsonType": "string",
+              "queries": [
+                {
+                  "queryType": "suffixPreview",
+                  "contention": {
+                    "$numberLong": "0"
+                  },
+                  "strMinQueryLength": {
+                    "$numberLong": "3"
+                  },
+                  "strMaxQueryLength": {
+                    "$numberLong": "30"
+                  },
+                  "caseSensitive": true,
+                  "diacriticSensitive": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "QE Text compactStructuredEncryptionData works",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "command": {
+              "compactStructuredEncryptionData": "coll"
+            },
+            "commandName": "compactStructuredEncryptionData"
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1,
+                  "filter": {
+                    "name": "coll"
+                  }
+                },
+                "commandName": "listCollections"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "q83vqxI0mHYSNBI0VniQEg==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "compactStructuredEncryptionData": "coll",
+                  "encryptionInformation": {
+                    "type": {
+                      "$numberInt": "1"
+                    },
+                    "schema": {
+                      "db.coll": {
+                        "fields": [
+                          {
+                            "keyId": {
+                              "$binary": {
+                                "base64": "q83vqxI0mHYSNBI0VniQEg==",
+                                "subType": "04"
+                              }
+                            },
+                            "path": "encryptedText",
+                            "bsonType": "string",
+                            "queries": [
+                              {
+                                "queryType": "suffixPreview",
+                                "contention": {
+                                  "$numberLong": "0"
+                                },
+                                "strMinQueryLength": {
+                                  "$numberLong": "3"
+                                },
+                                "strMaxQueryLength": {
+                                  "$numberLong": "30"
+                                },
+                                "caseSensitive": true,
+                                "diacriticSensitive": true
+                              }
+                            ]
+                          }
+                        ],
+                        "strEncodeVersion": {
+                          "$numberInt": "1"
+                        },
+                        "escCollection": "enxcol_.coll.esc",
+                        "ecocCollection": "enxcol_.coll.ecoc"
+                      }
+                    }
+                  },
+                  "compactionTokens": {
+                    "encryptedText": {
+                      "ecoc": {
+                        "$binary": {
+                          "base64": "SWO8WEoZ2r2Kx/muQKb7+COizy85nIIUFiHh4K9kcvA=",
+                          "subType": "00"
+                        }
+                      },
+                      "anchorPaddingToken": {
+                        "$binary": {
+                          "base64": "YAiF7Iwhqq1UyfxPvm70xfQJtrIRPrjfD2yRLG1+saQ=",
+                          "subType": "00"
+                        }
+                      }
+                    }
+                  }
+                },
+                "commandName": "compactStructuredEncryptionData"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
