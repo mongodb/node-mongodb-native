@@ -1,7 +1,6 @@
 import type { Document } from '../bson';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
-import { MONGODB_ERROR_CODES, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';

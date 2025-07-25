@@ -2,13 +2,15 @@ import { type Connection, type MongoError } from '../..';
 import type { Document } from '../../bson';
 import type { Collection } from '../../collection';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
-import type { Server, ServerCommandOptions } from '../../sdam/server';
+import type { ServerCommandOptions } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { type TimeoutContext } from '../../timeout';
-import { AbstractOperation, ModernOperation } from '../operation';
+import { ModernOperation } from '../operation';
 
 /** @internal */
-export class DropSearchIndexOperation extends ModernOperation<void> {
+export class DropSearchIndexOperation extends ModernOperation<undefined, void> {
+  override RESPONSE_TYPE: undefined;
+
   private readonly collection: Collection;
   private readonly name: string;
 
@@ -34,6 +36,10 @@ export class DropSearchIndexOperation extends ModernOperation<void> {
       command.name = this.name;
     }
     return command;
+  }
+
+  override handleOk(_response: Document): void {
+    // do nothing
   }
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {

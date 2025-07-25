@@ -291,7 +291,7 @@ async function tryOperation<
 
       try {
         const result = await server.modernCommand(operation, timeoutContext);
-        return operation.handleOk(result) as TResult;
+        return operation.handleOk(result);
       } catch (error) {
         operation.handleError(error);
       }

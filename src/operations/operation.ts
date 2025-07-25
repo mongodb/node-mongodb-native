@@ -1,4 +1,4 @@
-import { type Connection, type MongoError } from '..';
+import { type Connection, type MongoDBResponse, type MongoError } from '..';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
 import { type Abortable } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
@@ -130,13 +130,18 @@ export abstract class AbstractOperation<TResult = any> {
   }
 }
 
-export abstract class ModernOperation<T> extends AbstractOperation<T> {
+export abstract class ModernOperation<
+  TResponse extends typeof MongoDBResponse | undefined,
+  TResult
+> extends AbstractOperation<TResult> {
+  abstract RESPONSE_TYPE: TResponse;
+
   /** this will never be used - but we must implement it to satisfy AbstractOperation's interface */
   override execute(
     _server: Server,
     _session: ClientSession | undefined,
     _timeoutContext: TimeoutContext
-  ): Promise<T> {
+  ): Promise<TResult> {
     throw new Error('cannot execute!!');
   }
 
@@ -148,9 +153,9 @@ export abstract class ModernOperation<T> extends AbstractOperation<T> {
    * Optional - if the operation performs error handling, such as wrapping or renaming the error,
    * this method can be overridden.
    */
-  handleOk(response: Document) {
-    return response;
-  }
+  abstract handleOk(
+    response: TResponse extends typeof MongoDBResponse ? InstanceType<TResponse> : Document
+  ): TResult;
 
   /**
    * Optional - if the operation performs post-processing
