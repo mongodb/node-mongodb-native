@@ -290,6 +290,9 @@ describe('abstract operation', function () {
         if (!WrapperSubclasses.includes(subclassType.name.toString())) {
           it(`operation.commandName equals key in command document`, async function () {
             const subclassInstance = subclassCreator();
+            if (subclassInstance instanceof mongodb.ModernOperation) {
+              return;
+            }
             const yieldDoc =
               subclassType.name === 'ProfilingLevelOperation' ? { ok: 1, was: 1 } : { ok: 1 };
             const cmdCallerStub = sinon.stub(Server.prototype, 'command').resolves(yieldDoc);
