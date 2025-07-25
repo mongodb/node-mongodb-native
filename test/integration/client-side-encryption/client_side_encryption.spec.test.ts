@@ -62,7 +62,7 @@ describe('Client Side Encryption (Legacy)', function () {
   });
 });
 
-describe.only('Client Side Encryption (Unified)', function () {
+describe('Client Side Encryption (Unified)', function () {
   runUnifiedSuite(
     loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
     ({ description }, configuration) => {
