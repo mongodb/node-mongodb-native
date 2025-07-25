@@ -195,13 +195,7 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
 
   if (typeof options.batchSize === 'number') {
     if (options.batchSize < 0) {
-      if (
-        options.limit &&
-        options.limit !== 0 &&
-        Math.abs(options.batchSize) < Math.abs(options.limit)
-      ) {
-        findCommand.limit = -options.batchSize;
-      }
+      findCommand.limit = -options.batchSize;
     } else {
       if (options.batchSize === options.limit) {
         // Spec dictates that if these are equal the batchSize should be one more than the

@@ -557,7 +557,9 @@ export class Collection<TSchema extends Document = Document> {
     const { batchSize: _batchSize, noCursorTimeout: _noCursorTimeout, ...opts } = options;
     opts.singleBatch = true;
     const cursor = this.find(filter, opts).limit(1);
-    return await cursor.next();
+    const result = await cursor.next();
+    await cursor.close();
+    return result;
   }
 
   /**
