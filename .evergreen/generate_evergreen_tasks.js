@@ -156,7 +156,8 @@ TASKS.push(
       tags: ['auth', 'kerberos'],
       commands: [
         updateExpansions({
-          NATIVE: 'true'
+          NATIVE: 'true',
+          NPM_VERSION: '11.4.2'
         }),
         { func: 'install dependencies' },
         { func: 'assume secrets manager role' },

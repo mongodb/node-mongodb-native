@@ -1699,6 +1699,7 @@ tasks:
         params:
           updates:
             - {key: NATIVE, value: 'true'}
+            - {key: NPM_VERSION, value: 11.4.2}
       - func: install dependencies
       - func: assume secrets manager role
       - func: run kerberos tests
