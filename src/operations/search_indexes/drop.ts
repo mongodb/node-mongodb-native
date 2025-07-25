@@ -5,11 +5,12 @@ import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
 import type { ServerCommandOptions } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { type TimeoutContext } from '../../timeout';
-import { ModernOperation } from '../operation';
+import { ModernizedOperation } from '../operation';
+import { MongoDBResponse } from '../../cmap/wire_protocol/responses'
 
 /** @internal */
-export class DropSearchIndexOperation extends ModernOperation<undefined, void> {
-  override RESPONSE_TYPE: undefined;
+export class DropSearchIndexOperation extends ModernizedOperation<void> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
 
   private readonly collection: Collection;
   private readonly name: string;
@@ -38,7 +39,7 @@ export class DropSearchIndexOperation extends ModernOperation<undefined, void> {
     return command;
   }
 
-  override handleOk(_response: Document): void {
+  override handleOk(_response: MongoDBResponse): void {
     // do nothing
   }
 

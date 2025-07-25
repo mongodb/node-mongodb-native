@@ -1,5 +1,6 @@
-import { type Connection, type MongoDBResponse, type MongoError } from '..';
+import { type Connection, type MongoError } from '..';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
+import { type MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { type Abortable } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server, ServerCommandOptions } from '../sdam/server';
@@ -130,11 +131,8 @@ export abstract class AbstractOperation<TResult = any> {
   }
 }
 
-export abstract class ModernOperation<
-  TResponse extends typeof MongoDBResponse | undefined,
-  TResult
-> extends AbstractOperation<TResult> {
-  abstract RESPONSE_TYPE: TResponse;
+export abstract class ModernizedOperation<TResult> extends AbstractOperation<TResult> {
+  abstract SERVER_COMMAND_RESPONSE_TYPE: typeof MongoDBResponse;
 
   /** this will never be used - but we must implement it to satisfy AbstractOperation's interface */
   override execute(
@@ -150,16 +148,27 @@ export abstract class ModernOperation<
   abstract buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions;
 
   /**
-   * Optional - if the operation performs error handling, such as wrapping or renaming the error,
-   * this method can be overridden.
+   * Given an instance of a MongoDBResponse, map the response to the correct result type.  For
+   * example, a `CountOperation` might map the response as follows:
+   *
+   * ```typescript
+   *  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+   *    return response.toObject(this.bsonOptions).n ?? 0;
+   *  }
+   *
+   *  // or, with type safety:
+   *  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+   *    return response.getNumber('n') ?? 0;
+   *  }
+   * ```
    */
-  abstract handleOk(
-    response: TResponse extends typeof MongoDBResponse ? InstanceType<TResponse> : Document
-  ): TResult;
+  handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+    return response.toObject(this.bsonOptions) as TResult;
+  }
 
   /**
-   * Optional - if the operation performs post-processing
-   * on the result document, this method can be overridden.
+   * Optional - if the operation performs error handling, such as wrapping or renaming the error,
+   * this method can be overridden.
    */
   handleError(error: MongoError): void {
     throw error;

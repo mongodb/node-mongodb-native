@@ -7,10 +7,7 @@ import {
   type ConnectionPoolOptions
 } from '../cmap/connection_pool';
 import { PoolClearedError } from '../cmap/errors';
-import {
-  type MongoDBResponse,
-  type MongoDBResponseConstructor
-} from '../cmap/wire_protocol/responses';
+import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import {
   APM_EVENTS,
   CLOSED,
@@ -41,7 +38,7 @@ import {
 import type { ServerApi } from '../mongo_client';
 import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import type { GetMoreOptions } from '../operations/get_more';
-import { type ModernOperation } from '../operations/operation';
+import { type ModernizedOperation } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { isTransactionCommand } from '../transactions';
@@ -281,14 +278,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
-  public async modernCommand<TResponse extends typeof MongoDBResponse | undefined, TResult>(
-    operation: ModernOperation<TResponse, TResult>,
+  public async modernCommand<TResult>(
+    operation: ModernizedOperation<TResult>,
     timeoutContext: TimeoutContext
-  ): Promise<
-    typeof operation.RESPONSE_TYPE extends typeof MongoDBResponse
-      ? InstanceType<TResponse>
-      : Document
-  > {
+  ): Promise<InstanceType<typeof operation.SERVER_COMMAND_RESPONSE_TYPE>> {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       throw new MongoServerClosedError();
     }
@@ -333,12 +326,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     try {
       try {
-        const res = await conn.command(ns, cmd, options, operation.RESPONSE_TYPE);
+        const res = await conn.command(ns, cmd, options, operation.SERVER_COMMAND_RESPONSE_TYPE);
         throwIfWriteConcernError(res);
-        // TODO: figure out why casting is necessary
-        return res as typeof operation.RESPONSE_TYPE extends typeof MongoDBResponse
-          ? InstanceType<TResponse>
-          : Document;
+        return res;
       } catch (commandError) {
         throw this.decorateCommandError(conn, cmd, options, commandError);
       }
@@ -357,12 +347,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         reauthPromise = null; // only reachable if reauth succeeds
 
         try {
-          const res = await conn.command(ns, cmd, options);
+          const res = await conn.command(ns, cmd, options, operation.SERVER_COMMAND_RESPONSE_TYPE);
           throwIfWriteConcernError(res);
-          // TODO: figure out why casting is necessary
-          return res as typeof operation.RESPONSE_TYPE extends typeof MongoDBResponse
-            ? InstanceType<TResponse>
-            : Document;
+          return res;
         } catch (commandError) {
           throw this.decorateCommandError(conn, cmd, options, commandError);
         }

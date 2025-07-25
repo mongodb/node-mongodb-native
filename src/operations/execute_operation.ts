@@ -26,7 +26,7 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { abortable, supportsRetryableWrites } from '../utils';
-import { AbstractOperation, Aspect, ModernOperation } from './operation';
+import { AbstractOperation, Aspect, ModernizedOperation } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -233,7 +233,7 @@ async function tryOperation<
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 
-  const isModernOperation = operation instanceof ModernOperation;
+  const isModernOperation = operation instanceof ModernizedOperation;
 
   for (let tries = 0; tries < maxTries; tries++) {
     if (previousOperationError) {

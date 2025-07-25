@@ -290,7 +290,7 @@ describe('abstract operation', function () {
         if (!WrapperSubclasses.includes(subclassType.name.toString())) {
           it(`operation.commandName equals key in command document`, async function () {
             const subclassInstance = subclassCreator();
-            if (subclassInstance instanceof mongodb.ModernOperation) {
+            if (subclassInstance instanceof mongodb.ModernizedOperation) {
               return;
             }
             const yieldDoc =
