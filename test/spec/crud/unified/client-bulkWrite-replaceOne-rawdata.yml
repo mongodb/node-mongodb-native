@@ -1,0 +1,92 @@
+description: "client bulkWrite replaceOne-rawData"
+
+schemaVersion: "1.4"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+
+tests:
+  - description: "client bulkWrite replaceOne with rawData option"
+    runOnRequirements:
+      - minServerVersion: "8.2.0"
+        serverless: forbid
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - replaceOne:
+                namespace: *namespace
+                filter: &filter {}
+                replacement: &replacement
+                  x: 1
+          rawData: &rawdata true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                ops:
+                  - update: 0
+                    filter: *filter
+                    updateMods: *replacement
+                    multi:
+                      $$unsetOrMatches: false
+                    upsert:
+                      $$unsetOrMatches: false
+                nsInfo:
+                  - ns: *namespace
+                rawData: *rawdata
+  - description: "client bulk write replaceOne with rawData option on less than 8.2.0 - ignore argument"
+    runOnRequirements:
+      - minServerVersion: "8.0"
+        maxServerVersion: "8.1.99"
+        serverless: forbid
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - replaceOne:
+                namespace: *namespace
+                filter: &filter {}
+                replacement: &replacement
+                  x: 1
+          rawData: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              commandName: bulkWrite
+              databaseName: admin
+              command:
+                bulkWrite: 1
+                ordered: true
+                ops:
+                  - update: 0
+                    filter: *filter
+                    updateMods: *replacement
+                    multi:
+                      $$unsetOrMatches: false
+                    upsert:
+                      $$unsetOrMatches: false
+                nsInfo:
+                  - ns: *namespace
+                rawData:
+                  $$exists: false

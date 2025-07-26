@@ -3,6 +3,7 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
+import { decorateRawData, maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -14,6 +15,12 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
    * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    */
   maxTimeMS?: number;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */
@@ -36,6 +43,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<number> {
+    const serverWireVersion = maxWireVersion(server);
     const cmd: Document = { count: this.collectionName };
 
     if (typeof this.options.maxTimeMS === 'number') {
@@ -47,6 +55,8 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     if (this.options.comment !== undefined) {
       cmd.comment = this.options.comment;
     }
+
+    decorateRawData(cmd, !!this.options.rawData, serverWireVersion);
 
     const response = await super.executeCommand(server, session, cmd, timeoutContext);
 

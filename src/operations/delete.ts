@@ -5,7 +5,7 @@ import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { type MongoDBNamespace } from '../utils';
+import { decorateRawData, maxWireVersion, type MongoDBNamespace } from '../utils';
 import { type WriteConcernOptions } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -20,6 +20,12 @@ export interface DeleteOptions extends CommandOperationOptions, WriteConcernOpti
   hint?: string | Document;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @public */
@@ -71,6 +77,7 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
     session: ClientSession | undefined,
     timeoutContext: TimeoutContext
   ): Promise<DeleteResult> {
+    const serverWireVersion = maxWireVersion(server);
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -96,6 +103,8 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
         throw new MongoCompatibilityError(`hint is not supported with unacknowledged writes`);
       }
     }
+
+    decorateRawData(command, !!this.options.rawData, serverWireVersion);
 
     const res: TODO_NODE_3286 = await super.executeCommand(
       server,

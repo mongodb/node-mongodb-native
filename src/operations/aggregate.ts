@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { MIN_SUPPORTED_RAW_DATA_WIRE_VERSION } from '../cmap/wire_protocol/constants';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
@@ -6,7 +7,7 @@ import { type ExplainOptions } from '../explain';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { maxWireVersion, type MongoDBNamespace } from '../utils';
+import { decorateRawData, maxWireVersion, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -48,6 +49,12 @@ export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain
   explain?: ExplainOptions['explain'];
   /** @internal */
   timeoutMode?: CursorTimeoutMode;
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */
@@ -150,6 +157,12 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
     command.cursor = options.cursor || {};
     if (options.batchSize && !this.hasWriteStage) {
       command.cursor.batchSize = options.batchSize;
+    }
+
+    decorateRawData(command, !!options.rawData, serverWireVersion);
+
+    if (options.rawData != null && serverWireVersion >= MIN_SUPPORTED_RAW_DATA_WIRE_VERSION) {
+      command.rawData = options.rawData;
     }
 
     return await super.executeCommand(
