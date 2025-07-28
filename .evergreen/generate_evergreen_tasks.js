@@ -157,7 +157,7 @@ TASKS.push(
       commands: [
         updateExpansions({
           NATIVE: 'true',
-          NPM_VERSION: '11.4.2'
+          NPM_VERSION: '8.19.4'
         }),
         { func: 'install dependencies' },
         { func: 'assume secrets manager role' },
