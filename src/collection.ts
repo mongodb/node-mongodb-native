@@ -61,7 +61,6 @@ import {
   type ListIndexesOptions
 } from './operations/indexes';
 import {
-  InsertManyOperation,
   type InsertManyResult,
   InsertOneOperation,
   type InsertOneOptions,
@@ -305,14 +304,34 @@ export class Collection<TSchema extends Document = Document> {
     docs: ReadonlyArray<OptionalUnlessRequiredId<TSchema>>,
     options?: BulkWriteOptions
   ): Promise<InsertManyResult<TSchema>> {
-    return await executeOperation(
-      this.client,
-      new InsertManyOperation(
-        this as TODO_NODE_3286,
-        docs,
-        resolveOptions(this, options ?? { ordered: true })
-      ) as TODO_NODE_3286
+    if (!Array.isArray(docs)) {
+      throw new MongoInvalidArgumentError('Argument "docs" must be an array of documents');
+    }
+
+    const writeConcern = WriteConcern.fromOptions(options);
+    const bulkWriteOperation = new BulkWriteOperation(
+      this as unknown as Collection<Document>,
+      docs.map(document => ({
+        insertOne: { document }
+      })),
+      options ?? {}
     );
+
+    try {
+      const res = await executeOperation(this.client, bulkWriteOperation);
+      return {
+        acknowledged: writeConcern?.w !== 0,
+        insertedCount: res.insertedCount,
+        insertedIds: res.insertedIds
+      };
+    } catch (err) {
+      if (err && err.message === 'Operation must be an object with an operation key') {
+        throw new MongoInvalidArgumentError(
+          'Collection.insertMany() cannot be called with an array that has null/undefined values'
+        );
+      }
+      throw err;
+    }
   }
 
   /**

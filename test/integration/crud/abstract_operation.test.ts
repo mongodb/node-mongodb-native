@@ -162,11 +162,6 @@ describe('abstract operation', function () {
         correctCommandName: 'insert'
       },
       {
-        subclassCreator: () => new mongodb.InsertManyOperation(collection, [{ a: 1 }], {}),
-        subclassType: mongodb.InsertManyOperation,
-        correctCommandName: 'insert'
-      },
-      {
         subclassCreator: () => new mongodb.IsCappedOperation(collection, {}),
         subclassType: mongodb.IsCappedOperation,
         correctCommandName: 'listCollections'
