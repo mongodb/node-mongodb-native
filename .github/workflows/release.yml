@@ -49,7 +49,7 @@ jobs:
           npm_package_name: mongodb
 
       - name: actions/compress_sign_and_upload
-        uses: blink1073/drivers-github-tools/node/sign_node_package@PYTHON-5432 
+        uses: baileympearson/drivers-github-tools/node/sign_node_package@no-story-PYTHON-5432-test 
         with:
           aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
           aws_region_name: us-east-1
