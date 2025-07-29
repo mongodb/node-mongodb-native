@@ -1,5 +1,10 @@
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
-import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
+import type {
+  AnyBulkWriteOperation,
+  BulkOperationBase,
+  BulkWriteOptions,
+  BulkWriteResult
+} from './bulk/common';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
@@ -24,7 +29,6 @@ import type {
   WithoutId
 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
-import { BulkWriteOperation } from './operations/bulk_write';
 import { CountOperation, type CountOptions } from './operations/count';
 import {
   DeleteManyOperation,
@@ -307,20 +311,17 @@ export class Collection<TSchema extends Document = Document> {
     if (!Array.isArray(docs)) {
       throw new MongoInvalidArgumentError('Argument "docs" must be an array of documents');
     }
+    options = options ?? {};
 
-    const writeConcern = WriteConcern.fromOptions(options);
-    const bulkWriteOperation = new BulkWriteOperation(
-      this as unknown as Collection<Document>,
-      docs.map(document => ({
-        insertOne: { document }
-      })),
-      options ?? {}
-    );
+    const acknowledged = WriteConcern.fromOptions(options)?.w !== 0;
 
     try {
-      const res = await executeOperation(this.client, bulkWriteOperation);
+      const res = await this.bulkWrite(
+        docs.map(doc => ({ insertOne: { document: doc } })),
+        options
+      );
       return {
-        acknowledged: writeConcern?.w !== 0,
+        acknowledged,
         insertedCount: res.insertedCount,
         insertedIds: res.insertedIds
       };
@@ -361,14 +362,21 @@ export class Collection<TSchema extends Document = Document> {
       throw new MongoInvalidArgumentError('Argument "operations" must be an array of documents');
     }
 
-    return await executeOperation(
-      this.client,
-      new BulkWriteOperation(
-        this as TODO_NODE_3286,
-        operations,
-        resolveOptions(this, options ?? { ordered: true })
-      )
-    );
+    options = options ?? {};
+
+    // Create the bulk operation
+    const bulk: BulkOperationBase =
+      options.ordered === false
+        ? this.initializeUnorderedBulkOp(options)
+        : this.initializeOrderedBulkOp(options);
+
+    // for each op go through and add to the bulk
+    for (let i = 0; i < operations.length; i++) {
+      bulk.raw(operations[i]);
+    }
+
+    // Execute the bulk
+    return await bulk.execute({ ...options });
   }
 
   /**
