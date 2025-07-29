@@ -42,7 +42,7 @@ import {
   EstimatedDocumentCountOperation,
   type EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
-import { executeOperation } from './operations/execute_operation';
+import { autoConnect, executeOperation } from './operations/execute_operation';
 import type { FindOptions } from './operations/find';
 import {
   FindOneAndDeleteOperation,
@@ -311,7 +311,7 @@ export class Collection<TSchema extends Document = Document> {
     if (!Array.isArray(docs)) {
       throw new MongoInvalidArgumentError('Argument "docs" must be an array of documents');
     }
-    options = options ?? {};
+    options = resolveOptions(this, options ?? {});
 
     const acknowledged = WriteConcern.fromOptions(options)?.w !== 0;
 
@@ -362,7 +362,14 @@ export class Collection<TSchema extends Document = Document> {
       throw new MongoInvalidArgumentError('Argument "operations" must be an array of documents');
     }
 
-    options = options ?? {};
+    options = resolveOptions(this, options ?? {});
+
+    // TODO(NODE-7071): remove once the client doesn't need to be connected to construct
+    // bulk operations
+    const isConnected = this.client.topology != null;
+    if (!isConnected) {
+      await autoConnect(this.client);
+    }
 
     // Create the bulk operation
     const bulk: BulkOperationBase =
@@ -371,8 +378,8 @@ export class Collection<TSchema extends Document = Document> {
         : this.initializeOrderedBulkOp(options);
 
     // for each op go through and add to the bulk
-    for (let i = 0; i < operations.length; i++) {
-      bulk.raw(operations[i]);
+    for (const operation of operations) {
+      bulk.raw(operation);
     }
 
     // Execute the bulk
