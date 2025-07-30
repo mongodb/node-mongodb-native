@@ -38,11 +38,6 @@ describe('abstract operation', function () {
         correctCommandName: 'aggregate'
       },
       {
-        subclassCreator: () => new mongodb.CollectionsOperation(db, {}),
-        subclassType: mongodb.CollectionsOperation,
-        correctCommandName: 'listCollections'
-      },
-      {
         subclassCreator: () => new mongodb.CountOperation(collection.fullNamespace, { a: 1 }, {}),
         subclassType: mongodb.CountOperation,
         correctCommandName: 'count'
@@ -156,11 +151,6 @@ describe('abstract operation', function () {
         correctCommandName: 'insert'
       },
       {
-        subclassCreator: () => new mongodb.IsCappedOperation(collection, {}),
-        subclassType: mongodb.IsCappedOperation,
-        correctCommandName: 'listCollections'
-      },
-      {
         subclassCreator: () =>
           new mongodb.KillCursorsOperation(
             Long.fromNumber(1),
@@ -180,11 +170,6 @@ describe('abstract operation', function () {
         subclassCreator: () => new mongodb.ListDatabasesOperation(db, {}),
         subclassType: mongodb.ListDatabasesOperation,
         correctCommandName: 'listDatabases'
-      },
-      {
-        subclassCreator: () => new mongodb.OptionsOperation(collection, {}),
-        subclassType: mongodb.OptionsOperation,
-        correctCommandName: 'listCollections'
       },
       {
         subclassCreator: () => new mongodb.ProfilingLevelOperation(db, {}),

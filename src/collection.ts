@@ -16,7 +16,7 @@ import {
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
-import { MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
+import { MongoAPIError, MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Abortable,
@@ -70,9 +70,7 @@ import {
   type InsertOneOptions,
   type InsertOneResult
 } from './operations/insert';
-import { IsCappedOperation } from './operations/is_capped';
 import type { Hint, OperationOptions } from './operations/operation';
-import { OptionsOperation } from './operations/options_operation';
 import { RenameOperation, type RenameOptions } from './operations/rename';
 import {
   CreateSearchIndexesOperation,
@@ -591,10 +589,16 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async options(options?: OperationOptions): Promise<Document> {
-    return await executeOperation(
-      this.client,
-      new OptionsOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
+    options = resolveOptions(this, options);
+    const [collection] = await this.s.db
+      .listCollections({ name: this.collectionName }, { ...options, nameOnly: false })
+      .toArray();
+
+    if (collection == null || collection.options == null) {
+      throw new MongoAPIError(`collection ${this.namespace} not found`);
+    }
+
+    return collection.options;
   }
 
   /**
@@ -603,10 +607,8 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async isCapped(options?: OperationOptions): Promise<boolean> {
-    return await executeOperation(
-      this.client,
-      new IsCappedOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
+    const collectionOptions = await this.options(options);
+    return Boolean(collectionOptions?.isCapped);
   }
 
   /**
