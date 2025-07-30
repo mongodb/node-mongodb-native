@@ -607,8 +607,8 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async isCapped(options?: OperationOptions): Promise<boolean> {
-    const collectionOptions = await this.options(options);
-    return Boolean(collectionOptions?.isCapped);
+    const { capped } = await this.options(options);
+    return Boolean(capped);
   }
 
   /**
