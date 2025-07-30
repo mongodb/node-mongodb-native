@@ -38,12 +38,6 @@ describe('abstract operation', function () {
         correctCommandName: 'aggregate'
       },
       {
-        subclassCreator: () =>
-          new mongodb.BulkWriteOperation(collection, [{ insertOne: { document: { a: 1 } } }], {}),
-        subclassType: mongodb.BulkWriteOperation,
-        correctCommandName: 'bulkWrite'
-      },
-      {
         subclassCreator: () => new mongodb.CollectionsOperation(db, {}),
         subclassType: mongodb.CollectionsOperation,
         correctCommandName: 'listCollections'
@@ -159,11 +153,6 @@ describe('abstract operation', function () {
       {
         subclassCreator: () => new mongodb.InsertOneOperation(collection, { a: 1 }, {}),
         subclassType: mongodb.InsertOneOperation,
-        correctCommandName: 'insert'
-      },
-      {
-        subclassCreator: () => new mongodb.InsertManyOperation(collection, [{ a: 1 }], {}),
-        subclassType: mongodb.InsertManyOperation,
         correctCommandName: 'insert'
       },
       {

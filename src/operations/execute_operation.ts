@@ -129,7 +129,7 @@ export async function executeOperation<
  * Connects a client if it has not yet been connected
  * @internal
  */
-async function autoConnect(client: MongoClient): Promise<Topology> {
+export async function autoConnect(client: MongoClient): Promise<Topology> {
   if (client.topology == null) {
     if (client.s.hasBeenClosed) {
       throw new MongoNotConnectedError('Client must be connected before running operations');

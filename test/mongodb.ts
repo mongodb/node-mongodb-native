@@ -163,7 +163,6 @@ export * from '../src/mongo_client';
 export * from '../src/mongo_logger';
 export * from '../src/mongo_types';
 export * from '../src/operations/aggregate';
-export * from '../src/operations/bulk_write';
 export * from '../src/operations/client_bulk_write/command_builder';
 export * from '../src/operations/client_bulk_write/common';
 export * from '../src/operations/client_bulk_write/results_merger';

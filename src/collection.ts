@@ -1,5 +1,10 @@
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
-import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
+import type {
+  AnyBulkWriteOperation,
+  BulkOperationBase,
+  BulkWriteOptions,
+  BulkWriteResult
+} from './bulk/common';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
@@ -24,7 +29,6 @@ import type {
   WithoutId
 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
-import { BulkWriteOperation } from './operations/bulk_write';
 import { CountOperation, type CountOptions } from './operations/count';
 import {
   DeleteManyOperation,
@@ -38,7 +42,7 @@ import {
   EstimatedDocumentCountOperation,
   type EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
-import { executeOperation } from './operations/execute_operation';
+import { autoConnect, executeOperation } from './operations/execute_operation';
 import type { FindOptions } from './operations/find';
 import {
   FindOneAndDeleteOperation,
@@ -61,7 +65,6 @@ import {
   type ListIndexesOptions
 } from './operations/indexes';
 import {
-  InsertManyOperation,
   type InsertManyResult,
   InsertOneOperation,
   type InsertOneOptions,
@@ -305,14 +308,31 @@ export class Collection<TSchema extends Document = Document> {
     docs: ReadonlyArray<OptionalUnlessRequiredId<TSchema>>,
     options?: BulkWriteOptions
   ): Promise<InsertManyResult<TSchema>> {
-    return await executeOperation(
-      this.client,
-      new InsertManyOperation(
-        this as TODO_NODE_3286,
-        docs,
-        resolveOptions(this, options ?? { ordered: true })
-      ) as TODO_NODE_3286
-    );
+    if (!Array.isArray(docs)) {
+      throw new MongoInvalidArgumentError('Argument "docs" must be an array of documents');
+    }
+    options = resolveOptions(this, options ?? {});
+
+    const acknowledged = WriteConcern.fromOptions(options)?.w !== 0;
+
+    try {
+      const res = await this.bulkWrite(
+        docs.map(doc => ({ insertOne: { document: doc } })),
+        options
+      );
+      return {
+        acknowledged,
+        insertedCount: res.insertedCount,
+        insertedIds: res.insertedIds
+      };
+    } catch (err) {
+      if (err && err.message === 'Operation must be an object with an operation key') {
+        throw new MongoInvalidArgumentError(
+          'Collection.insertMany() cannot be called with an array that has null/undefined values'
+        );
+      }
+      throw err;
+    }
   }
 
   /**
@@ -342,14 +362,28 @@ export class Collection<TSchema extends Document = Document> {
       throw new MongoInvalidArgumentError('Argument "operations" must be an array of documents');
     }
 
-    return await executeOperation(
-      this.client,
-      new BulkWriteOperation(
-        this as TODO_NODE_3286,
-        operations,
-        resolveOptions(this, options ?? { ordered: true })
-      )
-    );
+    options = resolveOptions(this, options ?? {});
+
+    // TODO(NODE-7071): remove once the client doesn't need to be connected to construct
+    // bulk operations
+    const isConnected = this.client.topology != null;
+    if (!isConnected) {
+      await autoConnect(this.client);
+    }
+
+    // Create the bulk operation
+    const bulk: BulkOperationBase =
+      options.ordered === false
+        ? this.initializeUnorderedBulkOp(options)
+        : this.initializeOrderedBulkOp(options);
+
+    // for each op go through and add to the bulk
+    for (const operation of operations) {
+      bulk.raw(operation);
+    }
+
+    // Execute the bulk
+    return await bulk.execute({ ...options });
   }
 
   /**

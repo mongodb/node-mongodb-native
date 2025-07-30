@@ -14,13 +14,11 @@ import type { CollationOptions, CommandOperationOptions } from '../operations/co
 import { DeleteOperation, type DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import { AbstractOperation, type Hint } from '../operations/operation';
+import { type Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../operations/update';
-import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
-import type { ClientSession } from '../sessions';
 import { type Sort } from '../sort';
-import { type TimeoutContext } from '../timeout';
+import { TimeoutContext } from '../timeout';
 import {
   applyRetryableWrites,
   getTopology,
@@ -854,40 +852,6 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   timeoutContext?: TimeoutContext;
 }
 
-/**
- * TODO(NODE-4063)
- * BulkWrites merge complexity is implemented in executeCommands
- * This provides a vehicle to treat bulkOperations like any other operation (hence "shim")
- * We would like this logic to simply live inside the BulkWriteOperation class
- * @internal
- */
-export class BulkWriteShimOperation extends AbstractOperation {
-  bulkOperation: BulkOperationBase;
-  constructor(bulkOperation: BulkOperationBase, options: BulkWriteOptions) {
-    super(options);
-    this.bulkOperation = bulkOperation;
-  }
-
-  get commandName(): string {
-    return 'bulkWrite' as const;
-  }
-
-  async execute(
-    _server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<any> {
-    if (this.options.session == null) {
-      // An implicit session could have been created by 'executeOperation'
-      // So if we stick it on finalOptions here, each bulk operation
-      // will use this same session, it'll be passed in the same way
-      // an explicit session would be
-      this.options.session = session;
-    }
-    return await executeCommands(this.bulkOperation, { ...this.options, timeoutContext });
-  }
-}
-
 /** @public */
 export abstract class BulkOperationBase {
   isOrdered: boolean;
@@ -1208,10 +1172,26 @@ export abstract class BulkOperationBase {
     }
 
     this.s.executed = true;
-    const finalOptions = { ...this.s.options, ...options };
-    const operation = new BulkWriteShimOperation(this, finalOptions);
+    const finalOptions = resolveOptions(this.collection, { ...this.s.options, ...options });
 
-    return await executeOperation(this.s.collection.client, operation, finalOptions.timeoutContext);
+    // if there is no timeoutContext provided, create a timeoutContext and use it for
+    // all batches in the bulk operation
+    finalOptions.timeoutContext ??= TimeoutContext.create({
+      session: finalOptions.session,
+      timeoutMS: finalOptions.timeoutMS,
+      serverSelectionTimeoutMS: this.collection.client.s.options.serverSelectionTimeoutMS,
+      waitQueueTimeoutMS: this.collection.client.s.options.waitQueueTimeoutMS
+    });
+
+    if (finalOptions.session == null) {
+      // if there is not an explicit session provided to `execute()`, create
+      // an implicit session and use that for all batches in the bulk operation
+      return await this.collection.client.withSession({ explicit: false }, async session => {
+        return await executeCommands(this, { ...finalOptions, session });
+      });
+    }
+
+    return await executeCommands(this, { ...finalOptions });
   }
 
   /**

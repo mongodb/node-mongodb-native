@@ -1357,38 +1357,23 @@ export async function once<T>(ee: EventEmitter, name: string, options?: Abortabl
 }
 
 export function maybeAddIdToDocuments(
-  coll: Collection,
-  docs: Document[],
+  collection: Collection,
+  document: Document,
   options: { forceServerObjectId?: boolean }
-): Document[];
-export function maybeAddIdToDocuments(
-  coll: Collection,
-  docs: Document,
-  options: { forceServerObjectId?: boolean }
-): Document;
-export function maybeAddIdToDocuments(
-  coll: Collection,
-  docOrDocs: Document[] | Document,
-  options: { forceServerObjectId?: boolean }
-): Document[] | Document {
+): Document {
   const forceServerObjectId =
-    typeof options.forceServerObjectId === 'boolean'
-      ? options.forceServerObjectId
-      : coll.s.db.options?.forceServerObjectId;
+    options.forceServerObjectId ?? collection.s.db.options?.forceServerObjectId ?? false;
 
   // no need to modify the docs if server sets the ObjectId
-  if (forceServerObjectId === true) {
-    return docOrDocs;
+  if (forceServerObjectId) {
+    return document;
   }
 
-  const transform = (doc: Document): Document => {
-    if (doc._id == null) {
-      doc._id = coll.s.pkFactory.createPk();
-    }
+  if (document._id == null) {
+    document._id = collection.s.pkFactory.createPk();
+  }
 
-    return doc;
-  };
-  return Array.isArray(docOrDocs) ? docOrDocs.map(transform) : transform(docOrDocs);
+  return document;
 }
 
 export async function fileIsAccessible(fileName: string, mode?: number) {
