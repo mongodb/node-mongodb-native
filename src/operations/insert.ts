@@ -71,7 +71,7 @@ export interface InsertOneResult<TSchema = Document> {
 
 export class InsertOneOperation extends InsertOperation {
   constructor(collection: Collection, doc: Document, options: InsertOneOptions) {
-    super(collection.s.namespace, maybeAddIdToDocuments(collection, [doc], options), options);
+    super(collection.s.namespace, [maybeAddIdToDocuments(collection, doc, options)], options);
   }
 
   override async execute(
