@@ -435,9 +435,9 @@ export class Db {
    */
   async collections(options?: ListCollectionsOptions): Promise<Collection[]> {
     options = resolveOptions(this, options);
-    const documents = await this.listCollections({}, { ...options, nameOnly: true }).toArray();
+    const collections = await this.listCollections({}, { ...options, nameOnly: true }).toArray();
 
-    return documents
+    return collections
       .filter(
         // Filter collections removing any illegal ones
         ({ name }) => !name.includes('$')
