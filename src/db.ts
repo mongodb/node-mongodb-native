@@ -10,7 +10,6 @@ import { MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { Abortable, TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
-import { CollectionsOperation } from './operations/collections';
 import {
   CreateCollectionOperation,
   type CreateCollectionOptions
@@ -435,10 +434,15 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async collections(options?: ListCollectionsOptions): Promise<Collection[]> {
-    return await executeOperation(
-      this.client,
-      new CollectionsOperation(this, resolveOptions(this, options))
-    );
+    options = resolveOptions(this, options);
+    const collections = await this.listCollections({}, { ...options, nameOnly: true }).toArray();
+
+    return collections
+      .filter(
+        // Filter collections removing any illegal ones
+        ({ name }) => !name.includes('$')
+      )
+      .map(({ name }) => new Collection(this, name, this.s.options));
   }
 
   /**
