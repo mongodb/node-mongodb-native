@@ -131,6 +131,7 @@ export abstract class AbstractOperation<TResult = any> {
   }
 }
 
+/** @internal */
 export abstract class ModernizedOperation<TResult> extends AbstractOperation<TResult> {
   abstract SERVER_COMMAND_RESPONSE_TYPE: typeof MongoDBResponse;
 

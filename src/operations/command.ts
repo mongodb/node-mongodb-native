@@ -185,6 +185,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
   }
 }
 
+/** @internal */
 export abstract class ModernizedCommandOperation<T> extends ModernizedOperation<T> {
   override options: CommandOperationOptions;
   readConcern?: ReadConcern;

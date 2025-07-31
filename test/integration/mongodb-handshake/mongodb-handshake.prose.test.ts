@@ -162,23 +162,25 @@ describe('Handshake Prose Tests', function () {
     let stubCalled = false;
     beforeEach(() => {
       // Mock the server response in a way that saslSupportedMechs array in the hello command response contains an arbitrary string.
-      sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
-        // @ts-expect-error: sinon will place wrappedMethod there
-        const command = Connection.prototype.command.wrappedMethod.bind(this);
-        if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
-          return stub();
-        }
-        return command(ns, cmd, options);
+      sinon
+        .stub(Connection.prototype, 'command')
+        .callsFake(async function (ns, cmd, options, responseType) {
+          // @ts-expect-error: sinon will place wrappedMethod there
+          const command = Connection.prototype.command.wrappedMethod.bind(this);
+          if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+            return stub();
+          }
+          return command(ns, cmd, options, responseType);
 
-        async function stub() {
-          stubCalled = true;
-          const response = await command(ns, cmd, options);
-          return {
-            ...response,
-            saslSupportedMechs: [...(response.saslSupportedMechs ?? []), 'random string']
-          };
-        }
-      });
+          async function stub() {
+            stubCalled = true;
+            const response = await command(ns, cmd, options, responseType);
+            return {
+              ...response,
+              saslSupportedMechs: [...(response.saslSupportedMechs ?? []), 'random string']
+            };
+          }
+        });
     });
 
     afterEach(() => sinon.restore());
