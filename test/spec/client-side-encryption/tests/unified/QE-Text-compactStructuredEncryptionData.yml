@@ -1,10 +1,10 @@
 description: QE-Text-compactStructuredEncryptionData
-schemaVersion: "1.23"
+schemaVersion: "1.25"
 runOnRequirements:
-  # Requires libmongocrypt 1.15.0 for SPM-4158.
   - minServerVersion: "8.2.0" # Server 8.2.0 adds preview support for QE text queries.
     topologies: ["replicaset", "sharded", "load-balanced"] # QE does not support standalone.
-    csfle: true
+    csfle:
+      minLibmongocryptVersion: 1.15.0 # For SPM-4158.
 createEntities:
   - client:
       id: &client "client"
