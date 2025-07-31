@@ -94,7 +94,7 @@
     "express": "^5.1.0",
     "gcp-metadata": "^5.3.0",
     "js-yaml": "^4.1.0",
-    "mocha": "^10.8.2",
+    "mocha": "^11.7.1",
     "mocha-sinon": "^2.1.2",
     "mongodb-client-encryption": "^6.4.0",
     "mongodb-legacy": "^6.1.3",

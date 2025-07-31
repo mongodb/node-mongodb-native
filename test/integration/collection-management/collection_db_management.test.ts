@@ -6,9 +6,10 @@ describe('Collection Management and Db Management', function () {
   let client: MongoClient;
   let db: Db;
 
-  beforeEach(function () {
+  beforeEach(async function () {
     client = this.configuration.newClient();
     db = client.db();
+    await db.dropDatabase();
   });
 
   afterEach(async function () {

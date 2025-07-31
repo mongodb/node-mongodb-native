@@ -1,16 +1,14 @@
 import type { Document } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
 import type { Collection } from '../collection';
-import { MongoInvalidArgumentError, MongoServerError } from '../error';
+import { MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { maybeAddIdToDocuments, type MongoDBNamespace } from '../utils';
-import { WriteConcern } from '../write_concern';
-import { BulkWriteOperation } from './bulk_write';
 import { CommandOperation, type CommandOperationOptions } from './command';
-import { AbstractOperation, Aspect, defineAspects } from './operation';
+import { Aspect, defineAspects } from './operation';
 
 /** @internal */
 export class InsertOperation extends CommandOperation<Document> {
@@ -73,7 +71,7 @@ export interface InsertOneResult<TSchema = Document> {
 
 export class InsertOneOperation extends InsertOperation {
   constructor(collection: Collection, doc: Document, options: InsertOneOptions) {
-    super(collection.s.namespace, maybeAddIdToDocuments(collection, [doc], options), options);
+    super(collection.s.namespace, [maybeAddIdToDocuments(collection, doc, options)], options);
   }
 
   override async execute(
@@ -105,62 +103,5 @@ export interface InsertManyResult<TSchema = Document> {
   insertedIds: { [key: number]: InferIdType<TSchema> };
 }
 
-/** @internal */
-export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
-  override options: BulkWriteOptions;
-  collection: Collection;
-  docs: ReadonlyArray<Document>;
-
-  constructor(collection: Collection, docs: ReadonlyArray<Document>, options: BulkWriteOptions) {
-    super(options);
-
-    if (!Array.isArray(docs)) {
-      throw new MongoInvalidArgumentError('Argument "docs" must be an array of documents');
-    }
-
-    this.options = options;
-    this.collection = collection;
-    this.docs = docs;
-  }
-
-  override get commandName() {
-    return 'insert' as const;
-  }
-
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<InsertManyResult> {
-    const coll = this.collection;
-    const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
-    const writeConcern = WriteConcern.fromOptions(options);
-    const bulkWriteOperation = new BulkWriteOperation(
-      coll,
-      this.docs.map(document => ({
-        insertOne: { document }
-      })),
-      options
-    );
-
-    try {
-      const res = await bulkWriteOperation.execute(server, session, timeoutContext);
-      return {
-        acknowledged: writeConcern?.w !== 0,
-        insertedCount: res.insertedCount,
-        insertedIds: res.insertedIds
-      };
-    } catch (err) {
-      if (err && err.message === 'Operation must be an object with an operation key') {
-        throw new MongoInvalidArgumentError(
-          'Collection.insertMany() cannot be called with an array that has null/undefined values'
-        );
-      }
-      throw err;
-    }
-  }
-}
-
 defineAspects(InsertOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
 defineAspects(InsertOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(InsertManyOperation, [Aspect.WRITE_OPERATION]);

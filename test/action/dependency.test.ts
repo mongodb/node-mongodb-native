@@ -91,7 +91,7 @@ describe('package.json', function () {
 
       context(`when ${depName} is installed`, () => {
         beforeEach(async function () {
-          execSync(`npm install --no-save "${depName}"@"${depMajor}"`);
+          execSync(`npm install --no-save -D "${depName}"@"${depMajor}"`);
         });
 
         it(`driver is importable`, () => {

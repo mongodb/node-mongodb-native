@@ -10,14 +10,10 @@ import { MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { Abortable, TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
-import { CollectionsOperation } from './operations/collections';
+import { type CreateCollectionOptions, createCollections } from './operations/create_collection';
 import {
-  CreateCollectionOperation,
-  type CreateCollectionOptions
-} from './operations/create_collection';
-import {
-  DropCollectionOperation,
   type DropCollectionOptions,
+  dropCollections,
   DropDatabaseOperation,
   type DropDatabaseOptions
 } from './operations/drop';
@@ -242,10 +238,8 @@ export class Db {
     name: string,
     options?: CreateCollectionOptions
   ): Promise<Collection<TSchema>> {
-    return await executeOperation(
-      this.client,
-      new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_3286
-    );
+    options = resolveOptions(this, options);
+    return await createCollections<TSchema>(this, name, options);
   }
 
   /**
@@ -411,10 +405,8 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async dropCollection(name: string, options?: DropCollectionOptions): Promise<boolean> {
-    return await executeOperation(
-      this.client,
-      new DropCollectionOperation(this, name, resolveOptions(this, options))
-    );
+    options = resolveOptions(this, options);
+    return await dropCollections(this, name, options);
   }
 
   /**
@@ -435,10 +427,15 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async collections(options?: ListCollectionsOptions): Promise<Collection[]> {
-    return await executeOperation(
-      this.client,
-      new CollectionsOperation(this, resolveOptions(this, options))
-    );
+    options = resolveOptions(this, options);
+    const collections = await this.listCollections({}, { ...options, nameOnly: true }).toArray();
+
+    return collections
+      .filter(
+        // Filter collections removing any illegal ones
+        ({ name }) => !name.includes('$')
+      )
+      .map(({ name }) => new Collection(this, name, this.s.options));
   }
 
   /**
