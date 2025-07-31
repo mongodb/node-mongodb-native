@@ -1,12 +1,12 @@
 import { type Connection, type MongoError } from '../..';
 import type { Document } from '../../bson';
+import { MongoDBResponse } from '../../cmap/wire_protocol/responses';
 import type { Collection } from '../../collection';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
 import type { ServerCommandOptions } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { type TimeoutContext } from '../../timeout';
 import { ModernizedOperation } from '../operation';
-import { MongoDBResponse } from '../../cmap/wire_protocol/responses'
 
 /** @internal */
 export class DropSearchIndexOperation extends ModernizedOperation<void> {

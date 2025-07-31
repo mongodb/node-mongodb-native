@@ -1,3 +1,4 @@
+import { type Connection } from '..';
 import type { BSONSerializeOptions, Document } from '../bson';
 import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError } from '../error';
@@ -9,14 +10,14 @@ import {
 } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
-import type { Server } from '../sdam/server';
+import type { Server, ServerCommandOptions } from '../sdam/server';
 import { MIN_SECONDARY_WRITE_WIRE_VERSION } from '../sdam/server_selection';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { commandSupportsReadConcern, maxWireVersion, MongoDBNamespace } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
-import { AbstractOperation, Aspect, type OperationOptions } from './operation';
+import { AbstractOperation, Aspect, ModernizedOperation, type OperationOptions } from './operation';
 
 /** @public */
 export interface CollationOptions {
@@ -181,5 +182,95 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     }
 
     return await server.command(this.ns, cmd, options, responseType);
+  }
+}
+
+export abstract class ModernizedCommandOperation<T> extends ModernizedOperation<T> {
+  override options: CommandOperationOptions;
+  readConcern?: ReadConcern;
+  writeConcern?: WriteConcern;
+  explain?: Explain;
+
+  constructor(parent?: OperationParent, options?: CommandOperationOptions) {
+    super(options);
+    this.options = options ?? {};
+
+    // NOTE: this was explicitly added for the add/remove user operations, it's likely
+    //       something we'd want to reconsider. Perhaps those commands can use `Admin`
+    //       as a parent?
+    const dbNameOverride = options?.dbName || options?.authdb;
+    if (dbNameOverride) {
+      this.ns = new MongoDBNamespace(dbNameOverride, '$cmd');
+    } else {
+      this.ns = parent
+        ? parent.s.namespace.withCollection('$cmd')
+        : new MongoDBNamespace('admin', '$cmd');
+    }
+
+    this.readConcern = ReadConcern.fromOptions(options);
+    this.writeConcern = WriteConcern.fromOptions(options);
+
+    if (this.hasAspect(Aspect.EXPLAINABLE)) {
+      this.explain = Explain.fromOptions(options);
+      if (this.explain) validateExplainTimeoutOptions(this.options, this.explain);
+    } else if (options?.explain != null) {
+      throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
+    }
+  }
+
+  override get canRetryWrite(): boolean {
+    if (this.hasAspect(Aspect.EXPLAINABLE)) {
+      return this.explain == null;
+    }
+    return super.canRetryWrite;
+  }
+
+  abstract buildCommandDocument(connection: Connection, session?: ClientSession): Document;
+
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return {
+      ...this.options,
+      ...this.bsonOptions,
+      timeoutContext,
+      readPreference: this.readPreference,
+      session: this.session
+    };
+  }
+
+  override buildCommand(connection: Connection, session?: ClientSession): Document {
+    const command = this.buildCommandDocument(connection, session);
+
+    const serverWireVersion = maxWireVersion(connection);
+    const inTransaction = this.session && this.session.inTransaction();
+
+    if (this.readConcern && commandSupportsReadConcern(command) && !inTransaction) {
+      Object.assign(command, { readConcern: this.readConcern });
+    }
+
+    if (this.trySecondaryWrite && serverWireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION) {
+      command.omitReadPreference = true;
+    }
+
+    if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
+      WriteConcern.apply(command, this.writeConcern);
+    }
+
+    if (
+      this.options.collation &&
+      typeof this.options.collation === 'object' &&
+      !this.hasAspect(Aspect.SKIP_COLLATION)
+    ) {
+      Object.assign(command, { collation: this.options.collation });
+    }
+
+    if (typeof this.options.maxTimeMS === 'number') {
+      command.maxTimeMS = this.options.maxTimeMS;
+    }
+
+    if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
+      return decorateWithExplain(command, this.explain);
+    }
+
+    return command;
   }
 }

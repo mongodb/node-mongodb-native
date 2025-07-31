@@ -279,6 +279,8 @@ async function tryOperation<
       }
     }
 
+    operation.server = server;
+
     try {
       // If tries > 0 and we are command batching we need to reset the batch.
       if (tries > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
