@@ -1,0 +1,221 @@
+description: QE-Text-suffixPreview
+schemaVersion: "1.25"
+runOnRequirements:
+  - minServerVersion: "8.2.0" # Server 8.2.0 adds preview support for QE text queries.
+    topologies: ["replicaset", "sharded", "load-balanced"] # QE does not support standalone.
+    csfle:
+      minLibmongocryptVersion: 1.15.0 # For SPM-4158.
+createEntities:
+  - client:
+      id: &client "client"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &db "db"
+      client: *client
+      databaseName: *db
+  - collection:
+      id: &coll "coll"
+      database: *db
+      collectionName: *coll
+initialData:
+  # Insert data encryption key:
+  - databaseName: keyvault
+    collectionName: datakeys
+    documents:
+      [
+        {
+          "_id": &keyid { "$binary": { "base64": "q83vqxI0mHYSNBI0VniQEg==", "subType": "04" } },
+          "keyMaterial":
+            {
+              "$binary":
+                {
+                  "base64": "HBk9BWihXExNDvTp1lUxOuxuZK2Pe2ZdVdlsxPEBkiO1bS4mG5NNDsQ7zVxJAH8BtdOYp72Ku4Y3nwc0BUpIKsvAKX4eYXtlhv5zUQxWdeNFhg9qK7qb8nqhnnLeT0f25jFSqzWJoT379hfwDeu0bebJHr35QrJ8myZdPMTEDYF08QYQ48ShRBli0S+QzBHHAQiM2iJNr4svg2WR8JSeWQ==",
+                  "subType": "00",
+                },
+            },
+          "creationDate": { "$date": { "$numberLong": "1648914851981" } },
+          "updateDate": { "$date": { "$numberLong": "1648914851981" } },
+          "status": { "$numberInt": "0" },
+          "masterKey": { "provider": "local" },
+        },
+      ]
+  # Create encrypted collection:
+  - databaseName: *db
+    collectionName: *coll
+    documents: []
+    createOptions:
+      encryptedFields:
+        {
+          "fields":
+            [
+              {
+                "keyId": *keyid,
+                "path": "encryptedText",
+                "bsonType": "string",
+                "queries": [
+                    # Use zero contention for deterministic __safeContent__:
+                    {
+                      "queryType": "suffixPreview",
+                      "contention": { "$numberLong": "0" },
+                      "strMinQueryLength": { "$numberLong": "3" },
+                      "strMaxQueryLength": { "$numberLong": "30" },
+                      "caseSensitive": true,
+                      "diacriticSensitive": true,
+                    },
+                  ],
+              },
+            ],
+        }
+tests:
+  - description: "Insert QE suffixPreview"
+    operations:
+      - name: insertOne
+        arguments:
+          document: { _id: 1, encryptedText: "foobar" }
+        object: *coll
+    expectEvents:
+      - client: "client"
+        events:
+          - commandStartedEvent:
+              command:
+                listCollections: 1
+                filter:
+                  name: *coll
+              commandName: listCollections
+          - commandStartedEvent:
+              command:
+                find: datakeys
+                filter:
+                  {
+                    "$or":
+                      [
+                        "_id": { "$in": [ *keyid ] },
+                        "keyAltNames": { "$in": [] },
+                      ],
+                  }
+                $db: keyvault
+                readConcern: { level: "majority" }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                insert: *coll
+                documents:
+                  - { "_id": 1, "encryptedText": { $$type: "binData" } } # Sends encrypted payload
+                ordered: true
+              commandName: insert
+  - description: "Query with matching $encStrStartsWith"
+    operations:
+      - name: insertOne
+        arguments:
+          document: { _id: 1, encryptedText: "foobar" }
+        object: *coll
+      - name: find
+        arguments:
+          filter:
+            {
+              $expr:
+                { $encStrEndsWith: { input: "$encryptedText", suffix: "bar" } },
+            }
+        object: *coll
+        expectResult:
+          [
+            {
+              "_id": { "$numberInt": "1" },
+              "encryptedText": "foobar",
+              "__safeContent__":
+                [
+                  {
+                    "$binary":
+                      {
+                        "base64": "wpaMBVDjL4bHf9EtSP52PJFzyNn1R19+iNI/hWtvzdk=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "uDCWsucUsJemUP7pmeb+Kd8B9qupVzI8wnLFqX1rkiU=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "W3E1x4bHZ8SEHFz4zwXM0G5Z5WSwBhnxE8x5/qdP6JM=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "6g/TXVDDf6z+ntResIvTKWdmIy4ajQ1rhwdNZIiEG7A=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "hU+u/T3D6dHDpT3d/v5AlgtRoAufCXCAyO2jQlgsnCw=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "vrPnq0AtBIURNgNGA6HJL+5/p5SBWe+qz8505TRo/dE=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "W5pylBxdv2soY2NcBfPiHDVLTS6tx+0ULkI8gysBeFY=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "oWO3xX3x0bYUJGK2S1aPAmlU3Xtfsgb9lTZ6flGAlsg=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "SjZGucTEUbdpd86O8yj1pyMyBOOKxvAQ9C8ngZ9C5UE=",
+                        "subType": "00",
+                      },
+                  },
+                  {
+                    "$binary":
+                      {
+                        "base64": "CEaMZkxVDVbnXr+To0DOyvsva04UQkIYP3KtgYVVwf8=",
+                        "subType": "00",
+                      },
+                  },
+                ],
+            },
+          ]
+
+  - description: "Query with non-matching $encStrEndsWith"
+    operations:
+      - name: insertOne
+        arguments:
+          document: { _id: 1, encryptedText: "foobar" }
+        object: *coll
+      - name: find
+        arguments:
+          filter:
+            {
+              $expr:
+                { $encStrEndsWith: { input: "$encryptedText", suffix: "foo" } },
+            }
+        object: *coll
+        expectResult: []
