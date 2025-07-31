@@ -1,6 +1,6 @@
 {
   "description": "QE-Text-cleanupStructuredEncryptionData",
-  "schemaVersion": "1.23",
+  "schemaVersion": "1.25",
   "runOnRequirements": [
     {
       "minServerVersion": "8.2.0",
@@ -9,7 +9,9 @@
         "sharded",
         "load-balanced"
       ],
-      "csfle": true
+      "csfle": {
+        "minLibmongocryptVersion": "1.15.0"
+      }
     }
   ],
   "createEntities": [
