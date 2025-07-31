@@ -9,8 +9,9 @@ import { MongoCompatibilityError } from '../error';
 import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
+import { TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
+import { executeOperation } from './execute_operation';
 import { CreateIndexesOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
 
@@ -135,79 +136,95 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     const name = this.name;
     const options = this.options;
 
-    const encryptedFields: Document | undefined =
-      options.encryptedFields ??
-      db.client.s.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
-
-    if (encryptedFields) {
-      // Creating a QE collection required min server of 7.0.0
-      // TODO(NODE-5353): Get wire version information from connection.
-      if (
-        !server.loadBalanced &&
-        server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION
-      ) {
-        throw new MongoCompatibilityError(
-          `${INVALID_QE_VERSION} The minimum server version required is ${MIN_SUPPORTED_QE_SERVER_VERSION}`
-        );
-      }
-      // Create auxilliary collections for queryable encryption support.
-      const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
-      const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
-
-      for (const collectionName of [escCollection, ecocCollection]) {
-        const createOp = new CreateCollectionOperation(db, collectionName, {
-          clusteredIndex: {
-            key: { _id: 1 },
-            unique: true
-          }
-        });
-        await createOp.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
-      }
-
-      if (!options.encryptedFields) {
-        this.options = { ...this.options, encryptedFields };
-      }
-    }
-
-    const coll = await this.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
-
-    if (encryptedFields) {
-      // Create the required index for queryable encryption support.
-      const createIndexOp = CreateIndexesOperation.fromIndexSpecification(
-        db,
-        name,
-        { __safeContent__: 1 },
-        {}
-      );
-      await createIndexOp.execute(server, session, timeoutContext);
-    }
-
-    return coll;
-  }
-
-  private async executeWithoutEncryptedFieldsCheck(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<Collection> {
-    const db = this.db;
-    const name = this.name;
-    const options = this.options;
-
     const cmd: Document = { create: name };
-    for (const n in options) {
-      if (
-        (options as any)[n] != null &&
-        typeof (options as any)[n] !== 'function' &&
-        !ILLEGAL_COMMAND_FIELDS.has(n)
-      ) {
-        cmd[n] = (options as any)[n];
+    for (const [option, value] of Object.entries(options)) {
+      if (value != null && typeof value !== 'function' && !ILLEGAL_COMMAND_FIELDS.has(option)) {
+        cmd[option] = value;
       }
     }
+
     // otherwise just execute the command
     await super.executeCommand(server, session, cmd, timeoutContext);
     return new Collection(db, name, options);
   }
+}
+
+export async function createCollections<TSchema extends Document>(
+  db: Db,
+  name: string,
+  options: CreateCollectionOptions
+): Promise<Collection<TSchema>> {
+  const timeoutContext = TimeoutContext.create({
+    session: options.session,
+    serverSelectionTimeoutMS: db.client.s.options.serverSelectionTimeoutMS,
+    waitQueueTimeoutMS: db.client.s.options.waitQueueTimeoutMS,
+    timeoutMS: options.timeoutMS
+  });
+
+  const encryptedFields: Document | undefined =
+    options.encryptedFields ??
+    db.client.s.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
+
+  if (encryptedFields) {
+    class CreateSupportingFLEv2CollectionOperation extends CreateCollectionOperation {
+      override execute(
+        server: Server,
+        session: ClientSession | undefined,
+        timeoutContext: TimeoutContext
+      ): Promise<Collection> {
+        // Creating a QE collection required min server of 7.0.0
+        // TODO(NODE-5353): Get wire version information from connection.
+        if (
+          !server.loadBalanced &&
+          server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION
+        ) {
+          throw new MongoCompatibilityError(
+            `${INVALID_QE_VERSION} The minimum server version required is ${MIN_SUPPORTED_QE_SERVER_VERSION}`
+          );
+        }
+
+        return super.execute(server, session, timeoutContext);
+      }
+    }
+
+    // Create auxilliary collections for queryable encryption support.
+    const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
+    const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
+
+    for (const collectionName of [escCollection, ecocCollection]) {
+      const createOp = new CreateSupportingFLEv2CollectionOperation(db, collectionName, {
+        clusteredIndex: {
+          key: { _id: 1 },
+          unique: true
+        },
+        session: options.session
+      });
+      await executeOperation(db.client, createOp, timeoutContext);
+    }
+
+    if (!options.encryptedFields) {
+      options = { ...options, encryptedFields };
+    }
+  }
+
+  const coll = await executeOperation(
+    db.client,
+    new CreateCollectionOperation(db, name, options),
+    timeoutContext
+  );
+
+  if (encryptedFields) {
+    // Create the required index for queryable encryption support.
+    const createIndexOp = CreateIndexesOperation.fromIndexSpecification(
+      db,
+      name,
+      { __safeContent__: 1 },
+      { session: options.session }
+    );
+    await executeOperation(db.client, createIndexOp, timeoutContext);
+  }
+
+  return coll as unknown as Collection<TSchema>;
 }
 
 defineAspects(CreateCollectionOperation, [Aspect.WRITE_OPERATION]);
