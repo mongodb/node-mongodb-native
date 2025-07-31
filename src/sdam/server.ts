@@ -304,7 +304,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     const options = operation.buildOptions(timeoutContext);
     const ns = operation.ns;
 
-    if (this.loadBalanced && isPinnableCommand(cmd, session)) {
+    if (this.loadBalanced && isPinnableCommand(cmd, session) && !session?.pinnedConnection) {
       session?.pin(conn);
     }
 

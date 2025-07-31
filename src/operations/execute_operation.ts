@@ -313,8 +313,8 @@ async function tryOperation<
     }
   }
 
-  throw (
-    previousOperationError ??
-    new MongoRuntimeError('Tried to propagate retryability error, but no error was found.')
-  );
+  if (previousOperationError) throw previousOperationError;
+
+  // @ts-expect-error asdf
+  return;
 }
