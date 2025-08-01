@@ -36,6 +36,7 @@ export class DropSearchIndexOperation extends ModernizedOperation<void> {
     if (typeof this.name === 'string') {
       command.name = this.name;
     }
+
     return command;
   }
 

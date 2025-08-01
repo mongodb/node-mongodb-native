@@ -144,8 +144,14 @@ export abstract class ModernizedOperation<TResult> extends AbstractOperation<TRe
     throw new Error('cannot execute!!');
   }
 
+  /**
+   * Build a raw command document.
+   */
   abstract buildCommand(connection: Connection, session?: ClientSession): Document;
 
+  /**
+   * Builds an instance of `ServerCommandOptions` to be used for operation execution.
+   */
   abstract buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions;
 
   /**
@@ -168,10 +174,12 @@ export abstract class ModernizedOperation<TResult> extends AbstractOperation<TRe
   }
 
   /**
-   * Optional - if the operation performs error handling, such as wrapping or renaming the error,
+   * Optional.
+   *
+   * If the operation performs error handling, such as wrapping, renaming the error, or squashing errors
    * this method can be overridden.
    */
-  handleError(error: MongoError): void {
+  handleError(error: MongoError): TResult | never {
     throw error;
   }
 }

@@ -295,7 +295,7 @@ async function tryOperation<
         const result = await server.modernCommand(operation, timeoutContext);
         return operation.handleOk(result);
       } catch (error) {
-        operation.handleError(error);
+        return operation.handleError(error);
       }
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;
@@ -313,8 +313,8 @@ async function tryOperation<
     }
   }
 
-  if (previousOperationError) throw previousOperationError;
-
-  // @ts-expect-error asdf
-  return;
+  throw (
+    previousOperationError ??
+    new MongoRuntimeError('Tried to propagate retryability error, but no error was found.')
+  );
 }
