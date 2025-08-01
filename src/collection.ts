@@ -43,7 +43,7 @@ import {
   type EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
 import { autoConnect, executeOperation } from './operations/execute_operation';
-import type { FindOptions } from './operations/find';
+import { type FindOneOptions, type FindOptions } from './operations/find';
 import {
   FindOneAndDeleteOperation,
   type FindOneAndDeleteOptions,
@@ -536,7 +536,7 @@ export class Collection<TSchema extends Document = Document> {
   async findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
   async findOne(
     filter: Filter<TSchema>,
-    options: Omit<FindOptions, 'timeoutMode'> & Abortable
+    options: Omit<FindOneOptions, 'timeoutMode'> & Abortable
   ): Promise<WithId<TSchema> | null>;
 
   // allow an override of the schema.
@@ -544,17 +544,22 @@ export class Collection<TSchema extends Document = Document> {
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
   async findOne<T = TSchema>(
     filter: Filter<TSchema>,
-    options?: Omit<FindOptions, 'timeoutMode'> & Abortable
+    options?: Omit<FindOneOptions, 'timeoutMode'> & Abortable
   ): Promise<T | null>;
 
   async findOne(
     filter: Filter<TSchema> = {},
-    options: FindOptions & Abortable = {}
+    options: Omit<FindOneOptions, 'timeoutMode'> & Abortable = {}
   ): Promise<WithId<TSchema> | null> {
-    const cursor = this.find(filter, options).limit(-1).batchSize(1);
-    const res = await cursor.next();
+    // Explicitly set the limit to 1 and singleBatch to true for all commands, per the spec.
+    // noCursorTimeout must be unset as well as batchSize.
+    // See: https://github.com/mongodb/specifications/blob/master/source/crud/crud.md#findone-api-details
+    const { batchSize: _batchSize, noCursorTimeout: _noCursorTimeout, ...opts } = options;
+    opts.singleBatch = true;
+    const cursor = this.find(filter, opts).limit(1);
+    const result = await cursor.next();
     await cursor.close();
-    return res;
+    return result;
   }
 
   /**
