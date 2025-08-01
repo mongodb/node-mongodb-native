@@ -185,7 +185,12 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
   }
 
   if (typeof options.limit === 'number') {
-    findCommand.limit = options.limit;
+    if (options.limit < 0) {
+      findCommand.limit = -options.limit;
+      findCommand.singleBatch = true;
+    } else {
+      findCommand.limit = options.limit;
+    }
   }
 
   if (typeof options.batchSize === 'number') {
