@@ -248,8 +248,9 @@ async function tryOperation<
       if (hasWriteAspect && !isRetryableWriteError(previousOperationError))
         throw previousOperationError;
 
-      if (hasReadAspect && !isRetryableReadError(previousOperationError))
+      if (hasReadAspect && !isRetryableReadError(previousOperationError)) {
         throw previousOperationError;
+      }
 
       if (
         previousOperationError instanceof MongoNetworkError &&

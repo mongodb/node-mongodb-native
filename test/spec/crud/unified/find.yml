@@ -105,3 +105,31 @@ tests:
           - { _id: 2, x: 22 }
           - { _id: 3, x: 33 }
           - { _id: 4, x: 44 }
+  -
+    description: 'Find with batchSize equal to limit'
+    operations:
+      -
+        object: *collection0
+        name: find
+        arguments:
+          filter: { _id: { $gt: 1 } }
+          sort: { _id: 1 }
+          limit: 4
+          batchSize: 4
+        expectResult:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+          - { _id: 4, x: 44 }
+          - { _id: 5, x: 55 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: { $gt: 1 } }
+                limit: 4
+                # Drivers use limit + 1 for batchSize to ensure the server closes the cursor
+                batchSize: 5
+              commandName: find
+              databaseName: *database0Name
