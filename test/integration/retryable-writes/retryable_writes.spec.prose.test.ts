@@ -275,14 +275,13 @@ describe('Retryable Writes Spec Prose', () => {
       'when a retry attempt fails with an error labeled NoWritesPerformed, drivers MUST return the original error',
       { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
       async () => {
-        const serverCommandStub = sinon.stub(Server.prototype, 'command');
-        serverCommandStub.onCall(0).returns(
-          Promise.reject(
-            new MongoWriteConcernError({
-              errorLabels: ['RetryableWriteError'],
-              writeConcernError: { errmsg: 'ShutdownInProgress error', code: 91 }
-            })
-          )
+        const serverCommandStub = sinon.stub(Server.prototype, 'modernCommand');
+        serverCommandStub.onCall(0).rejects(
+          new MongoWriteConcernError({
+            errorLabels: ['RetryableWriteError'],
+            writeConcernError: { errmsg: 'ShutdownInProgress error', code: 91 },
+            ok: 1
+          })
         );
         serverCommandStub.onCall(1).returns(
           Promise.reject(

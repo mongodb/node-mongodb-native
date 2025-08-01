@@ -1,7 +1,9 @@
+import { type Connection, type MongoError } from '..';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
+import { type MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { type Abortable } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
-import type { Server } from '../sdam/server';
+import type { Server, ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
@@ -108,6 +110,10 @@ export abstract class AbstractOperation<TResult = any> {
     return this._session;
   }
 
+  set session(session: ClientSession) {
+    this._session = session;
+  }
+
   clearSession() {
     this._session = undefined;
   }
@@ -122,6 +128,59 @@ export abstract class AbstractOperation<TResult = any> {
 
   get canRetryWrite(): boolean {
     return this.hasAspect(Aspect.RETRYABLE) && this.hasAspect(Aspect.WRITE_OPERATION);
+  }
+}
+
+/** @internal */
+export abstract class ModernizedOperation<TResult> extends AbstractOperation<TResult> {
+  abstract SERVER_COMMAND_RESPONSE_TYPE: typeof MongoDBResponse;
+
+  /** this will never be used - but we must implement it to satisfy AbstractOperation's interface */
+  override execute(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _timeoutContext: TimeoutContext
+  ): Promise<TResult> {
+    throw new Error('cannot execute!!');
+  }
+
+  /**
+   * Build a raw command document.
+   */
+  abstract buildCommand(connection: Connection, session?: ClientSession): Document;
+
+  /**
+   * Builds an instance of `ServerCommandOptions` to be used for operation execution.
+   */
+  abstract buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions;
+
+  /**
+   * Given an instance of a MongoDBResponse, map the response to the correct result type.  For
+   * example, a `CountOperation` might map the response as follows:
+   *
+   * ```typescript
+   *  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+   *    return response.toObject(this.bsonOptions).n ?? 0;
+   *  }
+   *
+   *  // or, with type safety:
+   *  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+   *    return response.getNumber('n') ?? 0;
+   *  }
+   * ```
+   */
+  handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+    return response.toObject(this.bsonOptions) as TResult;
+  }
+
+  /**
+   * Optional.
+   *
+   * If the operation performs error handling, such as wrapping, renaming the error, or squashing errors
+   * this method can be overridden.
+   */
+  handleError(error: MongoError): TResult | never {
+    throw error;
   }
 }
 
