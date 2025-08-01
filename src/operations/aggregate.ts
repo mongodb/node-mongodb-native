@@ -1,14 +1,16 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import { type ExplainOptions } from '../explain';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
-import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import {
+  type CollationOptions,
+  type CommandOperationOptions,
+  ModernizedCommandOperation
+} from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @internal */
@@ -51,7 +53,8 @@ export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain
 }
 
 /** @internal */
-export class AggregateOperation extends CommandOperation<CursorResponse> {
+export class AggregateOperation extends ModernizedCommandOperation<CursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   override options: AggregateOptions;
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
@@ -79,9 +82,7 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
       }
     }
 
-    if (this.hasWriteStage) {
-      this.trySecondaryWrite = true;
-    } else {
+    if (!this.hasWriteStage) {
       delete this.options.writeConcern;
     }
 
@@ -94,6 +95,8 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
     if (options?.cursor != null && typeof options.cursor !== 'object') {
       throw new MongoInvalidArgumentError('Cursor options must be an object');
     }
+
+    this.SERVER_COMMAND_RESPONSE_TYPE = this.explain ? ExplainedCursorResponse : CursorResponse;
   }
 
   override get commandName() {
@@ -108,13 +111,9 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
     this.pipeline.push(stage);
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<CursorResponse> {
-    const options: AggregateOptions = this.options;
-    const serverWireVersion = maxWireVersion(server);
+  override buildCommandDocument(connection: Connection): Document {
+    const options = this.options;
+    const serverWireVersion = maxWireVersion(connection);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
 
     if (this.hasWriteStage && serverWireVersion < MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT) {
@@ -152,13 +151,13 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
       command.cursor.batchSize = options.batchSize;
     }
 
-    return await super.executeCommand(
-      server,
-      session,
-      command,
-      timeoutContext,
-      this.explain ? ExplainedCursorResponse : CursorResponse
-    );
+    return command;
+  }
+
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
   }
 }
 

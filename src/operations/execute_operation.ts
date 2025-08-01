@@ -26,6 +26,7 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { abortable, supportsRetryableWrites } from '../utils';
+import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect, ModernizedOperation } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -192,7 +193,7 @@ async function tryOperation<
     // server selection to potentially force monitor checks if the server is
     // in an unknown state.
     selector = sameServerSelector(operation.server?.description);
-  } else if (operation.trySecondaryWrite) {
+  } else if (operation instanceof AggregateOperation && operation.hasWriteStage) {
     // If operation should try to write to secondary use the custom server selector
     // otherwise provide the read preference.
     selector = secondaryWritableServerSelector(topology.commonWireVersion, readPreference);

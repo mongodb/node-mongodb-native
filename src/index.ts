@@ -10,7 +10,6 @@ import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import type { RunCommandCursor } from './cursor/run_command_cursor';
 import { Db } from './db';
-import { ExplainableCursor } from './explain';
 import { GridFSBucket } from './gridfs';
 import { GridFSBucketReadStream } from './gridfs/download';
 import { GridFSBucketWriteStream } from './gridfs/upload';
@@ -44,6 +43,7 @@ export {
 } from './bulk/common';
 export { ClientEncryption } from './client-side-encryption/client_encryption';
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
+export { ExplainableCursor } from './cursor/explainable_cursor';
 export {
   MongoAPIError,
   MongoAWSError,
@@ -98,7 +98,6 @@ export {
   ClientSession,
   Collection,
   Db,
-  ExplainableCursor,
   FindCursor,
   GridFSBucket,
   GridFSBucketReadStream,
@@ -511,6 +510,7 @@ export type {
   CollationOptions,
   CommandOperation,
   CommandOperationOptions,
+  ModernizedCommandOperation,
   OperationParent
 } from './operations/command';
 export type { CountOptions } from './operations/count';
