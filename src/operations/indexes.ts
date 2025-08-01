@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { type Connection } from '../cmap/connection';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
@@ -12,6 +13,7 @@ import {
   type CollationOptions,
   CommandOperation,
   type CommandOperationOptions,
+  ModernizedCommandOperation,
   type OperationParent
 } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -366,7 +368,8 @@ export type ListIndexesOptions = AbstractCursorOptions & {
 };
 
 /** @internal */
-export class ListIndexesOperation extends CommandOperation<CursorResponse> {
+export class ListIndexesOperation extends ModernizedCommandOperation<CursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -389,12 +392,8 @@ export class ListIndexesOperation extends CommandOperation<CursorResponse> {
     return 'listIndexes' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<CursorResponse> {
-    const serverWireVersion = maxWireVersion(server);
+  override buildCommandDocument(connection: Connection): Document {
+    const serverWireVersion = maxWireVersion(connection);
 
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
 
@@ -406,7 +405,13 @@ export class ListIndexesOperation extends CommandOperation<CursorResponse> {
       command.comment = this.options.comment;
     }
 
-    return await super.executeCommand(server, session, command, timeoutContext, CursorResponse);
+    return command;
+  }
+
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
   }
 }
 
