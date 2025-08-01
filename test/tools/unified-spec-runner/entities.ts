@@ -621,7 +621,9 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const client = new UnifiedMongoClient(uri, entity.client, config);
         try {
           new EntityEventRegistry(client, entity.client, map).register();
+          await client.connect();
         } catch (error) {
+          console.error('failed to connect entity', entity);
           // In the case where multiple clients are defined in the test and any one of them failed
           // to connect, but others did succeed, we need to ensure all open clients are closed.
           const clients = map.mapOf('client');
