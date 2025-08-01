@@ -294,19 +294,6 @@ functions:
             perl -p -i -e "s|ABSOLUTE_PATH_REPLACEMENT_TOKEN|${DRIVERS_TOOLS}|g" $filename
           done
 
-  "windows fix":
-    - command: shell.exec
-      params:
-        silent: true
-        script: |
-          ${PREPARE_SHELL}
-          # for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
-          #   cat $i | tr -d '\r' > $i.new
-          #   mv $i.new $i
-          # done
-          # Copy client certificate because symlinks do not work on Windows.
-          cp ${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem ${MONGO_ORCHESTRATION_HOME}/lib/client.pem
-
   "make files executable":
     - command: shell.exec
       params:
@@ -993,6 +980,7 @@ tasks:
           args:
             - .evergreen/run-search-index-management-tests.sh
 
+task_groups:
   - name: test_gcpkms_task_group
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800 # 30 minutes
@@ -1255,7 +1243,6 @@ tasks:
 
 pre:
   - func: "fetch source"
-  - func: "windows fix"
   - func: "fix absolute paths"
   - func: "make files executable"
 
