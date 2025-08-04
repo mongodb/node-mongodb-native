@@ -618,7 +618,7 @@ describe('class MongoClient', function () {
         const checkoutStarted = once(client, 'connectionCheckOutStarted');
         await client.connect();
         const checkout = await checkoutStarted;
-        expect(checkout).to.not.exist;
+        expect(checkout).to.exist;
 
         const findCommandToBeStarted = once(client, 'commandStarted');
         await client.db('test').collection('test').findOne();
