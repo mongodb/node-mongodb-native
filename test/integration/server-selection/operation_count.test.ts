@@ -70,7 +70,7 @@ describe('Server Operation Count Tests', function () {
     it('is zero after a successful command', loadBalancedTestMetadata, async function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
-      const commandSpy = sinon.spy(server, 'command');
+      const commandSpy = sinon.spy(server, 'modernCommand');
 
       await collection.findOne({ count: 1 });
 
@@ -84,7 +84,7 @@ describe('Server Operation Count Tests', function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
 
-      const commandSpy = sinon.spy(server, 'command');
+      const commandSpy = sinon.spy(server, 'modernCommand');
 
       const error = await collection.findOne({ count: 1 }).catch(e => e);
 
@@ -104,7 +104,7 @@ describe('Server Operation Count Tests', function () {
         sinon
           .stub(ConnectionPool.prototype, 'checkOut')
           .rejects(new Error('unable to checkout connection'));
-        const commandSpy = sinon.spy(server, 'command');
+        const commandSpy = sinon.spy(server, 'modernCommand');
 
         const error = await collection.findOne({ count: 1 }).catch(e => e);
 
