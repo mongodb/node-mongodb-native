@@ -843,32 +843,6 @@ describe('When executing an operation for the first time', () => {
     });
 
     describe(
-      'when the server requires auth and ping is delayed',
-      { requires: { auth: 'enabled', mongodb: '>=4.4' } },
-      function () {
-        beforeEach(async function () {
-          // set failpoint to delay ping
-          // create new util client to avoid affecting the test client
-          const utilClient = this.configuration.newClient();
-          await utilClient.db('admin').command({
-            configureFailPoint: 'failCommand',
-            mode: { times: 1 },
-            data: { failCommands: ['ping'], blockConnection: true, blockTimeMS: 1000 }
-          } as FailPoint);
-          await utilClient.close();
-        });
-
-        it('timeoutMS from the client is not used for the internal `ping`', async function () {
-          const start = performance.now();
-          const returnedClient = await client.connect();
-          const end = performance.now();
-          expect(returnedClient).to.equal(client);
-          expect(end - start).to.be.within(1000, 1500); // timeoutMS is 1000, did not apply.
-        });
-      }
-    );
-
-    describe(
       'when server selection takes longer than the timeout',
       { requires: { auth: 'enabled', mongodb: '>=4.4' } },
       function () {

@@ -615,15 +615,15 @@ describe('class MongoClient', function () {
       'permits operations to be run after connect is called',
       { requires: { auth: 'enabled' } },
       async function () {
-        const pingCommandToBeStarted = once(client, 'commandStarted');
+        const checkoutStarted = once(client, 'connectionCheckOutStarted');
         await client.connect();
-        const [pingOnConnect] = await pingCommandToBeStarted;
+        const checkout = await checkoutStarted;
+        expect(checkout).to.not.exist;
 
         const findCommandToBeStarted = once(client, 'commandStarted');
         await client.db('test').collection('test').findOne();
         const [findCommandStarted] = await findCommandToBeStarted;
 
-        expect(pingOnConnect).to.have.property('commandName', 'ping');
         expect(findCommandStarted).to.have.property('commandName', 'find');
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       }
