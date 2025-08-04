@@ -1,5 +1,7 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
@@ -7,12 +9,13 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { maybeAddIdToDocuments, type MongoDBNamespace } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
-
 /** @internal */
-export class InsertOperation extends CommandOperation<Document> {
+export class InsertOperation extends ModernizedCommandOperation<Document> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: BulkWriteOptions;
+
   documents: Document[];
 
   constructor(ns: MongoDBNamespace, documents: Document[], options: BulkWriteOptions) {
@@ -26,11 +29,7 @@ export class InsertOperation extends CommandOperation<Document> {
     return 'insert' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<Document> {
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -49,7 +48,7 @@ export class InsertOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
-    return await super.executeCommand(server, session, command, timeoutContext);
+    return command;
   }
 }
 
@@ -80,6 +79,20 @@ export class InsertOneOperation extends InsertOperation {
     timeoutContext: TimeoutContext
   ): Promise<InsertOneResult> {
     const res = await super.execute(server, session, timeoutContext);
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) {
+      // This should be a WriteError but we can't change it now because of error hierarchy
+      throw new MongoServerError(res.writeErrors[0]);
+    }
+
+    return {
+      acknowledged: this.writeConcern?.w !== 0,
+      insertedId: this.documents[0]._id
+    };
+  }
+
+  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
+    const res = super.handleOk(response);
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) {
       // This should be a WriteError but we can't change it now because of error hierarchy

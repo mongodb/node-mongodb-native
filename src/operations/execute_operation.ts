@@ -26,7 +26,7 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { abortable, supportsRetryableWrites } from '../utils';
-import { AbstractOperation, Aspect } from './operation';
+import { AbstractOperation, Aspect, ModernizedOperation } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -84,6 +84,8 @@ export async function executeOperation<
   } else if (session.client !== client) {
     throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');
   }
+
+  operation.session ??= session;
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
@@ -231,6 +233,8 @@ async function tryOperation<
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 
+  const isModernOperation = operation instanceof ModernizedOperation;
+
   for (let tries = 0; tries < maxTries; tries++) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
@@ -276,12 +280,24 @@ async function tryOperation<
       }
     }
 
+    operation.server = server;
+
     try {
       // If tries > 0 and we are command batching we need to reset the batch.
       if (tries > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
         operation.resetBatch();
       }
-      return await operation.execute(server, session, timeoutContext);
+
+      if (!isModernOperation) {
+        return await operation.execute(server, session, timeoutContext);
+      }
+
+      try {
+        const result = await server.modernCommand(operation, timeoutContext);
+        return operation.handleOk(result);
+      } catch (error) {
+        return operation.handleError(error);
+      }
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;
       if (
