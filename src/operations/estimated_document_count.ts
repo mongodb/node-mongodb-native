@@ -1,9 +1,9 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -16,8 +16,15 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
   maxTimeMS?: number;
 }
 
+class EstimatedDocumentCountResponse extends MongoDBResponse {
+  get n(): number {
+    return this.getNumber('n') ?? 0;
+  }
+}
+
 /** @internal */
-export class EstimatedDocumentCountOperation extends CommandOperation<number> {
+export class EstimatedDocumentCountOperation extends ModernizedCommandOperation<number> {
+  override SERVER_COMMAND_RESPONSE_TYPE = EstimatedDocumentCountResponse;
   override options: EstimatedDocumentCountOptions;
   collectionName: string;
 
@@ -31,11 +38,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     return 'count' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<number> {
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     const cmd: Document = { count: this.collectionName };
 
     if (typeof this.options.maxTimeMS === 'number') {
@@ -48,9 +51,11 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
       cmd.comment = this.options.comment;
     }
 
-    const response = await super.executeCommand(server, session, cmd, timeoutContext);
+    return cmd;
+  }
 
-    return response?.n || 0;
+  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): number {
+    return response.n;
   }
 }
 
