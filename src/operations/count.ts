@@ -1,10 +1,10 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -21,8 +21,15 @@ export interface CountOptions extends CommandOperationOptions {
   hint?: string | Document;
 }
 
+class CountResponse extends MongoDBResponse {
+  get n(): number {
+    return this.getNumber('n') ?? 0;
+  }
+}
+
 /** @internal */
-export class CountOperation extends CommandOperation<number> {
+export class CountOperation extends ModernizedCommandOperation<number> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CountResponse;
   override options: CountOptions;
   collectionName?: string;
   query: Document;
@@ -39,35 +46,33 @@ export class CountOperation extends CommandOperation<number> {
     return 'count' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<number> {
-    const options = this.options;
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     const cmd: Document = {
       count: this.collectionName,
       query: this.query
     };
 
-    if (typeof options.limit === 'number') {
-      cmd.limit = options.limit;
+    if (typeof this.options.limit === 'number') {
+      cmd.limit = this.options.limit;
     }
 
-    if (typeof options.skip === 'number') {
-      cmd.skip = options.skip;
+    if (typeof this.options.skip === 'number') {
+      cmd.skip = this.options.skip;
     }
 
-    if (options.hint != null) {
-      cmd.hint = options.hint;
+    if (this.options.hint != null) {
+      cmd.hint = this.options.hint;
     }
 
-    if (typeof options.maxTimeMS === 'number') {
-      cmd.maxTimeMS = options.maxTimeMS;
+    if (typeof this.options.maxTimeMS === 'number') {
+      cmd.maxTimeMS = this.options.maxTimeMS;
     }
 
-    const result = await super.executeCommand(server, session, cmd, timeoutContext);
-    return result ? result.n : 0;
+    return cmd;
+  }
+
+  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): number {
+    return response.n;
   }
 }
 
