@@ -18,7 +18,7 @@ import {
   ServerDescription,
   Topology
 } from '../../mongodb';
-import { clearFailPoint, configureFailPoint, runLater } from '../../tools/utils';
+import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('class MongoClient', function () {
@@ -603,10 +603,12 @@ describe('class MongoClient', function () {
       'does not checkout connection when authentication is disabled',
       { requires: { auth: 'disabled' } },
       async function () {
-        const checkoutStarted = once(client, 'connectionCheckOutStarted');
+        const checkoutStartedEvents = [];
+        client.on('connectionCheckOutStarted', event => {
+          checkoutStartedEvents.push(event);
+        });
         await client.connect();
-        const checkout = await checkoutStarted;
-        expect(checkout).to.not.exist;
+        expect(checkoutStartedEvents).to.be.empty;
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       }
     );
