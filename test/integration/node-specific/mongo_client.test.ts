@@ -588,30 +588,25 @@ describe('class MongoClient', function () {
     });
 
     it(
-      'creates topology and send ping when auth is enabled',
+      'creates topology and checks out connection when auth is enabled',
       { requires: { auth: 'enabled' } },
       async function () {
-        const commandToBeStarted = once(client, 'commandStarted');
+        const checkoutStarted = once(client, 'connectionCheckOutStarted');
         await client.connect();
-        const [pingOnConnect] = await commandToBeStarted;
-        expect(pingOnConnect).to.have.property('commandName', 'ping');
+        const checkout = await checkoutStarted;
+        expect(checkout).to.exist;
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       }
     );
 
     it(
-      'does not send ping when authentication is disabled',
+      'does not checkout connection when authentication is disabled',
       { requires: { auth: 'disabled' } },
       async function () {
-        const commandToBeStarted = once(client, 'commandStarted');
+        const checkoutStarted = once(client, 'connectionCheckOutStarted');
         await client.connect();
-        const delayedFind = runLater(async () => {
-          await client.db().collection('test').findOne();
-        }, 300);
-        const [findOneOperation] = await commandToBeStarted;
-        // Proves that the first command started event that is emitted is a find and not a ping
-        expect(findOneOperation).to.have.property('commandName', 'find');
-        await delayedFind;
+        const checkout = await checkoutStarted;
+        expect(checkout).to.not.exist;
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       }
     );
@@ -1186,14 +1181,18 @@ describe('class MongoClient', function () {
 
       const tests = [
         // only skipInitialPing=true will have no events upon connect
-        { description: 'should skip ping command when set to true', value: true, expectEvents: 0 },
         {
-          description: 'should not skip ping command when set to false',
+          description: 'should skip connection checkout when set to true',
+          value: true,
+          expectEvents: 0
+        },
+        {
+          description: 'should not skip connection checkout when set to false',
           value: false,
           expectEvents: 1
         },
         {
-          description: 'should not skip ping command when unset',
+          description: 'should not skip connection checkout command when unset',
           value: undefined,
           expectEvents: 1
         }
@@ -1201,9 +1200,9 @@ describe('class MongoClient', function () {
       for (const { description, value, expectEvents } of tests) {
         it(description, async function () {
           const options = value === undefined ? {} : { __skipPingOnConnect: value };
-          const client = this.configuration.newClient({}, { ...options, monitorCommands: true });
+          const client = this.configuration.newClient({}, { ...options });
           const events = [];
-          client.on('commandStarted', event => events.push(event));
+          client.on('connectionCheckOutStarted', event => events.push(event));
 
           try {
             await client.connect();
@@ -1212,11 +1211,6 @@ describe('class MongoClient', function () {
           }
 
           expect(events).to.have.lengthOf(expectEvents);
-          if (expectEvents > 1) {
-            for (const event of events) {
-              expect(event).to.have.property('commandName', 'ping');
-            }
-          }
         });
       }
     });
