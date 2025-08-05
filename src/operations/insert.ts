@@ -5,9 +5,7 @@ import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { maybeAddIdToDocuments, type MongoDBNamespace } from '../utils';
 import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -71,24 +69,6 @@ export interface InsertOneResult<TSchema = Document> {
 export class InsertOneOperation extends InsertOperation {
   constructor(collection: Collection, doc: Document, options: InsertOneOptions) {
     super(collection.s.namespace, [maybeAddIdToDocuments(collection, doc, options)], options);
-  }
-
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<InsertOneResult> {
-    const res = await super.execute(server, session, timeoutContext);
-    if (res.code) throw new MongoServerError(res);
-    if (res.writeErrors) {
-      // This should be a WriteError but we can't change it now because of error hierarchy
-      throw new MongoServerError(res.writeErrors[0]);
-    }
-
-    return {
-      acknowledged: this.writeConcern?.w !== 0,
-      insertedId: this.documents[0]._id
-    };
   }
 
   override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
