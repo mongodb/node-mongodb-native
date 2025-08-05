@@ -2,18 +2,16 @@ import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
-import {
-  decorateWithExplain,
-  type ExplainOptions,
-  validateExplainTimeoutOptions
-} from '../explain';
-import { ReadConcern } from '../read_concern';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
+import { type ExplainOptions } from '../explain';
+import type { ServerCommandOptions } from '../sdam/server';
 import { formatSort, type Sort } from '../sort';
 import { type TimeoutContext } from '../timeout';
 import { type MongoDBNamespace, normalizeHintField } from '../utils';
-import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import {
+  type CollationOptions,
+  type CommandOperationOptions,
+  ModernizedCommandOperation
+} from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /**
@@ -92,7 +90,9 @@ export interface FindOneOptions extends FindOptions {
 }
 
 /** @internal */
-export class FindOperation extends CommandOperation<CursorResponse> {
+export class FindOperation extends ModernizedCommandOperation<CursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
+
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -116,39 +116,32 @@ export class FindOperation extends CommandOperation<CursorResponse> {
 
     // special case passing in an ObjectId as a filter
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
+
+    this.SERVER_COMMAND_RESPONSE_TYPE = this.explain ? ExplainedCursorResponse : CursorResponse;
   }
 
   override get commandName() {
     return 'find' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<CursorResponse> {
-    this.server = server;
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return {
+      ...this.options,
+      ...this.bsonOptions,
+      documentsReturnedIn: 'firstBatch',
+      session: this.session,
+      timeoutContext
+    };
+  }
 
-    const options = this.options;
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
+  }
 
-    let findCommand = makeFindCommand(this.ns, this.filter, options);
-    if (this.explain) {
-      validateExplainTimeoutOptions(this.options, this.explain);
-      findCommand = decorateWithExplain(findCommand, this.explain);
-    }
-
-    return await server.command(
-      this.ns,
-      findCommand,
-      {
-        ...this.options,
-        ...this.bsonOptions,
-        documentsReturnedIn: 'firstBatch',
-        session,
-        timeoutContext
-      },
-      this.explain ? ExplainedCursorResponse : CursorResponse
-    );
+  override buildCommandDocument(): Document {
+    return makeFindCommand(this.ns, this.filter, this.options);
   }
 }
 
@@ -217,15 +210,6 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
     findCommand.comment = options.comment;
   }
 
-  if (typeof options.maxTimeMS === 'number') {
-    findCommand.maxTimeMS = options.maxTimeMS;
-  }
-
-  const readConcern = ReadConcern.fromOptions(options);
-  if (readConcern) {
-    findCommand.readConcern = readConcern.toJSON();
-  }
-
   if (options.max) {
     findCommand.max = options.max;
   }
@@ -263,11 +247,6 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
   if (typeof options.allowPartialResults === 'boolean') {
     findCommand.allowPartialResults = options.allowPartialResults;
   }
-
-  if (options.collation) {
-    findCommand.collation = options.collation;
-  }
-
   if (typeof options.allowDiskUse === 'boolean') {
     findCommand.allowDiskUse = options.allowDiskUse;
   }

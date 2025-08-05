@@ -113,6 +113,7 @@ export type ServerEvents = {
 /** @internal */
 export type ServerCommandOptions = Omit<CommandOptions, 'timeoutContext' | 'socketTimeoutMS'> & {
   timeoutContext: TimeoutContext;
+  returnFieldSelector?: Document | null;
 } & Abortable;
 
 /** @internal */

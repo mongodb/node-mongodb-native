@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { FindOperation, ns, Server, ServerDescription } from '../../mongodb';
-import { topologyWithPlaceholderClient } from '../../tools/utils';
+import { FindOperation, ns } from '../../mongodb';
 
 describe('FindOperation', function () {
   const namespace = ns('db.coll');
@@ -33,34 +32,16 @@ describe('FindOperation', function () {
     });
   });
 
-  describe('#execute', function () {
-    context('command construction', () => {
-      const namespace = ns('db.collection');
-      const topology = topologyWithPlaceholderClient([], {} as any);
-      const server = new Server(topology, new ServerDescription('a:1'), {} as any);
+  context('command construction', () => {
+    const namespace = ns('db.collection');
 
-      it('should build basic find command with filter', async () => {
-        const findOperation = new FindOperation(namespace, filter);
-        const stub = sinon.stub(server, 'command').resolves({});
-        await findOperation.execute(server, undefined);
-        expect(stub).to.have.been.calledOnceWith(namespace, {
-          find: namespace.collection,
-          filter
-        });
-      });
-
-      it('should build find command with oplogReplay', async () => {
-        const options = {
-          oplogReplay: true
-        };
-        const findOperation = new FindOperation(namespace, {}, options);
-        const stub = sinon.stub(server, 'command').resolves({});
-        await findOperation.execute(server, undefined);
-        expect(stub).to.have.been.calledOnceWith(
-          namespace,
-          sinon.match.has('oplogReplay', options.oplogReplay)
-        );
-      });
+    it('should build find command with oplogReplay', () => {
+      const options = {
+        oplogReplay: true
+      };
+      const findOperation = new FindOperation(namespace, {}, options);
+      const command = findOperation.buildCommandDocument();
+      expect(command.oplogReplay).to.be.true;
     });
   });
 });
