@@ -631,7 +631,7 @@ describe('AbortSignal support', () => {
             mongodbLogComponentSeverities: { serverSelection: 'debug' },
             mongodbLogPath: {
               write: log => {
-                if (log.c === 'serverSelection' && log.operation === 'ping') {
+                if (log.c === 'serverSelection' && log.operation === 'handshake') {
                   controller.abort();
                   promise.resolve();
                 }
@@ -676,7 +676,7 @@ describe('AbortSignal support', () => {
           mongodbLogComponentSeverities: { serverSelection: 'debug' },
           mongodbLogPath: {
             write: log => {
-              if (log.c === 'serverSelection' && log.operation === 'ping') {
+              if (log.c === 'serverSelection' && log.operation === 'handshake') {
                 controller.abort();
                 promise.resolve();
               }
