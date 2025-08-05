@@ -1,15 +1,16 @@
+import { type Document } from '../bson';
+import { type Connection } from '../cmap/connection';
+import { ProfilingLevelResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import { MongoUnexpectedServerResponseError } from '../error';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 
 /** @public */
 export type ProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class ProfilingLevelOperation extends CommandOperation<string> {
+export class ProfilingLevelOperation extends ModernizedCommandOperation<string> {
+  override SERVER_COMMAND_RESPONSE_TYPE = ProfilingLevelResponse;
   override options: ProfilingLevelOptions;
 
   constructor(db: Db, options: ProfilingLevelOptions) {
@@ -21,14 +22,13 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
     return 'profile' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<string> {
-    const doc = await super.executeCommand(server, session, { profile: -1 }, timeoutContext);
-    if (doc.ok === 1) {
-      const was = doc.was;
+  override buildCommandDocument(_connection: Connection): Document {
+    return { profile: -1 };
+  }
+
+  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): string {
+    if (response.ok === 1) {
+      const was = response.was;
       if (was === 0) return 'off';
       if (was === 1) return 'slow_only';
       if (was === 2) return 'all';
