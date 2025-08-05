@@ -1,10 +1,10 @@
+import { type Connection } from '..';
 import type { Admin } from '../admin';
-import type { Document } from '../bson';
+import { type Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { MongoUnexpectedServerResponseError } from '../error';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 
 /** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {
@@ -13,24 +13,14 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ValidateCollectionOperation extends CommandOperation<Document> {
+export class ValidateCollectionOperation extends ModernizedCommandOperation<Document> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: ValidateCollectionOptions;
   collectionName: string;
-  command: Document;
 
   constructor(admin: Admin, collectionName: string, options: ValidateCollectionOptions) {
-    // Decorate command with extra options
-    const command: Document = { validate: collectionName };
-    const keys = Object.keys(options);
-    for (let i = 0; i < keys.length; i++) {
-      if (Object.prototype.hasOwnProperty.call(options, keys[i]) && keys[i] !== 'session') {
-        command[keys[i]] = (options as Document)[keys[i]];
-      }
-    }
-
     super(admin.s.db, options);
     this.options = options;
-    this.command = command;
     this.collectionName = collectionName;
   }
 
@@ -38,21 +28,23 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
     return 'validate' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<Document> {
-    const collectionName = this.collectionName;
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    // Decorate command with extra options
+    return {
+      validate: this.collectionName,
+      ...Object.fromEntries(Object.entries(this.options).filter(entry => entry[0] !== 'session'))
+    };
+  }
 
-    const doc = await super.executeCommand(server, session, this.command, timeoutContext);
-    if (doc.result != null && typeof doc.result !== 'string')
+  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
+    const result = super.handleOk(response);
+    if (result.result != null && typeof result.result !== 'string')
       throw new MongoUnexpectedServerResponseError('Error with validation data');
-    if (doc.result != null && doc.result.match(/exception|corrupt/) != null)
-      throw new MongoUnexpectedServerResponseError(`Invalid collection ${collectionName}`);
-    if (doc.valid != null && !doc.valid)
-      throw new MongoUnexpectedServerResponseError(`Invalid collection ${collectionName}`);
+    if (result.result != null && result.result.match(/exception|corrupt/) != null)
+      throw new MongoUnexpectedServerResponseError(`Invalid collection ${this.collectionName}`);
+    if (result.valid != null && !result.valid)
+      throw new MongoUnexpectedServerResponseError(`Invalid collection ${this.collectionName}`);
 
-    return doc;
+    return response;
   }
 }
