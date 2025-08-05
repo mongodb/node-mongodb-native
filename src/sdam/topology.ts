@@ -46,7 +46,6 @@ import {
   makeStateMachine,
   noop,
   now,
-  ns,
   promiseWithResolvers,
   shuffle
 } from '../utils';
@@ -459,7 +458,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
     });
     const selectServerOptions = {
-      operationName: 'ping',
+      operationName: 'handshake',
       ...options,
       timeoutContext
     };
@@ -469,9 +468,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         readPreferenceServerSelector(readPreference),
         selectServerOptions
       );
+
       const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
       if (!skipPingOnConnect && this.s.credentials) {
-        await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
+        const connection = await server.pool.checkOut({ timeoutContext: timeoutContext });
+        server.pool.checkIn(connection);
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
         this.emit(Topology.CONNECT, this);
