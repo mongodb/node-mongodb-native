@@ -33,7 +33,6 @@ export interface OperationOptions extends BSONSerializeOptions {
 
   /** @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction */
   bypassPinningCheck?: boolean;
-  omitReadPreference?: boolean;
 
   /** @internal Hint to `executeOperation` to omit maxTimeMS */
   omitMaxTimeMS?: boolean;
@@ -57,7 +56,6 @@ export abstract class AbstractOperation<TResult = any> {
   readPreference: ReadPreference;
   server!: Server;
   bypassPinningCheck: boolean;
-  trySecondaryWrite: boolean;
 
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
@@ -83,7 +81,6 @@ export abstract class AbstractOperation<TResult = any> {
 
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
-    this.trySecondaryWrite = false;
   }
 
   /** Must match the first key of the command object sent to the server.

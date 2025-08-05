@@ -37,6 +37,7 @@ import {
 } from '../error';
 import type { ServerApi } from '../mongo_client';
 import { type Abortable, TypedEventEmitter } from '../mongo_types';
+import { AggregateOperation } from '../operations/aggregate';
 import type { GetMoreOptions } from '../operations/get_more';
 import { type ModernizedOperation } from '../operations/operation';
 import type { ClientSession } from '../sessions';
@@ -68,6 +69,7 @@ import type {
 } from './events';
 import { Monitor, type MonitorOptions } from './monitor';
 import { compareTopologyVersion, ServerDescription } from './server_description';
+import { MIN_SECONDARY_WRITE_WIRE_VERSION } from './server_selection';
 import type { Topology } from './topology';
 
 const stateTransition = makeStateMachine({
@@ -310,11 +312,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     options.directConnection = this.topology.s.options.directConnection;
 
-    // There are cases where we need to flag the read preference not to get sent in
-    // the command, such as pre-5.0 servers attempting to perform an aggregate write
-    // with a non-primary read preference. In this case the effective read preference
-    // (primary) is not the same as the provided and must be removed completely.
-    if (options.omitReadPreference) {
+    const omitReadPreference =
+      operation instanceof AggregateOperation &&
+      operation.hasWriteStage &&
+      maxWireVersion(conn) < MIN_SECONDARY_WRITE_WIRE_VERSION;
+    if (omitReadPreference) {
       delete options.readPreference;
     }
 
@@ -400,14 +402,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     options.directConnection = this.topology.s.options.directConnection;
-
-    // There are cases where we need to flag the read preference not to get sent in
-    // the command, such as pre-5.0 servers attempting to perform an aggregate write
-    // with a non-primary read preference. In this case the effective read preference
-    // (primary) is not the same as the provided and must be removed completely.
-    if (options.omitReadPreference) {
-      delete options.readPreference;
-    }
 
     if (this.description.iscryptd) {
       options.omitMaxTimeMS = true;

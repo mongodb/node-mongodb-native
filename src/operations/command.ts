@@ -11,10 +11,9 @@ import {
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
 import type { Server, ServerCommandOptions } from '../sdam/server';
-import { MIN_SECONDARY_WRITE_WIRE_VERSION } from '../sdam/server_selection';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { commandSupportsReadConcern, maxWireVersion, MongoDBNamespace } from '../utils';
+import { commandSupportsReadConcern, MongoDBNamespace } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
 import { AbstractOperation, Aspect, ModernizedOperation, type OperationOptions } from './operation';
@@ -150,15 +149,10 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       session
     };
 
-    const serverWireVersion = maxWireVersion(server);
     const inTransaction = this.session && this.session.inTransaction();
 
     if (this.readConcern && commandSupportsReadConcern(cmd) && !inTransaction) {
       Object.assign(cmd, { readConcern: this.readConcern });
-    }
-
-    if (this.trySecondaryWrite && serverWireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION) {
-      options.omitReadPreference = true;
     }
 
     if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
@@ -241,15 +235,10 @@ export abstract class ModernizedCommandOperation<T> extends ModernizedOperation<
   override buildCommand(connection: Connection, session?: ClientSession): Document {
     const command = this.buildCommandDocument(connection, session);
 
-    const serverWireVersion = maxWireVersion(connection);
     const inTransaction = this.session && this.session.inTransaction();
 
     if (this.readConcern && commandSupportsReadConcern(command) && !inTransaction) {
       Object.assign(command, { readConcern: this.readConcern });
-    }
-
-    if (this.trySecondaryWrite && serverWireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION) {
-      command.omitReadPreference = true;
     }
 
     if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {

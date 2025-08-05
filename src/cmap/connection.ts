@@ -92,7 +92,6 @@ export interface CommandOptions extends BSONSerializeOptions {
   session?: ClientSession;
   documentsReturnedIn?: string;
   noResponse?: boolean;
-  omitReadPreference?: boolean;
   omitMaxTimeMS?: boolean;
 
   // TODO(NODE-2802): Currently the CommandOptions take a property willRetryWrite which is a hint
