@@ -13,7 +13,7 @@ import {
   Topology,
   TopologyType
 } from '../../mongodb';
-import { type FailPoint, sleep } from '../../tools/utils';
+import { sleep } from '../../tools/utils';
 
 describe('When executing an operation for the first time', () => {
   let client: MongoClient;

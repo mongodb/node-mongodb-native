@@ -458,7 +458,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
     });
     const selectServerOptions = {
-      operationName: 'ping',
+      operationName: 'handshake',
       ...options,
       timeoutContext
     };
