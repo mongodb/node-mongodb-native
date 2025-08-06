@@ -1,6 +1,6 @@
-import { type Document } from '../../bson';
+import { BSONType, type Document, parseUtf8ValidationOption } from '../../bson';
 import { type Connection } from '../../cmap/connection';
-import { CreateSearchIndexesResponse } from '../../cmap/wire_protocol/responses';
+import { MongoDBResponse } from '../../cmap/wire_protocol/responses';
 import type { Collection } from '../../collection';
 import type { ServerCommandOptions } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
@@ -19,6 +19,12 @@ export interface SearchIndexDescription extends Document {
 
   /** The type of the index.  Currently `search` or `vectorSearch` are supported. */
   type?: string;
+}
+
+class CreateSearchIndexesResponse extends MongoDBResponse {
+  get indexesCreated() {
+    return this.get('indexesCreated', BSONType.array);
+  }
 }
 
 /** @internal */
@@ -47,7 +53,10 @@ export class CreateSearchIndexesOperation extends ModernizedOperation<string[]> 
   }
 
   override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): string[] {
-    const indexesCreated = response.indexesCreated?.toObject();
+    const indexesCreated = response.indexesCreated?.toObject({
+      ...this.bsonOptions,
+      validation: parseUtf8ValidationOption(this.bsonOptions)
+    });
     return indexesCreated ? Object.entries(indexesCreated).map(([_key, val]) => val.name) : [];
   }
 
