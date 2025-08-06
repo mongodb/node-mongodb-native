@@ -1,6 +1,6 @@
-import type { Document } from '../bson';
+import { BSONType, type Document, parseUtf8ValidationOption } from '../bson';
 import { type Connection } from '../cmap/connection';
-import { DistinctResponse } from '../cmap/wire_protocol/responses';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -21,11 +21,17 @@ export type DistinctOptions = CommandOperationOptions & {
   hint?: Document | string;
 };
 
+class DistinctResponse extends MongoDBResponse {
+  get values() {
+    return this.get('values', BSONType.array, true);
+  }
+}
+
 /**
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends ModernizedCommandOperation<any[]> {
+export class DistinctOperation extends ModernizedCommandOperation<any[] | Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = DistinctResponse;
   override options: DistinctOptions;
   collection: Collection;
@@ -63,8 +69,17 @@ export class DistinctOperation extends ModernizedCommandOperation<any[]> {
     };
   }
 
-  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): any[] {
-    this.explain ? response.toObject() : response.values;
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): any[] | Document {
+    if (this.explain) {
+      return response.toObject(this.bsonOptions);
+    }
+    const values = response.values.toObject({
+      ...this.bsonOptions,
+      validation: parseUtf8ValidationOption(this.bsonOptions)
+    });
+    return Object.entries(values).map(([_key, val]) => val);
   }
 }
 

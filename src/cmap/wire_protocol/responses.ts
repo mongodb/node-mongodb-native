@@ -391,15 +391,3 @@ export class ClientBulkWriteCursorResponse extends CursorResponse {
     return this.get('writeConcernError', BSONType.object, false);
   }
 }
-
-export class ProfilingLevelResponse extends MongoDBResponse {
-  get was() {
-    return this.get('was', BSONType.int, true);
-  }
-}
-
-export class DistinctResponse extends MongoDBResponse {
-  get values() {
-    return this.get('values', BSONType.array, true);
-  }
-}
