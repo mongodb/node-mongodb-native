@@ -402,12 +402,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
-      new UpdateOneOperation(
-        this as TODO_NODE_3286,
-        filter,
-        update,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286
+      new UpdateOneOperation(this.s.namespace, filter, update, resolveOptions(this, options))
     );
   }
 
@@ -425,12 +420,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
-      new ReplaceOneOperation(
-        this as TODO_NODE_3286,
-        filter,
-        replacement,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286
+      new ReplaceOneOperation(this.s.namespace, filter, replacement, resolveOptions(this, options))
     );
   }
 
@@ -452,12 +442,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
-      new UpdateManyOperation(
-        this as TODO_NODE_3286,
-        filter,
-        update,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286
+      new UpdateManyOperation(this.s.namespace, filter, update, resolveOptions(this, options))
     );
   }
 
@@ -473,11 +458,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<DeleteResult> {
     return await executeOperation(
       this.client,
-      new DeleteOneOperation(
-        this as TODO_NODE_3286,
-        filter,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286
+      new DeleteOneOperation(this.s.namespace, filter, resolveOptions(this, options))
     );
   }
 
@@ -493,11 +474,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<DeleteResult> {
     return await executeOperation(
       this.client,
-      new DeleteManyOperation(
-        this as TODO_NODE_3286,
-        filter,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286
+      new DeleteManyOperation(this.s.namespace, filter, resolveOptions(this, options))
     );
   }
 
@@ -521,7 +498,7 @@ export class Collection<TSchema extends Document = Document> {
           ...options,
           readPreference: ReadPreference.PRIMARY
         })
-      ) as TODO_NODE_3286
+      )
     );
   }
 
@@ -589,7 +566,7 @@ export class Collection<TSchema extends Document = Document> {
       this.client,
       this.s.namespace,
       filter,
-      resolveOptions(this as TODO_NODE_3286, options)
+      resolveOptions(this, options)
     );
   }
 

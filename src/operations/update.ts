@@ -1,12 +1,15 @@
 import type { Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
-import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
-import { hasAtomicOperators, type MongoDBNamespace } from '../utils';
+import {
+  hasAtomicOperators,
+  type MongoDBCollectionNamespace,
+  type MongoDBNamespace
+} from '../utils';
 import {
   type CollationOptions,
   type CommandOperationOptions,
@@ -136,21 +139,27 @@ export class UpdateOperation extends ModernizedCommandOperation<Document> {
 
 /** @internal */
 export class UpdateOneOperation extends UpdateOperation {
-  constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
-    super(
-      collection.s.namespace,
-      [makeUpdateStatement(filter, update, { ...options, multi: false })],
-      options
-    );
+  constructor(
+    ns: MongoDBCollectionNamespace,
+    filter: Document,
+    update: Document,
+    options: UpdateOptions
+  ) {
+    super(ns, [makeUpdateStatement(filter, update, { ...options, multi: false })], options);
 
     if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
 
-  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): UpdateResult {
     const res = super.handleOk(response);
+
+    // @ts-expect-error Explain typing is broken
     if (this.explain != null) return res;
+
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
@@ -167,20 +176,25 @@ export class UpdateOneOperation extends UpdateOperation {
 
 /** @internal */
 export class UpdateManyOperation extends UpdateOperation {
-  constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
-    super(
-      collection.s.namespace,
-      [makeUpdateStatement(filter, update, { ...options, multi: true })],
-      options
-    );
+  constructor(
+    ns: MongoDBCollectionNamespace,
+    filter: Document,
+    update: Document,
+    options: UpdateOptions
+  ) {
+    super(ns, [makeUpdateStatement(filter, update, { ...options, multi: true })], options);
 
     if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
 
-  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): UpdateResult {
     const res = super.handleOk(response);
+
+    // @ts-expect-error Explain typing is broken
     if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
@@ -215,24 +229,24 @@ export interface ReplaceOptions extends CommandOperationOptions {
 /** @internal */
 export class ReplaceOneOperation extends UpdateOperation {
   constructor(
-    collection: Collection,
+    ns: MongoDBCollectionNamespace,
     filter: Document,
     replacement: Document,
     options: ReplaceOptions
   ) {
-    super(
-      collection.s.namespace,
-      [makeUpdateStatement(filter, replacement, { ...options, multi: false })],
-      options
-    );
+    super(ns, [makeUpdateStatement(filter, replacement, { ...options, multi: false })], options);
 
     if (hasAtomicOperators(replacement)) {
       throw new MongoInvalidArgumentError('Replacement document must not contain atomic operators');
     }
   }
 
-  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): UpdateResult {
     const res = super.handleOk(response);
+
+    // @ts-expect-error Explain typing is broken
     if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);

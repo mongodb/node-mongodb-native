@@ -1,10 +1,9 @@
 import type { Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
-import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoServerError } from '../error';
 import type { ClientSession } from '../sessions';
-import { type MongoDBNamespace } from '../utils';
+import { type MongoDBCollectionNamespace, type MongoDBNamespace } from '../utils';
 import { type WriteConcernOptions } from '../write_concern';
 import {
   type CollationOptions,
@@ -103,8 +102,8 @@ export class DeleteOperation extends ModernizedCommandOperation<Document> {
 }
 
 export class DeleteOneOperation extends DeleteOperation {
-  constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
+  constructor(ns: MongoDBCollectionNamespace, filter: Document, options: DeleteOptions) {
+    super(ns, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
 
   override handleOk(
@@ -125,8 +124,8 @@ export class DeleteOneOperation extends DeleteOperation {
   }
 }
 export class DeleteManyOperation extends DeleteOperation {
-  constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
+  constructor(ns: MongoDBCollectionNamespace, filter: Document, options: DeleteOptions) {
+    super(ns, [makeDeleteStatement(filter, options)], options);
   }
 
   override handleOk(
