@@ -1,12 +1,18 @@
-import { type Document } from '../bson';
+import { BSONType, type Document } from '../bson';
 import { type Connection } from '../cmap/connection';
-import { ProfilingLevelResponse } from '../cmap/wire_protocol/responses';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import { MongoUnexpectedServerResponseError } from '../error';
 import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 
 /** @public */
 export type ProfilingLevelOptions = CommandOperationOptions;
+
+class ProfilingLevelResponse extends MongoDBResponse {
+  get was() {
+    return this.get('was', BSONType.int, true);
+  }
+}
 
 /** @internal */
 export class ProfilingLevelOperation extends ModernizedCommandOperation<string> {

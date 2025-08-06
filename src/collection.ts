@@ -853,27 +853,31 @@ export class Collection<TSchema extends Document = Document> {
    */
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key
-  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>> | Document>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>
-  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>> | Document>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
     options: DistinctOptions
-  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>> | Document>;
 
   // Embedded documents overload
-  distinct(key: string): Promise<any[]>;
-  distinct(key: string, filter: Filter<TSchema>): Promise<any[]>;
-  distinct(key: string, filter: Filter<TSchema>, options: DistinctOptions): Promise<any[]>;
+  distinct(key: string): Promise<any[] | Document>;
+  distinct(key: string, filter: Filter<TSchema>): Promise<any[] | Document>;
+  distinct(
+    key: string,
+    filter: Filter<TSchema>,
+    options: DistinctOptions
+  ): Promise<any[] | Document>;
 
   async distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema> = {},
     options: DistinctOptions = {}
-  ): Promise<any[]> {
+  ): Promise<any[] | Document> {
     return await executeOperation(
       this.client,
       new DistinctOperation(
