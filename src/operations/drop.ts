@@ -1,12 +1,12 @@
-import { MongoServerError } from '..';
+import { type Connection, MongoServerError } from '..';
 import type { Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import { MONGODB_ERROR_CODES } from '../error';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 import { executeOperation } from './execute_operation';
 import { Aspect, defineAspects } from './operation';
 
@@ -17,7 +17,9 @@ export interface DropCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DropCollectionOperation extends CommandOperation<boolean> {
+export class DropCollectionOperation extends ModernizedCommandOperation<boolean> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
+
   override options: DropCollectionOptions;
   name: string;
 
@@ -31,12 +33,11 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     return 'drop' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<boolean> {
-    await super.executeCommand(server, session, { drop: this.name }, timeoutContext);
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    return { drop: this.name };
+  }
+
+  override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): boolean {
     return true;
   }
 }
@@ -106,7 +107,8 @@ export async function dropCollections(
 export type DropDatabaseOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropDatabaseOperation extends CommandOperation<boolean> {
+export class DropDatabaseOperation extends ModernizedCommandOperation<boolean> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DropDatabaseOptions;
 
   constructor(db: Db, options: DropDatabaseOptions) {
@@ -117,12 +119,11 @@ export class DropDatabaseOperation extends CommandOperation<boolean> {
     return 'dropDatabase' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<boolean> {
-    await super.executeCommand(server, session, { dropDatabase: 1 }, timeoutContext);
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    return { dropDatabase: 1 };
+  }
+
+  override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): boolean {
     return true;
   }
 }

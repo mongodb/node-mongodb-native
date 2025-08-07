@@ -34,7 +34,11 @@ const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
 type ResultTypeFromOperation<TOperation> =
-  TOperation extends AbstractOperation<infer K> ? K : never;
+  TOperation extends ModernizedOperation<infer _>
+    ? ReturnType<TOperation['handleOk']>
+    : TOperation extends AbstractOperation<infer K>
+      ? K
+      : never;
 
 /**
  * Executes the given operation with provided arguments.
@@ -57,7 +61,7 @@ type ResultTypeFromOperation<TOperation> =
  * @param operation - The operation to execute
  */
 export async function executeOperation<
-  T extends AbstractOperation<TResult>,
+  T extends AbstractOperation,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T, timeoutContext?: TimeoutContext | null): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
@@ -179,10 +183,7 @@ type RetryOptions = {
  *
  * @param operation - The operation to execute
  * */
-async function tryOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(
+async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFromOperation<T>>(
   operation: T,
   { topology, timeoutContext, session, readPreference }: RetryOptions
 ): Promise<TResult> {

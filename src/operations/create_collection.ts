@@ -1,16 +1,18 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
 import {
   MIN_SUPPORTED_QE_SERVER_VERSION,
   MIN_SUPPORTED_QE_WIRE_VERSION
 } from '../cmap/wire_protocol/constants';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { Collection } from '../collection';
 import type { Db } from '../db';
 import { MongoCompatibilityError } from '../error';
 import type { PkFactory } from '../mongo_client';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { maxWireVersion } from '../utils';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 import { executeOperation } from './execute_operation';
 import { CreateIndexesOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
@@ -110,7 +112,8 @@ const INVALID_QE_VERSION =
   'Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption.';
 
 /** @internal */
-export class CreateCollectionOperation extends CommandOperation<Collection> {
+export class CreateCollectionOperation extends ModernizedCommandOperation<Collection> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: CreateCollectionOptions;
   db: Db;
   name: string;
@@ -127,25 +130,19 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     return 'create' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<Collection> {
-    const db = this.db;
-    const name = this.name;
-    const options = this.options;
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    const isOptionValid = ([k, v]: [k: string, v: unknown]) =>
+      v != null && typeof v !== 'function' && !ILLEGAL_COMMAND_FIELDS.has(k);
+    return {
+      create: this.name,
+      ...Object.fromEntries(Object.entries(this.options).filter(isOptionValid))
+    };
+  }
 
-    const cmd: Document = { create: name };
-    for (const [option, value] of Object.entries(options)) {
-      if (value != null && typeof value !== 'function' && !ILLEGAL_COMMAND_FIELDS.has(option)) {
-        cmd[option] = value;
-      }
-    }
-
-    // otherwise just execute the command
-    await super.executeCommand(server, session, cmd, timeoutContext);
-    return new Collection(db, name, options);
+  override handleOk(
+    _response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): Collection<Document> {
+    return new Collection(this.db, this.name, this.options);
   }
 }
 
@@ -167,23 +164,17 @@ export async function createCollections<TSchema extends Document>(
 
   if (encryptedFields) {
     class CreateSupportingFLEv2CollectionOperation extends CreateCollectionOperation {
-      override execute(
-        server: Server,
-        session: ClientSession | undefined,
-        timeoutContext: TimeoutContext
-      ): Promise<Collection> {
-        // Creating a QE collection required min server of 7.0.0
-        // TODO(NODE-5353): Get wire version information from connection.
+      override buildCommandDocument(connection: Connection, session?: ClientSession): Document {
         if (
-          !server.loadBalanced &&
-          server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION
+          !connection.description.loadBalanced &&
+          maxWireVersion(connection) < MIN_SUPPORTED_QE_WIRE_VERSION
         ) {
           throw new MongoCompatibilityError(
             `${INVALID_QE_VERSION} The minimum server version required is ${MIN_SUPPORTED_QE_SERVER_VERSION}`
           );
         }
 
-        return super.execute(server, session, timeoutContext);
+        return super.buildCommandDocument(connection, session);
       }
     }
 

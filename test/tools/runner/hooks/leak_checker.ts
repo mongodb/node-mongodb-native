@@ -143,14 +143,14 @@ const leakCheckerAfterEach = async function () {
 const TRACE_SOCKETS = process.env.TRACE_SOCKETS === 'true' ? true : false;
 const kSocketId = Symbol('socketId');
 const originalCreateConnection = net.createConnection;
-let socketCounter = 0n;
 
-const socketLeakCheckBeforeAll = function socketLeakCheckBeforeAll() {
+const socketLeakCheckBeforeEach = function socketLeakCheckBeforeAll() {
+  const description = this.currentTest.title;
+  let id = 0;
   // @ts-expect-error: Typescript says this is readonly, but it is not at runtime
   net.createConnection = options => {
     const socket = originalCreateConnection(options);
-    socket[kSocketId] = socketCounter.toString().padStart(5, '0');
-    socketCounter++;
+    socket[kSocketId] = `"${description}" (${id++})`;
     return socket;
   };
 };
@@ -175,7 +175,6 @@ const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheck
   }
 };
 
-const beforeAll = TRACE_SOCKETS ? [socketLeakCheckBeforeAll] : [];
-const beforeEach = [leakCheckerBeforeEach];
+const beforeEach = [leakCheckerBeforeEach, ...(TRACE_SOCKETS ? [socketLeakCheckBeforeEach] : [])];
 const afterEach = [leakCheckerAfterEach, ...(TRACE_SOCKETS ? [socketLeakCheckAfterEach] : [])];
-export const mochaHooks = { beforeAll, beforeEach, afterEach };
+export const mochaHooks = { beforeEach, afterEach };

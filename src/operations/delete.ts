@@ -1,13 +1,15 @@
 import type { Document } from '../bson';
-import type { Collection } from '../collection';
+import { type Connection } from '../cmap/connection';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { MongoCompatibilityError, MongoServerError } from '../error';
-import { type TODO_NODE_3286 } from '../mongo_types';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
-import { type MongoDBNamespace } from '../utils';
+import { type MongoDBCollectionNamespace, type MongoDBNamespace } from '../utils';
 import { type WriteConcernOptions } from '../write_concern';
-import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import {
+  type CollationOptions,
+  type CommandOperationOptions,
+  ModernizedCommandOperation
+} from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
@@ -43,7 +45,8 @@ export interface DeleteStatement {
 }
 
 /** @internal */
-export class DeleteOperation extends CommandOperation<DeleteResult> {
+export class DeleteOperation extends ModernizedCommandOperation<Document> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DeleteOptions;
   statements: DeleteStatement[];
 
@@ -66,12 +69,9 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
     return this.statements.every(op => (op.limit != null ? op.limit > 0 : true));
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<DeleteResult> {
-    const options = this.options ?? {};
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    const options = this.options;
+
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
       delete: this.ns.collection,
@@ -97,28 +97,23 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
       }
     }
 
-    const res: TODO_NODE_3286 = await super.executeCommand(
-      server,
-      session,
-      command,
-      timeoutContext
-    );
-    return res;
+    return command;
   }
 }
 
 export class DeleteOneOperation extends DeleteOperation {
-  constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
+  constructor(ns: MongoDBCollectionNamespace, filter: Document, options: DeleteOptions) {
+    super(ns, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<DeleteResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): DeleteResult {
+    const res = super.handleOk(response);
+
+    // @ts-expect-error Explain commands have broken TS
     if (this.explain) return res;
+
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
@@ -129,17 +124,18 @@ export class DeleteOneOperation extends DeleteOperation {
   }
 }
 export class DeleteManyOperation extends DeleteOperation {
-  constructor(collection: Collection, filter: Document, options: DeleteOptions) {
-    super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
+  constructor(ns: MongoDBCollectionNamespace, filter: Document, options: DeleteOptions) {
+    super(ns, [makeDeleteStatement(filter, options)], options);
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<DeleteResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): DeleteResult {
+    const res = super.handleOk(response);
+
+    // @ts-expect-error Explain commands have broken TS
     if (this.explain) return res;
+
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 

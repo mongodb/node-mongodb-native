@@ -171,10 +171,20 @@ describe('useBigInt64 option', function () {
       beforeEach(async function () {
         client = await this.configuration.newClient().connect();
         db = client.db('bsonOptions', { promoteLongs: false, useBigInt64: true });
+
+        await db.createCollection('foo');
+        await db.createCollection('bar');
+      });
+
+      afterEach(async function () {
+        await db.dropDatabase();
       });
 
       it('throws a BSONError', async function () {
-        const e = await db.createCollection('bsonError').catch(e => e);
+        const e = await db
+          .listCollections()
+          .toArray()
+          .catch(e => e);
         expect(e).to.be.instanceOf(BSON.BSONError);
       });
     });
@@ -186,8 +196,11 @@ describe('useBigInt64 option', function () {
       });
 
       it('throws a BSONError', async function () {
-        const e = await db
-          .createCollection('bsonError', { promoteLongs: false, useBigInt64: true })
+        const collection = db.collection('bsonError', { promoteLongs: false, useBigInt64: true });
+
+        const e = await collection
+          .insertOne({ name: 'bailey ' })
+          .then(() => null)
           .catch(e => e);
         expect(e).to.be.instanceOf(BSON.BSONError);
       });
@@ -229,11 +242,21 @@ describe('useBigInt64 option', function () {
     describe('when set at DB level', function () {
       beforeEach(async function () {
         client = await this.configuration.newClient().connect();
-        db = client.db('bsonOptions', { promoteValues: false, useBigInt64: true });
+        db = client.db('bsonOptions', { promoteLongs: false, useBigInt64: true });
+
+        await db.createCollection('foo');
+        await db.createCollection('bar');
+      });
+
+      afterEach(async function () {
+        await db.dropDatabase();
       });
 
       it('throws a BSONError', async function () {
-        const e = await db.createCollection('bsonError').catch(e => e);
+        const e = await db
+          .listCollections()
+          .toArray()
+          .catch(e => e);
         expect(e).to.be.instanceOf(BSON.BSONError);
       });
     });
@@ -245,8 +268,11 @@ describe('useBigInt64 option', function () {
       });
 
       it('throws a BSONError', async function () {
-        const e = await db
-          .createCollection('bsonError', { promoteValues: false, useBigInt64: true })
+        const collection = db.collection('bsonError', { promoteValues: false, useBigInt64: true });
+
+        const e = await collection
+          .insertOne({ name: 'bailey ' })
+          .then(() => null)
           .catch(e => e);
         expect(e).to.be.instanceOf(BSON.BSONError);
       });
