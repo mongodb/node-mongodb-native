@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.19.0](https://github.com/mongodb/node-mongodb-native/compare/v6.18.0...v6.19.0) (2025-08-07)
+
+
+### Features
+
+* **NODE-4179:** allow secureContext in KMS TLS options ([#4578](https://github.com/mongodb/node-mongodb-native/issues/4578)) ([0ea6eaa](https://github.com/mongodb/node-mongodb-native/commit/0ea6eaa82d56073f1a63d4168935d63a4a4e7a61))
+* **NODE-6472:** findOne and find no longer keep open cursors ([#4580](https://github.com/mongodb/node-mongodb-native/issues/4580)) ([be7f808](https://github.com/mongodb/node-mongodb-native/commit/be7f808c3ff0d894906ec187de98e159ebb7b18d))
+* **NODE-7020:** remove ping on connect ([#4607](https://github.com/mongodb/node-mongodb-native/issues/4607)) ([3d296b7](https://github.com/mongodb/node-mongodb-native/commit/3d296b7d94810c3bc29153ffc3c8795f02699dd4))
+
 ## [6.18.0](https://github.com/mongodb/node-mongodb-native/compare/v6.17.0...v6.18.0) (2025-07-22)
 
 
