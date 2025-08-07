@@ -22,7 +22,7 @@ export interface SearchIndexDescription extends Document {
 }
 
 /** @internal */
-export class CreateSearchIndexesOperation extends ModernizedOperation<string[]> {
+export class CreateSearchIndexesOperation extends ModernizedOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   private readonly collection: Collection;
   private readonly descriptions: ReadonlyArray<SearchIndexDescription>;
@@ -47,7 +47,7 @@ export class CreateSearchIndexesOperation extends ModernizedOperation<string[]> 
   }
 
   override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): string[] {
-    return response.toObject(this.bsonOptions).indexesCreated.map((val: { name: any }) => val.name);
+    return super.handleOk(response).indexesCreated.map((val: { name: any }) => val.name);
   }
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
