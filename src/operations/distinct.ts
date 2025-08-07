@@ -1,4 +1,4 @@
-import { BSONType, type Document, parseUtf8ValidationOption } from '../bson';
+import { type Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
@@ -21,18 +21,12 @@ export type DistinctOptions = CommandOperationOptions & {
   hint?: Document | string;
 };
 
-class DistinctResponse extends MongoDBResponse {
-  get values() {
-    return this.get('values', BSONType.array, true);
-  }
-}
-
 /**
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
 export class DistinctOperation extends ModernizedCommandOperation<any[] | Document> {
-  override SERVER_COMMAND_RESPONSE_TYPE = DistinctResponse;
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DistinctOptions;
   collection: Collection;
   /** Field of the document to find distinct values for. */
@@ -75,11 +69,7 @@ export class DistinctOperation extends ModernizedCommandOperation<any[] | Docume
     if (this.explain) {
       return response.toObject(this.bsonOptions);
     }
-    const values = response.values.toObject({
-      ...this.bsonOptions,
-      validation: parseUtf8ValidationOption(this.bsonOptions)
-    });
-    return Object.entries(values).map(([_key, val]) => val);
+    return response.toObject(this.bsonOptions).values;
   }
 }
 

@@ -17,6 +17,7 @@ import {
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
 import { MongoAPIError, MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
+import { type ExplainCommandOptions, type ExplainVerbosityLike } from './explain';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Abortable,
@@ -853,31 +854,32 @@ export class Collection<TSchema extends Document = Document> {
    */
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key
-  ): Promise<Array<Flatten<WithId<TSchema>[Key]>> | Document>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>
-  ): Promise<Array<Flatten<WithId<TSchema>[Key]>> | Document>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
     options: DistinctOptions
-  ): Promise<Array<Flatten<WithId<TSchema>[Key]>> | Document>;
+  ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
+  distinct<Key extends keyof WithId<TSchema>>(
+    key: Key,
+    filter: Filter<TSchema>,
+    options: DistinctOptions & { explain: ExplainVerbosityLike | ExplainCommandOptions }
+  ): Promise<Document>;
 
   // Embedded documents overload
-  distinct(key: string): Promise<any[] | Document>;
-  distinct(key: string, filter: Filter<TSchema>): Promise<any[] | Document>;
-  distinct(
-    key: string,
-    filter: Filter<TSchema>,
-    options: DistinctOptions
-  ): Promise<any[] | Document>;
+  distinct(key: string): Promise<any[]>;
+  distinct(key: string, filter: Filter<TSchema>): Promise<any[]>;
+  distinct(key: string, filter: Filter<TSchema>, options: DistinctOptions): Promise<any[]>;
 
   async distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema> = {},
     options: DistinctOptions = {}
-  ): Promise<any[] | Document> {
+  ): Promise<any[]> {
     return await executeOperation(
       this.client,
       new DistinctOperation(
