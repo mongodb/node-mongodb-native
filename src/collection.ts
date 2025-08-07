@@ -17,6 +17,7 @@ import {
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
 import { MongoAPIError, MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
+import { type ExplainCommandOptions, type ExplainVerbosityLike } from './explain';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Abortable,
@@ -863,6 +864,11 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     options: DistinctOptions
   ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
+  distinct<Key extends keyof WithId<TSchema>>(
+    key: Key,
+    filter: Filter<TSchema>,
+    options: DistinctOptions & { explain: ExplainVerbosityLike | ExplainCommandOptions }
+  ): Promise<Document>;
 
   // Embedded documents overload
   distinct(key: string): Promise<any[]>;
