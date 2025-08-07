@@ -591,14 +591,14 @@ export class ClientEncryption {
         field == null || typeof field !== 'object' || field.keyId != null
           ? field
           : {
-              ...field,
-              keyId: await this.createDataKey(provider, {
-                masterKey,
-                // clone the timeoutContext
-                // in order to avoid sharing the same timeout for server selection and connection checkout across different concurrent operations
-                timeoutContext: timeoutContext?.csotEnabled() ? timeoutContext?.clone() : undefined
-              })
-            }
+            ...field,
+            keyId: await this.createDataKey(provider, {
+              masterKey,
+              // clone the timeoutContext
+              // in order to avoid sharing the same timeout for server selection and connection checkout across different concurrent operations
+              timeoutContext: timeoutContext?.csotEnabled() ? timeoutContext?.clone() : undefined
+            })
+          }
       );
       const createDataKeyResolutions = await Promise.allSettled(createDataKeyPromises);
 
@@ -814,12 +814,12 @@ export interface ClientEncryptionEncryptOptions {
    * The algorithm to use for encryption.
    */
   algorithm:
-    | 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-    | 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
-    | 'Indexed'
-    | 'Unindexed'
-    | 'Range'
-    | 'TextPreview';
+  | 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+  | 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
+  | 'Indexed'
+  | 'Unindexed'
+  | 'Range'
+  | 'TextPreview';
 
   /**
    * The id of the Binary dataKey to use for encryption
@@ -847,7 +847,7 @@ export interface ClientEncryptionEncryptOptions {
 
 interface TextQueryOptions {
   caseSensitive: boolean;
-  diacraticSensitive: boolean;
+  diacriticSensitive: boolean;
 
   prefix?: {
     strMaxQueryLength: Int32 | number;
@@ -873,11 +873,11 @@ interface TextQueryOptions {
 export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
   provider: ClientEncryptionDataKeyProvider;
   masterKey?:
-    | AWSEncryptionKeyOptions
-    | AzureEncryptionKeyOptions
-    | GCPEncryptionKeyOptions
-    | KMIPEncryptionKeyOptions
-    | undefined;
+  | AWSEncryptionKeyOptions
+  | AzureEncryptionKeyOptions
+  | GCPEncryptionKeyOptions
+  | KMIPEncryptionKeyOptions
+  | undefined;
 }
 
 /**
@@ -1066,11 +1066,11 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
    * Identifies a new KMS-specific key used to encrypt the new data key
    */
   masterKey?:
-    | AWSEncryptionKeyOptions
-    | AzureEncryptionKeyOptions
-    | GCPEncryptionKeyOptions
-    | KMIPEncryptionKeyOptions
-    | undefined;
+  | AWSEncryptionKeyOptions
+  | AzureEncryptionKeyOptions
+  | GCPEncryptionKeyOptions
+  | KMIPEncryptionKeyOptions
+  | undefined;
 
   /**
    * An optional list of string alternate names used to reference a key.
