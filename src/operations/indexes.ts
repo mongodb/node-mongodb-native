@@ -1,17 +1,13 @@
 import type { Document } from '../bson';
 import { type Connection } from '../cmap/connection';
-import { CursorResponse } from '../cmap/wire_protocol/responses';
+import { CursorResponse, MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
 import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
-  CommandOperation,
   type CommandOperationOptions,
   ModernizedCommandOperation,
   type OperationParent
@@ -246,7 +242,8 @@ type ResolvedIndexDescription = Omit<IndexDescription, 'key' | 'version'> & {
 };
 
 /** @internal */
-export class CreateIndexesOperation extends CommandOperation<string[]> {
+export class CreateIndexesOperation extends ModernizedCommandOperation<string[]> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: CreateIndexesOptions;
   collectionName: string;
   indexes: ReadonlyArray<ResolvedIndexDescription>;
@@ -260,6 +257,8 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     super(parent, options);
 
     this.options = options ?? {};
+    // collation is set on each index, it should not be defined at the root
+    this.options.collation = undefined;
     this.collectionName = collectionName;
     this.indexes = indexes.map((userIndex: IndexDescription): ResolvedIndexDescription => {
       // Ensure the key is a Map to preserve index key ordering
@@ -273,6 +272,7 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
         key
       };
     });
+    this.ns = parent.s.namespace;
   }
 
   static fromIndexDescriptionArray(
@@ -299,15 +299,11 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     return 'createIndexes';
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<string[]> {
+  override buildCommandDocument(connection: Connection): Document {
     const options = this.options;
     const indexes = this.indexes;
 
-    const serverWireVersion = maxWireVersion(server);
+    const serverWireVersion = maxWireVersion(connection);
 
     const cmd: Document = { createIndexes: this.collectionName, indexes };
 
@@ -319,13 +315,11 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
       }
       cmd.commitQuorum = options.commitQuorum;
     }
+    return cmd;
+  }
 
-    // collation is set on each index, it should not be defined at the root
-    this.options.collation = undefined;
-
-    await super.executeCommand(server, session, cmd, timeoutContext);
-
-    const indexNames = indexes.map(index => index.name || '');
+  override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): string[] {
+    const indexNames = this.indexes.map(index => index.name || '');
     return indexNames;
   }
 }
@@ -334,7 +328,8 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
 export type DropIndexesOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropIndexOperation extends CommandOperation<Document> {
+export class DropIndexOperation extends ModernizedCommandOperation<Document> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DropIndexesOptions;
   collection: Collection;
   indexName: string;
@@ -345,19 +340,15 @@ export class DropIndexOperation extends CommandOperation<Document> {
     this.options = options ?? {};
     this.collection = collection;
     this.indexName = indexName;
+    this.ns = collection.fullNamespace;
   }
 
   override get commandName() {
     return 'dropIndexes' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<Document> {
-    const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
-    return await super.executeCommand(server, session, cmd, timeoutContext);
+  override buildCommandDocument(_connection: Connection): Document {
+    return { dropIndexes: this.collection.collectionName, index: this.indexName };
   }
 }
 
