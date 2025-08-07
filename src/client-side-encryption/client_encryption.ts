@@ -749,7 +749,8 @@ export class ClientEncryption {
     expressionMode: boolean,
     options: ClientEncryptionEncryptOptions
   ): Promise<Binary> {
-    const { algorithm, keyId, keyAltName, contentionFactor, queryType, rangeOptions } = options;
+    const { algorithm, keyId, keyAltName, contentionFactor, queryType, rangeOptions, textOptions } =
+      options;
     const contextOptions: ExplicitEncryptionContextOptions = {
       expressionMode,
       algorithm
@@ -782,6 +783,11 @@ export class ClientEncryption {
       contextOptions.rangeOptions = serialize(rangeOptions);
     }
 
+    if (typeof textOptions === 'object') {
+      // @ts-expect-error errors until mongodb-client-encryption release
+      contextOptions.textOptions = serialize(textOptions);
+    }
+
     const valueBuffer = serialize({ v: value });
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
@@ -812,7 +818,8 @@ export interface ClientEncryptionEncryptOptions {
     | 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
     | 'Indexed'
     | 'Unindexed'
-    | 'Range';
+    | 'Range'
+    | 'TextPreview';
 
   /**
    * The id of the Binary dataKey to use for encryption
@@ -830,10 +837,33 @@ export interface ClientEncryptionEncryptOptions {
   /**
    * The query type.
    */
-  queryType?: 'equality' | 'range';
+  queryType?: 'equality' | 'range' | 'prefixPreview' | 'suffixPreview' | 'substringPreview';
 
   /** The index options for a Queryable Encryption field supporting "range" queries.*/
   rangeOptions?: RangeOptions;
+
+  textOptions?: TextQueryOptions;
+}
+
+interface TextQueryOptions {
+  caseSensitive: boolean;
+  diacraticSensitive: boolean;
+
+  prefix?: {
+    strMaxQueryLength: Int32 | number;
+    strMinQueryLength: Int32 | number;
+  };
+
+  suffix?: {
+    strMaxQueryLength: Int32 | number;
+    strMinQueryLength: Int32 | number;
+  };
+
+  substring?: {
+    strMaxLength: Int32 | number;
+    strMaxQueryLength: Int32 | number;
+    strMinQueryLength: Int32 | number;
+  };
 }
 
 /**
