@@ -34,7 +34,7 @@ export const LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE = new RegExp(
  */
 export const NODE_IS_RECOVERING_ERROR_MESSAGE = new RegExp('node is recovering', 'i');
 
-/** @internal MongoDB Error Codes */
+/** @public */
 export const MONGODB_ERROR_CODES = Object.freeze({
   HostUnreachable: 6,
   HostNotFound: 7,
