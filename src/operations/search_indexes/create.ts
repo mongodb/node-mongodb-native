@@ -47,7 +47,7 @@ export class CreateSearchIndexesOperation extends ModernizedOperation<Document> 
   }
 
   override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): string[] {
-    return super.handleOk(response).indexesCreated.map((val: { name: any }) => val.name);
+    return super.handleOk(response).indexesCreated.map((val: { name: string }) => val.name);
   }
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
