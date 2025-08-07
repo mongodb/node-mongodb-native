@@ -1,4 +1,4 @@
-import { BSONType, type Document, parseUtf8ValidationOption } from '../../bson';
+import { type Document } from '../../bson';
 import { type Connection } from '../../cmap/connection';
 import { MongoDBResponse } from '../../cmap/wire_protocol/responses';
 import type { Collection } from '../../collection';
@@ -21,15 +21,9 @@ export interface SearchIndexDescription extends Document {
   type?: string;
 }
 
-class CreateSearchIndexesResponse extends MongoDBResponse {
-  get indexesCreated() {
-    return this.get('indexesCreated', BSONType.array);
-  }
-}
-
 /** @internal */
 export class CreateSearchIndexesOperation extends ModernizedOperation<string[]> {
-  override SERVER_COMMAND_RESPONSE_TYPE = CreateSearchIndexesResponse;
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   private readonly collection: Collection;
   private readonly descriptions: ReadonlyArray<SearchIndexDescription>;
 
@@ -53,11 +47,7 @@ export class CreateSearchIndexesOperation extends ModernizedOperation<string[]> 
   }
 
   override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): string[] {
-    const indexesCreated = response.indexesCreated?.toObject({
-      ...this.bsonOptions,
-      validation: parseUtf8ValidationOption(this.bsonOptions)
-    });
-    return indexesCreated ? Object.entries(indexesCreated).map(([_key, val]) => val.name) : [];
+    return response.toObject(this.bsonOptions).indexesCreated.map((val: { name: any }) => val.name);
   }
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
