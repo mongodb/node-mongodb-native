@@ -1,11 +1,10 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
-import { type TODO_NODE_3286 } from '../mongo_types';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -27,7 +26,8 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult> {
+export class ListDatabasesOperation extends ModernizedCommandOperation<ListDatabasesResult> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: ListDatabasesOptions;
 
   constructor(db: Db, options?: ListDatabasesOptions) {
@@ -40,11 +40,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     return 'listDatabases' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<ListDatabasesResult> {
+  override buildCommandDocument(connection: Connection, _session?: ClientSession): Document {
     const cmd: Document = { listDatabases: 1 };
 
     if (typeof this.options.nameOnly === 'boolean') {
@@ -61,16 +57,11 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (maxWireVersion(server) >= 9 && this.options.comment !== undefined) {
+    if (maxWireVersion(connection) >= 9 && this.options.comment !== undefined) {
       cmd.comment = this.options.comment;
     }
 
-    return await (super.executeCommand(
-      server,
-      session,
-      cmd,
-      timeoutContext
-    ) as Promise<TODO_NODE_3286>);
+    return cmd;
   }
 }
 
