@@ -591,14 +591,14 @@ export class ClientEncryption {
         field == null || typeof field !== 'object' || field.keyId != null
           ? field
           : {
-              ...field,
-              keyId: await this.createDataKey(provider, {
-                masterKey,
-                // clone the timeoutContext
-                // in order to avoid sharing the same timeout for server selection and connection checkout across different concurrent operations
-                timeoutContext: timeoutContext?.csotEnabled() ? timeoutContext?.clone() : undefined
-              })
-            }
+            ...field,
+            keyId: await this.createDataKey(provider, {
+              masterKey,
+              // clone the timeoutContext
+              // in order to avoid sharing the same timeout for server selection and connection checkout across different concurrent operations
+              timeoutContext: timeoutContext?.csotEnabled() ? timeoutContext?.clone() : undefined
+            })
+          }
       );
       const createDataKeyResolutions = await Promise.allSettled(createDataKeyPromises);
 
@@ -749,7 +749,8 @@ export class ClientEncryption {
     expressionMode: boolean,
     options: ClientEncryptionEncryptOptions
   ): Promise<Binary> {
-    const { algorithm, keyId, keyAltName, contentionFactor, queryType, rangeOptions } = options;
+    const { algorithm, keyId, keyAltName, contentionFactor, queryType, rangeOptions, textOptions } =
+      options;
     const contextOptions: ExplicitEncryptionContextOptions = {
       expressionMode,
       algorithm
@@ -782,6 +783,11 @@ export class ClientEncryption {
       contextOptions.rangeOptions = serialize(rangeOptions);
     }
 
+    if (typeof textOptions === 'object') {
+      // @ts-expect-error errors until mongodb-client-encryption release
+      contextOptions.textOptions = serialize(textOptions);
+    }
+
     const valueBuffer = serialize({ v: value });
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
@@ -808,11 +814,12 @@ export interface ClientEncryptionEncryptOptions {
    * The algorithm to use for encryption.
    */
   algorithm:
-    | 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-    | 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
-    | 'Indexed'
-    | 'Unindexed'
-    | 'Range';
+  | 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+  | 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
+  | 'Indexed'
+  | 'Unindexed'
+  | 'Range'
+  | 'TextPreview';
 
   /**
    * The id of the Binary dataKey to use for encryption
@@ -830,10 +837,33 @@ export interface ClientEncryptionEncryptOptions {
   /**
    * The query type.
    */
-  queryType?: 'equality' | 'range';
+  queryType?: 'equality' | 'range' | 'prefixPreview' | 'suffixPreview' | 'substringPreview';
 
   /** The index options for a Queryable Encryption field supporting "range" queries.*/
   rangeOptions?: RangeOptions;
+
+  textOptions?: TextQueryOptions;
+}
+
+interface TextQueryOptions {
+  caseSensitive: boolean;
+  diacriticSensitive: boolean;
+
+  prefix?: {
+    strMaxQueryLength: Int32 | number;
+    strMinQueryLength: Int32 | number;
+  };
+
+  suffix?: {
+    strMaxQueryLength: Int32 | number;
+    strMinQueryLength: Int32 | number;
+  };
+
+  substring?: {
+    strMaxLength: Int32 | number;
+    strMaxQueryLength: Int32 | number;
+    strMinQueryLength: Int32 | number;
+  };
 }
 
 /**
@@ -843,11 +873,11 @@ export interface ClientEncryptionEncryptOptions {
 export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
   provider: ClientEncryptionDataKeyProvider;
   masterKey?:
-    | AWSEncryptionKeyOptions
-    | AzureEncryptionKeyOptions
-    | GCPEncryptionKeyOptions
-    | KMIPEncryptionKeyOptions
-    | undefined;
+  | AWSEncryptionKeyOptions
+  | AzureEncryptionKeyOptions
+  | GCPEncryptionKeyOptions
+  | KMIPEncryptionKeyOptions
+  | undefined;
 }
 
 /**
@@ -1036,11 +1066,11 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
    * Identifies a new KMS-specific key used to encrypt the new data key
    */
   masterKey?:
-    | AWSEncryptionKeyOptions
-    | AzureEncryptionKeyOptions
-    | GCPEncryptionKeyOptions
-    | KMIPEncryptionKeyOptions
-    | undefined;
+  | AWSEncryptionKeyOptions
+  | AzureEncryptionKeyOptions
+  | GCPEncryptionKeyOptions
+  | KMIPEncryptionKeyOptions
+  | undefined;
 
   /**
    * An optional list of string alternate names used to reference a key.

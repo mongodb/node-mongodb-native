@@ -1,0 +1,30 @@
+{
+  "fields": [
+    {
+            "keyId": {
+                "$binary": {
+                    "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                    "subType": "04"
+                }
+            },
+            "path": "encrypted-textPreview",
+            "bsonType": "string",
+            "queries": [
+                {
+                    "queryType": "substringPreview",
+                    "strMaxLength": {
+                        "$numberInt": "10"
+                    },
+                    "strMinQueryLength": {
+                        "$numberInt": "2"
+                    },
+                    "strMaxQueryLength": {
+                        "$numberInt": "10"
+                    },
+                    "caseSensitive": true,
+                    "diacriticSensitive": true
+                }
+            ]
+        }
+  ]
+}

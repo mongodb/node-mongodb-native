@@ -113,7 +113,11 @@ export interface RunOnRequirement {
   minServerVersion?: string;
   topologies?: TopologyName[];
   serverParameters?: Document;
-  csfle?: boolean;
+  csfle?:
+    | boolean
+    | {
+        minLibmongocryptVersion?: string;
+      };
 }
 export type ObservableCommandEventId =
   | 'commandStartedEvent'
