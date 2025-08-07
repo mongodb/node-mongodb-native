@@ -1,13 +1,20 @@
 import type { Document } from '../bson';
-import type { Collection } from '../collection';
+import { type Connection } from '../cmap/connection';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
-import type { InferIdType, TODO_NODE_3286 } from '../mongo_types';
-import type { Server } from '../sdam/server';
+import type { InferIdType } from '../mongo_types';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
-import { type TimeoutContext } from '../timeout';
-import { hasAtomicOperators, type MongoDBNamespace } from '../utils';
-import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import {
+  hasAtomicOperators,
+  type MongoDBCollectionNamespace,
+  type MongoDBNamespace
+} from '../utils';
+import {
+  type CollationOptions,
+  type CommandOperationOptions,
+  ModernizedCommandOperation
+} from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
@@ -67,7 +74,8 @@ export interface UpdateStatement {
  * @internal
  * UpdateOperation is used in bulk write, while UpdateOneOperation and UpdateManyOperation are only used in the collections API
  */
-export class UpdateOperation extends CommandOperation<Document> {
+export class UpdateOperation extends ModernizedCommandOperation<Document> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];
 
@@ -95,17 +103,12 @@ export class UpdateOperation extends CommandOperation<Document> {
     return this.statements.every(op => op.multi == null || op.multi === false);
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<Document> {
-    const options = this.options ?? {};
-    const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    const options = this.options;
     const command: Document = {
       update: this.ns.collection,
       updates: this.statements,
-      ordered
+      ordered: options.ordered ?? true
     };
 
     if (typeof options.bypassDocumentValidation === 'boolean') {
@@ -122,7 +125,7 @@ export class UpdateOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
-    const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
+    const unacknowledgedWrite = this.writeConcern?.w === 0;
     if (unacknowledgedWrite) {
       if (this.statements.find((o: Document) => o.hint)) {
         // TODO(NODE-3541): fix error for hint with unacknowledged writes
@@ -130,32 +133,33 @@ export class UpdateOperation extends CommandOperation<Document> {
       }
     }
 
-    const res = await super.executeCommand(server, session, command, timeoutContext);
-    return res;
+    return command;
   }
 }
 
 /** @internal */
 export class UpdateOneOperation extends UpdateOperation {
-  constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
-    super(
-      collection.s.namespace,
-      [makeUpdateStatement(filter, update, { ...options, multi: false })],
-      options
-    );
+  constructor(
+    ns: MongoDBCollectionNamespace,
+    filter: Document,
+    update: Document,
+    options: UpdateOptions
+  ) {
+    super(ns, [makeUpdateStatement(filter, update, { ...options, multi: false })], options);
 
     if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<UpdateResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): UpdateResult {
+    const res = super.handleOk(response);
+
+    // @ts-expect-error Explain typing is broken
     if (this.explain != null) return res;
+
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
@@ -172,24 +176,25 @@ export class UpdateOneOperation extends UpdateOperation {
 
 /** @internal */
 export class UpdateManyOperation extends UpdateOperation {
-  constructor(collection: Collection, filter: Document, update: Document, options: UpdateOptions) {
-    super(
-      collection.s.namespace,
-      [makeUpdateStatement(filter, update, { ...options, multi: true })],
-      options
-    );
+  constructor(
+    ns: MongoDBCollectionNamespace,
+    filter: Document,
+    update: Document,
+    options: UpdateOptions
+  ) {
+    super(ns, [makeUpdateStatement(filter, update, { ...options, multi: true })], options);
 
     if (!hasAtomicOperators(update, options)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<UpdateResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): UpdateResult {
+    const res = super.handleOk(response);
+
+    // @ts-expect-error Explain typing is broken
     if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
@@ -224,28 +229,24 @@ export interface ReplaceOptions extends CommandOperationOptions {
 /** @internal */
 export class ReplaceOneOperation extends UpdateOperation {
   constructor(
-    collection: Collection,
+    ns: MongoDBCollectionNamespace,
     filter: Document,
     replacement: Document,
     options: ReplaceOptions
   ) {
-    super(
-      collection.s.namespace,
-      [makeUpdateStatement(filter, replacement, { ...options, multi: false })],
-      options
-    );
+    super(ns, [makeUpdateStatement(filter, replacement, { ...options, multi: false })], options);
 
     if (hasAtomicOperators(replacement)) {
       throw new MongoInvalidArgumentError('Replacement document must not contain atomic operators');
     }
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<UpdateResult> {
-    const res: TODO_NODE_3286 = await super.execute(server, session, timeoutContext);
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): UpdateResult {
+    const res = super.handleOk(response);
+
+    // @ts-expect-error Explain typing is broken
     if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);

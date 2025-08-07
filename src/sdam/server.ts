@@ -303,7 +303,30 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       }
     }
 
-    const cmd = operation.buildCommand(conn, session);
+    let reauthPromise: Promise<void> | null = null;
+    const cleanup = () => {
+      this.decrementOperationCount();
+      if (session?.pinnedConnection !== conn) {
+        if (reauthPromise != null) {
+          // The reauth promise only exists if it hasn't thrown.
+          const checkBackIn = () => {
+            this.pool.checkIn(conn);
+          };
+          void reauthPromise.then(checkBackIn, checkBackIn);
+        } else {
+          this.pool.checkIn(conn);
+        }
+      }
+    };
+
+    let cmd;
+    try {
+      cmd = operation.buildCommand(conn, session);
+    } catch (e) {
+      cleanup();
+      throw e;
+    }
+
     const options = operation.buildOptions(timeoutContext);
     const ns = operation.ns;
 
@@ -324,8 +347,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     if (this.description.iscryptd) {
       options.omitMaxTimeMS = true;
     }
-
-    let reauthPromise: Promise<void> | null = null;
 
     try {
       try {
@@ -360,18 +381,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         throw operationError;
       }
     } finally {
-      this.decrementOperationCount();
-      if (session?.pinnedConnection !== conn) {
-        if (reauthPromise != null) {
-          // The reauth promise only exists if it hasn't thrown.
-          const checkBackIn = () => {
-            this.pool.checkIn(conn);
-          };
-          void reauthPromise.then(checkBackIn, checkBackIn);
-        } else {
-          this.pool.checkIn(conn);
-        }
-      }
+      cleanup();
     }
   }
 
