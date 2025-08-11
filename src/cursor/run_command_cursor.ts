@@ -4,7 +4,7 @@ import type { Db } from '../db';
 import { MongoAPIError, MongoRuntimeError } from '../error';
 import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
-import { RunCommandOperation } from '../operations/run_command';
+import { RunCommandOperation, RunCursorCommandOperation } from '../operations/run_command';
 import type { ReadConcernLike } from '../read_concern';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
@@ -143,7 +143,7 @@ export class RunCommandCursor extends AbstractCursor {
 
   /** @internal */
   protected async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
-    const operation = new RunCommandOperation<CursorResponse>(this.db, this.command, {
+    const operation = new RunCursorCommandOperation(this.db, this.command, {
       ...this.cursorOptions,
       session: session,
       readPreference: this.cursorOptions.readPreference,

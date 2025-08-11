@@ -1,6 +1,6 @@
 import type { BSONSerializeOptions, Document } from '../bson';
 import { type Connection } from '../cmap/connection';
-import { MongoDBResponse, type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
+import { CursorResponse, MongoDBResponse, type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import { type Db } from '../db';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ServerCommandOptions } from '../sdam/server';
@@ -51,6 +51,41 @@ export class RunCommandOperation<T = Document> extends ModernizedOperation<T> {
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
     return { session: this.session, timeoutContext };
+  }
+}
+
+/** @internal */
+export class RunCursorCommandOperation extends ModernizedOperation<CursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
+  command: Document;
+  override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor };
+
+  constructor(
+    parent: Db,
+    command: Document,
+    options: RunCommandOptions & { responseType?: MongoDBResponseConstructor }
+  ) {
+    super(options);
+    this.command = command;
+    this.options = options;
+    this.ns = parent.s.namespace.withCollection('$cmd');
+  }
+
+  override get commandName() {
+    return 'runCommand' as const;
+  }
+
+  override buildCommand(_connection: Connection, _session?: ClientSession): Document {
+    return this.command;
+  }
+
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return { session: this.session, timeoutContext };
+  }
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
   }
 }
 
