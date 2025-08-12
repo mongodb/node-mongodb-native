@@ -591,14 +591,14 @@ export class ClientEncryption {
         field == null || typeof field !== 'object' || field.keyId != null
           ? field
           : {
-            ...field,
-            keyId: await this.createDataKey(provider, {
-              masterKey,
-              // clone the timeoutContext
-              // in order to avoid sharing the same timeout for server selection and connection checkout across different concurrent operations
-              timeoutContext: timeoutContext?.csotEnabled() ? timeoutContext?.clone() : undefined
-            })
-          }
+              ...field,
+              keyId: await this.createDataKey(provider, {
+                masterKey,
+                // clone the timeoutContext
+                // in order to avoid sharing the same timeout for server selection and connection checkout across different concurrent operations
+                timeoutContext: timeoutContext?.csotEnabled() ? timeoutContext?.clone() : undefined
+              })
+            }
       );
       const createDataKeyResolutions = await Promise.allSettled(createDataKeyPromises);
 
@@ -784,7 +784,6 @@ export class ClientEncryption {
     }
 
     if (typeof textOptions === 'object') {
-      // @ts-expect-error errors until mongodb-client-encryption release
       contextOptions.textOptions = serialize(textOptions);
     }
 
@@ -814,12 +813,12 @@ export interface ClientEncryptionEncryptOptions {
    * The algorithm to use for encryption.
    */
   algorithm:
-  | 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-  | 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
-  | 'Indexed'
-  | 'Unindexed'
-  | 'Range'
-  | 'TextPreview';
+    | 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+    | 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
+    | 'Indexed'
+    | 'Unindexed'
+    | 'Range'
+    | 'TextPreview';
 
   /**
    * The id of the Binary dataKey to use for encryption
@@ -842,26 +841,45 @@ export interface ClientEncryptionEncryptOptions {
   /** The index options for a Queryable Encryption field supporting "range" queries.*/
   rangeOptions?: RangeOptions;
 
+  /**
+   * Options for a Queryable Encryption field supporting text queries.  Only valid when `algorithm` is `TextPreview`.
+   *
+   * @experimental Public Technical Preview: `textPreview` is an experimental feature and may break at any time.
+   */
   textOptions?: TextQueryOptions;
 }
 
+/**
+ * Options for a Queryable Encryption field supporting text queries.
+ *
+ * @experimental Public Technical Preview: `textPreview` is an experimental feature and may break at any time.
+ */
 interface TextQueryOptions {
+  /** Indicates that text indexes for this field are case sensitive */
   caseSensitive: boolean;
+  /** Indicates that text indexes for this field are diacritic sensitive. */
   diacriticSensitive: boolean;
 
   prefix?: {
+    /** The maximum allowed query length. */
     strMaxQueryLength: Int32 | number;
+    /** The minimum allowed query length. */
     strMinQueryLength: Int32 | number;
   };
 
   suffix?: {
+    /** The maximum allowed query length. */
     strMaxQueryLength: Int32 | number;
+    /** The minimum allowed query length. */
     strMinQueryLength: Int32 | number;
   };
 
   substring?: {
+    /** The maximum allowed length to insert. */
     strMaxLength: Int32 | number;
+    /** The maximum allowed query length. */
     strMaxQueryLength: Int32 | number;
+    /** The minimum allowed query length. */
     strMinQueryLength: Int32 | number;
   };
 }
@@ -873,11 +891,11 @@ interface TextQueryOptions {
 export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
   provider: ClientEncryptionDataKeyProvider;
   masterKey?:
-  | AWSEncryptionKeyOptions
-  | AzureEncryptionKeyOptions
-  | GCPEncryptionKeyOptions
-  | KMIPEncryptionKeyOptions
-  | undefined;
+    | AWSEncryptionKeyOptions
+    | AzureEncryptionKeyOptions
+    | GCPEncryptionKeyOptions
+    | KMIPEncryptionKeyOptions
+    | undefined;
 }
 
 /**
@@ -1066,11 +1084,11 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
    * Identifies a new KMS-specific key used to encrypt the new data key
    */
   masterKey?:
-  | AWSEncryptionKeyOptions
-  | AzureEncryptionKeyOptions
-  | GCPEncryptionKeyOptions
-  | KMIPEncryptionKeyOptions
-  | undefined;
+    | AWSEncryptionKeyOptions
+    | AzureEncryptionKeyOptions
+    | GCPEncryptionKeyOptions
+    | KMIPEncryptionKeyOptions
+    | undefined;
 
   /**
    * An optional list of string alternate names used to reference a key.
