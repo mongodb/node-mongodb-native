@@ -229,19 +229,16 @@ function passwordDigest(username: string, password: string) {
     throw new MongoInvalidArgumentError('Password cannot be empty');
   }
 
-  let md5: crypto.Hash;
+  // Use PBKDF2 with SHA-256, 100,000 iterations, and a salt derived from username
+  const salt = Buffer.from(username + ':mongo', 'utf8');
+  const iterations = 100000;
+  const keylen = 32; // 256 bits
   try {
-    md5 = crypto.createHash('md5');
+    const derivedKey = crypto.pbkdf2Sync(password, salt, iterations, keylen, 'sha256');
+    return derivedKey.toString('hex');
   } catch (err) {
-    if (crypto.getFips()) {
-      // This error is (slightly) more helpful than what comes from OpenSSL directly, e.g.
-      // 'Error: error:060800C8:digital envelope routines:EVP_DigestInit_ex:disabled for FIPS'
-      throw new Error('Auth mechanism SCRAM-SHA-1 is not supported in FIPS mode');
-    }
-    throw err;
+    throw new MongoRuntimeError('Error hashing password with PBKDF2: ' + err.message);
   }
-  md5.update(`${username}:mongo:${password}`, 'utf8');
-  return md5.digest('hex');
 }
 
 // XOR two buffers
