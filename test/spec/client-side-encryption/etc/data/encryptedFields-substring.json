@@ -1,13 +1,13 @@
 {
-  "fields": [
-    {
+    "fields": [
+        {
             "keyId": {
                 "$binary": {
                     "base64": "EjRWeBI0mHYSNBI0VniQEg==",
                     "subType": "04"
                 }
             },
-            "path": "encrypted-textPreview",
+            "path": "encryptedText",
             "bsonType": "string",
             "queries": [
                 {
@@ -26,5 +26,5 @@
                 }
             ]
         }
-  ]
+    ]
 }

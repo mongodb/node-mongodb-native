@@ -59,7 +59,7 @@ export class ClientSideEncryptionFilter extends Filter {
     };
   }
 
-  filter(test: { metadata?: MongoDBMetadataUI }) {
+  filter(test: { metadata?: MongoDBMetadataUI }): boolean | string {
     const clientSideEncryption =
       test.metadata && test.metadata.requires && test.metadata.requires.clientSideEncryption;
 
