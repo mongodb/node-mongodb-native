@@ -1,6 +1,10 @@
 import type { BSONSerializeOptions, Document } from '../bson';
 import { type Connection } from '../cmap/connection';
-import { CursorResponse, MongoDBResponse, type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
+import {
+  CursorResponse,
+  MongoDBResponse,
+  type MongoDBResponseConstructor
+} from '../cmap/wire_protocol/responses';
 import { type Db } from '../db';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ServerCommandOptions } from '../sdam/server';

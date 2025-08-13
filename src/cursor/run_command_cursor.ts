@@ -4,7 +4,7 @@ import type { Db } from '../db';
 import { MongoAPIError, MongoRuntimeError } from '../error';
 import { executeOperation } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
-import { RunCommandOperation, RunCursorCommandOperation } from '../operations/run_command';
+import { RunCursorCommandOperation } from '../operations/run_command';
 import type { ReadConcernLike } from '../read_concern';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
