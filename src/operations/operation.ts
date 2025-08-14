@@ -167,7 +167,6 @@ export abstract class ModernizedOperation<TResult> extends AbstractOperation<TRe
    * ```
    */
   handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
-    console.log(response);
     return response.toObject(this.bsonOptions) as TResult;
   }
 
