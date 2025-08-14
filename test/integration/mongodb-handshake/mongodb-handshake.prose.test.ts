@@ -6,7 +6,6 @@ import {
   getFAASEnv,
   Int32,
   LEGACY_HELLO_COMMAND,
-  MongoDBResponse,
   type MongoClient
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
