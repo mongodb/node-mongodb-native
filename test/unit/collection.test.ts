@@ -25,7 +25,6 @@ describe('Collection', function () {
 
       server.setMessageHandler(request => {
         const doc = request.document;
-        console.log('doc', doc);
 
         if (isHello(doc)) {
           return request.reply(Object.assign({}, HELLO));
