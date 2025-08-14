@@ -56,11 +56,17 @@ export class DistinctOperation extends ModernizedCommandOperation<any[] | Docume
   }
 
   override buildCommandDocument(_connection: Connection): Document {
-    return {
+    const command: Document = {
       distinct: this.collection.collectionName,
       key: this.key,
       query: this.query
     };
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (this.options.comment !== undefined) {
+      command.comment = this.options.comment;
+    }
+    return command;
   }
 
   override handleOk(
