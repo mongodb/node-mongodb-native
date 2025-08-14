@@ -1,0 +1,11 @@
+description: "runOnRequirement-csfle-minLibmongocryptVersion-pattern"
+
+schemaVersion: "1.25"
+
+runOnRequirements:
+  - csfle:
+      minLibmongocryptVersion: "1.2.3.4"
+
+tests:
+  - description: "foo"
+    operations: []
