@@ -6,6 +6,7 @@ import {
   getFAASEnv,
   Int32,
   LEGACY_HELLO_COMMAND,
+  MongoDBResponse,
   type MongoClient
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
@@ -239,19 +240,21 @@ describe('Client Metadata Update Prose Tests', function () {
             }
           );
 
-          sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
-            // @ts-expect-error: sinon will place wrappedMethod on the command method.
-            const command = Connection.prototype.command.wrappedMethod.bind(this);
+          sinon
+            .stub(Connection.prototype, 'command')
+            .callsFake(async function (ns, cmd, options, responseType) {
+              // @ts-expect-error: sinon will place wrappedMethod on the command method.
+              const command = Connection.prototype.command.wrappedMethod.bind(this);
 
-            if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
-              if (!initialClientMetadata) {
-                initialClientMetadata = cmd.client;
-              } else {
-                updatedClientMetadata = cmd.client;
+              if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+                if (!initialClientMetadata) {
+                  initialClientMetadata = cmd.client;
+                } else {
+                  updatedClientMetadata = cmd.client;
+                }
               }
-            }
-            return command(ns, cmd, options);
-          });
+              return command(ns, cmd, options, responseType);
+            });
 
           await client.db('test').command({ ping: 1 });
           await sleep(5);
@@ -311,19 +314,21 @@ describe('Client Metadata Update Prose Tests', function () {
           client = this.configuration.newClient({}, { maxIdleTimeMS: 1 });
           client.appendMetadata({ name: 'library', version: '1.2', platform: 'Library Platform' });
 
-          sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
-            // @ts-expect-error: sinon will place wrappedMethod on the command method.
-            const command = Connection.prototype.command.wrappedMethod.bind(this);
+          sinon
+            .stub(Connection.prototype, 'command')
+            .callsFake(async function (ns, cmd, options, responseType) {
+              // @ts-expect-error: sinon will place wrappedMethod on the command method.
+              const command = Connection.prototype.command.wrappedMethod.bind(this);
 
-            if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
-              if (!initialClientMetadata) {
-                initialClientMetadata = cmd.client;
-              } else {
-                updatedClientMetadata = cmd.client;
+              if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+                if (!initialClientMetadata) {
+                  initialClientMetadata = cmd.client;
+                } else {
+                  updatedClientMetadata = cmd.client;
+                }
               }
-            }
-            return command(ns, cmd, options);
-          });
+              return command(ns, cmd, options, responseType);
+            });
 
           await client.db('test').command({ ping: 1 });
           await sleep(5);
