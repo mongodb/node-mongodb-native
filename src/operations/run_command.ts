@@ -1,13 +1,19 @@
 import type { BSONSerializeOptions, Document } from '../bson';
-import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
+import { type Connection } from '../cmap/connection';
+import {
+  CursorResponse,
+  MongoDBResponse,
+  type MongoDBResponseConstructor
+} from '../cmap/wire_protocol/responses';
 import { type Db } from '../db';
-import { type TODO_NODE_3286 } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
-import type { Server } from '../sdam/server';
+import type { ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { MongoDBNamespace } from '../utils';
-import { AbstractOperation } from './operation';
+import { type WriteConcern } from '../write_concern';
+import { ModernizedCommandOperation } from './command';
+import { ModernizedOperation } from './operation';
 
 /** @public */
 export type RunCommandOptions = {
@@ -25,7 +31,38 @@ export type RunCommandOptions = {
 } & BSONSerializeOptions;
 
 /** @internal */
-export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
+export class RunCommandOperation<T = Document> extends ModernizedCommandOperation<T> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
+  command: Document;
+  override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor };
+
+  constructor(
+    parent: Db,
+    command: Document,
+    options: RunCommandOptions & { responseType?: MongoDBResponseConstructor }
+  ) {
+    super(undefined, options);
+    this.command = command;
+    this.options = options;
+    this.ns = parent.s.namespace.withCollection('$cmd');
+  }
+
+  override get commandName() {
+    return 'runCommand' as const;
+  }
+
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    return this.command;
+  }
+
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return { session: this.session, timeoutContext };
+  }
+}
+
+/** @internal */
+export class RunCursorCommandOperation extends ModernizedOperation<CursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   command: Document;
   override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor };
 
@@ -44,43 +81,36 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
     return 'runCommand' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<T> {
-    this.server = server;
-    const res: TODO_NODE_3286 = await server.command(
-      this.ns,
-      this.command,
-      {
-        ...this.options,
-        readPreference: this.readPreference,
-        session,
-        timeoutContext
-      },
-      this.options.responseType
-    );
+  override buildCommand(_connection: Connection, _session?: ClientSession): Document {
+    return this.command;
+  }
 
-    return res;
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return { session: this.session, timeoutContext };
+  }
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
   }
 }
 
-export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T> {
+export class RunAdminCommandOperation<T = Document> extends ModernizedCommandOperation<T> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   command: Document;
   override options: RunCommandOptions & {
-    noResponse?: boolean;
+    writeConcern?: WriteConcern;
     bypassPinningCheck?: boolean;
   };
 
   constructor(
     command: Document,
     options: RunCommandOptions & {
-      noResponse?: boolean;
+      writeConcern?: WriteConcern;
       bypassPinningCheck?: boolean;
     }
   ) {
-    super(options);
+    super(undefined, options);
     this.command = command;
     this.options = options;
     this.ns = new MongoDBNamespace('admin', '$cmd');
@@ -90,18 +120,11 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
     return 'runCommand' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<T> {
-    this.server = server;
-    const res: TODO_NODE_3286 = await server.command(this.ns, this.command, {
-      ...this.options,
-      readPreference: this.readPreference,
-      session,
-      timeoutContext
-    });
-    return res;
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    return this.command;
+  }
+
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return { session: this.session, timeoutContext };
   }
 }

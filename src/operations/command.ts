@@ -223,13 +223,14 @@ export abstract class ModernizedCommandOperation<T> extends ModernizedOperation<
   abstract buildCommandDocument(connection: Connection, session?: ClientSession): Document;
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
-    return {
+    const options = {
       ...this.options,
       ...this.bsonOptions,
       timeoutContext,
       readPreference: this.readPreference,
       session: this.session
     };
+    return options;
   }
 
   override buildCommand(connection: Connection, session?: ClientSession): Document {
@@ -260,6 +261,8 @@ export abstract class ModernizedCommandOperation<T> extends ModernizedOperation<
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
       return decorateWithExplain(command, this.explain);
     }
+
+    console.log(command);
 
     return command;
   }

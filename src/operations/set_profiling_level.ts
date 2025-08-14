@@ -1,10 +1,10 @@
+import { type Document } from '../bson';
+import { type Connection } from '../cmap/connection';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import { MongoInvalidArgumentError } from '../error';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { enumToString } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
 
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
@@ -22,7 +22,8 @@ export type ProfilingLevel = (typeof ProfilingLevel)[keyof typeof ProfilingLevel
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
+export class SetProfilingLevelOperation extends ModernizedCommandOperation<ProfilingLevel> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: SetProfilingLevelOptions;
   level: ProfilingLevel;
   profile: 0 | 1 | 2;
@@ -52,21 +53,22 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     return 'profile' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<ProfilingLevel> {
+  override buildCommandDocument(_connection: Connection): Document {
     const level = this.level;
 
     if (!levelValues.has(level)) {
+      // TODO(NODE-3483): Determine error to put here
       throw new MongoInvalidArgumentError(
         `Profiling level must be one of "${enumToString(ProfilingLevel)}"`
       );
     }
 
-    // TODO(NODE-3483): Determine error to put here
-    await super.executeCommand(server, session, { profile: this.profile }, timeoutContext);
-    return level;
+    return { profile: this.profile };
+  }
+
+  override handleOk(
+    _response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): ProfilingLevel {
+    return this.level;
   }
 }
