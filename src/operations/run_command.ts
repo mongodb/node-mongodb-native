@@ -31,7 +31,7 @@ export type RunCommandOptions = {
 } & BSONSerializeOptions;
 
 /** @internal */
-export class RunCommandOperation<T = Document> extends ModernizedOperation<T> {
+export class RunCommandOperation<T = Document> extends ModernizedCommandOperation<T> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   command: Document;
   override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor };
@@ -41,7 +41,7 @@ export class RunCommandOperation<T = Document> extends ModernizedOperation<T> {
     command: Document,
     options: RunCommandOptions & { responseType?: MongoDBResponseConstructor }
   ) {
-    super(options);
+    super(undefined, options);
     this.command = command;
     this.options = options;
     this.ns = parent.s.namespace.withCollection('$cmd');
@@ -51,7 +51,7 @@ export class RunCommandOperation<T = Document> extends ModernizedOperation<T> {
     return 'runCommand' as const;
   }
 
-  override buildCommand(_connection: Connection, _session?: ClientSession): Document {
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     return this.command;
   }
 
