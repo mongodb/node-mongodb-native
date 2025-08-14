@@ -11,6 +11,8 @@ import type { ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { MongoDBNamespace } from '../utils';
+import { type WriteConcern } from '../write_concern';
+import { ModernizedCommandOperation } from './command';
 import { ModernizedOperation } from './operation';
 
 /** @public */
@@ -93,22 +95,22 @@ export class RunCursorCommandOperation extends ModernizedOperation<CursorRespons
   }
 }
 
-export class RunAdminCommandOperation<T = Document> extends ModernizedOperation<T> {
+export class RunAdminCommandOperation<T = Document> extends ModernizedCommandOperation<T> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   command: Document;
   override options: RunCommandOptions & {
-    noResponse?: boolean;
+    writeConcern?: WriteConcern;
     bypassPinningCheck?: boolean;
   };
 
   constructor(
     command: Document,
     options: RunCommandOptions & {
-      noResponse?: boolean;
+      writeConcern?: WriteConcern;
       bypassPinningCheck?: boolean;
     }
   ) {
-    super(options);
+    super(undefined, options);
     this.command = command;
     this.options = options;
     this.ns = new MongoDBNamespace('admin', '$cmd');
@@ -118,7 +120,7 @@ export class RunAdminCommandOperation<T = Document> extends ModernizedOperation<
     return 'runCommand' as const;
   }
 
-  override buildCommand(_connection: Connection, _session?: ClientSession): Document {
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     return this.command;
   }
 
