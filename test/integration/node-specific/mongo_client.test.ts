@@ -916,7 +916,7 @@ describe('class MongoClient', function () {
       expect(result2).to.have.property('ok', 1);
     });
 
-    it.only('sends endSessions with noResponse set', async () => {
+    it('sends endSessions with noResponse set', async () => {
       const session = client.startSession(); // make a session to be ended
       await client.db('test').command({ ping: 1 }, { session });
       await session.endSession();

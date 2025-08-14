@@ -230,7 +230,6 @@ export abstract class ModernizedCommandOperation<T> extends ModernizedOperation<
       readPreference: this.readPreference,
       session: this.session
     };
-    console.log(options);
     return options;
   }
 
