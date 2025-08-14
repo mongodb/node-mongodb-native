@@ -24,7 +24,7 @@ const loadFLEDataFile = async (filename: string) =>
     { relaxed: false }
   );
 
-describe.only('27. Text Explicit Encryption', function () {
+describe('27. Text Explicit Encryption', function () {
   let keyDocument1: Document;
   let keyId1: Binary;
   let utilClient: MongoClient;

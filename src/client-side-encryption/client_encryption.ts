@@ -852,9 +852,10 @@ export interface ClientEncryptionEncryptOptions {
 /**
  * Options for a Queryable Encryption field supporting text queries.
  *
+ * @public
  * @experimental Public Technical Preview: `textPreview` is an experimental feature and may break at any time.
  */
-interface TextQueryOptions {
+export interface TextQueryOptions {
   /** Indicates that text indexes for this field are case sensitive */
   caseSensitive: boolean;
   /** Indicates that text indexes for this field are diacritic sensitive. */

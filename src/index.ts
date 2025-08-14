@@ -242,7 +242,8 @@ export type {
   DataKey,
   GCPEncryptionKeyOptions,
   KMIPEncryptionKeyOptions,
-  RangeOptions
+  RangeOptions,
+  TextQueryOptions
 } from './client-side-encryption/client_encryption';
 export {
   MongoCryptAzureKMSRequestError,
