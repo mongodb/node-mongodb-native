@@ -15,7 +15,17 @@ describe('Collection', function () {
   });
 
   context('#createIndex', () => {
-    it('should error when createIndex fails', function (done) {
+    let client;
+
+    before(function () {
+      client = new MongoClient(`mongodb://${server.uri()}`);
+    });
+
+    after(async function () {
+      await client.close();
+    });
+
+    it('should error when createIndex fails', async function () {
       const ERROR_RESPONSE = {
         ok: 0,
         errmsg:
@@ -39,27 +49,11 @@ describe('Collection', function () {
         }
       });
 
-      const client = new MongoClient(`mongodb://${server.uri()}`);
-
-      const close = e => client.close().then(() => done(e));
-
-      client
-        .connect()
-        .then(() => client.db('foo').collection('bar'))
-        .then(coll => coll.createIndex({ a: 1 }))
-        .then(
-          () => close('Expected createIndex to fail, but it succeeded'),
-          e => {
-            try {
-              expect(e).to.have.property('ok', ERROR_RESPONSE.ok);
-              expect(e).to.have.property('errmsg', ERROR_RESPONSE.errmsg);
-              expect(e).to.have.property('code', ERROR_RESPONSE.code);
-              close(null);
-            } catch (err) {
-              close(err);
-            }
-          }
-        );
+      const coll = client.db('foo').collection('bar');
+      const e = await coll.createIndex({ a: 1 }).catch(e => e);
+      expect(e).to.have.property('ok', ERROR_RESPONSE.ok);
+      expect(e).to.have.property('errmsg', ERROR_RESPONSE.errmsg);
+      expect(e).to.have.property('code', ERROR_RESPONSE.code);
     });
   });
 
