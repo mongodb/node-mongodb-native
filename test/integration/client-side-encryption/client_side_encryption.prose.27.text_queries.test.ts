@@ -35,7 +35,7 @@ describe('27. Text Explicit Encryption', function () {
   beforeEach(async function () {
     utilClient = this.configuration.newClient();
 
-    // Using QE CreateCollection() and Collection.Drop(), drop and create the following collections:
+    // Using QE CreateCollection() and Collection.Drop(), drop and create the following collections with majority write concern:
     // - db.prefix-suffix using the encryptedFields option set to the contents of encryptedFields-prefix-suffix.json
     // - db.substring using the encryptedFields option set to the contents of encryptedFields-substring.json
     async function dropAndCreateCollection(ns: string, encryptedFields?: Document) {
@@ -64,10 +64,10 @@ describe('27. Text Explicit Encryption', function () {
     // Read the "_id" field of key1Document as key1ID.
     keyId1 = keyDocument1._id;
 
-    // Drop and create the collection keyvault.datakeys.
+    // Drop and create the collection keyvault.datakeys with majority write concern.
     await dropAndCreateCollection('keyvault.datakeys');
 
-    // Insert `key1Document` in `keyvault.datakeys` with majority write concern.
+    // Insert `key1Document` in `keyvault.datakeys` with majority write concern with majority write concern.
     await utilClient
       .db('keyvault')
       .collection('datakeys')
@@ -109,6 +109,24 @@ describe('27. Text Explicit Encryption', function () {
     );
 
     {
+      // Use `clientEncryption` to encrypt the string `"foobarbaz"` with the following `EncryptOpts`:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "TextPreview",
+      //    contentionFactor: 0,
+      //    textOpts: TextOpts {
+      //       caseSensitive: true,
+      //       diacriticSensitive: true,
+      //       prefix: PrefixOpts {
+      //         strMaxQueryLength: 10,
+      //         strMinQueryLength: 2,
+      //       },
+      //       suffix: SuffixOpts {
+      //         strMaxQueryLength: 10,
+      //         strMinQueryLength: 2,
+      //       },
+      //    },
+      // }
       const encryptedText = await clientEncryption.encrypt('foobarbaz', {
         keyId: keyId1,
         algorithm: 'TextPreview',
@@ -127,16 +145,36 @@ describe('27. Text Explicit Encryption', function () {
         }
       });
 
+      // Use `encryptedClient` to insert the following document into `db.prefix-suffix` with majority write concern:
+      // { "_id": 0, "encryptedText": <encrypted 'foobarbaz'> }
       await encryptedClient
         .db('db')
         .collection<{ _id: number; encryptedText: Binary }>('prefix-suffix')
-        .insertOne({
-          _id: 0,
-          encryptedText
-        });
+        .insertOne(
+          {
+            _id: 0,
+            encryptedText
+          },
+          { writeConcern: { w: 'majority' } }
+        );
     }
 
     {
+      // Use `clientEncryption` to encrypt the string `"foobarbaz"` with the following `EncryptOpts`:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "TextPreview",
+      //    contentionFactor: 0,
+      //    textOpts: TextOpts {
+      //       caseSensitive: true,
+      //       diacriticSensitive: true,
+      //       substring: SubstringOpts {
+      //        strMaxLength: 10,
+      //        strMaxQueryLength: 10,
+      //        strMinQueryLength: 2,
+      //       }
+      //    },
+      // }
       const encryptedText = await clientEncryption.encrypt('foobarbaz', {
         keyId: keyId1,
         algorithm: 'TextPreview',
@@ -152,13 +190,18 @@ describe('27. Text Explicit Encryption', function () {
         }
       });
 
+      // Use `encryptedClient` to insert the following document into `db.substring` with majority write concern:
+      // { "_id": 0, "encryptedText": <encrypted 'foobarbaz'> }
       await encryptedClient
         .db('db')
         .collection<{ _id: number; encryptedText: Binary }>('substring')
-        .insertOne({
-          _id: 0,
-          encryptedText
-        });
+        .insertOne(
+          {
+            _id: 0,
+            encryptedText
+          },
+          { writeConcern: { w: 'majority' } }
+        );
     }
   });
 
