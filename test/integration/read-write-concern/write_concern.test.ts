@@ -276,9 +276,9 @@ describe('Write Concern', function () {
             await client.connect();
           });
 
-          afterEach(function () {
+          afterEach(async function () {
             sinon.restore();
-            client.close();
+            await client.close();
           });
 
           it(
