@@ -96,7 +96,7 @@
     "js-yaml": "^4.1.0",
     "mocha": "^11.7.1",
     "mocha-sinon": "^2.1.2",
-    "mongodb-client-encryption": "^6.4.0",
+    "mongodb-client-encryption": "^6.5.0",
     "mongodb-legacy": "^6.1.3",
     "nyc": "^15.1.0",
     "prettier": "^3.5.3",
