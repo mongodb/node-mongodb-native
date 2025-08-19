@@ -810,9 +810,7 @@ BUILD_VARIANTS.push({
   display_name: 'Azure KMS Test',
   run_on: DEBIAN_OS,
   batchtime: 20160,
-  // TODO(NODE-7080): Fix setup of Azure tests in CI
-  // tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
-  tasks: ['test-azurekms-fail-task']
+  tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });
 
 BUILD_VARIANTS.push({

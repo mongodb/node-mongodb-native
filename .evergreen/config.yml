@@ -3611,6 +3611,7 @@ buildvariants:
     run_on: debian11-small
     batchtime: 20160
     tasks:
+      - test_azurekms_task_group
       - test-azurekms-fail-task
   - name: ubuntu20-test-all-oidc
     display_name: MONGODB-OIDC Auth Tests
