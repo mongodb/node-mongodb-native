@@ -262,8 +262,6 @@ export abstract class ModernizedCommandOperation<T> extends ModernizedOperation<
       return decorateWithExplain(command, this.explain);
     }
 
-    console.log(command);
-
     return command;
   }
 }

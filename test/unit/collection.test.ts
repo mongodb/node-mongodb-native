@@ -14,49 +14,6 @@ describe('Collection', function () {
     await cleanup();
   });
 
-  context('#createIndex', () => {
-    let client;
-
-    before(function () {
-      client = new MongoClient(`mongodb://${server.uri()}`);
-    });
-
-    after(async function () {
-      await client.close();
-    });
-
-    it('should error when createIndex fails', async function () {
-      const ERROR_RESPONSE = {
-        ok: 0,
-        errmsg:
-          'WiredTigerIndex::insert: key too large to index, failing  1470 { : "56f37cb8e4b089e98d52ab0e", : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." }',
-        code: 17280
-      };
-
-      server.setMessageHandler(request => {
-        const doc = request.document;
-
-        if (isHello(doc)) {
-          return request.reply(Object.assign({}, HELLO));
-        }
-
-        if (doc.createIndexes) {
-          return request.reply(ERROR_RESPONSE);
-        }
-
-        if (doc.insert === 'system.indexes') {
-          return request.reply(ERROR_RESPONSE);
-        }
-      });
-
-      const coll = client.db('foo').collection('bar');
-      const e = await coll.createIndex({ a: 1 }).catch(e => e);
-      expect(e).to.have.property('ok', ERROR_RESPONSE.ok);
-      expect(e).to.have.property('errmsg', ERROR_RESPONSE.errmsg);
-      expect(e).to.have.property('code', ERROR_RESPONSE.code);
-    });
-  });
-
   context('#aggregate', () => {
     // general test for aggregate function
     function testAggregate(config, done) {

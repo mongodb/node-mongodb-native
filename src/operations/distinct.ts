@@ -66,6 +66,11 @@ export class DistinctOperation extends ModernizedCommandOperation<any[] | Docume
     if (this.options.comment !== undefined) {
       command.comment = this.options.comment;
     }
+
+    if (this.options.hint != null) {
+      command.hint = this.options.hint;
+    }
+
     return command;
   }
 

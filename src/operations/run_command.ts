@@ -1,3 +1,4 @@
+import { type Abortable } from '..';
 import type { BSONSerializeOptions, Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import {
@@ -28,7 +29,8 @@ export type RunCommandOptions = {
   timeoutMS?: number;
   /** @internal */
   omitMaxTimeMS?: boolean;
-} & BSONSerializeOptions;
+} & BSONSerializeOptions &
+  Abortable;
 
 /** @internal */
 export class RunCommandOperation<T = Document> extends ModernizedCommandOperation<T> {
@@ -56,7 +58,7 @@ export class RunCommandOperation<T = Document> extends ModernizedCommandOperatio
   }
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
-    return { session: this.session, timeoutContext };
+    return { session: this.session, timeoutContext, signal: this.options.signal };
   }
 }
 
@@ -101,6 +103,7 @@ export class RunAdminCommandOperation<T = Document> extends ModernizedCommandOpe
   override options: RunCommandOptions & {
     writeConcern?: WriteConcern;
     bypassPinningCheck?: boolean;
+    noResponse?: boolean;
   };
 
   constructor(
@@ -108,6 +111,7 @@ export class RunAdminCommandOperation<T = Document> extends ModernizedCommandOpe
     options: RunCommandOptions & {
       writeConcern?: WriteConcern;
       bypassPinningCheck?: boolean;
+      noResponse?: boolean;
     }
   ) {
     super(undefined, options);
@@ -125,6 +129,6 @@ export class RunAdminCommandOperation<T = Document> extends ModernizedCommandOpe
   }
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
-    return { session: this.session, timeoutContext };
+    return { session: this.session, timeoutContext, noResponse: this.options.noResponse };
   }
 }
