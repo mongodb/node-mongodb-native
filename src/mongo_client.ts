@@ -62,7 +62,7 @@ import {
   type HostAddress,
   hostMatchesWildcards,
   isHostMatch,
-  type MongoDBNamespace,
+  MongoDBNamespace,
   noop,
   ns,
   resolveOptions,
@@ -793,6 +793,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       if (endSessions.length !== 0) {
         try {
           class EndSessionsOperation extends ModernizedOperation<void> {
+            override ns = MongoDBNamespace.fromString('admin.$cmd');
             override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
             override buildCommand(_connection: Connection, _session?: ClientSession): Document {
               return {
