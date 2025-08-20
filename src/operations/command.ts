@@ -223,14 +223,13 @@ export abstract class ModernizedCommandOperation<T> extends ModernizedOperation<
   abstract buildCommandDocument(connection: Connection, session?: ClientSession): Document;
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
-    const options = {
+    return {
       ...this.options,
       ...this.bsonOptions,
       timeoutContext,
       readPreference: this.readPreference,
       session: this.session
     };
-    return options;
   }
 
   override buildCommand(connection: Connection, session?: ClientSession): Document {

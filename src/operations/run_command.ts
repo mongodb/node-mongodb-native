@@ -12,7 +12,6 @@ import type { ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { MongoDBNamespace } from '../utils';
-import { type WriteConcern } from '../write_concern';
 import { ModernizedCommandOperation } from './command';
 
 /** @public */
@@ -85,17 +84,15 @@ export class RunAdminCommandOperation<T = Document> extends ModernizedCommandOpe
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   command: Document;
   override options: RunCommandOptions & {
-    writeConcern?: WriteConcern;
-    bypassPinningCheck?: boolean;
     noResponse?: boolean;
+    bypassPinningCheck?: boolean;
   };
 
   constructor(
     command: Document,
     options: RunCommandOptions & {
-      writeConcern?: WriteConcern;
-      bypassPinningCheck?: boolean;
       noResponse?: boolean;
+      bypassPinningCheck?: boolean;
     }
   ) {
     super(undefined, options);
