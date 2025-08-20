@@ -54,6 +54,7 @@ export class RunCommandOperation<T = Document> extends ModernizedOperation<T> {
 
   override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
     return {
+      ...this.options,
       session: this.session,
       timeoutContext,
       signal: this.options.signal,
