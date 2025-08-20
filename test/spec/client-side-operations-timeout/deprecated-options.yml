@@ -3743,16 +3743,19 @@ tests:
               failCommands: ["dropIndexes"]
               blockConnection: true
               blockTimeMS: 5
+      # Create the index first so dropIndex doesn't return IndexNotFound on
+      # servers prior to 8.3.
+      - name: createIndex 
+        object: *collection
+        arguments:
+          keys: { x: 1 }
+          timeoutMS: 100000
+          name: "x_1"
       - name: dropIndex
         object: *collection
         arguments:
           timeoutMS: 100000
           name: "x_1"
-          
-        expectError:
-          isClientError: false
-          isTimeoutError: false
-
   - description: "wTimeoutMS is ignored if timeoutMS is set - dropIndex on collection"
     operations:
       - name: createEntities
@@ -3781,18 +3784,26 @@ tests:
             - session:
                 id: &session session
                 client: *client
+      # Create the index first so dropIndex doesn't return IndexNotFound on
+      # servers prior to 8.3.
+      - name: createIndex
+        object: *collection
+        arguments:
+          keys: { x: 1 }
+          timeoutMS: 100000
+          name: "x_1"
       - name: dropIndex
         object: *collection
         arguments:
           timeoutMS: 100000
           name: "x_1"
-          
-        expectError:
-          isClientError: false
-          isTimeoutError: false
     expectEvents:
       - client: *client
         events:
+          - commandStartedEvent:
+              commandName: createIndexes
+              databaseName: *databaseName
+
           - commandStartedEvent:
               commandName: dropIndexes
               databaseName: *databaseName
@@ -3828,19 +3839,26 @@ tests:
             - session:
                 id: &session session
                 client: *client
+      # Create the index first so dropIndex doesn't return IndexNotFound on
+      # servers prior to 8.3.
+      - name: createIndex 
+        object: *collection
+        arguments:
+          keys: { x: 1 }
+          name: "x_1"
       - name: dropIndex
         object: *collection
         arguments:
           timeoutMS: &timeoutMS 1000
           maxTimeMS: 5000
           name: "x_1"
-          
-        expectError:
-          isClientError: false
-          isTimeoutError: false
     expectEvents:
       - client: *client
         events:
+          - commandStartedEvent:
+              commandName: createIndexes
+              databaseName: *databaseName
+
           - commandStartedEvent:
               commandName: dropIndexes
               databaseName: *databaseName
@@ -3884,6 +3902,14 @@ tests:
               failCommands: ["dropIndexes"]
               blockConnection: true
               blockTimeMS: 5
+      # Create the index first so dropIndex doesn't return IndexNotFound on
+      # servers prior to 8.3.
+      - name: createIndex 
+        object: *collection
+        arguments:
+          keys: { x: 1 }
+          name: "x_1"
+          timeoutMS: 100000
       - name: dropIndexes
         object: *collection
         arguments:
