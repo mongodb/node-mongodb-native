@@ -2,7 +2,7 @@ import type { Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -12,7 +12,7 @@ export interface DbStatsOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DbStatsOperation extends ModernizedCommandOperation<Document> {
+export class DbStatsOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DbStatsOptions;
 

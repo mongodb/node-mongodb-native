@@ -511,7 +511,7 @@ export type {
   CollationOptions,
   CommandOperation,
   CommandOperationOptions,
-  ModernizedCommandOperation,
+  CommandOperation as ModernizedCommandOperation,
   OperationParent
 } from './operations/command';
 export type { CountOptions } from './operations/count';
@@ -547,7 +547,7 @@ export type { ListDatabasesOptions, ListDatabasesResult } from './operations/lis
 export type {
   AbstractOperation,
   Hint,
-  ModernizedOperation,
+  AbstractOperation as ModernizedOperation,
   OperationOptions
 } from './operations/operation';
 export type { ProfilingLevelOptions } from './operations/profiling_level';

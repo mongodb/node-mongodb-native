@@ -8,8 +8,8 @@ import { type OneOrMore } from '../mongo_types';
 import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
+  CommandOperation,
   type CommandOperationOptions,
-  ModernizedCommandOperation,
   type OperationParent
 } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -242,7 +242,7 @@ type ResolvedIndexDescription = Omit<IndexDescription, 'key' | 'version'> & {
 };
 
 /** @internal */
-export class CreateIndexesOperation extends ModernizedCommandOperation<string[]> {
+export class CreateIndexesOperation extends CommandOperation<string[]> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: CreateIndexesOptions;
   collectionName: string;
@@ -328,7 +328,7 @@ export class CreateIndexesOperation extends ModernizedCommandOperation<string[]>
 export type DropIndexesOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropIndexOperation extends ModernizedCommandOperation<Document> {
+export class DropIndexOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DropIndexesOptions;
   collection: Collection;
@@ -359,7 +359,7 @@ export type ListIndexesOptions = AbstractCursorOptions & {
 };
 
 /** @internal */
-export class ListIndexesOperation extends ModernizedCommandOperation<CursorResponse> {
+export class ListIndexesOperation extends CommandOperation<CursorResponse> {
   override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   /**
    * @remarks WriteConcern can still be present on the options because

@@ -275,7 +275,7 @@ describe('Retryable Writes Spec Prose', () => {
       'when a retry attempt fails with an error labeled NoWritesPerformed, drivers MUST return the original error',
       { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
       async () => {
-        const serverCommandStub = sinon.stub(Server.prototype, 'modernCommand');
+        const serverCommandStub = sinon.stub(Server.prototype, 'command');
         serverCommandStub.onCall(0).rejects(
           new MongoWriteConcernError({
             errorLabels: ['RetryableWriteError'],

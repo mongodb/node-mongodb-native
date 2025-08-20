@@ -32,7 +32,7 @@ describe('Non Server Retryable Writes', function () {
     'returns the original error with a PoolRequstedRetry label after encountering a WriteConcernError',
     { requires: { topology: 'replicaset' } },
     async () => {
-      const serverCommandStub = sinon.stub(Server.prototype, 'modernCommand');
+      const serverCommandStub = sinon.stub(Server.prototype, 'command');
       serverCommandStub.onCall(0).rejects(new PoolClearedError('error'));
       serverCommandStub.onCall(1).returns(
         Promise.reject(

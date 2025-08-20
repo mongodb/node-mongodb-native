@@ -5,10 +5,10 @@ import type { Collection } from '../../collection';
 import type { ServerCommandOptions } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { type TimeoutContext } from '../../timeout';
-import { ModernizedOperation } from '../operation';
+import { AbstractOperation } from '../operation';
 
 /** @internal */
-export class UpdateSearchIndexOperation extends ModernizedOperation<void> {
+export class UpdateSearchIndexOperation extends AbstractOperation<void> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   private readonly collection: Collection;
   private readonly name: string;

@@ -44,7 +44,7 @@ import {
 } from './operations/client_bulk_write/common';
 import { ClientBulkWriteExecutor } from './operations/client_bulk_write/executor';
 import { executeOperation } from './operations/execute_operation';
-import { ModernizedOperation } from './operations/operation';
+import { AbstractOperation } from './operations/operation';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
@@ -792,7 +792,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
       if (endSessions.length !== 0) {
         try {
-          class EndSessionsOperation extends ModernizedOperation<void> {
+          class EndSessionsOperation extends AbstractOperation<void> {
             override ns = MongoDBNamespace.fromString('admin.$cmd');
             override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
             override buildCommand(_connection: Connection, _session?: ClientSession): Document {

@@ -70,7 +70,7 @@ describe('Server Operation Count Tests', function () {
     it('is zero after a successful command', loadBalancedTestMetadata, async function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
-      const commandSpy = sinon.spy(server, 'modernCommand');
+      const commandSpy = sinon.spy(server, 'command');
 
       await collection.findOne({ count: 1 });
 
@@ -84,7 +84,7 @@ describe('Server Operation Count Tests', function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
 
-      const commandSpy = sinon.spy(server, 'modernCommand');
+      const commandSpy = sinon.spy(server, 'command');
 
       const error = await collection.findOne({ count: 1 }).catch(e => e);
 
@@ -104,7 +104,7 @@ describe('Server Operation Count Tests', function () {
         sinon
           .stub(ConnectionPool.prototype, 'checkOut')
           .rejects(new Error('unable to checkout connection'));
-        const commandSpy = sinon.spy(server, 'modernCommand');
+        const commandSpy = sinon.spy(server, 'command');
 
         const error = await collection.findOne({ count: 1 }).catch(e => e);
 
@@ -120,7 +120,7 @@ describe('Server Operation Count Tests', function () {
     it('is zero after a successful command', testMetadata, async function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
-      const commandSpy = sinon.spy(server, 'modernCommand');
+      const commandSpy = sinon.spy(server, 'command');
       const incrementSpy = sinon.spy(server, 'incrementOperationCount');
       const decrementSpy = sinon.spy(server, 'decrementOperationCount');
 
@@ -147,7 +147,7 @@ describe('Server Operation Count Tests', function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
 
-      const commandSpy = sinon.spy(server, 'modernCommand');
+      const commandSpy = sinon.spy(server, 'command');
 
       const error = await collection.insertOne({ count: 1 }).catch(e => e);
 
@@ -171,7 +171,7 @@ describe('Server Operation Count Tests', function () {
           sinon
             .stub(ConnectionPool.prototype, 'checkOut')
             .rejects(new Error('unable to checkout connection'));
-          const commandSpy = sinon.spy(server, 'modernCommand');
+          const commandSpy = sinon.spy(server, 'command');
 
           const error = await collection.insertOne({ count: 1 }).catch(e => e);
 

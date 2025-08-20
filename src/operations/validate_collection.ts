@@ -4,7 +4,7 @@ import { type Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { MongoUnexpectedServerResponseError } from '../error';
 import type { ClientSession } from '../sessions';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {
@@ -13,7 +13,7 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ValidateCollectionOperation extends ModernizedCommandOperation<Document> {
+export class ValidateCollectionOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: ValidateCollectionOptions;
   collectionName: string;

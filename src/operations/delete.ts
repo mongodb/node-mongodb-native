@@ -5,11 +5,7 @@ import { MongoCompatibilityError, MongoServerError } from '../error';
 import type { ClientSession } from '../sessions';
 import { type MongoDBCollectionNamespace, type MongoDBNamespace } from '../utils';
 import { type WriteConcernOptions } from '../write_concern';
-import {
-  type CollationOptions,
-  type CommandOperationOptions,
-  ModernizedCommandOperation
-} from './command';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
@@ -45,7 +41,7 @@ export interface DeleteStatement {
 }
 
 /** @internal */
-export class DeleteOperation extends ModernizedCommandOperation<Document> {
+export class DeleteOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DeleteOptions;
   statements: DeleteStatement[];

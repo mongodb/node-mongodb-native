@@ -2,7 +2,7 @@ import { type Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -25,7 +25,7 @@ export type DistinctOptions = CommandOperationOptions & {
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends ModernizedCommandOperation<any[] | Document> {
+export class DistinctOperation extends CommandOperation<any[] | Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DistinctOptions;
   collection: Collection;

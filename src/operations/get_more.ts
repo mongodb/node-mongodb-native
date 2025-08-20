@@ -5,7 +5,7 @@ import { MongoRuntimeError } from '../error';
 import type { Server, ServerCommandOptions } from '../sdam/server';
 import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
-import { Aspect, defineAspects, ModernizedOperation, type OperationOptions } from './operation';
+import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /** @internal */
 export interface GetMoreOptions extends OperationOptions {
@@ -37,7 +37,7 @@ export interface GetMoreCommand {
 }
 
 /** @internal */
-export class GetMoreOperation extends ModernizedOperation<CursorResponse> {
+export class GetMoreOperation extends AbstractOperation<CursorResponse> {
   override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   cursorId: Long;
   override options: GetMoreOptions;

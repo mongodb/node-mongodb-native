@@ -6,7 +6,7 @@ import type { Server, ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { type MongoDBNamespace } from '../utils';
-import { Aspect, defineAspects, ModernizedOperation, type OperationOptions } from './operation';
+import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /**
  * https://www.mongodb.com/docs/manual/reference/command/killCursors/
@@ -18,7 +18,7 @@ interface KillCursorsCommand {
   comment?: unknown;
 }
 
-export class KillCursorsOperation extends ModernizedOperation<void> {
+export class KillCursorsOperation extends AbstractOperation<void> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   cursorId: Long;
 

@@ -6,11 +6,7 @@ import { MongoInvalidArgumentError } from '../error';
 import { type ExplainOptions } from '../explain';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
-import {
-  type CollationOptions,
-  type CommandOperationOptions,
-  ModernizedCommandOperation
-} from './command';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @internal */
@@ -53,7 +49,7 @@ export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain
 }
 
 /** @internal */
-export class AggregateOperation extends ModernizedCommandOperation<CursorResponse> {
+export class AggregateOperation extends CommandOperation<CursorResponse> {
   override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   override options: AggregateOptions;
   target: string | typeof DB_AGGREGATE_COLLECTION;

@@ -6,7 +6,7 @@ import type { Db } from '../db';
 import { MONGODB_ERROR_CODES } from '../error';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { executeOperation } from './execute_operation';
 import { Aspect, defineAspects } from './operation';
 
@@ -17,7 +17,7 @@ export interface DropCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DropCollectionOperation extends ModernizedCommandOperation<boolean> {
+export class DropCollectionOperation extends CommandOperation<boolean> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
 
   override options: DropCollectionOptions;
@@ -107,7 +107,7 @@ export async function dropCollections(
 export type DropDatabaseOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropDatabaseOperation extends ModernizedCommandOperation<boolean> {
+export class DropDatabaseOperation extends CommandOperation<boolean> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DropDatabaseOptions;
 

@@ -2,14 +2,14 @@ import { type Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
 export type RemoveUserOptions = CommandOperationOptions;
 
 /** @internal */
-export class RemoveUserOperation extends ModernizedCommandOperation<boolean> {
+export class RemoveUserOperation extends CommandOperation<boolean> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: RemoveUserOptions;
   username: string;

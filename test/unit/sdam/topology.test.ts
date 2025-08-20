@@ -14,6 +14,8 @@ import {
   MongoServerSelectionError,
   ns,
   ReadPreference,
+  RunCommandOperation,
+  RunCursorCommandOperation,
   Server,
   SrvPoller,
   SrvPollingEvent,
@@ -121,7 +123,7 @@ describe('Topology (unit)', function () {
           })
           .then(server => {
             server
-              .command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250, timeoutContext: ctx })
+              .command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx)
               .then(
                 () => expect.fail('expected command to fail'),
                 err => {
@@ -235,11 +237,15 @@ describe('Topology (unit)', function () {
         waitQueueTimeoutMS: 0
       });
       const err = await server
-        .command(ns('test.test'), { insert: { a: 42 } }, { timeoutContext })
+        .command(
+          new RunCommandOperation(ns('test.test'), { insert: { a: 42 } }, {}),
+          timeoutContext
+        )
         .then(
           () => null,
           e => e
         );
+      console.error({ err });
       expect(err).to.eql(serverDescription.error);
       expect(poolCleared).to.be.true;
     });
@@ -270,7 +276,10 @@ describe('Topology (unit)', function () {
       });
 
       const err = await server
-        .command(ns('test.test'), { insert: { a: 42 } }, { timeoutContext })
+        .command(
+          new RunCommandOperation(ns('test.test'), { insert: { a: 42 } }, {}),
+          timeoutContext
+        )
         .then(
           () => null,
           e => e
@@ -303,7 +312,10 @@ describe('Topology (unit)', function () {
       server.on('descriptionReceived', sd => (serverDescription = sd));
 
       const err = await server
-        .command(ns('test.test'), { insert: { a: 42 } }, { timeoutContext })
+        .command(
+          new RunCommandOperation(ns('test.test'), { insert: { a: 42 } }, {}),
+          timeoutContext
+        )
         .then(
           () => null,
           e => e

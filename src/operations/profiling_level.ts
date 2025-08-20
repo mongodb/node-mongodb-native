@@ -3,7 +3,7 @@ import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import { MongoUnexpectedServerResponseError } from '../error';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export type ProfilingLevelOptions = CommandOperationOptions;
@@ -15,7 +15,7 @@ class ProfilingLevelResponse extends MongoDBResponse {
 }
 
 /** @internal */
-export class ProfilingLevelOperation extends ModernizedCommandOperation<string> {
+export class ProfilingLevelOperation extends CommandOperation<string> {
   override SERVER_COMMAND_RESPONSE_TYPE = ProfilingLevelResponse;
   override options: ProfilingLevelOptions;
 
