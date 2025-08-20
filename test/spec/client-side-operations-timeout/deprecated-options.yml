@@ -3909,6 +3909,7 @@ tests:
         arguments:
           keys: { x: 1 }
           name: "x_1"
+          timeoutMS: 100000
       - name: dropIndexes
         object: *collection
         arguments:
