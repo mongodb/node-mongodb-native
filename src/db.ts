@@ -272,7 +272,7 @@ export class Db {
     return await executeOperation(
       this.client,
       new RunCommandOperation(
-        this,
+        this.s.namespace,
         command,
         resolveOptions(undefined, {
           ...resolveBSONOptions(options),

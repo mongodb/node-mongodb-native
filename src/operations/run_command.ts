@@ -1,18 +1,13 @@
 import { type Abortable } from '..';
 import type { BSONSerializeOptions, Document } from '../bson';
 import { type Connection } from '../cmap/connection';
-import {
-  CursorResponse,
-  MongoDBResponse,
-  type MongoDBResponseConstructor
-} from '../cmap/wire_protocol/responses';
-import { type Db } from '../db';
+import { CursorResponse, MongoDBResponse } from '../cmap/wire_protocol/responses';
+import { ModernizedOperation } from '../operations/operation';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { MongoDBNamespace } from '../utils';
-import { ModernizedCommandOperation } from './command';
+import { type MongoDBNamespace } from '../utils';
 
 /** @public */
 export type RunCommandOptions = {
@@ -27,31 +22,33 @@ export type RunCommandOptions = {
   timeoutMS?: number;
   /** @internal */
   omitMaxTimeMS?: boolean;
+
+  /**
+   * @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction
+   * This is only used by the driver for transaction commands
+   */
+  bypassPinningCheck?: boolean;
 } & BSONSerializeOptions &
   Abortable;
 
 /** @internal */
-export class RunCommandOperation<T = Document> extends ModernizedCommandOperation<T> {
+export class RunCommandOperation<T = Document> extends ModernizedOperation<T> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   command: Document;
-  override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor };
+  override options: RunCommandOptions;
 
-  constructor(
-    parent: Db,
-    command: Document,
-    options: RunCommandOptions & { responseType?: MongoDBResponseConstructor }
-  ) {
-    super(undefined, options);
+  constructor(namespace: MongoDBNamespace, command: Document, options: RunCommandOptions) {
+    super(options);
     this.command = command;
     this.options = options;
-    this.ns = parent.s.namespace.withCollection('$cmd');
+    this.ns = namespace.withCollection('$cmd');
   }
 
   override get commandName() {
     return 'runCommand' as const;
   }
 
-  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+  override buildCommand(_connection: Connection, _session?: ClientSession): Document {
     return this.command;
   }
 
@@ -77,39 +74,5 @@ export class RunCursorCommandOperation extends RunCommandOperation {
     response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
   ): CursorResponse {
     return response;
-  }
-}
-
-export class RunAdminCommandOperation<T = Document> extends ModernizedCommandOperation<T> {
-  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
-  command: Document;
-  override options: RunCommandOptions & {
-    noResponse?: boolean;
-    bypassPinningCheck?: boolean;
-  };
-
-  constructor(
-    command: Document,
-    options: RunCommandOptions & {
-      noResponse?: boolean;
-      bypassPinningCheck?: boolean;
-    }
-  ) {
-    super(undefined, options);
-    this.command = command;
-    this.options = options;
-    this.ns = new MongoDBNamespace('admin', '$cmd');
-  }
-
-  override get commandName() {
-    return 'runCommand' as const;
-  }
-
-  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
-    return this.command;
-  }
-
-  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
-    return { session: this.session, timeoutContext, noResponse: this.options.noResponse };
   }
 }

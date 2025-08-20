@@ -1,5 +1,5 @@
 import type { BSONSerializeOptions, Document } from '../bson';
-import { CursorResponse } from '../cmap/wire_protocol/responses';
+import { type CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import { MongoAPIError, MongoRuntimeError } from '../error';
 import { executeOperation } from '../operations/execute_operation';
@@ -143,11 +143,10 @@ export class RunCommandCursor extends AbstractCursor {
 
   /** @internal */
   protected async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
-    const operation = new RunCursorCommandOperation(this.db, this.command, {
+    const operation = new RunCursorCommandOperation(this.db.s.namespace, this.command, {
       ...this.cursorOptions,
       session: session,
-      readPreference: this.cursorOptions.readPreference,
-      responseType: CursorResponse
+      readPreference: this.cursorOptions.readPreference
     });
 
     const response = await executeOperation(this.client, operation, this.timeoutContext);

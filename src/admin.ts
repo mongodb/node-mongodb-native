@@ -8,11 +8,12 @@ import {
   type ListDatabasesResult
 } from './operations/list_databases';
 import { RemoveUserOperation, type RemoveUserOptions } from './operations/remove_user';
-import { RunAdminCommandOperation, type RunCommandOptions } from './operations/run_command';
+import { RunCommandOperation, type RunCommandOptions } from './operations/run_command';
 import {
   ValidateCollectionOperation,
   type ValidateCollectionOptions
 } from './operations/validate_collection';
+import { MongoDBNamespace } from './utils';
 
 /** @internal */
 export interface AdminPrivate {
@@ -75,7 +76,7 @@ export class Admin {
   async command(command: Document, options?: RunCommandOptions): Promise<Document> {
     return await executeOperation(
       this.s.db.client,
-      new RunAdminCommandOperation(command, {
+      new RunCommandOperation(new MongoDBNamespace('admin'), command, {
         ...resolveBSONOptions(options),
         session: options?.session,
         readPreference: options?.readPreference,

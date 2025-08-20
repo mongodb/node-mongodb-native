@@ -194,12 +194,6 @@ describe('abstract operation', function () {
       },
       {
         subclassCreator: () =>
-          new mongodb.RunAdminCommandOperation({ dummyCommand: 'dummyCommand' }, {}),
-        subclassType: mongodb.RunAdminCommandOperation,
-        correctCommandName: 'runCommand'
-      },
-      {
-        subclassCreator: () =>
           new mongodb.CreateSearchIndexesOperation(collection, [{ definition: { a: 1 } }]),
         subclassType: mongodb.CreateSearchIndexesOperation,
         correctCommandName: 'createSearchIndexes'
