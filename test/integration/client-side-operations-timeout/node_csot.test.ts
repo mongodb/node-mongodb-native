@@ -1359,7 +1359,8 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe('Connection after timeout', { requires: { mongodb: '>=4.4' } }, function () {
+  // TODO(NODE-7118): Find a way to reimplement this test for latest server.
+  describe.skip('Connection after timeout', { requires: { mongodb: '>=4.4' } }, function () {
     let client: MongoClient;
 
     beforeEach(async function () {
@@ -1395,6 +1396,8 @@ describe('CSOT driver tests', metadata, () => {
         .insertOne({})
         .catch(error => error);
 
+      // Note: In the case where the timeout comes from the server, the driver does not
+      // need to close the connection as no more potential messages are expected.
       expect(error).to.be.instanceOf(MongoOperationTimeoutError);
       expect(cmap).to.have.lengthOf(2);
 
