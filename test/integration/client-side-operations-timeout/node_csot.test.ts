@@ -1360,51 +1360,61 @@ describe('CSOT driver tests', metadata, () => {
   });
 
   // TODO(NODE-7118): Find a way to reimplement this test for latest server.
-  describe.skip('Connection after timeout', { requires: { mongodb: '>=4.4' } }, function () {
-    let client: MongoClient;
+  describe(
+    'Connection after timeout',
+    {
+      requires: {
+        // 4.4 for use of failCommands
+        // < 8.3 because of https://jira.mongodb.org/browse/SERVER-101116
+        mongodb: '>=4.4 <=8.2'
+      }
+    },
+    function () {
+      let client: MongoClient;
 
-    beforeEach(async function () {
-      client = this.configuration.newClient({ timeoutMS: 500 });
+      beforeEach(async function () {
+        client = this.configuration.newClient({ timeoutMS: 500 });
 
-      const failpoint: FailPoint = {
-        configureFailPoint: 'failCommand',
-        mode: {
-          times: 1
-        },
-        data: {
-          failCommands: ['insert'],
-          blockConnection: true,
-          blockTimeMS: 700
-        }
-      };
+        const failpoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: {
+            times: 1
+          },
+          data: {
+            failCommands: ['insert'],
+            blockConnection: true,
+            blockTimeMS: 700
+          }
+        };
 
-      await client.db('admin').command(failpoint);
-    });
+        await client.db('admin').command(failpoint);
+      });
 
-    afterEach(async function () {
-      await client.close();
-    });
+      afterEach(async function () {
+        await client.close();
+      });
 
-    it('closes so pending messages are not read by another operation', async function () {
-      const cmap = [];
-      client.on('connectionCheckedOut', ev => cmap.push(ev));
-      client.on('connectionClosed', ev => cmap.push(ev));
+      it('closes so pending messages are not read by another operation', async function () {
+        const cmap = [];
+        client.on('connectionCheckedOut', ev => cmap.push(ev));
+        client.on('connectionClosed', ev => cmap.push(ev));
 
-      const error = await client
-        .db('socket')
-        .collection('closes')
-        .insertOne({})
-        .catch(error => error);
+        const error = await client
+          .db('socket')
+          .collection('closes')
+          .insertOne({})
+          .catch(error => error);
 
-      // Note: In the case where the timeout comes from the server, the driver does not
-      // need to close the connection as no more potential messages are expected.
-      expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-      expect(cmap).to.have.lengthOf(2);
+        // Note: In the case where the timeout comes from the server, the driver does not
+        // need to close the connection as no more potential messages are expected.
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+        expect(cmap).to.have.lengthOf(2);
 
-      const [checkedOut, closed] = cmap;
-      expect(checkedOut).to.have.property('name', 'connectionCheckedOut');
-      expect(closed).to.have.property('name', 'connectionClosed');
-      expect(checkedOut).to.have.property('connectionId', closed.connectionId);
-    });
-  });
+        const [checkedOut, closed] = cmap;
+        expect(checkedOut).to.have.property('name', 'connectionCheckedOut');
+        expect(closed).to.have.property('name', 'connectionClosed');
+        expect(checkedOut).to.have.property('connectionId', closed.connectionId);
+      });
+    }
+  );
 });
