@@ -511,7 +511,6 @@ export type {
   CollationOptions,
   CommandOperation,
   CommandOperationOptions,
-  CommandOperation as ModernizedCommandOperation,
   OperationParent
 } from './operations/command';
 export type { CountOptions } from './operations/count';
@@ -544,12 +543,7 @@ export type {
 export type { InsertManyResult, InsertOneOptions, InsertOneResult } from './operations/insert';
 export type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
 export type { ListDatabasesOptions, ListDatabasesResult } from './operations/list_databases';
-export type {
-  AbstractOperation,
-  Hint,
-  AbstractOperation as ModernizedOperation,
-  OperationOptions
-} from './operations/operation';
+export type { AbstractOperation, Hint, OperationOptions } from './operations/operation';
 export type { ProfilingLevelOptions } from './operations/profiling_level';
 export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';
