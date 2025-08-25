@@ -8,7 +8,7 @@ import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
 import { decorateWithCollation, hasAtomicOperators } from '../utils';
 import { type WriteConcern, type WriteConcernSettings } from '../write_concern';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -120,7 +120,7 @@ function configureFindAndModifyCmdBaseUpdateOpts(
 }
 
 /** @internal */
-export class FindAndModifyOperation extends ModernizedCommandOperation<Document> {
+export class FindAndModifyOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
   collection: Collection;

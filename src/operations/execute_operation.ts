@@ -27,18 +27,15 @@ import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { abortable, supportsRetryableWrites } from '../utils';
 import { AggregateOperation } from './aggregate';
-import { AbstractOperation, Aspect, ModernizedOperation } from './operation';
+import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
-type ResultTypeFromOperation<TOperation> =
-  TOperation extends ModernizedOperation<infer _>
-    ? ReturnType<TOperation['handleOk']>
-    : TOperation extends AbstractOperation<infer K>
-      ? K
-      : never;
+type ResultTypeFromOperation<TOperation extends AbstractOperation> = ReturnType<
+  TOperation['handleOk']
+>;
 
 /**
  * Executes the given operation with provided arguments.
@@ -235,8 +232,6 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
 
-  const isModernOperation = operation instanceof ModernizedOperation;
-
   for (let tries = 0; tries < maxTries; tries++) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
@@ -290,12 +285,8 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
         operation.resetBatch();
       }
 
-      if (!isModernOperation) {
-        return await operation.execute(server, session, timeoutContext);
-      }
-
       try {
-        const result = await server.modernCommand(operation, timeoutContext);
+        const result = await server.command(operation, timeoutContext);
         return operation.handleOk(result);
       } catch (error) {
         return operation.handleError(error);

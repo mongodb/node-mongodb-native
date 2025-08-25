@@ -30,6 +30,7 @@ import {
   NODE_IS_RECOVERING_ERROR_MESSAGE,
   ns,
   PoolClosedError as MongoPoolClosedError,
+  RunCommandOperation,
   setDifference,
   TimeoutContext,
   type TopologyDescription,
@@ -405,14 +406,15 @@ describe('MongoErrors', () => {
         serverSelectionTimeoutMS: 0,
         waitQueueTimeoutMS: 0
       });
+      const op = new RunCommandOperation(
+        ns('db1'),
+        Object.assign({}, RAW_USER_WRITE_CONCERN_CMD),
+        {}
+      );
       return replSet
         .connect()
         .then(topology => topology.selectServer('primary', { timeoutContext }))
-        .then(server =>
-          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {
-            timeoutContext
-          })
-        )
+        .then(server => server.command(op, timeoutContext))
         .then(
           () => expect.fail('expected command to fail'),
           err => {
@@ -455,23 +457,26 @@ describe('MongoErrors', () => {
           waitQueueTimeoutMS: 0
         });
 
+        const op = new RunCommandOperation(
+          ns('db1'),
+          Object.assign({}, RAW_USER_WRITE_CONCERN_CMD),
+          {}
+        );
         topology.selectServer('primary', { timeoutContext }).then(server => {
-          server
-            .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), { timeoutContext })
-            .then(expect.fail, err => {
-              let _err;
-              try {
-                expect(err).to.be.an.instanceOf(MongoWriteConcernError);
-                expect(err.result).to.exist;
-                expect(err.result.writeConcernError).to.deep.equal(
-                  RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
-                );
-              } catch (e) {
-                _err = e;
-              } finally {
-                cleanup(_err);
-              }
-            });
+          server.command(op, timeoutContext).then(expect.fail, err => {
+            let _err;
+            try {
+              expect(err).to.be.an.instanceOf(MongoWriteConcernError);
+              expect(err.result).to.exist;
+              expect(err.result.writeConcernError).to.deep.equal(
+                RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
+              );
+            } catch (e) {
+              _err = e;
+            } finally {
+              cleanup(_err);
+            }
+          });
         }, expect.fail);
       });
     });

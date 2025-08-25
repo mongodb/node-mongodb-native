@@ -7,11 +7,7 @@ import type { ServerCommandOptions } from '../sdam/server';
 import { formatSort, type Sort } from '../sort';
 import { type TimeoutContext } from '../timeout';
 import { type MongoDBNamespace, normalizeHintField } from '../utils';
-import {
-  type CollationOptions,
-  type CommandOperationOptions,
-  ModernizedCommandOperation
-} from './command';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /**
@@ -90,7 +86,7 @@ export interface FindOneOptions extends FindOptions {
 }
 
 /** @internal */
-export class FindOperation extends ModernizedCommandOperation<CursorResponse> {
+export class FindOperation extends CommandOperation<CursorResponse> {
   override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
 
   /**

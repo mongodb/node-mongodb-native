@@ -3,7 +3,7 @@ import type { Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import type { ClientSession } from '../sessions';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -17,7 +17,7 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EstimatedDocumentCountOperation extends ModernizedCommandOperation<number> {
+export class EstimatedDocumentCountOperation extends CommandOperation<number> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: EstimatedDocumentCountOptions;
   collectionName: string;

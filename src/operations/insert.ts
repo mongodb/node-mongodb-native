@@ -7,10 +7,10 @@ import { MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { ClientSession } from '../sessions';
 import { maybeAddIdToDocuments, type MongoDBNamespace } from '../utils';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 /** @internal */
-export class InsertOperation extends ModernizedCommandOperation<Document> {
+export class InsertOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: BulkWriteOptions;
 

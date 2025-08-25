@@ -2,7 +2,7 @@ import { type Connection } from '../../cmap/connection';
 import { ClientBulkWriteCursorResponse } from '../../cmap/wire_protocol/responses';
 import type { ClientSession } from '../../sessions';
 import { MongoDBNamespace } from '../../utils';
-import { ModernizedCommandOperation } from '../command';
+import { CommandOperation } from '../command';
 import { Aspect, defineAspects } from '../operation';
 import { type ClientBulkWriteCommand, type ClientBulkWriteCommandBuilder } from './command_builder';
 import { type ClientBulkWriteOptions } from './common';
@@ -11,7 +11,7 @@ import { type ClientBulkWriteOptions } from './common';
  * Executes a single client bulk write operation within a potential batch.
  * @internal
  */
-export class ClientBulkWriteOperation extends ModernizedCommandOperation<ClientBulkWriteCursorResponse> {
+export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCursorResponse> {
   override SERVER_COMMAND_RESPONSE_TYPE = ClientBulkWriteCursorResponse;
 
   commandBuilder: ClientBulkWriteCommandBuilder;

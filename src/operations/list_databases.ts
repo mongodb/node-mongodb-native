@@ -4,7 +4,7 @@ import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -26,7 +26,7 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListDatabasesOperation extends ModernizedCommandOperation<ListDatabasesResult> {
+export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: ListDatabasesOptions;
 

@@ -5,7 +5,7 @@ import { type CursorTimeoutContext, type CursorTimeoutMode } from '../cursor/abs
 import type { Db } from '../db';
 import { type Abortable } from '../mongo_types';
 import { maxWireVersion } from '../utils';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -26,7 +26,7 @@ export interface ListCollectionsOptions
 }
 
 /** @internal */
-export class ListCollectionsOperation extends ModernizedCommandOperation<CursorResponse> {
+export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
   override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   /**
    * @remarks WriteConcern can still be present on the options because

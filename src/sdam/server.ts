@@ -7,7 +7,6 @@ import {
   type ConnectionPoolOptions
 } from '../cmap/connection_pool';
 import { PoolClearedError } from '../cmap/errors';
-import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import {
   APM_EVENTS,
   CLOSED,
@@ -27,7 +26,6 @@ import {
   MONGODB_ERROR_CODES,
   MongoError,
   MongoErrorLabel,
-  MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
@@ -39,7 +37,7 @@ import type { ServerApi } from '../mongo_client';
 import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import { AggregateOperation } from '../operations/aggregate';
 import type { GetMoreOptions } from '../operations/get_more';
-import { type ModernizedOperation } from '../operations/operation';
+import { type AbstractOperation } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { isTransactionCommand } from '../transactions';
@@ -48,7 +46,6 @@ import {
   type EventEmitterWithState,
   makeStateMachine,
   maxWireVersion,
-  type MongoDBNamespace,
   noop,
   squashError,
   supportsRetryableWrites
@@ -281,8 +278,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
-  public async modernCommand<TResult>(
-    operation: ModernizedOperation<TResult>,
+  public async command<TResult>(
+    operation: AbstractOperation<TResult>,
     timeoutContext: TimeoutContext
   ): Promise<InstanceType<typeof operation.SERVER_COMMAND_RESPONSE_TYPE>> {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
@@ -295,7 +292,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     this.incrementOperationCount();
     if (conn == null) {
       try {
-        conn = await this.pool.checkOut({ timeoutContext });
+        conn = await this.pool.checkOut({ timeoutContext, signal: operation.options.signal });
       } catch (checkoutError) {
         this.decrementOperationCount();
         if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
@@ -382,106 +379,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       }
     } finally {
       cleanup();
-    }
-  }
-
-  public async command<T extends MongoDBResponseConstructor>(
-    ns: MongoDBNamespace,
-    command: Document,
-    options: ServerCommandOptions,
-    responseType: T | undefined
-  ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
-
-  public async command(
-    ns: MongoDBNamespace,
-    command: Document,
-    options: ServerCommandOptions
-  ): Promise<Document>;
-
-  public async command(
-    ns: MongoDBNamespace,
-    cmd: Document,
-    { ...options }: ServerCommandOptions,
-    responseType?: MongoDBResponseConstructor
-  ): Promise<Document> {
-    if (ns.db == null || typeof ns === 'string') {
-      throw new MongoInvalidArgumentError('Namespace must not be a string');
-    }
-
-    if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      throw new MongoServerClosedError();
-    }
-
-    options.directConnection = this.topology.s.options.directConnection;
-
-    if (this.description.iscryptd) {
-      options.omitMaxTimeMS = true;
-    }
-
-    const session = options.session;
-    let conn = session?.pinnedConnection;
-
-    this.incrementOperationCount();
-    if (conn == null) {
-      try {
-        conn = await this.pool.checkOut(options);
-        if (this.loadBalanced && isPinnableCommand(cmd, session)) {
-          session?.pin(conn);
-        }
-      } catch (checkoutError) {
-        this.decrementOperationCount();
-        if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
-        throw checkoutError;
-      }
-    }
-
-    let reauthPromise: Promise<void> | null = null;
-
-    try {
-      try {
-        const res = await conn.command(ns, cmd, options, responseType);
-        throwIfWriteConcernError(res);
-        return res;
-      } catch (commandError) {
-        throw this.decorateCommandError(conn, cmd, options, commandError);
-      }
-    } catch (operationError) {
-      if (
-        operationError instanceof MongoError &&
-        operationError.code === MONGODB_ERROR_CODES.Reauthenticate
-      ) {
-        reauthPromise = this.pool.reauthenticate(conn);
-        reauthPromise.then(undefined, error => {
-          reauthPromise = null;
-          squashError(error);
-        });
-
-        await abortable(reauthPromise, options);
-        reauthPromise = null; // only reachable if reauth succeeds
-
-        try {
-          const res = await conn.command(ns, cmd, options, responseType);
-          throwIfWriteConcernError(res);
-          return res;
-        } catch (commandError) {
-          throw this.decorateCommandError(conn, cmd, options, commandError);
-        }
-      } else {
-        throw operationError;
-      }
-    } finally {
-      this.decrementOperationCount();
-      if (session?.pinnedConnection !== conn) {
-        if (reauthPromise != null) {
-          // The reauth promise only exists if it hasn't thrown.
-          const checkBackIn = () => {
-            this.pool.checkIn(conn);
-          };
-          void reauthPromise.then(checkBackIn, checkBackIn);
-        } else {
-          this.pool.checkIn(conn);
-        }
-      }
     }
   }
 

@@ -6,10 +6,10 @@ import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
 import type { ServerCommandOptions } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { type TimeoutContext } from '../../timeout';
-import { ModernizedOperation } from '../operation';
+import { AbstractOperation } from '../operation';
 
 /** @internal */
-export class DropSearchIndexOperation extends ModernizedOperation<void> {
+export class DropSearchIndexOperation extends AbstractOperation<void> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
 
   private readonly collection: Collection;

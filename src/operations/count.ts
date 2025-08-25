@@ -4,7 +4,7 @@ import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import type { ClientSession } from '../sessions';
 import type { MongoDBNamespace } from '../utils';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -22,7 +22,7 @@ export interface CountOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class CountOperation extends ModernizedCommandOperation<number> {
+export class CountOperation extends CommandOperation<number> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: CountOptions;
   collectionName?: string;

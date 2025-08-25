@@ -4,7 +4,7 @@ import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { Collection } from '../collection';
 import type { ClientSession } from '../sessions';
 import { MongoDBNamespace } from '../utils';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -16,7 +16,7 @@ export interface RenameOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class RenameOperation extends ModernizedCommandOperation<Document> {
+export class RenameOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   collection: Collection;
   newName: string;

@@ -10,11 +10,7 @@ import {
   type MongoDBCollectionNamespace,
   type MongoDBNamespace
 } from '../utils';
-import {
-  type CollationOptions,
-  type CommandOperationOptions,
-  ModernizedCommandOperation
-} from './command';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
@@ -74,7 +70,7 @@ export interface UpdateStatement {
  * @internal
  * UpdateOperation is used in bulk write, while UpdateOneOperation and UpdateManyOperation are only used in the collections API
  */
-export class UpdateOperation extends ModernizedCommandOperation<Document> {
+export class UpdateOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];

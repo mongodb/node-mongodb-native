@@ -87,12 +87,6 @@ export abstract class AbstractOperation<TResult = any> {
   Command name should be stateless (should not use 'this' keyword) */
   abstract get commandName(): string;
 
-  abstract execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<TResult>;
-
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as { aspects?: Set<symbol> };
     if (ctor.aspects == null) {
@@ -126,20 +120,7 @@ export abstract class AbstractOperation<TResult = any> {
   get canRetryWrite(): boolean {
     return this.hasAspect(Aspect.RETRYABLE) && this.hasAspect(Aspect.WRITE_OPERATION);
   }
-}
-
-/** @internal */
-export abstract class ModernizedOperation<TResult> extends AbstractOperation<TResult> {
   abstract SERVER_COMMAND_RESPONSE_TYPE: typeof MongoDBResponse;
-
-  /** this will never be used - but we must implement it to satisfy AbstractOperation's interface */
-  override execute(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _timeoutContext: TimeoutContext
-  ): Promise<TResult> {
-    throw new Error('cannot execute!!');
-  }
 
   /**
    * Build a raw command document.

@@ -12,7 +12,7 @@ import type { PkFactory } from '../mongo_client';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { maxWireVersion } from '../utils';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { executeOperation } from './execute_operation';
 import { CreateIndexesOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
@@ -112,7 +112,7 @@ const INVALID_QE_VERSION =
   'Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption.';
 
 /** @internal */
-export class CreateCollectionOperation extends ModernizedCommandOperation<Collection> {
+export class CreateCollectionOperation extends CommandOperation<Collection> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: CreateCollectionOptions;
   db: Db;

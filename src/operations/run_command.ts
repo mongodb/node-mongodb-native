@@ -2,7 +2,7 @@ import { type Abortable } from '..';
 import type { BSONSerializeOptions, Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { CursorResponse, MongoDBResponse } from '../cmap/wire_protocol/responses';
-import { ModernizedOperation } from '../operations/operation';
+import { AbstractOperation } from '../operations/operation';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -32,7 +32,7 @@ export type RunCommandOptions = {
   Abortable;
 
 /** @internal */
-export class RunCommandOperation<T = Document> extends ModernizedOperation<T> {
+export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   command: Document;
   override options: RunCommandOptions;

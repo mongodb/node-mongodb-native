@@ -4,7 +4,7 @@ import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import { MongoInvalidArgumentError } from '../error';
 import { enumToString } from '../utils';
-import { type CommandOperationOptions, ModernizedCommandOperation } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
@@ -22,7 +22,7 @@ export type ProfilingLevel = (typeof ProfilingLevel)[keyof typeof ProfilingLevel
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class SetProfilingLevelOperation extends ModernizedCommandOperation<ProfilingLevel> {
+export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: SetProfilingLevelOptions;
   level: ProfilingLevel;
