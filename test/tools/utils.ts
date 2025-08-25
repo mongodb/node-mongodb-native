@@ -206,7 +206,7 @@ export function extractAuthFromConnectionString(connectionString: string | any[]
 }
 
 export interface FailPoint {
-  configureFailPoint: 'failCommand' | 'failGetMoreAfterCursorCheckout';
+  configureFailPoint: 'failCommand' | 'failGetMoreAfterCursorCheckout' | 'maxTimeNeverTimeOut';
   mode: { activationProbability: number } | { times: number } | 'alwaysOn' | 'off';
   data: {
     failCommands: string[];
