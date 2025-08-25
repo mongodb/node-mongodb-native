@@ -214,7 +214,7 @@ class MockServer extends EventEmitter {
    * @param {function} [messageHandler] the optional message handler, if a type was specified
    */
   setMessageHandler(type, messageHandler) {
-    if (typeof type === 'function') (messageHandler = type), (type = undefined);
+    if (typeof type === 'function') ((messageHandler = type), (type = undefined));
 
     if (type == null) {
       this.genericMessageHandler = messageHandler;

@@ -750,7 +750,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   auth(credentials?: MongoCredentials, callback?: Callback): void {
-    if (typeof credentials === 'function') (callback = credentials), (credentials = undefined);
+    if (typeof credentials === 'function') ((callback = credentials), (credentials = undefined));
     if (typeof callback === 'function') callback(undefined, true);
   }
 
