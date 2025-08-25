@@ -102,10 +102,10 @@ const Response = function (documents, options) {
   this.opCode = 1;
 
   // Message fields
-  (this.cursorId = options.cursorId),
+  ((this.cursorId = options.cursorId),
     (this.responseFlags = options.responseFlags),
     (this.startingFrom = options.startingFrom),
-    (this.numberReturned = options.numberReturned);
+    (this.numberReturned = options.numberReturned));
 
   // Store documents
   this.documents = documents;
