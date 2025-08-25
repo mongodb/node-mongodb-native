@@ -1359,7 +1359,7 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe.only(
+  describe(
     'Connection after timeout',
     {
       requires: {
