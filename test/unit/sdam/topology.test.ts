@@ -245,7 +245,6 @@ describe('Topology (unit)', function () {
           () => null,
           e => e
         );
-      console.error({ err });
       expect(err).to.eql(serverDescription.error);
       expect(poolCleared).to.be.true;
     });
