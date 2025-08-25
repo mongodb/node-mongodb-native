@@ -8,6 +8,7 @@ import {
   type MongoClient,
   MongoServerError
 } from '../mongodb';
+import { type FailPoint } from '../tools/utils';
 import { assert as test, filterForCommands, setupDatabase } from './shared';
 
 describe('Indexes', function () {
@@ -34,6 +35,19 @@ describe('Indexes', function () {
     // Create an index
     const response = await db.createIndex('promiseCollectionCollections1', { a: 1 }, { w: 1 });
     expect(response).to.exist;
+  });
+
+  it('createIndex() throws an error error when createIndex fails', async function () {
+    await client.db('admin').command(<FailPoint>{
+      configureFailPoint: 'failCommand',
+      mode: { times: 1 },
+      data: {
+        failCommands: ['createIndexes'],
+        errorCode: 10
+      }
+    });
+    const error = await db.createIndex('promiseCollectionCollections1', { a: 1 }).catch(e => e);
+    expect(error).to.be.instanceOf(MongoServerError);
   });
 
   it('shouldCorrectlyExtractIndexInformation', async function () {

@@ -188,14 +188,12 @@ describe('abstract operation', function () {
       },
       {
         subclassCreator: () =>
-          new mongodb.RunCommandOperation(db, { dummyCommand: 'dummyCommand' }, {}),
+          new mongodb.RunCommandOperation(
+            new mongodb.MongoDBNamespace('foo', 'bar'),
+            { dummyCommand: 'dummyCommand' },
+            {}
+          ),
         subclassType: mongodb.RunCommandOperation,
-        correctCommandName: 'runCommand'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.RunAdminCommandOperation({ dummyCommand: 'dummyCommand' }, {}),
-        subclassType: mongodb.RunAdminCommandOperation,
         correctCommandName: 'runCommand'
       },
       {
