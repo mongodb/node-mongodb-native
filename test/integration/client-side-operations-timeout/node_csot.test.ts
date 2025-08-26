@@ -1359,14 +1359,12 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  // TODO(NODE-7118): Find a way to reimplement this test for latest server.
   describe(
     'Connection after timeout',
     {
       requires: {
         // 4.4 for use of failCommands
-        // < 8.3 because of https://jira.mongodb.org/browse/SERVER-101116
-        mongodb: '>=4.4 <=8.2'
+        mongodb: '>=4.4'
       }
     },
     function () {
@@ -1374,6 +1372,11 @@ describe('CSOT driver tests', metadata, () => {
 
       beforeEach(async function () {
         client = this.configuration.newClient({ timeoutMS: 500 });
+
+        await client.db('admin').command(<FailPoint>{
+          configureFailPoint: 'maxTimeNeverTimeOut',
+          mode: 'alwaysOn'
+        });
 
         const failpoint: FailPoint = {
           configureFailPoint: 'failCommand',
@@ -1391,6 +1394,11 @@ describe('CSOT driver tests', metadata, () => {
       });
 
       afterEach(async function () {
+        await client.db('admin').command(<FailPoint>{
+          configureFailPoint: 'maxTimeNeverTimeOut',
+          mode: 'off'
+        });
+
         await client.close();
       });
 
