@@ -1,4 +1,4 @@
-current = "6.18 Driver"
+current = "6.19 Driver"
 mongoDBManual = "https://www.mongodb.com/docs/drivers/node/"
 
 [[versions]]
@@ -9,8 +9,15 @@ usesMongoDBManual = true
 tag = "Next"
 
 [[versions]]
-version = "6.18 Driver"
+version = "6.19 Driver"
 status = "latest"
+api = "./6.19"
+usesMongoDBManual = true
+tag = "6.19"
+
+[[versions]]
+version = "6.18 Driver"
+status = "supported"
 api = "./6.18"
 usesMongoDBManual = true
 tag = "6.18"
