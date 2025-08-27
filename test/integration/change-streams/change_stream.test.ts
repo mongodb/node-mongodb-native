@@ -45,7 +45,7 @@ const pipeline = [
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
 
-describe('Change Streams', function () {
+describe.only('Change Streams', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
@@ -370,31 +370,50 @@ describe('Change Streams', function () {
     }
   );
 
-  it('should cache the change stream resume token using iterator form', {
-    metadata: { requires: { topology: 'replicaset' } },
+  describe('cache the change stream resume token', () => {
+    describe('using iterator form', () => {
+      it('#next', {
+        metadata: { requires: { topology: 'replicaset' } },
 
-    async test() {
-      await initIteratorMode(changeStream);
-      collection.insertOne({ a: 1 });
+        async test() {
+          await initIteratorMode(changeStream);
+          collection.insertOne({ a: 1 });
 
-      const hasNext = await changeStream.hasNext();
-      expect(hasNext).to.be.true;
+          const hasNext = await changeStream.hasNext();
+          expect(hasNext).to.be.true;
 
-      const change = await changeStream.next();
-      expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-    }
-  });
+          const change = await changeStream.next();
+          expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+        }
+      });
 
-  it('should cache the change stream resume token using event listener form', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
-      const willBeChange = once(changeStream, 'change');
-      await once(changeStream.cursor, 'init');
-      collection.insertOne({ a: 1 });
+      it('#tryNext', {
+        metadata: { requires: { topology: 'replicaset' } },
 
-      const [change] = await willBeChange;
-      expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-    }
+        async test() {
+          await initIteratorMode(changeStream);
+          collection.insertOne({ a: 1 });
+
+          const hasNext = await changeStream.hasNext();
+          expect(hasNext).to.be.true;
+
+          const change = await changeStream.tryNext();
+          expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+        }
+      });
+    });
+
+    it('should cache using event listener form', {
+      metadata: { requires: { topology: 'replicaset' } },
+      async test() {
+        const willBeChange = once(changeStream, 'change');
+        await once(changeStream.cursor, 'init');
+        collection.insertOne({ a: 1 });
+
+        const [change] = await willBeChange;
+        expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+      }
+    });
   });
 
   it('should error if resume token projected out of change stream document using iterator', {
