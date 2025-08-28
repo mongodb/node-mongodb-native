@@ -193,6 +193,13 @@ export class Collection<TSchema extends Document = Document> {
   }
 
   /**
+   * Get the database object for the collection.
+   */
+  get db(): Db {
+    return this.s.db;
+  }
+
+  /**
    * The name of the database this collection belongs to
    */
   get dbName(): string {
