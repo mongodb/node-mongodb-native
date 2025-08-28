@@ -27,7 +27,7 @@ import {
 import {
   clearFailPoint,
   configureFailPoint,
-  type FailPoint,
+  type FailCommandFailPoint,
   makeMultiBatchWrite,
   measureDuration
 } from '../../tools/utils';
@@ -74,7 +74,7 @@ describe('CSOT spec prose tests', function () {
      * 1. Verify that two `insert` commands were executed against `db.coll` as part of the `insertMany` call.
      */
 
-    const failpoint: FailPoint = {
+    const failpoint: FailCommandFailPoint = {
       configureFailPoint: 'failCommand',
       mode: {
         times: 2
@@ -219,7 +219,7 @@ describe('CSOT spec prose tests', function () {
         .command({
           configureFailPoint: 'failCommand',
           mode: 'off'
-        } as FailPoint);
+        } as FailCommandFailPoint);
       await keyVaultClient.close();
       await internalClient.close();
     });
@@ -259,7 +259,7 @@ describe('CSOT spec prose tests', function () {
               blockConnection: true,
               blockTimeMS: 150
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
         const commandStarted: CommandStartedEvent[] = [];
         keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
 
@@ -314,7 +314,7 @@ describe('CSOT spec prose tests', function () {
               blockConnection: true,
               blockTimeMS: 150
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
         const commandStarted: CommandStartedEvent[] = [];
         keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
@@ -386,7 +386,7 @@ describe('CSOT spec prose tests', function () {
               blockConnection: true,
               blockTimeMS: 150
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
         const commandStarted: CommandStartedEvent[] = [];
         keyVaultClient.on('commandStarted', ev => commandStarted.push(ev));
@@ -471,7 +471,7 @@ describe('CSOT spec prose tests', function () {
      * blocking method for cursor iteration that executes `getMore` commands in a loop until a document is available or an
      * error occurs.
      */
-    const failpoint: FailPoint = {
+    const failpoint: FailCommandFailPoint = {
       configureFailPoint: 'failCommand',
       mode: 'alwaysOn',
       data: {
@@ -659,8 +659,10 @@ describe('CSOT spec prose tests', function () {
     afterEach(async function () {
       await clearFailPoint(
         this.configuration,
+        'failCommand',
         this.configuration.url({ useMultipleMongoses: false })
       );
+
       await client?.close();
     });
 
@@ -855,7 +857,7 @@ describe('CSOT spec prose tests', function () {
       const bucket = new GridFSBucket(client.db('db'));
       const downloadStream = bucket.openDownloadStream(new ObjectId('000000000000000000000005'));
 
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
         data: {
@@ -1152,7 +1154,7 @@ describe('CSOT spec prose tests', function () {
     //     ```
     // 5. Using `session`, execute `session.end_session`
     //     - Expect this to fail with a timeout error after no more than 150ms.
-    const failpoint: FailPoint = {
+    const failpoint: FailCommandFailPoint = {
       configureFailPoint: 'failCommand',
       mode: { times: 1 },
       data: {
@@ -1264,7 +1266,7 @@ describe('CSOT spec prose tests', function () {
       // 6. Verify that the following events were published during the `withTransaction` call:
       //     1. `command_started` and `command_failed` events for an `insert` command.
       //     2. `command_started` and `command_failed` events for an `abortTransaction` command.
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
         data: {
@@ -1390,7 +1392,7 @@ describe('CSOT spec prose tests', function () {
        *
        * 7. Verify that two `bulkWrite` commands were executed as part of the `MongoClient.bulkWrite` call.
        */
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: {
           times: 2

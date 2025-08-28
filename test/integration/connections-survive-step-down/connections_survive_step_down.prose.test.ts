@@ -9,7 +9,7 @@ import {
   MongoServerError,
   ReadPreference
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailCommandFailPoint } from '../../tools/utils';
 
 describe('Connections Survive Primary Step Down - prose', function () {
   let client: MongoClient;
@@ -94,7 +94,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
     // This test requires a replica set with server version 4.2 or higher.
 
     // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 10107}}``
-    const failPoint: FailPoint = {
+    const failPoint: FailCommandFailPoint = {
       configureFailPoint: 'failCommand',
       mode: { times: 1 },
       data: { failCommands: ['insert'], errorCode: 10107 }
@@ -121,7 +121,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
       // This test should be run on all server versions >= 4.0.
 
       // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 91}}``
-      const failPoint: FailPoint = {
+      const failPoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
         data: { failCommands: ['insert'], errorCode: 91 }
@@ -149,7 +149,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
       // This test should be run on all server versions >= 4.0.
 
       // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 11600}}``
-      const failPoint: FailPoint = {
+      const failPoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
         data: { failCommands: ['insert'], errorCode: 11600 }

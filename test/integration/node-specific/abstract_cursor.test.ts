@@ -560,7 +560,7 @@ describe('class AbstractCursor', function () {
       });
 
       afterEach(async function () {
-        await clearFailPoint(this.configuration, uri);
+        await clearFailPoint(this.configuration, 'failCommand', uri);
       });
 
       it(

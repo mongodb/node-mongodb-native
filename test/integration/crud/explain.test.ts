@@ -310,6 +310,7 @@ describe('CRUD API explain option', function () {
     afterEach(async function () {
       await clearFailPoint(
         this.configuration,
+        'failCommand',
         this.configuration.url({ useMultipleMongoses: false })
       );
     });

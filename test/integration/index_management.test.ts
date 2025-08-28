@@ -8,7 +8,7 @@ import {
   type MongoClient,
   MongoServerError
 } from '../mongodb';
-import { type FailPoint } from '../tools/utils';
+import { type FailCommandFailPoint } from '../tools/utils';
 import { assert as test, filterForCommands, setupDatabase } from './shared';
 
 describe('Indexes', function () {
@@ -38,7 +38,7 @@ describe('Indexes', function () {
   });
 
   it('createIndex() throws an error error when createIndex fails', async function () {
-    await client.db('admin').command(<FailPoint>{
+    await client.db('admin').command(<FailCommandFailPoint>{
       configureFailPoint: 'failCommand',
       mode: { times: 1 },
       data: {

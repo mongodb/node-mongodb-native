@@ -26,7 +26,7 @@ import {
 import {
   clearFailPoint,
   configureFailPoint,
-  type FailPoint,
+  type FailCommandFailPoint,
   getEncryptExtraOptions,
   measureDuration,
   sleep
@@ -399,6 +399,10 @@ describe('Client Side Encryption Functional', function () {
     function makeBlockingFailFor(command: string | string[], blockTimeMS: number) {
       beforeEach(async function () {
         await configureFailPoint(this.configuration, {
+          configureFailPoint: 'maxTimeNeverTimeOut',
+          mode: 'alwaysOn'
+        });
+        await configureFailPoint(this.configuration, {
           configureFailPoint: 'failCommand',
           mode: { times: 2 },
           data: {
@@ -412,6 +416,7 @@ describe('Client Side Encryption Functional', function () {
 
       afterEach(async function () {
         sinon.restore();
+        await clearFailPoint(this.configuration, 'maxTimeNeverTimeOut');
         await clearFailPoint(this.configuration);
       });
     }
@@ -681,7 +686,7 @@ describe('CSOT', function () {
             blockConnection: true,
             blockTimeMS: 2000
           }
-        } as FailPoint);
+        } as FailCommandFailPoint);
     });
 
     afterEach(async function () {
@@ -692,7 +697,7 @@ describe('CSOT', function () {
         .command({
           configureFailPoint: 'failCommand',
           mode: 'off'
-        } as FailPoint);
+        } as FailCommandFailPoint);
       await setupClient.close();
     });
 
@@ -863,7 +868,7 @@ describe('CSOT', function () {
               blockConnection: true,
               blockTimeMS: 2000
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
       });
 
       afterEach(async function () {
@@ -873,7 +878,7 @@ describe('CSOT', function () {
           .command({
             configureFailPoint: 'failCommand',
             mode: 'off'
-          } as FailPoint);
+          } as FailCommandFailPoint);
         await setupClient.close();
       });
 
@@ -1004,7 +1009,7 @@ describe('CSOT', function () {
               blockConnection: true,
               blockTimeMS: 2000
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
       });
 
       afterEach(async function () {
@@ -1014,7 +1019,7 @@ describe('CSOT', function () {
           .command({
             configureFailPoint: 'failCommand',
             mode: 'off'
-          } as FailPoint);
+          } as FailCommandFailPoint);
         await setupClient.close();
       });
 
@@ -1116,7 +1121,7 @@ describe('CSOT', function () {
           .command({
             configureFailPoint: 'failCommand',
             mode: 'off'
-          } as FailPoint);
+          } as FailCommandFailPoint);
         await client
           .db('db')
           .collection('newnew')
@@ -1168,7 +1173,7 @@ describe('CSOT', function () {
                     blockConnection: true,
                     blockTimeMS: timeoutMS * 1.2
                   }
-                } as FailPoint);
+                } as FailCommandFailPoint);
 
               const { duration, result: err } = await runCreateEncryptedCollection();
               expect(err).to.be.instanceOf(MongoCryptCreateDataKeyError);
@@ -1199,7 +1204,7 @@ describe('CSOT', function () {
                     blockConnection: true,
                     blockTimeMS: timeoutMS * 1.2
                   }
-                } as FailPoint);
+                } as FailCommandFailPoint);
 
               const { duration, result: err } = await runCreateEncryptedCollection();
               expect(err).to.be.instanceOf(MongoCryptCreateEncryptedCollectionError);
@@ -1230,7 +1235,7 @@ describe('CSOT', function () {
                     blockConnection: true,
                     blockTimeMS: timeoutMS * 0.6
                   }
-                } as FailPoint);
+                } as FailCommandFailPoint);
 
               const { duration, result: err } = await runCreateEncryptedCollection();
               expect(err).to.be.instanceOf(MongoCryptCreateEncryptedCollectionError);
