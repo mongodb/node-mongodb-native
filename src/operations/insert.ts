@@ -96,5 +96,13 @@ export interface InsertManyResult<TSchema = Document> {
   insertedIds: { [key: number]: InferIdType<TSchema> };
 }
 
-defineAspects(InsertOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
-defineAspects(InsertOneOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(InsertOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.SUPPORTS_RAW_DATA
+]);
+defineAspects(InsertOneOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.SUPPORTS_RAW_DATA
+]);

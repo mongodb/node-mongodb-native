@@ -161,5 +161,6 @@ defineAspects(AggregateOperation, [
   Aspect.READ_OPERATION,
   Aspect.RETRYABLE,
   Aspect.EXPLAINABLE,
-  Aspect.CURSOR_CREATING
+  Aspect.CURSOR_CREATING,
+  Aspect.SUPPORTS_RAW_DATA
 ]);
