@@ -48,7 +48,7 @@ export class RenameOperation extends CommandOperation<Document> {
   }
 
   override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
-    return new Collection(this.collection.s.db, this.newName, this.collection.s.options);
+    return new Collection(this.collection.db, this.newName, this.collection.s.options);
   }
 }
 

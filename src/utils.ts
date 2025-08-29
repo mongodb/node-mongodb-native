@@ -1362,7 +1362,7 @@ export function maybeAddIdToDocuments(
   options: { forceServerObjectId?: boolean }
 ): Document {
   const forceServerObjectId =
-    options.forceServerObjectId ?? collection.s.db.options?.forceServerObjectId ?? false;
+    options.forceServerObjectId ?? collection.db.options?.forceServerObjectId ?? false;
 
   // no need to modify the docs if server sets the ObjectId
   if (forceServerObjectId) {
