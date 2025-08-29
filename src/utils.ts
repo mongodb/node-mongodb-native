@@ -10,10 +10,7 @@ import { promisify } from 'util';
 
 import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
-import {
-  MAX_SUPPORTED_WIRE_VERSION,
-  MIN_SUPPORTED_RAW_DATA_WIRE_VERSION
-} from './cmap/wire_protocol/constants';
+import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 import type { Collection } from './collection';
 import { kDecoratedKeys, LEGACY_HELLO_COMMAND } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
@@ -1356,16 +1353,6 @@ export async function once<T>(ee: EventEmitter, name: string, options?: Abortabl
     ee.off(name, onEvent);
     ee.off('error', onError);
     abortListener?.[kDispose]();
-  }
-}
-
-export function decorateRawData(
-  command: Document,
-  rawData: boolean,
-  serverWireVersion: number
-): void {
-  if (rawData && serverWireVersion >= MIN_SUPPORTED_RAW_DATA_WIRE_VERSION) {
-    command.rawData = rawData;
   }
 }
 
