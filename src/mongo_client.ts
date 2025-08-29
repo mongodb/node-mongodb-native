@@ -492,6 +492,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * @param driverInfo - Information about the application or library.
    */
   appendMetadata(driverInfo: DriverInfo) {
+    for (const info of this.options.additionalDriverInfo) {
+      if (info.name === driverInfo.name) {
+        return;
+      }
+    }
     this.options.additionalDriverInfo.push(driverInfo);
     this.options.metadata = makeClientMetadata(this.options);
     this.options.extendedMetadata = addContainerMetadata(this.options.metadata)
