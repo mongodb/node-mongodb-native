@@ -173,10 +173,16 @@ export class Collection<TSchema extends Document = Document> {
   client: MongoClient;
 
   /**
+   * Get the database object for the collection.
+   */
+  readonly db: Db;
+
+  /**
    * Create a new Collection instance
    * @internal
    */
   constructor(db: Db, name: string, options?: CollectionOptions) {
+    this.db = db;
     // Internal state
     this.s = {
       db,
@@ -228,7 +234,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get readConcern(): ReadConcern | undefined {
     if (this.s.readConcern == null) {
-      return this.s.db.readConcern;
+      return this.db.readConcern;
     }
     return this.s.readConcern;
   }
@@ -239,7 +245,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get readPreference(): ReadPreference | undefined {
     if (this.s.readPreference == null) {
-      return this.s.db.readPreference;
+      return this.db.readPreference;
     }
 
     return this.s.readPreference;
@@ -255,7 +261,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get writeConcern(): WriteConcern | undefined {
     if (this.s.writeConcern == null) {
-      return this.s.db.writeConcern;
+      return this.db.writeConcern;
     }
     return this.s.writeConcern;
   }
@@ -509,7 +515,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async drop(options?: DropCollectionOptions): Promise<boolean> {
-    return await this.s.db.dropCollection(this.collectionName, options);
+    return await this.db.dropCollection(this.collectionName, options);
   }
 
   /**
@@ -578,7 +584,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async options(options?: OperationOptions): Promise<Document> {
     options = resolveOptions(this, options);
-    const [collection] = await this.s.db
+    const [collection] = await this.db
       .listCollections({ name: this.collectionName }, { ...options, nameOnly: false })
       .toArray();
 

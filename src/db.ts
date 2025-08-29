@@ -126,7 +126,10 @@ export class Db {
   /** @internal */
   s: DbPrivate;
 
-  /** @internal */
+  /**
+   * Gets the MongoClient associated with the Db.
+   * @public
+   */
   readonly client: MongoClient;
 
   public static SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
