@@ -1,0 +1,122 @@
+{
+  "description": "BulkWrite deleteOne-rawData",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "BulkWrite deleteOne with rawData option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.2.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {}
+                }
+              }
+            ],
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll0",
+                  "deletes": [
+                    {
+                      "q": {},
+                      "limit": 1
+                    }
+                  ],
+                  "rawData": true
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite deleteOne with rawData option on less than 8.2.0 - ignore argument",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "8.1.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {}
+                }
+              }
+            ],
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll0",
+                  "deletes": [
+                    {
+                      "q": {},
+                      "limit": 1
+                    }
+                  ],
+                  "rawData": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

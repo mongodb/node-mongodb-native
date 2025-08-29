@@ -314,5 +314,6 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
 defineAspects(FindAndModifyOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.RETRYABLE,
-  Aspect.EXPLAINABLE
+  Aspect.EXPLAINABLE,
+  Aspect.SUPPORTS_RAW_DATA
 ]);

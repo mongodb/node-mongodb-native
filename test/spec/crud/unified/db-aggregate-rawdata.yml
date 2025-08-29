@@ -1,0 +1,64 @@
+description: "db-aggregate-rawdata"
+
+schemaVersion: "1.4"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name admin
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName crud-v2
+
+tests:
+  - description: "Aggregate with rawData option"
+    runOnRequirements:
+      - minServerVersion: "8.2.0"
+        topologies: [ replicaset ]
+        serverless: forbid
+    operations:
+      - object: *database0
+        name: aggregate
+        arguments:
+          pipeline: &pipeline
+            - { $listLocalSessions: {} }
+            - { $limit: 1 }
+            - { $addFields: { dummy: 'dummy field' } }
+            - { $project: { _id: 0, dummy: 1 } }
+          rawData: &rawdata true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: 1
+                pipeline: *pipeline
+                rawData: *rawdata
+  - description: "Aggregate with rawData option on less than 8.2.0 - ignore argument"
+    runOnRequirements:
+      - maxServerVersion: "8.1.99"
+        serverless: forbid
+    operations:
+      - object: *database0
+        name: aggregate
+        arguments:
+          pipeline: &pipeline
+            - { $listLocalSessions: {} }
+            - { $limit: 1 }
+            - { $addFields: { dummy: 'dummy field' } }
+            - { $project: { _id: 0, dummy: 1 } }
+          rawData: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: 1
+                pipeline: *pipeline
+                rawData:
+                  $$exists: false

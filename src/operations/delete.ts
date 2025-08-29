@@ -167,10 +167,12 @@ defineAspects(DeleteOneOperation, [
   Aspect.RETRYABLE,
   Aspect.WRITE_OPERATION,
   Aspect.EXPLAINABLE,
-  Aspect.SKIP_COLLATION
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
 ]);
 defineAspects(DeleteManyOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.EXPLAINABLE,
-  Aspect.SKIP_COLLATION
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
 ]);
