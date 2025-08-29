@@ -1,0 +1,253 @@
+{
+  "description": "create-null-ids",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "crud_id"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "type_tests"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "type_tests",
+      "databaseName": "crud_id",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "inserting _id with type null via insertOne",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "_id": null
+            }
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$type": "null"
+              }
+            }
+          },
+          "expectResult": 1
+        }
+      ]
+    },
+    {
+      "description": "inserting _id with type null via insertMany",
+      "operations": [
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": null
+              }
+            ]
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$type": "null"
+              }
+            }
+          },
+          "expectResult": 1
+        }
+      ]
+    },
+    {
+      "description": "inserting _id with type null via updateOne",
+      "operations": [
+        {
+          "name": "updateOne",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": null
+            },
+            "update": {
+              "$unset": {
+                "a": ""
+              }
+            },
+            "upsert": true
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$type": "null"
+              }
+            }
+          },
+          "expectResult": 1
+        }
+      ]
+    },
+    {
+      "description": "inserting _id with type null via updateMany",
+      "operations": [
+        {
+          "name": "updateMany",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": null
+            },
+            "update": {
+              "$unset": {
+                "a": ""
+              }
+            },
+            "upsert": true
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$type": "null"
+              }
+            }
+          },
+          "expectResult": 1
+        }
+      ]
+    },
+    {
+      "description": "inserting _id with type null via replaceOne",
+      "operations": [
+        {
+          "name": "replaceOne",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "replacement": {
+              "_id": null
+            },
+            "upsert": true
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$type": "null"
+              }
+            }
+          },
+          "expectResult": 1
+        }
+      ]
+    },
+    {
+      "description": "inserting _id with type null via bulkWrite",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": null
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$type": "null"
+              }
+            }
+          },
+          "expectResult": 1
+        }
+      ]
+    },
+    {
+      "description": "inserting _id with type null via clientBulkWrite",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "clientBulkWrite",
+          "object": "client",
+          "arguments": {
+            "models": [
+              {
+                "insertOne": {
+                  "namespace": "crud_id.type_tests",
+                  "document": {
+                    "_id": null
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$type": "null"
+              }
+            }
+          },
+          "expectResult": 1
+        }
+      ]
+    }
+  ]
+}

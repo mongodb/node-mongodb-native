@@ -1,0 +1,66 @@
+description: bulkWrite-updateOne-pipeline
+
+schemaVersion: '1.0'
+
+runOnRequirements:
+  - minServerVersion: 4.1.11
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name test
+
+initialData:
+  - collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 1, y: 1, t: { u: { v: 1 } } }
+      - { _id: 2, x: 2, y: 1 }
+
+tests:
+  -
+    description: 'UpdateOne in bulk write using pipelines'
+    operations:
+      - object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            - updateOne:
+                filter: { _id: 1 }
+                update:
+                  - { $replaceRoot: { newRoot: $t } }
+                  - { $addFields: { foo: 1 } }
+        expectResult:
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  - q: { _id: 1 }
+                    u:
+                      - { $replaceRoot: { newRoot: $t } }
+                      - { $addFields: { foo: 1 } }
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
+              commandName: update
+              databaseName: *database_name
+    outcome:
+      - collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, u: { v: 1 }, foo: 1 }
+          - { _id: 2, x: 2, y: 1 }
