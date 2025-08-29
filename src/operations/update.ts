@@ -299,7 +299,12 @@ export function makeUpdateStatement(
   return op;
 }
 
-defineAspects(UpdateOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION, Aspect.SKIP_COLLATION]);
+defineAspects(UpdateOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
+]);
 defineAspects(UpdateOneOperation, [
   Aspect.RETRYABLE,
   Aspect.WRITE_OPERATION,
