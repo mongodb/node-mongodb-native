@@ -1,0 +1,262 @@
+description: "client bulkWrite partial results"
+schemaVersion: "1.4" # To support `serverless: forbid`
+runOnRequirements:
+  - minServerVersion: "8.0"
+    serverless: forbid
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - &existingDocument { _id: 1, x: 11 }
+
+_yamlAnchors:
+  namespace: &namespace "crud-tests.coll0"
+  newDocument: &newDocument { _id: 2, x: 22 }
+
+tests:
+  - description: "partialResult is unset when first operation fails during an ordered bulk write (verbose)"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+            - insertOne:
+                namespace: *namespace
+                document: *newDocument
+          ordered: true
+          verboseResults: true
+        expectError:
+          expectResult:
+            $$unsetOrMatches:
+              insertedCount: { $$exists: false }
+              upsertedCount: { $$exists: false }
+              matchedCount: { $$exists: false }
+              modifiedCount: { $$exists: false }
+              deletedCount: { $$exists: false }
+              insertResults: { $$exists: false }
+              updateResults: { $$exists: false }
+              deleteResults: { $$exists: false }
+  - description: "partialResult is unset when first operation fails during an ordered bulk write (summary)"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+            - insertOne:
+                namespace: *namespace
+                document: *newDocument
+          ordered: true
+          verboseResults: false
+        expectError:
+          expectResult:
+            $$unsetOrMatches:
+              insertedCount: { $$exists: false }
+              upsertedCount: { $$exists: false }
+              matchedCount: { $$exists: false }
+              modifiedCount: { $$exists: false }
+              deletedCount: { $$exists: false }
+              insertResults: { $$exists: false }
+              updateResults: { $$exists: false }
+              deleteResults: { $$exists: false }
+  - description: "partialResult is set when second operation fails during an ordered bulk write (verbose)"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *newDocument
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+          ordered: true
+          verboseResults: true
+        expectError:
+          expectResult:
+            insertedCount: 1
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 0
+            insertResults:
+              0:
+                insertedId: 2
+            updateResults: {}
+            deleteResults: {}
+  - description: "partialResult is set when second operation fails during an ordered bulk write (summary)"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *newDocument
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+          ordered: true
+          verboseResults: false
+        expectError:
+          expectResult:
+            insertedCount: 1
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 0
+            insertResults:
+              $$unsetOrMatches: {}
+            updateResults:
+              $$unsetOrMatches: {}
+            deleteResults:
+              $$unsetOrMatches: {}
+  - description: "partialResult is unset when all operations fail during an unordered bulk write"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+          ordered: false
+        expectError:
+          expectResult:
+            $$unsetOrMatches:
+              insertedCount: { $$exists: false }
+              upsertedCount: { $$exists: false }
+              matchedCount: { $$exists: false }
+              modifiedCount: { $$exists: false }
+              deletedCount: { $$exists: false }
+              insertResults: { $$exists: false }
+              updateResults: { $$exists: false }
+              deleteResults: { $$exists: false }
+  - description: "partialResult is set when first operation fails during an unordered bulk write (verbose)"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+            - insertOne:
+                namespace: *namespace
+                document: *newDocument
+          ordered: false
+          verboseResults: true
+        expectError:
+          expectResult:
+            insertedCount: 1
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 0
+            insertResults:
+              1:
+                insertedId: 2
+            updateResults: {}
+            deleteResults: {}
+  - description: "partialResult is set when first operation fails during an unordered bulk write (summary)"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+            - insertOne:
+                namespace: *namespace
+                document: *newDocument
+          ordered: false
+          verboseResults: false
+        expectError:
+          expectResult:
+            insertedCount: 1
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 0
+            insertResults:
+              $$unsetOrMatches: {}
+            updateResults:
+              $$unsetOrMatches: {}
+            deleteResults:
+              $$unsetOrMatches: {}
+  - description: "partialResult is set when second operation fails during an unordered bulk write (verbose)"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *newDocument
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+          ordered: false
+          verboseResults: true
+        expectError:
+          expectResult:
+            insertedCount: 1
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 0
+            insertResults:
+              0:
+                insertedId: 2
+            updateResults: {}
+            deleteResults: {}
+  - description: "partialResult is set when second operation fails during an unordered bulk write (summary)"
+    operations:
+      - object: *client0
+        name: clientBulkWrite
+        arguments:
+          models:
+            - insertOne:
+                namespace: *namespace
+                document: *newDocument
+            - insertOne:
+                namespace: *namespace
+                document: *existingDocument
+          ordered: false
+          verboseResults: false
+        expectError:
+          expectResult:
+            insertedCount: 1
+            upsertedCount: 0
+            matchedCount: 0
+            modifiedCount: 0
+            deletedCount: 0
+            insertResults:
+              $$unsetOrMatches: {}
+            updateResults:
+              $$unsetOrMatches: {}
+            deleteResults:
+              $$unsetOrMatches: {}

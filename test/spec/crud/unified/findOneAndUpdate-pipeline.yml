@@ -1,0 +1,56 @@
+description: findOneAndUpdate-pipeline
+
+schemaVersion: '1.0'
+
+runOnRequirements:
+  - minServerVersion: 4.1.11
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name test
+
+initialData:
+  - collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 1, y: 1, t: { u: { v: 1 } } }
+      - { _id: 2, x: 2, y: 1 }
+
+tests:
+  -
+    description: 'FindOneAndUpdate using pipelines'
+    operations:
+      - object: *collection0
+        name: findOneAndUpdate
+        arguments:
+          filter: { _id: 1 }
+          update:
+            - { $project: { x: 1 } }
+            - { $addFields: { foo: 1 } }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection_name
+                update:
+                  - { $project: { x: 1 } }
+                  - { $addFields: { foo: 1 } }
+              commandName: findAndModify
+              databaseName: *database_name
+    outcome:
+      - collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1, x: 1, foo: 1 }
+          - { _id: 2, x: 2, y: 1 }
