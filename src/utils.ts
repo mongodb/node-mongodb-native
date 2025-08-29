@@ -361,13 +361,8 @@ export function uuidV4(): Buffer {
  */
 export function maxWireVersion(topologyOrServer?: Connection | Topology | Server): number {
   if (topologyOrServer) {
-    if (topologyOrServer.loadBalanced || topologyOrServer.serverApi?.version) {
-      // Since we do not have a monitor in the load balanced mode,
-      // we assume the load-balanced server is always pointed at the latest mongodb version.
-      // There is a risk that for on-prem deployments
-      // that don't upgrade immediately that this could alert to the
-      // application that a feature is available that is actually not.
-      // We also return the max supported wire version for serverAPI.
+    if (topologyOrServer.serverApi?.version) {
+      // We return the max supported wire version for serverAPI.
       return MAX_SUPPORTED_WIRE_VERSION;
     }
     if (topologyOrServer.hello) {
@@ -387,6 +382,17 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
       topologyOrServer.description.maxWireVersion != null
     ) {
       return topologyOrServer.description.maxWireVersion;
+    }
+
+    // This is the fallback case for load balanced mode. If we are building commands the
+    // object being checked will be a connection, and we will have a hello response on
+    // it. For other cases, such as retryable writes, the object will be a server or
+    // topology, and there will be no hello response on those objects, so we return
+    // the max wire version so we support retryability. Once we have a min supported
+    // wire version of 9, then the needsRetryableWriteLabel() check can remove the
+    // usage of passing the wire version into it.
+    if (topologyOrServer.loadBalanced) {
+      return MAX_SUPPORTED_WIRE_VERSION;
     }
   }
 
