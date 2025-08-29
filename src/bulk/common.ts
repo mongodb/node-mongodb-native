@@ -900,7 +900,7 @@ export abstract class BulkOperationBase {
 
     // Final options for retryable writes
     let finalOptions = Object.assign({}, options);
-    finalOptions = applyRetryableWrites(finalOptions, collection.s.db);
+    finalOptions = applyRetryableWrites(finalOptions, collection.db);
 
     // Final results
     const bulkResult: BulkResult = {
@@ -1228,7 +1228,7 @@ export abstract class BulkOperationBase {
   private shouldForceServerObjectId(): boolean {
     return (
       this.s.options.forceServerObjectId === true ||
-      this.s.collection.s.db.options?.forceServerObjectId === true
+      this.s.collection.db.options?.forceServerObjectId === true
     );
   }
 }

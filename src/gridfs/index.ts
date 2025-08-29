@@ -160,13 +160,13 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param id - The id of the file doc
    */
   async delete(id: ObjectId, options?: { timeoutMS: number }): Promise<void> {
-    const { timeoutMS } = resolveOptions(this.s.db, options);
+    const { timeoutMS } = resolveOptions(this.db, options);
     let timeoutContext: CSOTTimeoutContext | undefined = undefined;
 
     if (timeoutMS) {
       timeoutContext = new CSOTTimeoutContext({
         timeoutMS,
-        serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
+        serverSelectionTimeoutMS: this.db.client.s.options.serverSelectionTimeoutMS
       });
     }
 
@@ -240,13 +240,13 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
 
   /** Removes this bucket's files collection, followed by its chunks collection. */
   async drop(options?: { timeoutMS: number }): Promise<void> {
-    const { timeoutMS } = resolveOptions(this.s.db, options);
+    const { timeoutMS } = resolveOptions(this.db, options);
     let timeoutContext: CSOTTimeoutContext | undefined = undefined;
 
     if (timeoutMS) {
       timeoutContext = new CSOTTimeoutContext({
         timeoutMS,
-        serverSelectionTimeoutMS: this.s.db.client.s.options.serverSelectionTimeoutMS
+        serverSelectionTimeoutMS: this.db.client.s.options.serverSelectionTimeoutMS
       });
     }
 
