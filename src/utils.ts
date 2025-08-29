@@ -359,29 +359,14 @@ export function uuidV4(): Buffer {
  * A helper function for determining `maxWireVersion` between legacy and new topology instances
  * @internal
  */
-export function maxWireVersion(topologyOrServer?: Connection | Topology | Server): number {
-  if (topologyOrServer) {
-    if (topologyOrServer.serverApi?.version) {
+export function maxWireVersion(handshakeAware?: Connection | Topology | Server): number {
+  if (handshakeAware) {
+    if (handshakeAware.serverApi?.version) {
       // We return the max supported wire version for serverAPI.
       return MAX_SUPPORTED_WIRE_VERSION;
     }
-    if (topologyOrServer.hello) {
-      return topologyOrServer.hello.maxWireVersion;
-    }
-
-    if ('lastHello' in topologyOrServer && typeof topologyOrServer.lastHello === 'function') {
-      const lastHello = topologyOrServer.lastHello();
-      if (lastHello) {
-        return lastHello.maxWireVersion;
-      }
-    }
-
-    if (
-      topologyOrServer.description &&
-      'maxWireVersion' in topologyOrServer.description &&
-      topologyOrServer.description.maxWireVersion != null
-    ) {
-      return topologyOrServer.description.maxWireVersion;
+    if (handshakeAware.hello) {
+      return handshakeAware.hello.maxWireVersion;
     }
 
     // This is the fallback case for load balanced mode. If we are building commands the
@@ -391,8 +376,23 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
     // the max wire version so we support retryability. Once we have a min supported
     // wire version of 9, then the needsRetryableWriteLabel() check can remove the
     // usage of passing the wire version into it.
-    if (topologyOrServer.loadBalanced) {
+    if (handshakeAware.loadBalanced) {
       return MAX_SUPPORTED_WIRE_VERSION;
+    }
+
+    if ('lastHello' in handshakeAware && typeof handshakeAware.lastHello === 'function') {
+      const lastHello = handshakeAware.lastHello();
+      if (lastHello) {
+        return lastHello.maxWireVersion;
+      }
+    }
+
+    if (
+      handshakeAware.description &&
+      'maxWireVersion' in handshakeAware.description &&
+      handshakeAware.description.maxWireVersion != null
+    ) {
+      return handshakeAware.description.maxWireVersion;
     }
   }
 
