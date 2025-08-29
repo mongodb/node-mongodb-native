@@ -674,7 +674,7 @@ export class ChangeStream<
 
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;
-      serverSelectionTimeoutMS = parent.db.client.options.serverSelectionTimeoutMS;
+      serverSelectionTimeoutMS = parent.s.db.client.options.serverSelectionTimeoutMS;
     } else if (parent instanceof Db) {
       this.type = CHANGE_DOMAIN_TYPES.DATABASE;
       serverSelectionTimeoutMS = parent.client.options.serverSelectionTimeoutMS;

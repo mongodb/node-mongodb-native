@@ -75,12 +75,12 @@ export class Admin {
    */
   async command(command: Document, options?: RunCommandOptions): Promise<Document> {
     return await executeOperation(
-      this.db.client,
+      this.s.db.client,
       new RunCommandOperation(new MongoDBNamespace('admin'), command, {
         ...resolveBSONOptions(options),
         session: options?.session,
         readPreference: options?.readPreference,
-        timeoutMS: options?.timeoutMS ?? this.db.timeoutMS
+        timeoutMS: options?.timeoutMS ?? this.s.db.timeoutMS
       })
     );
   }
@@ -129,8 +129,8 @@ export class Admin {
    */
   async removeUser(username: string, options?: RemoveUserOptions): Promise<boolean> {
     return await executeOperation(
-      this.db.client,
-      new RemoveUserOperation(this.db, username, { dbName: 'admin', ...options })
+      this.s.db.client,
+      new RemoveUserOperation(this.s.db, username, { dbName: 'admin', ...options })
     );
   }
 
@@ -145,7 +145,7 @@ export class Admin {
     options: ValidateCollectionOptions = {}
   ): Promise<Document> {
     return await executeOperation(
-      this.db.client,
+      this.s.db.client,
       new ValidateCollectionOperation(this, collectionName, options)
     );
   }
@@ -157,8 +157,8 @@ export class Admin {
    */
   async listDatabases(options?: ListDatabasesOptions): Promise<ListDatabasesResult> {
     return await executeOperation(
-      this.db.client,
-      new ListDatabasesOperation(this.db, { timeoutMS: this.db.timeoutMS, ...options })
+      this.s.db.client,
+      new ListDatabasesOperation(this.s.db, { timeoutMS: this.s.db.timeoutMS, ...options })
     );
   }
 

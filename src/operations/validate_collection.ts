@@ -19,7 +19,7 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
   collectionName: string;
 
   constructor(admin: Admin, collectionName: string, options: ValidateCollectionOptions) {
-    super(admin.db, options);
+    super(admin.s.db, options);
     this.options = options;
     this.collectionName = collectionName;
   }

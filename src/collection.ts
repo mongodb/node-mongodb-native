@@ -129,6 +129,7 @@ export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOpt
 /** @internal */
 export interface CollectionPrivate {
   pkFactory: PkFactory;
+  db: Db;
   options: any;
   namespace: MongoDBCollectionNamespace;
   readPreference?: ReadPreference;
@@ -184,6 +185,7 @@ export class Collection<TSchema extends Document = Document> {
     this.db = db;
     // Internal state
     this.s = {
+      db,
       options,
       namespace: new MongoDBCollectionNamespace(db.databaseName, name),
       pkFactory: db.options?.pkFactory ?? DEFAULT_PK_FACTORY,
@@ -232,7 +234,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get readConcern(): ReadConcern | undefined {
     if (this.s.readConcern == null) {
-      return this.db.readConcern;
+      return this.s.db.readConcern;
     }
     return this.s.readConcern;
   }
@@ -243,7 +245,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get readPreference(): ReadPreference | undefined {
     if (this.s.readPreference == null) {
-      return this.db.readPreference;
+      return this.s.db.readPreference;
     }
 
     return this.s.readPreference;
@@ -259,7 +261,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get writeConcern(): WriteConcern | undefined {
     if (this.s.writeConcern == null) {
-      return this.db.writeConcern;
+      return this.s.db.writeConcern;
     }
     return this.s.writeConcern;
   }
@@ -513,7 +515,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async drop(options?: DropCollectionOptions): Promise<boolean> {
-    return await this.db.dropCollection(this.collectionName, options);
+    return await this.s.db.dropCollection(this.collectionName, options);
   }
 
   /**
@@ -582,7 +584,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async options(options?: OperationOptions): Promise<Document> {
     options = resolveOptions(this, options);
-    const [collection] = await this.db
+    const [collection] = await this.s.db
       .listCollections({ name: this.collectionName }, { ...options, nameOnly: false })
       .toArray();
 
