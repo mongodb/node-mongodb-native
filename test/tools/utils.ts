@@ -208,6 +208,10 @@ export function extractAuthFromConnectionString(connectionString: string | any[]
 export interface FailPoint {
   configureFailPoint: 'failCommand' | 'failGetMoreAfterCursorCheckout' | 'maxTimeNeverTimeOut';
   mode: { activationProbability: number } | { times: number } | 'alwaysOn' | 'off';
+}
+
+export interface FailCommandFailPoint extends FailPoint {
+  configureFailPoint: 'failCommand';
   data: {
     failCommands: string[];
     errorCode?: number;
@@ -379,6 +383,16 @@ export async function waitUntilPoolsFilled(
 export async function configureFailPoint(
   configuration: TestConfiguration,
   failPoint: FailPoint,
+  uri?: string | undefined
+);
+export async function configureFailPoint(
+  configuration: TestConfiguration,
+  failPoint: FailCommandFailPoint,
+  uri?: string | undefined
+);
+export async function configureFailPoint<T extends FailPoint>(
+  configuration: TestConfiguration,
+  failPoint: T,
   uri = configuration.url()
 ) {
   const utilClient = configuration.newClient(uri);
@@ -391,13 +405,17 @@ export async function configureFailPoint(
   }
 }
 
-export async function clearFailPoint(configuration: TestConfiguration, url = configuration.url()) {
+export async function clearFailPoint(
+  configuration: TestConfiguration,
+  failPoint: FailPoint['configureFailPoint'] = 'failCommand',
+  url = configuration.url()
+) {
   const utilClient = configuration.newClient(url);
   await utilClient.connect();
 
   try {
     await utilClient.db('admin').command(<FailPoint>{
-      configureFailPoint: 'failCommand',
+      configureFailPoint: failPoint,
       mode: 'off'
     });
   } finally {

@@ -9,7 +9,7 @@ import {
   MongoNetworkError,
   type ServerSessionPool
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailCommandFailPoint } from '../../tools/utils';
 
 describe('Transactions', function () {
   describe('withTransaction', function () {
@@ -149,7 +149,7 @@ describe('Transactions', function () {
             errorLabels: ['TransientTransactionError'],
             closeConnection: false
           }
-        } as FailPoint);
+        } as FailCommandFailPoint);
 
         collection = await client.db('withTransaction').createCollection('withTransactionRetry');
       });

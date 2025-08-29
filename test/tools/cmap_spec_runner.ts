@@ -15,7 +15,7 @@ import {
   TimeoutContext
 } from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
-import { type FailPoint, sleep } from './utils';
+import { type FailCommandFailPoint, sleep } from './utils';
 
 type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
@@ -86,7 +86,7 @@ export type CmapTest = {
     minServerVersion?: string;
     maxServerVersion?: string;
   }[];
-  failPoint?: FailPoint;
+  failPoint?: FailCommandFailPoint;
 };
 
 const ALL_POOL_EVENTS = new Set(CMAP_EVENTS);
