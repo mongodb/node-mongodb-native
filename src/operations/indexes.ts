@@ -409,7 +409,8 @@ export class ListIndexesOperation extends CommandOperation<CursorResponse> {
 defineAspects(ListIndexesOperation, [
   Aspect.READ_OPERATION,
   Aspect.RETRYABLE,
-  Aspect.CURSOR_CREATING
+  Aspect.CURSOR_CREATING,
+  Aspect.SUPPORTS_RAW_DATA
 ]);
-defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
-defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION]);
+defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION, Aspect.SUPPORTS_RAW_DATA]);
+defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION, Aspect.SUPPORTS_RAW_DATA]);

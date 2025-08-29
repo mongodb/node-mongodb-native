@@ -1,0 +1,55 @@
+description: "aggregate-rawData"
+
+schemaVersion: "1.4"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+tests:
+  - description: "Aggregate with rawData option"
+    runOnRequirements:
+      - minServerVersion: "8.2.0"
+    operations:
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: &pipeline0
+            - $match: {}
+          rawData: &rawdata true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline0
+                rawData: *rawdata
+  - description: "Aggregate with rawData option on less than 8.2.0 - ignore argument"
+    runOnRequirements:
+      - maxServerVersion: "8.1.99"
+    operations:
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: &pipeline0
+            - $match: {}
+          rawData: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline0
+                rawData:
+                  $$exists: false
