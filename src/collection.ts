@@ -173,10 +173,16 @@ export class Collection<TSchema extends Document = Document> {
   client: MongoClient;
 
   /**
+   * Get the database object for the collection.
+   */
+  readonly db: Db;
+
+  /**
    * Create a new Collection instance
    * @internal
    */
   constructor(db: Db, name: string, options?: CollectionOptions) {
+    this.db = db;
     // Internal state
     this.s = {
       db,
@@ -190,13 +196,6 @@ export class Collection<TSchema extends Document = Document> {
     };
 
     this.client = db.client;
-  }
-
-  /**
-   * Get the database object for the collection.
-   */
-  get db(): Db {
-    return this.s.db;
   }
 
   /**
