@@ -370,31 +370,44 @@ describe('Change Streams', function () {
     }
   );
 
-  it('should cache the change stream resume token using iterator form', {
-    metadata: { requires: { topology: 'replicaset' } },
+  describe('cache the change stream resume token', () => {
+    describe('using iterator form', () => {
+      it('#next', {
+        metadata: { requires: { topology: 'replicaset' } },
 
-    async test() {
-      await initIteratorMode(changeStream);
-      collection.insertOne({ a: 1 });
+        async test() {
+          await initIteratorMode(changeStream);
+          await collection.insertOne({ a: 1 });
 
-      const hasNext = await changeStream.hasNext();
-      expect(hasNext).to.be.true;
+          const change = await changeStream.next();
+          expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+        }
+      });
 
-      const change = await changeStream.next();
-      expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-    }
-  });
+      it('#tryNext', {
+        metadata: { requires: { topology: 'replicaset' } },
 
-  it('should cache the change stream resume token using event listener form', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
-      const willBeChange = once(changeStream, 'change');
-      await once(changeStream.cursor, 'init');
-      collection.insertOne({ a: 1 });
+        async test() {
+          await initIteratorMode(changeStream);
+          await collection.insertOne({ a: 1 });
 
-      const [change] = await willBeChange;
-      expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-    }
+          const change = await changeStream.tryNext();
+          expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+        }
+      });
+    });
+
+    it('should cache using event listener form', {
+      metadata: { requires: { topology: 'replicaset' } },
+      async test() {
+        const willBeChange = once(changeStream, 'change');
+        await once(changeStream.cursor, 'init');
+        await collection.insertOne({ a: 1 });
+
+        const [change] = await willBeChange;
+        expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+      }
+    });
   });
 
   it('should error if resume token projected out of change stream document using iterator', {
@@ -1814,6 +1827,78 @@ describe('Change Streams', function () {
           expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
         }
       });
+    });
+  });
+
+  describe("NODE-4763 - doesn't produce duplicates after resume", function () {
+    const resumableError = { code: 6, message: 'host unreachable' };
+
+    beforeEach(async function () {
+      await client.db('admin').command({
+        configureFailPoint: is4_2Server(this.configuration.version)
+          ? 'failCommand'
+          : 'failGetMoreAfterCursorCheckout',
+        mode: { skip: 1 },
+        data: {
+          failCommands: ['getMore'],
+          errorCode: resumableError.code,
+          errmsg: resumableError.message
+        }
+      } as FailPoint);
+    });
+
+    afterEach(async function () {
+      await client.db('admin').command({
+        configureFailPoint: is4_2Server(this.configuration.version)
+          ? 'failCommand'
+          : 'failGetMoreAfterCursorCheckout',
+        mode: 'off'
+      } as FailPoint);
+    });
+
+    describe('when using iterator form', function () {
+      it('#next', { requires: { topology: 'replicaset' } }, async function test() {
+        await initIteratorMode(changeStream);
+
+        await collection.insertOne({ a: 1 });
+        const change = await changeStream.next();
+        expect(change).to.have.property('operationType', 'insert');
+        expect(change).to.have.nested.property('fullDocument.a', 1);
+
+        await collection.insertOne({ a: 2 });
+        const change2 = await changeStream.next();
+        expect(change2).to.have.property('operationType', 'insert');
+        expect(change2).to.have.nested.property('fullDocument.a', 2);
+      });
+
+      it('#tryNext', { requires: { topology: 'replicaset' } }, async function test() {
+        await initIteratorMode(changeStream);
+
+        await collection.insertOne({ a: 1 });
+        const change = await changeStream.tryNext();
+        expect(change).to.have.property('operationType', 'insert');
+        expect(change).to.have.nested.property('fullDocument.a', 1);
+
+        await collection.insertOne({ a: 2 });
+        const change2 = await changeStream.tryNext();
+        expect(change2).to.have.property('operationType', 'insert');
+        expect(change2).to.have.nested.property('fullDocument.a', 2);
+      });
+    });
+
+    it('in an event listener form', { requires: { topology: 'replicaset' } }, async function () {
+      const willBeChange = on(changeStream, 'change');
+      await once(changeStream.cursor, 'init');
+
+      await collection.insertOne({ a: 1 });
+      const change = await willBeChange.next();
+      expect(change.value[0]).to.have.property('operationType', 'insert');
+      expect(change.value[0]).to.have.nested.property('fullDocument.a', 1);
+
+      await collection.insertOne({ a: 2 });
+      const change2 = await willBeChange.next();
+      expect(change2.value[0]).to.have.property('operationType', 'insert');
+      expect(change2.value[0]).to.have.nested.property('fullDocument.a', 2);
     });
   });
 });
