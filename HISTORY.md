@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.20.0](https://github.com/mongodb/node-mongodb-native/compare/v6.19.0...v6.20.0) (2025-08-29)
+
+
+### Features
+
+* **NODE-7125:** add db and client properties to collection and database objects ([#4640](https://github.com/mongodb/node-mongodb-native/issues/4640)) ([3469f86](https://github.com/mongodb/node-mongodb-native/commit/3469f86816e4b583a12de29d76b19823a3ad25ef))
+
 ## [6.19.0](https://github.com/mongodb/node-mongodb-native/compare/v6.18.0...v6.19.0) (2025-08-26)
 
 
