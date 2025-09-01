@@ -62,7 +62,7 @@
     }
   },
   "devDependencies": {
-    "@aws-sdk/credential-providers": "^3.876.0",
+    "@aws-sdk/credential-providers": "^3.879.0",
     "@iarna/toml": "^2.2.5",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@microsoft/api-extractor": "^7.52.11",
