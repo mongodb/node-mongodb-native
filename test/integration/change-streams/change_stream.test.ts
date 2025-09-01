@@ -1862,13 +1862,17 @@ describe('Change Streams', function () {
 
         await collection.insertOne({ a: 1 });
         const change = await changeStream.next();
-        expect(change).to.have.property('operationType', 'insert');
-        expect(change).to.have.nested.property('fullDocument.a', 1);
+        expect(change).to.containSubset({
+          operationType: 'insert',
+          fullDocument: { a: 1 }
+        });
 
         await collection.insertOne({ a: 2 });
         const change2 = await changeStream.next();
-        expect(change2).to.have.property('operationType', 'insert');
-        expect(change2).to.have.nested.property('fullDocument.a', 2);
+        expect(change2).to.containSubset({
+          operationType: 'insert',
+          fullDocument: { a: 2 }
+        });
       });
 
       it('#tryNext', { requires: { topology: 'replicaset' } }, async function test() {
@@ -1876,13 +1880,17 @@ describe('Change Streams', function () {
 
         await collection.insertOne({ a: 1 });
         const change = await changeStream.tryNext();
-        expect(change).to.have.property('operationType', 'insert');
-        expect(change).to.have.nested.property('fullDocument.a', 1);
+        expect(change).to.containSubset({
+          operationType: 'insert',
+          fullDocument: { a: 1 }
+        });
 
         await collection.insertOne({ a: 2 });
         const change2 = await changeStream.tryNext();
-        expect(change2).to.have.property('operationType', 'insert');
-        expect(change2).to.have.nested.property('fullDocument.a', 2);
+        expect(change2).to.containSubset({
+          operationType: 'insert',
+          fullDocument: { a: 2 }
+        });
       });
     });
 
@@ -1892,13 +1900,17 @@ describe('Change Streams', function () {
 
       await collection.insertOne({ a: 1 });
       const change = await willBeChange.next();
-      expect(change.value[0]).to.have.property('operationType', 'insert');
-      expect(change.value[0]).to.have.nested.property('fullDocument.a', 1);
+      expect(change.value[0]).to.containSubset({
+        operationType: 'insert',
+        fullDocument: { a: 1 }
+      });
 
       await collection.insertOne({ a: 2 });
       const change2 = await willBeChange.next();
-      expect(change2.value[0]).to.have.property('operationType', 'insert');
-      expect(change2.value[0]).to.have.nested.property('fullDocument.a', 2);
+      expect(change2.value[0]).to.containSubset({
+        operationType: 'insert',
+        fullDocument: { a: 2 }
+      });
     });
   });
 });
