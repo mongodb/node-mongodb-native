@@ -7,6 +7,7 @@ import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
 import {
   hasAtomicOperators,
+  maxWireVersion,
   type MongoDBCollectionNamespace,
   type MongoDBNamespace
 } from '../utils';
@@ -119,14 +120,6 @@ export class UpdateOperation extends CommandOperation<Document> {
     // eslint-disable-next-line no-restricted-syntax
     if (options.comment !== undefined) {
       command.comment = options.comment;
-    }
-
-    const unacknowledgedWrite = this.writeConcern?.w === 0;
-    if (unacknowledgedWrite) {
-      if (this.statements.find((o: Document) => o.hint)) {
-        // TODO(NODE-3541): fix error for hint with unacknowledged writes
-        throw new MongoCompatibilityError(`hint is not supported with unacknowledged writes`);
-      }
     }
 
     return command;
