@@ -1,13 +1,12 @@
 import type { Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
-import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
+import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
 import {
   hasAtomicOperators,
-  maxWireVersion,
   type MongoDBCollectionNamespace,
   type MongoDBNamespace
 } from '../utils';
