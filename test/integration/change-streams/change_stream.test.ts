@@ -1831,9 +1831,22 @@ describe('Change Streams', function () {
   });
 
   describe("NODE-4763 - doesn't produce duplicates after resume", function () {
+    let client: MongoClient;
+    let collection: Collection;
+    let changeStream: ChangeStream;
+    let aggregateEvents: CommandStartedEvent[] = [];
     const resumableError = { code: 6, message: 'host unreachable' };
 
     beforeEach(async function () {
+      const dbName = 'node-4763';
+      const collectionName = 'test-collection';
+
+      client = this.configuration.newClient({ monitorCommands: true });
+      client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
+      collection = client.db(dbName).collection(collectionName);
+
+      changeStream = collection.watch([]);
+
       await client.db('admin').command({
         configureFailPoint: is4_2Server(this.configuration.version)
           ? 'failCommand'
@@ -1844,7 +1857,7 @@ describe('Change Streams', function () {
           errorCode: resumableError.code,
           errmsg: resumableError.message
         }
-      } as FailPoint);
+      } as FailCommandFailPoint);
     });
 
     afterEach(async function () {
@@ -1853,7 +1866,11 @@ describe('Change Streams', function () {
           ? 'failCommand'
           : 'failGetMoreAfterCursorCheckout',
         mode: 'off'
-      } as FailPoint);
+      } as FailCommandFailPoint);
+
+      await changeStream.close();
+      await client.close();
+      aggregateEvents = [];
     });
 
     describe('when using iterator form', function () {
@@ -1873,6 +1890,8 @@ describe('Change Streams', function () {
           operationType: 'insert',
           fullDocument: { a: 2 }
         });
+
+        expect(aggregateEvents.length).to.equal(2);
       });
 
       it('#tryNext', { requires: { topology: 'replicaset' } }, async function test() {
@@ -1891,6 +1910,8 @@ describe('Change Streams', function () {
           operationType: 'insert',
           fullDocument: { a: 2 }
         });
+
+        expect(aggregateEvents.length).to.equal(2);
       });
     });
 
@@ -1911,6 +1932,8 @@ describe('Change Streams', function () {
         operationType: 'insert',
         fullDocument: { a: 2 }
       });
+
+      expect(aggregateEvents.length).to.equal(2);
     });
   });
 });
