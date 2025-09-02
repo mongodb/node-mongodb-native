@@ -1,6 +1,6 @@
 import { createInterface } from 'readline';
 import * as util from 'util';
-import yargs from 'yargs';
+import * as yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 export const LATEST_TAG = 'Next';
