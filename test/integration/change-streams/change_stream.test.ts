@@ -395,6 +395,25 @@ describe('Change Streams', function () {
           expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
         }
       });
+
+      it('should cache the resume token on an actual change, not on a probe', {
+        metadata: { requires: { topology: 'replicaset' } },
+        async test() {
+          await initIteratorMode(changeStream);
+          const resumeToken = changeStream.resumeToken;
+
+          await collection.insertOne({ a: 1 });
+
+          const hasNext = await changeStream.hasNext();
+          expect(hasNext).to.be.true;
+
+          expect(changeStream.resumeToken).to.equal(resumeToken);
+
+          const change = await changeStream.next();
+          expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+          expect(resumeToken).to.not.equal(changeStream.resumeToken);
+        }
+      });
     });
 
     it('should cache using event listener form', {
@@ -1847,6 +1866,8 @@ describe('Change Streams', function () {
 
       changeStream = collection.watch([]);
 
+      // Configure a fail point with skip: 1 to simulate a server failure on the second `getMore`,
+      // triggering the resume process.
       await client.db('admin').command({
         configureFailPoint: is4_2Server(this.configuration.version)
           ? 'failCommand'
