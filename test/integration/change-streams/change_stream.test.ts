@@ -1865,20 +1865,6 @@ describe('Change Streams', function () {
       collection = client.db(dbName).collection(collectionName);
 
       changeStream = collection.watch([]);
-
-      // Configure a fail point with skip: 1 to simulate a server failure on the second `getMore`,
-      // triggering the resume process.
-      await client.db('admin').command({
-        configureFailPoint: is4_2Server(this.configuration.version)
-          ? 'failCommand'
-          : 'failGetMoreAfterCursorCheckout',
-        mode: { skip: 1 },
-        data: {
-          failCommands: ['getMore'],
-          errorCode: resumableError.code,
-          errmsg: resumableError.message
-        }
-      } as FailCommandFailPoint);
     });
 
     afterEach(async function () {
@@ -1905,6 +1891,18 @@ describe('Change Streams', function () {
           fullDocument: { a: 1 }
         });
 
+        await client.db('admin').command({
+          configureFailPoint: is4_2Server(this.configuration.version)
+            ? 'failCommand'
+            : 'failGetMoreAfterCursorCheckout',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['getMore'],
+            errorCode: resumableError.code,
+            errmsg: resumableError.message
+          }
+        } as FailCommandFailPoint);
+
         await collection.insertOne({ a: 2 });
         const change2 = await changeStream.next();
         expect(change2).to.containSubset({
@@ -1924,6 +1922,18 @@ describe('Change Streams', function () {
           operationType: 'insert',
           fullDocument: { a: 1 }
         });
+
+        await client.db('admin').command({
+          configureFailPoint: is4_2Server(this.configuration.version)
+            ? 'failCommand'
+            : 'failGetMoreAfterCursorCheckout',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['getMore'],
+            errorCode: resumableError.code,
+            errmsg: resumableError.message
+          }
+        } as FailCommandFailPoint);
 
         await collection.insertOne({ a: 2 });
         const change2 = await changeStream.tryNext();
@@ -1947,7 +1957,26 @@ describe('Change Streams', function () {
         fullDocument: { a: 1 }
       });
 
+      await client.db('admin').command({
+        configureFailPoint: is4_2Server(this.configuration.version)
+          ? 'failCommand'
+          : 'failGetMoreAfterCursorCheckout',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['getMore'],
+          errorCode: resumableError.code,
+          errmsg: resumableError.message
+        }
+      } as FailCommandFailPoint);
+
+      // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
+      // resuming a change stream don't return the change event.
+      // So we defer the insert until a period of time after the change stream has received the first change.
+      // 2000ms is long enough for the change stream to attempt to resume and fail once before exhausting the failpoint
+      // and succeeding.
+      await sleep(2000);
       await collection.insertOne({ a: 2 });
+
       const change2 = await willBeChange.next();
       expect(change2.value[0]).to.containSubset({
         operationType: 'insert',
