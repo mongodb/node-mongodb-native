@@ -284,7 +284,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private get supportsOpMsg(): boolean {
     return (
       this.description != null &&
-      maxWireVersion(this) >= 6 &&
       !this.description.__nodejs_mock_server__
     );
   }
@@ -878,12 +877,6 @@ export class CryptoConnection extends Connection {
     if (serverWireVersion === 0) {
       // This means the initial handshake hasn't happened yet
       return await super.command<T>(ns, cmd, options, responseType);
-    }
-
-    if (serverWireVersion < 8) {
-      throw new MongoCompatibilityError(
-        'Auto-encryption requires a minimum MongoDB version of 4.2'
-      );
     }
 
     // Save sort or indexKeys based on the command being run
