@@ -4,14 +4,13 @@ import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/r
 import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
 import { type ExplainOptions } from '../explain';
-import { maxWireVersion, type MongoDBNamespace } from '../utils';
+import { type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @internal */
 export const DB_AGGREGATE_COLLECTION = 1 as const;
-const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
 
 /** @public */
 export interface AggregateOptions extends Omit<CommandOperationOptions, 'explain'> {
@@ -109,12 +108,7 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
 
   override buildCommandDocument(connection: Connection): Document {
     const options = this.options;
-    const serverWireVersion = maxWireVersion(connection);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
-
-    if (this.hasWriteStage && serverWireVersion < MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT) {
-      this.readConcern = undefined;
-    }
 
     if (this.hasWriteStage && this.writeConcern) {
       WriteConcern.apply(command, this.writeConcern);
