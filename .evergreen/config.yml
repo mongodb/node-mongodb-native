@@ -658,6 +658,15 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/docker/alpine.sh
+  build documentation:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        args:
+          - '-c'
+          - npm run build:docs -- --yes
 tasks:
   - name: test-atlas-data-lake
     tags:
@@ -2038,6 +2047,17 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: check resource management feature integration
+  - name: test-build-docs
+    tags:
+      - lint-checks
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '22'}
+      - func: install dependencies
+      - func: build documentation
   - name: check-types-typescript-next-node-types-22.15.3
     tags:
       - check-types-typescript-next

@@ -571,6 +571,17 @@ SINGLETON_TASKS.push(
         { func: 'check resource management feature integration' }
       ]
     },
+    {
+      name: 'test-build-docs',
+      tags: ['lint-checks'],
+      commands: [
+        updateExpansions({
+          NODE_LTS_VERSION: LATEST_LTS
+        }),
+        { func: 'install dependencies' },
+        { func: 'build documentation' }
+      ]
+    },
     ...Array.from(makeTypescriptTasks())
   ]
 );

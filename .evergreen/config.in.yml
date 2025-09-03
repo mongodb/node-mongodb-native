@@ -723,6 +723,16 @@ functions:
         args:
           - .evergreen/docker/alpine.sh
 
+  "build documentation":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        binary: bash
+        args:
+          - "-c"
+          - "npm run build:docs -- --yes"
+
 tasks:
   - name: "test-atlas-data-lake"
     tags: ["datalake", "mongohouse"]
