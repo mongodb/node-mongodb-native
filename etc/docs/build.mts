@@ -3,6 +3,7 @@
 import { parse, stringify } from '@iarna/toml';
 import { exec as execCb } from 'child_process';
 import { readFile, writeFile } from 'fs/promises';
+import { basename, dirname, join } from 'path';
 import { chdir } from 'process';
 import { promisify } from 'util';
 
@@ -15,7 +16,7 @@ import {
   log,
   type TomlVersionSchema,
   type VersionSchema
-} from './utils';
+} from './utils.mts';
 
 const exec = promisify(execCb);
 
@@ -73,8 +74,10 @@ async function updateSiteTemplateForNewVersion(
 }
 
 async function main() {
+  const __dirname = import.meta.dirname;
+
   try {
-    await exec('bash ./etc/check-remote.sh');
+    await exec(`bash ${join(__dirname, '../check-remote.sh')}`);
   } catch (error) {
     console.error(error.stdout);
     process.exit(1);
@@ -82,7 +85,7 @@ async function main() {
 
   chdir(__dirname);
 
-  const { tag, status, skipPrompts } = getCommandLineArguments();
+  const { tag, status, skipPrompts } = await getCommandLineArguments();
 
   const newVersion: VersionSchema = {
     version: `${tag} Driver`,

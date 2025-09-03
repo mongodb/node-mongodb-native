@@ -1,6 +1,6 @@
-import * as express from 'express';
+import express from 'express';
 
-import { log } from './utils';
+import { log } from './utils.mts';
 
 const app = express();
 

@@ -125,7 +125,7 @@
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
     "build:dts": "npm run build:ts && api-extractor run && node etc/clean_definition_files.cjs && ESLINT_USE_FLAT_CONFIG=false eslint --no-ignore --fix mongodb.d.ts lib/beta.d.ts",
-    "build:docs": "./etc/docs/build.ts",
+    "build:docs": "cd etc/docs && node --loader ts-node/esm build.mts",
     "build:typedoc": "typedoc",
     "build:nightly": "node ./.github/scripts/nightly.mjs",
     "check:bench": "npm --prefix test/benchmarks/driver_bench start",
@@ -161,7 +161,7 @@
     "check:x509": "nyc mocha test/manual/x509_auth.test.ts",
     "fix:eslint": "npm run check:eslint -- --fix",
     "prepare": "node etc/prepare.js",
-    "preview:docs": "ts-node etc/docs/preview.ts",
+    "preview:docs": "cd etc/docs && node --loader ts-node/esm preview.mts",
     "test": "npm run check:lint && npm run test:all",
     "test:all": "npm run check:unit && npm run check:test",
     "update:docs": "npm run build:docs -- --yes"

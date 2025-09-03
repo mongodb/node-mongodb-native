@@ -54,11 +54,11 @@ export async function confirm(message: string) {
   }
 }
 
-export function getCommandLineArguments(): {
+export async function getCommandLineArguments(): Promise<{
   tag: string;
   status: VersionSchema['status'];
   skipPrompts;
-} {
+}> {
   const {
     status,
     tag,
