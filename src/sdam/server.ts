@@ -414,7 +414,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     } else {
       if (isSDAMUnrecoverableError(error)) {
         if (shouldHandleStateChangeError(this, error)) {
-          const shouldClearPool = maxWireVersion(this) <= 7 || isNodeShuttingDownError(error);
+          const shouldClearPool = isNodeShuttingDownError(error);
           if (this.loadBalanced && connection && shouldClearPool) {
             this.pool.clear({ serviceId: connection.serviceId });
           }
