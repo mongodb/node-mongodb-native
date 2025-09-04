@@ -373,6 +373,8 @@ describe('Client Metadata Update Prose Tests', function () {
     const originalDriverInfo = { name: 'library', version: '1.2', platform: 'Library Platform' };
     let initialClientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
+
+    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
     let client: RawMongoClient;
 
     // | Case | Name      | Version | Platform           |
@@ -486,8 +488,10 @@ describe('Client Metadata Update Prose Tests', function () {
   });
 
   describe('Test 4: Metadata is not appended if identical to initial metadata', function () {
-    let initialClientMetadata;
-    let updatedClientMetadata;
+    let initialClientMetadata: ClientMetadata;
+    let updatedClientMetadata: ClientMetadata;
+    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
+    let client: RawMongoClient;
 
     // 1. Create a `MongoClient` instance with the following:
     //     - `maxIdleTimeMS` set to `1ms`
@@ -536,6 +540,10 @@ describe('Client Metadata Update Prose Tests', function () {
 
       // 4. Wait 5ms for the connection to become idle.
       await sleep(5);
+    });
+
+    afterEach(async function () {
+      await client.close();
     });
 
     it('appends the metadata', async function () {
