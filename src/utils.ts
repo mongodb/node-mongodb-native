@@ -361,14 +361,14 @@ export function uuidV4(): Buffer {
  */
 export function maxWireVersion(handshakeAware?: Connection | Topology | Server): number {
   if (handshakeAware) {
-    if (handshakeAware.serverApi?.version) {
-      // We return the max supported wire version for serverAPI.
-      return MAX_SUPPORTED_WIRE_VERSION;
-    }
     if (handshakeAware.hello) {
       return handshakeAware.hello.maxWireVersion;
     }
 
+    if (handshakeAware.serverApi?.version) {
+      // We return the max supported wire version for serverAPI.
+      return MAX_SUPPORTED_WIRE_VERSION;
+    }
     // This is the fallback case for load balanced mode. If we are building commands the
     // object being checked will be a connection, and we will have a hello response on
     // it. For other cases, such as retryable writes, the object will be a server or

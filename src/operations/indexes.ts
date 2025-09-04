@@ -368,7 +368,7 @@ export class ListIndexesOperation extends CommandOperation<CursorResponse> {
    * This allows typescript to delete the key but will
    * not allow a writeConcern to be assigned as a property on options.
    */
-  override options: ListIndexesOptions & { writeConcern?: never };
+  override options: ListIndexesOptions & { writeConcern?: never; rawData?: boolean };
   collectionNamespace: MongoDBNamespace;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {

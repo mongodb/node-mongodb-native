@@ -69,6 +69,7 @@ export interface CommandOperationOptions
    * Used when the command needs to grant access to the underlying namespaces for time series collections.
    * Only available on server versions 8.2 and above.
    * @public
+   * @sinceServerVersion 8.2
    **/
   rawData?: boolean;
 }
