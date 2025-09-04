@@ -493,7 +493,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    */
   appendMetadata(driverInfo: DriverInfo) {
     for (const info of this.options.additionalDriverInfo) {
-      if (info.name === driverInfo.name) {
+      if (info.name === driverInfo.name && info.version === driverInfo.version) {
         return;
       }
     }

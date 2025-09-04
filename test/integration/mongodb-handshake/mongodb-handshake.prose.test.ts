@@ -356,11 +356,17 @@ describe('Client Metadata Update Prose Tests', function () {
           expect(updatedClientMetadata.os).to.deep.equal(initialClientMetadata.os);
         });
 
-        it('does not append duplicate metadata for the same name', async function () {
+        it('does not append duplicate metadata for the same name and version', async function () {
           client.appendMetadata({ name, version, platform });
           client.appendMetadata({ name, version, platform });
           await client.db('test').command({ ping: 1 });
           expect(updatedClientMetadata.driver.name).to.not.contain('|framework|framework');
+        });
+
+        it('appends metadata when the version differs', async function () {
+          client.appendMetadata({ name, version: '0.0', platform });
+          await client.db('test').command({ ping: 1 });
+          expect(updatedClientMetadata.driver.name).to.not.contain('0.0');
         });
       });
     }
