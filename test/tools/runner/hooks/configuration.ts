@@ -40,7 +40,6 @@ process.env.MONGODB_URI =
 //  determine the connection string based on the value of process.env.AUTH
 const MONGODB_URI = process.env.MONGODB_URI;
 
-const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 // Load balancer fronting 1 mongos.
 const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
 // Load balancer fronting 2 mongoses.
@@ -126,10 +125,6 @@ const testConfigBeforeHook = async function () {
 
   const context = await initializeFilters(client);
 
-  if (MONGODB_API_VERSION) {
-    context.serverApi = MONGODB_API_VERSION;
-  }
-
   if (SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI) {
     context.singleMongosLoadBalancerUri = SINGLE_MONGOS_LB_URI;
     context.multiMongosLoadBalancerUri = MULTI_MONGOS_LB_URI;
@@ -167,7 +162,7 @@ const testConfigBeforeHook = async function () {
     },
     cryptSharedVersion: context.cryptSharedVersion,
     cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH,
-    serverApi: MONGODB_API_VERSION,
+    serverApi: process.env.MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,
     aws: MONGODB_URI.includes('authMechanism=MONGODB-AWS'),
     awsSdk: process.env.MONGODB_AWS_SDK,

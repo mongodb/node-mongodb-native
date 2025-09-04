@@ -412,7 +412,10 @@ describe('Client Metadata Update Prose Tests', function () {
         // 4. Save intercepted `client` document as `updatedClientMetadata`.
         // 5. Wait 5ms for the connection to become idle.
         beforeEach(async function () {
-          client = new RawMongoClient(this.configuration.url(), { maxIdleTimeMS: 1 });
+          client = new RawMongoClient(this.configuration.url(), {
+            maxIdleTimeMS: 1,
+            serverApi: this.configuration.serverApi
+          });
           client.appendMetadata(originalDriverInfo);
 
           sinon
@@ -515,6 +518,7 @@ describe('Client Metadata Update Prose Tests', function () {
       //     | platform | Library Platform |
       client = new RawMongoClient(this.configuration.url(), {
         maxIdleTimeMS: 1,
+        serverApi: this.configuration.serverApi,
         driverInfo: { name: 'library', version: '1.2', platform: 'Library Platform' }
       });
 

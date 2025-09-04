@@ -99,10 +99,7 @@ export class LimitedSizeDocument {
   }
 }
 
-type MakeClientMetadataOptions = Pick<
-  MongoOptions,
-  'appName' | 'driverInfo' | 'additionalDriverInfo'
->;
+type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'additionalDriverInfo'>;
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
