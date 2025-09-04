@@ -22,7 +22,7 @@ information explaining why this change is valuable.
 ### Release Highlight
 
 <!-- 
-For user facing changes: please fill provide release notes.  Feel free to browse previous release for example release highlights.  For an 
+For user facing changes: please provide release notes.  Feel free to browse previous release for example release highlights.  For an 
 example PR which has the release notes section filled out, see https://github.com/mongodb/node-mongodb-native/pull/4642.
 
 If there are no user-facing changes in this PR, please delete the release highlight section from the PR description.
