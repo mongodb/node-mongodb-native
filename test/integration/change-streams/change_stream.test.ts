@@ -396,7 +396,7 @@ describe('Change Streams', function () {
         }
       });
 
-      it('should cache the resume token on an actual change, not on a probe', {
+      it('hasNext() does not cache the resume token', {
         metadata: { requires: { topology: 'replicaset' } },
         async test() {
           await initIteratorMode(changeStream);
