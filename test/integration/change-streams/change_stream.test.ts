@@ -396,23 +396,28 @@ describe('Change Streams', function () {
         }
       });
 
-      it('hasNext() does not cache the resume token', {
-        metadata: { requires: { topology: 'replicaset' } },
-        async test() {
-          await initIteratorMode(changeStream);
-          const resumeToken = changeStream.resumeToken;
+      describe('#hasNext', () => {
+        it('does not cache the resume token', {
+          metadata: { requires: { topology: 'replicaset' } },
+          async test() {
+            await initIteratorMode(changeStream);
+            const resumeToken = changeStream.resumeToken;
 
-          await collection.insertOne({ a: 1 });
+            await collection.insertOne({ a: 1 });
 
-          const hasNext = await changeStream.hasNext();
-          expect(hasNext).to.be.true;
+            const hasNext = await changeStream.hasNext();
+            expect(hasNext).to.be.true;
 
-          expect(changeStream.resumeToken).to.equal(resumeToken);
+            // Calling .hasNext() does not allow the ChangeStream to update the token,
+            // even when changes are present.
+            expect(changeStream.resumeToken).to.equal(resumeToken);
 
-          const change = await changeStream.next();
-          expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-          expect(resumeToken).to.not.equal(changeStream.resumeToken);
-        }
+            // Consuming the change causes the ChangeStream to cache the resume token.
+            const change = await changeStream.next();
+            expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+            expect(resumeToken).to.not.equal(changeStream.resumeToken);
+          }
+        });
       });
     });
 
