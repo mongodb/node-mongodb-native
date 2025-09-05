@@ -1,0 +1,65 @@
+description: "updateMany-rawData"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+tests:
+  - description: "updateMany with rawData option"
+    runOnRequirements:
+      - minServerVersion: "8.2.0"
+    operations:
+      - name: updateMany
+        object: *collection0
+        arguments:
+          filter: {}
+          update: &update { $set: {x: 1} }
+          rawData: &rawdata true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection0Name
+                updates:
+                  - q: {}
+                    u: *update
+                    multi: true
+                    upsert:
+                      $$unsetOrMatches: false
+                rawData: *rawdata
+  - description: "updateMany with rawData option on less than 8.2.0 - ignore argument"
+    runOnRequirements:
+      - maxServerVersion: "8.1.99"
+    operations:
+      - name: updateMany
+        object: *collection0
+        arguments:
+          filter: {}
+          update: &update { $set: {x: 1} }
+          rawData: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collection0Name
+                updates:
+                  - q: {}
+                    u: *update
+                    multi: true
+                    upsert:
+                      $$unsetOrMatches: false
+                rawData:
+                  $$exists: false

@@ -163,15 +163,21 @@ export function makeDeleteStatement(
   return op;
 }
 
-defineAspects(DeleteOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION]);
+defineAspects(DeleteOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.SUPPORTS_RAW_DATA
+]);
 defineAspects(DeleteOneOperation, [
   Aspect.RETRYABLE,
   Aspect.WRITE_OPERATION,
   Aspect.EXPLAINABLE,
-  Aspect.SKIP_COLLATION
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
 ]);
 defineAspects(DeleteManyOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.EXPLAINABLE,
-  Aspect.SKIP_COLLATION
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
 ]);

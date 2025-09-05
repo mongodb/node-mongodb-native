@@ -6,7 +6,7 @@ import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface DbStatsOptions extends CommandOperationOptions {
+export interface DbStatsOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** Divide the returned sizes by scale value. */
   scale?: number;
 }

@@ -67,5 +67,6 @@ defineAspects(ClientBulkWriteOperation, [
   Aspect.SKIP_COLLATION,
   Aspect.CURSOR_CREATING,
   Aspect.RETRYABLE,
-  Aspect.COMMAND_BATCHING
+  Aspect.COMMAND_BATCHING,
+  Aspect.SUPPORTS_RAW_DATA
 ]);

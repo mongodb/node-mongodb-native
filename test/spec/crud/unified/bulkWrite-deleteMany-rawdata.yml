@@ -1,0 +1,61 @@
+description: "BulkWrite deleteMany-rawData"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+tests:
+  - description: "BulkWrite deleteMany with rawData option"
+    runOnRequirements:
+      - minServerVersion: "8.2.0"
+    operations:
+      - object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            - deleteMany:
+                filter: &filter {}
+          rawData: &rawdata true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection0Name
+                deletes:
+                  - q: *filter
+                    limit: 0
+                rawData: *rawdata
+  - description: "BulkWrite deleteMany with rawData option on less than 8.2.0 - ignore argument"
+    runOnRequirements:
+      - maxServerVersion: "8.1.99"
+    operations:
+      - object: *collection0
+        name: bulkWrite
+        arguments:
+          requests:
+            - deleteMany:
+                filter: &filter {}
+          rawData: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection0Name
+                deletes:
+                  - q: *filter
+                    limit: 0
+                rawData:
+                  $$exists: false

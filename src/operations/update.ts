@@ -291,20 +291,28 @@ export function makeUpdateStatement(
   return op;
 }
 
-defineAspects(UpdateOperation, [Aspect.RETRYABLE, Aspect.WRITE_OPERATION, Aspect.SKIP_COLLATION]);
+defineAspects(UpdateOperation, [
+  Aspect.RETRYABLE,
+  Aspect.WRITE_OPERATION,
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
+]);
 defineAspects(UpdateOneOperation, [
   Aspect.RETRYABLE,
   Aspect.WRITE_OPERATION,
   Aspect.EXPLAINABLE,
-  Aspect.SKIP_COLLATION
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
 ]);
 defineAspects(UpdateManyOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.EXPLAINABLE,
-  Aspect.SKIP_COLLATION
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
 ]);
 defineAspects(ReplaceOneOperation, [
   Aspect.RETRYABLE,
   Aspect.WRITE_OPERATION,
-  Aspect.SKIP_COLLATION
+  Aspect.SKIP_COLLATION,
+  Aspect.SUPPORTS_RAW_DATA
 ]);

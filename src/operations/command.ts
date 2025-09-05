@@ -1,5 +1,6 @@
 import { type Connection } from '..';
 import type { BSONSerializeOptions, Document } from '../bson';
+import { MIN_SUPPORTED_RAW_DATA_WIRE_VERSION } from '../cmap/wire_protocol/constants';
 import { MongoInvalidArgumentError } from '../error';
 import {
   decorateWithExplain,
@@ -12,7 +13,7 @@ import type { ReadPreference } from '../read_preference';
 import type { ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { commandSupportsReadConcern, MongoDBNamespace } from '../utils';
+import { commandSupportsReadConcern, maxWireVersion, MongoDBNamespace } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
 import { AbstractOperation, Aspect, type OperationOptions } from './operation';
@@ -63,6 +64,14 @@ export interface CommandOperationOptions
    * This option is deprecated and will be removed in an upcoming major version.
    */
   noResponse?: boolean;
+
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above.
+   * @public
+   * @sinceServerVersion 8.2
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */
@@ -151,6 +160,14 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (typeof this.options.maxTimeMS === 'number') {
       command.maxTimeMS = this.options.maxTimeMS;
+    }
+
+    if (
+      this.options.rawData != null &&
+      this.hasAspect(Aspect.SUPPORTS_RAW_DATA) &&
+      maxWireVersion(connection) >= MIN_SUPPORTED_RAW_DATA_WIRE_VERSION
+    ) {
+      command.rawData = this.options.rawData;
     }
 
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {

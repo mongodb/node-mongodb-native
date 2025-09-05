@@ -8,7 +8,7 @@ import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface RenameOptions extends CommandOperationOptions {
+export interface RenameOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** Drop the target name collection if it previously exists. */
   dropTarget?: boolean;
   /** Unclear */

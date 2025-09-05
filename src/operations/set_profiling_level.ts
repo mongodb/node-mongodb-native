@@ -19,7 +19,7 @@ export const ProfilingLevel = Object.freeze({
 export type ProfilingLevel = (typeof ProfilingLevel)[keyof typeof ProfilingLevel];
 
 /** @public */
-export type SetProfilingLevelOptions = CommandOperationOptions;
+export type SetProfilingLevelOptions = Omit<CommandOperationOptions, 'rawData'>;
 
 /** @internal */
 export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {

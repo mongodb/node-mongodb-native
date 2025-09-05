@@ -71,4 +71,4 @@ export class CountOperation extends CommandOperation<number> {
   }
 }
 
-defineAspects(CountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(CountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.SUPPORTS_RAW_DATA]);

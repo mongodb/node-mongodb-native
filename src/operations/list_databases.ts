@@ -16,7 +16,7 @@ export interface ListDatabasesResult {
 }
 
 /** @public */
-export interface ListDatabasesOptions extends CommandOperationOptions {
+export interface ListDatabasesOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** A query predicate that determines which databases are listed */
   filter?: Document;
   /** A flag to indicate whether the command should return just the database names, or return both database names and size information */

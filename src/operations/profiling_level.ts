@@ -6,7 +6,7 @@ import { MongoUnexpectedServerResponseError } from '../error';
 import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
-export type ProfilingLevelOptions = CommandOperationOptions;
+export type ProfilingLevelOptions = Omit<CommandOperationOptions, 'rawData'>;
 
 class ProfilingLevelResponse extends MongoDBResponse {
   get was() {
