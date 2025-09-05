@@ -6,7 +6,7 @@ import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export type RemoveUserOptions = CommandOperationOptions;
+export type RemoveUserOptions = Omit<CommandOperationOptions, 'rawData'>;
 
 /** @internal */
 export class RemoveUserOperation extends CommandOperation<boolean> {

@@ -11,7 +11,7 @@ import { executeOperation } from './execute_operation';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface DropCollectionOptions extends CommandOperationOptions {
+export interface DropCollectionOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** @experimental */
   encryptedFields?: Document;
 }
