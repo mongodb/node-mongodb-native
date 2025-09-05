@@ -1,3 +1,4 @@
+import { type MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
 
 /**
@@ -18,6 +19,13 @@ export class ApiVersionFilter extends Filter {
     super();
     // Get environmental variables that are known
     this.apiVersion = process.env.MONGODB_API_VERSION;
+  }
+
+  override async initializeFilter(
+    _client: MongoClient,
+    context: Record<string, any>
+  ): Promise<void> {
+    context.serverApi = this.apiVersion;
   }
 
   filter(test: { metadata?: MongoDBMetadataUI }) {
