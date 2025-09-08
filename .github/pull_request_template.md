@@ -22,9 +22,6 @@ information explaining why this change is valuable.
 ### Release Highlight
 
 <!-- 
-Contributors: If you are unsure if there should be rlease notes for the changes in this PR, leave the template alone and 
-the Node driver team will fill in release notes, if necessary.
-
 For user facing changes: please provide release notes. Feel free to browse previous releases for example release highlights. For an 
 example PR which has the release notes section filled out, see https://github.com/mongodb/node-mongodb-native/pull/4642.
 
