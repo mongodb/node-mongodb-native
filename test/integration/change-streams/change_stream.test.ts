@@ -372,16 +372,31 @@ describe('Change Streams', function () {
 
   describe('cache the change stream resume token', () => {
     describe('using iterator form', () => {
-      it('#next', {
-        metadata: { requires: { topology: 'replicaset' } },
+      context('#next', () => {
+        it('caches the resume token on change', {
+          metadata: { requires: { topology: 'replicaset' } },
 
-        async test() {
-          await initIteratorMode(changeStream);
-          await collection.insertOne({ a: 1 });
+          async test() {
+            await initIteratorMode(changeStream);
+            await collection.insertOne({ a: 1 });
 
-          const change = await changeStream.next();
-          expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-        }
+            const change = await changeStream.next();
+            expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+          }
+        });
+
+        it('caches the resume token correctly when preceded by #hasNext', {
+          metadata: { requires: { topology: 'replicaset' } },
+          async test() {
+            await initIteratorMode(changeStream);
+            await collection.insertOne({ a: 1 });
+
+            await changeStream.hasNext();
+
+            const change = await changeStream.next();
+            expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+          }
+        });
       });
 
       it('#tryNext', {
@@ -396,7 +411,7 @@ describe('Change Streams', function () {
         }
       });
 
-      describe('#hasNext', () => {
+      context('#hasNext', () => {
         it('does not cache the resume token', {
           metadata: { requires: { topology: 'replicaset' } },
           async test() {
@@ -408,14 +423,7 @@ describe('Change Streams', function () {
             const hasNext = await changeStream.hasNext();
             expect(hasNext).to.be.true;
 
-            // Calling .hasNext() does not allow the ChangeStream to update the token,
-            // even when changes are present.
             expect(changeStream.resumeToken).to.equal(resumeToken);
-
-            // Consuming the change causes the ChangeStream to cache the resume token.
-            const change = await changeStream.next();
-            expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-            expect(resumeToken).to.not.equal(changeStream.resumeToken);
           }
         });
       });
