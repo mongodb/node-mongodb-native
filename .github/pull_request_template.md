@@ -1,32 +1,43 @@
 ### Description
 
-#### What is changing?
+#### Summary of Changes
 
-##### Is there new documentation needed for these changes?
+<!-- Please describe the changes in this PR in a high-level overview. -->
+
+##### Notes for Reviewers
+
+<!-- 
+If there is any additional context on the changes in the PR that reviewers might find helpful, feel free to make notes in this section.
+
+Otherwise, feel free to remove this section.
+-->
 
 #### What is the motivation for this change?
 
-<!-- If this is a bug, it helps to describe the current behavior and a clear outline of the expected behavior -->
-<!-- If this is a feature, it helps to describe the new use case enabled by this change -->
-
 <!--
-Contributors!
-First of all, thank you so much!!
-If you haven't already, it would greatly help the team review this work in a timely manner if you create a JIRA ticket to track this PR.
-You can do that here: https://jira.mongodb.org/projects/NODE
+Remove this section if there is an associated Jira ticket explaining the motiviation for this change. If there is not, please fill this section out with 
+information explaining why this change is valuable.
 -->
 
 ### Release Highlight
 
+<!-- 
+Contributors: please leave the release notes section for the Node driver team to fill in. The following instructions are for maintainers.
+
+For user facing changes: please provide release notes. Feel free to browse previous releases for example release highlights.
+
+If there are no user-facing changes in this PR, please delete the release highlight section from the PR description.
+-->
+
 <!-- RELEASE_HIGHLIGHT_START -->
 
-### Fill in title or leave empty for no highlight
+### Release notes highlight
 
 <!-- RELEASE_HIGHLIGHT_END -->
 
 ### Double check the following
 
-- [ ] Ran `npm run check:lint` script
+- [ ] Lint is passing (`npm run check:lint`)
 - [ ] Self-review completed using the [steps outlined here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md#reviewer-guidelines)
 - [ ] PR title follows the [correct format](https://www.conventionalcommits.org/en/v1.0.0/): `type(NODE-xxxx)[!]: description`
   - Example: `feat(NODE-1234)!: rewriting everything in coffeescript`
