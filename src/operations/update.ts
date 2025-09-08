@@ -1,7 +1,7 @@
 import type { Document } from '../bson';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
-import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
+import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
@@ -119,14 +119,6 @@ export class UpdateOperation extends CommandOperation<Document> {
     // eslint-disable-next-line no-restricted-syntax
     if (options.comment !== undefined) {
       command.comment = options.comment;
-    }
-
-    const unacknowledgedWrite = this.writeConcern?.w === 0;
-    if (unacknowledgedWrite) {
-      if (this.statements.find((o: Document) => o.hint)) {
-        // TODO(NODE-3541): fix error for hint with unacknowledged writes
-        throw new MongoCompatibilityError(`hint is not supported with unacknowledged writes`);
-      }
     }
 
     return command;

@@ -3,7 +3,7 @@ import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { MongoCompatibilityError, MongoServerError } from '../error';
 import type { ClientSession } from '../sessions';
-import { type MongoDBCollectionNamespace, type MongoDBNamespace } from '../utils';
+import { maxWireVersion, type MongoDBCollectionNamespace, type MongoDBNamespace } from '../utils';
 import { type WriteConcernOptions } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -65,7 +65,7 @@ export class DeleteOperation extends CommandOperation<Document> {
     return this.statements.every(op => (op.limit != null ? op.limit > 0 : true));
   }
 
-  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+  override buildCommandDocument(connection: Connection, _session?: ClientSession): Document {
     const options = this.options;
 
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
@@ -86,10 +86,11 @@ export class DeleteOperation extends CommandOperation<Document> {
     }
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
-    if (unacknowledgedWrite) {
+    if (unacknowledgedWrite && maxWireVersion(connection) < 9) {
       if (this.statements.find((o: Document) => o.hint)) {
-        // TODO(NODE-3541): fix error for hint with unacknowledged writes
-        throw new MongoCompatibilityError(`hint is not supported with unacknowledged writes`);
+        throw new MongoCompatibilityError(
+          `hint for the delete command is only supported on MongoDB 4.4+`
+        );
       }
     }
 
