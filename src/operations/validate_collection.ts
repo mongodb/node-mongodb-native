@@ -7,7 +7,7 @@ import type { ClientSession } from '../sessions';
 import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
-export interface ValidateCollectionOptions extends CommandOperationOptions {
+export interface ValidateCollectionOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
   background?: boolean;
 }

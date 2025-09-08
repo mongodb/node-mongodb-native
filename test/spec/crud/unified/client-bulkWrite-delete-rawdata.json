@@ -1,0 +1,171 @@
+{
+  "description": "client bulkWrite delete-rawData",
+  "schemaVersion": "1.4",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "_yamlAnchors": {
+    "namespace": "crud-tests.coll0",
+    "filter": {}
+  },
+  "tests": [
+    {
+      "description": "client bulk write delete with rawData option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.2.0",
+          "serverless": "forbid"
+        }
+      ],
+      "operations": [
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "deleteOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {}
+                }
+              },
+              {
+                "deleteMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {}
+                }
+              }
+            ],
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "delete": 0,
+                      "filter": {},
+                      "multi": false
+                    },
+                    {
+                      "delete": 0,
+                      "filter": {},
+                      "multi": true
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "crud-tests.coll0"
+                    }
+                  ],
+                  "rawData": true
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "client bulk write delete with rawData option on less than 8.2.0 - ignore argument",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0",
+          "maxServerVersion": "8.1.99",
+          "serverless": "forbid"
+        }
+      ],
+      "operations": [
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "deleteOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {}
+                }
+              },
+              {
+                "deleteMany": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {}
+                }
+              }
+            ],
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "bulkWrite",
+                "databaseName": "admin",
+                "command": {
+                  "bulkWrite": 1,
+                  "ordered": true,
+                  "ops": [
+                    {
+                      "delete": 0,
+                      "filter": {},
+                      "multi": false
+                    },
+                    {
+                      "delete": 0,
+                      "filter": {},
+                      "multi": true
+                    }
+                  ],
+                  "nsInfo": [
+                    {
+                      "ns": "crud-tests.coll0"
+                    }
+                  ],
+                  "rawData": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

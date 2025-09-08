@@ -84,4 +84,9 @@ export class DistinctOperation extends CommandOperation<any[] | Document> {
   }
 }
 
-defineAspects(DistinctOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);
+defineAspects(DistinctOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXPLAINABLE,
+  Aspect.SUPPORTS_RAW_DATA
+]);

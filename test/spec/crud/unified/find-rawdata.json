@@ -1,0 +1,100 @@
+{
+  "description": "find-rawData",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "Find with rawData option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.2.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll0",
+                  "filter": {},
+                  "rawData": true
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find with rawData option on less than 8.2.0 - ignore argument",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "8.1.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "rawData": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll0",
+                  "filter": {},
+                  "rawData": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
