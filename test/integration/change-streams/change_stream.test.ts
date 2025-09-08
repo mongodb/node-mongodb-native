@@ -14,6 +14,7 @@ import {
   type CommandStartedEvent,
   type Db,
   isHello,
+  LEGACY_HELLO_COMMAND,
   Long,
   MongoAPIError,
   MongoChangeStreamError,
@@ -2001,7 +2002,7 @@ describe('Change Streams', function () {
   });
 });
 
-describe('ChangeStream resumability', function () {
+describe.only('ChangeStream resumability', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
@@ -2227,6 +2228,65 @@ describe('ChangeStream resumability', function () {
           expect(aggregateEvents).to.have.lengthOf(2);
           expect(changeStream.closed).to.be.true;
         });
+      });
+
+      context.only('when the error is not a server error', function () {
+        let client1: MongoClient;
+        let client2: MongoClient;
+
+        beforeEach(async function () {
+          client1 = this.configuration.newClient(
+            {},
+            { serverSelectionTimeoutMS: 1000, appName: 'client-errors' }
+          );
+          client2 = this.configuration.newClient();
+
+          collection = client1.db('client-errors').collection('test');
+        });
+
+        afterEach(async function () {
+          await client2.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: 'off',
+            data: { appName: 'client-errors' }
+          } as FailCommandFailPoint);
+
+          await client1?.close();
+          await client2?.close();
+        });
+
+        it(
+          'should resume on ServerSelectionError',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await collection.insertOne({ a: 1 });
+
+            await client2.db('admin').command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
+                closeConnection: true,
+                handshakeCommands: true,
+                failInternalCommands: true,
+                appName: 'client-errors'
+              }
+            } as FailCommandFailPoint);
+            await client2
+              .db('admin')
+              .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.secondary });
+            await client2
+              .db('admin')
+              .command({ replSetStepDown: 15, secondaryCatchUpPeriodSecs: 10, force: true });
+            // await sleep(15_000);
+
+            const change = await changeStream.next();
+            expect(change).to.containSubset({ operationType: 'insert', fullDocument: { a: 1 } });
+          }
+        );
       });
     });
 
