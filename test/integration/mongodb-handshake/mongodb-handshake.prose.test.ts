@@ -490,7 +490,98 @@ describe('Client Metadata Update Prose Tests', function () {
     }
   });
 
-  describe('Test 4: Metadata is not appended if identical to initial metadata', function () {
+  describe('Test 4: Multiple Metadata Updates with Duplicate Data', function () {
+    let initialClientMetadata: ClientMetadata;
+    let updatedClientMetadata: ClientMetadata;
+    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
+    let client: RawMongoClient;
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('does not append duplicate metdata', async function () {
+      // 1. Create a `MongoClient` instance with:
+      //     - `maxIdleTimeMS` set to `1ms`
+
+      client = new RawMongoClient(this.configuration.url(), { maxIdleTimeMS: 1 });
+
+      // 2. Append the following `DriverInfoOptions` to the `MongoClient` metadata:
+      //   | Field    | Value            |
+      //   | -------- | ---------------- |
+      //   | name     | library          |
+      //   | version  | 1.2              |
+      //   | platform | Library Platform |
+
+      client.appendMetadata({
+        name: 'library',
+        version: '1.2',
+        platform: 'Library Platform'
+      });
+
+      // 3. Send a `ping` command to the server and verify that the command succeeds.
+      await client.db('test').command({ ping: 1 });
+
+      // 4. Wait 5ms for the connection to become idle.
+      await sleep(5);
+
+      // 5. Append the following `DriverInfoOptions` to the `MongoClient` metadata:
+      //   | Field    | Value              |
+      //   | -------- | ------------------ |
+      //   | name     | framework          |
+      //   | version  | 2.0                |
+      //   | platform | Framework Platform |
+      client.appendMetadata({
+        name: 'framework',
+        version: '2.0',
+        platform: 'Framework Platform'
+      });
+
+      // 6. Send a `ping` command to the server and verify that the command succeeds.
+      // 7. Save intercepted `client` document as `clientMetadata`.
+      // 11. Save intercepted `client` document as `updatedClientMetadata`.
+      sinon
+        .stub(Connection.prototype, 'command')
+        .callsFake(async function (ns, cmd, options, responseType) {
+          // @ts-expect-error: sinon will place wrappedMethod on the command method.
+          const command = Connection.prototype.command.wrappedMethod.bind(this);
+
+          if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+            if (!initialClientMetadata) {
+              initialClientMetadata = cmd.client;
+            } else {
+              updatedClientMetadata = cmd.client;
+            }
+          }
+          return command(ns, cmd, options, responseType);
+        });
+
+      await client.db('test').command({ ping: 1 });
+
+      // 8. Wait 5ms for the connection to become idle.
+      await sleep(5);
+
+      // 9. Append the following `DriverInfoOptions` to the `MongoClient` metadata:
+      //     | Field    | Value            |
+      //     | -------- | ---------------- |
+      //     | name     | library          |
+      //     | version  | 1.2              |
+      //     | platform | Library Platform |
+      client.appendMetadata({
+        name: 'library',
+        version: '1.2',
+        platform: 'Library Platform'
+      });
+
+      // 10. Send a `ping` command to the server and verify that the command succeeds.
+      await client.db('test').command({ ping: 1 });
+
+      // 12. Assert that `clientMetadata` is identical to `updatedClientMetadata`.
+      expect(updatedClientMetadata).to.deep.equal(initialClientMetadata);
+    });
+  });
+
+  describe('Test 5: Metadata is not appended if identical to initial metadata', function () {
     let initialClientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
     // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
@@ -565,6 +656,97 @@ describe('Client Metadata Update Prose Tests', function () {
 
       // 8. Assert that `clientMetadata` is identical to `updatedClientMetadata`.
       expect(initialClientMetadata).to.deep.equal(updatedClientMetadata);
+    });
+  });
+
+  describe('Test 6: Metadata is not appended if identical to initial metadata (separated by non-identical metadata)', function () {
+    let initialClientMetadata: ClientMetadata;
+    let updatedClientMetadata: ClientMetadata;
+    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
+    let client: RawMongoClient;
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('does not append duplicate metdaata', async function () {
+      // 1. Create a `MongoClient` instance with:
+      //     - `maxIdleTimeMS` set to `1ms`
+      //     - `driverInfo` set to the following:
+      //     | Field    | Value            |
+      //     | -------- | ---------------- |
+      //     | name     | library          |
+      //     | version  | 1.2              |
+      //     | platform | Library Platform |
+
+      client = new RawMongoClient(this.configuration.url(), {
+        maxIdleTimeMS: 1,
+        driverInfo: {
+          name: 'library',
+          version: '1.2',
+          platform: 'Library Platform'
+        }
+      });
+
+      // 2. Send a `ping` command to the server and verify that the command succeeds.
+      await client.db('test').command({ ping: 1 });
+
+      // 3. Wait 5ms for the connection to become idle.
+      await sleep(5);
+
+      // 4. Append the following `DriverInfoOptions` to the `MongoClient` metadata:
+      //   | Field    | Value              |
+      //   | -------- | ------------------ |
+      //   | name     | framework          |
+      //   | version  | 2.0                |
+      //   | platform | Framework Platform |
+      client.appendMetadata({
+        name: 'framework',
+        version: '2.0',
+        platform: 'Framework Platform'
+      });
+
+      // 5. Send a `ping` command to the server and verify that the command succeeds.
+      // 6. Save intercepted `client` document as `clientMetadata`.
+      // 10. Save intercepted `client` document as `updatedClientMetadata`.
+      sinon
+        .stub(Connection.prototype, 'command')
+        .callsFake(async function (ns, cmd, options, responseType) {
+          // @ts-expect-error: sinon will place wrappedMethod on the command method.
+          const command = Connection.prototype.command.wrappedMethod.bind(this);
+
+          if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+            if (!initialClientMetadata) {
+              initialClientMetadata = cmd.client;
+            } else {
+              updatedClientMetadata = cmd.client;
+            }
+          }
+          return command(ns, cmd, options, responseType);
+        });
+
+      await client.db('test').command({ ping: 1 });
+
+      // 7. Wait 5ms for the connection to become idle.
+      await sleep(5);
+
+      // 8. Append the following `DriverInfoOptions` to the `MongoClient` metadata:
+      //     | Field    | Value            |
+      //     | -------- | ---------------- |
+      //     | name     | library          |
+      //     | version  | 1.2              |
+      //     | platform | Library Platform |
+      client.appendMetadata({
+        name: 'library',
+        version: '1.2',
+        platform: 'Library Platform'
+      });
+
+      // 9. Send a `ping` command to the server and verify that the command succeeds.
+      await client.db('test').command({ ping: 1 });
+
+      // 11. Assert that `clientMetadata` is identical to `updatedClientMetadata`.
+      expect(updatedClientMetadata).to.deep.equal(initialClientMetadata);
     });
   });
 });
