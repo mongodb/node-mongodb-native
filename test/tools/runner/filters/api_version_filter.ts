@@ -18,7 +18,11 @@ export class ApiVersionFilter extends Filter {
   constructor() {
     super();
     // Get environmental variables that are known
-    this.apiVersion = process.env.MONGODB_API_VERSION;
+    this.apiVersion =
+      typeof process.env.MONGODB_API_VERSION === 'string' &&
+      process.env.MONGODB_API_VERSION.length > 0
+        ? process.env.MONGODB_API_VERSION
+        : undefined;
   }
 
   override async initializeFilter(
