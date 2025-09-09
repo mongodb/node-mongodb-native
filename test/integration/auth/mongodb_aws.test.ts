@@ -163,39 +163,117 @@ describe('MONGODB-AWS', function () {
       });
     });
 
-    context('when user supplies a credentials provider', function () {
-      let providerCount = 0;
+    context('when using a custom credential provider', function () {
+      context('1. Custom Credential Provider Authenticates', function () {
+        let providerCount = 0;
 
-      beforeEach(function () {
-        // If we have a username the credentials have been set from the URI, options, or environment
-        // variables per the auth spec stated order.
-        if (client.options.credentials.username) {
-          this.skipReason = 'Credentials in the URI on env variables will not use custom provider.';
-          return this.skip();
-        }
-      });
-
-      it('authenticates with a user provided credentials provider', async function () {
-        const credentialProvider = AWSSDKCredentialProvider.awsSDK;
-        const provider = async () => {
-          providerCount++;
-          return await credentialProvider.fromNodeProviderChain().apply();
-        };
-        client = this.configuration.newClient(process.env.MONGODB_URI, {
-          authMechanismProperties: {
-            AWS_CREDENTIAL_PROVIDER: provider
+        beforeEach(function () {
+          // If we have a username the credentials have been set from the URI, options, or environment
+          // variables per the auth spec stated order.
+          if (client.options.credentials.username) {
+            this.skipReason = 'Credentials in the URI will not use custom provider.';
+            return this.skip();
           }
         });
 
-        const result = await client
-          .db('aws')
-          .collection('aws_test')
-          .estimatedDocumentCount()
-          .catch(error => error);
+        it('authenticates with a user provided credentials provider', async function () {
+          const credentialProvider = AWSSDKCredentialProvider.awsSDK;
+          const provider = async () => {
+            providerCount++;
+            return await credentialProvider.fromNodeProviderChain().apply();
+          };
+          client = this.configuration.newClient(process.env.MONGODB_URI, {
+            authMechanismProperties: {
+              AWS_CREDENTIAL_PROVIDER: provider
+            }
+          });
 
-        expect(result).to.not.be.instanceOf(MongoServerError);
-        expect(result).to.be.a('number');
-        expect(providerCount).to.be.greaterThan(0);
+          const result = await client
+            .db('aws')
+            .collection('aws_test')
+            .estimatedDocumentCount()
+            .catch(error => error);
+
+          expect(result).to.not.be.instanceOf(MongoServerError);
+          expect(result).to.be.a('number');
+          expect(providerCount).to.be.greaterThan(0);
+        });
+      });
+
+      context('2. Custom Credential Provider Authentication Precedence', function () {
+        context('Case 1: Credentials in URI Take Precedence', function () {
+          let providerCount = 0;
+          let provider;
+
+          beforeEach(function () {
+            console.log(client?.options);
+            if (!client?.options.credentials.username) {
+              this.skipReason = 'Test only runs when credentials are present in the URI';
+              return this.skip();
+            }
+            // @ts-expect-error We intentionally access a protected variable.
+            const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+            provider = async () => {
+              providerCount++;
+              return await credentialProvider.fromNodeProviderChain().apply();
+            };
+          });
+
+          it('authenticates with a user provided credentials provider', async function () {
+            console.log(process.env);
+            client = this.configuration.newClient(process.env.MONGODB_URI, {
+              authMechanismProperties: {
+                AWS_CREDENTIAL_PROVIDER: provider
+              }
+            });
+
+            const result = await client
+              .db('aws')
+              .collection('aws_test')
+              .estimatedDocumentCount()
+              .catch(error => error);
+
+            expect(result).to.not.be.instanceOf(MongoServerError);
+            expect(result).to.be.a('number');
+            expect(providerCount).to.equal(0);
+          });
+        });
+
+        context('Case 2: Custom Provider Takes Precedence Over Environment Variables', function () {
+          let providerCount = 0;
+          let provider;
+
+          beforeEach(function () {
+            if (client?.options.credentials.username || !process.env.AWS_ACCESS_KEY_ID) {
+              this.skipReason = 'Test only runs when credentials are present in the environment';
+              return this.skip();
+            }
+            // @ts-expect-error We intentionally access a protected variable.
+            const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+            provider = async () => {
+              providerCount++;
+              return await credentialProvider.fromNodeProviderChain().apply();
+            };
+          });
+
+          it('authenticates with a user provided credentials provider', async function () {
+            client = this.configuration.newClient(process.env.MONGODB_URI, {
+              authMechanismProperties: {
+                AWS_CREDENTIAL_PROVIDER: provider
+              }
+            });
+
+            const result = await client
+              .db('aws')
+              .collection('aws_test')
+              .estimatedDocumentCount()
+              .catch(error => error);
+
+            expect(result).to.not.be.instanceOf(MongoServerError);
+            expect(result).to.be.a('number');
+            expect(providerCount).to.be.greaterThan(0);
+          });
+        });
       });
     });
 
@@ -218,7 +296,7 @@ describe('MONGODB-AWS', function () {
         .catch(error => error);
 
       expect(client).to.have.nested.property('s.authProviders');
-      const provider = client.s.authProviders.getOrCreateProvider('MONGODB-AWS');
+      const provider = client.s.authProviders.getOrCreateProvider('MONGODB-AWS', {});
       expect(provider).to.be.instanceOf(MongoDBAWS);
     });
 

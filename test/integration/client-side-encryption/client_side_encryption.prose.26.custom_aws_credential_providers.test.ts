@@ -102,4 +102,49 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
       });
     }
   );
+
+  context(
+    'ClientEncryption with credentialProviders and valid environment variables',
+    metadata,
+    function () {
+      let clientEncryption;
+      let providerCount = 0;
+      let previousAccessKey;
+      let previousSecretKey;
+
+      beforeEach(function () {
+        previousAccessKey = process.env.AWS_ACCESS_KEY_ID;
+        previousSecretKey = process.env.AWS_SECRET_ACCESS_KEY;
+        process.env.AWS_ACCESS_KEY_ID = process.env.FLE_AWS_KEY;
+        process.env.AWS_SECRET_ACCESS_KEY = process.env.FLE_AWS_SECRET;
+
+        const options = {
+          keyVaultNamespace: 'keyvault.datakeys',
+          kmsProviders: { aws: {} },
+          credentialProviders: {
+            aws: async () => {
+              providerCount++;
+              return {
+                accessKeyId: process.env.FLE_AWS_KEY,
+                secretAccessKey: process.env.FLE_AWS_SECRET
+              };
+            }
+          },
+          extraOptions: getEncryptExtraOptions()
+        };
+        clientEncryption = new ClientEncryption(keyVaultClient, options);
+      });
+
+      afterEach(function () {
+        process.env.AWS_ACCESS_KEY_ID = previousAccessKey;
+        process.env.AWS_SECRET_ACCESS_KEY = previousSecretKey;
+      });
+
+      it('is successful', metadata, async function () {
+        const dk = await clientEncryption.createDataKey('aws', { masterKey });
+        expect(dk).to.be.instanceOf(Binary);
+        expect(providerCount).to.be.greaterThan(0);
+      });
+    }
+  );
 });
