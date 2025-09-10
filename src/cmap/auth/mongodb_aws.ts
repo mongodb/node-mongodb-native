@@ -63,7 +63,8 @@ export class MongoDBAWS extends AuthProvider {
       );
     }
 
-    if (!authContext.credentials.username) {
+    // If a custom credential provider is present we will use that first.
+    if (this.credentialProvider || !authContext.credentials.username) {
       authContext.credentials = await makeTempCredentials(
         authContext.credentials,
         this.credentialFetcher

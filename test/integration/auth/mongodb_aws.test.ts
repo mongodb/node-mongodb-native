@@ -8,6 +8,7 @@ import * as sinon from 'sinon';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import {
+  type AWSCredentials,
   AWSTemporaryCredentialProvider,
   type CommandOptions,
   Connection,
@@ -138,27 +139,43 @@ describe('MONGODB-AWS', function () {
 
   context('when user supplies a credentials provider', function () {
     let providerCount = 0;
+    let provider;
+
+    before(function () {
+      if (client?.options.credentials.username) {
+        const credentials = client?.options.credentials;
+        // There are 2 variants in our tests that remove the environment variables
+        // and put the credentials in the URI. In those cases we need a custom
+        // provider that returns the correct variables by extracting them out.
+        const awsCredentials: AWSCredentials = {
+          accessKeyId: credentials.username,
+          secretAccessKey: credentials.password
+        };
+        if (credentials.mechanismProperties.AWS_SESSION_TOKEN) {
+          awsCredentials.sessionToken = credentials.mechanismProperties.AWS_SESSION_TOKEN;
+        }
+        provider = async () => {
+          providerCount++;
+          return awsCredentials;
+        };
+      } else {
+        // @ts-expect-error We intentionally access a protected variable.
+        const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+        provider = async () => {
+          providerCount++;
+          return await credentialProvider.fromNodeProviderChain().apply();
+        };
+      }
+    });
 
     beforeEach(function () {
       if (!awsSdkPresent) {
         this.skipReason = 'only relevant to AssumeRoleWithWebIdentity with SDK installed';
         return this.skip();
       }
-      // If we have a username the credentials have been set from the URI, options, or environment
-      // variables per the auth spec stated order.
-      if (client.options.credentials.username) {
-        this.skipReason = 'Credentials in the URI on env variables will not use custom provider.';
-        return this.skip();
-      }
     });
 
     it('authenticates with a user provided credentials provider', async function () {
-      // @ts-expect-error We intentionally access a protected variable.
-      const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
-      const provider = async () => {
-        providerCount++;
-        return await credentialProvider.fromNodeProviderChain().apply();
-      };
       client = this.configuration.newClient(process.env.MONGODB_URI, {
         authMechanismProperties: {
           AWS_CREDENTIAL_PROVIDER: provider
