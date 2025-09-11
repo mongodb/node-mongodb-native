@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { type ClientMetadata } from '../../../mongodb';
+import { type ClientMetadata, type DriverInfo } from '../../../mongodb';
 import { MongoClient as RawMongoClient } from '../../../src';
 import {
   Connection,
@@ -394,8 +394,7 @@ describe('Client Metadata Update Prose Tests', function () {
       { testCase: 4, name: 'library', version: '1.2', platform: 'Framework Platform' },
       { testCase: 5, name: 'framework', version: '2.0', platform: 'Library Platform' },
       { testCase: 6, name: 'framework', version: '1.2', platform: 'Framework Platform' },
-      { testCase: 7, name: 'library', version: '2.0', platform: 'Framework Platform' },
-      { testCase: 8, name: 'framework', version: '2.0', platform: 'Framework Platform' }
+      { testCase: 7, name: 'library', version: '2.0', platform: 'Framework Platform' }
     ];
 
     for (const { testCase, ...driverInfo } of tests) {
@@ -504,8 +503,10 @@ describe('Client Metadata Update Prose Tests', function () {
       // 1. Create a `MongoClient` instance with:
       //     - `maxIdleTimeMS` set to `1ms`
 
-      client = new RawMongoClient(this.configuration.url(), { maxIdleTimeMS: 1 });
-
+      client = new RawMongoClient(this.configuration.url(), {
+        maxIdleTimeMS: 1,
+        serverApi: this.configuration.serverApi
+      });
       // 2. Append the following `DriverInfoOptions` to the `MongoClient` metadata:
       //   | Field    | Value            |
       //   | -------- | ---------------- |
@@ -685,7 +686,8 @@ describe('Client Metadata Update Prose Tests', function () {
           name: 'library',
           version: '1.2',
           platform: 'Library Platform'
-        }
+        },
+        serverApi: this.configuration.serverApi
       });
 
       // 2. Send a `ping` command to the server and verify that the command succeeds.
@@ -748,5 +750,212 @@ describe('Client Metadata Update Prose Tests', function () {
       // 11. Assert that `clientMetadata` is identical to `updatedClientMetadata`.
       expect(updatedClientMetadata).to.deep.equal(initialClientMetadata);
     });
+  });
+
+  describe('Test 7: Empty strings are considered unset when appending duplicate metadata', function () {
+    let initialClientMetadata: ClientMetadata;
+    let updatedClientMetadata: ClientMetadata;
+    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
+    let client: RawMongoClient;
+
+    afterEach(async function () {
+      await client.close();
+      initialClientMetadata = undefined;
+      updatedClientMetadata = undefined;
+    });
+
+    const driverInfos: Array<{
+      initial: DriverInfo;
+      appended: DriverInfo;
+    }> = [
+      {
+        initial: {
+          name: undefined,
+          version: '1.2',
+          platform: 'Library Platform'
+        },
+        appended: {
+          name: '',
+          version: '1.2',
+          platform: 'Library Platform'
+        }
+      },
+      {
+        initial: {
+          name: 'library',
+          version: undefined,
+          platform: 'Library Platform'
+        },
+        appended: {
+          name: 'library',
+          version: '',
+          platform: 'Library Platform'
+        }
+      },
+      {
+        initial: {
+          name: 'library',
+          version: '1.2',
+          platform: undefined
+        },
+        appended: {
+          name: 'library',
+          version: '1.2',
+          platform: ''
+        }
+      }
+    ];
+
+    for (const [metadata, index] of driverInfos.map((infos, i) => [infos, i] as const)) {
+      describe(`Test ${index + 1}`, function () {
+        it('does not appended duplicate metadata', async function () {
+          // 1. Create a `MongoClient` instance with:
+          // - `maxIdleTimeMS` set to `1ms`
+          client = new RawMongoClient(this.configuration.url(), {
+            maxIdleTimeMS: 1,
+            serverApi: this.configuration.serverApi
+          });
+
+          // 2. Append the `DriverInfoOptions` from the selected test case from the initial metadata section.
+          client.appendMetadata(metadata.initial);
+
+          // 3. Send a `ping` command to the server and verify that the command succeeds.
+          // 4. Save intercepted `client` document as `initialClientMetadata`.
+          // 8. Store the response as `updatedClientMetadata`.
+          sinon
+            .stub(Connection.prototype, 'command')
+            .callsFake(async function (ns, cmd, options, responseType) {
+              // @ts-expect-error: sinon will place wrappedMethod on the command method.
+              const command = Connection.prototype.command.wrappedMethod.bind(this);
+
+              if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+                if (!initialClientMetadata) {
+                  initialClientMetadata = cmd.client;
+                } else {
+                  updatedClientMetadata = cmd.client;
+                }
+              }
+              return command(ns, cmd, options, responseType);
+            });
+
+          await client.db('test').command({ ping: 1 });
+
+          // 5. Wait 5ms for the connection to become idle.
+          await sleep(5);
+
+          // 6. Append the `DriverInfoOptions` from the selected test case from the appended metadata section.
+          client.appendMetadata(metadata.appended);
+
+          // 7. Send a `ping` command to the server and verify the command succeeds.
+          await client.db('test').command({ ping: 1 });
+
+          // 9. Assert that `initialClientMetadata` is identical to `updatedClientMetadata`.
+          expect(updatedClientMetadata).to.deep.equal(initialClientMetadata);
+        });
+      });
+    }
+  });
+
+  describe('Test 8: Empty strings are considered unset when appending metadata identical to initial metadata', function () {
+    let initialClientMetadata: ClientMetadata;
+    let updatedClientMetadata: ClientMetadata;
+    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
+    let client: RawMongoClient;
+
+    afterEach(async function () {
+      await client.close();
+      initialClientMetadata = undefined;
+      updatedClientMetadata = undefined;
+    });
+
+    const driverInfos: Array<{
+      initial: DriverInfo;
+      appended: DriverInfo;
+    }> = [
+      {
+        initial: {
+          name: undefined,
+          version: '1.2',
+          platform: 'Library Platform'
+        },
+        appended: {
+          name: '',
+          version: '1.2',
+          platform: 'Library Platform'
+        }
+      },
+      {
+        initial: {
+          name: 'library',
+          version: undefined,
+          platform: 'Library Platform'
+        },
+        appended: {
+          name: 'library',
+          version: '',
+          platform: 'Library Platform'
+        }
+      },
+      {
+        initial: {
+          name: 'library',
+          version: '1.2',
+          platform: undefined
+        },
+        appended: {
+          name: 'library',
+          version: '1.2',
+          platform: ''
+        }
+      }
+    ];
+
+    for (const [metadata, index] of driverInfos.map((infos, i) => [infos, i] as const)) {
+      describe(`Test ${index + 1}`, function () {
+        it('does not appended duplicate metadata', async function () {
+          // 1. Create a `MongoClient` instance with:
+          //   - `maxIdleTimeMS` set to `1ms`
+          //   - `driverInfo` set to the `DriverInfoOptions` from the selected test case from the initial metadata section.
+          client = new RawMongoClient(this.configuration.url(), {
+            maxIdleTimeMS: 1,
+            serverApi: this.configuration.serverApi,
+            driverInfo: metadata.initial
+          });
+
+          // 2. Send a `ping` command to the server and verify that the command succeeds.
+          // 3. Save intercepted `client` document as `initialClientMetadata`.
+          // 7. Store the response as `updatedClientMetadata`.
+          sinon
+            .stub(Connection.prototype, 'command')
+            .callsFake(async function (ns, cmd, options, responseType) {
+              // @ts-expect-error: sinon will place wrappedMethod on the command method.
+              const command = Connection.prototype.command.wrappedMethod.bind(this);
+
+              if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+                if (!initialClientMetadata) {
+                  initialClientMetadata = cmd.client;
+                } else {
+                  updatedClientMetadata = cmd.client;
+                }
+              }
+              return command(ns, cmd, options, responseType);
+            });
+
+          await client.db('test').command({ ping: 1 });
+
+          // 4. Wait 5ms for the connection to become idle.
+          await sleep(5);
+
+          // 5. Append the `DriverInfoOptions` from the selected test case from the appended metadata section.
+          client.appendMetadata(metadata.appended);
+
+          // 6. Send a `ping` command to the server and verify the command succeeds.
+          await client.db('test').command({ ping: 1 });
+
+          // 8. Assert that `initialClientMetadata` is identical to `updatedClientMetadata`.
+          expect(updatedClientMetadata).to.deep.equal(initialClientMetadata);
+        });
+      });
+    }
   });
 });

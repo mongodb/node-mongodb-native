@@ -11,10 +11,18 @@ const NODE_DRIVER_VERSION = require('../../../package.json').version;
 
 /** @internal */
 export function isDriverInfoEqual(info1: DriverInfo, info2: DriverInfo): boolean {
+  /** for equality comparison, we consider "" as unset */
+  const nonEmptyCmp = (s1: string | undefined, s2: string | undefined): boolean => {
+    s1 ||= undefined;
+    s2 ||= undefined;
+
+    return s1 === s2;
+  };
+
   return (
-    info1.name === info2.name &&
-    info1.platform === info2.platform &&
-    info1.version === info2.version
+    nonEmptyCmp(info1.name, info2.name) &&
+    nonEmptyCmp(info1.platform, info2.platform) &&
+    nonEmptyCmp(info1.version, info2.version)
   );
 }
 
