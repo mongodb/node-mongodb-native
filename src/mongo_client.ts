@@ -18,6 +18,7 @@ import type { Connection } from './cmap/connection';
 import {
   addContainerMetadata,
   type ClientMetadata,
+  isDriverInfoEqual,
   makeClientMetadata
 } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
@@ -439,6 +440,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
     this.options = parseOptions(url, this, options);
 
+    this.options.additionalDriverInfo = [];
+    this.appendMetadata(this.options.driverInfo);
+
     const shouldSetLogger = Object.values(this.options.mongoLoggerOptions.componentSeverities).some(
       value => value !== SeverityLevel.OFF
     );
@@ -495,6 +499,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * @param driverInfo - Information about the application or library.
    */
   appendMetadata(driverInfo: DriverInfo) {
+    const isDuplicateDriverInfo = this.options.additionalDriverInfo.some(info =>
+      isDriverInfoEqual(info, driverInfo)
+    );
+    if (isDuplicateDriverInfo) return;
+
     this.options.additionalDriverInfo.push(driverInfo);
     this.options.metadata = makeClientMetadata(this.options);
     this.options.extendedMetadata = addContainerMetadata(this.options.metadata)

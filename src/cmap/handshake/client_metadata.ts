@@ -2,12 +2,29 @@ import * as os from 'os';
 import * as process from 'process';
 
 import { BSON, type Document, Int32 } from '../../bson';
-import { MongoInvalidArgumentError, MongoRuntimeError } from '../../error';
-import type { MongoOptions } from '../../mongo_client';
+import { MongoInvalidArgumentError } from '../../error';
+import type { DriverInfo, MongoOptions } from '../../mongo_client';
 import { fileIsAccessible } from '../../utils';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const NODE_DRIVER_VERSION = require('../../../package.json').version;
+
+/** @internal */
+export function isDriverInfoEqual(info1: DriverInfo, info2: DriverInfo): boolean {
+  /** for equality comparison, we consider "" as unset */
+  const nonEmptyCmp = (s1: string | undefined, s2: string | undefined): boolean => {
+    s1 ||= undefined;
+    s2 ||= undefined;
+
+    return s1 === s2;
+  };
+
+  return (
+    nonEmptyCmp(info1.name, info2.name) &&
+    nonEmptyCmp(info1.platform, info2.platform) &&
+    nonEmptyCmp(info1.version, info2.version)
+  );
+}
 
 /**
  * @public
@@ -90,10 +107,7 @@ export class LimitedSizeDocument {
   }
 }
 
-type MakeClientMetadataOptions = Pick<
-  MongoOptions,
-  'appName' | 'driverInfo' | 'additionalDriverInfo'
->;
+type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'additionalDriverInfo'>;
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
@@ -115,18 +129,10 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     metadataDocument.ifItFitsItSits('application', { name });
   }
 
-  const { name = '', version = '', platform = '' } = options.driverInfo;
-
   const driverInfo = {
-    name: name.length > 0 ? `nodejs|${name}` : 'nodejs',
-    version: version.length > 0 ? `${NODE_DRIVER_VERSION}|${version}` : NODE_DRIVER_VERSION
+    name: 'nodejs',
+    version: NODE_DRIVER_VERSION
   };
-
-  if (options.additionalDriverInfo == null) {
-    throw new MongoRuntimeError(
-      'Client options `additionalDriverInfo` must always default to an empty array'
-    );
-  }
 
   // This is where we handle additional driver info added after client construction.
   for (const { name: n = '', version: v = '' } of options.additionalDriverInfo) {
@@ -145,13 +151,10 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   }
 
   let runtimeInfo = getRuntimeInfo();
-  if (platform.length > 0) {
-    runtimeInfo = `${runtimeInfo}|${platform}`;
-  }
-
-  for (const { platform: p = '' } of options.additionalDriverInfo) {
-    if (p.length > 0) {
-      runtimeInfo = `${runtimeInfo}|${p}`;
+  // This is where we handle additional driver info added after client construction.
+  for (const { platform = '' } of options.additionalDriverInfo) {
+    if (platform.length > 0) {
+      runtimeInfo = `${runtimeInfo}|${platform}`;
     }
   }
 
@@ -210,7 +213,9 @@ async function getContainerMetadata() {
  * Re-add each metadata value.
  * Attempt to add new env container metadata, but keep old data if it does not fit.
  */
-export async function addContainerMetadata(originalMetadata: ClientMetadata) {
+export async function addContainerMetadata(
+  originalMetadata: ClientMetadata
+): Promise<ClientMetadata> {
   const containerMetadata = await getContainerMetadata();
   if (Object.keys(containerMetadata).length === 0) return originalMetadata;
 
@@ -233,7 +238,7 @@ export async function addContainerMetadata(originalMetadata: ClientMetadata) {
     extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata);
   }
 
-  return extendedMetadata.toObject();
+  return extendedMetadata.toObject() as ClientMetadata;
 }
 
 /**

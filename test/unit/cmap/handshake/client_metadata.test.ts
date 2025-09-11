@@ -142,7 +142,7 @@ describe('client metadata module', () => {
   describe('makeClientMetadata()', () => {
     context('when no FAAS environment is detected', () => {
       it('does not append FAAS metadata', () => {
-        const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+        const metadata = makeClientMetadata({ additionalDriverInfo: [{}] });
         expect(metadata).not.to.have.property(
           'env',
           'faas metadata applied in a non-faas environment'
@@ -167,16 +167,14 @@ describe('client metadata module', () => {
       it('throws an error if driverInfo.platform is too large', () => {
         expect(() =>
           makeClientMetadata({
-            driverInfo: { platform: 'a'.repeat(512) },
-            additionalDriverInfo: []
+            additionalDriverInfo: [{ platform: 'a'.repeat(512) }]
           })
         ).to.throw(MongoInvalidArgumentError, /platform/);
       });
 
       it('appends driverInfo.platform to the platform field', () => {
         const options = {
-          driverInfo: { platform: 'myPlatform' },
-          additionalDriverInfo: []
+          additionalDriverInfo: [{ platform: 'myPlatform' }]
         };
         const metadata = makeClientMetadata(options);
         expect(metadata).to.deep.equal({
@@ -198,16 +196,12 @@ describe('client metadata module', () => {
     context('when driverInfo.name is provided', () => {
       it('throws an error if driverInfo.name is too large', () => {
         expect(() =>
-          makeClientMetadata({ driverInfo: { name: 'a'.repeat(512) }, additionalDriverInfo: [] })
+          makeClientMetadata({ additionalDriverInfo: [{ name: 'a'.repeat(512) }] })
         ).to.throw(MongoInvalidArgumentError, /name/);
       });
 
       it('appends driverInfo.name to the driver.name field', () => {
-        const options = {
-          driverInfo: { name: 'myName' },
-          additionalDriverInfo: []
-        };
-        const metadata = makeClientMetadata(options);
+        const metadata = makeClientMetadata({ additionalDriverInfo: [{ name: 'myName' }] });
         expect(metadata).to.deep.equal({
           driver: {
             name: 'nodejs|myName',
@@ -227,16 +221,14 @@ describe('client metadata module', () => {
     context('when driverInfo.version is provided', () => {
       it('throws an error if driverInfo.version is too large', () => {
         expect(() =>
-          makeClientMetadata({ driverInfo: { version: 'a'.repeat(512) }, additionalDriverInfo: [] })
+          makeClientMetadata({ additionalDriverInfo: [{ version: 'a'.repeat(512) }] })
         ).to.throw(MongoInvalidArgumentError, /version/);
       });
 
       it('appends driverInfo.version to the version field', () => {
-        const options = {
-          driverInfo: { version: 'myVersion' },
-          additionalDriverInfo: []
-        };
-        const metadata = makeClientMetadata(options);
+        const metadata = makeClientMetadata({
+          additionalDriverInfo: [{ version: 'myVersion' }]
+        });
         expect(metadata).to.deep.equal({
           driver: {
             name: 'nodejs',
@@ -254,7 +246,7 @@ describe('client metadata module', () => {
     });
 
     context('when no custom driverInto is provided', () => {
-      const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+      const metadata = makeClientMetadata({ additionalDriverInfo: [] });
 
       it('does not append the driver info to the metadata', () => {
         expect(metadata).to.deep.equal({
@@ -280,12 +272,10 @@ describe('client metadata module', () => {
     context('when app name is provided', () => {
       context('when the app name is over 128 bytes', () => {
         const longString = 'a'.repeat(300);
-        const options = {
+        const metadata = makeClientMetadata({
           appName: longString,
-          driverInfo: {},
           additionalDriverInfo: []
-        };
-        const metadata = makeClientMetadata(options);
+        });
 
         it('truncates the application name to <=128 bytes', () => {
           expect(metadata.application?.name).to.be.a('string');
@@ -300,12 +290,10 @@ describe('client metadata module', () => {
         'TODO(NODE-5150): fix appName truncation when multi-byte unicode charaters straddle byte 128',
         () => {
           const longString = '€'.repeat(300);
-          const options = {
+          const metadata = makeClientMetadata({
             appName: longString,
-            driverInfo: {},
             additionalDriverInfo: []
-          };
-          const metadata = makeClientMetadata(options);
+          });
 
           it('truncates the application name to 129 bytes', () => {
             expect(metadata.application?.name).to.be.a('string');
@@ -318,12 +306,10 @@ describe('client metadata module', () => {
       );
 
       context('when the app name is under 128 bytes', () => {
-        const options = {
+        const metadata = makeClientMetadata({
           appName: 'myApplication',
-          driverInfo: {},
           additionalDriverInfo: []
-        };
-        const metadata = makeClientMetadata(options);
+        });
 
         it('sets the application name to the value', () => {
           expect(metadata.application?.name).to.equal('myApplication');
@@ -339,40 +325,39 @@ describe('client metadata module', () => {
 
         it('sets platform to Deno', () => {
           globalThis.Deno = { version: { deno: '1.2.3' } };
-          const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+          const metadata = makeClientMetadata({ additionalDriverInfo: [] });
           expect(metadata.platform).to.equal('Deno v1.2.3, LE');
         });
 
         it('sets platform to Deno with driverInfo.platform', () => {
           globalThis.Deno = { version: { deno: '1.2.3' } };
           const metadata = makeClientMetadata({
-            driverInfo: { platform: 'myPlatform' },
-            additionalDriverInfo: []
+            additionalDriverInfo: [{ platform: 'myPlatform' }]
           });
           expect(metadata.platform).to.equal('Deno v1.2.3, LE|myPlatform');
         });
 
         it('ignores version if Deno.version.deno is not a string', () => {
           globalThis.Deno = { version: { deno: 1 } };
-          const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+          const metadata = makeClientMetadata({ additionalDriverInfo: [] });
           expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
         it('ignores version if Deno.version does not have a deno property', () => {
           globalThis.Deno = { version: { somethingElse: '1.2.3' } };
-          const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+          const metadata = makeClientMetadata({ additionalDriverInfo: [] });
           expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
         it('ignores version if Deno.version is null', () => {
           globalThis.Deno = { version: null };
-          const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+          const metadata = makeClientMetadata({ additionalDriverInfo: [] });
           expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
         it('ignores version if Deno is nullish', () => {
           globalThis.Deno = null;
-          const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+          const metadata = makeClientMetadata({ additionalDriverInfo: [] });
           expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
       });
@@ -386,7 +371,7 @@ describe('client metadata module', () => {
           globalThis.Bun = class {
             static version = '1.2.3';
           };
-          const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+          const metadata = makeClientMetadata({ additionalDriverInfo: [] });
           expect(metadata.platform).to.equal('Bun v1.2.3, LE');
         });
 
@@ -395,8 +380,7 @@ describe('client metadata module', () => {
             static version = '1.2.3';
           };
           const metadata = makeClientMetadata({
-            driverInfo: { platform: 'myPlatform' },
-            additionalDriverInfo: []
+            additionalDriverInfo: [{ platform: 'myPlatform' }]
           });
           expect(metadata.platform).to.equal('Bun v1.2.3, LE|myPlatform');
         });
@@ -405,7 +389,7 @@ describe('client metadata module', () => {
           globalThis.Bun = class {
             static version = 1;
           };
-          const metadata = makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] });
+          const metadata = makeClientMetadata({ additionalDriverInfo: [] });
           expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE');
         });
 
@@ -414,8 +398,7 @@ describe('client metadata module', () => {
             static version = 1;
           };
           const metadata = makeClientMetadata({
-            driverInfo: { platform: 'myPlatform' },
-            additionalDriverInfo: []
+            additionalDriverInfo: [{ platform: 'myPlatform' }]
           });
           expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE|myPlatform');
         });
@@ -423,8 +406,7 @@ describe('client metadata module', () => {
         it('ignores version if Bun is nullish', () => {
           globalThis.Bun = null;
           const metadata = makeClientMetadata({
-            driverInfo: { platform: 'myPlatform' },
-            additionalDriverInfo: []
+            additionalDriverInfo: [{ platform: 'myPlatform' }]
           });
           expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE|myPlatform');
         });
