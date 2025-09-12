@@ -27,6 +27,7 @@ import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 import { type FailCommandFailPoint, sleep } from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
+import { UUID } from 'bson';
 
 const initIteratorMode = async (cs: ChangeStream) => {
   const initEvent = once(cs.cursor, 'init');
@@ -2007,6 +2008,7 @@ describe.only('ChangeStream resumability', function () {
   let collection: Collection;
   let changeStream: ChangeStream;
   let aggregateEvents: CommandStartedEvent[] = [];
+  let appName: string;
 
   const changeStreamResumeOptions: ChangeStreamOptions = {
     fullDocument: 'updateLookup',
@@ -2065,7 +2067,15 @@ describe.only('ChangeStream resumability', function () {
     await utilClient.db(dbName).createCollection(collectionName);
     await utilClient.close();
 
-    client = this.configuration.newClient({ monitorCommands: true });
+    // we are going to switch primary in tests and cleanup of failpoints is difficult,
+    // so generating unique appname instead of cleaning for each test is an easier solution
+    appName = new UUID().toString();
+
+    client = this.configuration.newClient({
+      monitorCommands: true,
+      serverSelectionTimeoutMS: 5_000,
+      appName: appName
+    });
     client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
     collection = client.db(dbName).collection(collectionName);
   });
@@ -2230,41 +2240,19 @@ describe.only('ChangeStream resumability', function () {
         });
       });
 
-      context.only('when the error is not a server error', function () {
-        let client1: MongoClient;
-        let client2: MongoClient;
-
-        beforeEach(async function () {
-          client1 = this.configuration.newClient(
-            {},
-            { serverSelectionTimeoutMS: 1000, appName: 'client-errors' }
-          );
-          client2 = this.configuration.newClient();
-
-          collection = client1.db('client-errors').collection('test');
-        });
-
-        afterEach(async function () {
-          await client2.db('admin').command({
-            configureFailPoint: 'failCommand',
-            mode: 'off',
-            data: { appName: 'client-errors' }
-          } as FailCommandFailPoint);
-
-          await client1?.close();
-          await client2?.close();
-        });
-
+      context('when the error is not a server error', function () {
+        // This test requires a replica set to call replSetFreeze command
         it(
           'should resume on ServerSelectionError',
-          { requires: { topology: '!single' } },
+          { requires: { topology: ['replicaset'] } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
 
             await collection.insertOne({ a: 1 });
 
-            await client2.db('admin').command({
+            // mimic the node termination by closing the connection and failing on heartbeat
+            await client.db('admin').command({
               configureFailPoint: 'failCommand',
               mode: 'alwaysOn',
               data: {
@@ -2272,19 +2260,22 @@ describe.only('ChangeStream resumability', function () {
                 closeConnection: true,
                 handshakeCommands: true,
                 failInternalCommands: true,
-                appName: 'client-errors'
+                appName: appName
               }
             } as FailCommandFailPoint);
-            await client2
+            // force new election in the cluster
+            await client
               .db('admin')
-              .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.secondary });
-            await client2
-              .db('admin')
-              .command({ replSetStepDown: 15, secondaryCatchUpPeriodSecs: 10, force: true });
-            // await sleep(15_000);
+              .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
+            await client.db('admin').command({ replSetStepDown: 30, force: true });
+            await sleep(1500);
 
             const change = await changeStream.next();
             expect(change).to.containSubset({ operationType: 'insert', fullDocument: { a: 1 } });
+
+            expect(aggregateEvents).to.have.lengthOf(2);
+            const [e1, e2] = aggregateEvents;
+            expect(e1.address).to.not.equal(e2.address);
           }
         );
       });
@@ -2601,6 +2592,46 @@ describe.only('ChangeStream resumability', function () {
           expect(changeStream.closed).to.be.true;
         });
       });
+
+      context('when the error is not a server error', function () {
+        // This test requires a replica set to call replSetFreeze command
+        it(
+          'should resume on ServerSelectionError',
+          { requires: { topology: ['replicaset'] } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await collection.insertOne({ a: 1 });
+
+            // mimic the node termination by closing the connection and failing on heartbeat
+            await client.db('admin').command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
+                closeConnection: true,
+                handshakeCommands: true,
+                failInternalCommands: true,
+                appName: appName
+              }
+            } as FailCommandFailPoint);
+            // force new election in the cluster
+            await client
+              .db('admin')
+              .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
+            await client.db('admin').command({ replSetStepDown: 30, force: true });
+            await sleep(1500);
+
+            const change = await changeStream.tryNext();
+            expect(change).to.containSubset({ operationType: 'insert', fullDocument: { a: 1 } });
+
+            expect(aggregateEvents).to.have.lengthOf(2);
+            const [e1, e2] = aggregateEvents;
+            expect(e1.address).to.not.equal(e2.address);
+          }
+        );
+      });
     });
 
     context('#asyncIterator', function () {
@@ -2736,6 +2767,50 @@ describe.only('ChangeStream resumability', function () {
             expect(changeStream.closed).to.be.true;
           }
         });
+      });
+
+      context('when the error is not a server error', function () {
+        // This test requires a replica set to call replSetFreeze command
+        it(
+          'should resume on ServerSelectionError',
+          { requires: { topology: ['replicaset'] } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+            await collection.insertOne({ a: 1 });
+
+            // mimic the node termination by closing the connection and failing on heartbeat
+            await client.db('admin').command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
+                closeConnection: true,
+                handshakeCommands: true,
+                failInternalCommands: true,
+                appName: appName
+              }
+            } as FailCommandFailPoint);
+            // force new election in the cluster
+            await client
+              .db('admin')
+              .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
+            await client.db('admin').command({ replSetStepDown: 30, force: true });
+            await sleep(1500);
+
+            const change = await changeStreamIterator.next();
+            expect(change.value).to.containSubset({
+              operationType: 'insert',
+              fullDocument: { a: 1 }
+            });
+
+            expect(aggregateEvents).to.have.lengthOf(2);
+            const [e1, e2] = aggregateEvents;
+            expect(e1.address).to.not.equal(e2.address);
+          }
+        );
       });
     });
   });
