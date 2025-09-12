@@ -19,7 +19,6 @@ import type { Db } from './db';
 import {
   type AnyError,
   MongoAPIError,
-  MongoCompatibilityError,
   MongoInvalidArgumentError,
   MongoNetworkTimeoutError,
   MongoNotConnectedError,
@@ -207,12 +206,10 @@ export function isPromiseLike<T = unknown>(value?: unknown): value is PromiseLik
  * @param options - options containing collation settings
  */
 export function decorateWithCollation(
-  command: Document,
-  target: MongoClient | Db | Collection,
-  options: AnyOptions
+  command: Document, options: AnyOptions
 ): void {
   if (options.collation && typeof options.collation === 'object') {
-      command.collation = options.collation;
+    command.collation = options.collation;
   }
 }
 

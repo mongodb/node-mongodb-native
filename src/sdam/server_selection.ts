@@ -1,4 +1,4 @@
-import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import { ReadPreference } from '../read_preference';
 import { ServerType, TopologyType } from './common';
 import type { ServerDescription, TagSet } from './server_description';
@@ -273,7 +273,6 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
     servers: ServerDescription[],
     deprioritized: ServerDescription[] = []
   ): ServerDescription[] {
-
     if (topologyDescription.type === TopologyType.LoadBalanced) {
       return servers.filter(loadBalancerFilter);
     }

@@ -1,4 +1,3 @@
-import { type Connection } from '..';
 import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type CursorTimeoutMode } from '../cursor/abstract_cursor';
@@ -106,7 +105,7 @@ export class AggregateOperation extends CommandOperation<CursorResponse> {
     this.pipeline.push(stage);
   }
 
-  override buildCommandDocument(connection: Connection): Document {
+  override buildCommandDocument(): Document {
     const options = this.options;
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
 
