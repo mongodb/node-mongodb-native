@@ -1551,6 +1551,10 @@ export function isResumableError(error?: Error, wireVersion?: number): boolean {
     return true;
   }
 
+  if (error instanceof MongoServerSelectionError) {
+    return true;
+  }
+
   if (wireVersion != null && wireVersion >= 9) {
     // DRIVERS-1308: For 4.4 drivers running against 4.4 servers, drivers will add a special case to treat the CursorNotFound error code as resumable
     if (error.code === MONGODB_ERROR_CODES.CursorNotFound) {
