@@ -273,16 +273,6 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
     servers: ServerDescription[],
     deprioritized: ServerDescription[] = []
   ): ServerDescription[] {
-    const commonWireVersion = topologyDescription.commonWireVersion;
-    if (
-      commonWireVersion &&
-      readPreference.minWireVersion &&
-      readPreference.minWireVersion > commonWireVersion
-    ) {
-      throw new MongoCompatibilityError(
-        `Minimum wire version '${readPreference.minWireVersion}' required, but found '${commonWireVersion}'`
-      );
-    }
 
     if (topologyDescription.type === TopologyType.LoadBalanced) {
       return servers.filter(loadBalancerFilter);

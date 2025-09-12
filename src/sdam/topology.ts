@@ -1106,7 +1106,7 @@ function isStaleServerDescription(
 
 /**
  * @public
- * @deprecated This class will be removed as dead code.
+ * @deprecated This class will be removed as dead code in the next major version.
  */
 export class ServerCapabilities {
   maxWireVersion: number;
