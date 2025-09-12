@@ -188,7 +188,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
-    decorateWithCollation(command, this.collection, options);
+    decorateWithCollation(command, options);
 
     if (options.hint) {
       const unacknowledgedWrite = this.writeConcern?.w === 0;

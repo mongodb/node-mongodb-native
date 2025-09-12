@@ -93,7 +93,7 @@ export class ChangeStreamCursor<
       } else {
         options.resumeAfter = this.resumeToken;
       }
-    } else if (this.startAtOperationTime != null && maxWireVersion(this.server) >= 7) {
+    } else if (this.startAtOperationTime != null) {
       options.startAtOperationTime = this.startAtOperationTime;
     }
 
@@ -145,8 +145,7 @@ export class ChangeStreamCursor<
     if (
       this.startAtOperationTime == null &&
       this.changeStreamCursorOptions.resumeAfter == null &&
-      this.changeStreamCursorOptions.startAfter == null &&
-      this.maxWireVersion >= 7
+      this.changeStreamCursorOptions.startAfter == null
     ) {
       this.startAtOperationTime = response.operationTime;
     }

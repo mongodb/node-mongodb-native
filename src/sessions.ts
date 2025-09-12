@@ -2,7 +2,6 @@ import { Binary, type Document, Long, type Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
 import { type MongoDBResponse } from './cmap/wire_protocol/responses';
-import { isSharded } from './cmap/wire_protocol/shared';
 import { PINNED, UNPINNED } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import {
@@ -42,7 +41,6 @@ import {
   commandSupportsReadConcern,
   isPromiseLike,
   List,
-  maxWireVersion,
   MongoDBNamespace,
   noop,
   now,
@@ -50,8 +48,6 @@ import {
   uuidV4
 } from './utils';
 import { WriteConcern, type WriteConcernOptions, type WriteConcernSettings } from './write_concern';
-
-const minWireVersionForShardedTransactions = 8;
 
 /** @public */
 export interface ClientSessionOptions {
@@ -403,17 +399,6 @@ export class ClientSession
 
     if (this.isPinned && this.transaction.isCommitted) {
       this.unpin();
-    }
-
-    const topologyMaxWireVersion = maxWireVersion(this.client.topology);
-    if (
-      isSharded(this.client.topology) &&
-      topologyMaxWireVersion != null &&
-      topologyMaxWireVersion < minWireVersionForShardedTransactions
-    ) {
-      throw new MongoCompatibilityError(
-        'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
-      );
     }
 
     this.commitAttempted = false;
