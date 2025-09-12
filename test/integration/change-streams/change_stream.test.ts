@@ -2003,7 +2003,7 @@ describe('Change Streams', function () {
   });
 });
 
-describe.only('ChangeStream resumability', function () {
+describe('ChangeStream resumability', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
