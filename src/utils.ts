@@ -205,9 +205,7 @@ export function isPromiseLike<T = unknown>(value?: unknown): value is PromiseLik
  * @param target - target of command
  * @param options - options containing collation settings
  */
-export function decorateWithCollation(
-  command: Document, options: AnyOptions
-): void {
+export function decorateWithCollation(command: Document, options: AnyOptions): void {
   if (options.collation && typeof options.collation === 'object') {
     command.collation = options.collation;
   }
