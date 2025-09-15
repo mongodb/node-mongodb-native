@@ -12,8 +12,7 @@ import {
   type AWSCredentialProvider,
   AWSSDKCredentialProvider,
   type AWSTempCredentials,
-  AWSTemporaryCredentialProvider,
-  LegacyAWSTemporaryCredentialProvider
+  type AWSTemporaryCredentialProvider
 } from './aws_temporary_credentials';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
@@ -41,9 +40,7 @@ export class MongoDBAWS extends AuthProvider {
     super();
 
     this.credentialProvider = credentialProvider;
-    this.credentialFetcher = AWSTemporaryCredentialProvider.isAWSSDKInstalled
-      ? new AWSSDKCredentialProvider(credentialProvider)
-      : new LegacyAWSTemporaryCredentialProvider();
+    this.credentialFetcher = new AWSSDKCredentialProvider(credentialProvider);
   }
 
   override async auth(authContext: AuthContext): Promise<void> {

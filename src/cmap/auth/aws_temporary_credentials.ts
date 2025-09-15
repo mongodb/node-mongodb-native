@@ -1,10 +1,5 @@
 import { type AWSCredentials, getAwsCredentialProvider } from '../../deps';
 import { MongoAWSError } from '../../error';
-import { request } from '../../utils';
-
-const AWS_RELATIVE_URI = 'http://169.254.170.2';
-const AWS_EC2_URI = 'http://169.254.169.254';
-const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
 
 /**
  * @internal
@@ -32,7 +27,7 @@ export type AWSCredentialProvider = () => Promise<AWSCredentials>;
 export abstract class AWSTemporaryCredentialProvider {
   abstract getCredentials(): Promise<AWSTempCredentials>;
   private static _awsSDK: ReturnType<typeof getAwsCredentialProvider>;
-  protected static get awsSDK() {
+  static get awsSDK() {
     AWSTemporaryCredentialProvider._awsSDK ??= getAwsCredentialProvider();
     return AWSTemporaryCredentialProvider._awsSDK;
   }
@@ -142,44 +137,5 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
     } catch (error) {
       throw new MongoAWSError(error.message, { cause: error });
     }
-  }
-}
-
-/**
- * @internal
- * Fetches credentials manually (without the AWS SDK), as outlined in the [Obtaining Credentials](https://github.com/mongodb/specifications/blob/master/source/auth/auth.md#obtaining-credentials)
- * section of the Auth spec.
- */
-export class LegacyAWSTemporaryCredentialProvider extends AWSTemporaryCredentialProvider {
-  override async getCredentials(): Promise<AWSTempCredentials> {
-    // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-    // is set then drivers MUST assume that it was set by an AWS ECS agent
-    if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
-      return await request(
-        `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`
-      );
-    }
-
-    // Otherwise assume we are on an EC2 instance
-
-    // get a token
-    const token = await request(`${AWS_EC2_URI}/latest/api/token`, {
-      method: 'PUT',
-      json: false,
-      headers: { 'X-aws-ec2-metadata-token-ttl-seconds': 30 }
-    });
-
-    // get role name
-    const roleName = await request(`${AWS_EC2_URI}/${AWS_EC2_PATH}`, {
-      json: false,
-      headers: { 'X-aws-ec2-metadata-token': token }
-    });
-
-    // get temp credentials
-    const creds = await request(`${AWS_EC2_URI}/${AWS_EC2_PATH}/${roleName}`, {
-      headers: { 'X-aws-ec2-metadata-token': token }
-    });
-
-    return creds;
   }
 }

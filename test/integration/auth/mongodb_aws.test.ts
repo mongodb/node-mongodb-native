@@ -153,7 +153,6 @@ describe('MONGODB-AWS', function () {
     });
 
     it('authenticates with a user provided credentials provider', async function () {
-      // @ts-expect-error We intentionally access a protected variable.
       const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
       const provider = async () => {
         providerCount++;
