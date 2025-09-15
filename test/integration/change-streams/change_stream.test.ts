@@ -1,4 +1,5 @@
 import { strict as assert } from 'assert';
+import { UUID } from 'bson';
 import { expect } from 'chai';
 import { on, once } from 'events';
 import { gte, lt } from 'semver';
@@ -27,7 +28,6 @@ import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 import { type FailCommandFailPoint, sleep } from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
-import { UUID } from 'bson';
 
 const initIteratorMode = async (cs: ChangeStream) => {
   const initEvent = once(cs.cursor, 'init');
@@ -2261,7 +2261,6 @@ describe('ChangeStream resumability', function () {
       });
 
       context('when the error is not a server error', function () {
-        // This test requires a replica set to call replSetFreeze command
         it(
           'should resume on ServerSelectionError',
           { requires: { topology: ['replicaset'] } },
@@ -2607,7 +2606,6 @@ describe('ChangeStream resumability', function () {
       });
 
       context('when the error is not a server error', function () {
-        // This test requires a replica set to call replSetFreeze command
         it(
           'should resume on ServerSelectionError',
           { requires: { topology: ['replicaset'] } },
@@ -2775,7 +2773,6 @@ describe('ChangeStream resumability', function () {
       });
 
       context('when the error is not a server error', function () {
-        // This test requires a replica set to call replSetFreeze command
         it(
           'should resume on ServerSelectionError',
           { requires: { topology: ['replicaset'] } },
