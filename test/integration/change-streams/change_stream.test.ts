@@ -2003,7 +2003,7 @@ describe('Change Streams', function () {
   });
 });
 
-describe('ChangeStream resumability', function () {
+describe.only('ChangeStream resumability', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
@@ -2071,11 +2071,15 @@ describe('ChangeStream resumability', function () {
     // so generating unique appname instead of cleaning for each test is an easier solution
     appName = new UUID().toString();
 
-    client = this.configuration.newClient({
-      monitorCommands: true,
-      serverSelectionTimeoutMS: 5_000,
-      appName: appName
-    });
+    client = this.configuration.newClient(
+      {},
+      {
+        monitorCommands: true,
+        serverSelectionTimeoutMS: 5_000,
+        heartbeatFrequencyMS: 500,
+        appName: appName
+      }
+    );
     client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
     collection = client.db(dbName).collection(collectionName);
   });
@@ -2268,7 +2272,8 @@ describe('ChangeStream resumability', function () {
               .db('admin')
               .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
             await client.db('admin').command({ replSetStepDown: 30, force: true });
-            await sleep(1500);
+
+            await sleep(500);
 
             const change = await changeStream.next();
             expect(change).to.containSubset({ operationType: 'insert', fullDocument: { a: 1 } });
@@ -2621,7 +2626,8 @@ describe('ChangeStream resumability', function () {
               .db('admin')
               .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
             await client.db('admin').command({ replSetStepDown: 30, force: true });
-            await sleep(1500);
+
+            await sleep(500);
 
             const change = await changeStream.tryNext();
             expect(change).to.containSubset({ operationType: 'insert', fullDocument: { a: 1 } });
@@ -2798,7 +2804,8 @@ describe('ChangeStream resumability', function () {
               .db('admin')
               .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
             await client.db('admin').command({ replSetStepDown: 30, force: true });
-            await sleep(1500);
+
+            await sleep(500);
 
             const change = await changeStreamIterator.next();
             expect(change.value).to.containSubset({
