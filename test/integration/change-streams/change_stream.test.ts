@@ -47,6 +47,19 @@ const pipeline = [
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
 
+async function forcePrimaryStepDown(client: MongoClient) {
+  await client
+    .db('admin')
+    .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
+  await client
+    .db('admin')
+    .command({ replSetStepDown: 15, secondaryCatchUpPeriodSecs: 10, force: true });
+
+  // wait for secondary to become primary but also allow previous primary to become next primary
+  // in subsequent test runs
+  await sleep(15_000);
+}
+
 describe('Change Streams', function () {
   let client: MongoClient;
   let collection: Collection;
@@ -2005,6 +2018,7 @@ describe('Change Streams', function () {
 
 describe.only('ChangeStream resumability', function () {
   let client: MongoClient;
+  let utilClient: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
   let aggregateEvents: CommandStartedEvent[] = [];
@@ -2058,14 +2072,15 @@ describe.only('ChangeStream resumability', function () {
   beforeEach(async function () {
     const dbName = 'resumabilty_tests';
     const collectionName = 'foo';
-    const utilClient = this.configuration.newClient();
+
+    utilClient = this.configuration.newClient();
+
     // 3.6 servers do not support creating a change stream on a database that doesn't exist
     await utilClient
       .db(dbName)
       .dropDatabase()
       .catch(e => e);
     await utilClient.db(dbName).createCollection(collectionName);
-    await utilClient.close();
 
     // we are going to switch primary in tests and cleanup of failpoints is difficult,
     // so generating unique appname instead of cleaning for each test is an easier solution
@@ -2075,8 +2090,8 @@ describe.only('ChangeStream resumability', function () {
       {},
       {
         monitorCommands: true,
-        serverSelectionTimeoutMS: 5_000,
-        heartbeatFrequencyMS: 500,
+        serverSelectionTimeoutMS: 10_000,
+        heartbeatFrequencyMS: 5_000,
         appName: appName
       }
     );
@@ -2086,6 +2101,7 @@ describe.only('ChangeStream resumability', function () {
 
   afterEach(async function () {
     await changeStream.close();
+    await utilClient.close();
     await client.close();
     aggregateEvents = [];
   });
@@ -2255,7 +2271,7 @@ describe.only('ChangeStream resumability', function () {
 
             await collection.insertOne({ a: 1 });
 
-            await client.db('admin').command({
+            await utilClient.db('admin').command({
               configureFailPoint: 'failCommand',
               mode: 'alwaysOn',
               data: {
@@ -2264,12 +2280,8 @@ describe.only('ChangeStream resumability', function () {
                 appName: appName
               }
             } as FailCommandFailPoint);
-            await client
-              .db('admin')
-              .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
-            await client.db('admin').command({ replSetStepDown: 5, force: true });
 
-            await sleep(500);
+            await forcePrimaryStepDown(utilClient);
 
             const change = await changeStream.next();
             expect(change).to.containSubset({ operationType: 'insert', fullDocument: { a: 1 } });
@@ -2605,7 +2617,7 @@ describe.only('ChangeStream resumability', function () {
 
             await collection.insertOne({ a: 1 });
 
-            await client.db('admin').command({
+            await utilClient.db('admin').command({
               configureFailPoint: 'failCommand',
               mode: 'alwaysOn',
               data: {
@@ -2614,12 +2626,7 @@ describe.only('ChangeStream resumability', function () {
                 appName: appName
               }
             } as FailCommandFailPoint);
-            await client
-              .db('admin')
-              .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
-            await client.db('admin').command({ replSetStepDown: 5, force: true });
-
-            await sleep(500);
+            await forcePrimaryStepDown(utilClient);
 
             const change = await changeStream.tryNext();
             expect(change).to.containSubset({ operationType: 'insert', fullDocument: { a: 1 } });
@@ -2779,7 +2786,7 @@ describe.only('ChangeStream resumability', function () {
 
             await collection.insertOne({ a: 1 });
 
-            await client.db('admin').command({
+            await utilClient.db('admin').command({
               configureFailPoint: 'failCommand',
               mode: 'alwaysOn',
               data: {
@@ -2788,12 +2795,7 @@ describe.only('ChangeStream resumability', function () {
                 appName: appName
               }
             } as FailCommandFailPoint);
-            await client
-              .db('admin')
-              .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
-            await client.db('admin').command({ replSetStepDown: 5, force: true });
-
-            await sleep(500);
+            await forcePrimaryStepDown(utilClient);
 
             const change = await changeStreamIterator.next();
             expect(change.value).to.containSubset({
@@ -2998,7 +3000,6 @@ describe.only('ChangeStream resumability', function () {
     });
 
     context('when the error is not a server error', function () {
-      // This test requires a replica set to call replSetFreeze command
       it(
         'should resume on ServerSelectionError',
         { requires: { topology: ['replicaset'] } },
@@ -3016,7 +3017,7 @@ describe.only('ChangeStream resumability', function () {
             fullDocument: { a: 1 }
           });
 
-          await client.db('admin').command({
+          await utilClient.db('admin').command({
             configureFailPoint: 'failCommand',
             mode: 'alwaysOn',
             data: {
@@ -3025,12 +3026,7 @@ describe.only('ChangeStream resumability', function () {
               appName: appName
             }
           } as FailCommandFailPoint);
-          await client
-            .db('admin')
-            .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
-          await client.db('admin').command({ replSetStepDown: 5, force: true });
-
-          await sleep(500);
+          await forcePrimaryStepDown(utilClient);
 
           await collection.insertOne({ a: 2 });
 
