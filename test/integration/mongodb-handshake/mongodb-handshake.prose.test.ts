@@ -358,18 +358,11 @@ describe('Client Metadata Update Prose Tests', function () {
           // (Note os is the only one getting set in these tests)
           expect(updatedClientMetadata.os).to.deep.equal(initialClientMetadata.os);
         });
-
-        it('does not append duplicate metadata for the same name', async function () {
-          client.appendMetadata({ name, version, platform });
-          client.appendMetadata({ name, version, platform });
-          await client.db('test').command({ ping: 1 });
-          expect(updatedClientMetadata.driver.name).to.not.contain('|framework|framework');
-        });
       });
     }
   });
 
-  describe('Test 3: Multiple Successive Metadata Updates with Identical/Partially Identical `DriverInfo`', function () {
+  describe('Test 3: Multiple Successive Metadata Updates with Duplicate Data', function () {
     const originalDriverInfo = { name: 'library', version: '1.2', platform: 'Library Platform' };
     let initialClientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
@@ -386,7 +379,6 @@ describe('Client Metadata Update Prose Tests', function () {
     // | 5    | framework | 2.0     | Library Platform   |
     // | 6    | framework | 1.2     | Framework Platform |
     // | 7    | library   | 2.0     | Framework Platform |
-    // | 8    | framework | 2.0     | Framework Platform |
     const tests = [
       { testCase: 1, name: 'library', version: '1.2', platform: 'Library Platform' },
       { testCase: 2, name: 'framework', version: '1.2', platform: 'Library Platform' },
@@ -642,7 +634,7 @@ describe('Client Metadata Update Prose Tests', function () {
       await client.close();
     });
 
-    it('appends the metadata', async function () {
+    it('does not append the duplicate metadata', async function () {
       // 5. Append the following `DriverInfoOptions` to the `MongoClient` metadata:
       //     | Field    | Value            |
       //     | -------- | ---------------- |
@@ -661,7 +653,7 @@ describe('Client Metadata Update Prose Tests', function () {
   });
 
   describe('Test 6: Metadata is not appended if identical to initial metadata (separated by non-identical metadata)', function () {
-    let initialClientMetadata: ClientMetadata;
+    let clientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
     // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
     let client: RawMongoClient;
@@ -718,8 +710,8 @@ describe('Client Metadata Update Prose Tests', function () {
           const command = Connection.prototype.command.wrappedMethod.bind(this);
 
           if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
-            if (!initialClientMetadata) {
-              initialClientMetadata = cmd.client;
+            if (!clientMetadata) {
+              clientMetadata = cmd.client;
             } else {
               updatedClientMetadata = cmd.client;
             }
@@ -748,7 +740,7 @@ describe('Client Metadata Update Prose Tests', function () {
       await client.db('test').command({ ping: 1 });
 
       // 11. Assert that `clientMetadata` is identical to `updatedClientMetadata`.
-      expect(updatedClientMetadata).to.deep.equal(initialClientMetadata);
+      expect(updatedClientMetadata).to.deep.equal(clientMetadata);
     });
   });
 
