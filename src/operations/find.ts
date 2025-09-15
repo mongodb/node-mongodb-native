@@ -2,14 +2,8 @@ import type { Document } from '../bson';
 import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type AbstractCursorOptions, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import { MongoInvalidArgumentError } from '../error';
-import {
-  decorateWithExplain,
-  type ExplainOptions,
-  validateExplainTimeoutOptions
-} from '../explain';
-import { ReadConcern } from '../read_concern';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
+import { type ExplainOptions } from '../explain';
+import type { ServerCommandOptions } from '../sdam/server';
 import { formatSort, type Sort } from '../sort';
 import { type TimeoutContext } from '../timeout';
 import { type MongoDBNamespace, normalizeHintField } from '../utils';
@@ -81,8 +75,20 @@ export interface FindOptions<TSchema extends Document = Document>
   timeoutMode?: CursorTimeoutMode;
 }
 
+/** @public */
+export interface FindOneOptions extends FindOptions {
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  batchSize?: number;
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  limit?: number;
+  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
+  noCursorTimeout?: boolean;
+}
+
 /** @internal */
 export class FindOperation extends CommandOperation<CursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
+
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -106,39 +112,32 @@ export class FindOperation extends CommandOperation<CursorResponse> {
 
     // special case passing in an ObjectId as a filter
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
+
+    this.SERVER_COMMAND_RESPONSE_TYPE = this.explain ? ExplainedCursorResponse : CursorResponse;
   }
 
   override get commandName() {
     return 'find' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<CursorResponse> {
-    this.server = server;
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return {
+      ...this.options,
+      ...this.bsonOptions,
+      documentsReturnedIn: 'firstBatch',
+      session: this.session,
+      timeoutContext
+    };
+  }
 
-    const options = this.options;
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
+  }
 
-    let findCommand = makeFindCommand(this.ns, this.filter, options);
-    if (this.explain) {
-      validateExplainTimeoutOptions(this.options, this.explain);
-      findCommand = decorateWithExplain(findCommand, this.explain);
-    }
-
-    return await server.command(
-      this.ns,
-      findCommand,
-      {
-        ...this.options,
-        ...this.bsonOptions,
-        documentsReturnedIn: 'firstBatch',
-        session,
-        timeoutContext
-      },
-      this.explain ? ExplainedCursorResponse : CursorResponse
-    );
+  override buildCommandDocument(): Document {
+    return makeFindCommand(this.ns, this.filter, this.options);
   }
 }
 
@@ -185,17 +184,15 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
 
   if (typeof options.batchSize === 'number') {
     if (options.batchSize < 0) {
-      if (
-        options.limit &&
-        options.limit !== 0 &&
-        Math.abs(options.batchSize) < Math.abs(options.limit)
-      ) {
-        findCommand.limit = -options.batchSize;
-      }
-
-      findCommand.singleBatch = true;
+      findCommand.limit = -options.batchSize;
     } else {
-      findCommand.batchSize = options.batchSize;
+      if (options.batchSize === options.limit) {
+        // Spec dictates that if these are equal the batchSize should be one more than the
+        // limit to avoid leaving the cursor open.
+        findCommand.batchSize = options.batchSize + 1;
+      } else {
+        findCommand.batchSize = options.batchSize;
+      }
     }
   }
 
@@ -207,15 +204,6 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
   // eslint-disable-next-line no-restricted-syntax
   if (options.comment !== undefined) {
     findCommand.comment = options.comment;
-  }
-
-  if (typeof options.maxTimeMS === 'number') {
-    findCommand.maxTimeMS = options.maxTimeMS;
-  }
-
-  const readConcern = ReadConcern.fromOptions(options);
-  if (readConcern) {
-    findCommand.readConcern = readConcern.toJSON();
   }
 
   if (options.max) {
@@ -255,11 +243,6 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
   if (typeof options.allowPartialResults === 'boolean') {
     findCommand.allowPartialResults = options.allowPartialResults;
   }
-
-  if (options.collation) {
-    findCommand.collation = options.collation;
-  }
-
   if (typeof options.allowDiskUse === 'boolean') {
     findCommand.allowDiskUse = options.allowDiskUse;
   }
@@ -275,5 +258,6 @@ defineAspects(FindOperation, [
   Aspect.READ_OPERATION,
   Aspect.RETRYABLE,
   Aspect.EXPLAINABLE,
-  Aspect.CURSOR_CREATING
+  Aspect.CURSOR_CREATING,
+  Aspect.SUPPORTS_RAW_DATA
 ]);

@@ -172,11 +172,6 @@ function checkTLSOptions(allOptions: CaseInsensitiveMap): void {
   };
   check('tlsInsecure', 'tlsAllowInvalidCertificates');
   check('tlsInsecure', 'tlsAllowInvalidHostnames');
-  check('tlsInsecure', 'tlsDisableCertificateRevocationCheck');
-  check('tlsInsecure', 'tlsDisableOCSPEndpointCheck');
-  check('tlsAllowInvalidCertificates', 'tlsDisableCertificateRevocationCheck');
-  check('tlsAllowInvalidCertificates', 'tlsDisableOCSPEndpointCheck');
-  check('tlsDisableCertificateRevocationCheck', 'tlsDisableOCSPEndpointCheck');
 }
 function getBoolean(name: string, value: unknown): boolean {
   if (typeof value === 'boolean') return value;
@@ -539,6 +534,9 @@ export function parseOptions(
       mongodbLogMaxDocumentLength: mongoOptions.mongodbLogMaxDocumentLength
     }
   );
+
+  // Set the default for the additional driver info.
+  mongoOptions.additionalDriverInfo = [];
 
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
 

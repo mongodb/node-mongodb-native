@@ -478,36 +478,52 @@ function compareCommandStartedEvents(
 
 function compareCommandSucceededEvents(
   actual: CommandSucceededEvent,
-  expected: ExpectedCommandEvent['commandSucceededEvent'],
+  expected: NonNullable<ExpectedCommandEvent['commandSucceededEvent']>,
   entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected!.reply) {
-    resultCheck(actual.reply as Document, expected!.reply, entities, [prefix]);
+  if (expected.reply) {
+    resultCheck(actual.reply as Document, expected.reply, entities, [prefix]);
   }
-  if (expected!.commandName) {
+  if (expected.commandName) {
     expect(
-      expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+      expected.commandName,
+      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${
         actual.commandName
       }`
     ).to.equal(actual.commandName);
+  }
+  if (expected.databaseName) {
+    expect(
+      expected.databaseName,
+      `expected ${prefix}.databaseName to equal ${expected.databaseName} but received ${
+        actual.databaseName
+      }`
+    ).to.equal(actual.databaseName);
   }
 }
 
 function compareCommandFailedEvents(
   actual: CommandFailedEvent,
-  expected: ExpectedCommandEvent['commandFailedEvent'],
-  entities: EntitiesMap,
+  expected: NonNullable<ExpectedCommandEvent['commandFailedEvent']>,
+  _entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected!.commandName) {
+  if (expected.commandName) {
     expect(
-      expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+      expected.commandName,
+      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${
         actual.commandName
       }`
     ).to.equal(actual.commandName);
+  }
+  if (expected.databaseName) {
+    expect(
+      expected.databaseName,
+      `expected ${prefix}.databaseName to equal ${expected.databaseName} but received ${
+        actual.databaseName
+      }`
+    ).to.equal(actual.databaseName);
   }
 }
 
@@ -756,6 +772,16 @@ export function compareLogs(
 
 function isMongoCryptError(err): boolean {
   if (err.constructor.name === 'MongoCryptError') {
+    return true;
+  }
+
+  // TODO(NODE-7043): remove special handling for FLE errors in the UTR
+  if (
+    err instanceof TypeError &&
+    err.message.includes(
+      `csfle "analyze_query" failed: JSON schema keyword 'required' is only allowed with a remote schema`
+    )
+  ) {
     return true;
   }
   return err.stack.includes('at ClientEncryption');

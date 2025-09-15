@@ -29,10 +29,9 @@ describe('class AggregationCursor', () => {
   });
 
   context('clone()', () => {
-    it('returns a new cursor with a different session', () => {
+    it('returns a new cursor', () => {
       const cloned = cursor.clone();
       expect(cursor).to.not.equal(cloned);
-      expect(cursor.session).to.not.equal(cloned.session);
     });
   });
 

@@ -925,7 +925,7 @@ describe('Bulk', function () {
         try {
           batch.insert({ string: hugeString });
           test.ok(false);
-        } catch (err) {} // eslint-disable-line
+        } catch (err) { } // eslint-disable-line
 
         // Finish up test
         client.close(done);
@@ -1216,34 +1216,27 @@ describe('Bulk', function () {
     }
   });
 
-  it('should correctly execute unordered batch using w:0', {
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
-
-    test: function (done) {
-      client.connect((err, client) => {
-        const db = client.db();
-        const col = db.collection('batch_write_ordered_ops_9');
-        const bulk = col.initializeUnorderedBulkOp();
-        for (let i = 0; i < 100; i++) {
-          bulk.insert({ a: 1 });
-        }
-
-        bulk.find({ b: 1 }).upsert().update({ b: 1 });
-        bulk.find({ c: 1 }).delete();
-
-        bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
-          expect(err).to.not.exist;
-          test.equal(0, result.upsertedCount);
-          test.equal(0, result.insertedCount);
-          test.equal(0, result.matchedCount);
-          test.ok(0 === result.modifiedCount || result.modifiedCount == null);
-          test.equal(0, result.deletedCount);
-          test.equal(false, result.hasWriteErrors());
-
-          client.close(done);
-        });
-      });
+  it('should correctly execute unordered batch using w:0', async function () {
+    await client.connect();
+    const db = client.db();
+    const col = db.collection('batch_write_ordered_ops_9');
+    const bulk = col.initializeUnorderedBulkOp();
+    for (let i = 0; i < 100; i++) {
+      bulk.insert({ a: 1 });
     }
+
+    bulk.find({ b: 1 }).upsert().update({ b: 1 });
+    bulk.find({ c: 1 }).delete();
+
+    const result = await bulk.execute({ writeConcern: { w: 0 } });
+    test.equal(0, result.upsertedCount);
+    test.equal(0, result.insertedCount);
+    test.equal(0, result.matchedCount);
+    test.ok(0 === result.modifiedCount || result.modifiedCount == null);
+    test.equal(0, result.deletedCount);
+    test.equal(false, result.hasWriteErrors());
+
+    await client.close();
   });
 
   it('should provide an accessor for operations on ordered bulk ops', function (done) {

@@ -1,14 +1,14 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { Collection } from '../collection';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface RenameOptions extends CommandOperationOptions {
+export interface RenameOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** Drop the target name collection if it previously exists. */
   dropTarget?: boolean;
   /** Unclear */
@@ -17,6 +17,7 @@ export interface RenameOptions extends CommandOperationOptions {
 
 /** @internal */
 export class RenameOperation extends CommandOperation<Document> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   collection: Collection;
   newName: string;
   override options: RenameOptions;
@@ -33,25 +34,21 @@ export class RenameOperation extends CommandOperation<Document> {
     return 'renameCollection' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<Collection> {
-    // Build the command
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     const renameCollection = this.collection.namespace;
-    const toCollection = this.collection.s.namespace.withCollection(this.newName).toString();
+    const to = this.collection.s.namespace.withCollection(this.newName).toString();
     const dropTarget =
       typeof this.options.dropTarget === 'boolean' ? this.options.dropTarget : false;
 
-    const command = {
-      renameCollection: renameCollection,
-      to: toCollection,
-      dropTarget: dropTarget
+    return {
+      renameCollection,
+      to,
+      dropTarget
     };
+  }
 
-    await super.executeCommand(server, session, command, timeoutContext);
-    return new Collection(this.collection.s.db, this.newName, this.collection.s.options);
+  override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
+    return new Collection(this.collection.db, this.newName, this.collection.s.options);
   }
 }
 

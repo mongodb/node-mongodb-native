@@ -23,6 +23,8 @@ import { OSFilter } from '../filters/os_filter';
 import { type Filter } from '../filters/filter';
 import { type Context } from 'mocha';
 import { flakyTests } from '../flaky';
+import { CryptSharedFilter } from '../filters/crypt_shared_filter';
+import { LibmongocryptVersionFilter } from '../filters/libmongocrypt_version_filter';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -57,8 +59,10 @@ async function initializeFilters(client): Promise<Record<string, any>> {
       new ApiVersionFilter(),
       new AuthFilter(),
       new ClientSideEncryptionFilter(),
+      new CryptSharedFilter(),
       new GenericPredicateFilter(),
       new IDMSMockServerFilter(),
+      new LibmongocryptVersionFilter(),
       new MongoDBTopologyFilter(),
       new MongoDBVersionFilter(),
       new NodeVersionFilter(),
@@ -107,34 +111,16 @@ const testSkipBeforeEachHook = async function () {
   }
 };
 
-/**
- * TODO: NODE-3891 - fix tests that are broken with auth enabled and remove this hook
- * @param skippedTests - define list of tests to skip
- * @returns
- */
-export const skipBrokenAuthTestBeforeEachHook = function (
-  { skippedTests }: { skippedTests: string[] } = { skippedTests: [] }
-) {
-  return function () {
-    if (process.env.AUTH === 'auth' && skippedTests.includes(this.currentTest.title)) {
-      this.currentTest.skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
-      this.skip();
-    }
-  };
-};
-
 const testConfigBeforeHook = async function () {
   if (process.env.DRIVERS_ATLAS_TESTING_URI) {
     this.configuration = new AstrolabeTestConfiguration(process.env.DRIVERS_ATLAS_TESTING_URI, {});
     return;
   }
 
-  const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
-    ...getEnvironmentalOptions(),
-    // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set
-    // the default dns resolution order for CI
-    family: 4
-  });
+  const client = new MongoClient(
+    loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
+    getEnvironmentalOptions()
+  );
 
   await client.db('test').command({ ping: 1 });
 
@@ -179,6 +165,8 @@ const testConfigBeforeHook = async function () {
     csfle: {
       ...this.configuration.clientSideEncryption
     },
+    cryptSharedVersion: context.cryptSharedVersion,
+    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH,
     serverApi: MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,
     aws: MONGODB_URI.includes('authMechanism=MONGODB-AWS'),
@@ -191,7 +179,6 @@ const testConfigBeforeHook = async function () {
     ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
     socks5: MONGODB_URI.includes('proxyHost='),
     compressor: process.env.COMPRESSOR,
-    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH,
     zstdVersion
   };
 

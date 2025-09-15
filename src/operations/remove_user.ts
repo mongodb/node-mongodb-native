@@ -1,15 +1,16 @@
+import { type Document } from '../bson';
+import { type Connection } from '../cmap/connection';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export type RemoveUserOptions = CommandOperationOptions;
+export type RemoveUserOptions = Omit<CommandOperationOptions, 'rawData'>;
 
 /** @internal */
 export class RemoveUserOperation extends CommandOperation<boolean> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: RemoveUserOptions;
   username: string;
 
@@ -23,12 +24,11 @@ export class RemoveUserOperation extends CommandOperation<boolean> {
     return 'dropUser' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<boolean> {
-    await super.executeCommand(server, session, { dropUser: this.username }, timeoutContext);
+  override buildCommandDocument(_connection: Connection): Document {
+    return { dropUser: this.username };
+  }
+
+  override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): boolean {
     return true;
   }
 }

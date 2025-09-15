@@ -74,11 +74,13 @@ export interface TransactionOptions extends Omit<CommandOperationOptions, 'timeo
 
 /**
  * @public
+ * @deprecated - Will be made internal in a future major release.
  * A class maintaining state related to a server transaction. Internal Only
  */
 export class Transaction {
   /** @internal */
   state: TxnState;
+  /** @deprecated - Will be made internal in a future major release. */
   options: TransactionOptions;
   /** @internal */
   _pinnedServer?: Server;
@@ -122,26 +124,33 @@ export class Transaction {
     return this._pinnedServer;
   }
 
+  /** @deprecated - Will be made internal in a future major release. */
   get recoveryToken(): Document | undefined {
     return this._recoveryToken;
   }
 
+  /** @deprecated - Will be made internal in a future major release. */
   get isPinned(): boolean {
     return !!this.server;
   }
 
-  /** @returns Whether the transaction has started */
+  /**
+   * @deprecated - Will be made internal in a future major release.
+   * @returns Whether the transaction has started
+   */
   get isStarting(): boolean {
     return this.state === TxnState.STARTING_TRANSACTION;
   }
 
   /**
+   * @deprecated - Will be made internal in a future major release.
    * @returns Whether this session is presently in a transaction
    */
   get isActive(): boolean {
     return ACTIVE_STATES.has(this.state);
   }
 
+  /** @deprecated - Will be made internal in a future major release. */
   get isCommitted(): boolean {
     return COMMITTED_STATES.has(this.state);
   }

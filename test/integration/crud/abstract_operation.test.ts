@@ -1,9 +1,7 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
-import { executeOperation, Long, Server } from '../../mongodb';
+import { Long } from '../../mongodb';
 import * as mongodb from '../../mongodb';
-import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('abstract operation', function () {
   describe('command name getter', function () {
@@ -13,40 +11,17 @@ describe('abstract operation', function () {
       correctCommandName: string;
     }
 
-    const WrapperSubclasses = [
-      'RunAdminCommandOperation',
-      'RunCommandOperation',
-      'OptionsOperation',
-      'IsCappedOperation',
-      'BulkWriteOperation',
-      'IndexOperation',
-      'CollectionsOperation'
-    ];
+    let client: mongodb.MongoClient;
+    let db: mongodb.Db;
+    let admin: mongodb.Admin;
+    let collection: mongodb.Collection;
 
-    const sameServerOnlyOperationSubclasses = ['GetMoreOperation', 'KillCursorsOperation'];
-
-    let client;
-    let db;
-    let admin;
-    let collection;
-    let constructorServer;
     const subclassArray: AbstractOperationSubclasses[] = [
       {
         subclassCreator: () =>
           new mongodb.AggregateOperation(collection.fullNamespace, [{ a: 1 }], {}),
         subclassType: mongodb.AggregateOperation,
         correctCommandName: 'aggregate'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.BulkWriteOperation(collection, [{ insertOne: { document: { a: 1 } } }], {}),
-        subclassType: mongodb.BulkWriteOperation,
-        correctCommandName: 'bulkWrite'
-      },
-      {
-        subclassCreator: () => new mongodb.CollectionsOperation(db, {}),
-        subclassType: mongodb.CollectionsOperation,
-        correctCommandName: 'listCollections'
       },
       {
         subclassCreator: () => new mongodb.CountOperation(collection.fullNamespace, { a: 1 }, {}),
@@ -66,13 +41,17 @@ describe('abstract operation', function () {
       },
       {
         subclassCreator: () =>
-          new mongodb.DeleteOneOperation(collection, [{ q: { a: 1 }, limit: 1 }], {}),
+          new mongodb.DeleteOneOperation(collection.fullNamespace, [{ q: { a: 1 }, limit: 1 }], {}),
         subclassType: mongodb.DeleteOneOperation,
         correctCommandName: 'delete'
       },
       {
         subclassCreator: () =>
-          new mongodb.DeleteManyOperation(collection, [{ q: { a: 1 }, limit: 1 }], {}),
+          new mongodb.DeleteManyOperation(
+            collection.fullNamespace,
+            [{ q: { a: 1 }, limit: 1 }],
+            {}
+          ),
         subclassType: mongodb.DeleteManyOperation,
         correctCommandName: 'delete'
       },
@@ -128,7 +107,7 @@ describe('abstract operation', function () {
           new mongodb.GetMoreOperation(
             collection.fullNamespace,
             Long.fromNumber(1),
-            constructorServer,
+            {} as any as mongodb.Server,
             {}
           ),
         subclassType: mongodb.GetMoreOperation,
@@ -162,21 +141,11 @@ describe('abstract operation', function () {
         correctCommandName: 'insert'
       },
       {
-        subclassCreator: () => new mongodb.InsertManyOperation(collection, [{ a: 1 }], {}),
-        subclassType: mongodb.InsertManyOperation,
-        correctCommandName: 'insert'
-      },
-      {
-        subclassCreator: () => new mongodb.IsCappedOperation(collection, {}),
-        subclassType: mongodb.IsCappedOperation,
-        correctCommandName: 'listCollections'
-      },
-      {
         subclassCreator: () =>
           new mongodb.KillCursorsOperation(
             Long.fromNumber(1),
             collection.fullNamespace,
-            constructorServer,
+            {} as any as mongodb.Server,
             {}
           ),
         subclassType: mongodb.KillCursorsOperation,
@@ -191,11 +160,6 @@ describe('abstract operation', function () {
         subclassCreator: () => new mongodb.ListDatabasesOperation(db, {}),
         subclassType: mongodb.ListDatabasesOperation,
         correctCommandName: 'listDatabases'
-      },
-      {
-        subclassCreator: () => new mongodb.OptionsOperation(collection, {}),
-        subclassType: mongodb.OptionsOperation,
-        correctCommandName: 'listCollections'
       },
       {
         subclassCreator: () => new mongodb.ProfilingLevelOperation(db, {}),
@@ -214,14 +178,12 @@ describe('abstract operation', function () {
       },
       {
         subclassCreator: () =>
-          new mongodb.RunCommandOperation(db, { dummyCommand: 'dummyCommand' }, {}),
+          new mongodb.RunCommandOperation(
+            new mongodb.MongoDBNamespace('foo', 'bar'),
+            { dummyCommand: 'dummyCommand' },
+            {}
+          ),
         subclassType: mongodb.RunCommandOperation,
-        correctCommandName: 'runCommand'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.RunAdminCommandOperation({ dummyCommand: 'dummyCommand' }, {}),
-        subclassType: mongodb.RunAdminCommandOperation,
         correctCommandName: 'runCommand'
       },
       {
@@ -264,17 +226,20 @@ describe('abstract operation', function () {
         correctCommandName: 'update'
       },
       {
-        subclassCreator: () => new mongodb.UpdateOneOperation(collection, { a: 1 }, { $a: 2 }, {}),
+        subclassCreator: () =>
+          new mongodb.UpdateOneOperation(collection.fullNamespace, { a: 1 }, { $a: 2 }, {}),
         subclassType: mongodb.UpdateOneOperation,
         correctCommandName: 'update'
       },
       {
-        subclassCreator: () => new mongodb.UpdateManyOperation(collection, { a: 1 }, { $a: 2 }, {}),
+        subclassCreator: () =>
+          new mongodb.UpdateManyOperation(collection.fullNamespace, { a: 1 }, { $a: 2 }, {}),
         subclassType: mongodb.UpdateManyOperation,
         correctCommandName: 'update'
       },
       {
-        subclassCreator: () => new mongodb.ReplaceOneOperation(collection, { a: 1 }, { b: 1 }, {}),
+        subclassCreator: () =>
+          new mongodb.ReplaceOneOperation(collection.fullNamespace, { a: 1 }, { b: 1 }, {}),
         subclassType: mongodb.ReplaceOneOperation,
         correctCommandName: 'update'
       },
@@ -290,20 +255,11 @@ describe('abstract operation', function () {
       db = client.db('foo');
       admin = client.db().admin();
       collection = db.collection('bar');
-      constructorServer = new Server(
-        topologyWithPlaceholderClient([], {} as any),
-        new mongodb.ServerDescription('a:1'),
-        {} as any
-      );
+      await client.connect();
     });
 
     afterEach(async function () {
-      db = undefined;
-      collection = undefined;
-      constructorServer = undefined;
-      admin = undefined;
       await client.close();
-      sinon.restore();
     });
 
     for (const { subclassCreator, subclassType, correctCommandName } of subclassArray) {
@@ -313,22 +269,31 @@ describe('abstract operation', function () {
           expect(subclassInstance.commandName).to.equal(correctCommandName);
         });
 
-        if (!WrapperSubclasses.includes(subclassType.name.toString())) {
-          it(`operation.commandName equals key in command document`, async function () {
-            const subclassInstance = subclassCreator();
-            const yieldDoc =
-              subclassType.name === 'ProfilingLevelOperation' ? { ok: 1, was: 1 } : { ok: 1 };
-            const cmdCallerStub = sinon.stub(Server.prototype, 'command').resolves(yieldDoc);
-            if (sameServerOnlyOperationSubclasses.includes(subclassType.name.toString())) {
-              await subclassInstance.execute(constructorServer, client.session);
-            } else {
-              await executeOperation(client, subclassInstance);
+        if (subclassType !== mongodb.RunCommandOperation) {
+          it(
+            `operation.commandName is a key in the command document`,
+            {
+              requires: { topology: 'single' }
+            },
+            async function () {
+              const session = client.startSession();
+              const pool = Array.from(client.topology.s.servers.values())[0].pool;
+              const timeoutContext = mongodb.TimeoutContext.create({
+                waitQueueTimeoutMS: 1000,
+                serverSelectionTimeoutMS: 1000
+              });
+              const connection = await pool.checkOut({
+                timeoutContext
+              });
+
+              try {
+                const command = subclassCreator().buildCommand(connection, session);
+                expect(command).to.have.property(subclassCreator().commandName);
+              } finally {
+                pool.checkIn(connection);
+              }
             }
-            expect(cmdCallerStub).to.have.been.calledWith(
-              sinon.match.any,
-              sinon.match.hasOwn(subclassInstance.commandName)
-            );
-          });
+          );
         }
       });
     }

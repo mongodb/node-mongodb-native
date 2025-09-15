@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { ListCollectionsOperation } = require('../../mongodb');
+const { ListCollectionsOperation, StreamDescription } = require('../../mongodb');
 
 describe('ListCollectionsOperation', function () {
   const db = 'test';
@@ -65,6 +65,8 @@ describe('ListCollectionsOperation', function () {
   });
 
   describe('#generateCommand', function () {
+    const description = new StreamDescription();
+
     context('when comment is provided', function () {
       context('when the wireVersion < 9', function () {
         it('does not set a comment on the command', function () {
@@ -73,7 +75,10 @@ describe('ListCollectionsOperation', function () {
             {},
             { dbName: db, comment: 'test comment' }
           );
-          const command = operation.generateCommand(8);
+          description.maxWireVersion = 8;
+          const command = operation.buildCommandDocument({
+            description
+          });
           expect(command).not.to.haveOwnProperty('comment');
         });
       });
@@ -85,7 +90,10 @@ describe('ListCollectionsOperation', function () {
             {},
             { dbName: db, comment: 'test comment' }
           );
-          const command = operation.generateCommand(9);
+          description.maxWireVersion = 9;
+          const command = operation.buildCommandDocument({
+            description
+          });
           expect(command).to.have.property('comment').that.equals('test comment');
         });
       });
@@ -95,7 +103,11 @@ describe('ListCollectionsOperation', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: true, dbName: db });
 
         it('sets nameOnly to true', function () {
-          expect(operation.generateCommand(8)).to.deep.equal({
+          description.maxWireVersion = 8;
+          const command = operation.buildCommandDocument({
+            description
+          });
+          expect(command).to.deep.equal({
             listCollections: 1,
             cursor: {},
             filter: {},
@@ -109,7 +121,11 @@ describe('ListCollectionsOperation', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: false, dbName: db });
 
         it('sets nameOnly to false', function () {
-          expect(operation.generateCommand(8)).to.deep.equal({
+          description.maxWireVersion = 8;
+          const command = operation.buildCommandDocument({
+            description
+          });
+          expect(command).to.deep.equal({
             listCollections: 1,
             cursor: {},
             filter: {},
@@ -129,7 +145,11 @@ describe('ListCollectionsOperation', function () {
         );
 
         it('sets authorizedCollections to true', function () {
-          expect(operation.generateCommand(8)).to.deep.equal({
+          description.maxWireVersion = 8;
+          const command = operation.buildCommandDocument({
+            description
+          });
+          expect(command).to.deep.equal({
             listCollections: 1,
             cursor: {},
             filter: {},
@@ -147,7 +167,11 @@ describe('ListCollectionsOperation', function () {
         );
 
         it('sets authorizedCollections to false', function () {
-          expect(operation.generateCommand(8)).to.deep.equal({
+          description.maxWireVersion = 8;
+          const command = operation.buildCommandDocument({
+            description
+          });
+          expect(command).to.deep.equal({
             listCollections: 1,
             cursor: {},
             filter: {},
@@ -162,7 +186,11 @@ describe('ListCollectionsOperation', function () {
       const operation = new ListCollectionsOperation(db, {}, { dbName: db });
 
       it('sets nameOnly and authorizedCollections properties to false', function () {
-        expect(operation.generateCommand(8)).to.deep.equal({
+        description.maxWireVersion = 8;
+        const command = operation.buildCommandDocument({
+          description
+        });
+        expect(command).to.deep.equal({
           listCollections: 1,
           cursor: {},
           filter: {},

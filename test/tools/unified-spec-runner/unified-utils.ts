@@ -1,6 +1,6 @@
 import { AssertionError, expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
-import { gte as semverGte, lte as semverLte } from 'semver';
+import { coerce, gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
@@ -115,23 +115,33 @@ export async function topologySatisfies(
     }
   }
 
-  if (typeof r.csfle === 'boolean') {
-    const versionSupportsCSFLE = semverGte(config.version, '4.2.0');
+  if (r.csfle != null) {
     const csfleEnabled = config.clientSideEncryption.enabled;
 
-    if (r.csfle) {
-      ok &&= versionSupportsCSFLE && csfleEnabled;
+    if (r.csfle === false) {
+      ok &&= !csfleEnabled;
       if (!ok && skipReason == null) {
-        skipReason = versionSupportsCSFLE
-          ? `requires csfle to run but CSFLE is not set for this environment`
-          : 'requires mongodb >= 4.2 to run csfle tests';
+        skipReason = `forbids csfle to run but CSFLE is set for this environment`;
       }
     } else {
-      ok &&= !(csfleEnabled && versionSupportsCSFLE);
+      // first, confirm that CSFLE is enabled
+      ok &&= csfleEnabled;
       if (!ok && skipReason == null) {
-        skipReason = versionSupportsCSFLE
-          ? `forbids csfle to run but CSFLE is set for this environment`
-          : 'forbids mongodb >= 4.2 to run csfle tests';
+        skipReason = `requires csfle to run but CSFLE is not set for this environment`;
+      }
+
+      // then, confirm that libmongocrypt satisfies the version constraint (if it exists)
+      const minLibmongocryptVersion: string | undefined =
+        typeof r.csfle === 'object' && r.csfle.minLibmongocryptVersion;
+
+      if (typeof minLibmongocryptVersion === 'string') {
+        ok &&= semverGte(
+          coerce(config.clientSideEncryption.libmongocrypt),
+          coerce(minLibmongocryptVersion)
+        );
+        if (!ok && skipReason == null) {
+          skipReason = `requires libmongocrypt>=${minLibmongocryptVersion} but ${config.clientSideEncryption.libmongocrypt} is being used.`;
+        }
       }
     }
   }

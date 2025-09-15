@@ -10,17 +10,6 @@ import {
   StateMachine,
   type UUID
 } from '../../mongodb';
-import { ClientSideEncryptionFilter } from '../../tools/runner/filters/client_encryption_filter';
-
-export const cryptShared = (status: 'enabled' | 'disabled') => () => {
-  const isCryptSharedLoaded = ClientSideEncryptionFilter.cryptShared != null;
-
-  if (status === 'enabled') {
-    return isCryptSharedLoaded ? true : 'Test requires the shared library.';
-  }
-
-  return isCryptSharedLoaded ? 'Test requires that the crypt shared library NOT be present' : true;
-};
 
 describe('mongocryptd auto spawn', function () {
   let client: MongoClient;
@@ -75,7 +64,7 @@ describe('mongocryptd auto spawn', function () {
 
   it(
     'should autoSpawn a mongocryptd on init by default',
-    { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
+    { requires: { clientSideEncryption: true, crypt_shared: 'disabled' } },
     async function () {
       const autoEncrypter = client.autoEncrypter;
       const mongocryptdManager = autoEncrypter._mongocryptdManager;
@@ -90,7 +79,7 @@ describe('mongocryptd auto spawn', function () {
 
   it(
     'should not attempt to kick off mongocryptd on a non-network error from mongocrpytd',
-    { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
+    { requires: { clientSideEncryption: true, crypt_shared: 'disabled' } },
     async function () {
       let called = false;
       sinon
@@ -124,7 +113,7 @@ describe('mongocryptd auto spawn', function () {
 
   it(
     'should respawn the mongocryptd after a MongoNetworkTimeoutError is returned when communicating with mongocryptd',
-    { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
+    { requires: { clientSideEncryption: true, crypt_shared: 'disabled' } },
     async function () {
       let called = false;
       sinon
@@ -158,7 +147,7 @@ describe('mongocryptd auto spawn', function () {
 
   it(
     'should propagate error if MongoNetworkTimeoutError is experienced twice in a row',
-    { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
+    { requires: { clientSideEncryption: true, crypt_shared: 'disabled' } },
     async function () {
       const stub = sinon
         .stub(StateMachine.prototype, 'markCommand')
@@ -193,7 +182,7 @@ describe('mongocryptd auto spawn', function () {
 
     it(
       'should return a useful message if mongocryptd fails to autospawn',
-      { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
+      { requires: { clientSideEncryption: true, crypt_shared: 'disabled' } },
       async function () {
         client = this.configuration.newClient(
           {},

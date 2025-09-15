@@ -14,6 +14,7 @@ import {
   makeClientMetadata,
   MongoClient,
   MongoClientAuthProviders,
+  type MongoClientOptions,
   MongoDBResponse,
   MongoServerError,
   ns,
@@ -21,7 +22,6 @@ import {
   Topology
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { processTick, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
@@ -37,15 +37,6 @@ const commonConnectOptions = {
 };
 
 describe('Connection', function () {
-  beforeEach(
-    skipBrokenAuthTestBeforeEachHook({
-      skippedTests: [
-        'should support calling back multiple times on exhaust commands',
-        'should correctly connect to server using domain socket'
-      ]
-    })
-  );
-
   before(function () {
     return setupDatabase(this.configuration);
   });
@@ -58,8 +49,10 @@ describe('Connection', function () {
           ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {} }),
-          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
+          extendedMetadata: addContainerMetadata(
+            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
+          )
         };
 
         let conn;
@@ -81,8 +74,10 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata({ driverInfo: {} }),
-          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
+          extendedMetadata: addContainerMetadata(
+            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
+          )
         };
 
         let conn;
@@ -113,8 +108,10 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata({ driverInfo: {} }),
-          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
+          extendedMetadata: addContainerMetadata(
+            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
+          )
         };
 
         let conn;
@@ -182,13 +179,16 @@ describe('Connection', function () {
       metadata: {
         requires: { topology: 'single', os: '!win32' }
       },
-
       test: function (done) {
         const configuration = this.configuration;
-        client = configuration.newClient(
-          `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
-          { maxPoolSize: 1 }
-        );
+        const uri = `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`;
+        const options: MongoClientOptions = {
+          maxPoolSize: 1
+        };
+        if (this.configuration.options.auth) {
+          options.auth = this.configuration.options.auth;
+        }
+        client = configuration.newClient(uri, options);
 
         const db = client.db(configuration.db);
 
@@ -268,7 +268,15 @@ describe('Connection', function () {
         // This test exists to prevent regression of processing many messages inside one chunk.
         it(
           'processes all of them and emits heartbeats',
-          { requires: { topology: 'replicaset', mongodb: '>=4.4' } },
+          {
+            requires: {
+              topology: 'replicaset',
+              mongodb: '>=4.4',
+              // When compression is enabled, processing heartbeat events is asynchronous.
+              predicate: () =>
+                process.env.COMPRESSOR ? 'test requires that compression is disabled' : true
+            }
+          },
           async function () {
             let hbSuccess = 0;
             client.on('serverHeartbeatSucceeded', () => (hbSuccess += 1));
@@ -291,6 +299,7 @@ describe('Connection', function () {
 
             // All of the hb will be emitted synchronously in the next tick as the entire chunk is processed.
             await processTick();
+
             expect(hbSuccess).to.be.greaterThan(1000);
           }
         );

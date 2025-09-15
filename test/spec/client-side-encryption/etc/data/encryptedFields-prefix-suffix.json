@@ -1,0 +1,38 @@
+{
+    "fields": [
+        {
+            "keyId": {
+                "$binary": {
+                    "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                    "subType": "04"
+                }
+            },
+            "path": "encryptedText",
+            "bsonType": "string",
+            "queries": [
+                {
+                    "queryType": "prefixPreview",
+                    "strMinQueryLength": {
+                        "$numberInt": "2"
+                    },
+                    "strMaxQueryLength": {
+                        "$numberInt": "10"
+                    },
+                    "caseSensitive": true,
+                    "diacriticSensitive": true
+                },
+                {
+                    "queryType": "suffixPreview",
+                    "strMinQueryLength": {
+                        "$numberInt": "2"
+                    },
+                    "strMaxQueryLength": {
+                        "$numberInt": "10"
+                    },
+                    "caseSensitive": true,
+                    "diacriticSensitive": true
+                }
+            ]
+        }
+    ]
+}

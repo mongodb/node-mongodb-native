@@ -1,9 +1,7 @@
-import type { Document } from '../bson';
+import { type Document } from '../bson';
+import { type Connection } from '../cmap/connection';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
-import { decorateWithCollation, decorateWithReadConcern } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -27,7 +25,8 @@ export type DistinctOptions = CommandOperationOptions & {
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends CommandOperation<any[]> {
+export class DistinctOperation extends CommandOperation<any[] | Document> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DistinctOptions;
   collection: Collection;
   /** Field of the document to find distinct values for. */
@@ -56,49 +55,38 @@ export class DistinctOperation extends CommandOperation<any[]> {
     return 'distinct' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<any[]> {
-    const coll = this.collection;
-    const key = this.key;
-    const query = this.query;
-    const options = this.options;
-
-    // Distinct command
-    const cmd: Document = {
-      distinct: coll.collectionName,
-      key: key,
-      query: query
+  override buildCommandDocument(_connection: Connection): Document {
+    const command: Document = {
+      distinct: this.collection.collectionName,
+      key: this.key,
+      query: this.query
     };
-
-    // Add maxTimeMS if defined
-    if (typeof options.maxTimeMS === 'number') {
-      cmd.maxTimeMS = options.maxTimeMS;
-    }
-
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (typeof options.comment !== 'undefined') {
-      cmd.comment = options.comment;
+    if (this.options.comment !== undefined) {
+      command.comment = this.options.comment;
     }
 
-    if (options.hint != null) {
-      cmd.hint = options.hint;
+    if (this.options.hint != null) {
+      command.hint = this.options.hint;
     }
 
-    // Do we have a readConcern specified
-    decorateWithReadConcern(cmd, coll, options);
+    return command;
+  }
 
-    // Have we specified collation
-    decorateWithCollation(cmd, coll, options);
-
-    const result = await super.executeCommand(server, session, cmd, timeoutContext);
-
-    // @ts-expect-error: Explain always returns a document
-    return this.explain ? result : result.values;
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): any[] | Document {
+    if (this.explain) {
+      return response.toObject(this.bsonOptions);
+    }
+    return response.toObject(this.bsonOptions).values;
   }
 }
 
-defineAspects(DistinctOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.EXPLAINABLE]);
+defineAspects(DistinctOperation, [
+  Aspect.READ_OPERATION,
+  Aspect.RETRYABLE,
+  Aspect.EXPLAINABLE,
+  Aspect.SUPPORTS_RAW_DATA
+]);

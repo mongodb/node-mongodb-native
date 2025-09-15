@@ -276,13 +276,12 @@ describe('Retryable Writes Spec Prose', () => {
       { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
       async () => {
         const serverCommandStub = sinon.stub(Server.prototype, 'command');
-        serverCommandStub.onCall(0).returns(
-          Promise.reject(
-            new MongoWriteConcernError({
-              errorLabels: ['RetryableWriteError'],
-              writeConcernError: { errmsg: 'ShutdownInProgress error', code: 91 }
-            })
-          )
+        serverCommandStub.onCall(0).rejects(
+          new MongoWriteConcernError({
+            errorLabels: ['RetryableWriteError'],
+            writeConcernError: { errmsg: 'ShutdownInProgress error', code: 91 },
+            ok: 1
+          })
         );
         serverCommandStub.onCall(1).returns(
           Promise.reject(

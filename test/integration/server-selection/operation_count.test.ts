@@ -7,7 +7,7 @@ import {
   ConnectionPool,
   type MongoClient
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailCommandFailPoint } from '../../tools/utils';
 
 const testMetadata: MongoDBMetadataUI = {
   requires: {
@@ -21,7 +21,7 @@ const loadBalancedTestMetadata: MongoDBMetadataUI = {
   }
 };
 
-const enableFailPointCommand: FailPoint = {
+const enableFailPointCommand: FailCommandFailPoint = {
   configureFailPoint: 'failCommand',
   mode: 'alwaysOn',
   data: {
@@ -30,7 +30,7 @@ const enableFailPointCommand: FailPoint = {
   }
 };
 
-const disableFailPointCommand: FailPoint = {
+const disableFailPointCommand: FailCommandFailPoint = {
   configureFailPoint: 'failCommand',
   mode: 'off',
   data: {

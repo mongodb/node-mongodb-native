@@ -1676,22 +1676,24 @@ describe('Cursor', function () {
     const collection = await client.db().collection('test');
 
     const cursor = collection.find({});
+    await cursor.next();
+
     const clonedCursor = cursor.clone();
 
-    expect(cursor).to.have.property('session');
-    expect(clonedCursor).to.have.property('session');
-    expect(cursor.session).to.not.equal(clonedCursor.session);
+    expect(cursor).to.have.property('session').not.to.be.null;
+    expect(clonedCursor).to.have.property('session').to.be.null;
   });
 
   it('removes session when cloning an aggregation cursor', async function () {
     const collection = await client.db().collection('test');
 
     const cursor = collection.aggregate([{ $match: {} }]);
+    await cursor.next();
+
     const clonedCursor = cursor.clone();
 
-    expect(cursor).to.have.property('session');
-    expect(clonedCursor).to.have.property('session');
-    expect(cursor.session).to.not.equal(clonedCursor.session);
+    expect(cursor).to.have.property('session').not.to.be.null;
+    expect(clonedCursor).to.have.property('session').to.be.null;
   });
 
   it('destroying a stream stops it', async function () {
@@ -1886,52 +1888,6 @@ describe('Cursor', function () {
       expect(error).to.be.instanceOf(MongoClientClosedError);
     }
   );
-
-  it('shouldAwaitData', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: function (done) {
-      // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
-
-      const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const db = client.db(configuration.db);
-        const options = { capped: true, size: 8 };
-        db.createCollection(
-          'should_await_data_retry_tailable_cursor',
-          options,
-          (err, collection) => {
-            expect(err).to.not.exist;
-
-            collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
-
-              // Create cursor with awaitData, and timeout after the period specified
-              const cursor = collection.find({}, { tailable: true, awaitData: true });
-              this.defer(() => cursor.close());
-
-              // Execute each
-              cursor.forEach(
-                () => cursor.close(),
-                () => {
-                  // Even though cursor is exhausted, should not close session
-                  // unless cursor is manually closed, due to awaitData / tailable
-                  done();
-                }
-              );
-            });
-          }
-        );
-      });
-    }
-  });
 
   it('shouldAwaitDataWithDocumentsAvailable', function (done) {
     // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
@@ -3644,42 +3600,38 @@ describe('Cursor', function () {
     });
 
     context('when executing on a find cursor', function () {
-      it('removes the existing session from the cloned cursor', function () {
+      it('removes the existing session from the cloned cursor', async function () {
         const docs = [{ name: 'test1' }, { name: 'test2' }];
-        return collection.insertMany(docs).then(() => {
-          const cursor = collection.find({}, { batchSize: 1 });
-          return cursor
-            .next()
-            .then(doc => {
-              expect(doc).to.exist;
-              const clonedCursor = cursor.clone();
-              expect(clonedCursor.cursorOptions.session).to.not.exist;
-              expect(clonedCursor.session).to.have.property('_serverSession', null); // session is brand new and has not been used
-            })
-            .finally(() => {
-              return cursor.close();
-            });
-        });
+        await collection.insertMany(docs);
+
+        const cursor = collection.find({}, { batchSize: 1 });
+        try {
+          const doc = await cursor.next();
+          expect(doc).to.exist;
+
+          const clonedCursor = cursor.clone();
+          expect(clonedCursor.session).to.be.null;
+        } finally {
+          await cursor.close();
+        }
       });
     });
 
     context('when executing on an aggregation cursor', function () {
-      it('removes the existing session from the cloned cursor', function () {
+      it('removes the existing session from the cloned cursor', async function () {
         const docs = [{ name: 'test1' }, { name: 'test2' }];
-        return collection.insertMany(docs).then(() => {
-          const cursor = collection.aggregate([{ $match: {} }], { batchSize: 1 });
-          return cursor
-            .next()
-            .then(doc => {
-              expect(doc).to.exist;
-              const clonedCursor = cursor.clone();
-              expect(clonedCursor.cursorOptions.session).to.not.exist;
-              expect(clonedCursor.session).to.have.property('_serverSession', null); // session is brand new and has not been used
-            })
-            .finally(() => {
-              return cursor.close();
-            });
-        });
+        await collection.insertMany(docs);
+
+        const cursor = collection.aggregate([{ $match: {} }], { batchSize: 1 });
+        try {
+          const doc = await cursor.next();
+          expect(doc).to.exist;
+
+          const clonedCursor = cursor.clone();
+          expect(clonedCursor.session).to.be.null;
+        } finally {
+          await cursor.close();
+        }
       });
     });
   });

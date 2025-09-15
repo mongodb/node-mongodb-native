@@ -4,7 +4,6 @@ const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 
 const { setupDatabase } = require('../shared');
 const { expect } = require('chai');
-const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND, 'endSessions'];
 const test = { commands: { started: [], succeeded: [] } };
@@ -15,21 +14,12 @@ describe('Causal Consistency - prose tests', function () {
     return setupDatabase(this.configuration);
   });
 
-  beforeEach(
-    skipBrokenAuthTestBeforeEachHook({
-      skippedTests: [
-        '2. The first read in a causally consistent session must not send afterClusterTime to the server',
-        'case: successful read with causal consistency',
-        'case: second operation is findOne',
-        'case: successful insert',
-        '6. A read operation in a ClientSession that is not causally consistent should not include the afterClusterTime parameter in the command sent to the server'
-      ]
-    })
-  );
-
   beforeEach(function () {
     test.commands = { started: [], succeeded: [] };
-    test.client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1, monitorCommands: true });
+    test.client = this.configuration.newClient(
+      { w: 1 },
+      { maxPoolSize: 1, monitorCommands: true, __skipPingOnConnect: true }
+    );
     test.client.on('commandStarted', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.started.push(event);
     });

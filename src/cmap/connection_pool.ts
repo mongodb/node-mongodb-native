@@ -610,13 +610,17 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   private createConnection(callback: Callback<Connection>) {
+    // Note that metadata and extendedMetadata may have changed on the client but have
+    // been frozen here, so we pull the extendedMetadata promise always from the client
+    // no mattter what options were set at the construction of the pool.
     const connectOptions: ConnectionOptions = {
       ...this.options,
       id: this.connectionCounter.next().value,
       generation: this.generation,
       cancellationToken: this.cancellationToken,
       mongoLogger: this.mongoLogger,
-      authProviders: this.server.topology.client.s.authProviders
+      authProviders: this.server.topology.client.s.authProviders,
+      extendedMetadata: this.server.topology.client.options.extendedMetadata
     };
 
     this.pending++;
@@ -691,7 +695,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   private ensureMinPoolSize() {
     const minPoolSize = this.options.minPoolSize;
-    if (this.poolState !== PoolState.ready || minPoolSize === 0) {
+    if (this.poolState !== PoolState.ready) {
       return;
     }
 

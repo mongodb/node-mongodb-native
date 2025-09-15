@@ -253,18 +253,6 @@ functions:
           for filename in $(find ${DRIVERS_TOOLS} -name \*.json); do
             perl -p -i -e "s|ABSOLUTE_PATH_REPLACEMENT_TOKEN|${DRIVERS_TOOLS}|g" $filename
           done
-  windows fix:
-    - command: shell.exec
-      params:
-        silent: true
-        script: |
-          ${PREPARE_SHELL}
-          # for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
-          #   cat $i | tr -d '\r' > $i.new
-          #   mv $i.new $i
-          # done
-          # Copy client certificate because symlinks do not work on Windows.
-          cp ${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem ${MONGO_ORCHESTRATION_HOME}/lib/client.pem
   make files executable:
     - command: shell.exec
       params:
@@ -331,6 +319,10 @@ functions:
       params:
         binary: bash
         working_dir: src
+        include_expansions_in_env:
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_ACCESS_KEY_ID
+          - AWS_SESSION_TOKEN
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         args:
@@ -344,6 +336,10 @@ functions:
       params:
         working_dir: src
         binary: bash
+        include_expansions_in_env:
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_ACCESS_KEY_ID
+          - AWS_SESSION_TOKEN
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           NODE_LTS_VERSION: ${NODE_LTS_VERSION}
@@ -632,10 +628,12 @@ functions:
       type: test
       params:
         working_dir: src
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        include_expansions_in_env:
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+          - PROJECT_DIRECTORY
+          - DRIVERS_TOOLS
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
@@ -909,255 +907,6 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
-  - name: test_gcpkms_task_group
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          working_dir: src
-          binary: bash
-          add_expansions_to_env: true
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
-    teardown_group:
-      - command: subprocess.exec
-        params:
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
-      - func: upload coverage report
-    tasks:
-      - test-gcpkms-task
-  - name: test_azurekms_task_group
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          working_dir: src
-          binary: bash
-          env:
-            AZUREKMS_VMNAME_PREFIX: NODE_DRIVER
-          add_expansions_to_env: true
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
-    teardown_group:
-      - command: expansions.update
-        params:
-          file: testazurekms-expansions.yml
-      - command: subprocess.exec
-        params:
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
-      - func: upload coverage report
-    tasks:
-      - test-azurekms-task
-  - name: testk8soidc_task_group_eks
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          binary: bash
-          add_expansions_to_env: true
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_group:
-      - func: upload coverage report
-      - command: subprocess.exec
-        params:
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - oidc-auth-test-k8s-latest-eks
-  - name: testk8soidc_task_group_gke
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          binary: bash
-          add_expansions_to_env: true
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_group:
-      - func: upload coverage report
-      - command: subprocess.exec
-        params:
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - oidc-auth-test-k8s-latest-gke
-  - name: testk8soidc_task_group_aks
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          binary: bash
-          add_expansions_to_env: true
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_group:
-      - func: upload coverage report
-      - command: subprocess.exec
-        params:
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - oidc-auth-test-k8s-latest-aks
-  - name: testtestoidc_task_group
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          binary: bash
-          include_expansions_in_env:
-            - AWS_ACCESS_KEY_ID
-            - AWS_SECRET_ACCESS_KEY
-            - AWS_SESSION_TOKEN
-          env:
-            MONGODB_VERSION: '8.0'
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
-    teardown_task:
-      - func: upload coverage report
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - oidc-auth-test-test-latest
-  - name: testazureoidc_task_group
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: shell.exec
-        params:
-          shell: bash
-          add_expansions_to_env: true
-          script: |-
-            set -o errexit
-            ${PREPARE_SHELL}
-            export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
-            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/setup.sh
-    teardown_group:
-      - command: shell.exec
-        params:
-          shell: bash
-          script: |-
-            ${PREPARE_SHELL}
-            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/teardown.sh
-      - func: upload coverage report
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - oidc-auth-test-azure-latest
-  - name: testgcpoidc_task_group
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: shell.exec
-        params:
-          shell: bash
-          add_expansions_to_env: true
-          script: |-
-            set -o errexit
-            ${PREPARE_SHELL}
-            export GCPOIDC_VMNAME_PREFIX="NODE_DRIVER"
-            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/setup.sh
-    teardown_group:
-      - command: shell.exec
-        params:
-          shell: bash
-          script: |-
-            ${PREPARE_SHELL}
-            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/teardown.sh
-      - func: upload coverage report
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - oidc-auth-test-gcp-latest
-  - name: test_atlas_task_group
-    setup_group:
-      - func: fetch source
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: MONGODB_VERSION, value: '7.0'}
-            - {key: LAMBDA_STACK_NAME, value: dbx-node-lambda}
-            - {key: CLUSTER_PREFIX, value: dbx-node-lambda}
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          working_dir: src
-          binary: bash
-          add_expansions_to_env: true
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
-            - atlas
-      - command: expansions.update
-        params:
-          file: src/atlas-expansion.yml
-    teardown_group:
-      - command: subprocess.exec
-        params:
-          working_dir: src
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
-      - func: upload coverage report
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - test-aws-lambda-deployed
-  - name: test_atlas_task_group_search_indexes
-    setup_group:
-      - func: fetch source
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: MONGODB_VERSION, value: '7.0'}
-            - {key: CLUSTER_PREFIX, value: dbx-node-lambda}
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          working_dir: src
-          binary: bash
-          add_expansions_to_env: true
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
-      - command: expansions.update
-        params:
-          file: src/atlas-expansion.yml
-    teardown_group:
-      - command: subprocess.exec
-        params:
-          working_dir: src
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
-      - func: upload coverage report
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - test-search-index-helpers
   - name: test-latest-server
     tags:
       - latest
@@ -1544,16 +1293,8 @@ tasks:
       - auth
       - x509
     commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: SSL, value: ssl}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: assume secrets manager role
       - func: run x509 auth tests
   - name: test-atlas-connectivity
     tags:
@@ -1687,6 +1428,27 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+  - name: test-auth-kerberos
+    tags:
+      - auth
+      - kerberos
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NATIVE, value: 'true'}
+      - func: install dependencies
+      - func: assume secrets manager role
+      - func: run kerberos tests
+  - name: test-auth-ldap
+    tags:
+      - auth
+      - ldap
+    commands:
+      - func: install dependencies
+      - func: assume secrets manager role
+      - func: run ldap tests
   - name: test-socks5
     tags: []
     commands:
@@ -1794,6 +1556,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1808,6 +1571,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1822,6 +1586,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1836,6 +1601,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1850,6 +1616,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1864,6 +1631,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1878,6 +1646,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -2996,9 +2765,258 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+task_groups:
+  - name: test_gcpkms_task_group
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    setup_group:
+      - func: fetch source
+      - func: assume secrets manager role
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
+      - func: upload coverage report
+    tasks:
+      - test-gcpkms-task
+  - name: test_azurekms_task_group
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    setup_group:
+      - func: fetch source
+      - func: assume secrets manager role
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            AZUREKMS_VMNAME_PREFIX: NODE_DRIVER
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
+    teardown_group:
+      - command: expansions.update
+        params:
+          file: testazurekms-expansions.yml
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
+      - func: upload coverage report
+    tasks:
+      - test-azurekms-task
+  - name: testk8soidc_task_group_eks
+    setup_group:
+      - func: fetch source
+      - func: assume secrets manager role
+      - command: subprocess.exec
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
+    teardown_group:
+      - func: upload coverage report
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-k8s-latest-eks
+  - name: testk8soidc_task_group_gke
+    setup_group:
+      - func: fetch source
+      - func: assume secrets manager role
+      - command: subprocess.exec
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
+    teardown_group:
+      - func: upload coverage report
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-k8s-latest-gke
+  - name: testk8soidc_task_group_aks
+    setup_group:
+      - func: fetch source
+      - func: assume secrets manager role
+      - command: subprocess.exec
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
+    teardown_group:
+      - func: upload coverage report
+      - command: subprocess.exec
+        params:
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-k8s-latest-aks
+  - name: testtestoidc_task_group
+    setup_group:
+      - func: fetch source
+      - func: assume secrets manager role
+      - command: subprocess.exec
+        params:
+          binary: bash
+          include_expansions_in_env:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_SESSION_TOKEN
+          env:
+            MONGODB_VERSION: '8.0'
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/setup.sh
+    teardown_task:
+      - func: upload coverage report
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-test-latest
+  - name: testazureoidc_task_group
+    setup_group:
+      - func: fetch source
+      - func: assume secrets manager role
+      - command: shell.exec
+        params:
+          shell: bash
+          add_expansions_to_env: true
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/setup.sh
+    teardown_group:
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            ${PREPARE_SHELL}
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/teardown.sh
+      - func: upload coverage report
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-azure-latest
+  - name: testgcpoidc_task_group
+    setup_group:
+      - func: fetch source
+      - func: assume secrets manager role
+      - command: shell.exec
+        params:
+          shell: bash
+          add_expansions_to_env: true
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            export GCPOIDC_VMNAME_PREFIX="NODE_DRIVER"
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/setup.sh
+    teardown_group:
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            ${PREPARE_SHELL}
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/teardown.sh
+      - func: upload coverage report
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-gcp-latest
+  - name: test_atlas_task_group
+    setup_group:
+      - func: fetch source
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: MONGODB_VERSION, value: '7.0'}
+            - {key: LAMBDA_STACK_NAME, value: dbx-node-lambda}
+            - {key: CLUSTER_PREFIX, value: dbx-node-lambda}
+      - func: assume secrets manager role
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+            - atlas
+      - command: expansions.update
+        params:
+          file: src/atlas-expansion.yml
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+      - func: upload coverage report
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - test-aws-lambda-deployed
+  - name: test_atlas_task_group_search_indexes
+    setup_group:
+      - func: fetch source
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: MONGODB_VERSION, value: '7.0'}
+            - {key: CLUSTER_PREFIX, value: dbx-node-lambda}
+      - func: assume secrets manager role
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+      - command: expansions.update
+        params:
+          file: src/atlas-expansion.yml
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+      - func: upload coverage report
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - test-search-index-helpers
 pre:
   - func: fetch source
-  - func: windows fix
   - func: fix absolute paths
   - func: make files executable
 post:
@@ -3057,6 +3075,8 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3112,6 +3132,8 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3167,6 +3189,8 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3222,6 +3246,8 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3275,6 +3301,8 @@ buildvariants:
       - test-8.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
       - test-socks5-csfle
       - test-socks5-tls
       - test-snappy-compression
@@ -3593,7 +3621,6 @@ buildvariants:
     batchtime: 20160
     tasks:
       - testtestoidc_task_group
-      - testazureoidc_task_group
       - testgcpoidc_task_group
       - testk8soidc_task_group_eks
       - testk8soidc_task_group_gke

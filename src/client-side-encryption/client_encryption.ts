@@ -749,7 +749,8 @@ export class ClientEncryption {
     expressionMode: boolean,
     options: ClientEncryptionEncryptOptions
   ): Promise<Binary> {
-    const { algorithm, keyId, keyAltName, contentionFactor, queryType, rangeOptions } = options;
+    const { algorithm, keyId, keyAltName, contentionFactor, queryType, rangeOptions, textOptions } =
+      options;
     const contextOptions: ExplicitEncryptionContextOptions = {
       expressionMode,
       algorithm
@@ -782,6 +783,10 @@ export class ClientEncryption {
       contextOptions.rangeOptions = serialize(rangeOptions);
     }
 
+    if (typeof textOptions === 'object') {
+      contextOptions.textOptions = serialize(textOptions);
+    }
+
     const valueBuffer = serialize({ v: value });
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
@@ -812,7 +817,8 @@ export interface ClientEncryptionEncryptOptions {
     | 'AEAD_AES_256_CBC_HMAC_SHA_512-Random'
     | 'Indexed'
     | 'Unindexed'
-    | 'Range';
+    | 'Range'
+    | 'TextPreview';
 
   /**
    * The id of the Binary dataKey to use for encryption
@@ -830,10 +836,53 @@ export interface ClientEncryptionEncryptOptions {
   /**
    * The query type.
    */
-  queryType?: 'equality' | 'range';
+  queryType?: 'equality' | 'range' | 'prefixPreview' | 'suffixPreview' | 'substringPreview';
 
   /** The index options for a Queryable Encryption field supporting "range" queries.*/
   rangeOptions?: RangeOptions;
+
+  /**
+   * Options for a Queryable Encryption field supporting text queries.  Only valid when `algorithm` is `TextPreview`.
+   *
+   * @experimental Public Technical Preview: `textPreview` is an experimental feature and may break at any time.
+   */
+  textOptions?: TextQueryOptions;
+}
+
+/**
+ * Options for a Queryable Encryption field supporting text queries.
+ *
+ * @public
+ * @experimental Public Technical Preview: `textPreview` is an experimental feature and may break at any time.
+ */
+export interface TextQueryOptions {
+  /** Indicates that text indexes for this field are case sensitive */
+  caseSensitive: boolean;
+  /** Indicates that text indexes for this field are diacritic sensitive. */
+  diacriticSensitive: boolean;
+
+  prefix?: {
+    /** The maximum allowed query length. */
+    strMaxQueryLength: Int32 | number;
+    /** The minimum allowed query length. */
+    strMinQueryLength: Int32 | number;
+  };
+
+  suffix?: {
+    /** The maximum allowed query length. */
+    strMaxQueryLength: Int32 | number;
+    /** The minimum allowed query length. */
+    strMinQueryLength: Int32 | number;
+  };
+
+  substring?: {
+    /** The maximum allowed length to insert. */
+    strMaxLength: Int32 | number;
+    /** The maximum allowed query length. */
+    strMaxQueryLength: Int32 | number;
+    /** The minimum allowed query length. */
+    strMinQueryLength: Int32 | number;
+  };
 }
 
 /**

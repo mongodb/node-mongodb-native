@@ -19,7 +19,6 @@ import type { Db } from './db';
 import {
   type AnyError,
   MongoAPIError,
-  MongoCompatibilityError,
   MongoInvalidArgumentError,
   MongoNetworkTimeoutError,
   MongoNotConnectedError,
@@ -206,18 +205,9 @@ export function isPromiseLike<T = unknown>(value?: unknown): value is PromiseLik
  * @param target - target of command
  * @param options - options containing collation settings
  */
-export function decorateWithCollation(
-  command: Document,
-  target: MongoClient | Db | Collection,
-  options: AnyOptions
-): void {
-  const capabilities = getTopology(target).capabilities;
+export function decorateWithCollation(command: Document, options: AnyOptions): void {
   if (options.collation && typeof options.collation === 'object') {
-    if (capabilities && capabilities.commandsTakeCollation) {
-      command.collation = options.collation;
-    } else {
-      throw new MongoCompatibilityError(`Current topology does not support collation`);
-    }
+    command.collation = options.collation;
   }
 }
 
@@ -359,34 +349,40 @@ export function uuidV4(): Buffer {
  * A helper function for determining `maxWireVersion` between legacy and new topology instances
  * @internal
  */
-export function maxWireVersion(topologyOrServer?: Connection | Topology | Server): number {
-  if (topologyOrServer) {
-    if (topologyOrServer.loadBalanced || topologyOrServer.serverApi?.version) {
-      // Since we do not have a monitor in the load balanced mode,
-      // we assume the load-balanced server is always pointed at the latest mongodb version.
-      // There is a risk that for on-prem deployments
-      // that don't upgrade immediately that this could alert to the
-      // application that a feature is available that is actually not.
-      // We also return the max supported wire version for serverAPI.
-      return MAX_SUPPORTED_WIRE_VERSION;
-    }
-    if (topologyOrServer.hello) {
-      return topologyOrServer.hello.maxWireVersion;
+export function maxWireVersion(handshakeAware?: Connection | Topology | Server): number {
+  if (handshakeAware) {
+    if (handshakeAware.hello) {
+      return handshakeAware.hello.maxWireVersion;
     }
 
-    if ('lastHello' in topologyOrServer && typeof topologyOrServer.lastHello === 'function') {
-      const lastHello = topologyOrServer.lastHello();
+    if (handshakeAware.serverApi?.version) {
+      // We return the max supported wire version for serverAPI.
+      return MAX_SUPPORTED_WIRE_VERSION;
+    }
+    // This is the fallback case for load balanced mode. If we are building commands the
+    // object being checked will be a connection, and we will have a hello response on
+    // it. For other cases, such as retryable writes, the object will be a server or
+    // topology, and there will be no hello response on those objects, so we return
+    // the max wire version so we support retryability. Once we have a min supported
+    // wire version of 9, then the needsRetryableWriteLabel() check can remove the
+    // usage of passing the wire version into it.
+    if (handshakeAware.loadBalanced) {
+      return MAX_SUPPORTED_WIRE_VERSION;
+    }
+
+    if ('lastHello' in handshakeAware && typeof handshakeAware.lastHello === 'function') {
+      const lastHello = handshakeAware.lastHello();
       if (lastHello) {
         return lastHello.maxWireVersion;
       }
     }
 
     if (
-      topologyOrServer.description &&
-      'maxWireVersion' in topologyOrServer.description &&
-      topologyOrServer.description.maxWireVersion != null
+      handshakeAware.description &&
+      'maxWireVersion' in handshakeAware.description &&
+      handshakeAware.description.maxWireVersion != null
     ) {
-      return topologyOrServer.description.maxWireVersion;
+      return handshakeAware.description.maxWireVersion;
     }
   }
 
@@ -1357,38 +1353,23 @@ export async function once<T>(ee: EventEmitter, name: string, options?: Abortabl
 }
 
 export function maybeAddIdToDocuments(
-  coll: Collection,
-  docs: Document[],
+  collection: Collection,
+  document: Document,
   options: { forceServerObjectId?: boolean }
-): Document[];
-export function maybeAddIdToDocuments(
-  coll: Collection,
-  docs: Document,
-  options: { forceServerObjectId?: boolean }
-): Document;
-export function maybeAddIdToDocuments(
-  coll: Collection,
-  docOrDocs: Document[] | Document,
-  options: { forceServerObjectId?: boolean }
-): Document[] | Document {
+): Document {
   const forceServerObjectId =
-    typeof options.forceServerObjectId === 'boolean'
-      ? options.forceServerObjectId
-      : coll.s.db.options?.forceServerObjectId;
+    options.forceServerObjectId ?? collection.db.options?.forceServerObjectId ?? false;
 
   // no need to modify the docs if server sets the ObjectId
-  if (forceServerObjectId === true) {
-    return docOrDocs;
+  if (forceServerObjectId) {
+    return document;
   }
 
-  const transform = (doc: Document): Document => {
-    if (doc._id == null) {
-      doc._id = coll.s.pkFactory.createPk();
-    }
+  if (document._id == null) {
+    document._id = collection.s.pkFactory.createPk();
+  }
 
-    return doc;
-  };
-  return Array.isArray(docOrDocs) ? docOrDocs.map(transform) : transform(docOrDocs);
+  return document;
 }
 
 export async function fileIsAccessible(fileName: string, mode?: number) {

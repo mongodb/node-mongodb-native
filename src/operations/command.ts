@@ -1,5 +1,6 @@
+import { type Connection } from '..';
 import type { BSONSerializeOptions, Document } from '../bson';
-import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
+import { MIN_SUPPORTED_RAW_DATA_WIRE_VERSION } from '../cmap/wire_protocol/constants';
 import { MongoInvalidArgumentError } from '../error';
 import {
   decorateWithExplain,
@@ -9,8 +10,7 @@ import {
 } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
-import type { Server } from '../sdam/server';
-import { MIN_SECONDARY_WRITE_WIRE_VERSION } from '../sdam/server_selection';
+import type { ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { commandSupportsReadConcern, maxWireVersion, MongoDBNamespace } from '../utils';
@@ -59,7 +59,19 @@ export interface CommandOperationOptions
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
+  /**
+   * @deprecated
+   * This option is deprecated and will be removed in an upcoming major version.
+   */
   noResponse?: boolean;
+
+  /**
+   * Used when the command needs to grant access to the underlying namespaces for time series collections.
+   * Only available on server versions 8.2 and above and is not meant for public use.
+   * @internal
+   * @sinceServerVersion 8.2
+   **/
+  rawData?: boolean;
 }
 
 /** @internal */
@@ -113,69 +125,55 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     return super.canRetryWrite;
   }
 
-  public async executeCommand<T extends MongoDBResponseConstructor>(
-    server: Server,
-    session: ClientSession | undefined,
-    cmd: Document,
-    timeoutContext: TimeoutContext,
-    responseType: T | undefined
-  ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
+  abstract buildCommandDocument(connection: Connection, session?: ClientSession): Document;
 
-  public async executeCommand(
-    server: Server,
-    session: ClientSession | undefined,
-    cmd: Document,
-    timeoutContext: TimeoutContext
-  ): Promise<Document>;
-
-  async executeCommand(
-    server: Server,
-    session: ClientSession | undefined,
-    cmd: Document,
-    timeoutContext: TimeoutContext,
-    responseType?: MongoDBResponseConstructor
-  ): Promise<Document> {
-    this.server = server;
-
-    const options = {
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return {
       ...this.options,
       ...this.bsonOptions,
       timeoutContext,
       readPreference: this.readPreference,
-      session
+      session: this.session
     };
+  }
 
-    const serverWireVersion = maxWireVersion(server);
+  override buildCommand(connection: Connection, session?: ClientSession): Document {
+    const command = this.buildCommandDocument(connection, session);
+
     const inTransaction = this.session && this.session.inTransaction();
 
-    if (this.readConcern && commandSupportsReadConcern(cmd) && !inTransaction) {
-      Object.assign(cmd, { readConcern: this.readConcern });
-    }
-
-    if (this.trySecondaryWrite && serverWireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION) {
-      options.omitReadPreference = true;
+    if (this.readConcern && commandSupportsReadConcern(command) && !inTransaction) {
+      Object.assign(command, { readConcern: this.readConcern });
     }
 
     if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
-      WriteConcern.apply(cmd, this.writeConcern);
+      WriteConcern.apply(command, this.writeConcern);
     }
 
     if (
-      options.collation &&
-      typeof options.collation === 'object' &&
+      this.options.collation &&
+      typeof this.options.collation === 'object' &&
       !this.hasAspect(Aspect.SKIP_COLLATION)
     ) {
-      Object.assign(cmd, { collation: options.collation });
+      Object.assign(command, { collation: this.options.collation });
     }
 
-    if (typeof options.maxTimeMS === 'number') {
-      cmd.maxTimeMS = options.maxTimeMS;
+    if (typeof this.options.maxTimeMS === 'number') {
+      command.maxTimeMS = this.options.maxTimeMS;
+    }
+
+    if (
+      this.options.rawData != null &&
+      this.hasAspect(Aspect.SUPPORTS_RAW_DATA) &&
+      maxWireVersion(connection) >= MIN_SUPPORTED_RAW_DATA_WIRE_VERSION
+    ) {
+      command.rawData = this.options.rawData;
     }
 
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
-      cmd = decorateWithExplain(cmd, this.explain);
+      return decorateWithExplain(command, this.explain);
     }
 
-    return await server.command(this.ns, cmd, options, responseType);
+    return command;
   }
 }

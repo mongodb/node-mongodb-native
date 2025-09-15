@@ -46,7 +46,6 @@ import {
   makeStateMachine,
   noop,
   now,
-  ns,
   promiseWithResolvers,
   shuffle
 } from '../utils';
@@ -459,7 +458,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       waitQueueTimeoutMS: this.client.s.options.waitQueueTimeoutMS
     });
     const selectServerOptions = {
-      operationName: 'ping',
+      operationName: 'handshake',
       ...options,
       timeoutContext
     };
@@ -469,9 +468,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         readPreferenceServerSelector(readPreference),
         selectServerOptions
       );
+
       const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
       if (!skipPingOnConnect && this.s.credentials) {
-        await server.command(ns('admin.$cmd'), { ping: 1 }, { timeoutContext });
+        const connection = await server.pool.checkOut({ timeoutContext: timeoutContext });
+        server.pool.checkIn(connection);
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
         this.emit(Topology.CONNECT, this);
@@ -749,7 +750,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   auth(credentials?: MongoCredentials, callback?: Callback): void {
-    if (typeof credentials === 'function') (callback = credentials), (credentials = undefined);
+    if (typeof credentials === 'function') ((callback = credentials), (credentials = undefined));
     if (typeof callback === 'function') callback(undefined, true);
   }
 
@@ -1103,7 +1104,10 @@ function isStaleServerDescription(
   );
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated This class will be removed as dead code in the next major version.
+ */
 export class ServerCapabilities {
   maxWireVersion: number;
   minWireVersion: number;
@@ -1114,26 +1118,26 @@ export class ServerCapabilities {
   }
 
   get hasAggregationCursor(): boolean {
-    return this.maxWireVersion >= 1;
+    return true;
   }
 
   get hasWriteCommands(): boolean {
-    return this.maxWireVersion >= 2;
+    return true;
   }
   get hasTextSearch(): boolean {
-    return this.minWireVersion >= 0;
+    return true;
   }
 
   get hasAuthCommands(): boolean {
-    return this.maxWireVersion >= 1;
+    return true;
   }
 
   get hasListCollectionsCommand(): boolean {
-    return this.maxWireVersion >= 3;
+    return true;
   }
 
   get hasListIndexesCommand(): boolean {
-    return this.maxWireVersion >= 3;
+    return true;
   }
 
   get supportsSnapshotReads(): boolean {
@@ -1141,10 +1145,10 @@ export class ServerCapabilities {
   }
 
   get commandsTakeWriteConcern(): boolean {
-    return this.maxWireVersion >= 5;
+    return true;
   }
 
   get commandsTakeCollation(): boolean {
-    return this.maxWireVersion >= 5;
+    return true;
   }
 }

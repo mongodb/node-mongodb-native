@@ -4,6 +4,7 @@ import * as types from 'node:util/types';
 import { expect } from 'chai';
 import { type Context } from 'mocha';
 import ConnectionString from 'mongodb-connection-string-url';
+import { type CompressorName } from 'mongodb-legacy';
 import * as qs from 'querystring';
 import * as url from 'url';
 
@@ -64,6 +65,21 @@ function convertToConnStringMap(obj: Record<string, any>) {
   return result.join(',');
 }
 
+function getCompressor(compressor: string | undefined): CompressorName {
+  if (!compressor) return null;
+
+  switch (compressor) {
+    case 'zstd':
+      return 'zstd';
+    case 'zlib':
+      return 'zlib';
+    case 'snappy':
+      return 'snappy';
+    default:
+      throw new Error('unsupported test runner compressor, would default to no compression');
+  }
+}
+
 export class TestConfiguration {
   version: string;
   clientSideEncryption: {
@@ -72,6 +88,7 @@ export class TestConfiguration {
     version: string;
     libmongocrypt: string | null;
   };
+  cryptSharedVersion: MongoClient['autoEncrypter']['cryptSharedLibVersionInfo'] | null;
   parameters: Record<string, any>;
   singleMongosLoadBalancerUri: string;
   multiMongosLoadBalancerUri: string;
@@ -94,6 +111,7 @@ export class TestConfiguration {
   activeResources: number;
   isSrv: boolean;
   filters: Record<string, Filter>;
+  compressor: CompressorName | null;
 
   constructor(
     private uri: string,
@@ -104,6 +122,7 @@ export class TestConfiguration {
     const hostAddresses = hosts.map(HostAddress.fromString);
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
+    this.cryptSharedVersion = context.cryptShared;
     this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
@@ -111,6 +130,7 @@ export class TestConfiguration {
     this.buildInfo = context.buildInfo;
     this.serverApi = context.serverApi;
     this.isSrv = uri.indexOf('mongodb+srv') > -1;
+    this.compressor = getCompressor(process.env.COMPRESSOR);
     this.options = {
       hosts,
       hostAddresses,
@@ -200,7 +220,13 @@ export class TestConfiguration {
   }
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
-    serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
+    const baseOptions: MongoClientOptions = this.compressor
+      ? {
+          compressors: this.compressor
+        }
+      : {};
+
+    serverOptions = Object.assign(baseOptions, getEnvironmentalOptions(), serverOptions);
 
     if (this.loggingEnabled && !Object.hasOwn(serverOptions, 'mongodbLogPath')) {
       serverOptions = this.setupLogging(serverOptions);
@@ -399,6 +425,8 @@ export class TestConfiguration {
       url.searchParams.append('authSource', 'admin');
     }
 
+    this.compressor && url.searchParams.append('compressors', this.compressor);
+
     // Secrets setup for OIDC always sets the workload URI as MONGODB_URI_SINGLE.
     if (process.env.MONGODB_URI_SINGLE?.includes('MONGODB-OIDC')) {
       return process.env.MONGODB_URI_SINGLE;
@@ -512,6 +540,12 @@ export class AstrolabeTestConfiguration extends TestConfiguration {
 }
 
 export class AlpineTestConfiguration extends TestConfiguration {
+  get encryptDefaultExtraOptions(): MongoClientOptions['autoEncryption']['extraOptions'] {
+    return {
+      mongocryptdBypassSpawn: true,
+      mongocryptdURI: process.env.MONGOCRYPTD_URI
+    };
+  }
   override newClient(
     urlOrQueryOptions?: string | Record<string, any>,
     serverOptions?: MongoClientOptions
@@ -521,8 +555,7 @@ export class AlpineTestConfiguration extends TestConfiguration {
     if (options.autoEncryption) {
       const extraOptions: MongoClientOptions['autoEncryption']['extraOptions'] = {
         ...options.autoEncryption.extraOptions,
-        mongocryptdBypassSpawn: true,
-        mongocryptdURI: process.env.MONGOCRYPTD_URI
+        ...this.encryptDefaultExtraOptions
       };
       options.autoEncryption.extraOptions = extraOptions;
     }

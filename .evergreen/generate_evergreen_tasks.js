@@ -118,14 +118,8 @@ BASE_TASKS.push({
   name: `test-x509-authentication`,
   tags: ['latest', 'auth', 'x509'],
   commands: [
-    updateExpansions({
-      VERSION: 'latest',
-      TOPOLOGY: 'server',
-      AUTH: 'noauth',
-      SSL: 'ssl'
-    }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'assume secrets manager role' },
     { func: 'run x509 auth tests' }
   ]
 });
@@ -157,23 +151,27 @@ TASKS.push(
         { func: 'stop-load-balancer' }
       ]
     })),
-    // TODO(NODE-6944): Unskip when devprod updates ldaptest servers.
-    // {
-    //   name: 'test-auth-kerberos',
-    //   tags: ['auth', 'kerberos'],
-    //   commands: [
-    //     updateExpansions({
-    //       NATIVE: 'true'
-    //     }),
-    //     { func: 'install dependencies' },
-    //     { func: 'run kerberos tests' }
-    //   ]
-    // },
-    // {
-    //   name: 'test-auth-ldap',
-    //   tags: ['auth', 'ldap'],
-    //   commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
-    // },
+    {
+      name: 'test-auth-kerberos',
+      tags: ['auth', 'kerberos'],
+      commands: [
+        updateExpansions({
+          NATIVE: 'true'
+        }),
+        { func: 'install dependencies' },
+        { func: 'assume secrets manager role' },
+        { func: 'run kerberos tests' }
+      ]
+    },
+    {
+      name: 'test-auth-ldap',
+      tags: ['auth', 'ldap'],
+      commands: [
+        { func: 'install dependencies' },
+        { func: 'assume secrets manager role' },
+        { func: 'run ldap tests' }
+      ]
+    },
     {
       name: 'test-socks5',
       tags: [],
@@ -323,9 +321,8 @@ for (const VERSION of TLS_VERSIONS) {
       updateExpansions({
         VERSION,
         SSL: 'ssl',
-        TOPOLOGY: 'server'
-        // TODO: NODE-3891 - fix tests broken when AUTH enabled
-        // AUTH: 'auth'
+        TOPOLOGY: 'server',
+        AUTH: 'auth'
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
@@ -826,7 +823,8 @@ BUILD_VARIANTS.push({
   batchtime: 20160,
   tasks: [
     'testtestoidc_task_group',
-    'testazureoidc_task_group',
+    // TODO(NODE-7080): Fix setup of Azure tests in CI
+    // 'testazureoidc_task_group',
     'testgcpoidc_task_group',
     'testk8soidc_task_group_eks',
     'testk8soidc_task_group_gke',

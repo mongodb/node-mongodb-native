@@ -1,4 +1,4 @@
-import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/utils';
+import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/unified_suite_builder';
 
 describe('listIndexes()', () => {
   UnifiedTestSuiteBuilder.describe('comment option')

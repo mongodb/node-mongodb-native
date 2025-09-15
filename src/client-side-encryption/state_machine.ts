@@ -68,12 +68,7 @@ const stateToString = new Map([
 const INSECURE_TLS_OPTIONS = [
   'tlsInsecure',
   'tlsAllowInvalidCertificates',
-  'tlsAllowInvalidHostnames',
-
-  // These options are disallowed by the spec, so we explicitly filter them out if provided, even
-  // though the StateMachine does not declare support for these options.
-  'tlsDisableOCSPEndpointCheck',
-  'tlsDisableCertificateRevocationCheck'
+  'tlsAllowInvalidHostnames'
 ];
 
 /**
@@ -111,7 +106,7 @@ declare module 'mongodb-client-encryption' {
  */
 export type ClientEncryptionTlsOptions = Pick<
   MongoClientOptions,
-  'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword'
+  'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword' | 'secureContext'
 >;
 
 /** @public */
@@ -526,6 +521,10 @@ export class StateMachine {
     tlsOptions: ClientEncryptionTlsOptions,
     options: tls.ConnectionOptions
   ): Promise<void> {
+    // If a secureContext is provided, ensure it is set.
+    if (tlsOptions.secureContext) {
+      options.secureContext = tlsOptions.secureContext;
+    }
     if (tlsOptions.tlsCertificateKeyFile) {
       const cert = await fs.readFile(tlsOptions.tlsCertificateKeyFile);
       options.cert = options.key = cert;

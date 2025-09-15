@@ -1,5 +1,10 @@
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
-import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
+import type {
+  AnyBulkWriteOperation,
+  BulkOperationBase,
+  BulkWriteOptions,
+  BulkWriteResult
+} from './bulk/common';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
@@ -11,7 +16,8 @@ import {
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
-import { MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
+import { MongoAPIError, MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
+import { type ExplainCommandOptions, type ExplainVerbosityLike } from './explain';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Abortable,
@@ -24,7 +30,6 @@ import type {
   WithoutId
 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
-import { BulkWriteOperation } from './operations/bulk_write';
 import { CountOperation, type CountOptions } from './operations/count';
 import {
   DeleteManyOperation,
@@ -33,13 +38,13 @@ import {
   type DeleteResult
 } from './operations/delete';
 import { DistinctOperation, type DistinctOptions } from './operations/distinct';
-import { DropCollectionOperation, type DropCollectionOptions } from './operations/drop';
+import { type DropCollectionOptions } from './operations/drop';
 import {
   EstimatedDocumentCountOperation,
   type EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
-import { executeOperation } from './operations/execute_operation';
-import type { FindOptions } from './operations/find';
+import { autoConnect, executeOperation } from './operations/execute_operation';
+import { type FindOneOptions, type FindOptions } from './operations/find';
 import {
   FindOneAndDeleteOperation,
   type FindOneAndDeleteOptions,
@@ -61,15 +66,12 @@ import {
   type ListIndexesOptions
 } from './operations/indexes';
 import {
-  InsertManyOperation,
   type InsertManyResult,
   InsertOneOperation,
   type InsertOneOptions,
   type InsertOneResult
 } from './operations/insert';
-import { IsCappedOperation } from './operations/is_capped';
 import type { Hint, OperationOptions } from './operations/operation';
-import { OptionsOperation } from './operations/options_operation';
 import { RenameOperation, type RenameOptions } from './operations/rename';
 import {
   CreateSearchIndexesOperation,
@@ -171,10 +173,16 @@ export class Collection<TSchema extends Document = Document> {
   client: MongoClient;
 
   /**
+   * Get the database object for the collection.
+   */
+  readonly db: Db;
+
+  /**
    * Create a new Collection instance
    * @internal
    */
   constructor(db: Db, name: string, options?: CollectionOptions) {
+    this.db = db;
     // Internal state
     this.s = {
       db,
@@ -226,7 +234,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get readConcern(): ReadConcern | undefined {
     if (this.s.readConcern == null) {
-      return this.s.db.readConcern;
+      return this.db.readConcern;
     }
     return this.s.readConcern;
   }
@@ -237,7 +245,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get readPreference(): ReadPreference | undefined {
     if (this.s.readPreference == null) {
-      return this.s.db.readPreference;
+      return this.db.readPreference;
     }
 
     return this.s.readPreference;
@@ -253,7 +261,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   get writeConcern(): WriteConcern | undefined {
     if (this.s.writeConcern == null) {
-      return this.s.db.writeConcern;
+      return this.db.writeConcern;
     }
     return this.s.writeConcern;
   }
@@ -305,14 +313,31 @@ export class Collection<TSchema extends Document = Document> {
     docs: ReadonlyArray<OptionalUnlessRequiredId<TSchema>>,
     options?: BulkWriteOptions
   ): Promise<InsertManyResult<TSchema>> {
-    return await executeOperation(
-      this.client,
-      new InsertManyOperation(
-        this as TODO_NODE_3286,
-        docs,
-        resolveOptions(this, options ?? { ordered: true })
-      ) as TODO_NODE_3286
-    );
+    if (!Array.isArray(docs)) {
+      throw new MongoInvalidArgumentError('Argument "docs" must be an array of documents');
+    }
+    options = resolveOptions(this, options ?? {});
+
+    const acknowledged = WriteConcern.fromOptions(options)?.w !== 0;
+
+    try {
+      const res = await this.bulkWrite(
+        docs.map(doc => ({ insertOne: { document: doc } })),
+        options
+      );
+      return {
+        acknowledged,
+        insertedCount: res.insertedCount,
+        insertedIds: res.insertedIds
+      };
+    } catch (err) {
+      if (err && err.message === 'Operation must be an object with an operation key') {
+        throw new MongoInvalidArgumentError(
+          'Collection.insertMany() cannot be called with an array that has null/undefined values'
+        );
+      }
+      throw err;
+    }
   }
 
   /**
@@ -342,14 +367,28 @@ export class Collection<TSchema extends Document = Document> {
       throw new MongoInvalidArgumentError('Argument "operations" must be an array of documents');
     }
 
-    return await executeOperation(
-      this.client,
-      new BulkWriteOperation(
-        this as TODO_NODE_3286,
-        operations,
-        resolveOptions(this, options ?? { ordered: true })
-      )
-    );
+    options = resolveOptions(this, options ?? {});
+
+    // TODO(NODE-7071): remove once the client doesn't need to be connected to construct
+    // bulk operations
+    const isConnected = this.client.topology != null;
+    if (!isConnected) {
+      await autoConnect(this.client);
+    }
+
+    // Create the bulk operation
+    const bulk: BulkOperationBase =
+      options.ordered === false
+        ? this.initializeUnorderedBulkOp(options)
+        : this.initializeOrderedBulkOp(options);
+
+    // for each op go through and add to the bulk
+    for (const operation of operations) {
+      bulk.raw(operation);
+    }
+
+    // Execute the bulk
+    return await bulk.execute({ ...options });
   }
 
   /**
@@ -370,12 +409,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
-      new UpdateOneOperation(
-        this as TODO_NODE_3286,
-        filter,
-        update,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286
+      new UpdateOneOperation(this.s.namespace, filter, update, resolveOptions(this, options))
     );
   }
 
@@ -393,12 +427,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
-      new ReplaceOneOperation(
-        this as TODO_NODE_3286,
-        filter,
-        replacement,
-        resolveOptions(this, options)
-      )
+      new ReplaceOneOperation(this.s.namespace, filter, replacement, resolveOptions(this, options))
     );
   }
 
@@ -420,12 +449,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<UpdateResult<TSchema>> {
     return await executeOperation(
       this.client,
-      new UpdateManyOperation(
-        this as TODO_NODE_3286,
-        filter,
-        update,
-        resolveOptions(this, options)
-      ) as TODO_NODE_3286
+      new UpdateManyOperation(this.s.namespace, filter, update, resolveOptions(this, options))
     );
   }
 
@@ -441,7 +465,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<DeleteResult> {
     return await executeOperation(
       this.client,
-      new DeleteOneOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
+      new DeleteOneOperation(this.s.namespace, filter, resolveOptions(this, options))
     );
   }
 
@@ -457,7 +481,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<DeleteResult> {
     return await executeOperation(
       this.client,
-      new DeleteManyOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
+      new DeleteManyOperation(this.s.namespace, filter, resolveOptions(this, options))
     );
   }
 
@@ -481,7 +505,7 @@ export class Collection<TSchema extends Document = Document> {
           ...options,
           readPreference: ReadPreference.PRIMARY
         })
-      ) as TODO_NODE_3286
+      )
     );
   }
 
@@ -491,10 +515,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async drop(options?: DropCollectionOptions): Promise<boolean> {
-    return await executeOperation(
-      this.client,
-      new DropCollectionOperation(this.s.db, this.collectionName, options)
-    );
+    return await this.db.dropCollection(this.collectionName, options);
   }
 
   /**
@@ -507,7 +528,7 @@ export class Collection<TSchema extends Document = Document> {
   async findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
   async findOne(
     filter: Filter<TSchema>,
-    options: Omit<FindOptions, 'timeoutMode'> & Abortable
+    options: Omit<FindOneOptions, 'timeoutMode'> & Abortable
   ): Promise<WithId<TSchema> | null>;
 
   // allow an override of the schema.
@@ -515,17 +536,22 @@ export class Collection<TSchema extends Document = Document> {
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
   async findOne<T = TSchema>(
     filter: Filter<TSchema>,
-    options?: Omit<FindOptions, 'timeoutMode'> & Abortable
+    options?: Omit<FindOneOptions, 'timeoutMode'> & Abortable
   ): Promise<T | null>;
 
   async findOne(
     filter: Filter<TSchema> = {},
-    options: FindOptions & Abortable = {}
+    options: Omit<FindOneOptions, 'timeoutMode'> & Abortable = {}
   ): Promise<WithId<TSchema> | null> {
-    const cursor = this.find(filter, options).limit(-1).batchSize(1);
-    const res = await cursor.next();
+    // Explicitly set the limit to 1 and singleBatch to true for all commands, per the spec.
+    // noCursorTimeout must be unset as well as batchSize.
+    // See: https://github.com/mongodb/specifications/blob/master/source/crud/crud.md#findone-api-details
+    const { batchSize: _batchSize, noCursorTimeout: _noCursorTimeout, ...opts } = options;
+    opts.singleBatch = true;
+    const cursor = this.find(filter, opts).limit(1);
+    const result = await cursor.next();
     await cursor.close();
-    return res;
+    return result;
   }
 
   /**
@@ -547,7 +573,7 @@ export class Collection<TSchema extends Document = Document> {
       this.client,
       this.s.namespace,
       filter,
-      resolveOptions(this as TODO_NODE_3286, options)
+      resolveOptions(this, options)
     );
   }
 
@@ -557,10 +583,16 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async options(options?: OperationOptions): Promise<Document> {
-    return await executeOperation(
-      this.client,
-      new OptionsOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
+    options = resolveOptions(this, options);
+    const [collection] = await this.db
+      .listCollections({ name: this.collectionName }, { ...options, nameOnly: false })
+      .toArray();
+
+    if (collection == null || collection.options == null) {
+      throw new MongoAPIError(`collection ${this.namespace} not found`);
+    }
+
+    return collection.options;
   }
 
   /**
@@ -569,10 +601,8 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async isCapped(options?: OperationOptions): Promise<boolean> {
-    return await executeOperation(
-      this.client,
-      new IsCappedOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
+    const { capped } = await this.options(options);
+    return Boolean(capped);
   }
 
   /**
@@ -840,6 +870,11 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     options: DistinctOptions
   ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
+  distinct<Key extends keyof WithId<TSchema>>(
+    key: Key,
+    filter: Filter<TSchema>,
+    options: DistinctOptions & { explain: ExplainVerbosityLike | ExplainCommandOptions }
+  ): Promise<Document>;
 
   // Embedded documents overload
   distinct(key: string): Promise<any[]>;

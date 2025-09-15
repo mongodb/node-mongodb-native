@@ -1,11 +1,9 @@
+import { type Connection } from '..';
 import type { Binary, Document } from '../bson';
-import { CursorResponse } from '../cmap/wire_protocol/responses';
+import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/responses';
 import { type CursorTimeoutContext, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import { type Abortable } from '../mongo_types';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import { maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -29,6 +27,7 @@ export interface ListCollectionsOptions
 
 /** @internal */
 export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -56,28 +55,15 @@ export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
     if (typeof this.options.batchSize === 'number') {
       this.batchSize = this.options.batchSize;
     }
+
+    this.SERVER_COMMAND_RESPONSE_TYPE = this.explain ? ExplainedCursorResponse : CursorResponse;
   }
 
   override get commandName() {
     return 'listCollections' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<CursorResponse> {
-    return await super.executeCommand(
-      server,
-      session,
-      this.generateCommand(maxWireVersion(server)),
-      timeoutContext,
-      CursorResponse
-    );
-  }
-
-  /* This is here for the purpose of unit testing the final command that gets sent. */
-  generateCommand(wireVersion: number): Document {
+  override buildCommandDocument(connection: Connection): Document {
     const command: Document = {
       listCollections: 1,
       filter: this.filter,
@@ -88,11 +74,17 @@ export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (wireVersion >= 9 && this.options.comment !== undefined) {
+    if (maxWireVersion(connection) >= 9 && this.options.comment !== undefined) {
       command.comment = this.options.comment;
     }
 
     return command;
+  }
+
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
   }
 }
 
@@ -111,5 +103,6 @@ export interface CollectionInfo extends Document {
 defineAspects(ListCollectionsOperation, [
   Aspect.READ_OPERATION,
   Aspect.RETRYABLE,
-  Aspect.CURSOR_CREATING
+  Aspect.CURSOR_CREATING,
+  Aspect.SUPPORTS_RAW_DATA
 ]);

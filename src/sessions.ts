@@ -2,7 +2,6 @@ import { Binary, type Document, Long, type Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
 import { type MongoDBResponse } from './cmap/wire_protocol/responses';
-import { isSharded } from './cmap/wire_protocol/shared';
 import { PINNED, UNPINNED } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import {
@@ -24,7 +23,7 @@ import {
 import type { MongoClient, MongoOptions } from './mongo_client';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
-import { RunAdminCommandOperation } from './operations/run_command';
+import { RunCommandOperation } from './operations/run_command';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
@@ -42,15 +41,13 @@ import {
   commandSupportsReadConcern,
   isPromiseLike,
   List,
-  maxWireVersion,
+  MongoDBNamespace,
   noop,
   now,
   squashError,
   uuidV4
 } from './utils';
 import { WriteConcern, type WriteConcernOptions, type WriteConcernSettings } from './write_concern';
-
-const minWireVersionForShardedTransactions = 8;
 
 /** @public */
 export interface ClientSessionOptions {
@@ -121,6 +118,7 @@ export class ClientSession
   /** @internal */
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
+  /** @deprecated - Will be made internal in the next major release */
   transaction: Transaction;
   /**
    * @internal
@@ -403,17 +401,6 @@ export class ClientSession
       this.unpin();
     }
 
-    const topologyMaxWireVersion = maxWireVersion(this.client.topology);
-    if (
-      isSharded(this.client.topology) &&
-      topologyMaxWireVersion != null &&
-      topologyMaxWireVersion < minWireVersionForShardedTransactions
-    ) {
-      throw new MongoCompatibilityError(
-        'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
-      );
-    }
-
     this.commitAttempted = false;
     // increment txnNumber
     this.incrementTransactionNumber();
@@ -504,7 +491,7 @@ export class ClientSession
       command.recoveryToken = this.transaction.recoveryToken;
     }
 
-    const operation = new RunAdminCommandOperation(command, {
+    const operation = new RunCommandOperation(new MongoDBNamespace('admin'), command, {
       session: this,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
@@ -535,7 +522,7 @@ export class ClientSession
         try {
           await executeOperation(
             this.client,
-            new RunAdminCommandOperation(command, {
+            new RunCommandOperation(new MongoDBNamespace('admin'), command, {
               session: this,
               readPreference: ReadPreference.primary,
               bypassPinningCheck: true
@@ -636,7 +623,7 @@ export class ClientSession
       command.recoveryToken = this.transaction.recoveryToken;
     }
 
-    const operation = new RunAdminCommandOperation(command, {
+    const operation = new RunCommandOperation(new MongoDBNamespace('admin'), command, {
       session: this,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true

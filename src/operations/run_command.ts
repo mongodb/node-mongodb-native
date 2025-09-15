@@ -1,13 +1,13 @@
+import { type Abortable } from '..';
 import type { BSONSerializeOptions, Document } from '../bson';
-import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
-import { type Db } from '../db';
-import { type TODO_NODE_3286 } from '../mongo_types';
+import { type Connection } from '../cmap/connection';
+import { CursorResponse, MongoDBResponse } from '../cmap/wire_protocol/responses';
+import { AbstractOperation } from '../operations/operation';
 import type { ReadPreferenceLike } from '../read_preference';
-import type { Server } from '../sdam/server';
+import type { ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { MongoDBNamespace } from '../utils';
-import { AbstractOperation } from './operation';
+import { type MongoDBNamespace } from '../utils';
 
 /** @public */
 export type RunCommandOptions = {
@@ -22,86 +22,58 @@ export type RunCommandOptions = {
   timeoutMS?: number;
   /** @internal */
   omitMaxTimeMS?: boolean;
-} & BSONSerializeOptions;
+
+  /**
+   * @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction
+   * This is only used by the driver for transaction commands
+   */
+  bypassPinningCheck?: boolean;
+} & BSONSerializeOptions &
+  Abortable;
 
 /** @internal */
 export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   command: Document;
-  override options: RunCommandOptions & { responseType?: MongoDBResponseConstructor };
+  override options: RunCommandOptions;
 
-  constructor(
-    parent: Db,
-    command: Document,
-    options: RunCommandOptions & { responseType?: MongoDBResponseConstructor }
-  ) {
+  constructor(namespace: MongoDBNamespace, command: Document, options: RunCommandOptions) {
     super(options);
     this.command = command;
     this.options = options;
-    this.ns = parent.s.namespace.withCollection('$cmd');
+    this.ns = namespace.withCollection('$cmd');
   }
 
   override get commandName() {
     return 'runCommand' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<T> {
-    this.server = server;
-    const res: TODO_NODE_3286 = await server.command(
-      this.ns,
-      this.command,
-      {
-        ...this.options,
-        readPreference: this.readPreference,
-        session,
-        timeoutContext
-      },
-      this.options.responseType
-    );
+  override buildCommand(_connection: Connection, _session?: ClientSession): Document {
+    return this.command;
+  }
 
-    return res;
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return {
+      ...this.options,
+      session: this.session,
+      timeoutContext,
+      signal: this.options.signal,
+      readPreference: this.options.readPreference
+    };
   }
 }
 
-export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T> {
-  command: Document;
-  override options: RunCommandOptions & {
-    noResponse?: boolean;
-    bypassPinningCheck?: boolean;
-  };
+/**
+ * @internal
+ *
+ * A specialized subclass of RunCommandOperation for cursor-creating commands.
+ */
+export class RunCursorCommandOperation extends RunCommandOperation {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
 
-  constructor(
-    command: Document,
-    options: RunCommandOptions & {
-      noResponse?: boolean;
-      bypassPinningCheck?: boolean;
-    }
-  ) {
-    super(options);
-    this.command = command;
-    this.options = options;
-    this.ns = new MongoDBNamespace('admin', '$cmd');
-  }
-
-  override get commandName() {
-    return 'runCommand' as const;
-  }
-
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<T> {
-    this.server = server;
-    const res: TODO_NODE_3286 = await server.command(this.ns, this.command, {
-      ...this.options,
-      readPreference: this.readPreference,
-      session,
-      timeoutContext
-    });
-    return res;
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
   }
 }

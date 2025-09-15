@@ -7,7 +7,6 @@ import {
   type ConnectionPoolOptions
 } from '../cmap/connection_pool';
 import { PoolClearedError } from '../cmap/errors';
-import { type MongoDBResponseConstructor } from '../cmap/wire_protocol/responses';
 import {
   APM_EVENTS,
   CLOSED,
@@ -27,7 +26,6 @@ import {
   MONGODB_ERROR_CODES,
   MongoError,
   MongoErrorLabel,
-  MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
@@ -37,7 +35,9 @@ import {
 } from '../error';
 import type { ServerApi } from '../mongo_client';
 import { type Abortable, TypedEventEmitter } from '../mongo_types';
+import { AggregateOperation } from '../operations/aggregate';
 import type { GetMoreOptions } from '../operations/get_more';
+import { type AbstractOperation } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import { isTransactionCommand } from '../transactions';
@@ -46,7 +46,6 @@ import {
   type EventEmitterWithState,
   makeStateMachine,
   maxWireVersion,
-  type MongoDBNamespace,
   noop,
   squashError,
   supportsRetryableWrites
@@ -67,6 +66,7 @@ import type {
 } from './events';
 import { Monitor, type MonitorOptions } from './monitor';
 import { compareTopologyVersion, ServerDescription } from './server_description';
+import { MIN_SECONDARY_WRITE_WIRE_VERSION } from './server_selection';
 import type { Topology } from './topology';
 
 const stateTransition = makeStateMachine({
@@ -110,6 +110,7 @@ export type ServerEvents = {
 /** @internal */
 export type ServerCommandOptions = Omit<CommandOptions, 'timeoutContext' | 'socketTimeoutMS'> & {
   timeoutContext: TimeoutContext;
+  returnFieldSelector?: Document | null;
 } & Abortable;
 
 /** @internal */
@@ -277,57 +278,21 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
-  public async command<T extends MongoDBResponseConstructor>(
-    ns: MongoDBNamespace,
-    command: Document,
-    options: ServerCommandOptions,
-    responseType: T | undefined
-  ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
-
-  public async command(
-    ns: MongoDBNamespace,
-    command: Document,
-    options: ServerCommandOptions
-  ): Promise<Document>;
-
-  public async command(
-    ns: MongoDBNamespace,
-    cmd: Document,
-    { ...options }: ServerCommandOptions,
-    responseType?: MongoDBResponseConstructor
-  ): Promise<Document> {
-    if (ns.db == null || typeof ns === 'string') {
-      throw new MongoInvalidArgumentError('Namespace must not be a string');
-    }
-
+  public async command<TResult>(
+    operation: AbstractOperation<TResult>,
+    timeoutContext: TimeoutContext
+  ): Promise<InstanceType<typeof operation.SERVER_COMMAND_RESPONSE_TYPE>> {
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
       throw new MongoServerClosedError();
     }
+    const session = operation.session;
 
-    options.directConnection = this.topology.s.options.directConnection;
-
-    // There are cases where we need to flag the read preference not to get sent in
-    // the command, such as pre-5.0 servers attempting to perform an aggregate write
-    // with a non-primary read preference. In this case the effective read preference
-    // (primary) is not the same as the provided and must be removed completely.
-    if (options.omitReadPreference) {
-      delete options.readPreference;
-    }
-
-    if (this.description.iscryptd) {
-      options.omitMaxTimeMS = true;
-    }
-
-    const session = options.session;
     let conn = session?.pinnedConnection;
 
     this.incrementOperationCount();
     if (conn == null) {
       try {
-        conn = await this.pool.checkOut(options);
-        if (this.loadBalanced && isPinnableCommand(cmd, session)) {
-          session?.pin(conn);
-        }
+        conn = await this.pool.checkOut({ timeoutContext, signal: operation.options.signal });
       } catch (checkoutError) {
         this.decrementOperationCount();
         if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
@@ -336,10 +301,53 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     let reauthPromise: Promise<void> | null = null;
+    const cleanup = () => {
+      this.decrementOperationCount();
+      if (session?.pinnedConnection !== conn) {
+        if (reauthPromise != null) {
+          // The reauth promise only exists if it hasn't thrown.
+          const checkBackIn = () => {
+            this.pool.checkIn(conn);
+          };
+          void reauthPromise.then(checkBackIn, checkBackIn);
+        } else {
+          this.pool.checkIn(conn);
+        }
+      }
+    };
+
+    let cmd;
+    try {
+      cmd = operation.buildCommand(conn, session);
+    } catch (e) {
+      cleanup();
+      throw e;
+    }
+
+    const options = operation.buildOptions(timeoutContext);
+    const ns = operation.ns;
+
+    if (this.loadBalanced && isPinnableCommand(cmd, session) && !session?.pinnedConnection) {
+      session?.pin(conn);
+    }
+
+    options.directConnection = this.topology.s.options.directConnection;
+
+    const omitReadPreference =
+      operation instanceof AggregateOperation &&
+      operation.hasWriteStage &&
+      maxWireVersion(conn) < MIN_SECONDARY_WRITE_WIRE_VERSION;
+    if (omitReadPreference) {
+      delete options.readPreference;
+    }
+
+    if (this.description.iscryptd) {
+      options.omitMaxTimeMS = true;
+    }
 
     try {
       try {
-        const res = await conn.command(ns, cmd, options, responseType);
+        const res = await conn.command(ns, cmd, options, operation.SERVER_COMMAND_RESPONSE_TYPE);
         throwIfWriteConcernError(res);
         return res;
       } catch (commandError) {
@@ -360,7 +368,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         reauthPromise = null; // only reachable if reauth succeeds
 
         try {
-          const res = await conn.command(ns, cmd, options, responseType);
+          const res = await conn.command(ns, cmd, options, operation.SERVER_COMMAND_RESPONSE_TYPE);
           throwIfWriteConcernError(res);
           return res;
         } catch (commandError) {
@@ -370,18 +378,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         throw operationError;
       }
     } finally {
-      this.decrementOperationCount();
-      if (session?.pinnedConnection !== conn) {
-        if (reauthPromise != null) {
-          // The reauth promise only exists if it hasn't thrown.
-          const checkBackIn = () => {
-            this.pool.checkIn(conn);
-          };
-          void reauthPromise.then(checkBackIn, checkBackIn);
-        } else {
-          this.pool.checkIn(conn);
-        }
-      }
+      cleanup();
     }
   }
 
@@ -417,7 +414,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     } else {
       if (isSDAMUnrecoverableError(error)) {
         if (shouldHandleStateChangeError(this, error)) {
-          const shouldClearPool = maxWireVersion(this) <= 7 || isNodeShuttingDownError(error);
+          const shouldClearPool = isNodeShuttingDownError(error);
           if (this.loadBalanced && connection && shouldClearPool) {
             this.pool.clear({ serviceId: connection.serviceId });
           }

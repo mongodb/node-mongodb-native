@@ -1,0 +1,16 @@
+description: "expectedCommandEvent-commandSucceededEvent-databaseName-type"
+
+schemaVersion: "1.15"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+
+tests:
+  - description: "foo"
+    operations: []
+    expectEvents:
+      - client: *client0
+        events:
+          - commandSucceededEvent:
+              databaseName: 0

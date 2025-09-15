@@ -1,7 +1,9 @@
+import { type Connection, type MongoError } from '..';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
+import { type MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { type Abortable } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
-import type { Server } from '../sdam/server';
+import type { Server, ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
@@ -14,7 +16,8 @@ export const Aspect = {
   SKIP_COLLATION: Symbol('SKIP_COLLATION'),
   CURSOR_CREATING: Symbol('CURSOR_CREATING'),
   MUST_SELECT_SAME_SERVER: Symbol('MUST_SELECT_SAME_SERVER'),
-  COMMAND_BATCHING: Symbol('COMMAND_BATCHING')
+  COMMAND_BATCHING: Symbol('COMMAND_BATCHING'),
+  SUPPORTS_RAW_DATA: Symbol('SUPPORTS_RAW_DATA')
 } as const;
 
 /** @public */
@@ -31,7 +34,6 @@ export interface OperationOptions extends BSONSerializeOptions {
 
   /** @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction */
   bypassPinningCheck?: boolean;
-  omitReadPreference?: boolean;
 
   /** @internal Hint to `executeOperation` to omit maxTimeMS */
   omitMaxTimeMS?: boolean;
@@ -55,7 +57,6 @@ export abstract class AbstractOperation<TResult = any> {
   readPreference: ReadPreference;
   server!: Server;
   bypassPinningCheck: boolean;
-  trySecondaryWrite: boolean;
 
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
@@ -81,18 +82,11 @@ export abstract class AbstractOperation<TResult = any> {
 
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
-    this.trySecondaryWrite = false;
   }
 
   /** Must match the first key of the command object sent to the server.
   Command name should be stateless (should not use 'this' keyword) */
   abstract get commandName(): string;
-
-  abstract execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<TResult>;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as { aspects?: Set<symbol> };
@@ -106,6 +100,10 @@ export abstract class AbstractOperation<TResult = any> {
   // Make sure the session is not writable from outside this class.
   get session(): ClientSession | undefined {
     return this._session;
+  }
+
+  set session(session: ClientSession) {
+    this._session = session;
   }
 
   clearSession() {
@@ -122,6 +120,46 @@ export abstract class AbstractOperation<TResult = any> {
 
   get canRetryWrite(): boolean {
     return this.hasAspect(Aspect.RETRYABLE) && this.hasAspect(Aspect.WRITE_OPERATION);
+  }
+  abstract SERVER_COMMAND_RESPONSE_TYPE: typeof MongoDBResponse;
+
+  /**
+   * Build a raw command document.
+   */
+  abstract buildCommand(connection: Connection, session?: ClientSession): Document;
+
+  /**
+   * Builds an instance of `ServerCommandOptions` to be used for operation execution.
+   */
+  abstract buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions;
+
+  /**
+   * Given an instance of a MongoDBResponse, map the response to the correct result type.  For
+   * example, a `CountOperation` might map the response as follows:
+   *
+   * ```typescript
+   *  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+   *    return response.toObject(this.bsonOptions).n ?? 0;
+   *  }
+   *
+   *  // or, with type safety:
+   *  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+   *    return response.getNumber('n') ?? 0;
+   *  }
+   * ```
+   */
+  handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): TResult {
+    return response.toObject(this.bsonOptions) as TResult;
+  }
+
+  /**
+   * Optional.
+   *
+   * If the operation performs error handling, such as wrapping, renaming the error, or squashing errors
+   * this method can be overridden.
+   */
+  handleError(error: MongoError): TResult | never {
+    throw error;
   }
 }
 

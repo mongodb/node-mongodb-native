@@ -43,10 +43,14 @@ updates:
         versions: ["18.x"]
 
     versioning-strategy: increase
-    allow:
-      - dependency-type: "development"
 
     groups:
+      prod-dependencies:
+        dependency-type: "production"
+        applies-to: version-updates
+        update-types:
+        - "minor"
+        - "patch"
       development-dependencies:
         dependency-type: "development"
         applies-to: version-updates

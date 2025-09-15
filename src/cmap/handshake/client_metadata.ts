@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as process from 'process';
 
 import { BSON, type Document, Int32 } from '../../bson';
-import { MongoInvalidArgumentError } from '../../error';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
 import { fileIsAccessible } from '../../utils';
 
@@ -11,6 +11,7 @@ const NODE_DRIVER_VERSION = require('../../../package.json').version;
 
 /**
  * @public
+ * @deprecated This interface will be made internal in the next major release.
  * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#hello-command
  */
 export interface ClientMetadata {
@@ -38,7 +39,10 @@ export interface ClientMetadata {
   };
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated This interface will be made internal in the next major release.
+ */
 export interface ClientMetadataOptions {
   driverInfo?: {
     name?: string;
@@ -86,7 +90,10 @@ export class LimitedSizeDocument {
   }
 }
 
-type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'driverInfo'>;
+type MakeClientMetadataOptions = Pick<
+  MongoOptions,
+  'appName' | 'driverInfo' | 'additionalDriverInfo'
+>;
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
@@ -115,6 +122,22 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     version: version.length > 0 ? `${NODE_DRIVER_VERSION}|${version}` : NODE_DRIVER_VERSION
   };
 
+  if (options.additionalDriverInfo == null) {
+    throw new MongoRuntimeError(
+      'Client options `additionalDriverInfo` must always default to an empty array'
+    );
+  }
+
+  // This is where we handle additional driver info added after client construction.
+  for (const { name: n = '', version: v = '' } of options.additionalDriverInfo) {
+    if (n.length > 0) {
+      driverInfo.name = `${driverInfo.name}|${n}`;
+    }
+    if (v.length > 0) {
+      driverInfo.version = `${driverInfo.version}|${v}`;
+    }
+  }
+
   if (!metadataDocument.ifItFitsItSits('driver', driverInfo)) {
     throw new MongoInvalidArgumentError(
       'Unable to include driverInfo name and version, metadata cannot exceed 512 bytes'
@@ -124,6 +147,12 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   let runtimeInfo = getRuntimeInfo();
   if (platform.length > 0) {
     runtimeInfo = `${runtimeInfo}|${platform}`;
+  }
+
+  for (const { platform: p = '' } of options.additionalDriverInfo) {
+    if (p.length > 0) {
+      runtimeInfo = `${runtimeInfo}|${p}`;
+    }
   }
 
   if (!metadataDocument.ifItFitsItSits('platform', runtimeInfo)) {

@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { on, once } from 'events';
-import { gte } from 'semver';
 import * as sinon from 'sinon';
 
 import {
@@ -174,6 +173,8 @@ describe('Write Concern', function () {
   });
 
   describe('fire-and-forget protocol', function () {
+    const compressionPredicate = () =>
+      process.env.COMPRESSOR ? 'Test requires that compression is disabled' : true;
     context('when writeConcern = 0 and OP_MSG is used', function () {
       const writeOperations: { name: string; command: any; expectedReturnVal: any }[] = [
         {
@@ -270,36 +271,44 @@ describe('Write Concern', function () {
           let spy;
 
           beforeEach(async function () {
-            if (gte('3.6.0', this.configuration.version)) {
-              this.currentTest.skipReason = 'Test requires OP_MSG, needs to be on MongoDB 3.6+';
-              this.skip();
-            }
             spy = sinon.spy(OpMsgRequest.prototype, 'toBin');
             client = this.configuration.newClient({ monitorCommands: true, w: 0 });
             await client.connect();
           });
 
-          afterEach(function () {
+          afterEach(async function () {
             sinon.restore();
-            client.close();
+            await client.close();
           });
 
-          it('the request should have moreToCome bit set', async function () {
-            await op.command(client);
-            expect(spy.returnValues[spy.returnValues.length - 1][0][16]).to.equal(2);
-          });
+          it(
+            'the request should have moreToCome bit set',
+            { requires: { predicate: compressionPredicate } },
+            async function () {
+              await op.command(client);
+              expect(spy.returnValues[spy.returnValues.length - 1][0][16]).to.equal(2);
+            }
+          );
 
-          it('the return value of the command should be nullish', async function () {
-            const result = await op.command(client);
-            expect(result).to.containSubset(op.expectedReturnVal);
-          });
+          it(
+            'the return value of the command should be nullish',
+            { requires: { predicate: compressionPredicate } },
+            async function () {
+              const result = await op.command(client);
+              expect(result).to.containSubset(op.expectedReturnVal);
+            }
+          );
 
-          it('commandSucceededEvent should have reply with only {ok: 1}', async function () {
-            const events: CommandSucceededEvent[] = [];
-            client.on('commandSucceeded', event => events.push(event));
-            await op.command(client);
-            expect(events[0]).to.containSubset({ reply: { ok: 1 } });
-          });
+          it(
+            'commandSucceededEvent should have reply with only {ok: 1}',
+            { requires: { predicate: compressionPredicate } },
+            async function () {
+              const events: CommandSucceededEvent[] = [];
+              client.on('commandSucceeded', event => events.push(event));
+              await op.command(client);
+              expect(events[0]).to.containSubset({ reply: { ok: 1 } });
+            }
+          );
         });
       }
     });

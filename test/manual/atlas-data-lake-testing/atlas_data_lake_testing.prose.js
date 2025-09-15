@@ -31,8 +31,7 @@ describe('Atlas Data Lake - prose', function () {
    * If a driver constructs and issues killCursors commands in other ways (e.g. public API), this test MUST be adapted to test all such code paths.
    */
   it('1. Test that the driver properly constructs and issues a killCursors command to Atlas Data Lake.', async function () {
-    // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set the default dns resolution order for CI
-    client = new MongoClient('mongodb://mhuser:pencil@localhost', { family: 4 });
+    client = new MongoClient('mongodb://mhuser:pencil@localhost');
     const db = client.db('admin');
     await db.command({ killCursors: 'kill_cursor_collection' });
   });
@@ -41,8 +40,7 @@ describe('Atlas Data Lake - prose', function () {
    * For these tests, create a MongoClient using a valid connection string without auth credentials and execute a ping command.
    */
   it('2. Test that the driver can establish a connection with Atlas Data Lake without authentication.', async function () {
-    // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set the default dns resolution order for CI
-    client = new MongoClient('mongodb://localhost', { family: 4 });
+    client = new MongoClient('mongodb://localhost');
     const db = client.db('admin');
     await db.command({ ping: 1 });
   });
@@ -52,10 +50,7 @@ describe('Atlas Data Lake - prose', function () {
    * from the drivers-evergreen-tools ADL configuration and execute a ping command.
    */
   it('3a. Test that the driver can establish a connection with Atlas Data Lake with authentication. (SCRAM-SHA-1)', async function () {
-    // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set the default dns resolution order for CI
-    client = new MongoClient('mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-1', {
-      family: 4
-    });
+    client = new MongoClient('mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-1');
     const db = client.db('admin');
     await db.command({ ping: 1 });
     await db.command({ killCursors: 'kill_cursor_collection' });
@@ -65,10 +60,7 @@ describe('Atlas Data Lake - prose', function () {
    * Repeat the authentication test using SCRAM-SHA-256.
    */
   it('3b. Test that the driver can establish a connection with Atlas Data Lake with authentication. (SCRAM-SHA-256)', async function () {
-    // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set the default dns resolution order for CI
-    client = new MongoClient('mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-256', {
-      family: 4
-    });
+    client = new MongoClient('mongodb://mhuser:pencil@localhost?authMechanism=SCRAM-SHA-256');
     const db = client.db('admin');
     await db.command({ ping: 1 });
     await db.command({ killCursors: 'kill_cursor_collection' });

@@ -13,7 +13,7 @@ import {
   ObjectId,
   ReturnDocument
 } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailCommandFailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
@@ -112,7 +112,7 @@ describe('CRUD API', function () {
 
     describe('when the find operation fails', () => {
       beforeEach(async function () {
-        const failPoint: FailPoint = {
+        const failPoint: FailCommandFailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
           data: {
@@ -125,7 +125,7 @@ describe('CRUD API', function () {
       });
 
       afterEach(async function () {
-        const failPoint: FailPoint = {
+        const failPoint: FailCommandFailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'off',
           data: { failCommands: ['find'] }
@@ -182,7 +182,7 @@ describe('CRUD API', function () {
 
     describe('when the aggregation operation fails', () => {
       beforeEach(async function () {
-        const failPoint: FailPoint = {
+        const failPoint: FailCommandFailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
           data: {
@@ -195,7 +195,7 @@ describe('CRUD API', function () {
       });
 
       afterEach(async function () {
-        const failPoint: FailPoint = {
+        const failPoint: FailCommandFailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'off',
           data: { failCommands: ['aggregate'] }

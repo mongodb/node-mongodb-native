@@ -23,7 +23,8 @@ import {
   type ResumeToken
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { type FailPoint, sleep, TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
+import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
+import { type FailCommandFailPoint, sleep } from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
 
 const initIteratorMode = async (cs: ChangeStream) => {
@@ -369,31 +370,76 @@ describe('Change Streams', function () {
     }
   );
 
-  it('should cache the change stream resume token using iterator form', {
-    metadata: { requires: { topology: 'replicaset' } },
+  describe('cache the change stream resume token', () => {
+    describe('using iterator form', () => {
+      context('#next', () => {
+        it('caches the resume token on change', {
+          metadata: { requires: { topology: 'replicaset' } },
 
-    async test() {
-      await initIteratorMode(changeStream);
-      collection.insertOne({ a: 1 });
+          async test() {
+            await initIteratorMode(changeStream);
+            await collection.insertOne({ a: 1 });
 
-      const hasNext = await changeStream.hasNext();
-      expect(hasNext).to.be.true;
+            const change = await changeStream.next();
+            expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+          }
+        });
 
-      const change = await changeStream.next();
-      expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-    }
-  });
+        it('caches the resume token correctly when preceded by #hasNext', {
+          metadata: { requires: { topology: 'replicaset' } },
+          async test() {
+            await initIteratorMode(changeStream);
+            await collection.insertOne({ a: 1 });
 
-  it('should cache the change stream resume token using event listener form', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
-      const willBeChange = once(changeStream, 'change');
-      await once(changeStream.cursor, 'init');
-      collection.insertOne({ a: 1 });
+            await changeStream.hasNext();
 
-      const [change] = await willBeChange;
-      expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
-    }
+            const change = await changeStream.next();
+            expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+          }
+        });
+      });
+
+      it('#tryNext', {
+        metadata: { requires: { topology: 'replicaset' } },
+
+        async test() {
+          await initIteratorMode(changeStream);
+          await collection.insertOne({ a: 1 });
+
+          const change = await changeStream.tryNext();
+          expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+        }
+      });
+
+      context('#hasNext', () => {
+        it('does not cache the resume token', {
+          metadata: { requires: { topology: 'replicaset' } },
+          async test() {
+            await initIteratorMode(changeStream);
+            const resumeToken = changeStream.resumeToken;
+
+            await collection.insertOne({ a: 1 });
+
+            const hasNext = await changeStream.hasNext();
+            expect(hasNext).to.be.true;
+
+            expect(changeStream.resumeToken).to.equal(resumeToken);
+          }
+        });
+      });
+    });
+
+    it('should cache using event listener form', {
+      metadata: { requires: { topology: 'replicaset' } },
+      async test() {
+        const willBeChange = once(changeStream, 'change');
+        await once(changeStream.cursor, 'init');
+        await collection.insertOne({ a: 1 });
+
+        const [change] = await willBeChange;
+        expect(change).to.have.property('_id').that.deep.equals(changeStream.resumeToken);
+      }
+    });
   });
 
   it('should error if resume token projected out of change stream document using iterator', {
@@ -1096,7 +1142,7 @@ describe('Change Streams', function () {
                 failCommands: ['getMore'],
                 errorCode: unresumableErrorCode
               }
-            } as FailPoint);
+            } as FailCommandFailPoint);
 
             await collection.insertOne({ city: 'New York City' });
             try {
@@ -1815,6 +1861,144 @@ describe('Change Streams', function () {
       });
     });
   });
+
+  describe("NODE-4763 - doesn't produce duplicates after resume", function () {
+    let client: MongoClient;
+    let collection: Collection;
+    let changeStream: ChangeStream;
+    let aggregateEvents: CommandStartedEvent[] = [];
+    const resumableError = { code: 6, message: 'host unreachable' };
+
+    beforeEach(async function () {
+      const dbName = 'node-4763';
+      const collectionName = 'test-collection';
+
+      client = this.configuration.newClient({ monitorCommands: true });
+      client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
+      collection = client.db(dbName).collection(collectionName);
+
+      changeStream = collection.watch([]);
+    });
+
+    afterEach(async function () {
+      await client.db('admin').command({
+        configureFailPoint: is4_2Server(this.configuration.version)
+          ? 'failCommand'
+          : 'failGetMoreAfterCursorCheckout',
+        mode: 'off'
+      } as FailCommandFailPoint);
+
+      await changeStream.close();
+      await client.close();
+      aggregateEvents = [];
+    });
+
+    describe('when using iterator form', function () {
+      it('#next', { requires: { topology: 'replicaset' } }, async function test() {
+        await initIteratorMode(changeStream);
+
+        await collection.insertOne({ a: 1 });
+        const change = await changeStream.next();
+        expect(change).to.containSubset({
+          operationType: 'insert',
+          fullDocument: { a: 1 }
+        });
+
+        await client.db('admin').command({
+          configureFailPoint: is4_2Server(this.configuration.version)
+            ? 'failCommand'
+            : 'failGetMoreAfterCursorCheckout',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['getMore'],
+            errorCode: resumableError.code,
+            errmsg: resumableError.message
+          }
+        } as FailCommandFailPoint);
+
+        await collection.insertOne({ a: 2 });
+        const change2 = await changeStream.next();
+        expect(change2).to.containSubset({
+          operationType: 'insert',
+          fullDocument: { a: 2 }
+        });
+
+        expect(aggregateEvents.length).to.equal(2);
+      });
+
+      it('#tryNext', { requires: { topology: 'replicaset' } }, async function test() {
+        await initIteratorMode(changeStream);
+
+        await collection.insertOne({ a: 1 });
+        const change = await changeStream.tryNext();
+        expect(change).to.containSubset({
+          operationType: 'insert',
+          fullDocument: { a: 1 }
+        });
+
+        await client.db('admin').command({
+          configureFailPoint: is4_2Server(this.configuration.version)
+            ? 'failCommand'
+            : 'failGetMoreAfterCursorCheckout',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['getMore'],
+            errorCode: resumableError.code,
+            errmsg: resumableError.message
+          }
+        } as FailCommandFailPoint);
+
+        await collection.insertOne({ a: 2 });
+        const change2 = await changeStream.tryNext();
+        expect(change2).to.containSubset({
+          operationType: 'insert',
+          fullDocument: { a: 2 }
+        });
+
+        expect(aggregateEvents.length).to.equal(2);
+      });
+    });
+
+    it('in an event listener form', { requires: { topology: 'replicaset' } }, async function () {
+      const willBeChange = on(changeStream, 'change');
+      await once(changeStream.cursor, 'init');
+
+      await collection.insertOne({ a: 1 });
+      const change = await willBeChange.next();
+      expect(change.value[0]).to.containSubset({
+        operationType: 'insert',
+        fullDocument: { a: 1 }
+      });
+
+      await client.db('admin').command({
+        configureFailPoint: is4_2Server(this.configuration.version)
+          ? 'failCommand'
+          : 'failGetMoreAfterCursorCheckout',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['getMore'],
+          errorCode: resumableError.code,
+          errmsg: resumableError.message
+        }
+      } as FailCommandFailPoint);
+
+      // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
+      // resuming a change stream don't return the change event.
+      // So we defer the insert until a period of time after the change stream has received the first change.
+      // 2000ms is long enough for the change stream to attempt to resume and fail once before exhausting the failpoint
+      // and succeeding.
+      await sleep(2000);
+      await collection.insertOne({ a: 2 });
+
+      const change2 = await willBeChange.next();
+      expect(change2.value[0]).to.containSubset({
+        operationType: 'insert',
+        fullDocument: { a: 2 }
+      });
+
+      expect(aggregateEvents.length).to.equal(2);
+    });
+  });
 });
 
 describe('ChangeStream resumability', function () {
@@ -1911,7 +2095,7 @@ describe('ChangeStream resumability', function () {
                 errorCode: code,
                 errmsg: message
               }
-            } as FailPoint);
+            } as FailCommandFailPoint);
 
             await collection.insertOne({ name: 'bailey' });
 
@@ -1939,7 +2123,7 @@ describe('ChangeStream resumability', function () {
                 errorCode: code,
                 errmsg: message
               }
-            } as FailPoint);
+            } as FailCommandFailPoint);
 
             // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
             // resuming a change stream don't return the change event.  So we defer the insert until a period of time
@@ -1978,7 +2162,7 @@ describe('ChangeStream resumability', function () {
               errorCode: resumableErrorCodes[0].code,
               errmsg: resumableErrorCodes[0].message
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           expect(changeStream.cursor)
             .to.have.property('changeStreamCursorOptions')
@@ -2008,7 +2192,7 @@ describe('ChangeStream resumability', function () {
               failCommands: ['getMore'],
               errorCode: unresumableErrorCode
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           await initIteratorMode(changeStream);
 
@@ -2031,7 +2215,7 @@ describe('ChangeStream resumability', function () {
               failCommands: ['aggregate'],
               errorCode: resumableErrorCode
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           changeStream = collection.watch([]);
 
@@ -2065,7 +2249,7 @@ describe('ChangeStream resumability', function () {
                 errorCode: code,
                 errmsg: message
               }
-            } as FailPoint);
+            } as FailCommandFailPoint);
 
             await collection.insertOne({ name: 'bailey' });
 
@@ -2093,7 +2277,7 @@ describe('ChangeStream resumability', function () {
                 errorCode: code,
                 errmsg: message
               }
-            } as FailPoint);
+            } as FailCommandFailPoint);
 
             // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
             // resuming a change stream don't return the change event.  So we defer the insert until a period of time
@@ -2132,7 +2316,7 @@ describe('ChangeStream resumability', function () {
               errorCode: resumableErrorCodes[0].code,
               errmsg: resumableErrorCodes[0].message
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           expect(changeStream.cursor)
             .to.have.property('changeStreamCursorOptions')
@@ -2162,7 +2346,7 @@ describe('ChangeStream resumability', function () {
               failCommands: ['getMore'],
               errorCode: unresumableErrorCode
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           await initIteratorMode(changeStream);
 
@@ -2185,7 +2369,7 @@ describe('ChangeStream resumability', function () {
               failCommands: ['aggregate'],
               errorCode: resumableErrorCode
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           changeStream = collection.watch([]);
 
@@ -2219,7 +2403,7 @@ describe('ChangeStream resumability', function () {
                 errorCode: code,
                 errmsg: message
               }
-            } as FailPoint);
+            } as FailCommandFailPoint);
 
             try {
               // tryNext is not blocking and on sharded clusters we don't have control of when
@@ -2254,7 +2438,7 @@ describe('ChangeStream resumability', function () {
                 errorCode: code,
                 errmsg: message
               }
-            } as FailPoint);
+            } as FailCommandFailPoint);
 
             try {
               // tryNext is not blocking and on sharded clusters we don't have control of when
@@ -2293,7 +2477,7 @@ describe('ChangeStream resumability', function () {
               errorCode: resumableErrorCodes[0].code,
               errmsg: resumableErrorCodes[0].message
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           expect(changeStream.cursor)
             .to.have.property('changeStreamCursorOptions')
@@ -2323,7 +2507,7 @@ describe('ChangeStream resumability', function () {
               failCommands: ['getMore'],
               errorCode: unresumableErrorCode
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           await initIteratorMode(changeStream);
 
@@ -2344,7 +2528,7 @@ describe('ChangeStream resumability', function () {
               failCommands: ['aggregate'],
               errorCode: resumableErrorCode
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           changeStream = collection.watch([]);
 
@@ -2381,7 +2565,7 @@ describe('ChangeStream resumability', function () {
                 errorCode: code,
                 errmsg: message
               }
-            } as FailPoint);
+            } as FailCommandFailPoint);
 
             for await (const change of changeStream) {
               const { fullDocument } = change;
@@ -2416,7 +2600,7 @@ describe('ChangeStream resumability', function () {
               errorCode: resumableErrorCodes[0].code,
               errmsg: resumableErrorCodes[0].message
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           expect(changeStream.cursor)
             .to.have.property('changeStreamCursorOptions')
@@ -2449,7 +2633,7 @@ describe('ChangeStream resumability', function () {
               failCommands: ['getMore'],
               errorCode: unresumableErrorCode
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           try {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -2478,7 +2662,7 @@ describe('ChangeStream resumability', function () {
               failCommands: ['aggregate'],
               errorCode: resumableErrorCode
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           try {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -2514,7 +2698,7 @@ describe('ChangeStream resumability', function () {
               errorCode: code,
               errmsg: message
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           const changes = once(changeStream, 'change');
           await once(changeStream.cursor, 'init');
@@ -2544,7 +2728,7 @@ describe('ChangeStream resumability', function () {
               errorCode: code,
               errmsg: message
             }
-          } as FailPoint);
+          } as FailCommandFailPoint);
 
           const changes = once(changeStream, 'change');
           await once(changeStream.cursor, 'init');
@@ -2584,7 +2768,7 @@ describe('ChangeStream resumability', function () {
             errorCode: resumableErrorCodes[0].code,
             errmsg: resumableErrorCodes[0].message
           }
-        } as FailPoint);
+        } as FailCommandFailPoint);
 
         expect(changeStream.cursor)
           .to.have.property('changeStreamCursorOptions')
@@ -2617,7 +2801,7 @@ describe('ChangeStream resumability', function () {
             failCommands: ['getMore'],
             errorCode: unresumableErrorCode
           }
-        } as FailPoint);
+        } as FailCommandFailPoint);
 
         const willBeError = once(changeStream, 'change').catch(error => error);
         await once(changeStream.cursor, 'init');
@@ -2645,7 +2829,7 @@ describe('ChangeStream resumability', function () {
             errorCode: unresumableErrorCode,
             errmsg: 'operation was interrupted'
           }
-        } as FailPoint);
+        } as FailCommandFailPoint);
 
         const willBeError = once(changeStream, 'change').catch(error => error);
         await once(changeStream.cursor, 'init');
@@ -2670,7 +2854,7 @@ describe('ChangeStream resumability', function () {
             failCommands: ['aggregate'],
             errorCode: resumableErrorCode
           }
-        } as FailPoint);
+        } as FailCommandFailPoint);
 
         const willBeError = once(changeStream, 'change').catch(error => error);
         await collection.insertOne({ name: 'bailey' });

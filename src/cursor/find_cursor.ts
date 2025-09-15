@@ -3,7 +3,6 @@ import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoAPIError, MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import {
   Explain,
-  ExplainableCursor,
   type ExplainCommandOptions,
   type ExplainVerbosityLike,
   validateExplainTimeoutOptions
@@ -19,6 +18,7 @@ import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
 import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
 import { type InitialCursorResponse } from './abstract_cursor';
+import { ExplainableCursor } from './explainable_cursor';
 
 /** @public Flags allowed for cursor */
 export const FLAGS = [

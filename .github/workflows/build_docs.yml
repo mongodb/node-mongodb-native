@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Node and dependencies
         uses: mongodb-labs/drivers-github-tools/node/setup@v2
-      - run: sudo apt-get install hugo
+      - run: sudo apt update && sudo apt-get install hugo
       - name: Build Docs
         run: npm run build:docs -- --yes
       - name: Open Pull Request

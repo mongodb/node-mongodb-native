@@ -10,7 +10,6 @@ import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import type { RunCommandCursor } from './cursor/run_command_cursor';
 import { Db } from './db';
-import { ExplainableCursor } from './explain';
 import { GridFSBucket } from './gridfs';
 import { GridFSBucketReadStream } from './gridfs/download';
 import { GridFSBucketWriteStream } from './gridfs/upload';
@@ -44,6 +43,7 @@ export {
 } from './bulk/common';
 export { ClientEncryption } from './client-side-encryption/client_encryption';
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
+export { ExplainableCursor } from './cursor/explainable_cursor';
 export {
   MongoAPIError,
   MongoAWSError,
@@ -98,7 +98,6 @@ export {
   ClientSession,
   Collection,
   Db,
-  ExplainableCursor,
   FindCursor,
   GridFSBucket,
   GridFSBucketReadStream,
@@ -243,7 +242,8 @@ export type {
   DataKey,
   GCPEncryptionKeyOptions,
   KMIPEncryptionKeyOptions,
-  RangeOptions
+  RangeOptions,
+  TextQueryOptions
 } from './client-side-encryption/client_encryption';
 export {
   MongoCryptAzureKMSRequestError,
@@ -523,7 +523,7 @@ export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
-export type { FindOptions } from './operations/find';
+export type { FindOneOptions, FindOptions } from './operations/find';
 export type {
   FindOneAndDeleteOptions,
   FindOneAndReplaceOptions,

@@ -294,19 +294,6 @@ functions:
             perl -p -i -e "s|ABSOLUTE_PATH_REPLACEMENT_TOKEN|${DRIVERS_TOOLS}|g" $filename
           done
 
-  "windows fix":
-    - command: shell.exec
-      params:
-        silent: true
-        script: |
-          ${PREPARE_SHELL}
-          # for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
-          #   cat $i | tr -d '\r' > $i.new
-          #   mv $i.new $i
-          # done
-          # Copy client certificate because symlinks do not work on Windows.
-          cp ${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem ${MONGO_ORCHESTRATION_HOME}/lib/client.pem
-
   "make files executable":
     - command: shell.exec
       params:
@@ -375,6 +362,10 @@ functions:
       params:
         binary: bash
         working_dir: src
+        include_expansions_in_env:
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_ACCESS_KEY_ID
+          - AWS_SESSION_TOKEN
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
         args:
@@ -387,6 +378,10 @@ functions:
       params:
         working_dir: src
         binary: bash
+        include_expansions_in_env:
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_ACCESS_KEY_ID
+          - AWS_SESSION_TOKEN
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           NODE_LTS_VERSION: ${NODE_LTS_VERSION}
@@ -697,10 +692,12 @@ functions:
       type: test
       params:
         working_dir: "src"
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        include_expansions_in_env:
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+          - PROJECT_DIRECTORY
+          - DRIVERS_TOOLS
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
@@ -983,6 +980,7 @@ tasks:
           args:
             - .evergreen/run-search-index-management-tests.sh
 
+task_groups:
   - name: test_gcpkms_task_group
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800 # 30 minutes
@@ -1245,7 +1243,6 @@ tasks:
 
 pre:
   - func: "fetch source"
-  - func: "windows fix"
   - func: "fix absolute paths"
   - func: "make files executable"
 

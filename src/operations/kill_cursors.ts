@@ -1,9 +1,11 @@
 import type { Long } from '../bson';
-import { MongoRuntimeError } from '../error';
-import type { Server } from '../sdam/server';
+import { type Connection } from '../cmap/connection';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
+import { type MongoError, MongoRuntimeError } from '../error';
+import type { Server, ServerCommandOptions } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type TimeoutContext } from '../timeout';
-import { type MongoDBNamespace, squashError } from '../utils';
+import { type MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /**
@@ -16,7 +18,8 @@ interface KillCursorsCommand {
   comment?: unknown;
 }
 
-export class KillCursorsOperation extends AbstractOperation {
+export class KillCursorsOperation extends AbstractOperation<void> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   cursorId: Long;
 
   constructor(cursorId: Long, ns: MongoDBNamespace, server: Server, options: OperationOptions) {
@@ -30,15 +33,7 @@ export class KillCursorsOperation extends AbstractOperation {
     return 'killCursors' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<void> {
-    if (server !== this.server) {
-      throw new MongoRuntimeError('Killcursor must run on the same server operation began on');
-    }
-
+  override buildCommand(_connection: Connection, _session?: ClientSession): KillCursorsCommand {
     const killCursors = this.ns.collection;
     if (killCursors == null) {
       // Cursors should have adopted the namespace returned by MongoDB
@@ -50,15 +45,19 @@ export class KillCursorsOperation extends AbstractOperation {
       killCursors,
       cursors: [this.cursorId]
     };
-    try {
-      await server.command(this.ns, killCursorsCommand, {
-        session,
-        timeoutContext
-      });
-    } catch (error) {
-      // The driver should never emit errors from killCursors, this is spec-ed behavior
-      squashError(error);
-    }
+
+    return killCursorsCommand;
+  }
+
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return {
+      session: this.session,
+      timeoutContext
+    };
+  }
+
+  override handleError(_error: MongoError): void {
+    // The driver should never emit errors from killCursors, this is spec-ed behavior
   }
 }
 

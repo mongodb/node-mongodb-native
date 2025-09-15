@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.19.0](https://github.com/mongodb/node-mongodb-native/compare/v6.18.0...v6.19.0) (2025-08-26)
+
+
+### Features
+
+* **NODE-4179:** allow secureContext in KMS TLS options ([#4578](https://github.com/mongodb/node-mongodb-native/issues/4578)) ([0ea6eaa](https://github.com/mongodb/node-mongodb-native/commit/0ea6eaa82d56073f1a63d4168935d63a4a4e7a61))
+* **NODE-6472:** findOne and find no longer keep open cursors ([#4580](https://github.com/mongodb/node-mongodb-native/issues/4580)) ([be7f808](https://github.com/mongodb/node-mongodb-native/commit/be7f808c3ff0d894906ec187de98e159ebb7b18d))
+* **NODE-7020:** remove ping on connect ([#4607](https://github.com/mongodb/node-mongodb-native/issues/4607)) ([3d296b7](https://github.com/mongodb/node-mongodb-native/commit/3d296b7d94810c3bc29153ffc3c8795f02699dd4))
+* **NODE-7059, NODE-7008:** add support for text queries for QE string fields ([#4597](https://github.com/mongodb/node-mongodb-native/issues/4597)) ([e4492f3](https://github.com/mongodb/node-mongodb-native/commit/e4492f3ff260a440ab4b2cb64ca90a68f9cf6fd5))
+
+## [6.18.0](https://github.com/mongodb/node-mongodb-native/compare/v6.17.0...v6.18.0) (2025-07-22)
+
+
+### Features
+
+* **NODE-5055:** Add databaseName property to command monitoring events ([#4586](https://github.com/mongodb/node-mongodb-native/issues/4586)) ([3faf0c9](https://github.com/mongodb/node-mongodb-native/commit/3faf0c967cd47b7fa6143aff914b4d2c47a584b3))
+* **NODE-6865:** deprecate transaction getters ([#4567](https://github.com/mongodb/node-mongodb-native/issues/4567)) ([da46aea](https://github.com/mongodb/node-mongodb-native/commit/da46aeafe857f0bbfe8935abb497ff8c92f692ca))
+* **NODE-6991:** deprecate unintentionally public client metadata types ([#4566](https://github.com/mongodb/node-mongodb-native/issues/4566)) ([ca6554b](https://github.com/mongodb/node-mongodb-native/commit/ca6554b203595cd195ea80b24b1bb662d88abee9))
+* **NODE-7009:** add client metadata on demand ([#4574](https://github.com/mongodb/node-mongodb-native/issues/4574)) ([b9636ee](https://github.com/mongodb/node-mongodb-native/commit/b9636ee3fe1daa54a65935f206f0c8fdac16ae86))
+* **NODE-7053:** deprecate noResponse option ([#4589](https://github.com/mongodb/node-mongodb-native/issues/4589)) ([1115319](https://github.com/mongodb/node-mongodb-native/commit/1115319a0913c136c688631a0cf9f6d3dfcb2e4c))
+
+
+### Bug Fixes
+
+* **NODE-4845:** allocate sessions lazily in cursors ([#4575](https://github.com/mongodb/node-mongodb-native/issues/4575)) ([5761703](https://github.com/mongodb/node-mongodb-native/commit/57617039c0275e25e607363fbdc971b0f94e99c7))
+* **NODE-6589:** background task does not prune idle connections when minPoolSize=0 ([#4569](https://github.com/mongodb/node-mongodb-native/issues/4569)) ([7cbb641](https://github.com/mongodb/node-mongodb-native/commit/7cbb641f848993788f5d11812518d1e360df1d53))
+* **NODE-6955:** add missing `wallTime` property TS change stream event interfaces ([#4541](https://github.com/mongodb/node-mongodb-native/issues/4541)) ([f153c6f](https://github.com/mongodb/node-mongodb-native/commit/f153c6f3df8c7c440af3bc0f862a30c53f9c5fc8))
+
 ## [6.17.0](https://github.com/mongodb/node-mongodb-native/compare/v6.16.0...v6.17.0) (2025-06-03)
 
 

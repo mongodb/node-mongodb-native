@@ -26,14 +26,16 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { abortable, supportsRetryableWrites } from '../utils';
+import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
-type ResultTypeFromOperation<TOperation> =
-  TOperation extends AbstractOperation<infer K> ? K : never;
+type ResultTypeFromOperation<TOperation extends AbstractOperation> = ReturnType<
+  TOperation['handleOk']
+>;
 
 /**
  * Executes the given operation with provided arguments.
@@ -56,7 +58,7 @@ type ResultTypeFromOperation<TOperation> =
  * @param operation - The operation to execute
  */
 export async function executeOperation<
-  T extends AbstractOperation<TResult>,
+  T extends AbstractOperation,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T, timeoutContext?: TimeoutContext | null): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
@@ -84,6 +86,8 @@ export async function executeOperation<
   } else if (session.client !== client) {
     throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');
   }
+
+  operation.session ??= session;
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
@@ -129,7 +133,7 @@ export async function executeOperation<
  * Connects a client if it has not yet been connected
  * @internal
  */
-async function autoConnect(client: MongoClient): Promise<Topology> {
+export async function autoConnect(client: MongoClient): Promise<Topology> {
   if (client.topology == null) {
     if (client.s.hasBeenClosed) {
       throw new MongoNotConnectedError('Client must be connected before running operations');
@@ -176,10 +180,7 @@ type RetryOptions = {
  *
  * @param operation - The operation to execute
  * */
-async function tryOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(
+async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFromOperation<T>>(
   operation: T,
   { topology, timeoutContext, session, readPreference }: RetryOptions
 ): Promise<TResult> {
@@ -190,7 +191,7 @@ async function tryOperation<
     // server selection to potentially force monitor checks if the server is
     // in an unknown state.
     selector = sameServerSelector(operation.server?.description);
-  } else if (operation.trySecondaryWrite) {
+  } else if (operation instanceof AggregateOperation && operation.hasWriteStage) {
     // If operation should try to write to secondary use the custom server selector
     // otherwise provide the read preference.
     selector = secondaryWritableServerSelector(topology.commonWireVersion, readPreference);
@@ -248,8 +249,9 @@ async function tryOperation<
       if (hasWriteAspect && !isRetryableWriteError(previousOperationError))
         throw previousOperationError;
 
-      if (hasReadAspect && !isRetryableReadError(previousOperationError))
+      if (hasReadAspect && !isRetryableReadError(previousOperationError)) {
         throw previousOperationError;
+      }
 
       if (
         previousOperationError instanceof MongoNetworkError &&
@@ -275,12 +277,20 @@ async function tryOperation<
       }
     }
 
+    operation.server = server;
+
     try {
       // If tries > 0 and we are command batching we need to reset the batch.
       if (tries > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
         operation.resetBatch();
       }
-      return await operation.execute(server, session, timeoutContext);
+
+      try {
+        const result = await server.command(operation, timeoutContext);
+        return operation.handleOk(result);
+      } catch (error) {
+        return operation.handleError(error);
+      }
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;
       if (

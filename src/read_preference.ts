@@ -63,6 +63,9 @@ export class ReadPreference {
   tags?: TagSet[];
   hedge?: HedgeOptions;
   maxStalenessSeconds?: number;
+  /**
+   * @deprecated This will be removed as dead code in the next major version.
+   */
   minWireVersion?: number;
 
   public static PRIMARY = ReadPreferenceMode.primary;

@@ -1,8 +1,8 @@
-import type { Long } from '../bson';
+import type { Document, Long } from '../bson';
+import { type Connection } from '../cmap/connection';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoRuntimeError } from '../error';
-import type { Server } from '../sdam/server';
-import type { ClientSession } from '../sessions';
+import type { Server, ServerCommandOptions } from '../sdam/server';
 import { type TimeoutContext } from '../timeout';
 import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
@@ -37,7 +37,8 @@ export interface GetMoreCommand {
 }
 
 /** @internal */
-export class GetMoreOperation extends AbstractOperation {
+export class GetMoreOperation extends AbstractOperation<CursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = CursorResponse;
   cursorId: Long;
   override options: GetMoreOptions;
 
@@ -53,19 +54,8 @@ export class GetMoreOperation extends AbstractOperation {
   override get commandName() {
     return 'getMore' as const;
   }
-  /**
-   * Although there is a server already associated with the get more operation, the signature
-   * for execute passes a server so we will just use that one.
-   */
-  override async execute(
-    server: Server,
-    _session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<CursorResponse> {
-    if (server !== this.server) {
-      throw new MongoRuntimeError('Getmore must run on the same server operation began on');
-    }
 
+  override buildCommand(connection: Connection): Document {
     if (this.cursorId == null || this.cursorId.isZero()) {
       throw new MongoRuntimeError('Unable to iterate cursor with no id');
     }
@@ -92,18 +82,26 @@ export class GetMoreOperation extends AbstractOperation {
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (this.options.comment !== undefined && maxWireVersion(server) >= 9) {
+    if (this.options.comment !== undefined && maxWireVersion(connection) >= 9) {
       getMoreCmd.comment = this.options.comment;
     }
 
-    const commandOptions = {
+    return getMoreCmd;
+  }
+
+  override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
+    return {
       returnFieldSelector: null,
       documentsReturnedIn: 'nextBatch',
       timeoutContext,
       ...this.options
     };
+  }
 
-    return await server.command(this.ns, getMoreCmd, commandOptions, CursorResponse);
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): CursorResponse {
+    return response;
   }
 }
 

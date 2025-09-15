@@ -4,20 +4,18 @@ import { clearTimeout, setTimeout } from 'timers';
 import { inspect } from 'util';
 
 import {
-  addContainerMetadata,
   CMAP_EVENTS,
   type Connection,
   ConnectionPool,
   type ConnectionPoolOptions,
   type HostAddress,
-  makeClientMetadata,
   type MongoClient,
   type Server,
   shuffle,
   TimeoutContext
 } from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
-import { type FailPoint, sleep } from './utils';
+import { type FailCommandFailPoint, sleep } from './utils';
 
 type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
@@ -88,7 +86,7 @@ export type CmapTest = {
     minServerVersion?: string;
     maxServerVersion?: string;
   }[];
-  failPoint?: FailPoint;
+  failPoint?: FailCommandFailPoint;
 };
 
 const ALL_POOL_EVENTS = new Set(CMAP_EVENTS);
@@ -324,7 +322,8 @@ export class ThreadContext {
       hostAddress: this.#hostAddress,
       serverApi: process.env.MONGODB_API_VERSION
         ? { version: process.env.MONGODB_API_VERSION }
-        : undefined
+        : undefined,
+      extendedMetadata: this.#server.topology.client.options.extendedMetadata
     });
     this.#originalServerPool = this.#server.pool;
     this.#server.pool = this.pool;
@@ -376,8 +375,6 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     delete poolOptions.backgroundThreadIntervalMS;
   }
 
-  const metadata = makeClientMetadata({ appName: poolOptions.appName, driverInfo: {} });
-  const extendedMetadata = addContainerMetadata(metadata);
   delete poolOptions.appName;
 
   const operations = test.operations;
@@ -391,8 +388,6 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
 
   threadContext.createPool({
     ...poolOptions,
-    metadata,
-    extendedMetadata,
     minPoolSizeCheckFrequencyMS
   });
   // yield control back to the event loop so that the ConnectionPoolCreatedEvent
@@ -513,10 +508,15 @@ export function runCmapTestSuite(
           const selectedHostUri = hosts[0];
           hostAddress = serverDescriptionMap.get(selectedHostUri).hostAddress;
 
+          const clientOptions: { appName?: string } = {};
+          if (test.poolOptions?.appName) {
+            clientOptions.appName = test.poolOptions.appName;
+          }
           client = this.configuration.newClient(
             `mongodb://${hostAddress}/${
               this.configuration.isLoadBalanced ? '?loadBalanced=true' : '?directConnection=true'
-            }`
+            }`,
+            clientOptions
           );
           await client.connect();
           if (test.failPoint) {

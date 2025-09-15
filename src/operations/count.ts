@@ -1,8 +1,8 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -23,6 +23,7 @@ export interface CountOptions extends CommandOperationOptions {
 
 /** @internal */
 export class CountOperation extends CommandOperation<number> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: CountOptions;
   collectionName?: string;
   query: Document;
@@ -39,11 +40,7 @@ export class CountOperation extends CommandOperation<number> {
     return 'count' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<number> {
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     const options = this.options;
     const cmd: Document = {
       count: this.collectionName,
@@ -66,9 +63,12 @@ export class CountOperation extends CommandOperation<number> {
       cmd.maxTimeMS = options.maxTimeMS;
     }
 
-    const result = await super.executeCommand(server, session, cmd, timeoutContext);
-    return result ? result.n : 0;
+    return cmd;
+  }
+
+  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): number {
+    return response.getNumber('n') ?? 0;
   }
 }
 
-defineAspects(CountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);
+defineAspects(CountOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.SUPPORTS_RAW_DATA]);

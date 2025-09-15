@@ -1,12 +1,10 @@
-import { MongoClientBulkWriteExecutionError, ServerType } from '../../beta';
+import { type Connection } from '../../cmap/connection';
 import { ClientBulkWriteCursorResponse } from '../../cmap/wire_protocol/responses';
-import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
-import { type TimeoutContext } from '../../timeout';
 import { MongoDBNamespace } from '../../utils';
 import { CommandOperation } from '../command';
 import { Aspect, defineAspects } from '../operation';
-import { type ClientBulkWriteCommandBuilder } from './command_builder';
+import { type ClientBulkWriteCommand, type ClientBulkWriteCommandBuilder } from './command_builder';
 import { type ClientBulkWriteOptions } from './common';
 
 /**
@@ -14,6 +12,8 @@ import { type ClientBulkWriteOptions } from './common';
  * @internal
  */
 export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCursorResponse> {
+  override SERVER_COMMAND_RESPONSE_TYPE = ClientBulkWriteCursorResponse;
+
   commandBuilder: ClientBulkWriteCommandBuilder;
   override options: ClientBulkWriteOptions;
 
@@ -36,72 +36,28 @@ export class ClientBulkWriteOperation extends CommandOperation<ClientBulkWriteCu
     return this.commandBuilder.isBatchRetryable;
   }
 
-  /**
-   * Execute the command. Superclass will handle write concern, etc.
-   * @param server - The server.
-   * @param session - The session.
-   * @returns The response.
-   */
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<ClientBulkWriteCursorResponse> {
-    let command;
+  override handleOk(
+    response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>
+  ): ClientBulkWriteCursorResponse {
+    return response;
+  }
 
-    if (server.description.type === ServerType.LoadBalancer) {
-      if (session) {
-        let connection;
-        if (!session.pinnedConnection) {
-          // Checkout a connection to build the command.
-          connection = await server.pool.checkOut({ timeoutContext });
-          // Pin the connection to the session so it get used to execute the command and we do not
-          // perform a double check-in/check-out.
-          session.pin(connection);
-        } else {
-          connection = session.pinnedConnection;
-        }
-        command = this.commandBuilder.buildBatch(
-          connection.hello?.maxMessageSizeBytes,
-          connection.hello?.maxWriteBatchSize,
-          connection.hello?.maxBsonObjectSize
-        );
-      } else {
-        throw new MongoClientBulkWriteExecutionError(
-          'Session provided to the client bulk write operation must be present.'
-        );
-      }
-    } else {
-      // At this point we have a server and the auto connect code has already
-      // run in executeOperation, so the server description will be populated.
-      // We can use that to build the command.
-      if (
-        !server.description.maxWriteBatchSize ||
-        !server.description.maxMessageSizeBytes ||
-        !server.description.maxBsonObjectSize
-      ) {
-        throw new MongoClientBulkWriteExecutionError(
-          'In order to execute a client bulk write, both maxWriteBatchSize, maxMessageSizeBytes and maxBsonObjectSize must be provided by the servers hello response.'
-        );
-      }
-      command = this.commandBuilder.buildBatch(
-        server.description.maxMessageSizeBytes,
-        server.description.maxWriteBatchSize,
-        server.description.maxBsonObjectSize
-      );
-    }
+  override buildCommandDocument(
+    connection: Connection,
+    _session?: ClientSession
+  ): ClientBulkWriteCommand {
+    const command = this.commandBuilder.buildBatch(
+      connection.description.maxMessageSizeBytes,
+      connection.description.maxWriteBatchSize,
+      connection.description.maxBsonObjectSize
+    );
 
-    // Check after the batch is built if we cannot retry it and override the option.
+    // Check _after_ the batch is built if we cannot retry it and override the option.
     if (!this.canRetryWrite) {
       this.options.willRetryWrite = false;
     }
-    return await super.executeCommand(
-      server,
-      session,
-      command,
-      timeoutContext,
-      ClientBulkWriteCursorResponse
-    );
+
+    return command;
   }
 }
 
@@ -111,5 +67,6 @@ defineAspects(ClientBulkWriteOperation, [
   Aspect.SKIP_COLLATION,
   Aspect.CURSOR_CREATING,
   Aspect.RETRYABLE,
-  Aspect.COMMAND_BATCHING
+  Aspect.COMMAND_BATCHING,
+  Aspect.SUPPORTS_RAW_DATA
 ]);

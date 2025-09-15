@@ -2,7 +2,6 @@ import type { Document } from '../bson';
 import { MongoAPIError } from '../error';
 import {
   Explain,
-  ExplainableCursor,
   type ExplainCommandOptions,
   type ExplainVerbosityLike,
   validateExplainTimeoutOptions
@@ -19,6 +18,7 @@ import {
   CursorTimeoutMode,
   type InitialCursorResponse
 } from './abstract_cursor';
+import { ExplainableCursor } from './explainable_cursor';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}

@@ -1,27 +1,30 @@
+import { type Connection, MongoServerError } from '..';
 import type { Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
+import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
-import { MONGODB_ERROR_CODES, MongoServerError } from '../error';
-import type { Server } from '../sdam/server';
+import { MONGODB_ERROR_CODES } from '../error';
 import type { ClientSession } from '../sessions';
-import { type TimeoutContext } from '../timeout';
+import { TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
+import { executeOperation } from './execute_operation';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface DropCollectionOptions extends CommandOperationOptions {
+export interface DropCollectionOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** @experimental */
   encryptedFields?: Document;
 }
 
 /** @internal */
 export class DropCollectionOperation extends CommandOperation<boolean> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
+
   override options: DropCollectionOptions;
-  db: Db;
   name: string;
 
   constructor(db: Db, name: string, options: DropCollectionOptions = {}) {
     super(db, options);
-    this.db = db;
     this.options = options;
     this.name = name;
   }
@@ -30,61 +33,74 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     return 'drop' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<boolean> {
-    const db = this.db;
-    const options = this.options;
-    const name = this.name;
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    return { drop: this.name };
+  }
 
-    const encryptedFieldsMap = db.client.s.options.autoEncryption?.encryptedFieldsMap;
-    let encryptedFields: Document | undefined =
-      options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
+  override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): boolean {
+    return true;
+  }
+}
 
-    if (!encryptedFields && encryptedFieldsMap) {
-      // If the MongoClient was configured with an encryptedFieldsMap,
-      // and no encryptedFields config was available in it or explicitly
-      // passed as an argument, the spec tells us to look one up using
-      // listCollections().
-      const listCollectionsResult = await db
-        .listCollections({ name }, { nameOnly: false })
-        .toArray();
-      encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
-    }
+export async function dropCollections(
+  db: Db,
+  name: string,
+  options: DropCollectionOptions
+): Promise<boolean> {
+  const timeoutContext = TimeoutContext.create({
+    session: options.session,
+    serverSelectionTimeoutMS: db.client.s.options.serverSelectionTimeoutMS,
+    waitQueueTimeoutMS: db.client.s.options.waitQueueTimeoutMS,
+    timeoutMS: options.timeoutMS
+  });
 
-    if (encryptedFields) {
-      const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
-      const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
+  const encryptedFieldsMap = db.client.s.options.autoEncryption?.encryptedFieldsMap;
+  let encryptedFields: Document | undefined =
+    options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
 
-      for (const collectionName of [escCollection, ecocCollection]) {
-        // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
-        const dropOp = new DropCollectionOperation(db, collectionName);
-        try {
-          await dropOp.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
-        } catch (err) {
-          if (
-            !(err instanceof MongoServerError) ||
-            err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
-          ) {
-            throw err;
-          }
+  if (!encryptedFields && encryptedFieldsMap) {
+    // If the MongoClient was configured with an encryptedFieldsMap,
+    // and no encryptedFields config was available in it or explicitly
+    // passed as an argument, the spec tells us to look one up using
+    // listCollections().
+    const listCollectionsResult = await db
+      .listCollections(
+        { name },
+        {
+          nameOnly: false,
+          session: options.session,
+          timeoutContext: new CursorTimeoutContext(timeoutContext, Symbol())
+        }
+      )
+      .toArray();
+    encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
+  }
+
+  if (encryptedFields) {
+    const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
+    const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
+
+    for (const collectionName of [escCollection, ecocCollection]) {
+      // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
+      const dropOp = new DropCollectionOperation(db, collectionName, options);
+      try {
+        await executeOperation(db.client, dropOp, timeoutContext);
+      } catch (err) {
+        if (
+          !(err instanceof MongoServerError) ||
+          err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
+        ) {
+          throw err;
         }
       }
     }
-
-    return await this.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
   }
 
-  private async executeWithoutEncryptedFieldsCheck(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<boolean> {
-    await super.executeCommand(server, session, { drop: this.name }, timeoutContext);
-    return true;
-  }
+  return await executeOperation(
+    db.client,
+    new DropCollectionOperation(db, name, options),
+    timeoutContext
+  );
 }
 
 /** @public */
@@ -92,6 +108,7 @@ export type DropDatabaseOptions = CommandOperationOptions;
 
 /** @internal */
 export class DropDatabaseOperation extends CommandOperation<boolean> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DropDatabaseOptions;
 
   constructor(db: Db, options: DropDatabaseOptions) {
@@ -102,12 +119,11 @@ export class DropDatabaseOperation extends CommandOperation<boolean> {
     return 'dropDatabase' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<boolean> {
-    await super.executeCommand(server, session, { dropDatabase: 1 }, timeoutContext);
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
+    return { dropDatabase: 1 };
+  }
+
+  override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): boolean {
     return true;
   }
 }

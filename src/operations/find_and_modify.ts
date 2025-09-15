@@ -1,11 +1,11 @@
+import { type Connection } from '..';
 import type { Document } from '../bson';
+import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
 import { ReadPreference } from '../read_preference';
-import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
-import { type TimeoutContext } from '../timeout';
 import { decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
 import { type WriteConcern, type WriteConcernSettings } from '../write_concern';
 import { CommandOperation, type CommandOperationOptions } from './command';
@@ -121,8 +121,8 @@ function configureFindAndModifyCmdBaseUpdateOpts(
 
 /** @internal */
 export class FindAndModifyOperation extends CommandOperation<Document> {
+  override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
-  cmdBase: FindAndModifyCmdBase;
   collection: Collection;
   query: Document;
   doc?: Document;
@@ -133,43 +133,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions
   ) {
     super(collection, options);
-    this.options = options ?? {};
-    this.cmdBase = {
-      remove: false,
-      new: false,
-      upsert: false
-    };
-
-    options.includeResultMetadata ??= false;
-
-    const sort = formatSort(options.sort);
-    if (sort) {
-      this.cmdBase.sort = sort;
-    }
-
-    if (options.projection) {
-      this.cmdBase.fields = options.projection;
-    }
-
-    if (options.maxTimeMS) {
-      this.cmdBase.maxTimeMS = options.maxTimeMS;
-    }
-
-    // Decorate the findAndModify command with the write Concern
-    if (options.writeConcern) {
-      this.cmdBase.writeConcern = options.writeConcern;
-    }
-
-    if (options.let) {
-      this.cmdBase.let = options.let;
-    }
-
-    // we check for undefined specifically here to allow falsy values
-    // eslint-disable-next-line no-restricted-syntax
-    if (options.comment !== undefined) {
-      this.cmdBase.comment = options.comment;
-    }
-
+    this.options = options;
     // force primary read preference
     this.readPreference = ReadPreference.primary;
 
@@ -181,40 +145,68 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     return 'findAndModify' as const;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined,
-    timeoutContext: TimeoutContext
-  ): Promise<Document> {
-    const coll = this.collection;
-    const query = this.query;
-    const options = { ...this.options, ...this.bsonOptions };
-
-    // Create findAndModify command object
-    const cmd: Document = {
-      findAndModify: coll.collectionName,
-      query: query,
-      ...this.cmdBase
+  override buildCommandDocument(
+    connection: Connection,
+    _session?: ClientSession
+  ): Document & FindAndModifyCmdBase {
+    const options = this.options;
+    const command: Document & FindAndModifyCmdBase = {
+      findAndModify: this.collection.collectionName,
+      query: this.query,
+      remove: false,
+      new: false,
+      upsert: false
     };
 
-    decorateWithCollation(cmd, coll, options);
+    options.includeResultMetadata ??= false;
+
+    const sort = formatSort(options.sort);
+    if (sort) {
+      command.sort = sort;
+    }
+
+    if (options.projection) {
+      command.fields = options.projection;
+    }
+
+    if (options.maxTimeMS) {
+      command.maxTimeMS = options.maxTimeMS;
+    }
+
+    // Decorate the findAndModify command with the write Concern
+    if (options.writeConcern) {
+      command.writeConcern = options.writeConcern;
+    }
+
+    if (options.let) {
+      command.let = options.let;
+    }
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      command.comment = options.comment;
+    }
+
+    decorateWithCollation(command, options);
 
     if (options.hint) {
-      // TODO: once this method becomes a CommandOperation we will have the server
-      // in place to check.
       const unacknowledgedWrite = this.writeConcern?.w === 0;
-      if (unacknowledgedWrite || maxWireVersion(server) < 8) {
+      if (unacknowledgedWrite && maxWireVersion(connection) < 9) {
         throw new MongoCompatibilityError(
-          'The current topology does not support a hint on findAndModify commands'
+          'hint for the findAndModify command is only supported on MongoDB 4.4+'
         );
       }
 
-      cmd.hint = options.hint;
+      command.hint = options.hint;
     }
 
-    // Execute the command
-    const result = await super.executeCommand(server, session, cmd, timeoutContext);
-    return options.includeResultMetadata ? result : (result.value ?? null);
+    return command;
+  }
+
+  override handleOk(response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): Document {
+    const result = super.handleOk(response);
+    return this.options.includeResultMetadata ? result : (result.value ?? null);
   }
 }
 
@@ -227,12 +219,21 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
     }
 
     super(collection, filter, options);
-    this.cmdBase.remove = true;
+  }
+
+  override buildCommandDocument(
+    connection: Connection,
+    session?: ClientSession
+  ): Document & FindAndModifyCmdBase {
+    const document = super.buildCommandDocument(connection, session);
+    document.remove = true;
+    return document;
   }
 }
 
 /** @internal */
 export class FindOneAndReplaceOperation extends FindAndModifyOperation {
+  private replacement: Document;
   constructor(
     collection: Collection,
     filter: Document,
@@ -252,13 +253,25 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
     }
 
     super(collection, filter, options);
-    this.cmdBase.update = replacement;
-    configureFindAndModifyCmdBaseUpdateOpts(this.cmdBase, options);
+    this.replacement = replacement;
+  }
+
+  override buildCommandDocument(
+    connection: Connection,
+    session?: ClientSession
+  ): Document & FindAndModifyCmdBase {
+    const document = super.buildCommandDocument(connection, session);
+    document.update = this.replacement;
+    configureFindAndModifyCmdBaseUpdateOpts(document, this.options);
+    return document;
   }
 }
 
 /** @internal */
 export class FindOneAndUpdateOperation extends FindAndModifyOperation {
+  override options: FindOneAndUpdateOptions;
+
+  private update: Document;
   constructor(
     collection: Collection,
     filter: Document,
@@ -278,17 +291,29 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
     }
 
     super(collection, filter, options);
-    this.cmdBase.update = update;
-    configureFindAndModifyCmdBaseUpdateOpts(this.cmdBase, options);
+    this.update = update;
+    this.options = options;
+  }
 
-    if (options.arrayFilters) {
-      this.cmdBase.arrayFilters = options.arrayFilters;
+  override buildCommandDocument(
+    connection: Connection,
+    session?: ClientSession
+  ): Document & FindAndModifyCmdBase {
+    const document = super.buildCommandDocument(connection, session);
+    document.update = this.update;
+    configureFindAndModifyCmdBaseUpdateOpts(document, this.options);
+
+    if (this.options.arrayFilters) {
+      document.arrayFilters = this.options.arrayFilters;
     }
+
+    return document;
   }
 }
 
 defineAspects(FindAndModifyOperation, [
   Aspect.WRITE_OPERATION,
   Aspect.RETRYABLE,
-  Aspect.EXPLAINABLE
+  Aspect.EXPLAINABLE,
+  Aspect.SUPPORTS_RAW_DATA
 ]);

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
-import { type FailPoint } from '../../tools/utils';
+import { type FailCommandFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('Collection', function () {
@@ -483,7 +483,7 @@ describe('Collection', function () {
             configureFailPoint: 'failCommand',
             mode: 'alwaysOn',
             data: { failCommands: ['aggregate'], errorCode: 1 }
-          } as FailPoint);
+          } as FailCommandFailPoint);
       });
 
       afterEach(async function () {
@@ -494,7 +494,7 @@ describe('Collection', function () {
             configureFailPoint: 'failCommand',
             mode: 'off',
             data: { failCommands: ['aggregate'] }
-          } as FailPoint);
+          } as FailCommandFailPoint);
       });
 
       it('rejects the countDocuments API', async () => {
@@ -547,7 +547,7 @@ describe('Collection', function () {
       const capped = await collection.isCapped();
       expect(capped).to.be.false;
     } finally {
-      client.close();
+      await client.close();
     }
   }
 

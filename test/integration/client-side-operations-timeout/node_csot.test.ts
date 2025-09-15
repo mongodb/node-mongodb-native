@@ -31,7 +31,7 @@ import {
   promiseWithResolvers,
   TopologyType
 } from '../../mongodb';
-import { type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
+import { type FailCommandFailPoint, type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
@@ -223,7 +223,7 @@ describe('CSOT driver tests', metadata, () => {
 
     describe('when a maxTimeExpired error is returned at the top-level', () => {
       // {ok: 0, code: 50, codeName: "MaxTimeMSExpired", errmsg: "operation time limit exceeded"}
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
         data: {
@@ -320,7 +320,7 @@ describe('CSOT driver tests', metadata, () => {
 
     describe('when a maxTimeExpired error is returned inside a writeConcernError embedded document', () => {
       // {ok: 1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
         data: {
@@ -368,7 +368,7 @@ describe('CSOT driver tests', metadata, () => {
     let internalClient: MongoClient;
     let commandStarted: (CommandStartedEvent & { command: { maxTimeMS?: number } })[];
     let commandSucceeded: CommandSucceededEvent[];
-    const failpoint: FailPoint = {
+    const failpoint: FailCommandFailPoint = {
       configureFailPoint: 'failCommand',
       mode: 'alwaysOn',
       data: {
@@ -491,7 +491,7 @@ describe('CSOT driver tests', metadata, () => {
       let internalClient: MongoClient;
       let commandStarted: CommandStartedEvent[];
       let commandSucceeded: CommandSucceededEvent[];
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
         data: {
@@ -621,7 +621,7 @@ describe('CSOT driver tests', metadata, () => {
       requires: { mongodb: '>=4.4' }
     };
 
-    const failpoint: FailPoint = {
+    const failpoint: FailCommandFailPoint = {
       configureFailPoint: 'failCommand',
       mode: 'alwaysOn',
       data: {
@@ -862,7 +862,7 @@ describe('CSOT driver tests', metadata, () => {
       context('when the initial aggregate times out', function () {
         beforeEach(async function () {
           data = [];
-          const failpoint: FailPoint = {
+          const failpoint: FailCommandFailPoint = {
             configureFailPoint: 'failCommand',
             mode: { times: 1 }, // fail twice to account for executeOperation's retry attempt
             data: {
@@ -901,7 +901,7 @@ describe('CSOT driver tests', metadata, () => {
             this.configuration.topologyType === TopologyType.LoadBalanced ||
             this.configuration.topologyType === TopologyType.Sharded;
           data = [];
-          const failpoint: FailPoint = {
+          const failpoint: FailCommandFailPoint = {
             configureFailPoint: 'failCommand',
             mode: { times: 1 },
             data: {
@@ -940,7 +940,7 @@ describe('CSOT driver tests', metadata, () => {
           async function () {
             // NOTE: duplicating setup code here so its particular configuration requirements don't
             // affect other tests.
-            const failpoint: FailPoint = {
+            const failpoint: FailCommandFailPoint = {
               configureFailPoint: 'failCommand',
               mode: { times: 1 },
               data: {
@@ -1011,7 +1011,7 @@ describe('CSOT driver tests', metadata, () => {
       });
 
       context('when the resume attempt times out', function () {
-        const failpoint: FailPoint = {
+        const failpoint: FailCommandFailPoint = {
           configureFailPoint: 'failCommand',
           mode: { times: 2 }, // timeout the getMore, and the aggregate
           data: {
@@ -1064,7 +1064,7 @@ describe('CSOT driver tests', metadata, () => {
     });
 
     context('upload', function () {
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
         data: {
@@ -1143,7 +1143,7 @@ describe('CSOT driver tests', metadata, () => {
     });
 
     context('download', function () {
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 1 },
         data: {
@@ -1281,7 +1281,7 @@ describe('CSOT driver tests', metadata, () => {
     };
 
     describe('when an operation fails inside withTransaction callback', () => {
-      const failpoint: FailPoint = {
+      const failpoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
         data: {
@@ -1359,49 +1359,70 @@ describe('CSOT driver tests', metadata, () => {
     });
   });
 
-  describe('Connection after timeout', { requires: { mongodb: '>=4.4' } }, function () {
-    let client: MongoClient;
+  describe(
+    'Connection after timeout',
+    {
+      requires: {
+        // 4.4 for use of failCommands
+        mongodb: '>=4.4'
+      }
+    },
+    function () {
+      let client: MongoClient;
 
-    beforeEach(async function () {
-      client = this.configuration.newClient({ timeoutMS: 500 });
+      beforeEach(async function () {
+        client = this.configuration.newClient({ timeoutMS: 500 });
 
-      const failpoint: FailPoint = {
-        configureFailPoint: 'failCommand',
-        mode: {
-          times: 1
-        },
-        data: {
-          failCommands: ['insert'],
-          blockConnection: true,
-          blockTimeMS: 700
-        }
-      };
+        await client.db('admin').command(<FailPoint>{
+          configureFailPoint: 'maxTimeNeverTimeOut',
+          mode: 'alwaysOn'
+        });
 
-      await client.db('admin').command(failpoint);
-    });
+        const failpoint: FailCommandFailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: {
+            times: 1
+          },
+          data: {
+            failCommands: ['insert'],
+            blockConnection: true,
+            blockTimeMS: 700
+          }
+        };
 
-    afterEach(async function () {
-      await client.close();
-    });
+        await client.db('admin').command(failpoint);
+      });
 
-    it('closes so pending messages are not read by another operation', async function () {
-      const cmap = [];
-      client.on('connectionCheckedOut', ev => cmap.push(ev));
-      client.on('connectionClosed', ev => cmap.push(ev));
+      afterEach(async function () {
+        await client.db('admin').command(<FailPoint>{
+          configureFailPoint: 'maxTimeNeverTimeOut',
+          mode: 'off'
+        });
 
-      const error = await client
-        .db('socket')
-        .collection('closes')
-        .insertOne({})
-        .catch(error => error);
+        await client.close();
+      });
 
-      expect(error).to.be.instanceOf(MongoOperationTimeoutError);
-      expect(cmap).to.have.lengthOf(2);
+      it('closes so pending messages are not read by another operation', async function () {
+        const cmap = [];
+        client.on('connectionCheckedOut', ev => cmap.push(ev));
+        client.on('connectionClosed', ev => cmap.push(ev));
 
-      const [checkedOut, closed] = cmap;
-      expect(checkedOut).to.have.property('name', 'connectionCheckedOut');
-      expect(closed).to.have.property('name', 'connectionClosed');
-      expect(checkedOut).to.have.property('connectionId', closed.connectionId);
-    });
-  });
+        const error = await client
+          .db('socket')
+          .collection('closes')
+          .insertOne({})
+          .catch(error => error);
+
+        // Note: In the case where the timeout comes from the server, the driver does not
+        // need to close the connection as no more potential messages are expected.
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+        expect(cmap).to.have.lengthOf(2);
+
+        const [checkedOut, closed] = cmap;
+        expect(checkedOut).to.have.property('name', 'connectionCheckedOut');
+        expect(closed).to.have.property('name', 'connectionClosed');
+        expect(checkedOut).to.have.property('connectionId', closed.connectionId);
+      });
+    }
+  );
 });
