@@ -2255,23 +2255,19 @@ describe.only('ChangeStream resumability', function () {
 
             await collection.insertOne({ a: 1 });
 
-            // mimic the node termination by closing the connection and failing on heartbeat
             await client.db('admin').command({
               configureFailPoint: 'failCommand',
               mode: 'alwaysOn',
               data: {
                 failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
                 closeConnection: true,
-                handshakeCommands: true,
-                failInternalCommands: true,
                 appName: appName
               }
             } as FailCommandFailPoint);
-            // force new election in the cluster
             await client
               .db('admin')
               .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
-            await client.db('admin').command({ replSetStepDown: 30, force: true });
+            await client.db('admin').command({ replSetStepDown: 5, force: true });
 
             await sleep(500);
 
@@ -2609,23 +2605,19 @@ describe.only('ChangeStream resumability', function () {
 
             await collection.insertOne({ a: 1 });
 
-            // mimic the node termination by closing the connection and failing on heartbeat
             await client.db('admin').command({
               configureFailPoint: 'failCommand',
               mode: 'alwaysOn',
               data: {
                 failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
                 closeConnection: true,
-                handshakeCommands: true,
-                failInternalCommands: true,
                 appName: appName
               }
             } as FailCommandFailPoint);
-            // force new election in the cluster
             await client
               .db('admin')
               .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
-            await client.db('admin').command({ replSetStepDown: 30, force: true });
+            await client.db('admin').command({ replSetStepDown: 5, force: true });
 
             await sleep(500);
 
@@ -2787,23 +2779,19 @@ describe.only('ChangeStream resumability', function () {
 
             await collection.insertOne({ a: 1 });
 
-            // mimic the node termination by closing the connection and failing on heartbeat
             await client.db('admin').command({
               configureFailPoint: 'failCommand',
               mode: 'alwaysOn',
               data: {
                 failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
                 closeConnection: true,
-                handshakeCommands: true,
-                failInternalCommands: true,
                 appName: appName
               }
             } as FailCommandFailPoint);
-            // force new election in the cluster
             await client
               .db('admin')
               .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
-            await client.db('admin').command({ replSetStepDown: 30, force: true });
+            await client.db('admin').command({ replSetStepDown: 5, force: true });
 
             await sleep(500);
 
@@ -3007,6 +2995,56 @@ describe.only('ChangeStream resumability', function () {
         expect(aggregateEvents).to.have.lengthOf(2);
         expect(changeStream.closed).to.be.true;
       });
+    });
+
+    context('when the error is not a server error', function () {
+      // This test requires a replica set to call replSetFreeze command
+      it(
+        'should resume on ServerSelectionError',
+        { requires: { topology: ['replicaset'] } },
+        async function () {
+          changeStream = collection.watch([]);
+
+          const changes = on(changeStream, 'change');
+          await once(changeStream.cursor, 'init');
+
+          await collection.insertOne({ a: 1 });
+
+          const change = await changes.next();
+          expect(change.value[0]).to.containSubset({
+            operationType: 'insert',
+            fullDocument: { a: 1 }
+          });
+
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
+              closeConnection: true,
+              appName: appName
+            }
+          } as FailCommandFailPoint);
+          await client
+            .db('admin')
+            .command({ replSetFreeze: 0 }, { readPreference: ReadPreference.SECONDARY });
+          await client.db('admin').command({ replSetStepDown: 5, force: true });
+
+          await sleep(500);
+
+          await collection.insertOne({ a: 2 });
+
+          const change2 = await changes.next();
+          expect(change2.value[0]).to.containSubset({
+            operationType: 'insert',
+            fullDocument: { a: 2 }
+          });
+
+          expect(aggregateEvents).to.have.lengthOf(2);
+          const [e1, e2] = aggregateEvents;
+          expect(e1.address).to.not.equal(e2.address);
+        }
+      );
     });
   });
 
