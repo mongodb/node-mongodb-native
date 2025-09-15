@@ -1104,7 +1104,10 @@ function isStaleServerDescription(
   );
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated This class will be removed as dead code in the next major version.
+ */
 export class ServerCapabilities {
   maxWireVersion: number;
   minWireVersion: number;
@@ -1115,26 +1118,26 @@ export class ServerCapabilities {
   }
 
   get hasAggregationCursor(): boolean {
-    return this.maxWireVersion >= 1;
+    return true;
   }
 
   get hasWriteCommands(): boolean {
-    return this.maxWireVersion >= 2;
+    return true;
   }
   get hasTextSearch(): boolean {
-    return this.minWireVersion >= 0;
+    return true;
   }
 
   get hasAuthCommands(): boolean {
-    return this.maxWireVersion >= 1;
+    return true;
   }
 
   get hasListCollectionsCommand(): boolean {
-    return this.maxWireVersion >= 3;
+    return true;
   }
 
   get hasListIndexesCommand(): boolean {
-    return this.maxWireVersion >= 3;
+    return true;
   }
 
   get supportsSnapshotReads(): boolean {
@@ -1142,10 +1145,10 @@ export class ServerCapabilities {
   }
 
   get commandsTakeWriteConcern(): boolean {
-    return this.maxWireVersion >= 5;
+    return true;
   }
 
   get commandsTakeCollation(): boolean {
-    return this.maxWireVersion >= 5;
+    return true;
   }
 }
