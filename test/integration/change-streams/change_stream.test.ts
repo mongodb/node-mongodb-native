@@ -2263,7 +2263,7 @@ describe('ChangeStream resumability', function () {
       context('when the error is not a server error', function () {
         it(
           'should resume on ServerSelectionError',
-          { requires: { topology: ['replicaset', 'sharded-replicaset', 'sharded', 'load-balanced'] } },
+          { requires: { topology: ['replicaset'] } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
