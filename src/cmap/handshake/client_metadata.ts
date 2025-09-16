@@ -107,7 +107,7 @@ export class LimitedSizeDocument {
   }
 }
 
-type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'additionalDriverInfo'>;
+type MakeClientMetadataOptions = Pick<MongoOptions, 'appName'>;
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
@@ -116,15 +116,17 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'additionalDrive
  * 3. Omit the `env` document entirely.
  * 4. Truncate `platform`. -- special we do not truncate this field
  */
-export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMetadata {
+export function makeClientMetadata(
+  driverInfos: DriverInfo[],
+  { appName = '' }: MakeClientMetadataOptions
+): ClientMetadata {
   const metadataDocument = new LimitedSizeDocument(512);
 
-  const { appName = '' } = options;
   // Add app name first, it must be sent
   if (appName.length > 0) {
     const name =
       Buffer.byteLength(appName, 'utf8') <= 128
-        ? options.appName
+        ? appName
         : Buffer.from(appName, 'utf8').subarray(0, 128).toString('utf8');
     metadataDocument.ifItFitsItSits('application', { name });
   }
@@ -135,7 +137,7 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   };
 
   // This is where we handle additional driver info added after client construction.
-  for (const { name: n = '', version: v = '' } of options.additionalDriverInfo) {
+  for (const { name: n = '', version: v = '' } of driverInfos) {
     if (n.length > 0) {
       driverInfo.name = `${driverInfo.name}|${n}`;
     }
@@ -152,7 +154,7 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
 
   let runtimeInfo = getRuntimeInfo();
   // This is where we handle additional driver info added after client construction.
-  for (const { platform = '' } of options.additionalDriverInfo) {
+  for (const { platform = '' } of driverInfos) {
     if (platform.length > 0) {
       runtimeInfo = `${runtimeInfo}|${platform}`;
     }
