@@ -94,7 +94,7 @@ Set the `DRIVERS_TOOLS` environment variable:
 export DRIVERS_TOOLS=<path to driver>/drivers-evergreen-tools
 ```
 
-Start a `mongod` replica set with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
+Start a replica set with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
 
 ```sh
 VERSION='latest' TOPOLOGY='replica_set' AUTH='noauth' bash .evergreen/run-orchestration.sh
