@@ -354,3 +354,4 @@ The nightly build is not suitable for production use.
 
 © 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTORS.md) \
 © 2009-2012 Christian Amor Kvalheim
+
