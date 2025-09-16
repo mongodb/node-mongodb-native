@@ -33,6 +33,7 @@ const CHANGE_STREAM_OPTIONS = [
   'showExpandedEvents'
 ] as const;
 
+
 const CHANGE_DOMAIN_TYPES = {
   COLLECTION: Symbol('Collection'),
   DATABASE: Symbol('Database'),
