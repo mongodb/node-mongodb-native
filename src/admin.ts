@@ -171,3 +171,4 @@ export class Admin {
     return await this.command({ replSetGetStatus: 1 }, options);
   }
 }
+
