@@ -18,7 +18,6 @@ import {
   type MongoDBNamespace,
   type MongoDBResponseConstructor,
   MongoMissingCredentialsError,
-  MongoMissingDependencyError,
   MongoServerError,
   setDifference
 } from '../../mongodb';
