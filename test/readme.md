@@ -97,7 +97,7 @@ export DRIVERS_TOOLS=<path to driver>/drivers-evergreen-tools
 Start a replica set with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
 
 ```sh
-VERSION='latest' TOPOLOGY='replica_set' AUTH='noauth' bash .evergreen/run-orchestration.sh
+VERSION='latest' TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
 ```
 
 Load the new cluster's URI into the environment:
