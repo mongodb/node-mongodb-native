@@ -117,7 +117,7 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName'>;
  * 4. Truncate `platform`. -- special we do not truncate this field
  */
 export function makeClientMetadata(
-  driverInfos: DriverInfo[],
+  driverInfoList: DriverInfo[],
   { appName = '' }: MakeClientMetadataOptions
 ): ClientMetadata {
   const metadataDocument = new LimitedSizeDocument(512);
@@ -137,7 +137,7 @@ export function makeClientMetadata(
   };
 
   // This is where we handle additional driver info added after client construction.
-  for (const { name: n = '', version: v = '' } of driverInfos) {
+  for (const { name: n = '', version: v = '' } of driverInfoList) {
     if (n.length > 0) {
       driverInfo.name = `${driverInfo.name}|${n}`;
     }
@@ -154,7 +154,7 @@ export function makeClientMetadata(
 
   let runtimeInfo = getRuntimeInfo();
   // This is where we handle additional driver info added after client construction.
-  for (const { platform = '' } of driverInfos) {
+  for (const { platform = '' } of driverInfoList) {
     if (platform.length > 0) {
       runtimeInfo = `${runtimeInfo}|${platform}`;
     }

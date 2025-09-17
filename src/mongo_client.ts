@@ -431,7 +431,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       | 'extendedMetadata'
     >;
 
-  private driverInfos: DriverInfo[] = [];
+  private driverInfoList: DriverInfo[] = [];
 
   constructor(url: string, options?: MongoClientOptions) {
     super();
@@ -497,13 +497,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * @param driverInfo - Information about the application or library.
    */
   appendMetadata(driverInfo: DriverInfo) {
-    const isDuplicateDriverInfo = this.driverInfos.some(info =>
+    const isDuplicateDriverInfo = this.driverInfoList.some(info =>
       isDriverInfoEqual(info, driverInfo)
     );
     if (isDuplicateDriverInfo) return;
 
-    this.driverInfos.push(driverInfo);
-    this.options.metadata = makeClientMetadata(this.driverInfos, this.options);
+    this.driverInfoList.push(driverInfo);
+    this.options.metadata = makeClientMetadata(this.driverInfoList, this.options);
     this.options.extendedMetadata = addContainerMetadata(this.options.metadata)
       .then(undefined, squashError)
       .then(result => result ?? {}); // ensure Promise<Document>
