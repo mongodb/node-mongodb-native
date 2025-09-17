@@ -62,7 +62,10 @@ describe('MONGODB-AWS', function () {
       }
     });
 
-    describe('when attempting AWS auth', function () {
+    // TODO(NODE-7046): Unskip when removing support for AWS credentials in URI.
+    // The drivers tools scripts put the credentials in the URI currently, this will
+    // need to change when doing the DRIVERS-3131 work.
+    describe.skip('when attempting AWS auth', function () {
       it('throws an error', async function () {
         client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
 
@@ -72,7 +75,7 @@ describe('MONGODB-AWS', function () {
           .estimatedDocumentCount()
           .catch(e => e);
 
-        expect(err).to.be.instanceof(MongoMissingDependencyError);
+        expect(err).to.be.instanceof(MongoAWSError);
         expect(err.message).to.match(/credential-providers/);
       });
     });
@@ -485,7 +488,8 @@ describe('AWS KMS Credential Fetching', function () {
     });
     it('fetching AWS KMS credentials throws an error', async function () {
       const error = await refreshKMSCredentials({ aws: {} }).catch(e => e);
-      expect(error).to.be.instanceOf(MongoMissingDependencyError);
+      expect(error).to.be.instanceOf(MongoAWSError);
+      expect(error.message).to.match(/credential-providers/);
     });
   });
 
