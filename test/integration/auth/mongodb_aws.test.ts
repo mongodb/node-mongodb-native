@@ -18,6 +18,7 @@ import {
   type MongoDBNamespace,
   type MongoDBResponseConstructor,
   MongoMissingCredentialsError,
+  MongoMissingDependencyError,
   MongoServerError,
   setDifference
 } from '../../mongodb';
@@ -25,7 +26,6 @@ import {
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 
 describe('MONGODB-AWS', function () {
-  let awsSdkPresent;
   let client: MongoClient;
 
   beforeEach(function () {
@@ -33,20 +33,6 @@ describe('MONGODB-AWS', function () {
       this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
       return this.skip();
     }
-
-    const { MONGODB_AWS_SDK = 'unset' } = process.env;
-    expect(
-      ['true', 'false'],
-      `Always inform the AWS tests if they run with or without the SDK (MONGODB_AWS_SDK=${MONGODB_AWS_SDK})`
-    ).to.include(MONGODB_AWS_SDK);
-
-    awsSdkPresent = AWSTemporaryCredentialProvider.isAWSSDKInstalled;
-    expect(
-      awsSdkPresent,
-      MONGODB_AWS_SDK === 'true'
-        ? 'expected aws sdk to be installed'
-        : 'expected aws sdk to not be installed'
-    ).to.be[MONGODB_AWS_SDK];
   });
 
   afterEach(async () => {
@@ -55,39 +41,43 @@ describe('MONGODB-AWS', function () {
 
   context('when the AWS SDK is not present', function () {
     beforeEach(function () {
-      if (awsSdkPresent) {
-        this.skipReason = 'Tests error case when the AWS SDK is not installed.';
-        return this.skip();
-      }
+      AWSTemporaryCredentialProvider.awsSDK['kModuleError'] = new MongoMissingDependencyError(
+        'Missing dependency @aws-sdk/credential-providers',
+        {
+          cause: new Error(),
+          dependencyName: '@aws-sdk/credential-providers'
+        }
+      );
     });
 
-    // TODO(NODE-7046): Unskip when removing support for AWS credentials in URI.
-    // The drivers tools scripts put the credentials in the URI currently, this will
-    // need to change when doing the DRIVERS-3131 work.
-    describe.skip('when attempting AWS auth', function () {
+    afterEach(function () {
+      delete AWSTemporaryCredentialProvider.awsSDK['kModuleError'];
+    });
+
+    describe('when attempting AWS auth', function () {
       it('throws an error', async function () {
         client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
 
-        const err = await client
+        const result = await client
           .db('aws')
           .collection('aws_test')
           .estimatedDocumentCount()
           .catch(e => e);
 
-        expect(err).to.be.instanceof(MongoAWSError);
-        expect(err.message).to.match(/credential-providers/);
+        // TODO(NODE-7046): Remove branch when removing support for AWS credentials in URI.
+        // The drivers tools scripts put the credentials in the URI currently for some environments,
+        // this will need to change when doing the DRIVERS-3131 work.
+        if (!client.options.credentials.username) {
+          expect(result).to.be.instanceof(MongoAWSError);
+          expect(result.message).to.match(/credential-providers/);
+        } else {
+          expect(result).to.equal(0);
+        }
       });
     });
   });
 
   context('when the AWS SDK is present', function () {
-    beforeEach(function () {
-      if (!awsSdkPresent) {
-        this.skipReason = 'Tests cases when the AWS SDK is installed.';
-        return this.skip();
-      }
-    });
-
     it('should authorize when successfully authenticated', async function () {
       client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
 
@@ -389,10 +379,7 @@ describe('MONGODB-AWS', function () {
 
         const envCheck = () => {
           const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
-          return (
-            AWS_WEB_IDENTITY_TOKEN_FILE.length === 0 ||
-            !AWSTemporaryCredentialProvider.isAWSSDKInstalled
-          );
+          return AWS_WEB_IDENTITY_TOKEN_FILE.length === 0;
         };
 
         beforeEach(function () {
@@ -402,7 +389,6 @@ describe('MONGODB-AWS', function () {
             return this.skip();
           }
 
-          // @ts-expect-error We intentionally access a protected variable.
           credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
 
           storedEnv = process.env;
@@ -473,35 +459,8 @@ describe('MONGODB-AWS', function () {
       });
     }
   });
-});
 
-describe('AWS KMS Credential Fetching', function () {
-  context('when the AWS SDK is not installed', function () {
-    beforeEach(function () {
-      this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
-        ? 'Test must run in an AWS auth testing environment'
-        : AWSTemporaryCredentialProvider.isAWSSDKInstalled
-          ? 'This test must run in an environment where the AWS SDK is not installed.'
-          : undefined;
-      this.currentTest?.skipReason && this.skip();
-    });
-    it('fetching AWS KMS credentials throws an error', async function () {
-      const error = await refreshKMSCredentials({ aws: {} }).catch(e => e);
-      expect(error).to.be.instanceOf(MongoAWSError);
-      expect(error.message).to.match(/credential-providers/);
-    });
-  });
-
-  context('when the AWS SDK is installed', function () {
-    beforeEach(function () {
-      this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
-        ? 'Test must run in an AWS auth testing environment'
-        : !AWSTemporaryCredentialProvider.isAWSSDKInstalled
-          ? 'This test must run in an environment where the AWS SDK is installed.'
-          : undefined;
-      this.currentTest?.skipReason && this.skip();
-    });
-
+  describe('AWS KMS Credential Fetching', function () {
     context('when a credential provider is not provided', function () {
       it('KMS credentials are successfully fetched.', async function () {
         const { aws } = await refreshKMSCredentials({ aws: {} });
@@ -516,7 +475,6 @@ describe('AWS KMS Credential Fetching', function () {
       let providerCount = 0;
 
       beforeEach(function () {
-        // @ts-expect-error We intentionally access a protected variable.
         const provider = AWSTemporaryCredentialProvider.awsSDK;
         credentialProvider = async () => {
           providerCount++;
