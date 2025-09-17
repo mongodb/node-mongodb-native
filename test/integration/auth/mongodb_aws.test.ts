@@ -136,6 +136,30 @@ describe('MONGODB-AWS', function () {
     });
   });
 
+  context('when the AWS SDK is not present', function () {
+    beforeEach(function () {
+      if (awsSdkPresent) {
+        this.skipReason = 'Tests error case when the AWS SDK is not installed.';
+        return this.skip();
+      }
+    });
+
+    describe('when attempting AWS auth', function () {
+      it('throws an error', async function () {
+        client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
+
+        const err = await client
+          .db('aws')
+          .collection('aws_test')
+          .estimatedDocumentCount()
+          .catch(e => e);
+
+        expect(err).to.be.instanceof(MongoServerError);
+        expect(err.message).to.match(/credential-providers/);
+      });
+    });
+  });
+
   context('when user supplies a credentials provider', function () {
     let providerCount = 0;
 
