@@ -49,10 +49,8 @@ describe('Connection', function () {
           ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
-          extendedMetadata: addContainerMetadata(
-            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
-          )
+          metadata: makeClientMetadata([], {}),
+          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
         };
 
         let conn;
@@ -74,10 +72,8 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
-          extendedMetadata: addContainerMetadata(
-            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
-          )
+          metadata: makeClientMetadata([], {}),
+          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
         };
 
         let conn;
@@ -108,10 +104,8 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
-          extendedMetadata: addContainerMetadata(
-            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
-          )
+          metadata: makeClientMetadata([], {}),
+          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
         };
 
         let conn;
