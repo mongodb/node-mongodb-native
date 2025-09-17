@@ -28,7 +28,6 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
     this.currentTest?.skipReason && this.skip();
 
     keyVaultClient = this.configuration.newClient(process.env.MONGODB_UR);
-    // @ts-expect-error We intentionally access a protected variable.
     credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
   });
 
