@@ -8,7 +8,7 @@ import * as sinon from 'sinon';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import {
-  AWSTemporaryCredentialProvider,
+  AWSSDKCredentialProvider,
   type CommandOptions,
   Connection,
   type Document,
@@ -41,7 +41,7 @@ describe('MONGODB-AWS', function () {
 
   context('when the AWS SDK is not present', function () {
     beforeEach(function () {
-      AWSTemporaryCredentialProvider.awsSDK['kModuleError'] = new MongoMissingDependencyError(
+      AWSSDKCredentialProvider.awsSDK['kModuleError'] = new MongoMissingDependencyError(
         'Missing dependency @aws-sdk/credential-providers',
         {
           cause: new Error(),
@@ -51,7 +51,7 @@ describe('MONGODB-AWS', function () {
     });
 
     afterEach(function () {
-      delete AWSTemporaryCredentialProvider.awsSDK['kModuleError'];
+      delete AWSSDKCredentialProvider.awsSDK['kModuleError'];
     });
 
     describe('when attempting AWS auth', function () {
@@ -176,7 +176,7 @@ describe('MONGODB-AWS', function () {
       });
 
       it('authenticates with a user provided credentials provider', async function () {
-        const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+        const credentialProvider = AWSSDKCredentialProvider.awsSDK;
         const provider = async () => {
           providerCount++;
           return await credentialProvider.fromNodeProviderChain().apply();
@@ -389,7 +389,7 @@ describe('MONGODB-AWS', function () {
             return this.skip();
           }
 
-          credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+          credentialProvider = AWSSDKCredentialProvider.awsSDK;
 
           storedEnv = process.env;
           if (test.env.AWS_STS_REGIONAL_ENDPOINTS === undefined) {
@@ -461,46 +461,78 @@ describe('MONGODB-AWS', function () {
   });
 
   describe('AWS KMS Credential Fetching', function () {
-    context('when a credential provider is not provided', function () {
-      it('KMS credentials are successfully fetched.', async function () {
+    context('when the AWS SDK is not installed', function () {
+      beforeEach(function () {
+        AWSSDKCredentialProvider.awsSDK['kModuleError'] = new MongoMissingDependencyError(
+          'Missing dependency @aws-sdk/credential-providers',
+          {
+            cause: new Error(),
+            dependencyName: '@aws-sdk/credential-providers'
+          }
+        );
+      });
+
+      afterEach(function () {
+        delete AWSSDKCredentialProvider.awsSDK['kModuleError'];
+      });
+
+      it('fetching AWS KMS credentials throws an error', async function () {
+        const result = await refreshKMSCredentials({ aws: {} }).catch(e => e);
+
+        // TODO(NODE-7046): Remove branch when removing support for AWS credentials in URI.
+        // The drivers tools scripts put the credentials in the URI currently for some environments,
+        // this will need to change when doing the DRIVERS-3131 work.
+        if (!client.options.credentials.username) {
+          expect(result).to.be.instanceof(MongoAWSError);
+          expect(result.message).to.match(/credential-providers/);
+        } else {
+          expect(result).to.equal(0);
+        }
+      });
+    });
+
+    context('when the AWS SDK is installed', function () {
+      context('when a credential provider is not provided', function () {
+        it('KMS credentials are successfully fetched.', async function () {
+          const { aws } = await refreshKMSCredentials({ aws: {} });
+
+          expect(aws).to.have.property('accessKeyId');
+          expect(aws).to.have.property('secretAccessKey');
+        });
+      });
+
+      context('when a credential provider is provided', function () {
+        let credentialProvider;
+        let providerCount = 0;
+
+        beforeEach(function () {
+          const provider = AWSSDKCredentialProvider.awsSDK;
+          credentialProvider = async () => {
+            providerCount++;
+            return await provider.fromNodeProviderChain().apply();
+          };
+        });
+
+        it('KMS credentials are successfully fetched.', async function () {
+          const { aws } = await refreshKMSCredentials({ aws: {} }, { aws: credentialProvider });
+
+          expect(aws).to.have.property('accessKeyId');
+          expect(aws).to.have.property('secretAccessKey');
+          expect(providerCount).to.be.greaterThan(0);
+        });
+      });
+
+      it('does not return any extra keys for the `aws` credential provider', async function () {
         const { aws } = await refreshKMSCredentials({ aws: {} });
 
-        expect(aws).to.have.property('accessKeyId');
-        expect(aws).to.have.property('secretAccessKey');
+        const keys = new Set(Object.keys(aws ?? {}));
+        const allowedKeys = ['accessKeyId', 'secretAccessKey', 'sessionToken'];
+
+        expect(
+          Array.from(setDifference(keys, allowedKeys)),
+          'received an unexpected key in the response refreshing KMS credentials'
+        ).to.deep.equal([]);
       });
-    });
-
-    context('when a credential provider is provided', function () {
-      let credentialProvider;
-      let providerCount = 0;
-
-      beforeEach(function () {
-        const provider = AWSTemporaryCredentialProvider.awsSDK;
-        credentialProvider = async () => {
-          providerCount++;
-          return await provider.fromNodeProviderChain().apply();
-        };
-      });
-
-      it('KMS credentials are successfully fetched.', async function () {
-        const { aws } = await refreshKMSCredentials({ aws: {} }, { aws: credentialProvider });
-
-        expect(aws).to.have.property('accessKeyId');
-        expect(aws).to.have.property('secretAccessKey');
-        expect(providerCount).to.be.greaterThan(0);
-      });
-    });
-
-    it('does not return any extra keys for the `aws` credential provider', async function () {
-      const { aws } = await refreshKMSCredentials({ aws: {} });
-
-      const keys = new Set(Object.keys(aws ?? {}));
-      const allowedKeys = ['accessKeyId', 'secretAccessKey', 'sessionToken'];
-
-      expect(
-        Array.from(setDifference(keys, allowedKeys)),
-        'received an unexpected key in the response refreshing KMS credentials'
-      ).to.deep.equal([]);
     });
   });
 });

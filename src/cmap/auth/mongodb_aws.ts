@@ -11,8 +11,7 @@ import { type AuthContext, AuthProvider } from './auth_provider';
 import {
   type AWSCredentialProvider,
   AWSSDKCredentialProvider,
-  type AWSTempCredentials,
-  type AWSTemporaryCredentialProvider
+  type AWSTempCredentials
 } from './aws_temporary_credentials';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
@@ -33,13 +32,10 @@ interface AWSSaslContinuePayload {
 }
 
 export class MongoDBAWS extends AuthProvider {
-  private credentialFetcher: AWSTemporaryCredentialProvider;
-  private credentialProvider?: AWSCredentialProvider;
+  private credentialFetcher: AWSSDKCredentialProvider;
 
   constructor(credentialProvider?: AWSCredentialProvider) {
     super();
-
-    this.credentialProvider = credentialProvider;
     this.credentialFetcher = new AWSSDKCredentialProvider(credentialProvider);
   }
 
@@ -159,7 +155,7 @@ export class MongoDBAWS extends AuthProvider {
 
 async function makeTempCredentials(
   credentials: MongoCredentials,
-  awsCredentialFetcher: AWSTemporaryCredentialProvider
+  awsCredentialFetcher: AWSSDKCredentialProvider
 ): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
     // The AWS session token (creds.Token) may or may not be set.

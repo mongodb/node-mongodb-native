@@ -19,26 +19,9 @@ export interface AWSTempCredentials {
 /** @public **/
 export type AWSCredentialProvider = () => Promise<AWSCredentials>;
 
-/**
- * @internal
- *
- * Fetches temporary AWS credentials.
- */
-export abstract class AWSTemporaryCredentialProvider {
-  abstract getCredentials(): Promise<AWSTempCredentials>;
-  private static _awsSDK: ReturnType<typeof getAwsCredentialProvider>;
-  static get awsSDK() {
-    AWSTemporaryCredentialProvider._awsSDK ??= getAwsCredentialProvider();
-    return AWSTemporaryCredentialProvider._awsSDK;
-  }
-
-  static get isAWSSDKInstalled(): boolean {
-    return !('kModuleError' in AWSTemporaryCredentialProvider.awsSDK);
-  }
-}
-
 /** @internal */
-export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
+export class AWSSDKCredentialProvider {
+  private static _awsSDK: ReturnType<typeof getAwsCredentialProvider>;
   private _provider?: AWSCredentialProvider;
 
   /**
@@ -46,11 +29,14 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
    * @param credentialsProvider - The credentials provider.
    */
   constructor(credentialsProvider?: AWSCredentialProvider) {
-    super();
-
     if (credentialsProvider) {
       this._provider = credentialsProvider;
     }
+  }
+
+  static get awsSDK() {
+    AWSSDKCredentialProvider._awsSDK ??= getAwsCredentialProvider();
+    return AWSSDKCredentialProvider._awsSDK;
   }
 
   /**
@@ -58,8 +44,8 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
    * To ensure this occurs, we need to cache the `provider` returned by the AWS sdk and re-use it when fetching credentials.
    */
   private get provider(): () => Promise<AWSCredentials> {
-    if ('kModuleError' in AWSTemporaryCredentialProvider.awsSDK) {
-      throw AWSTemporaryCredentialProvider.awsSDK.kModuleError;
+    if ('kModuleError' in AWSSDKCredentialProvider.awsSDK) {
+      throw AWSSDKCredentialProvider.awsSDK.kModuleError;
     }
     if (this._provider) {
       return this._provider;
@@ -107,15 +93,15 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
 
     this._provider =
       awsRegionSettingsExist && useRegionalSts
-        ? AWSTemporaryCredentialProvider.awsSDK.fromNodeProviderChain({
+        ? AWSSDKCredentialProvider.awsSDK.fromNodeProviderChain({
             clientConfig: { region: AWS_REGION }
           })
-        : AWSTemporaryCredentialProvider.awsSDK.fromNodeProviderChain();
+        : AWSSDKCredentialProvider.awsSDK.fromNodeProviderChain();
 
     return this._provider;
   }
 
-  override async getCredentials(): Promise<AWSTempCredentials> {
+  async getCredentials(): Promise<AWSTempCredentials> {
     /*
      * Creates a credential provider that will attempt to find credentials from the
      * following sources (listed in order of precedence):
