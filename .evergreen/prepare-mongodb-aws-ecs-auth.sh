@@ -10,8 +10,6 @@ mkdir -p $ECS_SRC_DIR/.evergreen
 set -ex
 
 # write test file
-echo "export MONGODB_AWS_SDK=$MONGODB_AWS_SDK" >>$PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
-echo "if [ $MONGODB_AWS_SDK = 'false' ]; then rm -rf ./node_modules/@aws-sdk/credential-providers; fi" >>$PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
 echo "npm run check:aws" >>$PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
 
 # copy test file to AWS ecs test directory

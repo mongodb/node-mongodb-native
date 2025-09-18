@@ -422,7 +422,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -440,7 +439,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -458,7 +456,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -477,7 +474,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -495,7 +491,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -513,7 +508,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -532,7 +526,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -549,7 +542,6 @@ functions:
       params:
         include_expansions_in_env:
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - PROJECT_DIRECTORY
           - MONGODB_BINARIES
           - AWS_ACCESS_KEY_ID
@@ -597,7 +589,6 @@ functions:
           - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: env-creds
-          MONGODB_AWS_SDK: "true"
         working_dir: "src"
         binary: bash
         args:
