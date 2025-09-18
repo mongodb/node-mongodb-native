@@ -1,11 +1,11 @@
 'use strict';
 
-import { MongoServerSelectionError } from '../../../src/error';
-import { ReadPreference } from '../../../src/read_preference';
-import { ServerType, TopologyType } from '../../../src/sdam/common';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import * as ServerSelectors from '../../../src/sdam/server_selection'; // src/sdam/server_selection.ts
-import { Topology } from '../../../src/sdam/topology';
+const { MongoServerSelectionError } = require('../../../src/error');
+const { ReadPreference } = require('../../../src/read_preference');
+const { ServerType, TopologyType } = require('../../../src/sdam/common');
+const { ServerDescription } = require('../../../src/sdam/server_description');
+const { Topology } = require('../../../src/sdam/topology');
+const ServerSelectors = require('../../../src/sdam/server_selection');
 
 const sinon = require('sinon');
 const { expect } = require('chai');

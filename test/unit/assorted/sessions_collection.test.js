@@ -2,8 +2,8 @@
 const { Timestamp } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
-import { MongoClient } from '../../../lib';
-import { isHello } from '../../../lib/utils';
+const { isHello } = require('../../../src/utils');
+const { MongoClient } = require('../../../src');
 
 const test = {};
 describe('Sessions - unit/sessions', function () {
