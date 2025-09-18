@@ -1,16 +1,17 @@
 'use strict';
-const { Topology } = require('../../mongodb');
-const { ServerType, TopologyType } = require('../../mongodb');
-const { ServerDescription } = require('../../mongodb');
-const { ReadPreference } = require('../../mongodb');
-const { MongoServerSelectionError } = require('../../mongodb');
-const ServerSelectors = require('../../mongodb');
+
+import { MongoServerSelectionError } from '../../../src/error';
+import { ReadPreference } from '../../../src/read_preference';
+import { ServerType, TopologyType } from '../../../src/sdam/common';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import * as ServerSelectors from '../../../src/sdam/server_selection'; // src/sdam/server_selection.ts
+import { Topology } from '../../../src/sdam/topology';
 
 const sinon = require('sinon');
 const { expect } = require('chai');
 const { topologyWithPlaceholderClient } = require('../../tools/utils');
 
-function serverDescriptionFromDefinition(definition, hosts) {
+export function serverDescriptionFromDefinition(definition, hosts) {
   hosts = hosts || [];
 
   const serverType = definition.type;
@@ -80,7 +81,7 @@ function readPreferenceFromDefinition(definition) {
   return new ReadPreference(mode, tags, options);
 }
 
-async function executeServerSelectionTest(testDefinition) {
+export async function executeServerSelectionTest(testDefinition) {
   const topologyDescription = testDefinition.topology_description;
   const seedData = topologyDescription.servers.reduce(
     (result, seed) => {
@@ -183,5 +184,3 @@ async function executeServerSelectionTest(testDefinition) {
     topology.close();
   }
 }
-
-module.exports = { executeServerSelectionTest, serverDescriptionFromDefinition };

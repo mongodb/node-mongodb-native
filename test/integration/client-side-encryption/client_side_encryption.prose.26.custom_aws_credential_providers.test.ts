@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { AWSTemporaryCredentialProvider, Binary, MongoClient } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';

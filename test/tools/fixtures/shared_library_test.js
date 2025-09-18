@@ -1,7 +1,6 @@
-/* eslint-disable no-restricted-modules */
 const { EJSON } = require('bson');
-const { AutoEncrypter } = require('../../../lib/client-side-encryption/auto_encrypter');
-const { MongoClient } = require('../../../lib/mongo_client');
+const { AutoEncrypter } = require('../../../src/client-side-encryption/auto_encrypter');
+const { MongoClient } = require('../../../src/mongo_client');
 
 try {
   const extraOptions = JSON.parse(process.env.EXTRA_OPTIONS);

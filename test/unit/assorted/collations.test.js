@@ -1,9 +1,9 @@
 'use strict';
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
-const { Long } = require('../../mongodb');
-const { isHello } = require('../../mongodb');
-const { MongoClient } = require('../../mongodb');
+const { Long } = require('../../../src/bson');
+const { isHello } = require('../../../src/utils');
+const { MongoClient } = require('../../../src/mongo_client');
 
 const testContext = {};
 describe('Collation', function () {
