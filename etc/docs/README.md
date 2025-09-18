@@ -15,7 +15,7 @@ necessary to backport a feature).
 `build.ts` requires the following in addition to dependencies installed with `npm i`:
 
 * Hugo static web generator `v0.150.0`
-  * You can download the right version [here](https://github.com/gohugoio/hugo/releases/tag/v0.30.2)](https://github.com/gohugoio/hugo/releases/tag/v0.150.0)
+  * You can download the right version [here](https://github.com/gohugoio/hugo/releases/tag/v0.150.0)
 * ts-node
 
 Note: `typedoc` is also a dependency but it is downloaded by the docs generation script automatically.
