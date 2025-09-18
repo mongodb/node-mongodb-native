@@ -377,7 +377,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -394,7 +393,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -411,7 +409,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -429,7 +426,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -446,7 +442,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -463,7 +458,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -481,7 +475,6 @@ functions:
         include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
@@ -497,7 +490,6 @@ functions:
       params:
         include_expansions_in_env:
           - DRIVERS_TOOLS
-          - MONGODB_AWS_SDK
           - PROJECT_DIRECTORY
           - MONGODB_BINARIES
           - AWS_ACCESS_KEY_ID
@@ -542,7 +534,6 @@ functions:
           - AWS_SESSION_TOKEN
         env:
           AWS_CREDENTIAL_TYPE: env-creds
-          MONGODB_AWS_SDK: 'true'
         working_dir: src
         binary: bash
         args:
@@ -1660,7 +1651,6 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
@@ -1675,7 +1665,6 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
@@ -1690,7 +1679,6 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
@@ -1705,7 +1693,6 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
@@ -1720,7 +1707,6 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
@@ -1735,7 +1721,6 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
@@ -1750,7 +1735,6 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
@@ -1765,87 +1749,10 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'false'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: assume secrets manager role
-      - func: run aws auth test with regular aws credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'false'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: assume secrets manager role
-      - func: run aws auth test with assume role credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'false'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: assume secrets manager role
-      - func: run aws auth test with aws credentials as environment variables
-  - name: >-
-      aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'false'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: assume secrets manager role
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-            - {key: MONGODB_AWS_SDK, value: 'false'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: assume secrets manager role
-      - func: run aws ECS auth test
   - name: run-spec-benchmark-tests-node-server
     tags:
       - run-spec-benchmark-tests
@@ -3567,12 +3474,6 @@ buildvariants:
       - aws-latest-auth-test-run-aws-ECS-auth-test
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-      - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-      - >-
-        aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-      - aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
   - name: ubuntu2204-test-atlas-data-lake
     display_name: Atlas Data Lake Tests
     run_on: ubuntu2204-large

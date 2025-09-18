@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { AWSTemporaryCredentialProvider, Binary, MongoClient } from '../../mongodb';
+import { AWSSDKCredentialProvider, Binary, MongoClient } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
@@ -22,14 +22,8 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
   let credentialProvider;
 
   beforeEach(async function () {
-    this.currentTest.skipReason = !AWSTemporaryCredentialProvider.isAWSSDKInstalled
-      ? 'This test must run in an environment where the AWS SDK is installed.'
-      : undefined;
-    this.currentTest?.skipReason && this.skip();
-
     keyVaultClient = this.configuration.newClient(process.env.MONGODB_UR);
-    // @ts-expect-error We intentionally access a protected variable.
-    credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+    credentialProvider = AWSSDKCredentialProvider.awsSDK;
   });
 
   afterEach(async () => {

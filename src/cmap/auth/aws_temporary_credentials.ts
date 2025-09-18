@@ -1,10 +1,5 @@
 import { type AWSCredentials, getAwsCredentialProvider } from '../../deps';
 import { MongoAWSError } from '../../error';
-import { request } from '../../utils';
-
-const AWS_RELATIVE_URI = 'http://169.254.170.2';
-const AWS_EC2_URI = 'http://169.254.169.254';
-const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
 
 /**
  * @internal
@@ -24,26 +19,9 @@ export interface AWSTempCredentials {
 /** @public **/
 export type AWSCredentialProvider = () => Promise<AWSCredentials>;
 
-/**
- * @internal
- *
- * Fetches temporary AWS credentials.
- */
-export abstract class AWSTemporaryCredentialProvider {
-  abstract getCredentials(): Promise<AWSTempCredentials>;
-  private static _awsSDK: ReturnType<typeof getAwsCredentialProvider>;
-  protected static get awsSDK() {
-    AWSTemporaryCredentialProvider._awsSDK ??= getAwsCredentialProvider();
-    return AWSTemporaryCredentialProvider._awsSDK;
-  }
-
-  static get isAWSSDKInstalled(): boolean {
-    return !('kModuleError' in AWSTemporaryCredentialProvider.awsSDK);
-  }
-}
-
 /** @internal */
-export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
+export class AWSSDKCredentialProvider {
+  private static _awsSDK: ReturnType<typeof getAwsCredentialProvider>;
   private _provider?: AWSCredentialProvider;
 
   /**
@@ -51,11 +29,14 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
    * @param credentialsProvider - The credentials provider.
    */
   constructor(credentialsProvider?: AWSCredentialProvider) {
-    super();
-
     if (credentialsProvider) {
       this._provider = credentialsProvider;
     }
+  }
+
+  static get awsSDK() {
+    AWSSDKCredentialProvider._awsSDK ??= getAwsCredentialProvider();
+    return AWSSDKCredentialProvider._awsSDK;
   }
 
   /**
@@ -63,8 +44,8 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
    * To ensure this occurs, we need to cache the `provider` returned by the AWS sdk and re-use it when fetching credentials.
    */
   private get provider(): () => Promise<AWSCredentials> {
-    if ('kModuleError' in AWSTemporaryCredentialProvider.awsSDK) {
-      throw AWSTemporaryCredentialProvider.awsSDK.kModuleError;
+    if ('kModuleError' in AWSSDKCredentialProvider.awsSDK) {
+      throw AWSSDKCredentialProvider.awsSDK.kModuleError;
     }
     if (this._provider) {
       return this._provider;
@@ -112,15 +93,15 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
 
     this._provider =
       awsRegionSettingsExist && useRegionalSts
-        ? AWSTemporaryCredentialProvider.awsSDK.fromNodeProviderChain({
+        ? AWSSDKCredentialProvider.awsSDK.fromNodeProviderChain({
             clientConfig: { region: AWS_REGION }
           })
-        : AWSTemporaryCredentialProvider.awsSDK.fromNodeProviderChain();
+        : AWSSDKCredentialProvider.awsSDK.fromNodeProviderChain();
 
     return this._provider;
   }
 
-  override async getCredentials(): Promise<AWSTempCredentials> {
+  async getCredentials(): Promise<AWSTempCredentials> {
     /*
      * Creates a credential provider that will attempt to find credentials from the
      * following sources (listed in order of precedence):
@@ -142,44 +123,5 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
     } catch (error) {
       throw new MongoAWSError(error.message, { cause: error });
     }
-  }
-}
-
-/**
- * @internal
- * Fetches credentials manually (without the AWS SDK), as outlined in the [Obtaining Credentials](https://github.com/mongodb/specifications/blob/master/source/auth/auth.md#obtaining-credentials)
- * section of the Auth spec.
- */
-export class LegacyAWSTemporaryCredentialProvider extends AWSTemporaryCredentialProvider {
-  override async getCredentials(): Promise<AWSTempCredentials> {
-    // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-    // is set then drivers MUST assume that it was set by an AWS ECS agent
-    if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
-      return await request(
-        `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`
-      );
-    }
-
-    // Otherwise assume we are on an EC2 instance
-
-    // get a token
-    const token = await request(`${AWS_EC2_URI}/latest/api/token`, {
-      method: 'PUT',
-      json: false,
-      headers: { 'X-aws-ec2-metadata-token-ttl-seconds': 30 }
-    });
-
-    // get role name
-    const roleName = await request(`${AWS_EC2_URI}/${AWS_EC2_PATH}`, {
-      json: false,
-      headers: { 'X-aws-ec2-metadata-token': token }
-    });
-
-    // get temp credentials
-    const creds = await request(`${AWS_EC2_URI}/${AWS_EC2_PATH}/${roleName}`, {
-      headers: { 'X-aws-ec2-metadata-token': token }
-    });
-
-    return creds;
   }
 }
