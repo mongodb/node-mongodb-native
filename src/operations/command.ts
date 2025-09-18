@@ -53,7 +53,11 @@ export interface CommandOperationOptions
    * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
   comment?: unknown;
-  /** Should retry failed writes */
+  /**
+   * @deprecated
+   * This option is deprecated and will be removed in a future release as it is not used
+   * in the driver. Use MongoClientOptions or connection string parameters instead.
+   * */
   retryWrites?: boolean;
 
   // Admin command overrides.
@@ -67,8 +71,8 @@ export interface CommandOperationOptions
 
   /**
    * Used when the command needs to grant access to the underlying namespaces for time series collections.
-   * Only available on server versions 8.2 and above.
-   * @public
+   * Only available on server versions 8.2 and above and is not meant for public use.
+   * @internal
    * @sinceServerVersion 8.2
    **/
   rawData?: boolean;

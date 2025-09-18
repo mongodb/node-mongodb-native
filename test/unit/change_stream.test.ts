@@ -184,36 +184,6 @@ describe('ChangeStreamCursor', function () {
             expect(cursor.resumeOptions).to.haveOwnProperty('startAtOperationTime');
           });
         });
-
-        context('when the maxWireVersion < 7', function () {
-          let cursor: ChangeStreamCursor;
-          beforeEach(function () {
-            cursor = new ChangeStreamCursor(
-              new MongoClient('mongodb://localhost:27027'),
-              new MongoDBNamespace('db', 'collection'),
-              [],
-              {
-                startAfter: 'start after',
-                resumeAfter: 'resume after',
-                startAtOperationTime: new Timestamp(Long.ZERO)
-              }
-            );
-            cursor.resumeToken = null;
-            sinon.stub(cursor, 'server').get(() => ({ hello: { maxWireVersion: 6 } }));
-          });
-
-          it('does NOT set the resumeAfter option', function () {
-            expect(cursor.resumeOptions).not.to.haveOwnProperty('resumeAfter');
-          });
-
-          it('does NOT set the startAfter option', function () {
-            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAfter');
-          });
-
-          it('does NOT set the startAtOperationTime option', function () {
-            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
-          });
-        });
       });
 
       context('when the cursor does NOT have a saved operation time', function () {
@@ -252,36 +222,6 @@ describe('ChangeStreamCursor', function () {
             );
             cursor.resumeToken = null;
             sinon.stub(cursor, 'server').get(() => ({ hello: { maxWireVersion: 7 } }));
-          });
-
-          it('does NOT set the resumeAfter option', function () {
-            expect(cursor.resumeOptions).not.to.haveOwnProperty('resumeAfter');
-          });
-
-          it('does NOT set the startAfter option', function () {
-            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAfter');
-          });
-
-          it('does NOT set the startAtOperationTime option', function () {
-            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
-          });
-        });
-
-        context('when the maxWireVersion < 7', function () {
-          let cursor: ChangeStreamCursor;
-          beforeEach(function () {
-            cursor = new ChangeStreamCursor(
-              new MongoClient('mongodb://localhost:27027'),
-              new MongoDBNamespace('db', 'collection'),
-              [],
-              {
-                startAfter: 'start after',
-                resumeAfter: 'resume after',
-                startAtOperationTime: new Timestamp(Long.ZERO)
-              }
-            );
-            cursor.resumeToken = null;
-            sinon.stub(cursor, 'server').get(() => ({ hello: { maxWireVersion: 6 } }));
           });
 
           it('does NOT set the resumeAfter option', function () {
