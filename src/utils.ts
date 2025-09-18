@@ -19,7 +19,6 @@ import type { Db } from './db';
 import {
   type AnyError,
   MongoAPIError,
-  MongoCompatibilityError,
   MongoInvalidArgumentError,
   MongoNetworkTimeoutError,
   MongoNotConnectedError,
@@ -206,18 +205,9 @@ export function isPromiseLike<T = unknown>(value?: unknown): value is PromiseLik
  * @param target - target of command
  * @param options - options containing collation settings
  */
-export function decorateWithCollation(
-  command: Document,
-  target: MongoClient | Db | Collection,
-  options: AnyOptions
-): void {
-  const capabilities = getTopology(target).capabilities;
+export function decorateWithCollation(command: Document, options: AnyOptions): void {
   if (options.collation && typeof options.collation === 'object') {
-    if (capabilities && capabilities.commandsTakeCollation) {
-      command.collation = options.collation;
-    } else {
-      throw new MongoCompatibilityError(`Current topology does not support collation`);
-    }
+    command.collation = options.collation;
   }
 }
 
