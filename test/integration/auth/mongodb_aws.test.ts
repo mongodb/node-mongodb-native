@@ -479,15 +479,8 @@ describe('MONGODB-AWS', function () {
       it('fetching AWS KMS credentials throws an error', async function () {
         const result = await refreshKMSCredentials({ aws: {} }).catch(e => e);
 
-        // TODO(NODE-7046): Remove branch when removing support for AWS credentials in URI.
-        // The drivers tools scripts put the credentials in the URI currently for some environments,
-        // this will need to change when doing the DRIVERS-3131 work.
-        if (!client.options.credentials.username) {
-          expect(result).to.be.instanceof(MongoAWSError);
-          expect(result.message).to.match(/credential-providers/);
-        } else {
-          expect(result).to.equal(0);
-        }
+        expect(result).to.be.instanceof(MongoAWSError);
+        expect(result.message).to.match(/credential-providers/);
       });
     });
 
