@@ -30,8 +30,7 @@ describe('MONGODB-AWS', function () {
 
   beforeEach(function () {
     if (!isMongoDBAWSAuthEnvironment) {
-      this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
-      return this.skip();
+      throw new Error('MONGODB-AWS auth tests can only run in an AWS environment.');
     }
   });
 
