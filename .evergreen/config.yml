@@ -1848,7 +1848,7 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
       - func: perf send
-  - name: run-unit-tests-node-16
+  - name: run-unit-tests-node-20.19.0
     tags:
       - unit-tests
     commands:
@@ -1856,31 +1856,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-      - func: install dependencies
-      - func: run unit tests
-  - name: run-unit-tests-node-18
-    tags:
-      - unit-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '18'}
-            - {key: NPM_VERSION, value: '10'}
-      - func: install dependencies
-      - func: run unit tests
-  - name: run-unit-tests-node-20
-    tags:
-      - unit-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '20'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: latest}
       - func: install dependencies
       - func: run unit tests
@@ -1907,18 +1883,6 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: run lint checks
-  - name: run-resource-management-no-async-dispose
-    tags:
-      - resource-management
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v16.20.2}
-            - {key: NPM_VERSION, value: '9'}
-      - func: install dependencies
-      - func: check resource management
   - name: run-resource-management-async-dispose
     tags:
       - resource-management
@@ -1954,7 +1918,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: next}
             - {key: TYPES_VERSION, value: 22.15.3}
@@ -1969,40 +1933,10 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: current}
             - {key: TYPES_VERSION, value: 22.15.3}
-      - func: install dependencies
-      - func: check types
-  - name: check-types-typescript-next-node-types-16.x
-    tags:
-      - check-types-typescript-next
-      - typescript-compilation
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: next}
-            - {key: TYPES_VERSION, value: 16.x}
-      - func: install dependencies
-      - func: check types
-  - name: check-types-typescript-current-node-types-16.x
-    tags:
-      - check-types-typescript-current
-      - typescript-compilation
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: current}
-            - {key: TYPES_VERSION, value: 16.x}
       - func: install dependencies
       - func: check types
   - name: check-types-typescript-4.4-node-types-18.11.9
@@ -2014,7 +1948,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: '4.4'}
             - {key: TYPES_VERSION, value: 18.11.9}
@@ -2029,7 +1963,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: current}
             - {key: TYPES_VERSION, value: 22.15.3}
@@ -2052,7 +1986,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
@@ -2070,7 +2004,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
@@ -2088,7 +2022,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
@@ -2106,7 +2040,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: replica_set}
@@ -2125,7 +2059,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_VERSION, value: 16.20.1}
+            - {key: NODE_VERSION, value: 20.19.0}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
@@ -2564,6 +2498,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2579,6 +2514,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2594,6 +2530,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2609,6 +2546,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2624,6 +2562,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2639,6 +2578,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2654,6 +2594,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2669,6 +2610,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2940,125 +2882,11 @@ buildvariants:
     run_on: ubuntu2204-small
     tasks:
       - .alpine-fle
-  - name: rhel80-large-gallium
-    display_name: rhel8 Node16
+  - name: rhel80-large-iron
+    display_name: rhel8 Node20.19.0
     run_on: rhel80-large
     expansions:
-      NODE_LTS_VERSION: 16
-      NPM_VERSION: 9
-      CLIENT_ENCRYPTION: 'true'
-      TEST_CSFLE: 'true'
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-rapid-server
-      - test-rapid-replica_set
-      - test-rapid-sharded_cluster
-      - test-8.0-server
-      - test-8.0-replica_set
-      - test-8.0-sharded_cluster
-      - test-7.0-server
-      - test-7.0-replica_set
-      - test-7.0-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-latest-server-v1-api
-      - test-x509-authentication
-      - test-atlas-connectivity
-      - test-5.0-load-balanced
-      - test-6.0-load-balanced
-      - test-7.0-load-balanced
-      - test-8.0-load-balanced
-      - test-rapid-load-balanced
-      - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-socks5
-      - test-socks5-csfle
-      - test-socks5-tls
-      - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
-      - test-tls-support-latest
-      - test-tls-support-8.0
-      - test-tls-support-7.0
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
-  - name: rhel80-large-hydrogen
-    display_name: rhel8 Node18
-    run_on: rhel80-large
-    expansions:
-      NODE_LTS_VERSION: 18
-      NPM_VERSION: 10
-      CLIENT_ENCRYPTION: 'true'
-      TEST_CSFLE: 'true'
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-rapid-server
-      - test-rapid-replica_set
-      - test-rapid-sharded_cluster
-      - test-8.0-server
-      - test-8.0-replica_set
-      - test-8.0-sharded_cluster
-      - test-7.0-server
-      - test-7.0-replica_set
-      - test-7.0-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-latest-server-v1-api
-      - test-x509-authentication
-      - test-atlas-connectivity
-      - test-5.0-load-balanced
-      - test-6.0-load-balanced
-      - test-7.0-load-balanced
-      - test-8.0-load-balanced
-      - test-rapid-load-balanced
-      - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-socks5
-      - test-socks5-csfle
-      - test-socks5-tls
-      - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
-      - test-tls-support-latest
-      - test-tls-support-8.0
-      - test-tls-support-7.0
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
-  - name: rhel80-large-Node20
-    display_name: rhel8 Node20
-    run_on: rhel80-large
-    expansions:
-      NODE_LTS_VERSION: 20
+      NODE_LTS_VERSION: 20.19.0
       NPM_VERSION: latest
       CLIENT_ENCRYPTION: 'true'
       TEST_CSFLE: 'true'
@@ -3222,103 +3050,11 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-vsCurrent-large-gallium
-    display_name: Windows Node16
+  - name: windows-vsCurrent-large-iron
+    display_name: Windows Node20.19.0
     run_on: windows-vsCurrent-large
     expansions:
-      NODE_LTS_VERSION: 16
-      NPM_VERSION: 9
-      CLIENT_ENCRYPTION: 'false'
-      TEST_CSFLE: 'false'
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-rapid-server
-      - test-rapid-replica_set
-      - test-rapid-sharded_cluster
-      - test-8.0-server
-      - test-8.0-replica_set
-      - test-8.0-sharded_cluster
-      - test-7.0-server
-      - test-7.0-replica_set
-      - test-7.0-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-latest-server-v1-api
-      - test-socks5
-      - test-socks5-tls
-      - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
-      - test-tls-support-latest
-      - test-tls-support-8.0
-      - test-tls-support-7.0
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
-  - name: windows-vsCurrent-large-hydrogen
-    display_name: Windows Node18
-    run_on: windows-vsCurrent-large
-    expansions:
-      NODE_LTS_VERSION: 18
-      NPM_VERSION: 10
-      CLIENT_ENCRYPTION: 'false'
-      TEST_CSFLE: 'false'
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-rapid-server
-      - test-rapid-replica_set
-      - test-rapid-sharded_cluster
-      - test-8.0-server
-      - test-8.0-replica_set
-      - test-8.0-sharded_cluster
-      - test-7.0-server
-      - test-7.0-replica_set
-      - test-7.0-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-latest-server-v1-api
-      - test-socks5
-      - test-socks5-tls
-      - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
-      - test-tls-support-latest
-      - test-tls-support-8.0
-      - test-tls-support-7.0
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
-  - name: windows-vsCurrent-large-Node20
-    display_name: Windows Node20
-    run_on: windows-vsCurrent-large
-    expansions:
-      NODE_LTS_VERSION: 20
+      NODE_LTS_VERSION: 20.19.0
       NPM_VERSION: latest
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
@@ -3406,13 +3142,13 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel8-node16-test-csfle-mongocryptd
-    display_name: rhel 8 Node16 test mongocryptd
+  - name: rhel8-node20.19.0-test-csfle-mongocryptd
+    display_name: rhel 8 Node20.19.0 test mongocryptd
     run_on: rhel80-large
     expansions:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
-      NODE_LTS_VERSION: 16
+      NODE_LTS_VERSION: 20.19.0
       NPM_VERSION: 9
     tasks:
       - test-latest-csfle-mongocryptd
@@ -3429,7 +3165,7 @@ buildvariants:
     expansions:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
-      NODE_LTS_VERSION: 16
+      NODE_LTS_VERSION: 20.19.0
       NPM_VERSION: 9
     tasks:
       - test-latest-csfle-mongocryptd
