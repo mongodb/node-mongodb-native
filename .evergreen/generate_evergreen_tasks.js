@@ -507,18 +507,6 @@ SINGLETON_TASKS.push(
       ]
     },
     {
-      name: 'run-resource-management-no-async-dispose',
-      tags: ['resource-management'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: 'v16.20.2',
-          NPM_VERSION: 9
-        }),
-        { func: 'install dependencies' },
-        { func: 'check resource management' }
-      ]
-    },
-    {
       name: 'run-resource-management-async-dispose',
       tags: ['resource-management'],
       commands: [
@@ -585,9 +573,6 @@ function* makeTypescriptTasks() {
   const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1);
   yield makeCheckTypesTask('next', typesVersion);
   yield makeCheckTypesTask('current', typesVersion);
-
-  yield makeCheckTypesTask('next', '16.x');
-  yield makeCheckTypesTask('current', '16.x');
 
   // typescript 4.4 only compiles our types with this particular version
   yield makeCheckTypesTask('4.4', '18.11.9');
@@ -702,7 +687,7 @@ SINGLETON_TASKS.push({
   tags: ['alpine-fle'],
   commands: [
     updateExpansions({
-      NODE_VERSION: '16.20.1',
+      NODE_VERSION: LOWEST_LTS,
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       CLIENT_ENCRYPTION: true,

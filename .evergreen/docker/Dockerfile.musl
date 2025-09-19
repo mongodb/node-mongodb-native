@@ -1,5 +1,5 @@
 ARG ARCH=arm64
-ARG NODE_VERSION=16.20.1
+ARG NODE_VERSION=20.19.0
 
 FROM ${ARCH}/node:${NODE_VERSION}-alpine AS dependencies
 
