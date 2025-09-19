@@ -15,7 +15,7 @@ import {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY
-} from '../../../mongodb';
+} from '../../../../src/constants';
 import { EntitiesMap, UnifiedMongoClient } from '../../../tools/unified-spec-runner/entities';
 import { EntityEventRegistry } from '../../../tools/unified-spec-runner/entity_event_registry';
 
