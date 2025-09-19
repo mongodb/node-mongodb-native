@@ -4,14 +4,12 @@
     "checkJs": false,
     "strict": true,
     "alwaysStrict": true,
-    "target": "ES2021",
+    "target": "ES2023",
     "module": "commonJS",
     "moduleResolution": "node",
     "skipLibCheck": true,
     "lib": [
-      "es2021",
-      "ES2022.Error",
-      "ES2022.Object",
+      "es2023",
       "esnext.disposable"
     ],
     // We don't make use of tslib helpers, all syntax used is supported by target engine
