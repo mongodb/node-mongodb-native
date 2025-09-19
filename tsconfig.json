@@ -34,7 +34,8 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     // TODO(NODE-3659): Enable useUnknownInCatchVariables and add type assertions or remove unnecessary catch blocks
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "useDefineForClassFields": false
   },
   "ts-node": {
     "transpileOnly": true,
