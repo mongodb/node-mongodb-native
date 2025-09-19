@@ -1,6 +1,5 @@
-/* eslint-disable no-restricted-modules */
 const chalk = require('chalk');
-const { List } = require('../../../lib/utils');
+const { List } = require('../../../src/utils');
 const { createHistogram } = require('perf_hooks');
 
 const iterations = 100;

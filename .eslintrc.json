@@ -178,7 +178,6 @@
           {
             "patterns": [
               "**/../lib/**",
-              "**/../src/**",
               "mongodb-mock-server"
             ]
           }
@@ -217,7 +216,6 @@
           {
             "patterns": [
               "**/../lib/**",
-              "**/../src/**",
               "mongodb-mock-server"
             ]
           }

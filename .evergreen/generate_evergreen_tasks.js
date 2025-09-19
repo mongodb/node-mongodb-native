@@ -342,14 +342,8 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     { func: 'run aws auth test with aws credentials as environment variables' },
     { func: 'run aws auth test with aws credentials and session token as environment variables' },
     { func: 'run aws ECS auth test' },
-    {
-      func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset',
-      onlySdk: true
-    },
-    {
-      func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set',
-      onlySdk: true
-    }
+    { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset' },
+    { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set' }
   ];
 
   const awsTasks = awsFuncs.map(fn => ({
@@ -359,8 +353,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
         VERSION,
         AUTH: 'auth',
         ORCHESTRATION_FILE: 'auth-aws.json',
-        TOPOLOGY: 'server',
-        MONGODB_AWS_SDK: 'true'
+        TOPOLOGY: 'server'
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
@@ -369,29 +362,8 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     ]
   }));
 
-  const awsNoPeerDependenciesTasks = awsFuncs
-    .filter(fn => fn.onlySdk !== true)
-    .map(fn => ({
-      name: `${name(fn.func)}-no-peer-dependencies`,
-      commands: [
-        updateExpansions({
-          VERSION: VERSION,
-          AUTH: 'auth',
-          ORCHESTRATION_FILE: 'auth-aws.json',
-          TOPOLOGY: 'server',
-          MONGODB_AWS_SDK: 'false'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'assume secrets manager role' },
-        { func: fn.func }
-      ]
-    }));
-
-  const allAwsTasks = awsTasks.concat(awsNoPeerDependenciesTasks);
-
-  TASKS.push(...allAwsTasks);
-  AWS_AUTH_TASKS.push(...allAwsTasks.map(t => t.name));
+  TASKS.push(...awsTasks);
+  AWS_AUTH_TASKS.push(...awsTasks.map(t => t.name));
 }
 
 const BUILD_VARIANTS = [];

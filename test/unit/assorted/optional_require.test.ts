@@ -2,14 +2,12 @@ import { expect } from 'chai';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
 
-import {
-  AuthContext,
-  compress,
-  GSSAPI,
-  HostAddress,
-  MongoDBAWS,
-  MongoMissingDependencyError
-} from '../../mongodb';
+import { AuthContext } from '../../../src/cmap/auth/auth_provider';
+import { GSSAPI } from '../../../src/cmap/auth/gssapi';
+import { MongoDBAWS } from '../../../src/cmap/auth/mongodb_aws';
+import { compress } from '../../../src/cmap/wire_protocol/compression';
+import { MongoMissingDependencyError } from '../../../src/error';
+import { HostAddress } from '../../../src/utils';
 
 function moduleExistsSync(moduleName) {
   return existsSync(resolve(__dirname, `../../../node_modules/${moduleName}`));

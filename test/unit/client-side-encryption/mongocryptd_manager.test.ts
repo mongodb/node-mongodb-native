@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
 
 describe('MongocryptdManager', function () {

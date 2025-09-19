@@ -1,15 +1,13 @@
+import { ObjectId } from 'bson';
 import { expect } from 'chai';
-import { type TopologyDescription } from 'mongodb-legacy';
 import * as sinon from 'sinon';
 
-import {
-  MongoClient,
-  ObjectId,
-  Server,
-  ServerDescription,
-  Topology,
-  type TopologyDescriptionChangedEvent
-} from '../../mongodb';
+import { MongoClient } from '../../../src/mongo_client';
+import { type TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { Topology } from '../../../src/sdam/topology';
+import { type TopologyDescription } from '../../../src/sdam/topology_description';
 
 describe('Server Discovery and Monitoring', function () {
   let serverConnect: sinon.SinonStub;

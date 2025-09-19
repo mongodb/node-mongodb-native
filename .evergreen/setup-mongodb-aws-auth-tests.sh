@@ -8,7 +8,6 @@ set +x
 if [ -z ${MONGODB_URI+omitted} ]; then echo "MONGODB_URI is unset" && exit 1; fi
 if [ -z ${DRIVERS_TOOLS+omitted} ]; then echo "DRIVERS_TOOLS is unset" && exit 1; fi
 if [ -z ${AWS_CREDENTIAL_TYPE+omitted} ]; then echo "AWS_CREDENTIAL_TYPE is unset" && exit 1; fi
-if [ -z ${MONGODB_AWS_SDK+omitted} ]; then echo "MONGODB_AWS_SDK is unset" && exit 1; fi
 
 bash $DRIVERS_TOOLS/.evergreen/auth_aws/setup-secrets.sh
 
@@ -24,8 +23,6 @@ cd $DRIVERS_TOOLS/.evergreen/auth_aws
 cd $BEFORE
 
 npm install --no-save aws4
-
-if [ $MONGODB_AWS_SDK = 'false' ]; then rm -rf ./node_modules/@aws-sdk/credential-providers; fi
 
 # revert to show test output
 set -x

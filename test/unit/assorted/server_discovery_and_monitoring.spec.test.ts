@@ -1,42 +1,43 @@
-import { EJSON, ObjectId } from 'bson';
+import { type Document, EJSON, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
 
+import { ConnectionPool } from '../../../src/cmap/connection_pool';
 import {
-  ConnectionPool,
   HEARTBEAT_EVENTS,
-  isRecord,
-  MongoClient,
+  SERVER_CLOSED,
+  SERVER_DESCRIPTION_CHANGED,
+  SERVER_OPENING,
+  TOPOLOGY_CLOSED,
+  TOPOLOGY_DESCRIPTION_CHANGED,
+  TOPOLOGY_OPENING
+} from '../../../src/constants';
+import {
   MongoCompatibilityError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoServerError,
-  ns,
-  RunCommandOperation,
-  Server,
-  SERVER_CLOSED,
-  SERVER_DESCRIPTION_CHANGED,
-  SERVER_OPENING,
+  MongoServerError
+} from '../../../src/error';
+import { MongoClient } from '../../../src/mongo_client';
+import { RunCommandOperation } from '../../../src/operations/run_command';
+import {
   ServerClosedEvent,
-  ServerDescription,
   ServerDescriptionChangedEvent,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
   ServerOpeningEvent,
-  squashError,
-  Topology,
-  TOPOLOGY_CLOSED,
-  TOPOLOGY_DESCRIPTION_CHANGED,
-  TOPOLOGY_OPENING,
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
-  TopologyOpeningEvent,
-  type TopologyVersion
-} from '../../mongodb';
+  TopologyOpeningEvent
+} from '../../../src/sdam/events';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription, type TopologyVersion } from '../../../src/sdam/server_description';
+import { Topology } from '../../../src/sdam/topology';
+import { isRecord, ns, squashError } from '../../../src/utils';
 import { ejson } from '../../tools/utils';
 
 const SDAM_EVENT_CLASSES = {

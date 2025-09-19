@@ -5,7 +5,6 @@ import { expect } from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type MongoClient, WriteConcern } from '../../mongodb';

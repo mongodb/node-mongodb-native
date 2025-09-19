@@ -10,7 +10,6 @@ import { setTimeout } from 'timers';
 import { TLSSocket } from 'tls';
 import { promisify } from 'util';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import {
   Connection,

@@ -40,6 +40,9 @@ about the types of tests and how to run them.
     - [Kerberos Tests](#kerberos-tests)
     - [AWS Authentication tests](#aws-authentication-tests)
     - [Container Tests](#container-tests)
+  - [GCP](#gcp)
+  - [Azure](#azure)
+  - [AWS](#aws)
     - [TODO Special Env Sections](#todo-special-env-sections)
   - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
     - [Point mongosh to the driver](#point-mongosh-to-the-driver)
@@ -76,7 +79,7 @@ The actual implementations of the spec tests can be unit tests or integration te
 
 ## Running the Tests Locally
 
-The easiest way to get started running the tests locally is to start a standalone server and run all of the tests.
+The easiest way to get started running the tests locally is to start a replica set and run all of the integration tests.
 
 Ensure the drivers tools submodule is cloned:
 
@@ -85,16 +88,28 @@ git submodule init
 git submodule update
 ```
 
-Start a `mongod` standalone with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
+Set the `DRIVERS_TOOLS` environment variable:
 
 ```sh
-VERSION='latest' TOPOLOGY='server' AUTH='noauth' ./.evergreen/run-orchestration.sh
+export DRIVERS_TOOLS=<path to driver>/drivers-evergreen-tools
+```
+
+Start a replica set with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
+
+```sh
+VERSION='latest' TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
+```
+
+Load the new cluster's URI into the environment:
+
+```sh
+source mo-expansion.sh
 ```
 
 Then run the tests:
 
 ```sh
-npm test
+npm run check:test
 ```
 
 > **Note:** the command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.

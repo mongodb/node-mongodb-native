@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { type Binary, Int32, Long } from '../../mongodb';

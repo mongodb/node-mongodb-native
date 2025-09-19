@@ -5,7 +5,6 @@ import { URLSearchParams } from 'url';
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
-import { addContainerMetadata, makeClientMetadata } from './cmap/handshake/client_metadata';
 import { Compressor, type CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
 import {
@@ -534,16 +533,6 @@ export function parseOptions(
       mongodbLogMaxDocumentLength: mongoOptions.mongodbLogMaxDocumentLength
     }
   );
-
-  // Set the default for the additional driver info.
-  mongoOptions.additionalDriverInfo = [];
-
-  mongoOptions.metadata = makeClientMetadata(mongoOptions);
-
-  mongoOptions.extendedMetadata = addContainerMetadata(mongoOptions.metadata).then(
-    undefined,
-    squashError
-  ); // rejections will be handled later
 
   return mongoOptions;
 }

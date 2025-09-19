@@ -1,8 +1,6 @@
 import { expect } from 'chai';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   type AzureKMSRequestOptions,
   fetchAzureKMSToken

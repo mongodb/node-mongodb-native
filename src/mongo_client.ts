@@ -18,6 +18,7 @@ import type { Connection } from './cmap/connection';
 import {
   addContainerMetadata,
   type ClientMetadata,
+  isDriverInfoEqual,
   makeClientMetadata
 } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
@@ -433,11 +434,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       | 'extendedMetadata'
     >;
 
+  private driverInfoList: DriverInfo[] = [];
+
   constructor(url: string, options?: MongoClientOptions) {
     super();
     this.on('error', noop);
 
     this.options = parseOptions(url, this, options);
+
+    this.appendMetadata(this.options.driverInfo);
 
     const shouldSetLogger = Object.values(this.options.mongoLoggerOptions.componentSeverities).some(
       value => value !== SeverityLevel.OFF
@@ -495,8 +500,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * @param driverInfo - Information about the application or library.
    */
   appendMetadata(driverInfo: DriverInfo) {
-    this.options.additionalDriverInfo.push(driverInfo);
-    this.options.metadata = makeClientMetadata(this.options);
+    const isDuplicateDriverInfo = this.driverInfoList.some(info =>
+      isDriverInfoEqual(info, driverInfo)
+    );
+    if (isDuplicateDriverInfo) return;
+
+    this.driverInfoList.push(driverInfo);
+    this.options.metadata = makeClientMetadata(this.driverInfoList, this.options);
     this.options.extendedMetadata = addContainerMetadata(this.options.metadata)
       .then(undefined, squashError)
       .then(result => result ?? {}); // ensure Promise<Document>
