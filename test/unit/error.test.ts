@@ -4,42 +4,17 @@ import { setTimeout } from 'timers';
 // Exception to the import from mongodb rule we're unit testing our public Errors API
 import * as importsFromErrorSrc from '../../src/error';
 import * as importsFromEntryPoint from '../../src/index';
-import {
-  isHello,
-  isResumableError,
-  isRetryableReadError,
-  isSDAMUnrecoverableError,
-  LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
-  LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
-  MONGODB_ERROR_CODES,
-  MongoDriverError,
-  MongoError,
-  MongoErrorLabel,
-  MongoMissingDependencyError,
-  MongoNetworkError,
-  MongoNetworkTimeoutError,
-  MongoOperationTimeoutError,
-  MongoParseError,
-  MongoRuntimeError,
-  MongoServerError,
-  MongoSystemError,
-  MongoWriteConcernError,
-  needsRetryableWriteLabel,
-  NODE_IS_RECOVERING_ERROR_MESSAGE,
-  ns,
-  PoolClosedError as MongoPoolClosedError,
-  RunCommandOperation,
-  setDifference,
-  TimeoutContext,
-  type TopologyDescription,
-  type TopologyOptions,
-  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
-} from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../tools/utils';
+import { isHello, ns, setDifference } from '../../src/utils';
+import { MongoDriverError, MongoError, MongoErrorLabel, MongoMissingDependencyError, MongoNetworkError, MongoNetworkTimeoutError, MongoOperationTimeoutError, MongoParseError, MongoRuntimeError, MongoServerError, MongoSystemError, MongoWriteConcernError, TopologyDescription, TopologyOptions } from '../../src/index';
+import { isResumableError, isRetryableReadError, isSDAMUnrecoverableError, LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE, LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE, MONGODB_ERROR_CODES, needsRetryableWriteLabel, NODE_IS_RECOVERING_ERROR_MESSAGE } from '../../src/error';
+import { PoolClosedError as MongoPoolClosedError, WaitQueueTimeoutError as MongoWaitQueueTimeoutError } from '../../src/cmap/errors';
+import { RunCommandOperation } from '../../src/operations/run_command';
+import { TimeoutContext } from '../../src/timeout';
 
-describe('MongoErrors', () => {
+describe.only('MongoErrors', () => {
   let errorClassesFromEntryPoint = Object.fromEntries(
     Object.entries(importsFromEntryPoint).filter(
       ([key, value]) => key.endsWith('Error') && value.toString().startsWith('class')

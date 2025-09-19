@@ -5,25 +5,13 @@ import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
 import { inspect } from 'util';
-
-import {
-  AUTH_MECHS_AUTH_SRC_EXTERNAL,
-  AuthMechanism,
-  COSMOS_DB_MSG,
-  DEFAULT_ALLOWED_HOSTS,
-  DOCUMENT_DB_MSG,
-  type Log,
-  MongoAPIError,
-  MongoClient,
-  MongoCredentials,
-  MongoDriverError,
-  MongoInvalidArgumentError,
-  type MongoOptions,
-  MongoParseError,
-  MongoRuntimeError,
-  parseOptions,
-  resolveSRVRecord
-} from '../mongodb';
+import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
+import { MongoAPIError, MongoDriverError, MongoInvalidArgumentError, MongoParseError, MongoRuntimeError } from '../../src/error';
+import { DEFAULT_ALLOWED_HOSTS, MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
+import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
+import { MongoClient, MongoOptions } from '../../src/mongo_client';
+import { Log } from '../../src/mongo_logger';
+import { COSMOS_DB_MSG, DOCUMENT_DB_MSG } from '../../src/utils';
 
 describe('Connection String', function () {
   context('when serverMonitoringMode is set', function () {
