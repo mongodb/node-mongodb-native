@@ -6,27 +6,19 @@ import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
-import {
-  isHello,
-  LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
-  makeClientMetadata,
-  MongoClient,
-  MongoServerSelectionError,
-  ns,
-  ReadPreference,
-  RunCommandOperation,
-  RunCursorCommandOperation,
-  Server,
-  SrvPoller,
-  SrvPollingEvent,
-  TimeoutContext,
-  Topology,
-  TopologyDescription,
-  TopologyDescriptionChangedEvent,
-  TopologyType
-} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
+import { ReadPreference, SrvPollingEvent, TopologyDescriptionChangedEvent, TopologyType } from '../../../lib';
+import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
+import { LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE, MongoServerSelectionError } from '../../../src/error';
+import { RunCursorCommandOperation, RunCommandOperation } from '../../../src/operations/run_command';
+import { SrvPoller } from '../../../src/sdam/srv_polling';
+import { Topology } from '../../../src/sdam/topology';
+import { TimeoutContext } from '../../../src/timeout';
+import { isHello, ns } from '../../../src/utils';
+import { MongoClient } from '../../../src/mongo_client';
+import { TopologyDescription } from '../../../src/sdam/topology_description';
+import { Server } from '../../../src/sdam/server';
 
 describe('Topology (unit)', function () {
   let client, topology;

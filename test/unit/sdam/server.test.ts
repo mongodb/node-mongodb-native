@@ -3,19 +3,13 @@ import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
 
-import {
-  type Connection,
-  MongoError,
-  MongoErrorLabel,
-  MongoNetworkError,
-  MongoNetworkTimeoutError,
-  ObjectId,
-  Server,
-  ServerDescription,
-  ServerType,
-  TopologyType
-} from '../../mongodb';
 import { sleep, topologyWithPlaceholderClient } from '../../tools/utils';
+import { MongoError, MongoErrorLabel, MongoNetworkError, MongoNetworkTimeoutError } from '../../../src/error';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { Connection } from '../../../src/cmap/connection';
+import { ServerType, TopologyType } from '../../../src/sdam/common';
+import { ObjectId } from 'bson';
 
 const handledErrors = [
   {

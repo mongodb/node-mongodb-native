@@ -1,13 +1,7 @@
 import { expect } from 'chai';
-
-import {
-  compareTopologyVersion,
-  Long,
-  MongoRuntimeError,
-  ObjectId,
-  ServerDescription,
-  type TopologyVersion
-} from '../../mongodb';
+import { compareTopologyVersion, ServerDescription, TopologyVersion } from '../../../src/sdam/server_description';
+import { MongoRuntimeError } from '../../../src/error';
+import { Long, ObjectId } from 'bson';
 
 describe('ServerDescription', function () {
   describe('constructor()', () => {

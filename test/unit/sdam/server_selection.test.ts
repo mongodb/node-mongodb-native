@@ -1,21 +1,16 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  MIN_SECONDARY_WRITE_WIRE_VERSION,
-  MongoLogger,
-  ObjectId,
-  ReadPreference,
-  readPreferenceServerSelector,
-  sameServerSelector,
-  secondaryWritableServerSelector,
-  ServerDescription,
-  ServerSelectionEvent,
-  TopologyDescription,
-  TopologyType
-} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { TopologyDescription } from '../../../src/sdam/topology_description';
+import { MIN_SECONDARY_WRITE_WIRE_VERSION, readPreferenceServerSelector, sameServerSelector, secondaryWritableServerSelector } from '../../../src/sdam/server_selection';
+import { TopologyType } from '../../../src/sdam/common';
+import { ObjectId } from 'bson';
+import { ReadPreference } from '../../../src/read_preference';
+import { ServerSelectionEvent } from '../../../src/sdam/server_selection_events';
+import { MongoLogger } from '../../../src/mongo_logger';
 
 describe('server selection', function () {
   const primary = new ServerDescription('127.0.0.1:27017', {

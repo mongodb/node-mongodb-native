@@ -7,24 +7,17 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-import {
-  isHello,
-  LEGACY_HELLO_COMMAND,
-  Long,
-  MongoClient,
-  Monitor,
-  MonitorInterval,
-  ObjectId,
-  RTTSampler,
-  ServerDescription,
-  type ServerHeartbeatFailedEvent,
-  type ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent,
-  ServerType
-} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { ServerType } from '../../../src/sdam/common';
+import { isHello } from '../../../src/utils';
+import { Monitor, MonitorInterval, RTTSampler } from '../../../src/sdam/monitor';
+import { ServerHeartbeatFailedEvent, ServerHeartbeatStartedEvent, ServerHeartbeatSucceededEvent } from '../../../src/sdam/events';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { Long, ObjectId } from 'bson';
+import { MongoClient } from '../../../src/mongo_client';
 
 class MockServer {
   pool: any;
