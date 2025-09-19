@@ -2485,6 +2485,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2500,6 +2501,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2515,6 +2517,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2530,6 +2533,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2545,6 +2549,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2560,6 +2565,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2575,6 +2581,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2590,6 +2597,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
