@@ -9,8 +9,7 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "lib": [
-      "es2023",
-      "esnext.disposable"
+      "es2023"
     ],
     // We don't make use of tslib helpers, all syntax used is supported by target engine
     "importHelpers": false,
