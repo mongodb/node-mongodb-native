@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v7.0.0) (2025-09-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-6988:** require aws sdk for aws auth ([#4659](https://github.com/mongodb/node-mongodb-native/issues/4659))
+
+### Features
+
+* **NODE-6988:** require aws sdk for aws auth ([#4659](https://github.com/mongodb/node-mongodb-native/issues/4659)) ([b7c6750](https://github.com/mongodb/node-mongodb-native/commit/b7c6750771e0a578e7f2ce6a8b9192ee7e76e8d3))
+
 ## [6.20.0](https://github.com/mongodb/node-mongodb-native/compare/v6.19.0...v6.20.0) (2025-09-17)
 
 
