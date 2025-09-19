@@ -1,12 +1,9 @@
 import { expect } from 'chai';
-
-import {
-  AggregationCursor,
-  CursorTimeoutMode,
-  MongoAPIError,
-  MongoClient,
-  ns
-} from '../../mongodb';
+import { MongoClient } from '../../../src/mongo_client';
+import { AggregationCursor } from '../../../src/cursor/aggregation_cursor';
+import { CursorTimeoutMode } from '../../../src/cursor/abstract_cursor';
+import { MongoAPIError } from '../../../src/error';
+import { ns } from '../../../src/utils';
 
 describe('class AggregationCursor', () => {
   let client: MongoClient;

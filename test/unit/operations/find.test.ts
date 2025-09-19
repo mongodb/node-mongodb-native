@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-
-import { FindOperation, ns } from '../../mongodb';
+import { ns } from '../../../src/utils';
+import { FindOperation } from '../../../src/operations/find';
 
 describe('FindOperation', function () {
   const namespace = ns('db.coll');

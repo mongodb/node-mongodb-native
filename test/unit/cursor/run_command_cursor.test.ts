@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-
-import { MongoAPIError, MongoClient } from '../../mongodb';
+import { MongoClient } from '../../../src/mongo_client';
+import { MongoAPIError } from '../../../src/error';
 
 describe('class RunCommandCursor', () => {
   let client: MongoClient;

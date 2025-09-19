@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-
-import { ListDatabasesOperation, MongoDBNamespace } from '../../mongodb';
+import { MongoDBNamespace } from '../../../src/utils';
+import { ListDatabasesOperation } from '../../../src/operations/list_databases';
 
 const mockDB = {
   s: {

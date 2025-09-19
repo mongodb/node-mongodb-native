@@ -1,15 +1,13 @@
 import { expect } from 'chai';
 
-import {
-  Aspect,
-  GetMoreOperation,
-  Long,
-  ns,
-  ReadPreference,
-  Server,
-  ServerDescription
-} from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
+import { ns } from '../../../src/utils';
+import { Long } from 'bson';
+import { ReadPreference } from '../../../src/read_preference';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { GetMoreOperation } from '../../../src/operations/get_more';
+import { Aspect } from '../../../src/operations/operation';
 
 describe('GetMoreOperation', function () {
   const namespace = ns('db.coll');
