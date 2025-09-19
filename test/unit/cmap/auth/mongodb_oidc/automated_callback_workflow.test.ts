@@ -1,9 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
 import {
   AutomatedCallbackWorkflow,
