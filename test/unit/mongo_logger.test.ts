@@ -4,33 +4,9 @@ import * as sinon from 'sinon';
 import { Readable, Writable } from 'stream';
 import { inspect } from 'util';
 
-import {
-  COMMAND_FAILED,
-  COMMAND_STARTED,
-  COMMAND_SUCCEEDED,
-  CONNECTION_CHECK_OUT_FAILED,
-  CONNECTION_CHECK_OUT_STARTED,
-  CONNECTION_CHECKED_IN,
-  CONNECTION_CHECKED_OUT,
-  CONNECTION_CLOSED,
-  CONNECTION_CREATED,
-  CONNECTION_POOL_CLEARED,
-  CONNECTION_POOL_CLOSED,
-  CONNECTION_POOL_CREATED,
-  CONNECTION_POOL_READY,
-  CONNECTION_READY,
-  createStdioLogger,
-  DEFAULT_MAX_DOCUMENT_LENGTH,
-  type Log,
-  type MongoDBLogWritable,
-  MongoLoggableComponent,
-  MongoLogger,
-  type MongoLoggerOptions,
-  parseSeverityFromString,
-  SeverityLevel,
-  stringifyWithMaxLen
-} from '../mongodb';
 import { sleep } from '../tools/utils';
+import { createStdioLogger, DEFAULT_MAX_DOCUMENT_LENGTH, Log, MongoDBLogWritable, MongoLoggableComponent, MongoLogger, MongoLoggerOptions, parseSeverityFromString, SeverityLevel, stringifyWithMaxLen } from '../../src/mongo_logger';
+import { COMMAND_FAILED, COMMAND_STARTED, COMMAND_SUCCEEDED, CONNECTION_CHECK_OUT_FAILED, CONNECTION_CHECK_OUT_STARTED, CONNECTION_CHECKED_IN, CONNECTION_CHECKED_OUT, CONNECTION_CLOSED, CONNECTION_CREATED, CONNECTION_POOL_CLEARED, CONNECTION_POOL_CLOSED, CONNECTION_POOL_CREATED, CONNECTION_POOL_READY, CONNECTION_READY } from '../../src/constants';
 
 class BufferingStream extends Writable {
   buffer: any[] = [];

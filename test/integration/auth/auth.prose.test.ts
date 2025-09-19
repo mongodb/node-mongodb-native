@@ -1,8 +1,11 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { Connection, LEGACY_HELLO_COMMAND, type MongoClient, ScramSHA256 } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
+import { MongoClient } from '../../../src/mongo_client';
+import { ScramSHA256 } from '../../../src/cmap/auth/scram';
+import { Connection } from '../../../src/cmap/connection';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 
 function makeConnectionString(config, username, password) {
   return `mongodb://${username}:${password}@${config.host}:${config.port}/admin?`;

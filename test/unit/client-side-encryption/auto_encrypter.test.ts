@@ -7,8 +7,9 @@ import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypte
 import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { MongoClient } from '../../../src/mongo_client';
-import { BSON, type DataKey } from '../../mongodb';
 import * as requirements from './requirements.helper';
+import { BSON } from 'bson';
+import { DataKey } from '../../../src/client-side-encryption/client_encryption';
 
 const bson = BSON;
 const { EJSON } = BSON;

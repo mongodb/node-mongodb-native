@@ -10,7 +10,8 @@ import {
   MongoCryptCreateEncryptedCollectionError
 } from '../../../src/client-side-encryption/errors';
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { Binary, BSON, deserialize, MongoClient } from '../../mongodb';
+import { Binary, BSON, deserialize } from 'bson';
+import { MongoClient } from '../../../src/mongo_client';
 
 const { EJSON } = BSON;
 

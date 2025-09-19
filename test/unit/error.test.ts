@@ -14,7 +14,7 @@ import { PoolClosedError as MongoPoolClosedError, WaitQueueTimeoutError as Mongo
 import { RunCommandOperation } from '../../src/operations/run_command';
 import { TimeoutContext } from '../../src/timeout';
 
-describe.only('MongoErrors', () => {
+describe('MongoErrors', () => {
   let errorClassesFromEntryPoint = Object.fromEntries(
     Object.entries(importsFromEntryPoint).filter(
       ([key, value]) => key.endsWith('Error') && value.toString().startsWith('class')

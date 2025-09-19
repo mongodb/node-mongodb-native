@@ -1,15 +1,12 @@
 import { expect } from 'chai';
 
-import {
-  type Collection,
-  type CommandStartedEvent,
-  type CommandSucceededEvent,
-  type Db,
-  type MongoClient,
-  MongoServerError
-} from '../mongodb';
 import { type FailCommandFailPoint } from '../tools/utils';
 import { assert as test, filterForCommands, setupDatabase } from './shared';
+import { MongoClient } from '../../src/mongo_client';
+import { Db } from '../../src/db';
+import { Collection } from '../../src/collection';
+import { MongoServerError } from '../../src/error';
+import { CommandStartedEvent, CommandSucceededEvent } from '../../src/cmap/command_monitoring_events';
 
 describe('Indexes', function () {
   let client: MongoClient;

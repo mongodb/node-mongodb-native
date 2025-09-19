@@ -10,19 +10,14 @@ import * as tls from 'tls';
 
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { Db } from '../../../src/db';
-import {
-  BSON,
-  Collection,
-  CSOTTimeoutContext,
-  CursorTimeoutContext,
-  type FindOptions,
-  Int32,
-  Long,
-  MongoClient,
-  serialize,
-  squashError
-} from '../../mongodb';
 import { sleep } from '../../tools/utils';
+import { BSON, Int32, Long, serialize } from 'bson';
+import { MongoClient } from '../../../src/mongo_client';
+import { Collection } from '../../../src/collection';
+import { CSOTTimeoutContext } from '../../../src/timeout';
+import { squashError } from '../../../src/utils';
+import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
+import { FindOptions } from '../../../src/operations/find';
 
 describe('StateMachine', function () {
   class MockRequest implements MongoCryptKMSRequest {

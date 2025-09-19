@@ -1,6 +1,5 @@
 import { expect } from 'chai';
-
-import { WriteConcern } from '../mongodb';
+import { WriteConcern } from '../../src/write_concern';
 
 describe('WriteConcern', function () {
   describe('#constructor', function () {

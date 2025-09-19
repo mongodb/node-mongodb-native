@@ -14,8 +14,8 @@ import {
 } from '../../../../src/client-side-encryption/providers/azure';
 import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
 import * as utils from '../../../../src/utils';
-import { MongoNetworkTimeoutError } from '../../../mongodb';
 import * as requirements from '../requirements.helper';
+import { MongoNetworkTimeoutError } from '../../../../src/error';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;

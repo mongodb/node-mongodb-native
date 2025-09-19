@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 
-import { isHello, MongoClient } from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
+import { MongoClient } from '../../src/mongo_client';
+import { isHello } from '../../src/utils';
+import { Long } from 'bson';
 
 describe('Collection', function () {
   let server = null;
@@ -16,29 +18,21 @@ describe('Collection', function () {
 
   context('#aggregate', () => {
     // general test for aggregate function
-    function testAggregate(config, done) {
+    async function testAggregate(config) {
       const client = new MongoClient(`mongodb://${server.uri()}/test`);
-      let close = e => {
-        close = () => null;
-        client.close(() => done(e));
-      };
 
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.aggregate) {
-          try {
-            expect(doc.bypassDocumentValidation).equal(config.expected);
-            request.reply({
-              ok: 1,
-              cursor: {
-                firstBatch: [{}],
-                id: 0,
-                ns: 'test.test'
-              }
-            });
-          } catch (e) {
-            close(e);
-          }
+          expect(doc.bypassDocumentValidation).equal(config.expected);
+          request.reply({
+            ok: 1,
+            cursor: {
+              firstBatch: [{}],
+              id: Long.ZERO,
+              ns: 'test.test'
+            }
+          });
         }
 
         if (isHello(doc)) {
@@ -48,52 +42,42 @@ describe('Collection', function () {
         }
       });
 
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        const db = client.db('test');
-        const collection = db.collection('test_c');
+      await client.connect();
+      const db = client.db('test');
+      const collection = db.collection('test_c');
 
-        const options = { bypassDocumentValidation: config.actual };
+      const options = { bypassDocumentValidation: config.actual };
 
-        const pipeline = [
-          {
-            $project: {}
-          }
-        ];
-        collection.aggregate(pipeline, options).next(() => close(null));
-      });
+      const pipeline = [
+        {
+          $project: {}
+        }
+      ];
+      await collection.aggregate(pipeline, options).next();
     }
 
     context('bypass document validation', () => {
-      it('should only set bypass document validation if strictly true in aggregate', function (done) {
-        testAggregate({ expected: true, actual: true }, done);
+      it('should only set bypass document validation if strictly true in aggregate', async function () {
+        await testAggregate({ expected: true, actual: true });
       });
 
-      it('should not set bypass document validation if not strictly true in aggregate', function (done) {
-        testAggregate({ expected: undefined, actual: false }, done);
+      it('should not set bypass document validation if not strictly true in aggregate', async function () {
+        await testAggregate({ expected: undefined, actual: false });
       });
     });
   });
 
   context('#findOneAndModify', () => {
-    function testFindOneAndUpdate(config, done) {
+    async function testFindOneAndUpdate(config) {
       const client = new MongoClient(`mongodb://${server.uri()}/test`);
-      let close = e => {
-        close = () => null;
-        client.close(() => done(e));
-      };
 
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.findAndModify) {
-          try {
-            expect(doc.bypassDocumentValidation).equal(config.expected);
-            request.reply({
-              ok: 1
-            });
-          } catch (e) {
-            close(e);
-          }
+          expect(doc.bypassDocumentValidation).equal(config.expected);
+          request.reply({
+            ok: 1
+          });
         }
 
         if (isHello(doc)) {
@@ -103,47 +87,35 @@ describe('Collection', function () {
         }
       });
 
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        const db = client.db('test');
-        const collection = db.collection('test_c');
+      await client.connect();
+      const db = client.db('test');
+      const collection = db.collection('test_c');
 
-        const options = { bypassDocumentValidation: config.actual };
+      const options = { bypassDocumentValidation: config.actual };
 
-        collection.findOneAndUpdate({ name: 'Andy' }, { $inc: { score: 1 } }, options, e => {
-          close(e);
-        });
-      });
+      await collection.findOneAndUpdate({ name: 'Andy' }, { $inc: { score: 1 } }, options);
     }
 
-    it('should only set bypass document validation if strictly true in findOneAndUpdate', function (done) {
-      testFindOneAndUpdate({ expected: true, actual: true }, done);
+    it('should only set bypass document validation if strictly true in findOneAndUpdate', async function () {
+      await testFindOneAndUpdate({ expected: true, actual: true });
     });
 
-    it('should not set bypass document validation if not strictly true in findOneAndUpdate', function (done) {
-      testFindOneAndUpdate({ expected: undefined, actual: false }, done);
+    it('should not set bypass document validation if not strictly true in findOneAndUpdate', async function () {
+      await testFindOneAndUpdate({ expected: undefined, actual: false });
     });
   });
 
   context('#bulkWrite', () => {
-    function testBulkWrite(config, done) {
+    async function testBulkWrite(config) {
       const client = new MongoClient(`mongodb://${server.uri()}/test`);
-      let close = e => {
-        close = () => null;
-        client.close(() => done(e));
-      };
 
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.insert) {
-          try {
-            expect(doc.bypassDocumentValidation).equal(config.expected);
-            request.reply({
-              ok: 1
-            });
-          } catch (e) {
-            close(e);
-          }
+          expect(doc.bypassDocumentValidation).equal(config.expected);
+          request.reply({
+            ok: 1
+          });
         }
 
         if (isHello(doc)) {
@@ -153,35 +125,34 @@ describe('Collection', function () {
         }
       });
 
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        const db = client.db('test');
-        const collection = db.collection('test_c');
+      await client.connect();
+      const db = client.db('test');
+      const collection = db.collection('test_c');
 
-        const options = {
-          bypassDocumentValidation: config.actual,
-          ordered: config.ordered
-        };
+      const options = {
+        bypassDocumentValidation: config.actual,
+        ordered: config.ordered
+      };
 
-        collection.bulkWrite([{ insertOne: { document: { a: 1 } } }], options, () => close(null));
-      });
-    }
+      await collection.bulkWrite([{ insertOne: { document: { a: 1 } } }], options);
+    };
+
     // ordered bulk write, testing change in ordered.js
-    it('should only set bypass document validation if strictly true in ordered bulkWrite', function (done) {
-      testBulkWrite({ expected: true, actual: true, ordered: true }, done);
+    it('should only set bypass document validation if strictly true in ordered bulkWrite', async function () {
+      await testBulkWrite({ expected: true, actual: true, ordered: true });
     });
 
-    it('should not set bypass document validation if not strictly true in ordered bulkWrite', function (done) {
-      testBulkWrite({ expected: undefined, actual: false, ordered: true }, done);
+    it('should not set bypass document validation if not strictly true in ordered bulkWrite', async function () {
+      await testBulkWrite({ expected: undefined, actual: false, ordered: true });
     });
 
     // unordered bulk write, testing change in ordered.js
-    it('should only set bypass document validation if strictly true in unordered bulkWrite', function (done) {
-      testBulkWrite({ expected: true, actual: true, ordered: false }, done);
+    it('should only set bypass document validation if strictly true in unordered bulkWrite', async function () {
+      await testBulkWrite({ expected: true, actual: true, ordered: false });
     });
 
-    it('should not set bypass document validation if not strictly true in unordered bulkWrite', function (done) {
-      testBulkWrite({ expected: undefined, actual: false, ordered: false }, done);
+    it('should not set bypass document validation if not strictly true in unordered bulkWrite', async function () {
+      await testBulkWrite({ expected: undefined, actual: false, ordered: false });
     });
   });
 });
