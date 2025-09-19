@@ -2,11 +2,10 @@
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 
-import { ObjectId } from 'bson';
-
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { MongoClient } from '../../../src/mongo_client';
-import { isHello } from '../../../src/utils';
+const { isHello } = require('../../../src/utils');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { MongoClient } = require('../../../src/mongo_client');
+const { ObjectId } = require('bson');
 
 const TEST_OPTIONS = { writeConcern: { w: 2, wtimeoutMS: 1000 } };
 
