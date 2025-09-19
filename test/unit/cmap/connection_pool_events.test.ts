@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-
-import { type ConnectionPool, ConnectionPoolCreatedEvent } from '../../mongodb';
+import { ConnectionPoolCreatedEvent } from '../../../src/cmap/connection_pool_events';
+import { ConnectionPool } from '../../../src/cmap/connection_pool';
 
 describe('Connection Pool Events', function () {
   const connectionPoolMock = {

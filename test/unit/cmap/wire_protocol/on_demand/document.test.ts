@@ -1,14 +1,6 @@
+import { BSON, Timestamp, Binary, ObjectId, BSONType, BSONError } from 'bson';
 import { expect } from 'chai';
-
-import {
-  Binary,
-  BSON,
-  BSONError,
-  BSONType,
-  ObjectId,
-  OnDemandDocument,
-  Timestamp
-} from '../../../../mongodb';
+import { OnDemandDocument } from '../../../../../src/cmap/wire_protocol/on_demand/document';
 
 describe('class OnDemandDocument', () => {
   context('when given an empty BSON sequence', () => {

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/azure_machine_workflow';
-import { OIDC_VERSION, type OIDCCallbackParams } from '../../../../mongodb';
+import { OIDC_VERSION, OIDCCallbackParams } from '../../../../../src/cmap/auth/mongodb_oidc';
 
 describe('Azure machine workflow', function () {
   describe('#callback', function () {

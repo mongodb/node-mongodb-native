@@ -1,22 +1,18 @@
 import { expect } from 'chai';
 
-import {
-  addContainerMetadata,
-  CancellationToken,
-  type ClientMetadata,
-  connect,
-  type Connection,
-  type ConnectionOptions,
-  HostAddress,
-  isHello,
-  LEGACY_HELLO_COMMAND,
-  MongoClientAuthProviders,
-  MongoCredentials,
-  MongoNetworkError,
-  prepareHandshakeDocument
-} from '../../mongodb';
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
+import { Document } from 'bson';
+import { ConnectionOptions } from 'node:tls';
+import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
+import { addContainerMetadata, ClientMetadata } from '../../../src/cmap/handshake/client_metadata';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { HostAddress, isHello } from '../../../src/utils';
+import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
+import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
+import { Connection } from '../../../src/cmap/connection';
+import { MongoNetworkError } from '../../../src/error';
+import { CancellationToken } from '../../../src/mongo_types';
 
 const CONNECT_DEFAULTS = {
   id: 1,
@@ -181,10 +177,13 @@ describe('Connect Tests', function () {
   });
 
   it('should emit `MongoNetworkError` for network errors', async function () {
-    const error = await connect({
-      hostAddress: new HostAddress('non-existent:27018')
-    }).catch(e => e);
+    try {
+      await connect({
+        hostAddress: new HostAddress('non-existent:27018')
+      });
+    } catch (error) {
     expect(error).to.be.instanceOf(MongoNetworkError);
+}
   });
 
   describe('prepareHandshakeDocument', () => {

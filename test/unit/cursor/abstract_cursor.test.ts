@@ -1,14 +1,10 @@
 import { expect } from 'chai';
-
+import { AbstractCursor, AbstractCursorOptions } from '../../../src/cursor/abstract_cursor';
+import { MongoClient } from '../../../src/mongo_client';
+import { ClientSession } from '../../../src/sessions';
+import { Callback, ns } from '../../../src/utils';
 import {
-  AbstractCursor,
-  type AbstractCursorOptions,
-  type Callback,
-  type ClientSession,
-  type ExecutionResult,
-  MongoClient,
-  ns,
-  type Server
+  ExecutionResult
 } from '../../mongodb';
 
 /** Minimal do nothing cursor to focus on testing the base cursor behavior */
