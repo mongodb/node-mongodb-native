@@ -247,8 +247,7 @@ describe('MONGODB-AWS', function () {
               this.skipReason = 'Test only runs when credentials are present in the environment';
               return this.skip();
             }
-            // @ts-expect-error We intentionally access a protected variable.
-            const credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
+            const credentialProvider = AWSSDKCredentialProvider.awsSDK;
             provider = async () => {
               providerCount++;
               return await credentialProvider.fromNodeProviderChain().apply();
