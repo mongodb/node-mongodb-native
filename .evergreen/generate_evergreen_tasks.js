@@ -65,7 +65,14 @@ function updateExpansions(expansions) {
 }
 
 function makeTask({ mongoVersion, topology, tags = [], auth = 'auth', nodeLtsVersion }) {
-  const expansions = nodeLtsVersion ? updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth, NODE_LTS_VERSION: nodeLtsVersion }) : updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth });
+  const expansions = nodeLtsVersion
+    ? updateExpansions({
+        VERSION: mongoVersion,
+        TOPOLOGY: topology,
+        AUTH: auth,
+        NODE_LTS_VERSION: nodeLtsVersion
+      })
+    : updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth });
   return {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],

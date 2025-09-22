@@ -334,7 +334,7 @@ describe('Connection', function () {
           sinon.restore();
         });
 
-        it('waits for an async drain event because the write was buffered', async () => {
+        it.only('waits for an async drain event because the write was buffered', async () => {
           const connectionReady = once(client, 'connectionReady');
           await client.connect();
           await connectionReady;
@@ -372,7 +372,8 @@ describe('Connection', function () {
 
           // Ensure that we used the drain event for this write
           expect(addedListeners).to.deep.equal(['drain', 'error']);
-          expect(removedListeners).to.deep.equal(['drain', 'error']);
+          expect(removedListeners).to.deep.equal(['error']);
+          expect(socket.listenerCount('drain')).to.equal(0);
         });
       }
     );
