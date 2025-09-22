@@ -1,11 +1,10 @@
 import { expect } from 'chai';
-import { AbstractCursor, AbstractCursorOptions } from '../../../src/cursor/abstract_cursor';
+import { AbstractCursor, AbstractCursorOptions, InitialCursorResponse } from '../../../src/cursor/abstract_cursor';
 import { MongoClient } from '../../../src/mongo_client';
 import { ClientSession } from '../../../src/sessions';
-import { Callback, ns } from '../../../src/utils';
-import {
-  ExecutionResult
-} from '../../mongodb';
+import { Server } from '../../../src/sdam/server';
+import { CursorResponse } from '../../../src/cmap/wire_protocol/responses';
+import { ns } from '../../../src/utils';
 
 /** Minimal do nothing cursor to focus on testing the base cursor behavior */
 class ConcreteCursor extends AbstractCursor {
@@ -15,8 +14,9 @@ class ConcreteCursor extends AbstractCursor {
   clone(): ConcreteCursor {
     return new ConcreteCursor(new MongoClient('mongodb://iLoveJavascript'));
   }
-  _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
-    return callback(undefined, { server: {} as Server, session, response: { ok: 1 } });
+  async _initialize(session: ClientSession): Promise<InitialCursorResponse> {
+    const response = CursorResponse.emptyGetMore;
+    return { server: {} as Server, session, response };
   }
 }
 
