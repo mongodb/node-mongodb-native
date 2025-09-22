@@ -1,37 +1,31 @@
 import { expect } from 'chai';
 
-import { Decimal128 } from '../../mongodb';
-import { assert as test, setupDatabase } from '../shared';
+import { type Collection, Decimal128, type MongoClient } from '../../../src';
 
 describe('Decimal128', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
+  let client: MongoClient;
+  let collection: Collection;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+    collection = client.db('decimal128').collection('decimal128');
   });
 
-  it('should correctly insert decimal128 value', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-    const db = client.db(configuration.db);
+  afterEach(async function () {
+    await client.close();
+  });
+
+  it('should correctly insert decimal128 value', async function () {
     const object = {
       id: 1,
       value: Decimal128.fromString('1.28')
     };
-
-    db.collection('decimal128').insertOne(object, function (err) {
-      expect(err).to.not.exist;
-
-      db.collection('decimal128').findOne(
-        {
-          id: 1
-        },
-        function (err, doc) {
-          expect(err).to.not.exist;
-          test.ok(doc.value instanceof Decimal128);
-          test.equal('1.28', doc.value.toString());
-
-          client.close(done);
-        }
-      );
+    await collection.insertOne(object);
+    const doc = await collection.findOne({
+      id: 1
     });
+
+    expect(doc.value).to.be.instanceof(Decimal128);
+    expect(doc.value.toString()).to.equal('1.28');
   });
 });
