@@ -1,7 +1,7 @@
 ARG ARCH=arm64
-ARG NODE_VERSION=20.19.0
+ARG NODE_LTS_VERSION=20.19.0
 
-FROM ${ARCH}/node:${NODE_VERSION}-alpine AS dependencies
+FROM ${ARCH}/node:${NODE_LTS_VERSION}-alpine AS dependencies
 
 RUN apk --no-cache add make g++ libc-dev curl bash python3 py3-pip cmake git vim ranger
 

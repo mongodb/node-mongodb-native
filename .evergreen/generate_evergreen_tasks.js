@@ -15,7 +15,6 @@ const {
   DEFAULT_OS,
   WINDOWS_OS,
   MACOS_OS,
-  UBUNTU_OS,
   UBUNTU_20_OS,
   DEBIAN_OS,
   UBUNTU_22_OS
@@ -65,12 +64,13 @@ function updateExpansions(expansions) {
   };
 }
 
-function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
+function makeTask({ mongoVersion, topology, tags = [], auth = 'auth', nodeLtsVersion }) {
+  const expansions = nodeLtsVersion ? updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth, NODE_LTS_VERSION: nodeLtsVersion }) : updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth });
   return {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
-      updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth }),
+      expansions,
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
       { func: 'run tests' }
@@ -92,7 +92,7 @@ function generateVersionTopologyMatrix() {
 
 const BASE_TASKS = generateVersionTopologyMatrix().map(makeTask);
 const AUTH_DISABLED_TASKS = generateVersionTopologyMatrix().map(test =>
-  makeTask({ ...test, auth: 'noauth', tags: ['noauth'] })
+  makeTask({ ...test, auth: 'noauth', tags: ['noauth'], nodeLtsVersion: LOWEST_LTS })
 );
 
 BASE_TASKS.push({
@@ -352,6 +352,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     commands: [
       updateExpansions({
         VERSION,
+        NODE_LTS_VERSION: LATEST_LTS,
         AUTH: 'auth',
         ORCHESTRATION_FILE: 'auth-aws.json',
         TOPOLOGY: 'server'
@@ -678,7 +679,7 @@ SINGLETON_TASKS.push({
   tags: ['alpine-fle'],
   commands: [
     updateExpansions({
-      NODE_VERSION: LOWEST_LTS,
+      NODE_LTS_VERSION: LOWEST_LTS,
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       CLIENT_ENCRYPTION: true,
