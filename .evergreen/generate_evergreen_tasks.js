@@ -285,7 +285,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   tags: ['latest', 'lambda'],
   commands: [
     updateExpansions({
-      NPM_VERSION: 9,
+      NODE_LTS_VERSION: LOWEST_LTS,
       VERSION: 'rapid',
       TOPOLOGY: 'server'
     }),
@@ -301,7 +301,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   tags: ['latest', 'lambda'],
   commands: [
     updateExpansions({
-      NPM_VERSION: 9,
+      NODE_LTS_VERSION: LOWEST_LTS,
       VERSION: 'rapid',
       AUTH: 'auth',
       ORCHESTRATION_FILE: 'auth-aws.json',
@@ -395,10 +395,7 @@ for (const {
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const NPM_VERSION = versions.find(
-      ({ versionNumber }) => versionNumber === NODE_LTS_VERSION
-    ).npmVersion;
-    const expansions = { NODE_LTS_VERSION, NPM_VERSION };
+    const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
     expansions.CLIENT_ENCRYPTION = String(!!clientEncryption);
@@ -455,8 +452,7 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
     expansions: {
       CLIENT_ENCRYPTION: true,
       RUN_WITH_MONGOCRYPTD: true,
-      NODE_LTS_VERSION: LOWEST_LTS,
-      NPM_VERSION: 9
+      NODE_LTS_VERSION: LOWEST_LTS
     },
     tasks: MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
   });
@@ -475,14 +471,13 @@ BUILD_VARIANTS.push({
 
 const unitTestTasks = Array.from(
   (function* () {
-    for (const { versionNumber: NODE_LTS_VERSION, npmVersion: NPM_VERSION } of versions) {
+    for (const { versionNumber: NODE_LTS_VERSION } of versions) {
       yield {
         name: `run-unit-tests-node-${NODE_LTS_VERSION}`,
         tags: ['unit-tests'],
         commands: [
           updateExpansions({
-            NODE_LTS_VERSION,
-            NPM_VERSION
+            NODE_LTS_VERSION
           }),
           { func: 'install dependencies' },
           { func: 'run unit tests' }
@@ -512,8 +507,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: LATEST_LTS,
-          NPM_VERSION: 9
+          NODE_LTS_VERSION: LATEST_LTS
         }),
         { func: 'install dependencies' },
         { func: 'check resource management' }
@@ -545,7 +539,6 @@ function* makeTypescriptTasks() {
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9,
           TS_VERSION,
           TYPES_VERSION
         }),
@@ -561,7 +554,6 @@ function* makeTypescriptTasks() {
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9,
           TS_VERSION,
           TYPES_VERSION
         }),
@@ -625,7 +617,6 @@ for (const serverVersion of ['5.0', 'rapid', 'latest']) {
     commands: [
       updateExpansions({
         NODE_LTS_VERSION: LOWEST_LTS,
-        NPM_VERSION: 9,
         VERSION: serverVersion,
         TOPOLOGY: 'replica_set',
         CLIENT_ENCRYPTION: true
@@ -645,7 +636,6 @@ customDependencyTests.push({
   commands: [
     updateExpansions({
       NODE_LTS_VERSION: LOWEST_LTS,
-      NPM_VERSION: 9,
       VERSION: '7.0',
       TOPOLOGY: 'replica_set',
       CLIENT_ENCRYPTION: true

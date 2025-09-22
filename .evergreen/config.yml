@@ -1844,7 +1844,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: latest}
       - func: install dependencies
       - func: run unit tests
   - name: run-unit-tests-node-22
@@ -1856,7 +1855,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: '22'}
-            - {key: NPM_VERSION, value: latest}
       - func: install dependencies
       - func: run unit tests
   - name: run-lint-checks
@@ -1879,7 +1877,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: '22'}
-            - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
       - func: check resource management
   - name: test-explicit-resource-management-feature-integration
@@ -1906,7 +1903,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: next}
             - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
@@ -1921,7 +1917,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: current}
             - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
@@ -1936,7 +1931,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: '4.4'}
             - {key: TYPES_VERSION, value: 18.11.9}
       - func: install dependencies
@@ -1951,7 +1945,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: TS_VERSION, value: current}
             - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
@@ -1974,7 +1967,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
@@ -1992,7 +1984,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
@@ -2010,7 +2001,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
@@ -2028,7 +2018,6 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
@@ -2449,7 +2438,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
@@ -2464,7 +2453,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NPM_VERSION, value: '9'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: VERSION, value: rapid}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
@@ -2874,7 +2863,6 @@ buildvariants:
     run_on: rhel80-large
     expansions:
       NODE_LTS_VERSION: 20.19.0
-      NPM_VERSION: latest
       CLIENT_ENCRYPTION: 'true'
       TEST_CSFLE: 'true'
     tasks:
@@ -2930,7 +2918,6 @@ buildvariants:
     run_on: rhel80-large
     expansions:
       NODE_LTS_VERSION: 22
-      NPM_VERSION: latest
       CLIENT_ENCRYPTION: 'true'
       TEST_CSFLE: 'true'
     tasks:
@@ -3039,7 +3026,6 @@ buildvariants:
     run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 20.19.0
-      NPM_VERSION: latest
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
@@ -3085,7 +3071,6 @@ buildvariants:
     run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 22
-      NPM_VERSION: latest
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
@@ -3133,7 +3118,6 @@ buildvariants:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 20.19.0
-      NPM_VERSION: 9
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
@@ -3150,7 +3134,6 @@ buildvariants:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 20.19.0
-      NPM_VERSION: 9
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
