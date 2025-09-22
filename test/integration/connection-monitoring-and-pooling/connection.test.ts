@@ -334,7 +334,7 @@ describe('Connection', function () {
           sinon.restore();
         });
 
-        it.only('waits for an async drain event because the write was buffered', async () => {
+        it('waits for an async drain event because the write was buffered', async () => {
           const connectionReady = once(client, 'connectionReady');
           await client.connect();
           await connectionReady;
