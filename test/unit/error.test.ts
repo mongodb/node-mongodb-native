@@ -405,7 +405,7 @@ describe('MongoErrors', () => {
         });
     });
 
-    it('should propagate writeConcernError.errInfo ', function (done) {
+    it('should propagate writeConcernError.errInfo ', function () {
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
