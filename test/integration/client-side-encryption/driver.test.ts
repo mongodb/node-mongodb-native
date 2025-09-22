@@ -6,7 +6,6 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
 import * as tls from 'tls';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {

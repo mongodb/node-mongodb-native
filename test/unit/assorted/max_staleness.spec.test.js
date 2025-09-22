@@ -2,7 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const { executeServerSelectionTest } = require('./server_selection_spec_helper');
-const { Server } = require('../../mongodb');
+const { Server } = require('../../../src/sdam/server');
 
 const { EJSON } = require('bson');
 
@@ -47,10 +47,11 @@ describe('Max Staleness (spec)', function () {
   const specTests = collectStalenessTests(maxStalenessDir);
   for (const [specTestName, test] of Object.entries(specTests)) {
     describe(specTestName, () => {
-      for (const testData of test)
+      for (const testData of test) {
         it(testData.description, async function () {
-          return executeServerSelectionTest(testData);
+          await executeServerSelectionTest(testData);
         });
+      }
     });
   }
 });

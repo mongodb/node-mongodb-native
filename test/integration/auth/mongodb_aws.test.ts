@@ -5,7 +5,6 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import {
   AWSSDKCredentialProvider,

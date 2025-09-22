@@ -6,15 +6,15 @@ import { basename, extname, join } from 'path';
 import {
   ReadPreference,
   type ReadPreferenceMode,
-  type ReadPreferenceOptions,
+  type ReadPreferenceOptions
+} from '../../../src/read_preference';
+import { type ServerType, type TopologyType } from '../../../src/sdam/common';
+import { type ServerDescription, type TagSet } from '../../../src/sdam/server_description';
+import {
   readPreferenceServerSelector,
-  type ServerDescription,
-  type ServerType,
-  type TagSet,
-  TopologyDescription,
-  type TopologyType,
   writableServerSelector
-} from '../../mongodb';
+} from '../../../src/sdam/server_selection';
+import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';
 
 interface ServerSelectionLogicTestServer {

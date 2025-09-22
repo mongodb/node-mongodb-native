@@ -3,13 +3,9 @@ import * as fs from 'fs';
 import * as net from 'net';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoClient } from '../../../src/mongo_client';
 import { BSON, type DataKey } from '../../mongodb';
 import * as requirements from './requirements.helper';
