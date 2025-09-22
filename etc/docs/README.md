@@ -32,6 +32,8 @@ To generate API documentation for a new major or minor version:
 
 `npm run build:docs -- --tag <version>`
 
+`<version>` should be formatted MAJOR.MINOR (ex. `--tag=6.8`)
+
 You can optionally specify the following options:
 
 - `--yes` if set, this will silence any prompts in the script. useful for running in CI
