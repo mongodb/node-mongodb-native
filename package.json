@@ -145,7 +145,6 @@
     "check:atlas": "nyc mocha --config test/manual/mocharc.js test/manual/atlas_connectivity.test.ts",
     "check:resource-management": "nyc mocha --config test/manual/mocharc.js test/manual/resource_management.test.ts",
     "check:drivers-atlas-testing": "nyc mocha --config test/mocha_mongodb.js test/atlas/drivers_atlas_testing.test.ts",
-    "check:adl": "nyc mocha --config test/mocha_mongodb.js test/manual/atlas-data-lake-testing",
     "check:aws": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_aws.test.ts",
     "check:oidc-auth": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/auth.spec.test.ts",
     "check:oidc-test": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_oidc.prose.test.ts",

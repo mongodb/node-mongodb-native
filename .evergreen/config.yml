@@ -345,19 +345,6 @@ functions:
           NODE_LTS_VERSION: ${NODE_LTS_VERSION}
         args:
           - .evergreen/run-ldap-tests.sh
-  run data lake tests:
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: src
-        binary: bash
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          MONGODB_URI: mongodb://mhuser:pencil@localhost
-          NODE_LTS_VERSION: ${NODE_LTS_VERSION}
-        args:
-          - .evergreen/run-data-lake-tests.sh
   run tls tests:
     - command: shell.exec
       type: test
@@ -650,14 +637,6 @@ functions:
         args:
           - .evergreen/docker/alpine.sh
 tasks:
-  - name: test-atlas-data-lake
-    tags:
-      - datalake
-      - mongohouse
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongohoused
-      - func: run data lake tests
   - name: test-gcpkms-task
     commands:
       - command: expansions.update
@@ -3474,13 +3453,6 @@ buildvariants:
       - aws-latest-auth-test-run-aws-ECS-auth-test
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-  - name: ubuntu2204-test-atlas-data-lake
-    display_name: Atlas Data Lake Tests
-    run_on: ubuntu2204-large
-    expansions:
-      NODE_LTS_VERSION: 22
-    tasks:
-      - test-atlas-data-lake
   - name: performance-tests
     display_name: Performance Test
     run_on: rhel90-dbx-perf-large
