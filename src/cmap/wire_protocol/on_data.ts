@@ -49,7 +49,7 @@ export function onData(
   /** Set to true only after event listeners have been removed. */
   let finished = false;
 
-  const iterator: AsyncGenerator<Buffer> = {
+  const iterator: AsyncGenerator<Buffer> & AsyncDisposable = {
     next() {
       // First, we consume all unread events
       const value = unconsumedEvents.shift();
@@ -87,6 +87,10 @@ export function onData(
 
     [Symbol.asyncIterator]() {
       return this;
+    },
+
+    async [Symbol.asyncDispose]() {
+      await closeHandler();
     }
   };
 
