@@ -1,8 +1,7 @@
-'use strict';
-const { assert: test } = require('../shared');
-const { expect } = require('chai');
-const { setupDatabase } = require('../shared');
-const { Decimal128 } = require('../../mongodb');
+import { expect } from 'chai';
+
+import { Decimal128 } from '../../mongodb';
+import { assert as test, setupDatabase } from '../shared';
 
 describe('Decimal128', function () {
   before(function () {
@@ -10,10 +9,10 @@ describe('Decimal128', function () {
   });
 
   it('should correctly insert decimal128 value', function (done) {
-    var configuration = this.configuration;
-    var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-    var db = client.db(configuration.db);
-    var object = {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    const db = client.db(configuration.db);
+    const object = {
       id: 1,
       value: Decimal128.fromString('1.28')
     };
