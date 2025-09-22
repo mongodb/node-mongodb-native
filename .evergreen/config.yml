@@ -692,6 +692,7 @@ tasks:
           binary: bash
           env:
             EXPECTED_GCPKMS_OUTCOME: failure
+            NODE_LTS_VERSION: ${NODE_LTS_VERSION}
           args:
             - src/.evergreen/run-gcp-kms-tests.sh
   - name: test-azurekms-task
@@ -728,6 +729,7 @@ tasks:
           binary: bash
           env:
             EXPECTED_AZUREKMS_OUTCOME: failure
+            NODE_LTS_VERSION: ${NODE_LTS_VERSION}
           args:
             - src/.evergreen/run-azure-kms-tests.sh
   - name: oidc-auth-test-k8s-latest-eks

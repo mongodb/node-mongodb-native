@@ -760,6 +760,7 @@ tasks:
           binary: bash
           env:
             EXPECTED_GCPKMS_OUTCOME: "failure"
+            NODE_LTS_VERSION: ${NODE_LTS_VERSION}
           args:
             - src/.evergreen/run-gcp-kms-tests.sh
 
@@ -798,6 +799,7 @@ tasks:
           binary: bash
           env:
             EXPECTED_AZUREKMS_OUTCOME: "failure"
+            NODE_LTS_VERSION: ${NODE_LTS_VERSION}
           args:
             - src/.evergreen/run-azure-kms-tests.sh
 
