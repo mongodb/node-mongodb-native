@@ -132,7 +132,7 @@ describe('Collection', function () {
 
     it('should correctly read back document with null', async function () {
       const collection = await db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {});
-      // Insert a document with a date
+      // Insert a document with null
       await collection.insertOne({ test: null }, configuration.writeConcernMax());
       const result = await collection.findOne();
       expect(result.test).to.not.exist;
