@@ -6,26 +6,6 @@ import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
-// import {
-//   isHello,
-//   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
-//   makeClientMetadata,
-//   MongoClient,
-//   MongoServerSelectionError,
-//   ns,
-//   ReadPreference,
-//   RunCommandOperation,
-//   RunCursorCommandOperation,
-//   Server,
-//   SrvPoller,
-//   SrvPollingEvent,
-//   TimeoutContext,
-//   Topology,
-//   TopologyDescription,
-//   TopologyDescriptionChangedEvent,
-//   TopologyType
-// } from '../../mongodb';
-
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
@@ -109,7 +89,7 @@ describe('Topology (unit)', function () {
 
     afterEach(() => mock.cleanup());
 
-    it('should time out operations against servers that have been blackholed', function (done) {
+    it('should time out operations against servers that have been blackholed', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
 
@@ -123,30 +103,26 @@ describe('Topology (unit)', function () {
       });
 
       const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
-      topology.connect().then(() => {
-        const ctx = TimeoutContext.create({
-          waitQueueTimeoutMS: 0,
-          serverSelectionTimeoutMS: 0,
-          socketTimeoutMS: 250
-        });
-        topology
-          .selectServer('primary', {
-            timeoutContext: ctx
-          })
-          .then(server => {
-            server
-              .command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx)
-              .then(
-                () => expect.fail('expected command to fail'),
-                err => {
-                  expect(err).to.exist;
-                  expect(err).to.match(/timed out/);
-                  topology.close();
-                  done();
-                }
-              );
-          }, expect.fail);
-      }, expect.fail);
+      await topology.connect();
+      const ctx = TimeoutContext.create({
+        waitQueueTimeoutMS: 0,
+        serverSelectionTimeoutMS: 0,
+        socketTimeoutMS: 250
+      });
+      const server = await topology.selectServer('primary', {
+            timeoutContext: ctx,
+            operationName: "none"
+      });
+      try {
+        await server.command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx);
+        expect.fail('expected command to fail')
+      } catch (err) {
+        expect(err).to.exist;
+        expect(err).to.match(/timed out/);
+      } finally {
+        topology.close();
+      }
+
     });
   });
 

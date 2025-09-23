@@ -98,12 +98,9 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       return mock.cleanup();
     });
 
-    afterEach(function (done) {
+    afterEach(function () {
       if (context.topology) {
         context.topology.close();
-        done();
-      } else {
-        done();
       }
     });
 

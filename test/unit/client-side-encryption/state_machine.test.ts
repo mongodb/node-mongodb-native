@@ -124,7 +124,7 @@ describe('StateMachine', function () {
         });
       });
 
-      it('should only resolve once bytesNeeded drops to zero', function (done) {
+      it('should only resolve once bytesNeeded drops to zero', async function () {
         const stateMachine = new StateMachine({} as any);
         const request = new MockRequest(Buffer.from('foobar'), 500);
         let status = 'pending';
@@ -138,22 +138,22 @@ describe('StateMachine', function () {
           .catch(() => {});
 
         this.fakeSocket.emit('connect');
-        setTimeout(() => {
-          expect(status).to.equal('pending');
-          expect(request.bytesNeeded).to.equal(500);
-          expect(request.kmsProvider).to.equal('aws');
-          this.fakeSocket.emit('data', Buffer.alloc(300));
-          setTimeout(() => {
-            expect(status).to.equal('pending');
-            expect(request.bytesNeeded).to.equal(200);
-            this.fakeSocket.emit('data', Buffer.alloc(200));
-            setTimeout(() => {
-              expect(status).to.equal('resolved');
-              expect(request.bytesNeeded).to.equal(0);
-              done();
-            });
-          });
-        });
+        await sleep();
+
+        expect(status).to.equal('pending');
+        expect(request.bytesNeeded).to.equal(500);
+        expect(request.kmsProvider).to.equal('aws');
+        this.fakeSocket.emit('data', Buffer.alloc(300));
+        await sleep();
+
+        expect(status).to.equal('pending');
+        expect(request.bytesNeeded).to.equal(200);
+        this.fakeSocket.emit('data', Buffer.alloc(200));
+        await sleep();
+
+        expect(status).to.equal('resolved');
+        expect(request.bytesNeeded).to.equal(0);
+
       });
     });
 
@@ -191,13 +191,15 @@ describe('StateMachine', function () {
               } as any);
               const request = new MockRequest(Buffer.from('foobar'), 500);
 
-              it('rejects with the validation error', function (done) {
-                stateMachine.kmsRequest(request).catch(err => {
+              it('rejects with the validation error', async function () {
+                try {
+                  await stateMachine.kmsRequest(request);
+                  expect.fail("should have failed with validation error");
+                } catch (err) {
                   expect(err.message).to.equal(
                     `Insecure TLS options prohibited for aws: ${option}`
                   );
-                  done();
-                });
+                }
               });
             });
           }
