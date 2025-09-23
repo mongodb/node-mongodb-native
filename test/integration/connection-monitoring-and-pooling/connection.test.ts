@@ -5,23 +5,24 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {
-  addContainerMetadata,
   Binary,
-  connect,
-  Connection,
   type ConnectionOptions,
-  HostAddress,
-  LEGACY_HELLO_COMMAND,
-  makeClientMetadata,
   MongoClient,
   MongoClientAuthProviders,
   type MongoClientOptions,
-  MongoDBResponse,
   MongoServerError,
-  ns,
-  ServerHeartbeatStartedEvent,
-  Topology
-} from '../../mongodb';
+  ServerHeartbeatStartedEvent
+} from '../../../src';
+import { connect } from '../../../src/cmap/connect';
+import { Connection } from '../../../src/cmap/connection';
+import {
+  addContainerMetadata,
+  makeClientMetadata
+} from '../../../src/cmap/handshake/client_metadata';
+import { MongoDBResponse } from '../../../src/cmap/wire_protocol/responses';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { Topology } from '../../../src/sdam/topology';
+import { HostAddress, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { processTick, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
