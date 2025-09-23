@@ -547,7 +547,7 @@ function* makeTypescriptTasks() {
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
-          TS_VERSION,
+          TS_VERSION
         }),
         { func: 'install dependencies' },
         { func: 'compile driver' }
@@ -561,7 +561,7 @@ function* makeTypescriptTasks() {
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
-          TS_VERSION,
+          TS_VERSION
         }),
         { func: 'install dependencies' },
         { func: 'check types' }
