@@ -188,7 +188,7 @@ describe('Connection', function () {
 
         const db = client.db(configuration.db);
 
-        await db.collection('domainSocketCollection0').insert({ a: 1 }, { writeConcern: { w: 1 } });
+        await db.collection('domainSocketCollection0').insertOne({ a: 1 }, { writeConcern: { w: 1 } });
 
         const items = await db.collection('domainSocketCollection0').find({ a: 1 }).toArray();
         test.equal(1, items.length);
