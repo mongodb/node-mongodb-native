@@ -5,12 +5,19 @@ import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
 import { inspect } from 'util';
-import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
-import { MongoAPIError, MongoDriverError, MongoInvalidArgumentError, MongoParseError, MongoRuntimeError } from '../../src/error';
+
 import { DEFAULT_ALLOWED_HOSTS, MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
-import { MongoClient, MongoOptions } from '../../src/mongo_client';
-import { Log } from '../../src/mongo_logger';
+import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
+import {
+  MongoAPIError,
+  MongoDriverError,
+  MongoInvalidArgumentError,
+  MongoParseError,
+  MongoRuntimeError
+} from '../../src/error';
+import { MongoClient, type MongoOptions } from '../../src/mongo_client';
+import { type Log } from '../../src/mongo_logger';
 import { COSMOS_DB_MSG, DOCUMENT_DB_MSG } from '../../src/utils';
 
 describe('Connection String', function () {

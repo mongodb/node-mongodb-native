@@ -1,23 +1,22 @@
+import { BSON, Int32, Long, serialize } from 'bson';
 import { expect } from 'chai';
 import { EventEmitter, once } from 'events';
 import * as fs from 'fs/promises';
 import { type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import * as tls from 'tls';
 
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { Db } from '../../../src/db';
-import { sleep } from '../../tools/utils';
-import { BSON, Int32, Long, serialize } from 'bson';
-import { MongoClient } from '../../../src/mongo_client';
 import { Collection } from '../../../src/collection';
+import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
+import { Db } from '../../../src/db';
+import { MongoClient } from '../../../src/mongo_client';
+import { type FindOptions } from '../../../src/operations/find';
 import { CSOTTimeoutContext } from '../../../src/timeout';
 import { squashError } from '../../../src/utils';
-import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
-import { FindOptions } from '../../../src/operations/find';
+import { sleep } from '../../tools/utils';
 
 describe('StateMachine', function () {
   class MockRequest implements MongoCryptKMSRequest {
@@ -153,7 +152,6 @@ describe('StateMachine', function () {
 
         expect(status).to.equal('resolved');
         expect(request.bytesNeeded).to.equal(0);
-
       });
     });
 
@@ -194,7 +192,7 @@ describe('StateMachine', function () {
               it('rejects with the validation error', async function () {
                 try {
                   await stateMachine.kmsRequest(request);
-                  expect.fail("should have failed with validation error");
+                  expect.fail('should have failed with validation error');
                 } catch (err) {
                   expect(err.message).to.equal(
                     `Insecure TLS options prohibited for aws: ${option}`

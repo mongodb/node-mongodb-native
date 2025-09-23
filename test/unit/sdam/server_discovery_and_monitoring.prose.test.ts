@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 import { once } from 'events';
 import { createServer, type Server } from 'net';
-import { MongoClient } from '../../../src/mongo_client';
+
 import { SERVER_HEARTBEAT_FAILED, SERVER_HEARTBEAT_STARTED } from '../../../src/constants';
+import { MongoClient } from '../../../src/mongo_client';
 
 describe('Heartbeat tests', function () {
   let client: MongoClient;

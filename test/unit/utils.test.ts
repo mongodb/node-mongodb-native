@@ -1,14 +1,29 @@
 import { setTimeout } from 'node:timers';
 
+import { ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { sleep } from '../tools/utils';
-import { abortable, BufferPool, ByteUtils, checkParentDomainMatch, compareObjectId, hasAtomicOperators, HostAddress, hostMatchesWildcards, isHello, isUint8Array, List, MongoDBCollectionNamespace, MongoDBNamespace, shuffle } from '../../src/utils';
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../../src/error';
 import { decorateWithExplain, Explain } from '../../src/explain';
-import { ObjectId } from 'bson';
-import { LEGACY_HELLO_COMMAND } from '../../src/constants';
+import {
+  abortable,
+  BufferPool,
+  ByteUtils,
+  checkParentDomainMatch,
+  compareObjectId,
+  hasAtomicOperators,
+  HostAddress,
+  hostMatchesWildcards,
+  isHello,
+  isUint8Array,
+  List,
+  MongoDBCollectionNamespace,
+  MongoDBNamespace,
+  shuffle
+} from '../../src/utils';
+import { sleep } from '../tools/utils';
 
 describe('driver utils', function () {
   describe('.hasAtomicOperators', function () {

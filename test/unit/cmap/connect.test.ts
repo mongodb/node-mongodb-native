@@ -1,18 +1,22 @@
+import { type ConnectionOptions } from 'node:tls';
+
+import { type Document } from 'bson';
 import { expect } from 'chai';
 
+import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
+import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
+import { type Connection } from '../../../src/cmap/connection';
+import {
+  addContainerMetadata,
+  type ClientMetadata
+} from '../../../src/cmap/handshake/client_metadata';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { MongoNetworkError } from '../../../src/error';
+import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
+import { CancellationToken } from '../../../src/mongo_types';
+import { HostAddress, isHello } from '../../../src/utils';
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
-import { Document } from 'bson';
-import { ConnectionOptions } from 'node:tls';
-import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
-import { addContainerMetadata, ClientMetadata } from '../../../src/cmap/handshake/client_metadata';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { HostAddress, isHello } from '../../../src/utils';
-import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
-import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
-import { Connection } from '../../../src/cmap/connection';
-import { MongoNetworkError } from '../../../src/error';
-import { CancellationToken } from '../../../src/mongo_types';
 
 const CONNECT_DEFAULTS = {
   id: 1,
@@ -182,8 +186,8 @@ describe('Connect Tests', function () {
         hostAddress: new HostAddress('non-existent:27018')
       });
     } catch (error) {
-    expect(error).to.be.instanceOf(MongoNetworkError);
-}
+      expect(error).to.be.instanceOf(MongoNetworkError);
+    }
   });
 
   describe('prepareHandshakeDocument', () => {

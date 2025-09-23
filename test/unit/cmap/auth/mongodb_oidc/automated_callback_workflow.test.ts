@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
-import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
+import { MongoCredentials } from '../../../../../src/cmap/auth/mongo_credentials';
 import { AutomatedCallbackWorkflow } from '../../../../../src/cmap/auth/mongodb_oidc/automated_callback_workflow';
 import { CallbackWorkflow } from '../../../../../src/cmap/auth/mongodb_oidc/callback_workflow';
+import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
+import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
 import { Connection } from '../../../../../src/cmap/connection';
-import { MongoCredentials } from '../../../../../src/cmap/auth/mongo_credentials';
 
 describe('AutomatedCallbackWorkflow', function () {
   describe('#execute', function () {

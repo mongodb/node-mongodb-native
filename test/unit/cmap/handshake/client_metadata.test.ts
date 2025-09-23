@@ -1,3 +1,4 @@
+import { Int32, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as os from 'os';
 import * as process from 'process';
@@ -5,8 +6,11 @@ import * as sinon from 'sinon';
 import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
-import { getFAASEnv, LimitedSizeDocument, makeClientMetadata } from '../../../../src/cmap/handshake/client_metadata';
-import { Int32, ObjectId } from 'bson';
+import {
+  getFAASEnv,
+  LimitedSizeDocument,
+  makeClientMetadata
+} from '../../../../src/cmap/handshake/client_metadata';
 import { MongoInvalidArgumentError } from '../../../../src/error';
 
 describe('client metadata module', () => {

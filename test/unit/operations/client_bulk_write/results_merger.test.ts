@@ -1,8 +1,9 @@
-import { BSON, Document, Long } from 'bson';
+import { BSON, type Document, Long } from 'bson';
 import { expect } from 'chai';
+
 import { ClientBulkWriteCursorResponse } from '../../../../src/cmap/wire_protocol/responses';
+import { type ClientBulkWriteResult } from '../../../../src/operations/client_bulk_write/common';
 import { ClientBulkWriteResultsMerger } from '../../../../src/operations/client_bulk_write/results_merger';
-import { ClientBulkWriteResult } from '../../../../src/operations/client_bulk_write/common';
 
 class MockCursor {
   operations: Document[];

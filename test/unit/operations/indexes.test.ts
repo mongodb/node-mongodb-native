@@ -1,5 +1,10 @@
 import { expect } from 'chai';
-import { CreateIndexesOperation, CreateIndexesOptions, IndexDirection } from '../../../src/operations/indexes';
+
+import {
+  CreateIndexesOperation,
+  type CreateIndexesOptions,
+  type IndexDirection
+} from '../../../src/operations/indexes';
 import { ns } from '../../../src/utils';
 
 describe('class CreateIndexesOperation', () => {

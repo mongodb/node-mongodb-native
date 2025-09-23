@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
+import { OIDC_VERSION, type OIDCCallbackParams } from '../../../../../src/cmap/auth/mongodb_oidc';
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
-import { OIDC_VERSION, OIDCCallbackParams } from '../../../../../src/cmap/auth/mongodb_oidc';
 
 describe('GCP machine workflow', function () {
   describe('#callback', function () {

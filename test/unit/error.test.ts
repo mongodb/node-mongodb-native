@@ -1,19 +1,46 @@
 import { expect } from 'chai';
 import { setTimeout } from 'timers';
 
+import {
+  PoolClosedError as MongoPoolClosedError,
+  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
+} from '../../src/cmap/errors';
 // Exception to the import from mongodb rule we're unit testing our public Errors API
 import * as importsFromErrorSrc from '../../src/error';
+import {
+  isResumableError,
+  isRetryableReadError,
+  isSDAMUnrecoverableError,
+  LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
+  LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
+  MONGODB_ERROR_CODES,
+  needsRetryableWriteLabel,
+  NODE_IS_RECOVERING_ERROR_MESSAGE
+} from '../../src/error';
 import * as importsFromEntryPoint from '../../src/index';
+import {
+  MongoDriverError,
+  MongoError,
+  MongoErrorLabel,
+  MongoMissingDependencyError,
+  MongoNetworkError,
+  MongoNetworkTimeoutError,
+  MongoOperationTimeoutError,
+  MongoParseError,
+  MongoRuntimeError,
+  MongoServerError,
+  MongoSystemError,
+  MongoWriteConcernError,
+  type TopologyDescription,
+  type TopologyOptions
+} from '../../src/index';
+import { RunCommandOperation } from '../../src/operations/run_command';
+import { type Topology } from '../../src/sdam/topology';
+import { TimeoutContext } from '../../src/timeout';
+import { isHello, ns, setDifference } from '../../src/utils';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../tools/utils';
-import { isHello, ns, setDifference } from '../../src/utils';
-import { MongoDriverError, MongoError, MongoErrorLabel, MongoMissingDependencyError, MongoNetworkError, MongoNetworkTimeoutError, MongoOperationTimeoutError, MongoParseError, MongoRuntimeError, MongoServerError, MongoSystemError, MongoWriteConcernError, TopologyDescription, TopologyOptions } from '../../src/index';
-import { isResumableError, isRetryableReadError, isSDAMUnrecoverableError, LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE, LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE, MONGODB_ERROR_CODES, needsRetryableWriteLabel, NODE_IS_RECOVERING_ERROR_MESSAGE } from '../../src/error';
-import { PoolClosedError as MongoPoolClosedError, WaitQueueTimeoutError as MongoWaitQueueTimeoutError } from '../../src/cmap/errors';
-import { RunCommandOperation } from '../../src/operations/run_command';
-import { TimeoutContext } from '../../src/timeout';
-import { Topology } from '../../src/sdam/topology';
 
 describe('MongoErrors', () => {
   let errorClassesFromEntryPoint = Object.fromEntries(

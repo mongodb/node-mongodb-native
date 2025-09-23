@@ -1,14 +1,13 @@
+import { BSON, Long } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+import { MongoRuntimeError } from '../../src/error';
+import { MongoClient } from '../../src/mongo_client';
+import { applySession, ClientSession, ServerSession, ServerSessionPool } from '../../src/sessions';
+import { isHello, now } from '../../src/utils';
 import { genClusterTime } from '../tools/common';
 import * as mock from '../tools/mongodb-mock/index';
-import { MongoClient } from '../../src/mongo_client';
-import { ClientSession, ServerSession, ServerSessionPool } from '../../src/sessions';
-import { applySession } from '../../src/sessions';
-import { isHello, now } from '../../src/utils';
-import { MongoRuntimeError } from '../../src/error';
-import { BSON, Long } from 'bson';
 
 describe('Sessions - unit', function () {
   let client;

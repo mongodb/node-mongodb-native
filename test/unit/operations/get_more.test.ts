@@ -1,13 +1,13 @@
+import { Long } from 'bson';
 import { expect } from 'chai';
 
-import { topologyWithPlaceholderClient } from '../../tools/utils';
-import { ns } from '../../../src/utils';
-import { Long } from 'bson';
+import { GetMoreOperation } from '../../../src/operations/get_more';
+import { Aspect } from '../../../src/operations/operation';
 import { ReadPreference } from '../../../src/read_preference';
 import { Server } from '../../../src/sdam/server';
 import { ServerDescription } from '../../../src/sdam/server_description';
-import { GetMoreOperation } from '../../../src/operations/get_more';
-import { Aspect } from '../../../src/operations/operation';
+import { ns } from '../../../src/utils';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('GetMoreOperation', function () {
   const namespace = ns('db.coll');

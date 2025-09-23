@@ -1,6 +1,7 @@
 import * as util from 'node:util';
 import * as types from 'node:util/types';
 
+import { Double, Long, ObjectId } from 'bson';
 import { expect } from 'chai';
 import { type Context } from 'mocha';
 import ConnectionString from 'mongodb-connection-string-url';
@@ -8,15 +9,14 @@ import { type CompressorName } from 'mongodb-legacy';
 import * as qs from 'querystring';
 import * as url from 'url';
 
+import { type AuthMechanism } from '../../../src/cmap/auth/providers';
+import { MongoClient, type MongoClientOptions, type ServerApi } from '../../../src/mongo_client';
+import { TopologyType } from '../../../src/sdam/common';
+import { HostAddress } from '../../../src/utils';
+import { type WriteConcernSettings } from '../../../src/write_concern';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
 import { flakyTests } from './flaky';
-import { AuthMechanism } from '../../../src/cmap/auth/providers';
-import { MongoClient, MongoClientOptions, ServerApi } from '../../../src/mongo_client';
-import { TopologyType } from '../../../src/sdam/common';
-import { HostAddress } from '../../../src/utils';
-import { Double, Long, ObjectId } from 'bson';
-import { WriteConcernSettings } from '../../../src/write_concern';
 
 interface ProxyParams {
   proxyHost?: string;

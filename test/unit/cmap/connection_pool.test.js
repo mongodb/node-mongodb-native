@@ -1,7 +1,7 @@
 'use strict';
 
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
-const { MongoError } = require( '../../../src/error');
+const { MongoError } = require('../../../src/error');
 const { WaitQueueTimeoutError } = require('../../../src/cmap/errors');
 const mock = require('../../tools/mongodb-mock/index');
 const sinon = require('sinon');

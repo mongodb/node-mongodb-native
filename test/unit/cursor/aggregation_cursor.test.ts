@@ -1,8 +1,9 @@
 import { expect } from 'chai';
-import { MongoClient } from '../../../src/mongo_client';
-import { AggregationCursor } from '../../../src/cursor/aggregation_cursor';
+
 import { CursorTimeoutMode } from '../../../src/cursor/abstract_cursor';
+import { AggregationCursor } from '../../../src/cursor/aggregation_cursor';
 import { MongoAPIError } from '../../../src/error';
+import { MongoClient } from '../../../src/mongo_client';
 import { ns } from '../../../src/utils';
 
 describe('class AggregationCursor', () => {

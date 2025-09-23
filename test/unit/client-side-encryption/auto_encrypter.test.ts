@@ -1,15 +1,15 @@
+import { BSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import * as net from 'net';
 import * as sinon from 'sinon';
 
 import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';
+import { type DataKey } from '../../../src/client-side-encryption/client_encryption';
 import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { MongoClient } from '../../../src/mongo_client';
 import * as requirements from './requirements.helper';
-import { BSON } from 'bson';
-import { DataKey } from '../../../src/client-side-encryption/client_encryption';
 
 const bson = BSON;
 const { EJSON } = BSON;

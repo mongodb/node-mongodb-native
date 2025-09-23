@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { AuthContext, AuthProvider } from '../../../../src/cmap/auth/auth_provider';
+
+import { type AuthContext, AuthProvider } from '../../../../src/cmap/auth/auth_provider';
 import { MongoRuntimeError } from '../../../../src/error';
 
 describe('AuthProvider', function () {

@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 import { promises as dns } from 'dns';
 import * as sinon from 'sinon';
-import { GSSAPICanonicalizationValue, performGSSAPICanonicalizeHostName, resolveCname } from '../../../../src/cmap/auth/gssapi';
+
+import {
+  GSSAPICanonicalizationValue,
+  performGSSAPICanonicalizeHostName,
+  resolveCname
+} from '../../../../src/cmap/auth/gssapi';
 
 describe('GSSAPI', () => {
   let lookupSpy;

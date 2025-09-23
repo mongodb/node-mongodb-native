@@ -4,12 +4,12 @@ import { EventEmitter, once } from 'events';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
-import { topologyWithPlaceholderClient } from '../../tools/utils';
-import { TopologyDescription } from '../../../src/sdam/topology_description';
+import { MongoDriverError } from '../../../src/error';
 import { TopologyType } from '../../../src/sdam/common';
 import { TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
-import { MongoDriverError } from '../../../src/error';
 import { SrvPoller, SrvPollingEvent } from '../../../src/sdam/srv_polling';
+import { TopologyDescription } from '../../../src/sdam/topology_description';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Mongos SRV Polling', function () {
   const SRV_HOST = 'darmok.tanagra.com';

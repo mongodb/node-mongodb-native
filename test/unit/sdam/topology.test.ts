@@ -6,21 +6,27 @@ import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
-import * as mock from '../../tools/mongodb-mock/index';
-import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
-import { LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE, MongoServerSelectionError } from '../../../src/error';
-import { RunCursorCommandOperation, RunCommandOperation } from '../../../src/operations/run_command';
+import {
+  LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
+  MongoServerSelectionError
+} from '../../../src/error';
+import { MongoClient } from '../../../src/mongo_client';
+import {
+  RunCommandOperation,
+  RunCursorCommandOperation
+} from '../../../src/operations/run_command';
+import { ReadPreference } from '../../../src/read_preference';
+import { TopologyType } from '../../../src/sdam/common';
+import { TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
+import { Server } from '../../../src/sdam/server';
 import { SrvPoller, SrvPollingEvent } from '../../../src/sdam/srv_polling';
 import { Topology } from '../../../src/sdam/topology';
+import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { TimeoutContext } from '../../../src/timeout';
 import { isHello, ns } from '../../../src/utils';
-import { MongoClient } from '../../../src/mongo_client';
-import { TopologyDescription } from '../../../src/sdam/topology_description';
-import { Server } from '../../../src/sdam/server';
-import { TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
-import { TopologyType } from '../../../src/sdam/common';
-import { ReadPreference } from '../../../src/read_preference';
+import * as mock from '../../tools/mongodb-mock/index';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Topology (unit)', function () {
   let client, topology;
@@ -110,19 +116,18 @@ describe('Topology (unit)', function () {
         socketTimeoutMS: 250
       });
       const server = await topology.selectServer('primary', {
-            timeoutContext: ctx,
-            operationName: "none"
+        timeoutContext: ctx,
+        operationName: 'none'
       });
       try {
         await server.command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx);
-        expect.fail('expected command to fail')
+        expect.fail('expected command to fail');
       } catch (err) {
         expect(err).to.exist;
         expect(err).to.match(/timed out/);
       } finally {
         topology.close();
       }
-
     });
   });
 

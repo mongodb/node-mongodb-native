@@ -6,11 +6,11 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
 
 import { connect } from '../../../src/cmap/connect';
-import * as mock from '../../tools/mongodb-mock/index';
 import { Connection, SizedMessageTransform } from '../../../src/cmap/connection';
-import { isHello, MongoDBCollectionNamespace, ns, promiseWithResolvers } from '../../../src/utils';
-import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
 import { MongoNetworkTimeoutError, MongoRuntimeError } from '../../../src/error';
+import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
+import { isHello, MongoDBCollectionNamespace, ns, promiseWithResolvers } from '../../../src/utils';
+import * as mock from '../../tools/mongodb-mock/index';
 
 const connectionOptionsDefaults = {
   id: 0,

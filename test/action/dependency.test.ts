@@ -5,8 +5,8 @@ import * as path from 'node:path';
 import { expect } from 'chai';
 
 import { dependencies, peerDependencies, peerDependenciesMeta } from '../../package.json';
-import { alphabetically, itInNodeProcess, sorted } from '../tools/utils';
 import { setDifference } from '../../src/utils';
+import { alphabetically, itInNodeProcess, sorted } from '../tools/utils';
 
 const EXPECTED_DEPENDENCIES = sorted(
   ['@mongodb-js/saslprep', 'bson', 'mongodb-connection-string-url'],

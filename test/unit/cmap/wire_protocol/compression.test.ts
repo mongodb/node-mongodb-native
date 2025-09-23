@@ -1,5 +1,6 @@
 import * as zstd from '@mongodb-js/zstd';
 import { expect } from 'chai';
+
 import { compress, Compressor, decompress } from '../../../../src/cmap/wire_protocol/compression';
 
 describe('compression', function () {

@@ -1,9 +1,9 @@
+import { Long } from 'bson';
 import { expect } from 'chai';
 
-import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 import { MongoClient } from '../../src/mongo_client';
 import { isHello } from '../../src/utils';
-import { Long } from 'bson';
+import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {
   let server = null;
@@ -135,7 +135,7 @@ describe('Collection', function () {
       };
 
       await collection.bulkWrite([{ insertOne: { document: { a: 1 } } }], options);
-    };
+    }
 
     // ordered bulk write, testing change in ordered.js
     it('should only set bypass document validation if strictly true in ordered bulkWrite', async function () {

@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { ns } from '../../../src/utils';
+
 import { FindOperation } from '../../../src/operations/find';
+import { ns } from '../../../src/utils';
 
 describe('FindOperation', function () {
   const namespace = ns('db.coll');

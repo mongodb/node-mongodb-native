@@ -1,9 +1,13 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import * as compression from '../../src/cmap/wire_protocol/compression';
-import { compress, Compressor, uncompressibleCommands } from '../../src/cmap/wire_protocol/compression';
 import { OpCompressedRequest, OpMsgRequest, OpQueryRequest } from '../../src/cmap/commands';
+import * as compression from '../../src/cmap/wire_protocol/compression';
+import {
+  compress,
+  Compressor,
+  uncompressibleCommands
+} from '../../src/cmap/wire_protocol/compression';
 import { OP_MSG, OP_QUERY } from '../../src/cmap/wire_protocol/constants';
 
 describe('class OpCompressedRequest', () => {

@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/unified_suite_builder';
-import { MongoClient } from '../../src/mongo_client';
 import { MongoServerError } from '../../src/error';
+import { type MongoClient } from '../../src/mongo_client';
+import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/unified_suite_builder';
 
 const metadata: MongoDBMetadataUI = {
   requires: {

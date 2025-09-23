@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+
 import { WriteConcern } from '../../src/write_concern';
 
 describe('WriteConcern', function () {

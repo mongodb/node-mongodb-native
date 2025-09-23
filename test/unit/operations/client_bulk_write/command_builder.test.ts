@@ -1,8 +1,24 @@
 import { ObjectId } from 'bson';
 import { expect } from 'chai';
-import { ClientDeleteManyModel, ClientDeleteOneModel, ClientInsertOneModel, ClientReplaceOneModel, ClientUpdateManyModel, ClientUpdateOneModel } from '../../../../src/operations/client_bulk_write/common';
-import { buildDeleteManyOperation, buildDeleteOneOperation, buildInsertOneOperation, buildReplaceOneOperation, buildUpdateManyOperation, buildUpdateOneOperation, ClientBulkWriteCommandBuilder } from '../../../../src/operations/client_bulk_write/command_builder';
+
 import { DocumentSequence } from '../../../../src/cmap/commands';
+import {
+  buildDeleteManyOperation,
+  buildDeleteOneOperation,
+  buildInsertOneOperation,
+  buildReplaceOneOperation,
+  buildUpdateManyOperation,
+  buildUpdateOneOperation,
+  ClientBulkWriteCommandBuilder
+} from '../../../../src/operations/client_bulk_write/command_builder';
+import {
+  type ClientDeleteManyModel,
+  type ClientDeleteOneModel,
+  type ClientInsertOneModel,
+  type ClientReplaceOneModel,
+  type ClientUpdateManyModel,
+  type ClientUpdateOneModel
+} from '../../../../src/operations/client_bulk_write/common';
 import { DEFAULT_PK_FACTORY } from '../../../../src/utils';
 
 describe('ClientBulkWriteCommandBuilder', function () {
