@@ -8,21 +8,15 @@ import { type CompressorName } from 'mongodb-legacy';
 import * as qs from 'querystring';
 import * as url from 'url';
 
-import {
-  type AuthMechanism,
-  Double,
-  HostAddress,
-  Long,
-  MongoClient,
-  type MongoClientOptions,
-  ObjectId,
-  type ServerApi,
-  TopologyType,
-  type WriteConcernSettings
-} from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
 import { flakyTests } from './flaky';
+import { AuthMechanism } from '../../../src/cmap/auth/providers';
+import { MongoClient, MongoClientOptions, ServerApi } from '../../../src/mongo_client';
+import { TopologyType } from '../../../src/sdam/common';
+import { HostAddress } from '../../../src/utils';
+import { Double, Long, ObjectId } from 'bson';
+import { WriteConcernSettings } from '../../../src/write_concern';
 
 interface ProxyParams {
   proxyHost?: string;

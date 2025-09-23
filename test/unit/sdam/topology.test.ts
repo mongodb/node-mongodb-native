@@ -6,6 +6,26 @@ import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
+// import {
+//   isHello,
+//   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
+//   makeClientMetadata,
+//   MongoClient,
+//   MongoServerSelectionError,
+//   ns,
+//   ReadPreference,
+//   RunCommandOperation,
+//   RunCursorCommandOperation,
+//   Server,
+//   SrvPoller,
+//   SrvPollingEvent,
+//   TimeoutContext,
+//   Topology,
+//   TopologyDescription,
+//   TopologyDescriptionChangedEvent,
+//   TopologyType
+// } from '../../mongodb';
+
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
