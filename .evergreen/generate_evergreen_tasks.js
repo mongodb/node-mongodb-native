@@ -542,28 +542,26 @@ SINGLETON_TASKS.push(
 function* makeTypescriptTasks() {
   function makeCompileTask(TS_VERSION, TYPES_VERSION) {
     return {
-      name: `compile-driver-typescript-${TS_VERSION}-node-types-${TYPES_VERSION}`,
+      name: `compile-driver-typescript-${TS_VERSION}`,
       tags: [`compile-driver-typescript-${TS_VERSION}`, 'typescript-compilation'],
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
           TS_VERSION,
-          TYPES_VERSION
         }),
         { func: 'install dependencies' },
         { func: 'compile driver' }
       ]
     };
   }
-  function makeCheckTypesTask(TS_VERSION, TYPES_VERSION) {
+  function makeCheckTypesTask(TS_VERSION) {
     return {
-      name: `check-types-typescript-${TS_VERSION}-node-types-${TYPES_VERSION}`,
+      name: `check-types-typescript-${TS_VERSION}`,
       tags: [`check-types-typescript-${TS_VERSION}`, 'typescript-compilation'],
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
           TS_VERSION,
-          TYPES_VERSION
         }),
         { func: 'install dependencies' },
         { func: 'check types' }
@@ -571,14 +569,11 @@ function* makeTypescriptTasks() {
     };
   }
 
-  const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1);
-  yield makeCheckTypesTask('next', typesVersion);
-  yield makeCheckTypesTask('current', typesVersion);
+  yield makeCheckTypesTask('next');
+  yield makeCheckTypesTask('current');
+  yield makeCheckTypesTask('5.6');
 
-  // typescript 4.4 only compiles our types with this particular version
-  yield makeCheckTypesTask('4.4', '18.11.9');
-
-  yield makeCompileTask('current', typesVersion);
+  yield makeCompileTask('current');
 }
 
 BUILD_VARIANTS.push({

@@ -1903,7 +1903,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: check resource management feature integration
-  - name: check-types-typescript-next-node-types-22.15.3
+  - name: check-types-typescript-next
     tags:
       - check-types-typescript-next
       - typescript-compilation
@@ -1914,10 +1914,9 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: TS_VERSION, value: next}
-            - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
       - func: check types
-  - name: check-types-typescript-current-node-types-22.15.3
+  - name: check-types-typescript-current
     tags:
       - check-types-typescript-current
       - typescript-compilation
@@ -1928,12 +1927,11 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: TS_VERSION, value: current}
-            - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
       - func: check types
-  - name: check-types-typescript-4.4-node-types-18.11.9
+  - name: check-types-typescript-5.6
     tags:
-      - check-types-typescript-4.4
+      - check-types-typescript-5.6
       - typescript-compilation
     commands:
       - command: expansions.update
@@ -1941,11 +1939,10 @@ tasks:
         params:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: TS_VERSION, value: '4.4'}
-            - {key: TYPES_VERSION, value: 18.11.9}
+            - {key: TS_VERSION, value: '5.6'}
       - func: install dependencies
       - func: check types
-  - name: compile-driver-typescript-current-node-types-22.15.3
+  - name: compile-driver-typescript-current
     tags:
       - compile-driver-typescript-current
       - typescript-compilation
@@ -1956,7 +1953,6 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
             - {key: TS_VERSION, value: current}
-            - {key: TYPES_VERSION, value: 22.15.3}
       - func: install dependencies
       - func: compile driver
   - name: download-and-merge-coverage

@@ -95,7 +95,7 @@ The following table describes add-on component version compatibility for the Nod
 
 #### Typescript Version
 
-We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against `typescript@4.4.0`.
+We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against `typescript@5.6.0`.
 This is the lowest typescript version guaranteed to work with our driver: older versions may or may not work - use at your own risk.
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
 If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
@@ -104,7 +104,7 @@ Additionally, our Typescript types are compatible with the ECMAScript standard f
 
 ## Installation
 
-The recommended way to get started using the Node.js 5.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js 6.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
 After you've created your own project using `npm init`, you can run:
 

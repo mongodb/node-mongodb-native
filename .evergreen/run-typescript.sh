@@ -12,7 +12,6 @@ case $TS_CHECK in
 esac
 
 if [ -z "$TS_VERSION" ]; then echo "TS_VERSION must be set"; exit 1; fi
-if [ -z "$TYPES_VERSION" ]; then echo "TYPES_VERSION must be set"; exit 1; fi
 
 if [ ! -f "mongodb.d.ts" ]; then
     echo "mongodb.d.ts should always exist because of the installation in prior steps but in case it doesn't, build it"
@@ -30,7 +29,7 @@ function get_ts_version() {
 export TSC="./node_modules/typescript/bin/tsc"
 export TS_VERSION=$(get_ts_version)
 
-npm install --no-save --force "typescript@$TS_VERSION" "@types/node@$TYPES_VERSION"
+npm install --no-save --force "typescript@$TS_VERSION"
 
 echo "Typescript $($TSC -v)"
 echo "Types: $(cat node_modules/@types/node/package.json | jq -r .version)"
@@ -44,12 +43,7 @@ if [ "$TS_CHECK" == "COMPILE_DRIVER" ]; then
     npm run build:ts
 elif [ "$TS_CHECK" == "CHECK_TYPES" ]; then
     echo "checking driver types"
-    if [ "$TS_VERSION" == "4.4" ]; then
-    # check compilation
-        node $TSC mongodb.d.ts --module commonjs --target es2021
-    else
-    node $TSC mongodb.d.ts --module node16 --target es2021
-    fi
+    node $TSC mongodb.d.ts --module node16 --target es2023
 else
     "Invalid value $TS_CHECK for TS_CHECK environment variable."
     exit 1
