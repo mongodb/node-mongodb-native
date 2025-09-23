@@ -1,11 +1,12 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
+import { Collection, type Db, type MongoClient, MongoServerError } from '../../../src';
+import { type TestConfiguration } from '../../tools/runner/config';
 import { type FailCommandFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('Collection', function () {
-  let configuration;
+  let configuration: TestConfiguration;
 
   before(function () {
     configuration = this.configuration;
@@ -40,51 +41,42 @@ describe('Collection', function () {
       expect(collections[1]).to.be.instanceOf(Collection);
     });
 
-    it('should correctly retrieve listCollections', function (done) {
-      db.createCollection('test_collection_names', err => {
-        expect(err).to.not.exist;
+    it('should correctly retrieve listCollections', async function () {
+      await db.createCollection('test_collection_names');
+      const documents = await db.listCollections().toArray();
+      let found = false;
+      let found2 = false;
 
-        db.listCollections().toArray((err, documents) => {
-          let found = false;
-          let found2 = false;
-
-          documents.forEach(document => {
-            if (
-              document.name === configuration.db + '.test_collection_names' ||
-              document.name === 'test_collection_names'
-            )
-              found = true;
-          });
-
-          expect(found).to.be.true;
-          // Insert a document in an non-existing collection should create the collection
-          const collection = db.collection('test_collection_names2');
-          collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-
-            db.listCollections().toArray((err, documents) => {
-              documents.forEach(document => {
-                if (
-                  document.name === configuration.db + '.test_collection_names2' ||
-                  document.name === 'test_collection_names2'
-                )
-                  found = true;
-                if (
-                  document.name === configuration.db + '.test_collection_names' ||
-                  document.name === 'test_collection_names'
-                )
-                  found2 = true;
-              });
-
-              expect(found).to.be.true;
-              expect(found2).to.be.true;
-
-              // Let's close the db
-              done();
-            });
-          });
-        });
+      documents.forEach(document => {
+        if (
+          document.name === configuration.db + '.test_collection_names' ||
+          document.name === 'test_collection_names'
+        )
+          found = true;
       });
+
+      expect(found).to.be.true;
+      // Insert a document in an non-existing collection should create the collection
+      const collection = db.collection('test_collection_names2');
+      await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
+
+      const documents2 = await db.listCollections().toArray();
+      documents2.forEach(document => {
+        if (
+          document.name === configuration.db + '.test_collection_names2' ||
+          document.name === 'test_collection_names2'
+        ) {
+          found = true;
+        }
+        if (
+          document.name === configuration.db + '.test_collection_names' ||
+          document.name === 'test_collection_names'
+        ) {
+          found2 = true;
+        }
+      });
+      expect(found).to.be.true;
+      expect(found2).to.be.true;
     });
 
     it('should permit insert of dot and dollar keys if requested', function () {
@@ -107,62 +99,43 @@ describe('Collection', function () {
       expect(error).to.have.property('codeName', 'InvalidNamespace');
     });
 
-    it('should correctly count on non-existent collection', function (done) {
+    it('should correctly count on non-existent collection', async function () {
       const collection = db.collection('test_multiple_insert_2');
-      collection.countDocuments((err, count) => {
-        expect(count).to.equal(0);
-        // Let's close the db
-        done();
-      });
+      const count = await collection.countDocuments();
+      expect(count).to.equal(0);
     });
 
-    it('should correctly execute insert update delete safe mode', function (done) {
-      db.createCollection(
-        'test_should_execute_insert_update_delete_safe_mode',
-        (err, collection) => {
-          expect(collection.collectionName).to.equal(
-            'test_should_execute_insert_update_delete_safe_mode'
-          );
-
-          collection.insertOne({ i: 1 }, configuration.writeConcernMax(), (err, r) => {
-            expect(err).to.not.exist;
-            expect(r).property('insertedId').to.exist;
-            expect(r.insertedId.toHexString()).to.have.lengthOf(24);
-
-            // Update the record
-            collection.updateOne(
-              { i: 1 },
-              { $set: { i: 2 } },
-              configuration.writeConcernMax(),
-              (err, r) => {
-                expect(err).to.not.exist;
-                expect(r).property('modifiedCount').to.equal(1);
-
-                // Remove safely
-                collection.deleteOne({}, configuration.writeConcernMax(), err => {
-                  expect(err).to.not.exist;
-                  done();
-                });
-              }
-            );
-          });
-        }
+    it('should correctly execute insert update delete safe mode', async function () {
+      const collection = await db.createCollection(
+        'test_should_execute_insert_update_delete_safe_mode'
       );
+
+      expect(collection.collectionName).to.equal(
+        'test_should_execute_insert_update_delete_safe_mode'
+      );
+
+      const document = await collection.insertOne({ i: 1 }, configuration.writeConcernMax());
+      expect(document).property('insertedId').to.exist;
+      expect(document.insertedId.toHexString()).to.have.lengthOf(24);
+
+      // Update the record
+      const document2 = await collection.updateOne(
+        { i: 1 },
+        { $set: { i: 2 } },
+        configuration.writeConcernMax()
+      );
+      expect(document2).property('modifiedCount').to.equal(1);
+
+      // Remove safely
+      await collection.deleteOne({}, configuration.writeConcernMax());
     });
 
-    it('should correctly read back document with null', function (done) {
-      db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, (err, collection) => {
-        // Insert a document with a date
-        collection.insertOne({ test: null }, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
-
-          collection.findOne((err, result) => {
-            expect(err).to.not.exist;
-            expect(result.test).to.not.exist;
-            done();
-          });
-        });
-      });
+    it('should correctly read back document with null', async function () {
+      const collection = await db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {});
+      // Insert a document with null
+      await collection.insertOne({ test: null }, configuration.writeConcernMax());
+      const result = await collection.findOne();
+      expect(result.test).to.not.exist;
     });
 
     it('should throw error due to illegal update', async function () {
@@ -190,19 +163,14 @@ describe('Collection', function () {
       }
     ];
 
-    selectorTests.forEach(test => {
-      it(test.title, function (done) {
-        db.collection(test.collectionName).updateOne(
-          test.filterObject,
-          test.updateObject,
-          (err, r) => {
-            expect(err).to.not.exist;
-            expect(r).property('matchedCount').to.equal(0);
-            done();
-          }
-        );
+    for (const test of selectorTests) {
+      it(test.title, async function () {
+        const response = await db
+          .collection(test.collectionName)
+          .updateOne(test.filterObject, test.updateObject);
+        expect(response).property('matchedCount').to.equal(0);
       });
-    });
+    }
 
     const updateTests = [
       {
@@ -219,25 +187,18 @@ describe('Collection', function () {
       }
     ];
 
-    updateTests.forEach(test => {
-      it(test.title, function (done) {
-        db.createCollection(test.collectionName, (err, collection) => {
-          expect(err).to.not.exist;
+    for (const test of updateTests) {
+      it(test.title, async function () {
+        const collection = await db.createCollection<{ _id: number }>(test.collectionName);
+        const response = await collection.updateOne(
+          test.filterObject,
+          test.updateObject,
+          configuration.writeConcernMax()
+        );
 
-          collection.updateOne(
-            test.filterObject,
-            test.updateObject,
-            configuration.writeConcernMax(),
-            (err, r) => {
-              expect(err).to.not.exist;
-              expect(r).property('matchedCount').to.equal(0);
-
-              done();
-            }
-          );
-        });
+        expect(response).property('matchedCount').to.equal(0);
       });
-    });
+    }
 
     const listCollectionsTests = [
       {
@@ -250,82 +211,55 @@ describe('Collection', function () {
       }
     ];
 
-    listCollectionsTests.forEach(test => {
-      it(test.title, function (done) {
-        db.createCollection(test.collectionName, (err, collection) => {
-          expect(err).to.not.exist;
-          expect(collection.collectionName).to.equal(test.collectionName);
-          db.listCollections().toArray((err, documents) => {
-            expect(err).to.not.exist;
-            let found = false;
-            documents.forEach(x => {
-              if (x.name === test.collectionName) found = true;
-            });
-
-            expect(found).to.be.true;
-            done();
-          });
+    for (const test of listCollectionsTests) {
+      it(test.title, async function () {
+        const collection = await db.createCollection(test.collectionName);
+        expect(collection.collectionName).to.equal(test.collectionName);
+        const documents = await db.listCollections().toArray();
+        let found = false;
+        documents.forEach(x => {
+          if (x.name === test.collectionName) found = true;
         });
-      });
-    });
 
-    it('should filter correctly with index during list', function (done) {
+        expect(found).to.be.true;
+      });
+    }
+
+    it('should filter correctly with index during list', async function () {
       const testCollection = 'collection_124';
       // Create a collection
-      db.createCollection(testCollection, err => {
-        expect(err).to.not.exist;
+      await db.createCollection(testCollection);
 
-        // Index name happens to be the same as collection name
-        db.createIndex(
-          testCollection,
-          'collection_124',
-          { writeConcern: { w: 1 } },
-          (err, indexName) => {
-            expect(err).to.not.exist;
-            expect(indexName).to.equal('collection_124_1');
+      // Index name happens to be the same as collection name
+      const indexName = await db.createIndex(testCollection, 'collection_124');
 
-            db.listCollections().toArray((err, documents) => {
-              expect(err).to.not.exist;
-              expect(documents.length > 1).to.be.true;
-              let found = false;
+      expect(indexName).to.equal('collection_124_1');
 
-              documents.forEach(document => {
-                if (document.name === testCollection) found = true;
-              });
+      const documents = await db.listCollections().toArray();
+      expect(documents.length > 1).to.be.true;
+      let found = false;
 
-              expect(found).to.be.true;
-              done();
-            });
-          }
-        );
+      documents.forEach(document => {
+        if (document.name === testCollection) found = true;
       });
+
+      expect(found).to.be.true;
     });
 
-    it('should correctly list multipleCollections', function (done) {
+    it('should correctly list multipleCollections', async function () {
       const emptyDb = client.db('listCollectionsDb');
-      emptyDb.createCollection('test1', err => {
-        expect(err).to.not.exist;
+      await emptyDb.createCollection('test1');
+      await emptyDb.createCollection('test2');
+      await emptyDb.createCollection('test3');
 
-        emptyDb.createCollection('test2', err => {
-          expect(err).to.not.exist;
-
-          emptyDb.createCollection('test3', err => {
-            expect(err).to.not.exist;
-
-            emptyDb.listCollections().toArray((err, collections) => {
-              expect(err).to.not.exist;
-              const names = [];
-              for (let i = 0; i < collections.length; i++) {
-                names.push(collections[i].name);
-              }
-              expect(names).to.include('test1');
-              expect(names).to.include('test2');
-              expect(names).to.include('test3');
-              done();
-            });
-          });
-        });
-      });
+      const collections = await emptyDb.listCollections().toArray();
+      const names = [];
+      for (let i = 0; i < collections.length; i++) {
+        names.push(collections[i].name);
+      }
+      expect(names).to.include('test1');
+      expect(names).to.include('test2');
+      expect(names).to.include('test3');
     });
 
     it('should create and access collection given the name and namespace as specified, including dots', async function () {
@@ -353,42 +287,23 @@ describe('Collection', function () {
         });
     });
 
-    it('should correctly create TTL collection with index using createIndex', function (done) {
-      db.createCollection(
-        'shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex',
-        (err, collection) => {
-          const errorCallBack = err => {
-            expect(err).to.not.exist;
-
-            // Insert a document with a date
-            collection.insertOne(
-              { a: 1, createdAt: new Date() },
-              configuration.writeConcernMax(),
-              err => {
-                expect(err).to.not.exist;
-
-                collection.indexInformation({ full: true }, (err, indexes) => {
-                  expect(err).to.not.exist;
-
-                  for (let i = 0; i < indexes.length; i++) {
-                    if (indexes[i].name === 'createdAt_1') {
-                      expect(indexes[i].expireAfterSeconds).to.equal(1);
-                      break;
-                    }
-                  }
-
-                  done();
-                });
-              }
-            );
-          };
-          collection.createIndex(
-            { createdAt: 1 },
-            { expireAfterSeconds: 1, writeConcern: { w: 1 } },
-            errorCallBack
-          );
-        }
+    it('should correctly create TTL collection with index using createIndex', async function () {
+      const collection = await db.createCollection(
+        'shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex'
       );
+      await collection.createIndex({ createdAt: 1 }, { expireAfterSeconds: 1 });
+
+      // Insert a document with a date
+      await collection.insertOne({ a: 1, createdAt: new Date() }, configuration.writeConcernMax());
+
+      const indexes = await collection.indexInformation({ full: true });
+
+      for (let i = 0; i < indexes.length; i++) {
+        if (indexes[i].name === 'createdAt_1') {
+          expect(indexes[i].expireAfterSeconds).to.equal(1);
+          break;
+        }
+      }
     });
 
     it('should support createIndex with no options', async function () {
@@ -623,27 +538,16 @@ describe('Collection', function () {
 
   it('should allow an empty replacement document for findOneAndReplace', {
     metadata: { requires: { mongodb: '>=3.0.0' } },
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
       const client = configuration.newClient({ w: 1 });
-
-      let finish = err => {
-        finish = () => null;
-        client.close(_err => done(err || _err));
-      };
 
       const db = client.db(configuration.db);
       const collection = db.collection('find_one_and_replace');
 
-      collection.insertOne({ a: 1 }, err => {
-        expect(err).to.not.exist;
-
-        try {
-          collection.findOneAndReplace({ a: 1 }, {}, finish);
-        } catch (e) {
-          finish(e);
-        }
-      });
+      await collection.insertOne({ a: 1 });
+      await collection.findOneAndReplace({ a: 1 }, {});
+      await client.close();
     }
   });
 
