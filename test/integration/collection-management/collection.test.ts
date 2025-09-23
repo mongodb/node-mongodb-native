@@ -5,7 +5,7 @@ import { type TestConfiguration } from '../../tools/runner/config';
 import { type FailCommandFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
-describe.only('Collection', function () {
+describe('Collection', function () {
   let configuration: TestConfiguration;
 
   before(function () {
@@ -189,7 +189,7 @@ describe.only('Collection', function () {
 
     for (const test of updateTests) {
       it(test.title, async function () {
-        const collection = await db.createCollection(test.collectionName);
+        const collection = await db.createCollection<{ _id: number }>(test.collectionName);
         const response = await collection.updateOne(
           test.filterObject,
           test.updateObject,
@@ -231,9 +231,7 @@ describe.only('Collection', function () {
       await db.createCollection(testCollection);
 
       // Index name happens to be the same as collection name
-      const indexName = await db.createIndex(testCollection, 'collection_124', {
-        writeConcern: { w: 1 }
-      });
+      const indexName = await db.createIndex(testCollection, 'collection_124');
 
       expect(indexName).to.equal('collection_124_1');
 
@@ -293,10 +291,7 @@ describe.only('Collection', function () {
       const collection = await db.createCollection(
         'shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex'
       );
-      await collection.createIndex(
-        { createdAt: 1 },
-        { expireAfterSeconds: 1, writeConcern: { w: 1 } }
-      );
+      await collection.createIndex({ createdAt: 1 }, { expireAfterSeconds: 1 });
 
       // Insert a document with a date
       await collection.insertOne({ a: 1, createdAt: new Date() }, configuration.writeConcernMax());
