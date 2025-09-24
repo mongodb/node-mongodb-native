@@ -115,19 +115,16 @@ describe('Topology (unit)', function () {
         serverSelectionTimeoutMS: 0,
         socketTimeoutMS: 250
       });
-      const server = await topology.selectServer('primary', {
-        timeoutContext: ctx,
-        operationName: 'none'
-      });
-      try {
-        await server.command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx);
-        expect.fail('expected command to fail');
-      } catch (err) {
-        expect(err).to.exist;
-        expect(err).to.match(/timed out/);
-      } finally {
-        topology.close();
-      }
+      const server = await topology
+        .selectServer('primary', {
+          timeoutContext: ctx, operationName: 'none'
+        });
+      const err = await server
+        .command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx)
+        .catch(e => e);
+      expect(err).to.exist;
+      expect(err).to.match(/timed out/);
+      topology.close();
     });
   });
 

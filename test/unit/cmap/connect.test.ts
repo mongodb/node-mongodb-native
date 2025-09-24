@@ -1,11 +1,10 @@
-import { type ConnectionOptions } from 'node:tls';
 
 import { type Document } from 'bson';
 import { expect } from 'chai';
 
 import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
 import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
-import { type Connection } from '../../../src/cmap/connection';
+import { ConnectionOptions, type Connection } from '../../../src/cmap/connection';
 import {
   addContainerMetadata,
   type ClientMetadata
@@ -181,14 +180,12 @@ describe('Connect Tests', function () {
   });
 
   it('should emit `MongoNetworkError` for network errors', async function () {
-    try {
-      await connect({
-        hostAddress: new HostAddress('non-existent:27018')
-      });
-    } catch (error) {
-      expect(error).to.be.instanceOf(MongoNetworkError);
-    }
+    const error = await connect({
+      hostAddress: new HostAddress('non-existent:27018')
+    }).catch(e => e);
+    expect(error).to.be.instanceOf(MongoNetworkError);
   });
+
 
   describe('prepareHandshakeDocument', () => {
     describe('client environment (containers and FAAS)', () => {

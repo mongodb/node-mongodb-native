@@ -54,6 +54,7 @@ describe('Collection', function () {
         }
       ];
       await collection.aggregate(pipeline, options).next();
+      await client.close();
     }
 
     context('bypass document validation', () => {
@@ -80,12 +81,12 @@ describe('Collection', function () {
           });
         }
 
-        if (isHello(doc)) {
-          request.reply(Object.assign({}, HELLO));
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
+          if (isHello(doc)) {
+            request.reply(Object.assign({}, HELLO));
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
+          }
+        });
 
       await client.connect();
       const db = client.db('test');
@@ -94,6 +95,7 @@ describe('Collection', function () {
       const options = { bypassDocumentValidation: config.actual };
 
       await collection.findOneAndUpdate({ name: 'Andy' }, { $inc: { score: 1 } }, options);
+      await client.close();
     }
 
     it('should only set bypass document validation if strictly true in findOneAndUpdate', async function () {
@@ -118,12 +120,12 @@ describe('Collection', function () {
           });
         }
 
-        if (isHello(doc)) {
-          request.reply(Object.assign({}, HELLO));
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
+          if (isHello(doc)) {
+            request.reply(Object.assign({}, HELLO));
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
+          }
+        });
 
       await client.connect();
       const db = client.db('test');
@@ -135,6 +137,7 @@ describe('Collection', function () {
       };
 
       await collection.bulkWrite([{ insertOne: { document: { a: 1 } } }], options);
+      await client.close();
     }
 
     // ordered bulk write, testing change in ordered.js
