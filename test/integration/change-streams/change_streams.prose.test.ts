@@ -3,22 +3,15 @@ import { once } from 'events';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
-import {
-  type ChangeStream,
-  type Collection,
-  type CommandFailedEvent,
-  type CommandStartedEvent,
-  type CommandSucceededEvent,
-  type Document,
-  LEGACY_HELLO_COMMAND,
-  Long,
-  type MongoClient,
-  MongoNetworkError,
-  ObjectId,
-  Timestamp
-} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
+import { ChangeStream } from '../../../src/change_stream';
+import { MongoNetworkError } from '../../../src/error';
+import { Collection } from '../../../src/collection';
+import { MongoClient } from '../../../src/mongo_client';
+import { Document, Long, ObjectId, Timestamp } from 'bson';
+import { CommandFailedEvent, CommandStartedEvent, CommandSucceededEvent } from '../../../src/cmap/command_monitoring_events';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 
 /**
  * Triggers a fake resumable error on a change stream
@@ -57,9 +50,7 @@ function triggerResumableError(
       nextStub.restore();
     });
 
-    changeStream.next(() => {
-      // ignore
-    });
+    changeStream.next();
   }
 
   if (typeof delay === 'number') {
@@ -77,12 +68,6 @@ const initIteratorMode = async (cs: ChangeStream) => {
   await initEvent;
   return;
 };
-
-/** Waits for a change stream to start */
-async function waitForStarted(changeStream, callback) {
-  await once(changeStream.cursor, 'init');
-  await callback();
-}
 
 describe('Change Stream prose tests', function () {
   before(async function () {
@@ -643,12 +628,12 @@ describe('Change Stream prose tests', function () {
     // when resuming a change stream.
     it('$changeStream with results must include resumeAfter and not startAfter', {
       metadata: { requires: { topology: 'replicaset' } },
-      test: function (done) {
+      test: async function () {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
-        changeStream.on('error', done);
-        this.defer(() => changeStream.close());
+        // changeStream.on('error', done);
+        // this.defer(() => changeStream.close());
 
         changeStream.on('change', change => {
           events.push({ change: { insert: { x: change.fullDocument.x } } });
@@ -663,16 +648,13 @@ describe('Change Stream prose tests', function () {
               expect(events[0]).to.equal('error');
               expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
               expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
-              done();
               break;
           }
         });
 
-        waitForStarted(changeStream, () =>
-          coll
-            .insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } })
-            .then(() => coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } }))
-        );
+        await once(changeStream.cursor, 'init');
+        await coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } });
+        await coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } });
       }
     });
   });

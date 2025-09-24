@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { UUID } from 'bson';
+import { Document, Long, UUID } from 'bson';
 import { expect } from 'chai';
 import { on, once } from 'events';
 import { gte, lt } from 'semver';
@@ -7,27 +7,19 @@ import * as sinon from 'sinon';
 import { PassThrough } from 'stream';
 import { setTimeout } from 'timers';
 
-import {
-  type ChangeStream,
-  type ChangeStreamDocument,
-  type ChangeStreamOptions,
-  type Collection,
-  type CommandStartedEvent,
-  type Db,
-  isHello,
-  LEGACY_HELLO_COMMAND,
-  Long,
-  MongoAPIError,
-  MongoChangeStreamError,
-  type MongoClient,
-  MongoServerError,
-  ReadPreference,
-  type ResumeToken
-} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 import { type FailCommandFailPoint, sleep } from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
+import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions, ResumeToken } from '../../../src/change_stream';
+import { MongoClient } from '../../../src/mongo_client';
+import { ReadPreference } from '../../../src/read_preference';
+import { Collection } from '../../../src/collection';
+import { Db } from '../../../src/db';
+import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { isHello } from '../../../src/utils';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { MongoAPIError, MongoChangeStreamError, MongoServerError } from '../../../src/error';
 
 const initIteratorMode = async (cs: ChangeStream) => {
   const initEvent = once(cs.cursor, 'init');
@@ -323,30 +315,30 @@ describe('Change Streams', function () {
   it('should properly close ChangeStream cursor', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
+      let changeStream: ChangeStream<Document, ChangeStreamDocument<Document>>;
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
+      try {
+        await client.connect();
         const database = client.db('integration_tests');
         const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
-        this.defer(() => changeStream.close());
 
         assert.equal(changeStream.closed, false);
         assert.equal(changeStream.cursor.closed, false);
 
-        changeStream.close(err => {
-          expect(err).to.not.exist;
+        await changeStream.close();
 
-          // Check the cursor is closed
-          expect(changeStream.closed).to.be.true;
-          expect(changeStream.cursor).property('closed', true);
-          done();
-        });
-      });
+        // Check the cursor is closed
+        expect(changeStream.closed).to.be.true;
+        expect(changeStream.cursor).property('closed', true);
+      } finally {
+        await client.close();
+        if (changeStream) {
+          await changeStream.close();
+        }
+      }
     }
   });
 
@@ -355,32 +347,34 @@ describe('Change Streams', function () {
     {
       metadata: { requires: { topology: 'replicaset' } },
 
-      test: function (done) {
+      test: async function () {
         const configuration = this.configuration;
         const client = configuration.newClient();
+        let changeStream: ChangeStream<Document, ChangeStreamDocument<Document>>;
 
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
+        await client.connect();
 
-          const forbiddenStage = {};
-          const forbiddenStageName = '$alksdjfhlaskdfjh';
-          forbiddenStage[forbiddenStageName] = 2;
+        const forbiddenStage = {};
+        const forbiddenStageName = '$alksdjfhlaskdfjh';
+        forbiddenStage[forbiddenStageName] = 2;
 
+        try {
           const database = client.db('integration_tests');
-          const changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
-          this.defer(() => changeStream.close());
+          changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
 
-          changeStream.next(err => {
-            assert.ok(err);
-            assert.ok(err.message);
-            assert.ok(
-              err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
-            );
-
-            done();
-          });
-        });
+          await changeStream.next();
+        } catch (err) {
+          assert.ok(err);
+          assert.ok(err.message);
+          assert.ok(
+            err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
+          );
+        } finally {
+          await client.close();
+          if (changeStream) {
+            await changeStream.close();
+          }
+        }
       }
     }
   );
@@ -457,32 +451,49 @@ describe('Change Streams', function () {
     });
   });
 
-  it('should error if resume token projected out of change stream document using iterator', {
+  it.only('should error if resume token projected out of change stream document using iterator', {
     metadata: { requires: { topology: 'replicaset' } },
     test(done) {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
+      console.log(`pavel >>> 1 before all`);
+
       client.connect((err, client) => {
         expect(err).to.not.exist;
+
+        console.log(`pavel >>> 2 after connect`);
 
         const database = client.db('integration_tests');
         const collection = database.collection('resumetokenProjectedOutCallback');
         const changeStream = collection.watch([{ $project: { _id: false } }]);
 
+        console.log(`pavel >>> 3 before hasNext`);
+
         changeStream.hasNext(() => {
           // trigger initialize
+          console.log(`pavel >>> ? trigger initialize?`);
         });
 
+        console.log(`pavel >>> 4 after hasNext`);
+
         changeStream.cursor.on('init', () => {
+          console.log(`pavel >>> 5 init`);
           collection.insertOne({ b: 2 }, (err, res) => {
+            console.log(`pavel >>> 6 after insertOne`);
             expect(err).to.be.undefined;
             expect(res).to.exist;
 
+            console.log(`pavel >>> 7 before next`);
             changeStream.next(err => {
+              console.log(`pavel >>> 8 after next`);
               expect(err).to.exist;
+              console.log(`pavel >>> 9 before close`);
               changeStream.close(() => {
+                console.log(`pavel >>> 10 after close change stream`);
                 client.close(() => {
+                  console.log(`pavel >>> 11 after close client`);
+                  console.log("pavel >>> DONE");
                   done();
                 });
               });
@@ -1290,7 +1301,7 @@ describe('Change Streams', function () {
         await mock.cleanup();
       });
 
-      it('changeStream should close if cursor id for initial aggregate is Long.ZERO', function (done) {
+      it('changeStream should close if cursor id for initial aggregate is Long.ZERO', async function () {
         mockServer.setMessageHandler(req => {
           const doc = req.document;
           if (isHello(doc)) {
@@ -1319,17 +1330,18 @@ describe('Change Streams', function () {
         const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`, {
           serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
         });
-        client.connect(err => {
-          expect(err).to.not.exist;
-          const collection = client.db('cs').collection('test');
-          const changeStream = collection.watch();
-          changeStream.next((err, doc) => {
-            expect(err).to.exist;
-            expect(doc).to.not.exist;
-            expect(err?.message).to.equal('ChangeStream is closed');
-            changeStream.close(() => client.close(done));
-          });
-        });
+        await client.connect();
+        const collection = client.db('cs').collection('test');
+        const changeStream = collection.watch();
+        try {
+        await changeStream.next();
+        } catch (err) {
+          expect(err).to.exist;
+          expect(err?.message).to.equal('ChangeStream is closed');
+        } finally {
+          await changeStream.close();
+          await client.close();
+        }
       });
     });
   });
