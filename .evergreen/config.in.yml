@@ -707,7 +707,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: NPM_VERSION, value: "9" }
+            - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: assume secrets manager role
       - func: "install dependencies"
       # Upload node driver to a GCP instance
@@ -727,7 +727,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: NPM_VERSION, value: "9" }
+            - { key: NODE_LTS_VERSION, value: "20.19.0" }
             - { key: VERSION, value: latest }
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: noauth }
@@ -739,6 +739,7 @@ tasks:
           binary: bash
           env:
             EXPECTED_GCPKMS_OUTCOME: "failure"
+            NODE_LTS_VERSION: ${NODE_LTS_VERSION}
           args:
             - src/.evergreen/run-gcp-kms-tests.sh
 
@@ -748,7 +749,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: NPM_VERSION, value: "9" }
+            - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: "install dependencies"
       - func: assume secrets manager role
       - command: subprocess.exec
@@ -765,7 +766,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: NPM_VERSION, value: "9" }
+            - { key: NODE_LTS_VERSION, value: "20.19.0" }
             - { key: VERSION, value: latest }
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: noauth }
@@ -777,6 +778,7 @@ tasks:
           binary: bash
           env:
             EXPECTED_AZUREKMS_OUTCOME: "failure"
+            NODE_LTS_VERSION: ${NODE_LTS_VERSION}
           args:
             - src/.evergreen/run-azure-kms-tests.sh
 
@@ -915,7 +917,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: NPM_VERSION, value: "9" }
+            - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: "install dependencies"
       - command: ec2.assume_role
         params:

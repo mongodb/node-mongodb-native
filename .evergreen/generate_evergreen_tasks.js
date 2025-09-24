@@ -15,7 +15,6 @@ const {
   DEFAULT_OS,
   WINDOWS_OS,
   MACOS_OS,
-  UBUNTU_OS,
   UBUNTU_20_OS,
   DEBIAN_OS,
   UBUNTU_22_OS
@@ -65,12 +64,20 @@ function updateExpansions(expansions) {
   };
 }
 
-function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
+function makeTask({ mongoVersion, topology, tags = [], auth = 'auth', nodeLtsVersion }) {
+  const expansions = nodeLtsVersion
+    ? updateExpansions({
+        VERSION: mongoVersion,
+        TOPOLOGY: topology,
+        AUTH: auth,
+        NODE_LTS_VERSION: nodeLtsVersion
+      })
+    : updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth });
   return {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
-      updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth }),
+      expansions,
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
       { func: 'run tests' }
@@ -92,7 +99,7 @@ function generateVersionTopologyMatrix() {
 
 const BASE_TASKS = generateVersionTopologyMatrix().map(makeTask);
 const AUTH_DISABLED_TASKS = generateVersionTopologyMatrix().map(test =>
-  makeTask({ ...test, auth: 'noauth', tags: ['noauth'] })
+  makeTask({ ...test, auth: 'noauth', tags: ['noauth'], nodeLtsVersion: LOWEST_LTS })
 );
 
 BASE_TASKS.push({
@@ -285,7 +292,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   tags: ['latest', 'lambda'],
   commands: [
     updateExpansions({
-      NPM_VERSION: 9,
+      NODE_LTS_VERSION: LOWEST_LTS,
       VERSION: 'rapid',
       TOPOLOGY: 'server'
     }),
@@ -301,7 +308,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   tags: ['latest', 'lambda'],
   commands: [
     updateExpansions({
-      NPM_VERSION: 9,
+      NODE_LTS_VERSION: LOWEST_LTS,
       VERSION: 'rapid',
       AUTH: 'auth',
       ORCHESTRATION_FILE: 'auth-aws.json',
@@ -352,6 +359,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     commands: [
       updateExpansions({
         VERSION,
+        NODE_LTS_VERSION: LATEST_LTS,
         AUTH: 'auth',
         ORCHESTRATION_FILE: 'auth-aws.json',
         TOPOLOGY: 'server'
@@ -395,10 +403,7 @@ for (const {
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const NPM_VERSION = versions.find(
-      ({ versionNumber }) => versionNumber === NODE_LTS_VERSION
-    ).npmVersion;
-    const expansions = { NODE_LTS_VERSION, NPM_VERSION };
+    const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
     expansions.CLIENT_ENCRYPTION = String(!!clientEncryption);
@@ -435,7 +440,8 @@ const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
       updateExpansions({
         VERSION: mongoVersion,
         TOPOLOGY: 'sharded_cluster',
-        AUTH: 'auth'
+        AUTH: 'auth',
+        NODE_LTS_VERSION: LATEST_LTS
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
@@ -454,8 +460,7 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
     expansions: {
       CLIENT_ENCRYPTION: true,
       RUN_WITH_MONGOCRYPTD: true,
-      NODE_LTS_VERSION: LOWEST_LTS,
-      NPM_VERSION: 9
+      NODE_LTS_VERSION: LOWEST_LTS
     },
     tasks: MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
   });
@@ -474,14 +479,13 @@ BUILD_VARIANTS.push({
 
 const unitTestTasks = Array.from(
   (function* () {
-    for (const { versionNumber: NODE_LTS_VERSION, npmVersion: NPM_VERSION } of versions) {
+    for (const { versionNumber: NODE_LTS_VERSION } of versions) {
       yield {
         name: `run-unit-tests-node-${NODE_LTS_VERSION}`,
         tags: ['unit-tests'],
         commands: [
           updateExpansions({
-            NODE_LTS_VERSION,
-            NPM_VERSION
+            NODE_LTS_VERSION
           }),
           { func: 'install dependencies' },
           { func: 'run unit tests' }
@@ -507,24 +511,11 @@ SINGLETON_TASKS.push(
       ]
     },
     {
-      name: 'run-resource-management-no-async-dispose',
-      tags: ['resource-management'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: 'v16.20.2',
-          NPM_VERSION: 9
-        }),
-        { func: 'install dependencies' },
-        { func: 'check resource management' }
-      ]
-    },
-    {
       name: 'run-resource-management-async-dispose',
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: LATEST_LTS,
-          NPM_VERSION: 9
+          NODE_LTS_VERSION: LATEST_LTS
         }),
         { func: 'install dependencies' },
         { func: 'check resource management' }
@@ -551,30 +542,26 @@ SINGLETON_TASKS.push(
 function* makeTypescriptTasks() {
   function makeCompileTask(TS_VERSION, TYPES_VERSION) {
     return {
-      name: `compile-driver-typescript-${TS_VERSION}-node-types-${TYPES_VERSION}`,
+      name: `compile-driver-typescript-${TS_VERSION}`,
       tags: [`compile-driver-typescript-${TS_VERSION}`, 'typescript-compilation'],
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9,
-          TS_VERSION,
-          TYPES_VERSION
+          TS_VERSION
         }),
         { func: 'install dependencies' },
         { func: 'compile driver' }
       ]
     };
   }
-  function makeCheckTypesTask(TS_VERSION, TYPES_VERSION) {
+  function makeCheckTypesTask(TS_VERSION) {
     return {
-      name: `check-types-typescript-${TS_VERSION}-node-types-${TYPES_VERSION}`,
+      name: `check-types-typescript-${TS_VERSION}`,
       tags: [`check-types-typescript-${TS_VERSION}`, 'typescript-compilation'],
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9,
-          TS_VERSION,
-          TYPES_VERSION
+          TS_VERSION
         }),
         { func: 'install dependencies' },
         { func: 'check types' }
@@ -582,17 +569,11 @@ function* makeTypescriptTasks() {
     };
   }
 
-  const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1);
-  yield makeCheckTypesTask('next', typesVersion);
-  yield makeCheckTypesTask('current', typesVersion);
+  yield makeCheckTypesTask('next');
+  yield makeCheckTypesTask('current');
+  yield makeCheckTypesTask('5.6');
 
-  yield makeCheckTypesTask('next', '16.x');
-  yield makeCheckTypesTask('current', '16.x');
-
-  // typescript 4.4 only compiles our types with this particular version
-  yield makeCheckTypesTask('4.4', '18.11.9');
-
-  yield makeCompileTask('current', typesVersion);
+  yield makeCompileTask('current');
 }
 
 BUILD_VARIANTS.push({
@@ -629,7 +610,6 @@ for (const serverVersion of ['5.0', 'rapid', 'latest']) {
     commands: [
       updateExpansions({
         NODE_LTS_VERSION: LOWEST_LTS,
-        NPM_VERSION: 9,
         VERSION: serverVersion,
         TOPOLOGY: 'replica_set',
         CLIENT_ENCRYPTION: true
@@ -649,7 +629,6 @@ customDependencyTests.push({
   commands: [
     updateExpansions({
       NODE_LTS_VERSION: LOWEST_LTS,
-      NPM_VERSION: 9,
       VERSION: '7.0',
       TOPOLOGY: 'replica_set',
       CLIENT_ENCRYPTION: true
@@ -692,7 +671,7 @@ SINGLETON_TASKS.push({
   tags: ['alpine-fle'],
   commands: [
     updateExpansions({
-      NODE_VERSION: '16.20.1',
+      NODE_LTS_VERSION: LOWEST_LTS,
       VERSION: 'latest',
       TOPOLOGY: 'replica_set',
       CLIENT_ENCRYPTION: true,

@@ -364,7 +364,11 @@ describe('Connection', function () {
 
           // Ensure that we used the drain event for this write
           expect(addedListeners).to.deep.equal(['drain', 'error']);
-          expect(removedListeners).to.deep.equal(['drain', 'error']);
+
+          // https://github.com/nodejs/node/issues/59977: Node 20.11.0
+          // does not emit a `removeListeners` event for `drain`.
+          expect(removedListeners).to.deep.equal(['error']);
+          expect(socket.listenerCount('drain')).to.equal(0);
         });
       }
     );

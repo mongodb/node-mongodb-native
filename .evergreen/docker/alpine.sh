@@ -3,7 +3,7 @@
 # script to aid in local testing of linux platforms
 # requires a running docker instance
 
-if [ -z ${NODE_VERSION+omitted} ]; then echo "NODE_VERSION is unset" && exit 1; fi
+if [ -z ${NODE_LTS_VERSION+omitted} ]; then echo "NODE_LTS_VERSION is unset" && exit 1; fi
 if [ -z ${DRIVERS_TOOLS+omitted} ]; then echo "DRIVERS_TOOLS is unset" && exit 1; fi
 if [ -z ${MONGODB_URI+omitted} ]; then echo "MONGODB_URI is unset" && exit 1; fi
 
@@ -15,11 +15,11 @@ IMAGE_TAG=${IMAGE_TAG:-alpine-fle-image}
 build_alpine() {
     docker buildx create --name builder --bootstrap --use
 
-    BASE_TAG=$LINUX_ARCH-alpine-base-node-$NODE_VERSION
+    BASE_TAG=$LINUX_ARCH-alpine-base-node-$NODE_LTS_VERSION
     docker --debug buildx build --load --progress=plain \
         --platform linux/$LINUX_ARCH \
         --build-arg="ARCH=$LINUX_ARCH" \
-        --build-arg="NODE_VERSION=$NODE_VERSION" \
+        --build-arg="NODE_LTS_VERSION=$NODE_LTS_VERSION" \
         --build-arg="DRIVERS_TOOLS=$DRIVERS_TOOLS" \
         -f ./.evergreen/docker/Dockerfile.musl -t $IMAGE_TAG \
         .
