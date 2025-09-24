@@ -451,56 +451,28 @@ describe('Change Streams', function () {
     });
   });
 
-  it.only('should error if resume token projected out of change stream document using iterator', {
+  it('should error if resume token projected out of change stream document using iterator', {
     metadata: { requires: { topology: 'replicaset' } },
-    test(done) {
+    async test() {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
-      console.log(`pavel >>> 1 before all`);
+      await client.connect();
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
+      const database = client.db('integration_tests');
+      const collection = database.collection('resumetokenProjectedOutCallback');
+      const changeStream = collection.watch([{ $project: { _id: false } }]);
 
-        console.log(`pavel >>> 2 after connect`);
+      await initIteratorMode(changeStream);
 
-        const database = client.db('integration_tests');
-        const collection = database.collection('resumetokenProjectedOutCallback');
-        const changeStream = collection.watch([{ $project: { _id: false } }]);
+      const res = await collection.insertOne({ b: 2 });
+      expect(res).to.exist;
 
-        console.log(`pavel >>> 3 before hasNext`);
-
-        changeStream.hasNext(() => {
-          // trigger initialize
-          console.log(`pavel >>> ? trigger initialize?`);
-        });
-
-        console.log(`pavel >>> 4 after hasNext`);
-
-        changeStream.cursor.on('init', () => {
-          console.log(`pavel >>> 5 init`);
-          collection.insertOne({ b: 2 }, (err, res) => {
-            console.log(`pavel >>> 6 after insertOne`);
-            expect(err).to.be.undefined;
-            expect(res).to.exist;
-
-            console.log(`pavel >>> 7 before next`);
-            changeStream.next(err => {
-              console.log(`pavel >>> 8 after next`);
-              expect(err).to.exist;
-              console.log(`pavel >>> 9 before close`);
-              changeStream.close(() => {
-                console.log(`pavel >>> 10 after close change stream`);
-                client.close(() => {
-                  console.log(`pavel >>> 11 after close client`);
-                  console.log("pavel >>> DONE");
-                  done();
-                });
-              });
-            });
-          });
-        });
-      });
+      const err = await changeStream.next().catch(e => e);
+        expect(err).to.exist;
+        console.log(`pavel >>> ${JSON.stringify(err)}`);
+      await changeStream.close();
+      await client.close();
     }
   });
 

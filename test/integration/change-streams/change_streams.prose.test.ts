@@ -632,8 +632,9 @@ describe('Change Stream prose tests', function () {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
-        // changeStream.on('error', done);
-        // this.defer(() => changeStream.close());
+        changeStream.on('error', async () => {
+          await changeStream.close();
+        });
 
         changeStream.on('change', change => {
           events.push({ change: { insert: { x: change.fullDocument.x } } });
