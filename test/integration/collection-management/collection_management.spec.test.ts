@@ -1,7 +1,5 @@
-'use strict';
-
-const { loadSpecTests } = require('../../spec/index');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
+import { loadSpecTests } from '../../spec';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 // The Node driver does not have a Collection.modifyCollection helper.
 const SKIPPED_TESTS = [
