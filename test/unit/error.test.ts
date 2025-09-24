@@ -451,9 +451,7 @@ describe('MongoErrors', () => {
           );
         }
       } finally {
-        if (topology) {
-          topology.close();
-        }
+        topology?.close();
       }
     });
   });
