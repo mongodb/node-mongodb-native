@@ -1,16 +1,16 @@
-'use strict';
+import { once } from 'node:events';
+import * as fs from 'node:fs';
+import * as stream from 'node:stream';
+import { promisify } from 'node:util';
 
-const { Double } = require('bson');
-const stream = require('stream');
-const fs = require('fs');
-const { expect } = require('chai');
-const { promisify } = require('node:util');
-const { once } = require('node:events');
-const { GridFSBucket, ObjectId, MongoAPIError } = require('../../mongodb');
+import { Double } from 'bson';
+import { expect } from 'chai';
 
-describe('GridFS Stream', function () {
-  let client;
-  let db;
+import { type Db, GridFSBucket, MongoAPIError, type MongoClient, ObjectId } from '../../mongodb';
+
+describe.only('GridFS Stream', function () {
+  let client: MongoClient;
+  let db: Db;
 
   beforeEach(async function () {
     client = this.configuration.newClient();
